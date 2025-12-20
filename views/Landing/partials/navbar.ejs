@@ -1,0 +1,83 @@
+<!-- ====================================
+     NAVIGATION BAR - MOBILE RESPONSIVE
+     ==================================== -->
+<nav class="nav-bar" id="navbar">
+  <div class="nav-gradient-top"></div>
+  <div class="container nav-container">
+    <!-- Logo -->
+    <div class="nav-logo">
+      <img src="/images/PARTSFORM-LOGO-CWstUpY1.webp" alt="PartsForm Logo" class="logo-image">
+    </div>
+
+    <!-- Mobile Menu Toggle Button -->
+    <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle mobile menu" aria-expanded="false">
+      <span class="menu-icon">
+        <span class="menu-line"></span>
+        <span class="menu-line"></span>
+        <span class="menu-line"></span>
+      </span>
+    </button>
+
+    <!-- Navigation Links -->
+    <div class="nav-links" id="navLinks">
+      <a href="#home" class="nav-link active" data-section="home">Home</a>
+      <a href="#sectors" class="nav-link" data-section="sectors">Sectors</a>
+      <a href="#advantages" class="nav-link" data-section="advantages">Advantages</a>
+      <a href="#about" class="nav-link" data-section="about">About</a>
+      <a href="#contact" class="nav-link" data-section="contact">Contact</a>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="nav-actions" id="navActions">
+      <!-- Language Selector -->
+      <div class="language-selector">
+        <button class="language-btn" id="language-btn">
+          <span class="lang-flag" id="current-flag">🇬🇧</span>
+          <span class="lang-code" id="current-lang">EN</span>
+          <i data-lucide="chevron-down" class="lang-chevron"></i>
+        </button>
+        <div class="language-dropdown" id="language-dropdown">
+          <button class="lang-option" data-lang="EN" data-flag="🇬🇧">
+            <span class="lang-flag">🇬🇧</span>
+            <span class="lang-name">English</span>
+          </button>
+          <button class="lang-option" data-lang="AR" data-flag="🇸🇦">
+            <span class="lang-flag">🇸🇦</span>
+            <span class="lang-name">Arabic</span>
+          </button>
+          <button class="lang-option" data-lang="RU" data-flag="🇷🇺">
+            <span class="lang-flag">🇷🇺</span>
+            <span class="lang-name">Russian</span>
+          </button>
+          <button class="lang-option" data-lang="UA" data-flag="🇺🇦">
+            <span class="lang-flag">🇺🇦</span>
+            <span class="lang-name">Ukrainian</span>
+          </button>
+          <button class="lang-option" data-lang="FR" data-flag="🇫🇷">
+            <span class="lang-flag">🇫🇷</span>
+            <span class="lang-name">French</span>
+          </button>
+          <button class="lang-option" data-lang="ES" data-flag="🇪🇸">
+            <span class="lang-flag">🇪🇸</span>
+            <span class="lang-name">Spanish</span>
+          </button>
+        </div>
+      </div>
+
+      <button class="btn-secondary btn-sign-in" id="sign-in-btn">
+        <i data-lucide="user"></i>
+        <span>Sign In</span>
+      </button>
+      <button class="btn-primary">
+        <i data-lucide="message-square"></i>
+        <span>Get Started</span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile Menu Backdrop -->
+<div class="mobile-backdrop" id="mobileBackdrop"></div>
+
+<!-- Navbar JavaScript -->
+<script src="/js/navbar.js"></script>

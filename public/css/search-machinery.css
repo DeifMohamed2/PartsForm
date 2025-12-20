@@ -1,0 +1,151 @@
+/* ====================================
+   HEAVY MACHINERY THEME - CUSTOM STYLING
+   ==================================== */
+
+.machinery-theme .search2-hero {
+  background: linear-gradient(135deg, #1c1917 0%, #44403c 50%, #1c1917 100%);
+  position: relative;
+}
+
+.machinery-theme .search2-hero::before {
+  background: linear-gradient(
+      135deg,
+      rgba(234, 179, 8, 0.15) 0%,
+      rgba(202, 138, 4, 0.1) 50%,
+      transparent 100%
+    ),
+    url('https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=1920&q=80')
+      center/cover;
+  background-attachment: fixed;
+  filter: brightness(0.38) saturate(1.1) contrast(1.12);
+}
+
+.machinery-badge {
+  background: rgba(234, 179, 8, 0.15) !important;
+  border-color: rgba(234, 179, 8, 0.4) !important;
+  color: #fde047 !important;
+}
+
+.machinery-badge i {
+  color: #eab308 !important;
+}
+
+/* Floating Machinery Icons Animation */
+.machinery-icons-bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0.13;
+}
+
+.machinery-icons-bg .floating-icon {
+  position: absolute;
+  width: 65px;
+  height: 65px;
+  color: rgba(234, 179, 8, 0.3);
+  stroke-width: 1.5px;
+  animation: floatMachinery 22s ease-in-out infinite;
+}
+
+.machinery-icons-bg .icon-1 {
+  top: 12%;
+  left: 8%;
+  animation-delay: 0s;
+  animation-duration: 20s;
+}
+
+.machinery-icons-bg .icon-2 {
+  top: 18%;
+  right: 12%;
+  animation-delay: 2.5s;
+  animation-duration: 24s;
+}
+
+.machinery-icons-bg .icon-3 {
+  bottom: 22%;
+  left: 14%;
+  animation-delay: 5s;
+  animation-duration: 22s;
+}
+
+.machinery-icons-bg .icon-4 {
+  top: 48%;
+  right: 12%;
+  animation-delay: 7.5s;
+  animation-duration: 26s;
+}
+
+.machinery-icons-bg .icon-5 {
+  bottom: 32%;
+  right: 22%;
+  animation-delay: 10s;
+  animation-duration: 21s;
+}
+
+.machinery-icons-bg .icon-6 {
+  top: 40%;
+  left: 16%;
+  animation-delay: 12.5s;
+  animation-duration: 23s;
+}
+
+@keyframes floatMachinery {
+  0%,
+  100% {
+    transform: translateY(0) translateX(0) rotate(0deg);
+    opacity: 0.1;
+  }
+  25% {
+    transform: translateY(-25px) translateX(18px) rotate(-4deg);
+    opacity: 0.18;
+  }
+  50% {
+    transform: translateY(-12px) translateX(-22px) rotate(6deg);
+    opacity: 0.14;
+  }
+  75% {
+    transform: translateY(18px) translateX(12px) rotate(-5deg);
+    opacity: 0.11;
+  }
+}
+
+/* Machinery Theme Accents */
+.machinery-theme .highlight {
+  background: linear-gradient(135deg, #eab308 0%, #f59e0b 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.machinery-theme .search2-btn {
+  background: linear-gradient(135deg, #eab308 0%, #f59e0b 100%);
+}
+
+.machinery-theme .search2-btn:hover {
+  background: linear-gradient(135deg, #ca8a04 0%, #d97706 100%);
+  box-shadow: 0 6px 20px rgba(234, 179, 8, 0.4);
+}
+
+.machinery-theme .quick-action-btn:hover {
+  border-color: rgba(234, 179, 8, 0.4);
+  background: rgba(234, 179, 8, 0.08);
+}
+
+.machinery-theme .filter-btn-apply {
+  background: linear-gradient(135deg, #eab308 0%, #f59e0b 100%);
+}
+
+.machinery-theme .filter-btn-apply:hover {
+  background: linear-gradient(135deg, #ca8a04 0%, #d97706 100%);
+}
+
+.machinery-theme .btn-add-to-cart {
+  background: linear-gradient(135deg, #eab308 0%, #f59e0b 100%);
+}
+
+.machinery-theme .btn-add-to-cart:hover {
+  background: linear-gradient(135deg, #ca8a04 0%, #d97706 100%);
+  box-shadow: 0 6px 20px rgba(234, 179, 8, 0.4);
+}

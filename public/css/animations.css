@@ -1,0 +1,494 @@
+/* ====================================
+   PARTSFORM - Premium Glow & Animation Styles
+   Enterprise-level visual effects
+   ==================================== */
+
+/* ====================================
+   GLOW EFFECTS
+   ==================================== */
+
+/* Button Glow */
+.btn-primary {
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.btn-primary::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    padding: 2px;
+    background: linear-gradient(135deg, #2B5278, #3B82F6);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.btn-primary:hover::before {
+    opacity: 0.6;
+}
+
+.btn-primary:hover {
+    box-shadow: 
+        0 8px 30px rgba(59, 130, 246, 0.4),
+        0 0 40px rgba(59, 130, 246, 0.2);
+    transform: translateY(-2px) scale(1.03);
+}
+
+.btn-secondary:hover {
+    box-shadow: 
+        0 8px 25px rgba(43, 82, 120, 0.25),
+        0 0 30px rgba(59, 130, 246, 0.15);
+    transform: translateY(-2px) scale(1.03);
+}
+
+/* Card Glow Effects */
+.stat-card,
+.advantage-card,
+.sector-panel,
+.stat-card-floating {
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    transform-style: preserve-3d;
+}
+
+.stat-card::after,
+.advantage-card::after,
+.sector-panel::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), 
+                rgba(59, 130, 246, 0.15) 0%, 
+                transparent 60%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.stat-card:hover::after,
+.advantage-card:hover::after,
+.sector-panel:hover::after {
+    opacity: 1;
+}
+
+.stat-card:hover,
+.advantage-card:hover,
+.sector-panel:hover {
+    box-shadow: 
+        0 12px 40px rgba(59, 130, 246, 0.2),
+        0 0 60px rgba(59, 130, 246, 0.1),
+        inset 0 0 20px rgba(59, 130, 246, 0.05);
+}
+
+/* Text Glow for Accents */
+.hero-accent,
+.title-accent,
+.quote-accent,
+.contact-accent {
+    position: relative;
+    display: inline-block;
+}
+
+.hero-accent::after,
+.title-accent::after,
+.quote-accent::after,
+.contact-accent::after {
+    content: attr(data-text);
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: -1;
+    filter: blur(15px);
+    opacity: 0.6;
+    background: inherit;
+    -webkit-background-clip: text;
+    background-clip: text;
+    animation: pulseGlow 3s ease-in-out infinite;
+}
+
+/* Badge Glow */
+.hero-badge,
+.contact-badge,
+.modal-badge {
+    position: relative;
+    animation: subtleGlow 3s ease-in-out infinite;
+}
+
+/* Input Focus Glow */
+.form-input:focus,
+.form-textarea:focus {
+    box-shadow: 
+        0 0 0 3px rgba(59, 130, 246, 0.15),
+        0 0 20px rgba(59, 130, 246, 0.1),
+        0 4px 12px rgba(59, 130, 246, 0.08);
+    border-color: rgba(59, 130, 246, 0.5);
+}
+
+/* Logo Icon Glow */
+.logo-icon,
+.footer-logo-icon {
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.logo-icon::before,
+.footer-logo-icon::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(255, 255, 255, 0.3), 
+        transparent);
+    animation: shimmer 3s infinite;
+}
+
+/* Modal Backdrop Blur */
+.modal-backdrop {
+    backdrop-filter: blur(16px) saturate(1.2);
+    -webkit-backdrop-filter: blur(16px) saturate(1.2);
+    background: rgba(26, 43, 61, 0.7);
+}
+
+.modal-content {
+    box-shadow: 
+        0 25px 50px rgba(26, 43, 61, 0.18),
+        0 0 0 1px rgba(59, 130, 246, 0.08) inset,
+        0 0 60px rgba(59, 130, 246, 0.1);
+}
+
+/* Section Dividers with Glow */
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 0;
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, #2B5278, #3B82F6);
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+}
+
+/* ====================================
+   ANIMATIONS
+   ==================================== */
+
+@keyframes pulseGlow {
+    0%, 100% {
+        opacity: 0.6;
+        filter: blur(15px);
+    }
+    50% {
+        opacity: 0.8;
+        filter: blur(20px);
+    }
+}
+
+@keyframes subtleGlow {
+    0%, 100% {
+        box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
+    }
+    50% {
+        box-shadow: 0 0 25px rgba(59, 130, 246, 0.4);
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        left: -100%;
+    }
+    50%, 100% {
+        left: 100%;
+    }
+}
+
+@keyframes floatUp {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes rotateGlow {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Gradient Orb Animation */
+.gradient-orb {
+    animation: floatOrb 20s ease-in-out infinite;
+}
+
+.orb-1 {
+    animation-delay: 0s;
+}
+
+.orb-2 {
+    animation-delay: 2s;
+}
+
+.orb-3 {
+    animation-delay: 4s;
+}
+
+.orb-4 {
+    animation-delay: 6s;
+}
+
+@keyframes floatOrb {
+    0%, 100% {
+        transform: translate(0, 0) scale(1);
+        opacity: 0.3;
+    }
+    25% {
+        transform: translate(50px, -50px) scale(1.1);
+        opacity: 0.4;
+    }
+    50% {
+        transform: translate(-30px, 30px) scale(0.9);
+        opacity: 0.35;
+    }
+    75% {
+        transform: translate(30px, 50px) scale(1.05);
+        opacity: 0.38;
+    }
+}
+
+/* ====================================
+   BACKGROUND GLOW BLOBS
+   ==================================== */
+
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 20%;
+    right: -10%;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, transparent 70%);
+    border-radius: 50%;
+    filter: blur(60px);
+    animation: floatBlob 15s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.hero-section::after {
+    content: '';
+    position: absolute;
+    bottom: 10%;
+    left: -5%;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(43, 82, 120, 0.06) 0%, transparent 70%);
+    border-radius: 50%;
+    filter: blur(50px);
+    animation: floatBlob 18s ease-in-out infinite reverse;
+    pointer-events: none;
+    z-index: 0;
+}
+
+@keyframes floatBlob {
+    0%, 100% {
+        transform: translate(0, 0) scale(1);
+        opacity: 1;
+    }
+    33% {
+        transform: translate(50px, -30px) scale(1.1);
+        opacity: 0.8;
+    }
+    66% {
+        transform: translate(-40px, 40px) scale(0.95);
+        opacity: 0.9;
+    }
+}
+
+/* ====================================
+   SCROLL INDICATOR ANIMATION
+   ==================================== */
+
+.scroll-indicator {
+    animation: scrollBounce 2s ease-in-out infinite;
+}
+
+@keyframes scrollBounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+.scroll-mouse {
+    position: relative;
+    width: 24px;
+    height: 40px;
+    border: 2px solid rgba(59, 130, 246, 0.4);
+    border-radius: 12px;
+    margin: 10px auto 0;
+}
+
+.scroll-wheel {
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 3px;
+    height: 8px;
+    background: rgba(59, 130, 246, 0.6);
+    border-radius: 2px;
+    animation: scrollWheel 2s ease-in-out infinite;
+}
+
+@keyframes scrollWheel {
+    0% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(12px);
+    }
+}
+
+/* ====================================
+   HOVER LIFT EFFECT
+   ==================================== */
+
+.sector-panel,
+.advantage-card,
+.stat-card {
+    transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.sector-panel:hover,
+.advantage-card:hover,
+.stat-card:hover {
+    transform: translateY(-8px) scale(1.02);
+}
+
+/* ====================================
+   RIPPLE EFFECT ON CLICK
+   ==================================== */
+
+.btn-primary,
+.btn-secondary,
+.btn-submit {
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-primary::after,
+.btn-secondary::after,
+.btn-submit::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.4);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn-primary:active::after,
+.btn-secondary:active::after,
+.btn-submit:active::after {
+    width: 300px;
+    height: 300px;
+    opacity: 0;
+}
+
+/* ====================================
+   MOBILE OPTIMIZATIONS
+   ==================================== */
+
+@media (max-width: 768px) {
+    /* Reduce animation intensity on mobile */
+    .stat-card:hover,
+    .advantage-card:hover,
+    .sector-panel:hover {
+        transform: translateY(-4px) scale(1.01);
+    }
+    
+    /* Disable 3D transforms on mobile */
+    .stat-card,
+    .advantage-card,
+    .sector-panel {
+        transform-style: flat;
+    }
+    
+    /* Reduce glow effects */
+    .btn-primary:hover {
+        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+    }
+    
+    /* Disable cursor trail and complex animations */
+    @keyframes floatBlob {
+        0%, 100% {
+            transform: translate(0, 0) scale(1);
+        }
+    }
+}
+
+/* ====================================
+   REDUCED MOTION SUPPORT
+   ==================================== */
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    
+    .gradient-orb,
+    .hero-badge,
+    .scroll-indicator {
+        animation: none !important;
+    }
+}
+
+/* ====================================
+   PERFORMANCE OPTIMIZATIONS
+   ==================================== */
+
+/* GPU Acceleration */
+.stat-card,
+.advantage-card,
+.sector-panel,
+.btn-primary,
+.btn-secondary,
+.modal-content {
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Remove will-change after animation */
+.stat-card:not(:hover),
+.advantage-card:not(:hover),
+.sector-panel:not(:hover) {
+    will-change: auto;
+}
+
