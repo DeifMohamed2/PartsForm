@@ -69,63 +69,6 @@ const getSearch2Page = async (req, res) => {
 };
 
 /**
- * Get Automotive industry-specific search page
- */
-const getAutomotiveSearchPage = async (req, res) => {
-  try {
-    res.render('Landing/search-automotive', {
-      title: 'Automotive Parts Search | PARTSFORM',
-      industry: 'automotive',
-      industryName: 'Automotive',
-    });
-  } catch (error) {
-    console.error('Error in getAutomotiveSearchPage:', error);
-    res.status(500).render('error', {
-      title: 'Error | PARTSFORM',
-      error: 'Failed to load automotive search page',
-    });
-  }
-};
-
-/**
- * Get Aviation industry-specific search page
- */
-const getAviationSearchPage = async (req, res) => {
-  try {
-    res.render('Landing/search-aviation', {
-      title: 'Aviation Parts Search | PARTSFORM',
-      industry: 'aviation',
-      industryName: 'Aviation',
-    });
-  } catch (error) {
-    console.error('Error in getAviationSearchPage:', error);
-    res.status(500).render('error', {
-      title: 'Error | PARTSFORM',
-      error: 'Failed to load aviation search page',
-    });
-  }
-};
-
-/**
- * Get Heavy Machinery industry-specific search page
- */
-const getHeavyMachinerySearchPage = async (req, res) => {
-  try {
-    res.render('Landing/search-machinery', {
-      title: 'Heavy Machinery Parts Search | PARTSFORM',
-      industry: 'heavy-machinery',
-      industryName: 'Heavy Machinery',
-    });
-  } catch (error) {
-    console.error('Error in getHeavyMachinerySearchPage:', error);
-    res.status(500).render('error', {
-      title: 'Error | PARTSFORM',
-      error: 'Failed to load heavy machinery search page',
-    });
-  }
-};
-
-/**
  * Search for parts by part number
  * POST /api/search
  */
@@ -255,9 +198,6 @@ module.exports = {
   getLandingPage,
   getSearchPage,
   getSearch2Page,
-  getAutomotiveSearchPage,
-  getAviationSearchPage,
-  getHeavyMachinerySearchPage,
   searchParts,
   getSectors,
   downloadSampleExcel,

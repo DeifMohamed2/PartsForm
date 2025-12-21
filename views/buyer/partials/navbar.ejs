@@ -1,0 +1,152 @@
+<!-- ====================================
+     BUYER NAVIGATION BAR - WITH LOGIN STATE
+     ==================================== -->
+<nav class="nav-bar" id="navbar">
+  <div class="nav-gradient-top"></div>
+  <div class="container nav-container">
+    <!-- Logo -->
+    <div class="nav-logo">
+      <a href="/">
+        <img src="/images/PARTSFORM-LOGO-CWstUpY1.webp" alt="PartsForm Logo" class="logo-image">
+      </a>
+    </div>
+
+    <!-- Mobile Menu Toggle Button -->
+    <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle mobile menu" aria-expanded="false">
+      <span class="menu-icon">
+        <span class="menu-line"></span>
+        <span class="menu-line"></span>
+        <span class="menu-line"></span>
+      </span>
+    </button>
+
+    <!-- Navigation Links -->
+    <div class="nav-links" id="navLinks">
+      <!-- Search Dropdown -->
+      <div class="nav-dropdown">
+        <button class="nav-link dropdown-trigger" id="searchDropdownBtn">
+          <span>Search</span>
+          <i data-lucide="chevron-down" class="dropdown-chevron"></i>
+        </button>
+        <div class="nav-dropdown-menu" id="searchDropdownMenu">
+          <a href="/buyer/search-automotive" class="nav-dropdown-item">
+            <i data-lucide="car-front"></i>
+            <div>
+              <span class="dropdown-item-title">Automotive</span>
+              <span class="dropdown-item-desc">Vehicle parts & components</span>
+            </div>
+          </a>
+          <a href="/buyer/search-aviation" class="nav-dropdown-item">
+            <i data-lucide="plane"></i>
+            <div>
+              <span class="dropdown-item-title">Aviation</span>
+              <span class="dropdown-item-desc">Aircraft parts & systems</span>
+            </div>
+          </a>
+          <a href="/buyer/search-machinery" class="nav-dropdown-item">
+            <i data-lucide="construction"></i>
+            <div>
+              <span class="dropdown-item-title">Heavy Machinery</span>
+              <span class="dropdown-item-desc">Industrial equipment parts</span>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <a href="/buyer/orders" class="nav-link" data-section="orders">My Orders</a>
+      <a href="/buyer/affiliate" class="nav-link" data-section="affiliate">Affiliate</a>
+      <a href="/buyer/payment" class="nav-link" data-section="payment">Payment</a>
+      <a href="/buyer/delivery" class="nav-link" data-section="delivery">Delivery</a>
+      <a href="/buyer/contacts" class="nav-link" data-section="contacts">Contacts</a>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="nav-actions" id="navActions">
+      <!-- Shopping Cart Button -->
+      <a href="/buyer/cart" class="btn-cart" id="cart-btn" title="Shopping Cart">
+        <i data-lucide="shopping-cart"></i>
+        <span class="cart-badge" id="cart-badge" style="display: none;">0</span>
+      </a>
+
+      <!-- Quick Search Button -->
+      <button class="btn-quick-search" id="quick-search-btn" title="Quick Search">
+        <i data-lucide="search"></i>
+        <span>Quick Search</span>
+      </button>
+
+      <!-- Language Selector -->
+      <div class="language-selector">
+        <button class="language-btn" id="language-btn">
+          <span class="lang-flag" id="current-flag">🇬🇧</span>
+          <span class="lang-code" id="current-lang">EN</span>
+          <i data-lucide="chevron-down" class="lang-chevron"></i>
+        </button>
+        <div class="language-dropdown" id="language-dropdown">
+          <button class="lang-option" data-lang="EN" data-flag="🇬🇧">
+            <span class="lang-flag">🇬🇧</span>
+            <span class="lang-name">English</span>
+          </button>
+          <button class="lang-option" data-lang="AR" data-flag="🇸🇦">
+            <span class="lang-flag">🇸🇦</span>
+            <span class="lang-name">Arabic</span>
+          </button>
+          <button class="lang-option" data-lang="RU" data-flag="🇷🇺">
+            <span class="lang-flag">🇷🇺</span>
+            <span class="lang-name">Russian</span>
+          </button>
+          <button class="lang-option" data-lang="UA" data-flag="🇺🇦">
+            <span class="lang-flag">🇺🇦</span>
+            <span class="lang-name">Ukrainian</span>
+          </button>
+          <button class="lang-option" data-lang="FR" data-flag="🇫🇷">
+            <span class="lang-flag">🇫🇷</span>
+            <span class="lang-name">French</span>
+          </button>
+          <button class="lang-option" data-lang="ES" data-flag="🇪🇸">
+            <span class="lang-flag">🇪🇸</span>
+            <span class="lang-name">Spanish</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Sign In Button (shown when not logged in) -->
+      <button class="btn-secondary btn-sign-in" id="sign-in-btn" style="display: none;">
+        <i data-lucide="user"></i>
+        <span>Sign In</span>
+      </button>
+
+      <!-- User Profile Dropdown (shown when logged in) -->
+      <div class="user-profile-dropdown" id="userProfileDropdown" style="display: none;">
+        <button type="button" class="user-profile-btn" id="userProfileBtn">
+          <div class="user-avatar">
+            <i data-lucide="user"></i>
+          </div>
+          <span class="user-name" id="userName">User</span>
+          <i data-lucide="chevron-down" class="user-chevron"></i>
+        </button>
+        <div class="user-dropdown-menu" id="userDropdownMenu">
+          <a href="/buyer/profile" class="user-dropdown-item">
+            <i data-lucide="user"></i>
+            <span>Profile</span>
+          </a>
+          <a href="/buyer/settings" class="user-dropdown-item">
+            <i data-lucide="settings"></i>
+            <span>Settings</span>
+          </a>
+          <div class="user-dropdown-divider"></div>
+          <button class="user-dropdown-item" id="logoutBtn">
+            <i data-lucide="log-out"></i>
+            <span>Logout</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile Menu Backdrop -->
+<div class="mobile-backdrop" id="mobileBackdrop"></div>
+
+<!-- Navbar JavaScript -->
+<script src="/js/navbar.js"></script>
+<script src="/js/buyer-auth.js"></script>

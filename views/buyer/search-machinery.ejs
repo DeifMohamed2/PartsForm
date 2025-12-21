@@ -1,6 +1,7 @@
 <%- include('partials/header') %>
-<link rel="stylesheet" href="/css/search2.css">
-<link rel="stylesheet" href="/css/search-machinery.css">
+<link rel="stylesheet" href="/css/buyerCSS/buyer-main.css">
+<link rel="stylesheet" href="/css/buyerCSS/search2.css">
+<link rel="stylesheet" href="/css/buyerCSS/search-machinery.css">
 
 <%- include('partials/navbar') %>
 
@@ -84,9 +85,85 @@
   <%- include('partials/search-results') %>
 </div>
 
+<!-- Quick Search Modal -->
+<%- include('partials/quick-search') %>
+
+<!-- ====================================
+     SIGN IN MODAL
+     ==================================== -->
+<div class="modal" id="sign-in-modal">
+  <div class="modal-backdrop" id="modal-backdrop"></div>
+  <div class="modal-content">
+    <button class="modal-close" id="modal-close">
+      <i data-lucide="x"></i>
+    </button>
+
+    <div class="modal-body">
+      <!-- Header Badge -->
+      <div class="modal-badge">
+        <i data-lucide="sparkles"></i>
+        <span>WELCOME BACK</span>
+      </div>
+
+      <h3 class="modal-title">Sign In</h3>
+      <p class="modal-description">
+        Continue your industrial sourcing journey
+      </p>
+
+      <form class="sign-in-form" id="sign-in-form">
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <div class="input-wrapper">
+            <i data-lucide="mail" class="input-icon"></i>
+            <input type="email" class="form-input" id="login-email" placeholder="your@email.com" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <div class="input-wrapper">
+            <i data-lucide="lock" class="input-icon"></i>
+            <input type="password" class="form-input" id="login-password" placeholder="••••••••" required>
+          </div>
+        </div>
+
+        <div class="form-footer">
+          <a href="#" class="forgot-password">Forgot password?</a>
+        </div>
+
+        <button type="submit" class="btn-primary btn-full">
+          <span>Sign In</span>
+          <i data-lucide="arrow-right"></i>
+        </button>
+      </form>
+
+      <!-- Sign Up Link -->
+      <div class="modal-footer">
+        <span>Don't have an account?</span>
+        <a href="#" class="sign-up-link">Sign Up</a>
+      </div>
+
+      <!-- Divider -->
+      <div class="modal-divider">
+        <span>or continue with</span>
+      </div>
+
+      <!-- Social Login -->
+      <div class="social-login">
+        <button class="social-btn">Google</button>
+        <button class="social-btn">LinkedIn</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="/js/animations.js"></script>
 <script src="/js/main.js"></script>
+<script src="/js/cart.js"></script>
 <script src="/js/search2.js"></script>
+<script src="/js/quick-search.js"></script>
+<script src="/js/buyer-auth.js"></script>
+<script src="/js/cart-badge-updater.js"></script>
 <script>
   lucide.createIcons();
   window.addEventListener('load', () => lucide.createIcons());

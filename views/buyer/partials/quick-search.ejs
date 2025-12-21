@@ -1,0 +1,75 @@
+<!-- ====================================
+     QUICK SEARCH MODAL
+     ==================================== -->
+<div class="quick-search-modal" id="quick-search-modal">
+  <div class="quick-search-backdrop" id="quick-search-backdrop"></div>
+  
+  <div class="quick-search-container">
+    <button class="quick-search-close" id="quick-search-close">
+      <i data-lucide="x"></i>
+    </button>
+    
+    <div class="quick-search-content">
+      <!-- Header -->
+      <div class="quick-search-header">
+        <div class="quick-search-badge">
+          <i data-lucide="zap"></i>
+          <span>QUICK SEARCH</span>
+        </div>
+        <h3 class="quick-search-title">Find Industrial Parts</h3>
+        <p class="quick-search-subtitle">Enter part number or description to search across all sectors</p>
+      </div>
+
+      <!-- Search Form -->
+      <div class="quick-search-form">
+        <div class="quick-search-input-wrapper">
+          <i data-lucide="search" class="quick-search-icon"></i>
+          <input 
+            type="text" 
+            class="quick-search-input" 
+            id="quick-search-input" 
+            placeholder="Enter part number or description..." 
+            autocomplete="off"
+          >
+          <button class="quick-search-clear" id="quick-search-clear" style="display: none;">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+
+        <!-- Category Selection -->
+        <div class="quick-search-categories">
+          <p class="category-label">Select Category:</p>
+          <div class="category-options">
+            <button class="category-option active" data-category="automotive">
+              <i data-lucide="car-front"></i>
+              <span>Automotive</span>
+            </button>
+            <button class="category-option" data-category="aviation">
+              <i data-lucide="plane"></i>
+              <span>Aviation</span>
+            </button>
+            <button class="category-option" data-category="machinery">
+              <i data-lucide="construction"></i>
+              <span>Heavy Machinery</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Search Button -->
+        <button class="quick-search-submit" id="quick-search-submit">
+          <span>Search Now</span>
+          <i data-lucide="arrow-right"></i>
+        </button>
+      </div>
+
+      <!-- Recent Searches -->
+      <div class="quick-search-recent" id="quick-search-recent" style="display: none;">
+        <p class="recent-label">
+          <i data-lucide="clock"></i>
+          <span>Recent Searches</span>
+        </p>
+        <div class="recent-items" id="recent-items"></div>
+      </div>
+    </div>
+  </div>
+</div>

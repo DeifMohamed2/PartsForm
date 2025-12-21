@@ -486,7 +486,142 @@
   function init() {
     setupEventListeners();
     initializeFilters();
+    checkAuthAndUpdateUI();
     console.log('Search2 page initialized');
+  }
+
+  // ====================================
+  // AUTHENTICATION CHECK
+  // ====================================
+  function checkAuthAndUpdateUI() {
+    // Check if user is logged in
+    const isLoggedIn =
+      typeof window.BuyerAuth !== 'undefined' && window.BuyerAuth.isLoggedIn();
+
+    if (!isLoggedIn) {
+      // Keep inputs enabled but update placeholder to indicate login needed
+      if (elements.searchInput) {
+        elements.searchInput.disabled = false;
+        elements.searchInput.placeholder =
+          'Please sign in to search for parts...';
+        elements.searchInput.style.cursor = 'text';
+        elements.searchInput.style.opacity = '1';
+      }
+
+      // Keep search button enabled
+      if (elements.searchBtn) {
+        elements.searchBtn.disabled = false;
+        elements.searchBtn.style.cursor = 'pointer';
+        elements.searchBtn.style.opacity = '1';
+      }
+
+      // Keep Excel upload enabled
+      if (elements.excelUploadTrigger) {
+        elements.excelUploadTrigger.disabled = false;
+        elements.excelUploadTrigger.style.cursor = 'pointer';
+        elements.excelUploadTrigger.style.opacity = '1';
+      }
+
+      // Keep advanced filters enabled
+      if (elements.advancedFilterTrigger) {
+        elements.advancedFilterTrigger.disabled = false;
+        elements.advancedFilterTrigger.style.cursor = 'pointer';
+        elements.advancedFilterTrigger.style.opacity = '1';
+      }
+
+      // Update empty state message to show login prompt
+      if (elements.emptyState) {
+        const emptyStateTitle =
+          elements.emptyState.querySelector('.empty-state-title');
+        const emptyStateDescription = elements.emptyState.querySelector(
+          '.empty-state-description'
+        );
+        if (emptyStateTitle) {
+          emptyStateTitle.textContent = 'Sign In Required';
+        }
+        if (emptyStateDescription) {
+          emptyStateDescription.innerHTML =
+            'Please <strong>sign in</strong> to search for parts from verified suppliers worldwide.';
+        }
+      }
+    } else {
+      // Enable search input
+      if (elements.searchInput) {
+        elements.searchInput.disabled = false;
+        // Restore original placeholder based on page
+        const pageTheme = document.querySelector('.search2-page')?.classList;
+        if (pageTheme?.contains('automotive-theme')) {
+          elements.searchInput.placeholder =
+            'Enter part number, vehicle model, or description...';
+        } else if (pageTheme?.contains('aviation-theme')) {
+          elements.searchInput.placeholder =
+            'Enter part number, aircraft model, or description...';
+        } else if (pageTheme?.contains('machinery-theme')) {
+          elements.searchInput.placeholder =
+            'Enter part number, equipment model, or description...';
+        } else {
+          elements.searchInput.placeholder =
+            'Enter part number, brand name, or description...';
+        }
+        elements.searchInput.style.cursor = 'text';
+        elements.searchInput.style.opacity = '1';
+      }
+
+      // Enable search button
+      if (elements.searchBtn) {
+        elements.searchBtn.disabled = false;
+        elements.searchBtn.style.cursor = 'pointer';
+        elements.searchBtn.style.opacity = '1';
+      }
+
+      // Enable Excel upload
+      if (elements.excelUploadTrigger) {
+        elements.excelUploadTrigger.disabled = false;
+        elements.excelUploadTrigger.style.cursor = 'pointer';
+        elements.excelUploadTrigger.style.opacity = '1';
+      }
+
+      // Enable advanced filters
+      if (elements.advancedFilterTrigger) {
+        elements.advancedFilterTrigger.disabled = false;
+        elements.advancedFilterTrigger.style.cursor = 'pointer';
+        elements.advancedFilterTrigger.style.opacity = '1';
+      }
+
+      // Restore original empty state message
+      if (elements.emptyState) {
+        const emptyStateTitle =
+          elements.emptyState.querySelector('.empty-state-title');
+        const emptyStateDescription = elements.emptyState.querySelector(
+          '.empty-state-description'
+        );
+        if (emptyStateTitle) {
+          emptyStateTitle.textContent = 'Start Your Search';
+        }
+        if (emptyStateDescription) {
+          emptyStateDescription.innerHTML =
+            'Enter a part number, brand name, or description to find parts from verified suppliers worldwide.';
+        }
+      }
+    }
+  }
+
+  // Listen for login events (when user logs in)
+  function setupAuthListener() {
+    // Listen for custom login event
+    window.addEventListener('userLoggedIn', () => {
+      checkAuthAndUpdateUI();
+    });
+
+    // Also listen for storage changes (when login happens in another tab)
+    window.addEventListener('storage', () => {
+      checkAuthAndUpdateUI();
+    });
+
+    // Check auth status periodically (fallback)
+    setInterval(() => {
+      checkAuthAndUpdateUI();
+    }, 2000);
   }
 
   // ====================================
@@ -496,6 +631,7 @@
     // Search input events
     elements.searchInput?.addEventListener('input', handleSearchInput);
     elements.searchInput?.addEventListener('keydown', handleSearchKeydown);
+    // Note: We don't show modal on focus - only when user tries to type or search
     elements.searchBtn?.addEventListener('click', performSearch);
     elements.clearBtn?.addEventListener('click', clearSearch);
     elements.resetBtn?.addEventListener('click', resetSearch);
@@ -516,7 +652,19 @@
     // Remove sort select since we're using table
 
     // Filters
-    elements.advancedFilterTrigger?.addEventListener('click', showFiltersPanel);
+    elements.advancedFilterTrigger?.addEventListener('click', () => {
+      // Check if user is logged in
+      if (
+        typeof window.BuyerAuth === 'undefined' ||
+        !window.BuyerAuth.isLoggedIn()
+      ) {
+        if (typeof window.showLoginModal === 'function') {
+          window.showLoginModal();
+        }
+        return;
+      }
+      showFiltersPanel();
+    });
     elements.filtersPanelClose?.addEventListener('click', hideFiltersPanel);
     elements.filtersBackdrop?.addEventListener('click', hideFiltersPanel);
     elements.clearAllFilters?.addEventListener('click', clearFilters);
@@ -528,7 +676,19 @@
     });
 
     // Excel modal
-    elements.excelUploadTrigger?.addEventListener('click', showExcelModal);
+    elements.excelUploadTrigger?.addEventListener('click', () => {
+      // Check if user is logged in
+      if (
+        typeof window.BuyerAuth === 'undefined' ||
+        !window.BuyerAuth.isLoggedIn()
+      ) {
+        if (typeof window.showLoginModal === 'function') {
+          window.showLoginModal();
+        }
+        return;
+      }
+      showExcelModal();
+    });
     elements.excelModalClose?.addEventListener('click', hideExcelModal);
     elements.excelModalOverlay?.addEventListener('click', hideExcelModal);
     elements.browseFileBtn?.addEventListener('click', () =>
@@ -540,6 +700,12 @@
 
     // Drag and drop
     setupDragAndDrop();
+
+    // Add to Cart button
+    const addToCartBtn = document.getElementById('add-to-cart-btn');
+    if (addToCartBtn) {
+      addToCartBtn.addEventListener('click', handleAddToCart);
+    }
   }
 
   // ====================================
@@ -547,6 +713,25 @@
   // ====================================
   function handleSearchInput(e) {
     const query = e.target.value.trim();
+
+    // Check if user is logged in before showing autocomplete
+    if (
+      typeof window.BuyerAuth === 'undefined' ||
+      !window.BuyerAuth.isLoggedIn()
+    ) {
+      // If user types and is not logged in, show login modal
+      if (query.length > 0) {
+        if (typeof window.showLoginModal === 'function') {
+          window.showLoginModal();
+        }
+        // Clear the input after showing modal
+        setTimeout(() => {
+          elements.searchInput.value = '';
+        }, 100);
+        return;
+      }
+      return;
+    }
 
     // Show/hide clear button
     if (query.length > 0) {
@@ -595,6 +780,21 @@
     const query = elements.searchInput.value.trim();
 
     if (!query) {
+      return;
+    }
+
+    // Check if user is logged in
+    if (
+      typeof window.BuyerAuth === 'undefined' ||
+      !window.BuyerAuth.isLoggedIn()
+    ) {
+      // Show login modal
+      if (typeof window.showLoginModal === 'function') {
+        window.showLoginModal();
+      } else {
+        // Fallback: show alert
+        alert('Please sign in to search for parts.');
+      }
       return;
     }
 
@@ -862,7 +1062,9 @@
           }
 
           return `
-                <tr data-part-code="${code}">
+                <tr data-part-code="${code}" data-part-index="${results.indexOf(
+            part
+          )}">
                     <td>
                         <input type="checkbox" class="table-checkbox" data-price="${price}" onchange="updateSelectedTotal()">
                     </td>
@@ -880,7 +1082,7 @@
                     <td>
                         <div class="order-qty-controls">
                             <button class="qty-btn" onclick="decrementQty(this)">−</button>
-                            <input type="number" class="qty-input" value="1" min="1" max="${quantity}" onchange="updateRowTotal(this)">
+                            <input type="number" class="qty-input" value="1" min="1" max="${quantity}" onchange="updateRowTotal(this)" oninput="updateRowTotal(this)">
                             <button class="qty-btn" onclick="incrementQty(this)">+</button>
                         </div>
                     </td>
@@ -889,10 +1091,21 @@
                           price
                         )}</strong> AED
                     </td>
+                    <td>
+                        <button class="btn-add-single-to-cart" data-part-index="${results.indexOf(
+                          part
+                        )}" title="Add to cart">
+                            <i data-lucide="shopping-cart"></i>
+                            <i data-lucide="plus" class="plus-icon"></i>
+                        </button>
+                    </td>
                 </tr>
             `;
         })
         .join('');
+
+      // Attach event listeners to add-to-cart buttons
+      attachSingleAddToCartListeners();
     }
 
     // Reinitialize Lucide icons
@@ -1143,7 +1356,7 @@
     }
 
     // Update selected total if checkbox is checked
-    if (checkbox.checked) {
+    if (checkbox && checkbox.checked) {
       updateSelectedTotal();
     }
   };
@@ -1196,6 +1409,290 @@
   };
 
   // ====================================
+  // ADD TO CART FUNCTIONALITY
+  // ====================================
+  function attachSingleAddToCartListeners() {
+    const addButtons = document.querySelectorAll('.btn-add-single-to-cart');
+    addButtons.forEach((button) => {
+      button.addEventListener('click', function (e) {
+        e.preventDefault();
+        const partIndex = parseInt(this.dataset.partIndex);
+        handleAddSingleToCart(partIndex);
+      });
+    });
+
+    // Re-create lucide icons for the new buttons
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons({ nameAttr: 'data-lucide' });
+    }
+  }
+
+  function handleAddSingleToCart(partIndex) {
+    // Check if cart API is available
+    if (typeof window.PartsFormCart === 'undefined') {
+      console.error('Cart API not loaded');
+      showCartAlert('error', 'Error', 'Shopping cart is not available');
+      return;
+    }
+
+    const partData = state.currentResults[partIndex];
+    if (!partData) {
+      showCartAlert('error', 'Error', 'Part not found');
+      return;
+    }
+
+    // Get the row to find the quantity input
+    const rows = document.querySelectorAll('tr[data-part-index]');
+    let qtyInput = null;
+    let addButton = null;
+    rows.forEach((row) => {
+      if (parseInt(row.dataset.partIndex) === partIndex) {
+        qtyInput = row.querySelector('.qty-input');
+        addButton = row.querySelector('.btn-add-single-to-cart');
+      }
+    });
+
+    const quantity = parseInt(qtyInput?.value) || 1;
+    const pageCategory = determineCategory();
+
+    // Prepare cart item
+    const cartItem = {
+      code: partData.vendorCode || partData.code || 'N/A',
+      brand: partData.brand || 'N/A',
+      description: partData.description || 'N/A',
+      terms: partData.terms || 'N/A',
+      weight: parseFloat(partData.weight) || 0,
+      stock: determineStockStatus(partData.stock || partData.qty || 0),
+      aircraftType: partData.aircraftType || 'N/A',
+      quantity: quantity,
+      price: parseFloat(partData.unitPrice || partData.price) || 0,
+      reference: '',
+      category: pageCategory,
+    };
+
+    // Add visual feedback - success animation
+    if (addButton) {
+      addButton.classList.add('added');
+      setTimeout(() => {
+        addButton.classList.remove('added');
+      }, 500);
+    }
+
+    // Add to cart
+    window.PartsFormCart.addToCart(cartItem);
+
+    // Show success message with animation
+    showCartAlert(
+      'success',
+      'Added to Cart',
+      `${cartItem.code} (${quantity} pcs) added successfully`
+    );
+
+    // Reset quantity to 1
+    if (qtyInput) {
+      qtyInput.value = 1;
+    }
+  }
+
+  function handleAddToCart() {
+    // Check if cart API is available
+    if (typeof window.PartsFormCart === 'undefined') {
+      console.error('Cart API not loaded');
+      showCartAlert('error', 'Error', 'Shopping cart is not available');
+      return;
+    }
+
+    // Get all checked items
+    const checkedBoxes = document.querySelectorAll('.table-checkbox:checked');
+
+    if (checkedBoxes.length === 0) {
+      showCartAlert(
+        'info',
+        'No Selection',
+        'Please select items to add to cart'
+      );
+      return;
+    }
+
+    let addedCount = 0;
+
+    checkedBoxes.forEach((checkbox) => {
+      const row = checkbox.closest('tr');
+      const partIndex = parseInt(row.dataset.partIndex);
+      const qtyInput = row.querySelector('.qty-input');
+      const quantity = parseInt(qtyInput?.value) || 1;
+
+      // Find the part data from current results using the unique index
+      const partData = state.currentResults[partIndex];
+
+      if (partData) {
+        // Determine current page category
+        const pageCategory = determineCategory();
+
+        // Prepare cart item
+        const cartItem = {
+          code: partData.vendorCode || partData.code || 'N/A',
+          brand: partData.brand || 'N/A',
+          description: partData.description || 'N/A',
+          terms: partData.terms || 'N/A',
+          weight: parseFloat(partData.weight) || 0,
+          stock: determineStockStatus(partData.stock || partData.qty || 0),
+          aircraftType: partData.aircraftType || 'N/A',
+          quantity: quantity,
+          price: parseFloat(partData.unitPrice || partData.price) || 0,
+          reference: '',
+          category: pageCategory,
+        };
+
+        // Add to cart
+        window.PartsFormCart.addToCart(cartItem);
+        addedCount++;
+
+        // Uncheck the checkbox
+        checkbox.checked = false;
+      }
+    });
+
+    // Update selected total
+    if (typeof window.updateSelectedTotal === 'function') {
+      window.updateSelectedTotal();
+    }
+
+    // Show success message
+    if (addedCount > 0) {
+      showCartAlert(
+        'success',
+        'Added to Cart',
+        `${addedCount} item(s) added successfully`
+      );
+    }
+  }
+
+  function determineCategory() {
+    const path = window.location.pathname;
+    if (path.includes('automotive')) return 'automotive';
+    if (path.includes('aviation')) return 'aviation';
+    if (path.includes('machinery')) return 'machinery';
+    return 'general';
+  }
+
+  function determineStockStatus(quantity) {
+    const qty = parseInt(quantity) || 0;
+    if (qty <= 5) return 'ST3';
+    if (qty <= 10) return 'ST2';
+    return 'ST1';
+  }
+
+  function showCartAlert(type, title, message) {
+    // Get or create a single persistent alerts container
+    let alertsContainer = document.getElementById('search2-alerts-container');
+    
+    if (!alertsContainer) {
+      alertsContainer = document.createElement('div');
+      alertsContainer.id = 'search2-alerts-container';
+      alertsContainer.style.cssText = `
+        position: fixed;
+        top: 100px;
+        right: 2rem;
+        z-index: 9999;
+        max-width: 400px;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        pointer-events: none;
+      `;
+      document.body.appendChild(alertsContainer);
+    }
+
+    // Create individual alert
+    const alert = document.createElement('div');
+    alert.style.cssText = `
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 1rem 1.25rem;
+      background: white;
+      border-radius: 0.75rem;
+      box-shadow: 0 12px 40px rgba(43, 82, 120, 0.15);
+      border-left: 4px solid ${
+        type === 'success'
+          ? '#16a34a'
+          : type === 'error'
+          ? '#dc2626'
+          : '#3b82f6'
+      };
+      animation: slideInRight 0.3s ease-out;
+      pointer-events: auto;
+      margin-bottom: 0;
+    `;
+
+    const iconColor =
+      type === 'success' ? '#16a34a' : type === 'error' ? '#dc2626' : '#3b82f6';
+    const iconName =
+      type === 'success'
+        ? 'check-circle'
+        : type === 'error'
+        ? 'x-circle'
+        : 'info';
+
+    alert.innerHTML = `
+      <div style="flex-shrink: 0; width: 24px; height: 24px; color: ${iconColor};">
+        <i data-lucide="${iconName}"></i>
+      </div>
+      <div style="flex: 1;">
+        <div style="font-weight: 700; color: #1a2b3d; margin-bottom: 0.25rem; font-size: 0.9375rem;">
+          ${title}
+        </div>
+        <p style="color: #475569; font-size: 0.875rem; margin: 0;">
+          ${message}
+        </p>
+      </div>
+      <button style="flex-shrink: 0; width: 20px; height: 20px; background: transparent; border: none; cursor: pointer; color: #64748b;">
+        <i data-lucide="x"></i>
+      </button>
+    `;
+
+    // Append alert to container
+    alertsContainer.appendChild(alert);
+
+    // Re-create icons
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons({ nameAttr: 'data-lucide' });
+    }
+
+    // Close button handler
+    const closeBtn = alert.querySelector('button');
+    closeBtn.addEventListener('click', () => {
+      alert.style.animation = 'slideOutRight 0.3s ease-out';
+      setTimeout(() => {
+        if (alert.parentElement) {
+          alert.remove();
+        }
+        // Remove container if empty
+        if (alertsContainer && alertsContainer.children.length === 0) {
+          alertsContainer.remove();
+        }
+      }, 300);
+    });
+
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+      if (alert.parentElement) {
+        alert.style.animation = 'slideOutRight 0.3s ease-out';
+        setTimeout(() => {
+          if (alert.parentElement) {
+            alert.remove();
+          }
+          // Remove container if empty
+          if (alertsContainer && alertsContainer.children.length === 0) {
+            alertsContainer.remove();
+          }
+        }, 300);
+      }
+    }, 5000);
+  }
+
+  // ====================================
   // INITIALIZE ON DOM READY
   // ====================================
 
@@ -1226,9 +1723,11 @@
     document.addEventListener('DOMContentLoaded', () => {
       init();
       initTableScrollIndicator();
+      setupAuthListener();
     });
   } else {
     init();
     initTableScrollIndicator();
+    setupAuthListener();
   }
 })();

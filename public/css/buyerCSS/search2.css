@@ -29,6 +29,41 @@
 .search2-page {
   min-height: 100vh;
   padding-top: 0;
+  position: relative;
+}
+
+/* Ensure navbar stays on top and visible with transparency */
+.search2-page .nav-bar {
+  z-index: 10001 !important;
+  position: fixed !important;
+  top: 0 !important;
+  width: 100% !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  border-bottom: 1px solid rgba(59, 130, 246, 0.15) !important;
+  box-shadow: 0 4px 24px rgba(43, 82, 120, 0.12) !important;
+  overflow: visible !important;
+}
+
+/* Ensure dropdown menu appears above everything */
+.search2-page .nav-dropdown-menu {
+  z-index: 10002 !important;
+}
+
+/* Ensure navbar links are visible */
+.search2-page .nav-link {
+  color: #1a2b3d !important;
+}
+
+.search2-page .nav-link.active {
+  color: #3b82f6 !important;
+}
+
+/* Ensure logo is visible */
+.search2-page .nav-logo img {
+  filter: none !important;
+  opacity: 1 !important;
 }
 
 body:has(.search2-page) {
@@ -573,7 +608,7 @@ body:has(.search2-page) {
 }
 
 .search2-results-section .container {
-  max-width: 100%;
+  max-width: 1400px;
   width: 100%;
   padding-left: 1.5rem;
   padding-right: 1.5rem;
@@ -600,7 +635,7 @@ body:has(.search2-page) {
   bottom: 0;
   background: rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(4px);
-  z-index: 999;
+  z-index: 10050;
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.3s ease, visibility 0.3s ease;
@@ -620,7 +655,7 @@ body:has(.search2-page) {
   background: var(--bg-primary);
   border-right: 1.5px solid var(--border-color);
   box-shadow: 4px 0 24px rgba(43, 82, 120, 0.12);
-  z-index: 1000;
+  z-index: 10051;
   transform: translateX(-100%);
   transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
   overflow-y: auto;
@@ -1306,6 +1341,84 @@ body:has(.search2-page) {
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
+/* Single Add to Cart Button */
+.btn-add-single-to-cart {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(59, 130, 246, 0.08);
+  border: 1.5px solid rgba(59, 130, 246, 0.2);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  overflow: visible;
+}
+
+.btn-add-single-to-cart:hover {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: rgba(59, 130, 246, 0.35);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+}
+
+.btn-add-single-to-cart:active {
+  transform: scale(0.95);
+}
+
+.btn-add-single-to-cart i {
+  width: 20px;
+  height: 20px;
+  color: #3b82f6;
+  transition: all 0.2s ease;
+}
+
+.btn-add-single-to-cart:hover i {
+  transform: scale(1.08);
+}
+
+.btn-add-single-to-cart .plus-icon {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  bottom: -1px;
+  right: -1px;
+  background: #10b981;
+  border-radius: 50%;
+  padding: 2px;
+  border: 1.5px solid white;
+  box-shadow: 0 1px 3px rgba(16, 185, 129, 0.3);
+  transition: all 0.2s ease;
+}
+
+.btn-add-single-to-cart:hover .plus-icon {
+  transform: scale(1.1);
+}
+
+/* Success animation when clicked */
+@keyframes cart-success {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.btn-add-single-to-cart.added {
+  animation: cart-success 0.4s ease;
+  background: rgba(16, 185, 129, 0.15);
+  border-color: rgba(16, 185, 129, 0.35);
+}
+
+.btn-add-single-to-cart.added i {
+  color: #10b981;
+}
+
 /* Results Footer */
 .results-footer {
   display: flex;
@@ -1965,6 +2078,28 @@ body:has(.search2-page) {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(100px);
   }
 }
 

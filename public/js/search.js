@@ -864,7 +864,7 @@
                     <td>
                         <div class="order-qty-controls">
                             <button class="qty-btn" onclick="decrementQty(this)">−</button>
-                            <input type="number" class="qty-input" value="1" min="1" max="${quantity}" onchange="updateRowTotal(this)">
+                            <input type="number" class="qty-input" value="1" min="1" max="${quantity}" onchange="updateRowTotal(this)" oninput="updateRowTotal(this)">
                             <button class="qty-btn" onclick="incrementQty(this)">+</button>
                         </div>
                     </td>
@@ -1126,7 +1126,7 @@
     }
 
     // Update selected total if checkbox is checked
-    if (checkbox.checked) {
+    if (checkbox && checkbox.checked) {
       updateSelectedTotal();
     }
   };

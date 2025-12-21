@@ -1,0 +1,205 @@
+<%- include('partials/header') %>
+<link rel="stylesheet" href="/css/buyerCSS/buyer-main.css">
+<link rel="stylesheet" href="/css/buyerCSS/orders.css">
+
+<%- include('partials/navbar') %>
+
+<!-- ====================================
+     ORDERS PAGE - PROFESSIONAL DESIGN
+     ==================================== -->
+<div class="orders-page">
+  <!-- Header Bar -->
+  <div class="orders-header-bar">
+    <div class="container">
+      <div class="orders-header-content">
+        <div class="orders-header-left">
+          <h1 class="orders-header-title">
+            <i data-lucide="package"></i>
+            <span>My Orders</span>
+          </h1>
+          <p class="orders-header-subtitle">Track and manage all your orders in one place</p>
+        </div>
+        <div class="orders-header-right">
+          <div class="orders-stats">
+            <div class="stat-card">
+              <div class="stat-card-icon pending">
+                <i data-lucide="clock"></i>
+              </div>
+              <div class="stat-card-content">
+                <span class="stat-card-value" id="stat-pending">0</span>
+                <span class="stat-card-label">Pending</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card-icon processing">
+                <i data-lucide="loader"></i>
+              </div>
+              <div class="stat-card-content">
+                <span class="stat-card-value" id="stat-processing">0</span>
+                <span class="stat-card-label">Processing</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card-icon completed">
+                <i data-lucide="check-circle"></i>
+              </div>
+              <div class="stat-card-content">
+                <span class="stat-card-value" id="stat-completed">0</span>
+                <span class="stat-card-label">Completed</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Orders Content -->
+  <div class="orders-content">
+    <div class="container">
+      <!-- Filters -->
+      <div class="orders-filters">
+        <div class="filters-row">
+          <div class="filter-group">
+            <label class="filter-label" for="filter-status">Status</label>
+            <select class="filter-select" id="filter-status">
+              <option value="">All Statuses</option>
+              <option value="pending">Pending</option>
+              <option value="processing">Processing</option>
+              <option value="shipped">Shipped</option>
+              <option value="delivered">Delivered</option>
+              <option value="completed">Completed</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label" for="filter-date-from">Date From</label>
+            <input type="date" class="filter-input" id="filter-date-from">
+          </div>
+          <div class="filter-group">
+            <label class="filter-label" for="filter-date-to">Date To</label>
+            <input type="date" class="filter-input" id="filter-date-to">
+          </div>
+          <div class="filter-group">
+            <label class="filter-label" for="filter-search">Search Order</label>
+            <input type="text" class="filter-input" id="filter-search" placeholder="Order number, part number...">
+          </div>
+          <div class="filter-actions">
+            <button class="btn-filter" id="btn-apply-filters">
+              <i data-lucide="filter"></i>
+              <span>Apply Filters</span>
+            </button>
+            <button class="btn-reset" id="btn-reset-filters">
+              <i data-lucide="x"></i>
+              <span>Reset</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Orders Table -->
+      <div class="orders-table-container" id="orders-table-container" style="display: none;">
+        <table class="orders-table" id="orders-table">
+          <thead>
+            <tr>
+              <th class="sortable" data-sort="orderNumber">
+                Order Number
+              </th>
+              <th class="sortable" data-sort="date">
+                Date
+              </th>
+              <th>Status</th>
+              <th>Items</th>
+              <th class="sortable" data-sort="amount">
+                Amount
+              </th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="orders-tbody">
+            <!-- Orders will be populated by JavaScript -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="orders-pagination" id="orders-pagination" style="display: none;">
+        <button class="pagination-btn" id="btn-prev" disabled>
+          <i data-lucide="chevron-left"></i>
+          <span>Previous</span>
+        </button>
+        <span class="pagination-info" id="pagination-info">Showing <span id="pagination-from">0</span>-<span id="pagination-to">0</span> of <span id="pagination-total">0</span></span>
+        <button class="pagination-btn" id="btn-next" disabled>
+          <span>Next</span>
+          <i data-lucide="chevron-right"></i>
+        </button>
+      </div>
+
+      <!-- Empty State -->
+      <div class="orders-empty" id="orders-empty">
+        <div class="orders-empty-icon">
+          <i data-lucide="package-x"></i>
+        </div>
+        <h2 class="orders-empty-title">No Orders Yet</h2>
+        <p class="orders-empty-text">
+          You haven't placed any orders yet. Start shopping to see your orders here.
+        </p>
+        <div class="orders-empty-actions">
+          <a href="/buyer/search-automotive" class="btn-empty-action primary">
+            <i data-lucide="shopping-bag"></i>
+            <span>Start Shopping</span>
+          </a>
+          <a href="/buyer" class="btn-empty-action secondary">
+            <i data-lucide="arrow-left"></i>
+            <span>Back to Main</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/quick-search') %>
+<%- include('partials/footer') %>
+
+<script src="/js/main.js"></script>
+<script src="/js/quick-search.js"></script>
+<script src="/js/cart.js"></script>
+<script src="/js/cart-badge-updater.js"></script>
+<script src="/js/orders.js"></script>
+<script>
+  lucide.createIcons();
+  window.addEventListener('load', () => lucide.createIcons());
+  
+  // Force navbar to always stay white on orders page
+  document.addEventListener('DOMContentLoaded', () => {
+    const navbar = document.getElementById('navbar');
+    if (navbar) {
+      navbar.classList.add('scrolled');
+      // Prevent other scripts from removing the scrolled class
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+            if (!navbar.classList.contains('scrolled')) {
+              navbar.classList.add('scrolled');
+            }
+          }
+        });
+      });
+      observer.observe(navbar, { attributes: true, attributeFilter: ['class'] });
+      // Also ensure on scroll
+      const ensureScrolled = () => navbar.classList.add('scrolled');
+      window.addEventListener('scroll', ensureScrolled, { passive: true });
+    }
+  });
+
+  // Order action functions
+  window.viewOrder = function(orderNumber) {
+    window.location.href = `/buyer/orders/${encodeURIComponent(orderNumber)}`;
+  };
+
+  window.trackOrder = function(orderNumber) {
+    alert(`Tracking order ${orderNumber}\n\nThis will open the order tracking page.`);
+    // window.location.href = `/buyer/orders/${orderNumber}/track`;
+  };
+</script>
