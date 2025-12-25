@@ -1,0 +1,312 @@
+<%- include('partials/header') %>
+<link rel="stylesheet" href="/css/buyerCSS/buyer-main.css">
+<link rel="stylesheet" href="/css/buyerCSS/create-ticket.css">
+
+<%- include('partials/navbar') %>
+
+<!-- ====================================
+     CREATE TICKET PAGE - PROFESSIONAL DESIGN
+     ==================================== -->
+<div class="create-ticket-page">
+  <!-- Hero Section -->
+  <div class="create-ticket-hero">
+    <div class="create-ticket-hero-content">
+      <div class="hero-badge">
+        <i data-lucide="life-buoy"></i>
+        <span>Support Center</span>
+      </div>
+
+      <h1 class="create-ticket-hero-title">Create Support Ticket</h1>
+      <p class="create-ticket-hero-subtitle">
+        Tell us about your issue and we'll get back to you as soon as possible
+      </p>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="buyer-container">
+    <div class="create-ticket-section">
+      <div class="create-ticket-container">
+        <!-- Back Button -->
+        <a href="/buyer/tickets" class="btn-back">
+          <i data-lucide="arrow-left"></i>
+          <span>Back to Tickets</span>
+        </a>
+
+        <!-- Form Card -->
+        <div class="create-ticket-card">
+          <div class="card-header">
+            <h2 class="card-title">Ticket Information</h2>
+            <p class="card-subtitle">Please provide details about your issue</p>
+          </div>
+
+          <form id="create-ticket-form" class="ticket-form">
+            <!-- Order Number -->
+            <div class="form-group">
+              <label for="order-number" class="form-label">
+                <i data-lucide="package"></i>
+                <span>Order Number</span>
+                <span class="required">*</span>
+              </label>
+              <input 
+                type="text" 
+                id="order-number" 
+                name="orderNumber" 
+                class="form-input" 
+                placeholder="e.g., ORD-2025-001"
+                required
+              >
+              <span class="form-hint">Enter the order number related to this issue</span>
+            </div>
+
+            <!-- Subject -->
+            <div class="form-group">
+              <label for="subject" class="form-label">
+                <i data-lucide="type"></i>
+                <span>Subject</span>
+                <span class="required">*</span>
+              </label>
+              <input 
+                type="text" 
+                id="subject" 
+                name="subject" 
+                class="form-input" 
+                placeholder="Brief description of your issue"
+                required
+              >
+              <span class="form-hint">Provide a clear, concise summary of your issue</span>
+            </div>
+
+            <!-- Category -->
+            <div class="form-group">
+              <label for="category" class="form-label">
+                <i data-lucide="tag"></i>
+                <span>Category</span>
+                <span class="required">*</span>
+              </label>
+              <select id="category" name="category" class="form-select" required>
+                <option value="">Select a category</option>
+                <option value="Shipping Issue">Shipping Issue</option>
+                <option value="Order Issue">Order Issue</option>
+                <option value="Product Inquiry">Product Inquiry</option>
+                <option value="Payment">Payment</option>
+                <option value="Documentation">Documentation</option>
+                <option value="Technical Issue">Technical Issue</option>
+                <option value="General">General</option>
+              </select>
+              <span class="form-hint">Choose the category that best describes your issue</span>
+            </div>
+
+            <!-- Description -->
+            <div class="form-group">
+              <label for="description" class="form-label">
+                <i data-lucide="file-text"></i>
+                <span>Description</span>
+                <span class="required">*</span>
+              </label>
+              <textarea 
+                id="description" 
+                name="description" 
+                class="form-textarea" 
+                rows="6"
+                placeholder="Please provide detailed information about your issue..."
+                required
+              ></textarea>
+              <span class="form-hint">Include as much detail as possible to help us resolve your issue quickly</span>
+            </div>
+
+            <!-- File Attachments -->
+            <div class="form-group">
+              <label for="attachments" class="form-label">
+                <i data-lucide="paperclip"></i>
+                <span>Attachments</span>
+                <span class="optional">(Optional)</span>
+              </label>
+              <div class="file-upload-area" id="file-upload-area">
+                <input 
+                  type="file" 
+                  id="attachments" 
+                  name="attachments" 
+                  multiple 
+                  accept="image/*,.pdf,.doc,.docx"
+                  hidden
+                >
+                <div class="file-upload-content">
+                  <div class="file-upload-icon">
+                    <i data-lucide="upload-cloud"></i>
+                  </div>
+                  <p class="file-upload-text">
+                    <strong>Click to upload</strong> or drag and drop
+                  </p>
+                  <p class="file-upload-hint">
+                    PNG, JPG, PDF up to 10MB each
+                  </p>
+                </div>
+              </div>
+              <div class="file-list" id="file-list"></div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-actions">
+              <button type="button" class="btn-cancel" onclick="window.location.href='/buyer/tickets'">
+                <i data-lucide="x"></i>
+                <span>Cancel</span>
+              </button>
+              <button type="submit" class="btn-submit">
+                <i data-lucide="send"></i>
+                <span>Submit Ticket</span>
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Help Card -->
+        <div class="help-card">
+          <div class="help-icon">
+            <i data-lucide="info"></i>
+          </div>
+          <div class="help-content">
+            <h3 class="help-title">Need Immediate Assistance?</h3>
+            <p class="help-text">
+              For urgent matters, you can also reach us directly:
+            </p>
+            <div class="help-contacts">
+              <a href="mailto:support@partsform.com" class="help-contact">
+                <i data-lucide="mail"></i>
+                <span>support@partsform.com</span>
+              </a>
+              <a href="tel:+971-4-123-4567" class="help-contact">
+                <i data-lucide="phone"></i>
+                <span>+971 4 123 4567</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/quick-search') %>
+<%- include('partials/footer') %>
+
+<script src="/js/main.js"></script>
+<script src="/js/quick-search.js"></script>
+<script src="/js/cart.js"></script>
+<script src="/js/cart-badge-updater.js"></script>
+<script>
+  lucide.createIcons();
+  window.addEventListener('load', () => lucide.createIcons());
+  
+  // Force navbar to always stay white
+  document.addEventListener('DOMContentLoaded', () => {
+    const navbar = document.getElementById('navbar');
+    if (navbar) {
+      navbar.classList.add('scrolled');
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+            if (!navbar.classList.contains('scrolled')) {
+              navbar.classList.add('scrolled');
+            }
+          }
+        });
+      });
+      observer.observe(navbar, { attributes: true, attributeFilter: ['class'] });
+      const ensureScrolled = () => navbar.classList.add('scrolled');
+      window.addEventListener('scroll', ensureScrolled, { passive: true });
+    }
+  });
+
+  // File upload handling
+  const fileUploadArea = document.getElementById('file-upload-area');
+  const fileInput = document.getElementById('attachments');
+  const fileList = document.getElementById('file-list');
+  let selectedFiles = [];
+
+  fileUploadArea.addEventListener('click', () => fileInput.click());
+
+  fileUploadArea.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    fileUploadArea.classList.add('drag-over');
+  });
+
+  fileUploadArea.addEventListener('dragleave', () => {
+    fileUploadArea.classList.remove('drag-over');
+  });
+
+  fileUploadArea.addEventListener('drop', (e) => {
+    e.preventDefault();
+    fileUploadArea.classList.remove('drag-over');
+    handleFiles(e.dataTransfer.files);
+  });
+
+  fileInput.addEventListener('change', (e) => {
+    handleFiles(e.target.files);
+  });
+
+  function handleFiles(files) {
+    selectedFiles = Array.from(files);
+    renderFileList();
+    lucide.createIcons();
+  }
+
+  function renderFileList() {
+    if (selectedFiles.length === 0) {
+      fileList.innerHTML = '';
+      return;
+    }
+
+    fileList.innerHTML = selectedFiles.map((file, index) => `
+      <div class="file-item">
+        <div class="file-info">
+          <i data-lucide="file"></i>
+          <span class="file-name">${file.name}</span>
+          <span class="file-size">${formatFileSize(file.size)}</span>
+        </div>
+        <button type="button" class="file-remove" onclick="removeFile(${index})">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+    `).join('');
+  }
+
+  function removeFile(index) {
+    selectedFiles.splice(index, 1);
+    renderFileList();
+    lucide.createIcons();
+  }
+
+  function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+  }
+
+  // Form submission
+  document.getElementById('create-ticket-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    const ticketData = {
+      orderNumber: formData.get('orderNumber'),
+      subject: formData.get('subject'),
+      category: formData.get('category'),
+      priority: 'high', // Default priority since field was removed
+      description: formData.get('description'),
+      attachments: selectedFiles.map(f => f.name)
+    };
+
+    console.log('Ticket Data:', ticketData);
+    
+    // Show success message
+    alert('Ticket created successfully! Redirecting to tickets page...');
+    
+    // Redirect to tickets page
+    setTimeout(() => {
+      window.location.href = '/buyer/tickets';
+    }, 1000);
+  });
+</script>

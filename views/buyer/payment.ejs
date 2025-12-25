@@ -1,31 +1,324 @@
 <%- include('partials/header') %>
 <link rel="stylesheet" href="/css/buyerCSS/buyer-main.css">
+<link rel="stylesheet" href="/css/buyerCSS/payment.css">
 
 <%- include('partials/navbar') %>
 
-<div class="buyer-page">
-  <div class="buyer-container">
-    <div style="padding: 4rem 0; text-align: center;">
-      <div style="max-width: 600px; margin: 0 auto;">
-        <div style="width: 100px; height: 100px; margin: 0 auto 2rem; background: linear-gradient(135deg, #10b981, #059669); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-          <i data-lucide="credit-card" style="width: 50px; height: 50px; color: white;"></i>
+<!-- ====================================
+     PAYMENT PAGE - PROFESSIONAL DESIGN
+     ==================================== -->
+<div class="payment-page">
+  <!-- Header Bar -->
+  <div class="payment-header-bar">
+    <div class="container">
+      <div class="payment-header-content">
+        <div class="payment-header-left">
+          <h1 class="payment-header-title">
+            <i data-lucide="wallet"></i>
+            <span>Payment & Billing</span>
+          </h1>
+          <p class="payment-header-subtitle">Manage your account balance and payment methods</p>
         </div>
-        <h1 style="font-size: 2.5rem; color: #1a2b3d; margin-bottom: 1rem;">Payment</h1>
-        <p style="font-size: 1.1rem; color: #64748b; margin-bottom: 2rem;">
-          Manage your payment methods and transactions
-        </p>
-        <div class="buyer-card" style="padding: 3rem; text-align: center;">
-          <i data-lucide="wallet" style="width: 60px; height: 60px; color: #cbd5e1; margin: 0 auto 1.5rem;"></i>
-          <h3 style="font-size: 1.5rem; color: #1a2b3d; margin-bottom: 1rem;">Payment Center</h3>
-          <p style="color: #64748b; margin-bottom: 2rem;">
-            This page is under construction. Payment features coming soon.
-          </p>
-          <a href="/buyer" class="buyer-btn buyer-btn-primary">
-            <i data-lucide="arrow-left"></i>
-            <span>Back to Main</span>
-          </a>
+        <div class="payment-header-right">
+          <button class="btn-add-funds" id="btn-add-funds">
+            <i data-lucide="plus-circle"></i>
+            <span>Add Funds</span>
+          </button>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- Payment Content -->
+  <div class="payment-content">
+    <div class="container">
+      
+      <!-- Account Balance Section -->
+      <div class="balance-section">
+        <div class="balance-header">
+          <h2 class="section-title">
+            <i data-lucide="trending-up"></i>
+            <span>Account Balance</span>
+          </h2>
+        </div>
+
+        <div class="balance-cards-grid">
+          <!-- Main Balance Card -->
+          <div class="balance-card main-balance">
+            <div class="balance-card-header">
+              <div class="balance-icon">
+                <i data-lucide="wallet"></i>
+              </div>
+              <span class="balance-label">Available Balance</span>
+            </div>
+            <div class="balance-amount">$0.00</div>
+            <div class="balance-footer">
+              <span class="balance-note">Ready to use</span>
+            </div>
+          </div>
+
+          <!-- Pending Balance -->
+          <div class="balance-card">
+            <div class="balance-card-header">
+              <div class="balance-icon pending">
+                <i data-lucide="clock"></i>
+              </div>
+              <span class="balance-label">Pending Payment</span>
+            </div>
+            <div class="balance-amount secondary">$0.00</div>
+            <div class="balance-footer">
+              <span class="balance-note">Processing</span>
+            </div>
+          </div>
+
+          <!-- Total Spent -->
+          <div class="balance-card">
+            <div class="balance-card-header">
+              <div class="balance-icon spent">
+                <i data-lucide="shopping-bag"></i>
+              </div>
+              <span class="balance-label">Total Spent</span>
+            </div>
+            <div class="balance-amount secondary">$0.00</div>
+            <div class="balance-footer">
+              <span class="balance-note">All time</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Payment Methods Section -->
+      <div class="payment-methods-section">
+        <div class="section-header">
+          <h2 class="section-title">
+            <i data-lucide="credit-card"></i>
+            <span>Payment Methods</span>
+          </h2>
+          <button class="btn-add-method" id="btn-add-method">
+            <i data-lucide="plus"></i>
+            <span>Add Method</span>
+          </button>
+        </div>
+
+        <div class="payment-methods-grid" id="payment-methods-grid">
+          <!-- Payment methods will be populated by JavaScript -->
+        </div>
+
+        <!-- Empty State -->
+        <div class="payment-methods-empty" id="payment-methods-empty">
+          <div class="empty-icon">
+            <i data-lucide="credit-card"></i>
+          </div>
+          <h3 class="empty-title">No Payment Methods</h3>
+          <p class="empty-text">Add a payment method to make purchases easier</p>
+          <button class="btn-empty-action" onclick="document.getElementById('btn-add-method').click()">
+            <i data-lucide="plus"></i>
+            <span>Add Payment Method</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Transaction History Section -->
+      <div class="transactions-section">
+        <div class="section-header">
+          <h2 class="section-title">
+            <i data-lucide="receipt"></i>
+            <span>Transaction History</span>
+          </h2>
+          <div class="transaction-filters">
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="completed">Completed</button>
+            <button class="filter-btn" data-filter="pending">Pending</button>
+            <button class="filter-btn" data-filter="refunded">Refunded</button>
+          </div>
+        </div>
+
+        <div class="transactions-card">
+          <div class="transactions-table-wrapper">
+            <table class="transactions-table" id="transactions-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Description</th>
+                  <th>Type</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="transactions-tbody">
+                <!-- Transactions will be populated by JavaScript -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Empty State -->
+          <div class="transactions-empty" id="transactions-empty">
+            <div class="empty-icon">
+              <i data-lucide="file-text"></i>
+            </div>
+            <h3 class="empty-title">No Transactions Yet</h3>
+            <p class="empty-text">Your transaction history will appear here</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Add Funds Modal -->
+<div class="payment-modal" id="funds-modal">
+  <div class="payment-modal-backdrop"></div>
+  <div class="payment-modal-container">
+    <button class="payment-modal-close" id="funds-modal-close">
+      <i data-lucide="x"></i>
+    </button>
+    
+    <div class="payment-modal-content">
+      <div class="modal-header">
+        <div class="modal-icon">
+          <i data-lucide="plus-circle"></i>
+        </div>
+        <h2 class="modal-title">Add Funds</h2>
+        <p class="modal-subtitle">Top up your account balance</p>
+      </div>
+
+      <form class="payment-form" id="add-funds-form">
+        <div class="form-group">
+          <label class="form-label">Amount (USD)</label>
+          <div class="amount-input-wrapper">
+            <span class="currency-symbol">$</span>
+            <input 
+              type="number" 
+              class="form-input amount-input" 
+              id="funds-amount" 
+              placeholder="0.00"
+              min="10"
+              step="0.01"
+              required
+            >
+          </div>
+        </div>
+
+        <div class="quick-amounts">
+          <button type="button" class="quick-amount-btn" data-amount="100">$100</button>
+          <button type="button" class="quick-amount-btn" data-amount="250">$250</button>
+          <button type="button" class="quick-amount-btn" data-amount="500">$500</button>
+          <button type="button" class="quick-amount-btn" data-amount="1000">$1,000</button>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Payment Method</label>
+          <select class="form-select" id="payment-method" required>
+            <option value="">Select payment method</option>
+            <option value="card">Credit/Debit Card</option>
+            <option value="bank">Bank Transfer</option>
+            <option value="paypal">PayPal</option>
+          </select>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn-cancel" id="funds-btn-cancel">
+            <i data-lucide="x"></i>
+            <span>Cancel</span>
+          </button>
+          <button type="submit" class="btn-save">
+            <i data-lucide="check"></i>
+            <span>Add Funds</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Add Payment Method Modal -->
+<div class="payment-modal" id="method-modal">
+  <div class="payment-modal-backdrop"></div>
+  <div class="payment-modal-container">
+    <button class="payment-modal-close" id="method-modal-close">
+      <i data-lucide="x"></i>
+    </button>
+    
+    <div class="payment-modal-content">
+      <div class="modal-header">
+        <div class="modal-icon">
+          <i data-lucide="credit-card"></i>
+        </div>
+        <h2 class="modal-title" id="method-modal-title">Add Payment Method</h2>
+        <p class="modal-subtitle">Save a payment method for faster checkout</p>
+      </div>
+
+      <form class="payment-form" id="payment-method-form">
+        <input type="hidden" id="method-id">
+        
+        <div class="form-group">
+          <label class="form-label">Card Holder Name *</label>
+          <input 
+            type="text" 
+            class="form-input" 
+            id="card-name" 
+            placeholder="John Doe"
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Card Number *</label>
+          <input 
+            type="text" 
+            class="form-input" 
+            id="card-number" 
+            placeholder="1234 5678 9012 3456"
+            maxlength="19"
+            required
+          >
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Expiry Date *</label>
+            <input 
+              type="text" 
+              class="form-input" 
+              id="card-expiry" 
+              placeholder="MM/YY"
+              maxlength="5"
+              required
+            >
+          </div>
+          <div class="form-group">
+            <label class="form-label">CVV *</label>
+            <input 
+              type="text" 
+              class="form-input" 
+              id="card-cvv" 
+              placeholder="123"
+              maxlength="4"
+              required
+            >
+          </div>
+        </div>
+
+        <div class="form-row">
+          <label class="checkbox-label">
+            <input type="checkbox" id="method-default">
+            <span>Set as default payment method</span>
+          </label>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn-cancel" id="method-btn-cancel">
+            <i data-lucide="x"></i>
+            <span>Cancel</span>
+          </button>
+          <button type="submit" class="btn-save">
+            <i data-lucide="check"></i>
+            <span>Save Method</span>
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 </div>
@@ -37,6 +330,28 @@
 <script src="/js/quick-search.js"></script>
 <script src="/js/cart.js"></script>
 <script src="/js/cart-badge-updater.js"></script>
+<script src="/js/payment.js"></script>
 <script>
   lucide.createIcons();
+  window.addEventListener('load', () => lucide.createIcons());
+  
+  // Force navbar to always stay white on payment page
+  document.addEventListener('DOMContentLoaded', () => {
+    const navbar = document.getElementById('navbar');
+    if (navbar) {
+      navbar.classList.add('scrolled');
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+            if (!navbar.classList.contains('scrolled')) {
+              navbar.classList.add('scrolled');
+            }
+          }
+        });
+      });
+      observer.observe(navbar, { attributes: true, attributeFilter: ['class'] });
+      const ensureScrolled = () => navbar.classList.add('scrolled');
+      window.addEventListener('scroll', ensureScrolled, { passive: true });
+    }
+  });
 </script>

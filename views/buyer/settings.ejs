@@ -1,0 +1,418 @@
+<%- include('partials/header') %>
+<link rel="stylesheet" href="/css/buyerCSS/buyer-main.css">
+<link rel="stylesheet" href="/css/buyerCSS/settings.css">
+
+<%- include('partials/navbar') %>
+
+<!-- ====================================
+     SETTINGS PAGE - PROFESSIONAL DESIGN
+     ==================================== -->
+<div class="settings-page">
+  <!-- Hero Section -->
+  <div class="settings-hero">
+    <div class="settings-hero-content">
+      <div class="settings-badge">
+        <i data-lucide="settings"></i>
+        <span>Account Settings</span>
+      </div>
+
+      <h1 class="settings-hero-title">Settings</h1>
+      <p class="settings-hero-subtitle">
+        Customize your account preferences and manage your settings
+      </p>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="buyer-container">
+    <div class="settings-section">
+      <div class="settings-layout">
+        <!-- Settings Navigation -->
+        <div class="settings-sidebar">
+          <div class="settings-nav">
+            <button class="settings-nav-item active" data-section="general">
+              <i data-lucide="sliders"></i>
+              <span>General</span>
+            </button>
+            <button class="settings-nav-item" data-section="notifications">
+              <i data-lucide="bell"></i>
+              <span>Notifications</span>
+            </button>
+            <button class="settings-nav-item" data-section="privacy">
+              <i data-lucide="lock"></i>
+              <span>Privacy</span>
+            </button>
+            <button class="settings-nav-item" data-section="security">
+              <i data-lucide="shield"></i>
+              <span>Security</span>
+            </button>
+            <button class="settings-nav-item" data-section="preferences">
+              <i data-lucide="palette"></i>
+              <span>Preferences</span>
+            </button>
+            <button class="settings-nav-item" data-section="billing">
+              <i data-lucide="credit-card"></i>
+              <span>Billing</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Settings Content -->
+        <div class="settings-content">
+          <!-- General Settings -->
+          <div class="settings-panel active" id="general-panel">
+            <div class="settings-panel-header">
+              <h2 class="settings-panel-title">
+                <i data-lucide="sliders"></i>
+                <span>General Settings</span>
+              </h2>
+              <p class="settings-panel-subtitle">Manage your account general preferences</p>
+            </div>
+
+            <div class="settings-group">
+              <div class="setting-item">
+                <div class="setting-info">
+                  <h3 class="setting-title">Language</h3>
+                  <p class="setting-description">Choose your preferred language for the interface</p>
+                </div>
+                <div class="setting-control">
+                  <select class="setting-select" id="languageSelect">
+                    <option value="en">English</option>
+                    <option value="ar">Arabic</option>
+                    <option value="ru">Russian</option>
+                    <option value="ua">Ukrainian</option>
+                    <option value="fr">French</option>
+                    <option value="es">Spanish</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="setting-item">
+                <div class="setting-info">
+                  <h3 class="setting-title">Timezone</h3>
+                  <p class="setting-description">Set your timezone for accurate time display</p>
+                </div>
+                <div class="setting-control">
+                  <select class="setting-select" id="timezoneSelect">
+                    <option value="UTC">UTC (Coordinated Universal Time)</option>
+                    <option value="America/New_York">Eastern Time (ET)</option>
+                    <option value="America/Chicago">Central Time (CT)</option>
+                    <option value="America/Denver">Mountain Time (MT)</option>
+                    <option value="America/Los_Angeles">Pacific Time (PT)</option>
+                    <option value="Europe/London">London (GMT)</option>
+                    <option value="Europe/Dubai">Dubai (GST)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="setting-item">
+                <div class="setting-info">
+                  <h3 class="setting-title">Date Format</h3>
+                  <p class="setting-description">Choose how dates are displayed</p>
+                </div>
+                <div class="setting-control">
+                  <select class="setting-select" id="dateFormatSelect">
+                    <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+                    <option value="DD/MM/YYYY">DD/MM/YYYY</option>
+                    <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Notifications Settings -->
+          <div class="settings-panel" id="notifications-panel">
+            <div class="settings-panel-header">
+              <h2 class="settings-panel-title">
+                <i data-lucide="bell"></i>
+                <span>Notification Settings</span>
+              </h2>
+              <p class="settings-panel-subtitle">Control how and when you receive notifications</p>
+            </div>
+
+            <div class="settings-group">
+              <div class="setting-item">
+                <div class="setting-info">
+                  <h3 class="setting-title">Email Notifications</h3>
+                  <p class="setting-description">Receive email notifications for important updates</p>
+                </div>
+                <div class="setting-control">
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="emailNotifications" checked>
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="setting-item">
+                <div class="setting-info">
+                  <h3 class="setting-title">Order Updates</h3>
+                  <p class="setting-description">Get notified when your order status changes</p>
+                </div>
+                <div class="setting-control">
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="orderUpdates" checked>
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="setting-item">
+                <div class="setting-info">
+                  <h3 class="setting-title">Promotional Emails</h3>
+                  <p class="setting-description">Receive emails about new products and special offers</p>
+                </div>
+                <div class="setting-control">
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="promotionalEmails">
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="setting-item">
+                <div class="setting-info">
+                  <h3 class="setting-title">SMS Notifications</h3>
+                  <p class="setting-description">Receive SMS notifications for urgent updates</p>
+                </div>
+                <div class="setting-control">
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="smsNotifications">
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Privacy Settings -->
+          <div class="settings-panel" id="privacy-panel">
+            <div class="settings-panel-header">
+              <h2 class="settings-panel-title">
+                <i data-lucide="lock"></i>
+                <span>Privacy Settings</span>
+              </h2>
+              <p class="settings-panel-subtitle">Manage your privacy and data preferences</p>
+            </div>
+
+            <div class="settings-group">
+              <div class="setting-item">
+                <div class="setting-info">
+                  <h3 class="setting-title">Profile Visibility</h3>
+                  <p class="setting-description">Control who can see your profile information</p>
+                </div>
+                <div class="setting-control">
+                  <select class="setting-select" id="profileVisibility">
+                    <option value="public">Public</option>
+                    <option value="private">Private</option>
+                    <option value="friends">Friends Only</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="setting-item">
+                <div class="setting-info">
+                  <h3 class="setting-title">Data Collection</h3>
+                  <p class="setting-description">Allow us to collect analytics data to improve our service</p>
+                </div>
+                <div class="setting-control">
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="dataCollection" checked>
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="setting-item">
+                <div class="setting-info">
+                  <h3 class="setting-title">Cookies</h3>
+                  <p class="setting-description">Accept cookies for a better browsing experience</p>
+                </div>
+                <div class="setting-control">
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="cookies" checked>
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Security Settings -->
+          <div class="settings-panel" id="security-panel">
+            <div class="settings-panel-header">
+              <h2 class="settings-panel-title">
+                <i data-lucide="shield"></i>
+                <span>Security Settings</span>
+              </h2>
+              <p class="settings-panel-subtitle">Manage your account security and authentication</p>
+            </div>
+
+            <div class="settings-group">
+              <div class="setting-item">
+                <div class="setting-info">
+                  <h3 class="setting-title">Two-Factor Authentication</h3>
+                  <p class="setting-description">Add an extra layer of security to your account</p>
+                </div>
+                <div class="setting-control">
+                  <button class="setting-action-btn" id="setup2FABtn">
+                    <i data-lucide="shield-check"></i>
+                    <span>Setup 2FA</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="setting-item">
+                <div class="setting-info">
+                  <h3 class="setting-title">Change Password</h3>
+                  <p class="setting-description">Update your account password regularly</p>
+                </div>
+                <div class="setting-control">
+                  <button class="setting-action-btn" id="changePasswordBtn">
+                    <i data-lucide="key"></i>
+                    <span>Change Password</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="setting-item">
+                <div class="setting-info">
+                  <h3 class="setting-title">Active Sessions</h3>
+                  <p class="setting-description">View and manage devices where you're logged in</p>
+                </div>
+                <div class="setting-control">
+                  <button class="setting-action-btn" id="viewSessionsBtn">
+                    <i data-lucide="monitor"></i>
+                    <span>View Sessions</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Preferences Settings -->
+          <div class="settings-panel" id="preferences-panel">
+            <div class="settings-panel-header">
+              <h2 class="settings-panel-title">
+                <i data-lucide="palette"></i>
+                <span>Preferences</span>
+              </h2>
+              <p class="settings-panel-subtitle">Customize your experience</p>
+            </div>
+
+            <div class="settings-group">
+              <div class="setting-item">
+                <div class="setting-info">
+                  <h3 class="setting-title">Theme</h3>
+                  <p class="setting-description">Choose your preferred color theme</p>
+                </div>
+                <div class="setting-control">
+                  <select class="setting-select" id="themeSelect">
+                    <option value="light">Light</option>
+                    <option value="dark">Dark</option>
+                    <option value="auto">Auto (System)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="setting-item">
+                <div class="setting-info">
+                  <h3 class="setting-title">Items Per Page</h3>
+                  <p class="setting-description">Number of items to display per page</p>
+                </div>
+                <div class="setting-control">
+                  <select class="setting-select" id="itemsPerPage">
+                    <option value="10">10</option>
+                    <option value="20" selected>20</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Billing Settings -->
+          <div class="settings-panel" id="billing-panel">
+            <div class="settings-panel-header">
+              <h2 class="settings-panel-title">
+                <i data-lucide="credit-card"></i>
+                <span>Billing Settings</span>
+              </h2>
+              <p class="settings-panel-subtitle">Manage your payment methods and billing information</p>
+            </div>
+
+            <div class="settings-group">
+              <div class="setting-item">
+                <div class="setting-info">
+                  <h3 class="setting-title">Payment Methods</h3>
+                  <p class="setting-description">Manage your saved payment methods</p>
+                </div>
+                <div class="setting-control">
+                  <button class="setting-action-btn" id="managePaymentMethodsBtn">
+                    <i data-lucide="credit-card"></i>
+                    <span>Manage Payment Methods</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="setting-item">
+                <div class="setting-info">
+                  <h3 class="setting-title">Billing Address</h3>
+                  <p class="setting-description">Update your billing address</p>
+                </div>
+                <div class="setting-control">
+                  <button class="setting-action-btn" id="updateBillingAddressBtn">
+                    <i data-lucide="map-pin"></i>
+                    <span>Update Address</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="setting-item">
+                <div class="setting-info">
+                  <h3 class="setting-title">Invoice History</h3>
+                  <p class="setting-description">View and download your past invoices</p>
+                </div>
+                <div class="setting-control">
+                  <button class="setting-action-btn" id="viewInvoicesBtn">
+                    <i data-lucide="file-text"></i>
+                    <span>View Invoices</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Save Button -->
+          <div class="settings-actions">
+            <button class="settings-save-btn" id="saveSettingsBtn">
+              <i data-lucide="save"></i>
+              <span>Save Changes</span>
+            </button>
+            <button class="settings-reset-btn" id="resetSettingsBtn">
+              <i data-lucide="refresh-cw"></i>
+              <span>Reset to Default</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/quick-search') %>
+<%- include('partials/footer') %>
+
+<script src="/js/main.js"></script>
+<script src="/js/quick-search.js"></script>
+<script src="/js/cart.js"></script>
+<script src="/js/cart-badge-updater.js"></script>
+<script src="/js/settings.js"></script>
+<script>
+  lucide.createIcons();
+  window.addEventListener('load', () => lucide.createIcons());
+</script>
+
+

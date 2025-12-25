@@ -1,0 +1,362 @@
+<%- include('partials/header') %>
+<link rel="stylesheet" href="/css/buyerCSS/buyer-main.css">
+<link rel="stylesheet" href="/css/buyerCSS/aog-case-tracking.css">
+
+<%- include('partials/navbar') %>
+
+<!-- ====================================
+     AOG CASE TRACKING
+     ==================================== -->
+<div class="aog-tracking-page">
+  <!-- Hero Header -->
+  <div class="tracking-hero">
+    <div class="tracking-hero-content">
+      <div class="tracking-badge">
+        <i data-lucide="truck"></i>
+        <span>SHIPMENT TRACKING</span>
+      </div>
+
+      <h1 class="tracking-hero-title">Track Your Delivery</h1>
+      <p class="tracking-hero-subtitle">
+        Real-time shipment monitoring and delivery status for your AOG case
+      </p>
+
+      <div class="tracking-hero-meta">
+        <div class="meta-item">
+          <i data-lucide="hash"></i>
+          <span>Case <%= caseId %></span>
+        </div>
+        <div class="meta-item">
+          <i data-lucide="plane"></i>
+          <span>Boeing 737-800</span>
+        </div>
+        <div class="meta-item">
+          <i data-lucide="map-pin"></i>
+          <span>JFK Airport</span>
+        </div>
+        <a href="/buyer/aog/command-center/<%= caseId %>" class="meta-item back-link">
+          <i data-lucide="arrow-left"></i>
+          <span>Back to Command Center</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="tracking-container">
+    <!-- Tracking Info Grid -->
+    <div class="tracking-info-grid">
+      <div class="tracking-info-card">
+        <div class="tracking-info-icon">
+          <i data-lucide="hash"></i>
+        </div>
+        <div class="tracking-info-content">
+          <div class="tracking-info-label">Case ID</div>
+          <div class="tracking-info-value"><%= caseId %></div>
+        </div>
+      </div>
+
+      <div class="tracking-info-card">
+        <div class="tracking-info-icon">
+          <i data-lucide="package"></i>
+        </div>
+        <div class="tracking-info-content">
+          <div class="tracking-info-label">Tracking Number</div>
+          <div class="tracking-info-value">TRK-789456123</div>
+        </div>
+      </div>
+
+      <div class="tracking-info-card">
+        <div class="tracking-info-icon">
+          <i data-lucide="truck"></i>
+        </div>
+        <div class="tracking-info-content">
+          <div class="tracking-info-label">Carrier</div>
+          <div class="tracking-info-value">FedEx Priority</div>
+        </div>
+      </div>
+
+      <div class="tracking-info-card">
+        <div class="tracking-info-icon">
+          <i data-lucide="map-pin"></i>
+        </div>
+        <div class="tracking-info-content">
+          <div class="tracking-info-label">Destination</div>
+          <div class="tracking-info-value">JFK Airport</div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Status Banner -->
+    <div class="status-banner">
+      <div class="status-banner-content">
+        <div class="status-banner-left">
+          <div class="status-banner-icon">
+            <i data-lucide="truck"></i>
+          </div>
+          <div class="status-banner-text">
+            <div class="status-banner-title">In Transit</div>
+            <div class="status-banner-desc">Your shipment is on the way and on schedule</div>
+          </div>
+        </div>
+        <div class="status-banner-eta">
+          <div class="eta-label">Estimated Arrival</div>
+          <div class="eta-value">Jan 2, 2026</div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Tracking Timeline -->
+    <div class="tracking-timeline-card">
+      <div class="timeline-header">
+        <i data-lucide="map"></i>
+        <h2 class="timeline-title">Shipment Journey</h2>
+      </div>
+
+      <div class="tracking-timeline">
+        <!-- Completed Step -->
+        <div class="timeline-item completed">
+          <div class="timeline-marker">
+            <i data-lucide="check"></i>
+          </div>
+          <div class="timeline-content">
+            <div class="timeline-header-row">
+              <div>
+                <div class="timeline-step-title">Order Confirmed</div>
+                <div class="timeline-step-desc">Supplier confirmed order and prepared shipment</div>
+              </div>
+              <div class="timeline-time">
+                <i data-lucide="clock"></i>
+                <span>Dec 23, 10:30 AM</span>
+              </div>
+            </div>
+            <div class="timeline-details">
+              <div class="timeline-detail">
+                <div class="timeline-detail-label">Supplier</div>
+                <div class="timeline-detail-value">Premier Aviation Supply</div>
+              </div>
+              <div class="timeline-detail">
+                <div class="timeline-detail-label">Location</div>
+                <div class="timeline-detail-value">Dallas, TX</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Completed Step -->
+        <div class="timeline-item completed">
+          <div class="timeline-marker">
+            <i data-lucide="check"></i>
+          </div>
+          <div class="timeline-content">
+            <div class="timeline-header-row">
+              <div>
+                <div class="timeline-step-title">Picked Up</div>
+                <div class="timeline-step-desc">Package collected by carrier</div>
+              </div>
+              <div class="timeline-time">
+                <i data-lucide="clock"></i>
+                <span>Dec 23, 2:15 PM</span>
+              </div>
+            </div>
+            <div class="timeline-details">
+              <div class="timeline-detail">
+                <div class="timeline-detail-label">Carrier</div>
+                <div class="timeline-detail-value">FedEx Priority</div>
+              </div>
+              <div class="timeline-detail">
+                <div class="timeline-detail-label">Weight</div>
+                <div class="timeline-detail-value">8.7 kg</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Active Step -->
+        <div class="timeline-item active">
+          <div class="timeline-marker">
+            <i data-lucide="truck"></i>
+          </div>
+          <div class="timeline-content">
+            <div class="timeline-header-row">
+              <div>
+                <div class="timeline-step-title">In Transit</div>
+                <div class="timeline-step-desc">Package is on the way to destination</div>
+              </div>
+              <div class="timeline-time">
+                <i data-lucide="clock"></i>
+                <span>In Progress</span>
+              </div>
+            </div>
+            <div class="timeline-details">
+              <div class="timeline-detail">
+                <div class="timeline-detail-label">Current Location</div>
+                <div class="timeline-detail-value">Memphis, TN Hub</div>
+              </div>
+              <div class="timeline-detail">
+                <div class="timeline-detail-label">Next Stop</div>
+                <div class="timeline-detail-value">New York, NY</div>
+              </div>
+              <div class="timeline-detail">
+                <div class="timeline-detail-label">Updated</div>
+                <div class="timeline-detail-value">2 hours ago</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pending Step -->
+        <div class="timeline-item">
+          <div class="timeline-marker">
+            <i data-lucide="building"></i>
+          </div>
+          <div class="timeline-content">
+            <div class="timeline-header-row">
+              <div>
+                <div class="timeline-step-title">Out for Delivery</div>
+                <div class="timeline-step-desc">Package is on delivery vehicle</div>
+              </div>
+              <div class="timeline-time">
+                <i data-lucide="clock"></i>
+                <span>Pending</span>
+              </div>
+            </div>
+            <div class="timeline-details">
+              <div class="timeline-detail">
+                <div class="timeline-detail-label">Expected</div>
+                <div class="timeline-detail-value">Jan 2, 8:00 AM</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pending Step -->
+        <div class="timeline-item">
+          <div class="timeline-marker">
+            <i data-lucide="check-circle"></i>
+          </div>
+          <div class="timeline-content">
+            <div class="timeline-header-row">
+              <div>
+                <div class="timeline-step-title">Delivered</div>
+                <div class="timeline-step-desc">Package delivered and signed for</div>
+              </div>
+              <div class="timeline-time">
+                <i data-lucide="clock"></i>
+                <span>Pending</span>
+              </div>
+            </div>
+            <div class="timeline-details">
+              <div class="timeline-detail">
+                <div class="timeline-detail-label">Expected</div>
+                <div class="timeline-detail-value">Jan 2, 10:00 AM</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Shipment Info Grid -->
+    <div class="shipment-info-grid">
+      <!-- Shipment Details -->
+      <div class="shipment-card">
+        <div class="shipment-card-header">
+          <i data-lucide="package"></i>
+          <h3 class="shipment-card-title">Shipment Details</h3>
+        </div>
+
+        <div class="shipment-detail-list">
+          <div class="shipment-detail-item">
+            <div class="shipment-detail-label">Package Type</div>
+            <div class="shipment-detail-value">Aviation Parts</div>
+          </div>
+          <div class="shipment-detail-item">
+            <div class="shipment-detail-label">Weight</div>
+            <div class="shipment-detail-value">8.7 kg</div>
+          </div>
+          <div class="shipment-detail-item">
+            <div class="shipment-detail-label">Dimensions</div>
+            <div class="shipment-detail-value">45 × 35 × 20 cm</div>
+          </div>
+          <div class="shipment-detail-item">
+            <div class="shipment-detail-label">Service Level</div>
+            <div class="shipment-detail-value">Priority Overnight</div>
+          </div>
+          <div class="shipment-detail-item">
+            <div class="shipment-detail-label">Insurance</div>
+            <div class="shipment-detail-value">$10,000</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contact Information -->
+      <div class="shipment-card">
+        <div class="contact-card">
+          <div class="contact-header">
+            <i data-lucide="headphones"></i>
+            <h3 class="contact-title">Need Assistance?</h3>
+          </div>
+
+          <div class="contact-info">
+            <div class="contact-item">
+              <div class="contact-icon">
+                <i data-lucide="phone"></i>
+              </div>
+              <div class="contact-text">
+                <div class="contact-label">Logistics Support</div>
+                <div class="contact-value">+1 (800) 555-0123</div>
+              </div>
+            </div>
+
+            <div class="contact-item">
+              <div class="contact-icon">
+                <i data-lucide="mail"></i>
+              </div>
+              <div class="contact-text">
+                <div class="contact-label">Email</div>
+                <div class="contact-value">aog@partsform.com</div>
+              </div>
+            </div>
+
+            <div class="contact-item">
+              <div class="contact-icon">
+                <i data-lucide="clock"></i>
+              </div>
+              <div class="contact-text">
+                <div class="contact-label">Available</div>
+                <div class="contact-value">24/7 Support</div>
+              </div>
+            </div>
+          </div>
+
+          <button class="btn-contact">
+            <i data-lucide="message-circle"></i>
+            <span>Contact Support</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Alert (if needed) -->
+    <!-- <div class="tracking-alert success">
+      <div class="alert-icon">
+        <i data-lucide="check-circle"></i>
+      </div>
+      <div class="alert-content">
+        <div class="alert-title">On Schedule</div>
+        <div class="alert-desc">Your shipment is progressing as planned with no delays.</div>
+      </div>
+    </div> -->
+  </div>
+</div>
+
+<script src="/js/animations.js"></script>
+<script src="/js/aog-case-tracking.js"></script>
+<script>
+  lucide.createIcons();
+  window.addEventListener('load', () => lucide.createIcons());
+</script>
+
+<%- include('partials/footer') %>

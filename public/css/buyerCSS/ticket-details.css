@@ -1,0 +1,613 @@
+/* ====================================
+   TICKET DETAILS PAGE - CHAT INTERFACE
+   PARTSFORM Buyer Portal
+   ==================================== */
+
+/* ====================================
+   PAGE LAYOUT
+   ==================================== */
+.ticket-details-page {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    padding-top: 0;
+}
+
+/* Ensure navbar stays on top */
+.ticket-details-page .nav-bar {
+    z-index: 10001 !important;
+    position: fixed !important;
+    top: 0 !important;
+    width: 100% !important;
+    background: rgba(255, 255, 255, 0.98) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    border-bottom: 1px solid rgba(59, 130, 246, 0.2) !important;
+    box-shadow: 0 4px 20px rgba(43, 82, 120, 0.08) !important;
+}
+
+/* ====================================
+   TICKET HEADER BAR
+   ==================================== */
+.ticket-header-bar {
+    background: linear-gradient(135deg, #1a2b3d 0%, #2b5278 100%);
+    padding: 7rem 0 2rem;
+    margin-top: 0;
+    box-shadow: 0 4px 20px rgba(43, 82, 120, 0.15);
+}
+
+.ticket-header-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.btn-back-header {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.125rem;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    width: fit-content;
+}
+
+.btn-back-header:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.btn-back-header i {
+    width: 16px;
+    height: 16px;
+}
+
+.ticket-header-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 2rem;
+}
+
+.ticket-header-left {
+    flex: 1;
+}
+
+.ticket-id-header {
+    display: inline-block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #60a5fa;
+    margin-bottom: 0.75rem;
+}
+
+.ticket-subject-header {
+    font-size: 2rem;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 1rem;
+    line-height: 1.3;
+}
+
+.ticket-meta-header {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.9rem;
+}
+
+.meta-item i {
+    width: 16px;
+    height: 16px;
+}
+
+.ticket-header-right {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: flex-end;
+}
+
+.status-badge-header,
+.priority-badge-header {
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.status-badge-header {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.priority-badge-header {
+    background: rgba(251, 191, 36, 0.2);
+    backdrop-filter: blur(10px);
+    color: #fbbf24;
+    border: 1px solid rgba(251, 191, 36, 0.3);
+}
+
+/* ====================================
+   MAIN CONTENT
+   ==================================== */
+.ticket-details-section {
+    padding: 3rem 0;
+}
+
+.ticket-details-container {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 2rem;
+}
+
+/* ====================================
+   TICKET INFO CARD
+   ==================================== */
+.ticket-info-card {
+    background: white;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    height: fit-content;
+    position: sticky;
+    top: 7rem;
+}
+
+.info-card-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.info-card-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1a2b3d;
+    margin: 0;
+}
+
+.info-card-body {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.info-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.info-value {
+    font-size: 0.95rem;
+    color: #1a2b3d;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.info-value i {
+    width: 16px;
+    height: 16px;
+    color: #3b82f6;
+}
+
+.info-value.priority {
+    padding: 0.5rem 0.875rem;
+    background: #fef3c7;
+    color: #d97706;
+    border-radius: 6px;
+    width: fit-content;
+    font-weight: 600;
+}
+
+.status-select {
+    width: 100%;
+    padding: 0.625rem 0.875rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    color: #1a2b3d;
+    background: #f8fafc;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.status-select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* ====================================
+   CHAT CONTAINER
+   ==================================== */
+.chat-container {
+    background: white;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 22rem);
+    min-height: 600px;
+}
+
+.chat-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #f1f5f9;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.chat-header-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.chat-header-icon i {
+    width: 24px;
+    height: 24px;
+    color: #3b82f6;
+}
+
+.chat-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1a2b3d;
+    margin: 0 0 0.25rem 0;
+}
+
+.chat-subtitle {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin: 0;
+}
+
+/* ====================================
+   CHAT MESSAGES
+   ==================================== */
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    background: #f8fafc;
+}
+
+.message {
+    display: flex;
+    gap: 1rem;
+    animation: messageSlideIn 0.3s ease-out;
+}
+
+@keyframes messageSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.message.buyer {
+    flex-direction: row-reverse;
+}
+
+.message-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+.message.support .message-avatar {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+}
+
+.message.buyer .message-avatar {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+}
+
+.message-content {
+    flex: 1;
+    max-width: 70%;
+}
+
+.message-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.message.buyer .message-header {
+    flex-direction: row-reverse;
+}
+
+.message-sender {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #1a2b3d;
+}
+
+.message-time {
+    font-size: 0.8rem;
+    color: #94a3b8;
+}
+
+.message-bubble {
+    padding: 1rem 1.25rem;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.message.support .message-bubble {
+    background: white;
+    color: #1a2b3d;
+    border: 1px solid #e2e8f0;
+    border-top-left-radius: 4px;
+}
+
+.message.buyer .message-bubble {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    border-top-right-radius: 4px;
+}
+
+.message-attachments {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+}
+
+.attachment-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.875rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    color: #3b82f6;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.message.buyer .attachment-item {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: white;
+}
+
+.attachment-item:hover {
+    background: #eff6ff;
+    border-color: #3b82f6;
+}
+
+.attachment-item i {
+    width: 14px;
+    height: 14px;
+}
+
+/* ====================================
+   CHAT INPUT
+   ==================================== */
+.chat-input-container {
+    padding: 1.5rem;
+    border-top: 1px solid #f1f5f9;
+    background: white;
+}
+
+.chat-form {
+    display: flex;
+    gap: 1rem;
+}
+
+.chat-input-wrapper {
+    flex: 1;
+    display: flex;
+    align-items: flex-end;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: #f8fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    transition: all 0.2s ease;
+}
+
+.chat-input-wrapper:focus-within {
+    border-color: #3b82f6;
+    background: white;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+.chat-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-size: 0.95rem;
+    color: #1a2b3d;
+    resize: none;
+    max-height: 120px;
+    font-family: inherit;
+}
+
+.chat-input:focus {
+    outline: none;
+}
+
+.btn-attach {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    color: #64748b;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.btn-attach:hover {
+    background: #e2e8f0;
+    color: #3b82f6;
+}
+
+.btn-attach i {
+    width: 18px;
+    height: 18px;
+}
+
+.btn-send {
+    padding: 0.875rem 1.75rem;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.btn-send:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+}
+
+.btn-send i {
+    width: 18px;
+    height: 18px;
+}
+
+/* ====================================
+   RESPONSIVE DESIGN
+   ==================================== */
+@media (max-width: 1024px) {
+    .ticket-details-container {
+        grid-template-columns: 1fr;
+    }
+
+    .ticket-info-card {
+        position: static;
+    }
+
+    .chat-container {
+        height: 600px;
+    }
+}
+
+@media (max-width: 768px) {
+    .ticket-header-bar {
+        padding: 6rem 0 1.5rem;
+    }
+
+    .ticket-subject-header {
+        font-size: 1.5rem;
+    }
+
+    .ticket-header-info {
+        flex-direction: column;
+    }
+
+    .ticket-header-right {
+        flex-direction: row;
+        align-items: center;
+        width: 100%;
+    }
+
+    .chat-messages {
+        padding: 1.5rem;
+    }
+
+    .message-content {
+        max-width: 85%;
+    }
+
+    .chat-form {
+        flex-direction: column;
+    }
+
+    .btn-send {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .ticket-header-bar {
+        padding: 5.5rem 0 1.25rem;
+    }
+
+    .ticket-subject-header {
+        font-size: 1.25rem;
+    }
+
+    .chat-messages {
+        padding: 1rem;
+    }
+
+    .message-content {
+        max-width: 90%;
+    }
+
+    .message-bubble {
+        padding: 0.875rem 1rem;
+        font-size: 0.9rem;
+    }
+}

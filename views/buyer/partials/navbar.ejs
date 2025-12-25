@@ -54,10 +54,22 @@
       </div>
 
       <a href="/buyer/orders" class="nav-link" data-section="orders">My Orders</a>
+      <a href="/buyer/tickets" class="nav-link" data-section="tickets">Tickets</a>
       <a href="/buyer/affiliate" class="nav-link" data-section="affiliate">Affiliate</a>
       <a href="/buyer/payment" class="nav-link" data-section="payment">Payment</a>
       <a href="/buyer/delivery" class="nav-link" data-section="delivery">Delivery</a>
       <a href="/buyer/contacts" class="nav-link" data-section="contacts">Contacts</a>
+      
+      <!-- More Dropdown for overflow items -->
+      <div class="nav-dropdown nav-more-dropdown" id="moreDropdown" style="display: none;">
+        <button class="nav-link dropdown-trigger" id="moreDropdownBtn">
+          <span>More</span>
+          <i data-lucide="chevron-down" class="dropdown-chevron"></i>
+        </button>
+        <div class="nav-dropdown-menu" id="moreDropdownMenu">
+          <!-- Overflow items will be moved here dynamically -->
+        </div>
+      </div>
     </div>
 
     <!-- Action Buttons -->

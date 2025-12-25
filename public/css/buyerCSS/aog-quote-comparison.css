@@ -1,0 +1,756 @@
+/* ====================================
+   AOG QUOTE COMPARISON - STYLING
+   PARTSFORM Aviation Emergency Response
+   ==================================== */
+
+/* Import base buyer styles */
+@import url('buyer-main.css');
+
+/* ====================================
+   PAGE LAYOUT
+   ==================================== */
+
+.aog-quote-page {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f8fafc 0%, #e0f2fe 100%);
+    padding-top: 0;
+    padding-bottom: 4rem;
+    position: relative;
+}
+
+/* ====================================
+   HERO HEADER
+   ==================================== */
+
+.quote-hero {
+    background: linear-gradient(135deg, #0c1e3d 0%, #1e3a5f 100%);
+    padding: 8rem 0 4rem;
+    margin-bottom: 3rem;
+    position: relative;
+    overflow: hidden;
+    border-radius: 0 0 20px 20px;
+    box-shadow: 0 10px 30px rgba(43, 82, 120, 0.2);
+}
+
+.quote-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(135deg, rgba(14, 165, 233, 0.1) 0%, transparent 100%),
+        url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><path d="M0 0L50 50L0 100M50 0L100 50L50 100" stroke="rgba(255,255,255,0.03)" fill="none"/></svg>');
+    opacity: 0.5;
+}
+
+.quote-hero-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+.quote-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: rgba(59, 130, 246, 0.2);
+    border: 2px solid rgba(59, 130, 246, 0.4);
+    border-radius: 2rem;
+    color: #93c5fd;
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+}
+
+.quote-badge i {
+    width: 20px;
+    height: 20px;
+    color: #3b82f6;
+}
+
+.quote-hero-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: white;
+    margin-bottom: 1rem;
+    line-height: 1.2;
+}
+
+.quote-hero-subtitle {
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.8);
+    max-width: 700px;
+    margin: 0 auto 2rem;
+}
+
+.quote-hero-meta {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.quote-hero-meta .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 10px;
+    color: white;
+    font-weight: 600;
+    font-size: 0.9rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.quote-hero-meta .meta-item:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+}
+
+.quote-hero-meta .meta-item i {
+    width: 18px;
+    height: 18px;
+}
+
+.quote-hero-meta .back-link {
+    background: rgba(59, 130, 246, 0.2);
+    border-color: rgba(59, 130, 246, 0.4);
+}
+
+.quote-hero-meta .back-link:hover {
+    background: rgba(59, 130, 246, 0.3);
+}
+
+.quote-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 var(--buyer-space-lg);
+}
+
+/* ====================================
+   HEADER SECTION
+   ==================================== */
+
+.quote-header {
+    background: white;
+    border-radius: var(--buyer-radius-xl);
+    box-shadow: var(--buyer-shadow-lg);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border: 1px solid var(--buyer-border);
+}
+
+.quote-header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.quote-title {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--buyer-text-primary);
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    background: var(--buyer-bg-secondary);
+    color: var(--buyer-text-primary);
+    border: 2px solid var(--buyer-border);
+    border-radius: var(--buyer-radius-md);
+    font-weight: 600;
+    text-decoration: none;
+    transition: var(--buyer-transition);
+}
+
+.back-link:hover {
+    background: var(--buyer-bg-accent);
+    border-color: var(--aviation-primary);
+    color: var(--aviation-primary);
+}
+
+.back-link i {
+    width: 18px;
+    height: 18px;
+}
+
+.quote-subtitle {
+    font-size: 1rem;
+    color: var(--buyer-text-secondary);
+}
+
+/* ====================================
+   RECOMMENDATION BANNER
+   ==================================== */
+
+.recommendation-banner {
+    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+    border-radius: var(--buyer-radius-lg);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: 0 4px 16px rgba(14, 165, 233, 0.3);
+}
+
+.recommendation-icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.recommendation-icon i {
+    width: 24px;
+    height: 24px;
+}
+
+.recommendation-content {
+    flex: 1;
+}
+
+.recommendation-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+.recommendation-desc {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+/* ====================================
+   COMPARISON TABLE
+   ==================================== */
+
+.comparison-wrapper {
+    background: white;
+    border-radius: var(--buyer-radius-xl);
+    box-shadow: var(--buyer-shadow-lg);
+    padding: 2rem;
+    border: 1px solid var(--buyer-border);
+    overflow-x: auto;
+}
+
+.comparison-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.comparison-table thead th {
+    background: var(--buyer-bg-secondary);
+    padding: 1.25rem 1rem;
+    text-align: left;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--buyer-text-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid var(--buyer-border);
+}
+
+.comparison-table thead th:first-child {
+    border-top-left-radius: var(--buyer-radius-md);
+}
+
+.comparison-table thead th:last-child {
+    border-top-right-radius: var(--buyer-radius-md);
+}
+
+.comparison-table tbody tr {
+    transition: var(--buyer-transition);
+}
+
+.comparison-table tbody tr:hover {
+    background: var(--buyer-bg-secondary);
+}
+
+.comparison-table tbody tr.recommended {
+    background: linear-gradient(90deg, rgba(14, 165, 233, 0.05) 0%, rgba(14, 165, 233, 0.02) 100%);
+    border-left: 4px solid var(--aviation-primary);
+}
+
+.comparison-table tbody tr.recommended:hover {
+    background: linear-gradient(90deg, rgba(14, 165, 233, 0.08) 0%, rgba(14, 165, 233, 0.04) 100%);
+}
+
+.comparison-table tbody td {
+    padding: 1.5rem 1rem;
+    border-bottom: 1px solid var(--buyer-border-light);
+}
+
+.comparison-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Supplier Column */
+.supplier-cell {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.supplier-logo {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--aviation-primary) 0%, var(--aviation-dark) 100%);
+    color: white;
+    border-radius: var(--buyer-radius-md);
+    font-weight: 700;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.supplier-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.supplier-name {
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--buyer-text-primary);
+}
+
+.supplier-location {
+    font-size: 0.85rem;
+    color: var(--buyer-text-muted);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.supplier-location i {
+    width: 14px;
+    height: 14px;
+}
+
+/* Part Details Column */
+.part-details-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.part-number {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--buyer-text-primary);
+    font-family: 'Courier New', monospace;
+}
+
+.part-condition {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0.75rem;
+    background: var(--buyer-bg-accent);
+    color: var(--aviation-primary);
+    border-radius: 1rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    width: fit-content;
+}
+
+.part-condition i {
+    width: 14px;
+    height: 14px;
+}
+
+/* Delivery Column */
+.delivery-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.delivery-time {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--buyer-text-primary);
+}
+
+.delivery-date {
+    font-size: 0.85rem;
+    color: var(--buyer-text-muted);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.delivery-date i {
+    width: 14px;
+    height: 14px;
+}
+
+.delivery-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    width: fit-content;
+}
+
+.delivery-badge.fastest {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+.delivery-badge.fast {
+    background: #fef3c7;
+    color: #ca8a04;
+}
+
+.delivery-badge.standard {
+    background: #e0f2fe;
+    color: #0284c7;
+}
+
+.delivery-badge i {
+    width: 12px;
+    height: 12px;
+}
+
+/* Price Column */
+.price-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.price-amount {
+    font-weight: 800;
+    font-size: 1.5rem;
+    color: var(--buyer-text-primary);
+}
+
+.price-breakdown {
+    font-size: 0.8rem;
+    color: var(--buyer-text-muted);
+}
+
+/* Reliability Column */
+.reliability-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.reliability-score {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.reliability-score.excellent {
+    color: #16a34a;
+}
+
+.reliability-score.good {
+    color: #0284c7;
+}
+
+.reliability-score.fair {
+    color: #ca8a04;
+}
+
+.reliability-stars {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.reliability-stars i {
+    width: 16px;
+    height: 16px;
+}
+
+.reliability-label {
+    font-size: 0.8rem;
+    color: var(--buyer-text-muted);
+}
+
+/* Action Column */
+.action-cell {
+    text-align: center;
+}
+
+.btn-select-quote {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.875rem 1.5rem;
+    background: linear-gradient(135deg, var(--aviation-primary) 0%, var(--aviation-dark) 100%);
+    color: white;
+    border: none;
+    border-radius: var(--buyer-radius-md);
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: var(--buyer-transition);
+    box-shadow: 0 2px 8px rgba(14, 165, 233, 0.3);
+}
+
+.btn-select-quote:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(14, 165, 233, 0.4);
+}
+
+.btn-select-quote i {
+    width: 18px;
+    height: 18px;
+}
+
+.btn-select-quote.secondary {
+    background: var(--buyer-bg-secondary);
+    color: var(--aviation-primary);
+    border: 2px solid var(--aviation-primary);
+    box-shadow: none;
+}
+
+.btn-select-quote.secondary:hover {
+    background: var(--aviation-primary);
+    color: white;
+}
+
+/* Recommended Badge */
+.recommended-badge {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+    color: white;
+    border-radius: 2rem;
+    font-weight: 700;
+    font-size: 0.8rem;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    white-space: nowrap;
+}
+
+.recommended-badge i {
+    width: 16px;
+    height: 16px;
+}
+
+/* ====================================
+   COMPARISON SUMMARY
+   ==================================== */
+
+.comparison-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 2px solid var(--buyer-border-light);
+}
+
+.summary-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem;
+    background: var(--buyer-bg-secondary);
+    border-radius: var(--buyer-radius-md);
+}
+
+.summary-icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--aviation-primary) 0%, var(--aviation-dark) 100%);
+    color: white;
+    border-radius: var(--buyer-radius-md);
+    flex-shrink: 0;
+}
+
+.summary-icon i {
+    width: 24px;
+    height: 24px;
+}
+
+.summary-content {
+    flex: 1;
+}
+
+.summary-label {
+    font-size: 0.8rem;
+    color: var(--buyer-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+.summary-value {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--buyer-text-primary);
+    margin-top: 0.25rem;
+}
+
+/* ====================================
+   DECISION HELPER
+   ==================================== */
+
+.decision-helper {
+    background: white;
+    border-radius: var(--buyer-radius-xl);
+    box-shadow: var(--buyer-shadow-lg);
+    padding: 2rem;
+    margin-top: 2rem;
+    border: 1px solid var(--buyer-border);
+}
+
+.decision-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.decision-header i {
+    width: 24px;
+    height: 24px;
+    color: var(--aviation-primary);
+}
+
+.decision-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--buyer-text-primary);
+}
+
+.decision-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.decision-card {
+    padding: 1.5rem;
+    background: var(--buyer-bg-secondary);
+    border: 2px solid var(--buyer-border);
+    border-radius: var(--buyer-radius-lg);
+    transition: var(--buyer-transition);
+}
+
+.decision-card:hover {
+    border-color: var(--aviation-primary);
+    background: white;
+    box-shadow: var(--buyer-shadow-md);
+}
+
+.decision-card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.decision-card-icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--buyer-bg-accent);
+    color: var(--aviation-primary);
+    border-radius: var(--buyer-radius-md);
+}
+
+.decision-card-icon i {
+    width: 20px;
+    height: 20px;
+}
+
+.decision-card-title {
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--buyer-text-primary);
+}
+
+.decision-card-desc {
+    font-size: 0.9rem;
+    color: var(--buyer-text-secondary);
+    line-height: 1.6;
+}
+
+/* ====================================
+   RESPONSIVE DESIGN
+   ==================================== */
+
+@media (max-width: 1024px) {
+    .comparison-wrapper {
+        overflow-x: scroll;
+    }
+
+    .comparison-table {
+        min-width: 1000px;
+    }
+}
+
+@media (max-width: 768px) {
+    .aog-quote-page {
+        padding-top: 4rem;
+    }
+
+    .quote-header {
+        padding: 1.5rem;
+    }
+
+    .quote-header-top {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .quote-title {
+        font-size: 1.5rem;
+    }
+
+    .comparison-wrapper {
+        padding: 1rem;
+    }
+
+    .decision-grid {
+        grid-template-columns: 1fr;
+    }
+}

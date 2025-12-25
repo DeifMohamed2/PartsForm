@@ -14,10 +14,14 @@
       <div class="header-bar-content">
         <div class="header-left">
           <h1 class="header-title">Checkout</h1>
-          <p class="header-subtitle">Review your order and select your preferred payment method</p>
+          <p class="header-subtitle" id="checkout-subtitle">Review your order and select your preferred payment method</p>
         </div>
         <div class="header-right">
-          <div class="checkout-badge">
+          <div class="checkout-badge" id="aog-badge" style="display: none; background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);">
+            <i data-lucide="alert-triangle"></i>
+            <span>AOG Case - Priority Processing</span>
+          </div>
+          <div class="checkout-badge" id="secure-badge">
             <i data-lucide="shield-check"></i>
             <span>Secure Checkout</span>
           </div>
@@ -396,8 +400,8 @@
         </svg>
       </div>
     </div>
-    <h2 class="success-title">Payment Successful!</h2>
-    <p class="success-message">Your order has been placed successfully</p>
+    <h2 class="success-title" id="success-title">Payment Successful!</h2>
+    <p class="success-message" id="success-message">Your order has been placed successfully</p>
     <div class="success-details">
       <div class="success-detail-item">
         <span class="detail-label">Order Number:</span>

@@ -1,0 +1,225 @@
+<%- include('partials/header') %>
+<link rel="stylesheet" href="/css/buyerCSS/buyer-main.css">
+<link rel="stylesheet" href="/css/buyerCSS/profile.css">
+
+<%- include('partials/navbar') %>
+
+<!-- ====================================
+     PROFILE PAGE - PROFESSIONAL DESIGN
+     ==================================== -->
+<div class="profile-page">
+  <!-- Hero Section -->
+  <div class="profile-hero">
+    <div class="profile-hero-content">
+      <div class="profile-badge">
+        <i data-lucide="user-circle"></i>
+        <span>My Profile</span>
+      </div>
+
+      <h1 class="profile-hero-title">User Profile</h1>
+      <p class="profile-hero-subtitle">
+        Manage your personal information and account details
+      </p>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="buyer-container">
+    <div class="profile-section">
+      <div class="profile-layout">
+        <!-- Left Column - Profile Card -->
+        <div class="profile-card-main">
+          <div class="profile-avatar-section">
+            <div class="profile-avatar-wrapper">
+              <div class="profile-avatar" id="profileAvatar">
+                <i data-lucide="user"></i>
+              </div>
+              <button class="avatar-edit-btn" id="avatarEditBtn" title="Change Avatar">
+                <i data-lucide="camera"></i>
+              </button>
+            </div>
+            <h2 class="profile-name" id="profileName">John Doe</h2>
+            <p class="profile-email" id="profileEmail">john.doe@example.com</p>
+            <div class="profile-status">
+              <span class="status-badge active">
+                <i data-lucide="check-circle"></i>
+                <span>Active Account</span>
+              </span>
+            </div>
+          </div>
+
+          <div class="profile-stats">
+            <div class="profile-stat-item">
+              <div class="stat-icon">
+                <i data-lucide="package"></i>
+              </div>
+              <div class="stat-content">
+                <span class="stat-value" id="totalOrders">0</span>
+                <span class="stat-label">Total Orders</span>
+              </div>
+            </div>
+            <div class="profile-stat-item">
+              <div class="stat-icon">
+                <i data-lucide="calendar"></i>
+              </div>
+              <div class="stat-content">
+                <span class="stat-value" id="memberSince">2024</span>
+                <span class="stat-label">Member Since</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column - Profile Information -->
+        <div class="profile-info-section">
+          <!-- Personal Information Card -->
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="info-card-title-wrapper">
+                <i data-lucide="user"></i>
+                <h3 class="info-card-title">Personal Information</h3>
+              </div>
+              <button class="info-card-edit-btn" id="editPersonalInfoBtn">
+                <i data-lucide="edit"></i>
+                <span>Edit</span>
+              </button>
+            </div>
+            <div class="info-card-body">
+              <div class="info-row">
+                <div class="info-label">
+                  <i data-lucide="user"></i>
+                  <span>Full Name</span>
+                </div>
+                <div class="info-value" id="fullNameValue">John Doe</div>
+              </div>
+              <div class="info-row">
+                <div class="info-label">
+                  <i data-lucide="mail"></i>
+                  <span>Email Address</span>
+                </div>
+                <div class="info-value" id="emailValue">john.doe@example.com</div>
+              </div>
+              <div class="info-row">
+                <div class="info-label">
+                  <i data-lucide="phone"></i>
+                  <span>Phone Number</span>
+                </div>
+                <div class="info-value" id="phoneValue">+1 (555) 123-4567</div>
+              </div>
+              <div class="info-row">
+                <div class="info-label">
+                  <i data-lucide="calendar"></i>
+                  <span>Date of Birth</span>
+                </div>
+                <div class="info-value" id="dobValue">January 1, 1990</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Address Information Card -->
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="info-card-title-wrapper">
+                <i data-lucide="map-pin"></i>
+                <h3 class="info-card-title">Address Information</h3>
+              </div>
+              <button class="info-card-edit-btn" id="editAddressBtn">
+                <i data-lucide="edit"></i>
+                <span>Edit</span>
+              </button>
+            </div>
+            <div class="info-card-body">
+              <div class="info-row">
+                <div class="info-label">
+                  <i data-lucide="map-pin"></i>
+                  <span>Street Address</span>
+                </div>
+                <div class="info-value" id="streetValue">123 Main Street</div>
+              </div>
+              <div class="info-row">
+                <div class="info-label">
+                  <i data-lucide="building"></i>
+                  <span>City</span>
+                </div>
+                <div class="info-value" id="cityValue">New York</div>
+              </div>
+              <div class="info-row">
+                <div class="info-label">
+                  <i data-lucide="map"></i>
+                  <span>State/Province</span>
+                </div>
+                <div class="info-value" id="stateValue">NY</div>
+              </div>
+              <div class="info-row">
+                <div class="info-label">
+                  <i data-lucide="globe"></i>
+                  <span>Country</span>
+                </div>
+                <div class="info-value" id="countryValue">United States</div>
+              </div>
+              <div class="info-row">
+                <div class="info-label">
+                  <i data-lucide="hash"></i>
+                  <span>Postal Code</span>
+                </div>
+                <div class="info-value" id="postalValue">10001</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Account Security Card -->
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="info-card-title-wrapper">
+                <i data-lucide="shield"></i>
+                <h3 class="info-card-title">Account Security</h3>
+              </div>
+            </div>
+            <div class="info-card-body">
+              <div class="info-row">
+                <div class="info-label">
+                  <i data-lucide="lock"></i>
+                  <span>Password</span>
+                </div>
+                <div class="info-value-action">
+                  <span class="info-value-text">Last changed 30 days ago</span>
+                  <button class="info-action-btn" id="changePasswordBtn">
+                    <i data-lucide="key"></i>
+                    <span>Change Password</span>
+                  </button>
+                </div>
+              </div>
+              <div class="info-row">
+                <div class="info-label">
+                  <i data-lucide="smartphone"></i>
+                  <span>Two-Factor Authentication</span>
+                </div>
+                <div class="info-value-action">
+                  <span class="info-value-text">Not enabled</span>
+                  <button class="info-action-btn" id="enable2FABtn">
+                    <i data-lucide="shield-check"></i>
+                    <span>Enable 2FA</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/quick-search') %>
+<%- include('partials/footer') %>
+
+<script src="/js/main.js"></script>
+<script src="/js/quick-search.js"></script>
+<script src="/js/cart.js"></script>
+<script src="/js/cart-badge-updater.js"></script>
+<script>
+  lucide.createIcons();
+  window.addEventListener('load', () => lucide.createIcons());
+</script>
+
+

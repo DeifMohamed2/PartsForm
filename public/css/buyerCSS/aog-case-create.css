@@ -1,0 +1,791 @@
+/* ====================================
+   AOG CASE CREATE - PROFESSIONAL STYLING
+   PARTSFORM Aviation Emergency Response
+   ==================================== */
+
+/* Import base buyer styles */
+@import url('buyer-main.css');
+
+/* ====================================
+   AOG THEME COLORS
+   ==================================== */
+
+:root {
+    /* AOG Emergency Colors */
+    --aog-critical: #dc2626;
+    --aog-critical-light: #ef4444;
+    --aog-critical-bg: #fef2f2;
+
+    /* Routine Colors */
+    --aog-routine: #3b82f6;
+    --aog-routine-light: #60a5fa;
+    --aog-routine-bg: #eff6ff;
+
+    /* Scheduled Colors */
+    --aog-scheduled: #10b981;
+    --aog-scheduled-light: #34d399;
+    --aog-scheduled-bg: #f0fdf4;
+
+    /* Aviation Theme */
+    --aviation-primary: #0ea5e9;
+    --aviation-dark: #0284c7;
+    --aviation-light: #7dd3fc;
+}
+
+/* ====================================
+   PAGE LAYOUT
+   ==================================== */
+
+.aog-create-page {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f8fafc 0%, #e0f2fe 100%);
+    padding-top: 0;
+    padding-bottom: 4rem;
+    position: relative;
+}
+
+/* ====================================
+   HERO SECTION
+   ==================================== */
+
+.aog-hero {
+    background: linear-gradient(135deg, #0c1e3d 0%, #1e3a5f 100%);
+    padding: 8rem 0 4rem;
+    margin-bottom: 3rem;
+    position: relative;
+    overflow: hidden;
+    border-radius: 0 0 20px 20px;
+    box-shadow: 0 10px 30px rgba(43, 82, 120, 0.2);
+}
+
+.aog-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(135deg, rgba(14, 165, 233, 0.1) 0%, transparent 100%),
+        url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><path d="M0 0L50 50L0 100M50 0L100 50L50 100" stroke="rgba(255,255,255,0.03)" fill="none"/></svg>');
+    opacity: 0.5;
+}
+
+.aog-hero-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+}
+
+.aog-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: rgba(14, 165, 233, 0.2);
+    border: 2px solid rgba(14, 165, 233, 0.4);
+    border-radius: 2rem;
+    color: #7dd3fc;
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+}
+
+.aog-badge i {
+    width: 20px;
+    height: 20px;
+    color: #0ea5e9;
+}
+
+.aog-hero-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: white;
+    margin-bottom: 1rem;
+    line-height: 1.2;
+}
+
+.aog-hero-subtitle {
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.8);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* ====================================
+   FORM CONTAINER
+   ==================================== */
+
+.aog-form-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 var(--buyer-space-lg);
+}
+
+.aog-form-card {
+    background: white;
+    border-radius: var(--buyer-radius-xl);
+    box-shadow: var(--buyer-shadow-xl);
+    padding: 2.5rem;
+    margin-bottom: 2rem;
+    border: 1px solid var(--buyer-border);
+}
+
+.aog-form-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 2px solid var(--buyer-border-light);
+}
+
+.aog-form-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--buyer-text-primary);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.aog-form-title i {
+    width: 28px;
+    height: 28px;
+    color: var(--aviation-primary);
+}
+
+.aog-form-description {
+    font-size: 0.95rem;
+    color: var(--buyer-text-secondary);
+}
+
+/* ====================================
+   CASE TYPE SELECTION
+   ==================================== */
+
+.case-type-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.case-type-option {
+    position: relative;
+    padding: 1.25rem 1rem;
+    background: white;
+    border: 2px solid var(--buyer-border);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.case-type-option:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.case-type-option:hover .case-type-icon {
+    transform: scale(1.05);
+}
+
+.case-type-option input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.case-type-option input[type="radio"]:checked~.case-type-content {
+    color: white;
+}
+
+/* AOG Type */
+.case-type-option.aog {
+    border-color: #dc2626;
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+}
+
+.case-type-option.aog input[type="radio"]:checked~.case-type-content {
+    background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+    box-shadow: 0 4px 16px rgba(220, 38, 38, 0.3);
+}
+
+.case-type-option.aog:not(:has(input:checked)) .case-type-icon {
+    color: #dc2626;
+}
+
+/* Routine Type */
+.case-type-option.routine {
+    border-color: #3b82f6;
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+}
+
+.case-type-option.routine input[type="radio"]:checked~.case-type-content {
+    background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
+}
+
+.case-type-option.routine:not(:has(input:checked)) .case-type-icon {
+    color: #3b82f6;
+}
+
+/* Scheduled Type */
+.case-type-option.scheduled {
+    border-color: #10b981;
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+}
+
+.case-type-option.scheduled input[type="radio"]:checked~.case-type-content {
+    background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+}
+
+.case-type-option.scheduled:not(:has(input:checked)) .case-type-icon {
+    color: #10b981;
+}
+
+.case-type-content {
+    border-radius: 8px;
+    padding: 1rem;
+    transition: all 0.3s ease;
+}
+
+.case-type-icon {
+    width: 40px;
+    height: 40px;
+    margin: 0 auto 0.75rem;
+    transition: all 0.3s ease;
+}
+
+.case-type-name {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.case-type-desc {
+    font-size: 0.8rem;
+    opacity: 0.85;
+    line-height: 1.4;
+    font-weight: 400;
+}
+
+/* ====================================
+   FORM FIELDS
+   ==================================== */
+
+.aog-form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.aog-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.aog-form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.aog-form-label {
+    font-weight: 600;
+    color: var(--buyer-text-primary);
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.aog-form-label .required {
+    color: var(--aog-critical);
+}
+
+.aog-form-label i {
+    width: 18px;
+    height: 18px;
+    color: var(--aviation-primary);
+}
+
+.aog-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.aog-input-icon {
+    position: absolute;
+    left: 1rem;
+    width: 20px;
+    height: 20px;
+    color: var(--buyer-text-muted);
+    pointer-events: none;
+}
+
+.aog-input {
+    width: 100%;
+    padding: 0.875rem 1rem 0.875rem 3rem;
+    background: var(--buyer-bg-secondary);
+    border: 2px solid var(--buyer-border);
+    border-radius: var(--buyer-radius-md);
+    font-size: 1rem;
+    color: var(--buyer-text-primary);
+    transition: var(--buyer-transition);
+}
+
+.aog-input:focus {
+    outline: none;
+    border-color: var(--aviation-primary);
+    background: white;
+    box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1);
+}
+
+.aog-input::placeholder {
+    color: var(--buyer-text-subtle);
+}
+
+.aog-textarea {
+    min-height: 120px;
+    resize: vertical;
+    font-family: inherit;
+}
+
+/* ====================================
+   PARTS LIST SECTION
+   ==================================== */
+
+.parts-list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.parts-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: var(--aviation-primary);
+    color: white;
+    border-radius: 2rem;
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.parts-count i {
+    width: 18px;
+    height: 18px;
+}
+
+.btn-add-part {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: var(--buyer-bg-accent);
+    color: var(--aviation-primary);
+    border: 2px solid var(--aviation-primary);
+    border-radius: var(--buyer-radius-md);
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--buyer-transition);
+}
+
+.btn-add-part:hover {
+    background: var(--aviation-primary);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: var(--buyer-shadow-md);
+}
+
+.btn-add-part i {
+    width: 18px;
+    height: 18px;
+}
+
+.parts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.part-item {
+    display: grid;
+    grid-template-columns: auto 1fr auto auto;
+    gap: 1.5rem;
+    align-items: center;
+    padding: 1.25rem;
+    background: var(--buyer-bg-secondary);
+    border: 2px solid var(--buyer-border);
+    border-radius: var(--buyer-radius-md);
+    transition: var(--buyer-transition);
+}
+
+.part-item:hover {
+    border-color: var(--aviation-primary);
+    background: white;
+    box-shadow: var(--buyer-shadow-sm);
+}
+
+.part-icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--aviation-primary) 0%, var(--aviation-dark) 100%);
+    color: white;
+    border-radius: var(--buyer-radius-md);
+}
+
+.part-icon i {
+    width: 24px;
+    height: 24px;
+}
+
+.part-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.part-name {
+    font-weight: 700;
+    color: var(--buyer-text-primary);
+    font-size: 1rem;
+}
+
+.part-number {
+    font-size: 0.85rem;
+    color: var(--buyer-text-muted);
+    font-family: 'Courier New', monospace;
+}
+
+.part-quantity {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 1rem;
+    background: white;
+    border: 2px solid var(--buyer-border);
+    border-radius: var(--buyer-radius-md);
+}
+
+.part-quantity span {
+    font-weight: 600;
+    color: var(--buyer-text-secondary);
+    font-size: 0.85rem;
+}
+
+.part-quantity input {
+    width: 60px;
+    padding: 0.5rem;
+    text-align: center;
+    border: 1px solid var(--buyer-border);
+    border-radius: 0.375rem;
+    font-weight: 700;
+}
+
+.btn-remove-part {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--aog-critical-bg);
+    color: var(--aog-critical);
+    border: none;
+    border-radius: var(--buyer-radius-md);
+    cursor: pointer;
+    transition: var(--buyer-transition);
+}
+
+.btn-remove-part:hover {
+    background: var(--aog-critical);
+    color: white;
+    transform: scale(1.1);
+}
+
+.btn-remove-part i {
+    width: 20px;
+    height: 20px;
+}
+
+/* Part Meta Info */
+.part-meta {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--buyer-text-muted);
+}
+
+.part-meta span {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.part-meta i {
+    width: 14px;
+    height: 14px;
+}
+
+/* Part Price */
+.part-price {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--aviation-primary);
+}
+
+/* Parts Summary */
+.parts-summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    background: var(--buyer-bg-secondary);
+    border-radius: var(--buyer-radius-md);
+    margin-top: 1rem;
+}
+
+.parts-summary-label {
+    font-weight: 600;
+    color: var(--buyer-text-secondary);
+}
+
+.parts-summary-value {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--buyer-text-primary);
+}
+
+/* Empty Parts Message */
+.empty-parts-message {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: var(--buyer-text-muted);
+}
+
+.empty-parts-message i {
+    width: 64px;
+    height: 64px;
+    margin-bottom: 1rem;
+    color: var(--buyer-border);
+}
+
+.empty-parts-message p {
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+/* ====================================
+   URGENCY INDICATOR
+   ==================================== */
+
+.urgency-indicator {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem 1.5rem;
+    background: var(--buyer-bg-secondary);
+    border-left: 4px solid var(--aviation-primary);
+    border-radius: 10px;
+    margin-top: 1.25rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    transition: all 0.3s ease;
+}
+
+.urgency-indicator.critical {
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+    border-left-color: #dc2626;
+    box-shadow: 0 2px 12px rgba(220, 38, 38, 0.12);
+}
+
+@keyframes pulseRed {
+
+    0%,
+    100% {
+        box-shadow: 0 4px 20px rgba(220, 38, 38, 0.15);
+    }
+
+    50% {
+        box-shadow: 0 6px 28px rgba(220, 38, 38, 0.25);
+    }
+}
+
+.urgency-indicator.routine {
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    border-left-color: #3b82f6;
+    box-shadow: 0 2px 12px rgba(59, 130, 246, 0.12);
+}
+
+.urgency-indicator.scheduled {
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    border-left-color: #10b981;
+    box-shadow: 0 2px 12px rgba(16, 185, 129, 0.12);
+}
+
+.urgency-icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+}
+
+.urgency-indicator:hover .urgency-icon {
+    transform: scale(1.05);
+}
+
+.urgency-icon i {
+    width: 20px;
+    height: 20px;
+}
+
+.urgency-indicator.critical .urgency-icon i {
+    color: #dc2626;
+}
+
+.urgency-indicator.routine .urgency-icon i {
+    color: #3b82f6;
+}
+
+.urgency-indicator.scheduled .urgency-icon i {
+    color: #10b981;
+}
+
+.urgency-text {
+    flex: 1;
+}
+
+.urgency-title {
+    font-weight: 700;
+    font-size: 0.95rem;
+    margin-bottom: 0.25rem;
+}
+
+.urgency-indicator.critical .urgency-title {
+    color: #dc2626;
+}
+
+.urgency-indicator.routine .urgency-title {
+    color: #3b82f6;
+}
+
+.urgency-indicator.scheduled .urgency-title {
+    color: #10b981;
+}
+
+.urgency-desc {
+    font-size: 0.8rem;
+    color: var(--buyer-text-secondary);
+}
+
+/* ====================================
+   ACTION BUTTONS
+   ==================================== */
+
+.aog-form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 2px solid var(--buyer-border-light);
+}
+
+.btn-aog-cancel {
+    padding: 1rem 2rem;
+    background: var(--buyer-bg-secondary);
+    color: var(--buyer-text-primary);
+    border: 2px solid var(--buyer-border);
+    border-radius: var(--buyer-radius-md);
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: var(--buyer-transition);
+}
+
+.btn-aog-cancel:hover {
+    background: var(--buyer-bg-tertiary);
+    border-color: var(--buyer-text-muted);
+}
+
+.btn-aog-submit {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 2.5rem;
+    background: linear-gradient(135deg, var(--aviation-primary) 0%, var(--aviation-dark) 100%);
+    color: white;
+    border: none;
+    border-radius: var(--buyer-radius-md);
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: var(--buyer-transition);
+    box-shadow: 0 4px 16px rgba(14, 165, 233, 0.3);
+}
+
+.btn-aog-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(14, 165, 233, 0.4);
+}
+
+.btn-aog-submit i {
+    width: 20px;
+    height: 20px;
+}
+
+/* ====================================
+   RESPONSIVE DESIGN
+   ==================================== */
+
+@media (max-width: 768px) {
+    .aog-create-page {
+        padding-top: 4rem;
+    }
+
+    .aog-hero {
+        padding: 2rem 0;
+    }
+
+    .aog-hero-title {
+        font-size: 2rem;
+    }
+
+    .aog-form-card {
+        padding: 1.5rem;
+    }
+
+    .case-type-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .aog-form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .part-item {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .aog-form-actions {
+        flex-direction: column-reverse;
+    }
+
+    .btn-aog-cancel,
+    .btn-aog-submit {
+        width: 100%;
+        justify-content: center;
+    }
+}

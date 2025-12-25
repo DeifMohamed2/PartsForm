@@ -1,0 +1,128 @@
+<%- include('partials/header') %>
+<link rel="stylesheet" href="/css/buyerCSS/buyer-main.css">
+<link rel="stylesheet" href="/css/buyerCSS/tickets.css">
+
+<%- include('partials/navbar') %>
+
+<!-- ====================================
+     TICKETS PAGE - PROFESSIONAL DESIGN
+     ==================================== -->
+<div class="tickets-page">
+  <!-- Hero Section -->
+  <div class="tickets-hero">
+    <div class="tickets-hero-content">
+      <div class="ticket-badge">
+        <i data-lucide="headset"></i>
+        <span>24/7 Support</span>
+      </div>
+
+      <h1 class="tickets-hero-title">Support Tickets</h1>
+      <p class="tickets-hero-subtitle">
+        Track and manage your support requests in one place
+      </p>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="buyer-container">
+    <div class="tickets-section">
+      <!-- Header with Stats and Create Button -->
+      <div class="tickets-header">
+        <div class="tickets-stats">
+          <div class="stat-card">
+            <div class="stat-icon open">
+              <i data-lucide="alert-circle"></i>
+            </div>
+            <div class="stat-content">
+              <span class="stat-value" id="stat-open">0</span>
+              <span class="stat-label">Open</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon in-progress">
+              <i data-lucide="loader"></i>
+            </div>
+            <div class="stat-content">
+              <span class="stat-value" id="stat-in-progress">0</span>
+              <span class="stat-label">In Progress</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon resolved">
+              <i data-lucide="check-circle"></i>
+            </div>
+            <div class="stat-content">
+              <span class="stat-value" id="stat-resolved">0</span>
+              <span class="stat-label">Resolved</span>
+            </div>
+          </div>
+        </div>
+        <a href="/buyer/tickets/create" class="btn-create-ticket">
+          <i data-lucide="plus"></i>
+          <span>Create Ticket</span>
+        </a>
+      </div>
+
+      <!-- Filters -->
+      <div class="tickets-filters">
+        <div class="filter-group">
+          <label class="filter-label" for="filter-status">Status</label>
+          <select class="filter-select" id="filter-status">
+            <option value="">All Statuses</option>
+            <option value="open">Open</option>
+            <option value="in-progress">In Progress</option>
+            <option value="resolved">Resolved</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label" for="filter-search">Search</label>
+          <input type="text" class="filter-input" id="filter-search" placeholder="Search tickets...">
+        </div>
+        <div class="filter-actions">
+          <button class="btn-filter" id="btn-apply-filters">
+            <i data-lucide="filter"></i>
+            <span>Apply</span>
+          </button>
+          <button class="btn-reset" id="btn-reset-filters">
+            <i data-lucide="x"></i>
+            <span>Reset</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Tickets List -->
+      <div class="tickets-list" id="tickets-list">
+        <!-- Tickets will be populated by JavaScript -->
+      </div>
+
+      <!-- Empty State -->
+      <div class="tickets-empty" id="tickets-empty" style="display: none;">
+        <div class="tickets-empty-icon">
+          <i data-lucide="inbox"></i>
+        </div>
+        <h2 class="tickets-empty-title">No Tickets Found</h2>
+        <p class="tickets-empty-text">
+          You haven't created any support tickets yet. Need help with an order?
+        </p>
+        <a href="/buyer/tickets/create" class="btn-empty-action">
+          <i data-lucide="plus-circle"></i>
+          <span>Create Your First Ticket</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/quick-search') %>
+<%- include('partials/footer') %>
+
+<script src="/js/main.js"></script>
+<script src="/js/quick-search.js"></script>
+<script src="/js/cart.js"></script>
+<script src="/js/cart-badge-updater.js"></script>
+<script src="/js/tickets.js"></script>
+<script>
+  lucide.createIcons();
+  window.addEventListener('load', () => lucide.createIcons());
+</script>
+

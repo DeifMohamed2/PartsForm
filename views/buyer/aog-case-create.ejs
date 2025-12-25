@@ -1,0 +1,204 @@
+<%- include('partials/header') %>
+<link rel="stylesheet" href="/css/buyerCSS/buyer-main.css">
+<link rel="stylesheet" href="/css/buyerCSS/aog-case-create.css">
+
+<%- include('partials/navbar') %>
+
+<!-- ====================================
+     AOG CASE CREATION PAGE
+     ==================================== -->
+<div class="aog-create-page">
+  <!-- Hero Section -->
+  <div class="aog-hero">
+    <div class="container">
+      <div class="aog-hero-content">
+        <div class="aog-badge">
+          <i data-lucide="alert-triangle"></i>
+          <span>AOG Case Management</span>
+        </div>
+
+        <h1 class="aog-hero-title">Create Emergency Case</h1>
+        <p class="aog-hero-subtitle">
+          Initiate priority sourcing for critical aircraft parts
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form Container -->
+  <div class="aog-form-container">
+    <!-- Case Type Selection -->
+    <div class="aog-form-card">
+      <div class="aog-form-header">
+        <h2 class="aog-form-title">
+          <i data-lucide="layers"></i>
+          Case Type
+        </h2>
+        <p class="aog-form-description">
+          Select the urgency level for this sourcing request
+        </p>
+      </div>
+
+      <div class="case-type-grid">
+        <!-- AOG Option -->
+        <label class="case-type-option aog">
+          <input type="radio" name="caseType" value="aog" checked>
+          <div class="case-type-content">
+            <i data-lucide="alert-octagon" class="case-type-icon"></i>
+            <div class="case-type-name">AOG</div>
+            <div class="case-type-desc">Aircraft On Ground - Immediate action required</div>
+          </div>
+        </label>
+
+        <!-- Routine Option -->
+        <label class="case-type-option routine">
+          <input type="radio" name="caseType" value="routine">
+          <div class="case-type-content">
+            <i data-lucide="clock" class="case-type-icon"></i>
+            <div class="case-type-name">Routine</div>
+            <div class="case-type-desc">Standard procurement timeline</div>
+          </div>
+        </label>
+
+        <!-- Scheduled Option -->
+        <label class="case-type-option scheduled">
+          <input type="radio" name="caseType" value="scheduled">
+          <div class="case-type-content">
+            <i data-lucide="calendar" class="case-type-icon"></i>
+            <div class="case-type-name">Scheduled</div>
+            <div class="case-type-desc">Planned maintenance request</div>
+          </div>
+        </label>
+      </div>
+
+      <!-- Urgency Indicator -->
+      <div class="urgency-indicator critical" id="urgency-indicator">
+        <div class="urgency-icon">
+          <i data-lucide="zap"></i>
+        </div>
+        <div class="urgency-text">
+          <div class="urgency-title">Priority Sourcing Active</div>
+          <div class="urgency-desc">SLA timers and escalation protocols will be activated</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Aircraft Information -->
+    <div class="aog-form-card">
+      <div class="aog-form-header">
+        <h2 class="aog-form-title">
+          <i data-lucide="plane"></i>
+          Aircraft Information
+        </h2>
+        <p class="aog-form-description">
+          Provide details about the affected aircraft
+        </p>
+      </div>
+
+      <div class="aog-form-grid">
+        <div class="aog-form-group">
+          <label class="aog-form-label">
+            <i data-lucide="plane-takeoff"></i>
+            Aircraft Type <span class="required">*</span>
+          </label>
+          <div class="aog-input-wrapper">
+            <i data-lucide="plane" class="aog-input-icon"></i>
+            <input type="text" class="aog-input" id="aircraft-type" placeholder="e.g., Boeing 737-800" required>
+          </div>
+        </div>
+
+        <div class="aog-form-group">
+          <label class="aog-form-label">
+            <i data-lucide="hash"></i>
+            Tail Number <span class="required">*</span>
+          </label>
+          <div class="aog-input-wrapper">
+            <i data-lucide="hash" class="aog-input-icon"></i>
+            <input type="text" class="aog-input" id="tail-number" placeholder="e.g., N12345" required>
+          </div>
+        </div>
+
+        <div class="aog-form-group">
+          <label class="aog-form-label">
+            <i data-lucide="map-pin"></i>
+            Station/Location <span class="required">*</span>
+          </label>
+          <div class="aog-input-wrapper">
+            <i data-lucide="map-pin" class="aog-input-icon"></i>
+            <input type="text" class="aog-input" id="station" placeholder="e.g., JFK Airport" required>
+          </div>
+        </div>
+
+        <div class="aog-form-group">
+          <label class="aog-form-label">
+            <i data-lucide="calendar-clock"></i>
+            Required By <span class="required">*</span>
+          </label>
+          <div class="aog-input-wrapper">
+            <i data-lucide="calendar" class="aog-input-icon"></i>
+            <input type="datetime-local" class="aog-input" id="required-by" required>
+          </div>
+        </div>
+
+        <div class="aog-form-group full-width">
+          <label class="aog-form-label">
+            <i data-lucide="file-text"></i>
+            Additional Notes
+          </label>
+          <div class="aog-input-wrapper">
+            <i data-lucide="file-text" class="aog-input-icon"></i>
+            <textarea class="aog-input aog-textarea" id="notes" placeholder="Any additional information about this case..."></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Selected Parts List -->
+    <div class="aog-form-card">
+      <div class="aog-form-header">
+        <h2 class="aog-form-title">
+          <i data-lucide="package"></i>
+          Selected Parts
+        </h2>
+        <p class="aog-form-description">
+          Parts selected from aviation search
+        </p>
+      </div>
+
+      <div class="parts-list" id="selected-parts-list">
+        <!-- Parts will be loaded here by JavaScript -->
+      </div>
+
+      <div class="parts-summary">
+        <div class="parts-summary-label">Total Parts:</div>
+        <div class="parts-summary-value" id="total-parts-count">0</div>
+      </div>
+      <div class="parts-summary">
+        <div class="parts-summary-label">Estimated Total:</div>
+        <div class="parts-summary-value" id="total-parts-amount">0.00 AED</div>
+      </div>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="aog-form-card">
+      <div class="aog-form-actions">
+        <button class="btn-aog-cancel" id="btn-cancel">
+          Cancel
+        </button>
+        <button class="btn-aog-submit" id="btn-submit">
+          <span>Proceed to Checkout</span>
+          <i data-lucide="arrow-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/js/animations.js"></script>
+<script src="/js/aog-case-create.js"></script>
+<script>
+  lucide.createIcons();
+  window.addEventListener('load', () => lucide.createIcons());
+</script>
+
+<%- include('partials/footer') %>

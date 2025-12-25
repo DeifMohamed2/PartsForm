@@ -214,6 +214,167 @@ const getOrderDetailsPage = async (req, res) => {
   }
 };
 
+/**
+ * Get Profile page
+ */
+const getProfilePage = async (req, res) => {
+  try {
+    res.render('buyer/profile', {
+      title: 'Profile | PARTSFORM',
+    });
+  } catch (error) {
+    console.error('Error in getProfilePage:', error);
+    res.status(500).render('error', {
+      title: 'Error | PARTSFORM',
+      error: 'Failed to load profile page',
+    });
+  }
+};
+
+/**
+ * Get Settings page
+ */
+const getSettingsPage = async (req, res) => {
+  try {
+    res.render('buyer/settings', {
+      title: 'Settings | PARTSFORM',
+    });
+  } catch (error) {
+    console.error('Error in getSettingsPage:', error);
+    res.status(500).render('error', {
+      title: 'Error | PARTSFORM',
+      error: 'Failed to load settings page',
+    });
+  }
+};
+
+/**
+ * Get AOG Case Creation page
+ */
+const getAOGCaseCreatePage = async (req, res) => {
+  try {
+    res.render('buyer/aog-case-create', {
+      title: 'Create AOG Case | PARTSFORM',
+    });
+  } catch (error) {
+    console.error('Error in getAOGCaseCreatePage:', error);
+    res.status(500).render('error', {
+      title: 'Error | PARTSFORM',
+      error: 'Failed to load AOG case creation page',
+    });
+  }
+};
+
+/**
+ * Get AOG Command Center page
+ */
+const getAOGCommandCenterPage = async (req, res) => {
+  try {
+    const caseId = req.params.caseId;
+    res.render('buyer/aog-command-center', {
+      title: `AOG Case ${caseId} | PARTSFORM`,
+      caseId: caseId,
+    });
+  } catch (error) {
+    console.error('Error in getAOGCommandCenterPage:', error);
+    res.status(500).render('error', {
+      title: 'Error | PARTSFORM',
+      error: 'Failed to load AOG command center',
+    });
+  }
+};
+
+/**
+ * Get AOG Quote Comparison page
+ */
+const getAOGQuoteComparisonPage = async (req, res) => {
+  try {
+    const caseId = req.params.caseId;
+    res.render('buyer/aog-quote-comparison', {
+      title: `Quote Comparison - Case ${caseId} | PARTSFORM`,
+      caseId: caseId,
+    });
+  } catch (error) {
+    console.error('Error in getAOGQuoteComparisonPage:', error);
+    res.status(500).render('error', {
+      title: 'Error | PARTSFORM',
+      error: 'Failed to load quote comparison page',
+    });
+  }
+};
+
+/**
+ * Get AOG Case Tracking page
+ */
+const getAOGCaseTrackingPage = async (req, res) => {
+  try {
+    const caseId = req.params.caseId;
+    res.render('buyer/aog-case-tracking', {
+      title: `Track Case ${caseId} | PARTSFORM`,
+      caseId: caseId,
+    });
+  } catch (error) {
+    console.error('Error in getAOGCaseTrackingPage:', error);
+    res.status(500).render('error', {
+      title: 'Error | PARTSFORM',
+      error: 'Failed to load case tracking page',
+    });
+  }
+};
+
+/**
+ * Get Support Tickets page
+ */
+const getTicketsPage = async (req, res) => {
+  try {
+    res.render('buyer/tickets', {
+      title: 'Support Tickets | PARTSFORM',
+    });
+  } catch (error) {
+    console.error('Error in getTicketsPage:', error);
+    res.status(500).render('error', {
+      title: 'Error | PARTSFORM',
+      error: 'Failed to load tickets page',
+    });
+  }
+};
+
+/**
+ * Get Create Ticket page
+ */
+const getCreateTicketPage = async (req, res) => {
+  try {
+    res.render('buyer/create-ticket', {
+      title: 'Create Support Ticket | PARTSFORM',
+    });
+  } catch (error) {
+    console.error('Error in getCreateTicketPage:', error);
+    res.status(500).render('error', {
+      title: 'Error | PARTSFORM',
+      error: 'Failed to load create ticket page',
+    });
+  }
+};
+
+/**
+ * Get Ticket Details page
+ */
+const getTicketDetailsPage = async (req, res) => {
+  try {
+    const ticketId = req.params.ticketId;
+    res.render('buyer/ticket-details', {
+      title: `Ticket #${ticketId} | PARTSFORM`,
+      ticketId: ticketId,
+    });
+  } catch (error) {
+    console.error('Error in getTicketDetailsPage:', error);
+    res.status(500).render('error', {
+      title: 'Error | PARTSFORM',
+      error: 'Failed to load ticket details page',
+    });
+  }
+};
+
 // Export controller functions
 module.exports = {
   getBuyerMain,
@@ -228,4 +389,13 @@ module.exports = {
   getCartPage,
   getCheckoutPage,
   getOrderDetailsPage,
+  getProfilePage,
+  getSettingsPage,
+  getAOGCaseCreatePage,
+  getAOGCommandCenterPage,
+  getAOGQuoteComparisonPage,
+  getAOGCaseTrackingPage,
+  getTicketsPage,
+  getCreateTicketPage,
+  getTicketDetailsPage,
 };

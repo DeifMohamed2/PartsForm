@@ -1,0 +1,360 @@
+<%- include('partials/header') %>
+<link rel="stylesheet" href="/css/buyerCSS/buyer-main.css">
+<link rel="stylesheet" href="/css/buyerCSS/aog-quote-comparison.css">
+
+<%- include('partials/navbar') %>
+
+<!-- ====================================
+     AOG QUOTE COMPARISON
+     ==================================== -->
+<div class="aog-quote-page">
+  <!-- Hero Header -->
+  <div class="quote-hero">
+    <div class="quote-hero-content">
+      <div class="quote-badge">
+        <i data-lucide="file-text"></i>
+        <span>QUOTE COMPARISON</span>
+      </div>
+
+      <h1 class="quote-hero-title">Supplier Quotes</h1>
+      <p class="quote-hero-subtitle">
+        Compare and select the best sourcing option for your AOG case
+      </p>
+
+      <div class="quote-hero-meta">
+        <div class="meta-item">
+          <i data-lucide="hash"></i>
+          <span>Case <%= caseId %></span>
+        </div>
+        <div class="meta-item">
+          <i data-lucide="plane"></i>
+          <span>Boeing 737-800</span>
+        </div>
+        <div class="meta-item">
+          <i data-lucide="package"></i>
+          <span>3 Parts Required</span>
+        </div>
+        <a href="/buyer/aog/command-center/<%= caseId %>" class="meta-item back-link">
+          <i data-lucide="arrow-left"></i>
+          <span>Back to Command Center</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="quote-container">
+
+    <!-- Recommendation Banner -->
+    <div class="recommendation-banner">
+      <div class="recommendation-icon">
+        <i data-lucide="star"></i>
+      </div>
+      <div class="recommendation-content">
+        <div class="recommendation-title">Fastest Confirmed Option</div>
+        <div class="recommendation-desc">
+          Premier Aviation Supply offers the best balance of speed and reliability for this AOG case
+        </div>
+      </div>
+    </div>
+
+    <!-- Comparison Table -->
+    <div class="comparison-wrapper">
+      <table class="comparison-table">
+        <thead>
+          <tr>
+            <th>Supplier</th>
+            <th>Part Details</th>
+            <th>Delivery</th>
+            <th>Price</th>
+            <th>Reliability</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Recommended Option -->
+          <tr class="recommended">
+            <td>
+              <div class="supplier-cell">
+                <div class="supplier-logo">PA</div>
+                <div class="supplier-info">
+                  <div class="supplier-name">Premier Aviation Supply</div>
+                  <div class="supplier-location">
+                    <i data-lucide="map-pin"></i>
+                    <span>USA</span>
+                  </div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="part-details-cell">
+                <div class="part-number">P/N: 7825934</div>
+                <div class="part-condition">
+                  <i data-lucide="shield-check"></i>
+                  <span>New - Certified</span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="delivery-cell">
+                <div class="delivery-time">10 Days</div>
+                <div class="delivery-date">
+                  <i data-lucide="calendar"></i>
+                  <span>Jan 2, 2026</span>
+                </div>
+                <div class="delivery-badge fastest">
+                  <i data-lucide="zap"></i>
+                  <span>Fastest</span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="price-cell">
+                <div class="price-amount">$5,200</div>
+                <div class="price-breakdown">+ $450 shipping</div>
+              </div>
+            </td>
+            <td>
+              <div class="reliability-cell">
+                <div class="reliability-score excellent">
+                  <span>98%</span>
+                </div>
+                <div class="reliability-stars">
+                  <i data-lucide="star" style="fill: #f59e0b; color: #f59e0b;"></i>
+                  <i data-lucide="star" style="fill: #f59e0b; color: #f59e0b;"></i>
+                  <i data-lucide="star" style="fill: #f59e0b; color: #f59e0b;"></i>
+                  <i data-lucide="star" style="fill: #f59e0b; color: #f59e0b;"></i>
+                  <i data-lucide="star" style="fill: #f59e0b; color: #f59e0b;"></i>
+                </div>
+                <div class="reliability-label">Excellent</div>
+              </div>
+            </td>
+            <td class="action-cell">
+              <button class="btn-select-quote">
+                <i data-lucide="check-circle"></i>
+                <span>Select</span>
+              </button>
+            </td>
+          </tr>
+
+          <!-- Alternative Option 1 -->
+          <tr>
+            <td>
+              <div class="supplier-cell">
+                <div class="supplier-logo">SA</div>
+                <div class="supplier-info">
+                  <div class="supplier-name">Skyline Aviation Parts</div>
+                  <div class="supplier-location">
+                    <i data-lucide="map-pin"></i>
+                    <span>USA</span>
+                  </div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="part-details-cell">
+                <div class="part-number">P/N: 7825934</div>
+                <div class="part-condition">
+                  <i data-lucide="shield-check"></i>
+                  <span>New - Certified</span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="delivery-cell">
+                <div class="delivery-time">14 Days</div>
+                <div class="delivery-date">
+                  <i data-lucide="calendar"></i>
+                  <span>Jan 6, 2026</span>
+                </div>
+                <div class="delivery-badge standard">
+                  <i data-lucide="clock"></i>
+                  <span>Standard</span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="price-cell">
+                <div class="price-amount">$4,850</div>
+                <div class="price-breakdown">+ $380 shipping</div>
+              </div>
+            </td>
+            <td>
+              <div class="reliability-cell">
+                <div class="reliability-score good">
+                  <span>95%</span>
+                </div>
+                <div class="reliability-stars">
+                  <i data-lucide="star" style="fill: #f59e0b; color: #f59e0b;"></i>
+                  <i data-lucide="star" style="fill: #f59e0b; color: #f59e0b;"></i>
+                  <i data-lucide="star" style="fill: #f59e0b; color: #f59e0b;"></i>
+                  <i data-lucide="star" style="fill: #f59e0b; color: #f59e0b;"></i>
+                  <i data-lucide="star" style="color: #d1d5db;"></i>
+                </div>
+                <div class="reliability-label">Good</div>
+              </div>
+            </td>
+            <td class="action-cell">
+              <button class="btn-select-quote secondary">
+                <i data-lucide="check-circle"></i>
+                <span>Select</span>
+              </button>
+            </td>
+          </tr>
+
+          <!-- Alternative Option 2 -->
+          <tr>
+            <td>
+              <div class="supplier-cell">
+                <div class="supplier-logo">GA</div>
+                <div class="supplier-info">
+                  <div class="supplier-name">Global Aerospace Trading</div>
+                  <div class="supplier-location">
+                    <i data-lucide="map-pin"></i>
+                    <span>UK</span>
+                  </div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="part-details-cell">
+                <div class="part-number">P/N: 7825934</div>
+                <div class="part-condition">
+                  <i data-lucide="shield-check"></i>
+                  <span>New - Premium</span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="delivery-cell">
+                <div class="delivery-time">21 Days</div>
+                <div class="delivery-date">
+                  <i data-lucide="calendar"></i>
+                  <span>Jan 13, 2026</span>
+                </div>
+                <div class="delivery-badge standard">
+                  <i data-lucide="clock"></i>
+                  <span>Standard</span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="price-cell">
+                <div class="price-amount">$6,500</div>
+                <div class="price-breakdown">+ $620 shipping</div>
+              </div>
+            </td>
+            <td>
+              <div class="reliability-cell">
+                <div class="reliability-score good">
+                  <span>92%</span>
+                </div>
+                <div class="reliability-stars">
+                  <i data-lucide="star" style="fill: #f59e0b; color: #f59e0b;"></i>
+                  <i data-lucide="star" style="fill: #f59e0b; color: #f59e0b;"></i>
+                  <i data-lucide="star" style="fill: #f59e0b; color: #f59e0b;"></i>
+                  <i data-lucide="star" style="fill: #f59e0b; color: #f59e0b;"></i>
+                  <i data-lucide="star" style="color: #d1d5db;"></i>
+                </div>
+                <div class="reliability-label">Good</div>
+              </div>
+            </td>
+            <td class="action-cell">
+              <button class="btn-select-quote secondary">
+                <i data-lucide="check-circle"></i>
+                <span>Select</span>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Summary -->
+      <div class="comparison-summary">
+        <div class="summary-item">
+          <div class="summary-icon">
+            <i data-lucide="zap"></i>
+          </div>
+          <div class="summary-content">
+            <div class="summary-label">Fastest Option</div>
+            <div class="summary-value">10 Days</div>
+          </div>
+        </div>
+
+        <div class="summary-item">
+          <div class="summary-icon">
+            <i data-lucide="dollar-sign"></i>
+          </div>
+          <div class="summary-content">
+            <div class="summary-label">Lowest Cost</div>
+            <div class="summary-value">$4,850</div>
+          </div>
+        </div>
+
+        <div class="summary-item">
+          <div class="summary-icon">
+            <i data-lucide="star"></i>
+          </div>
+          <div class="summary-content">
+            <div class="summary-label">Best Rated</div>
+            <div class="summary-value">98%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Decision Helper -->
+    <div class="decision-helper">
+      <div class="decision-header">
+        <i data-lucide="lightbulb"></i>
+        <h2 class="decision-title">Decision Guidance</h2>
+      </div>
+
+      <div class="decision-grid">
+        <div class="decision-card">
+          <div class="decision-card-header">
+            <div class="decision-card-icon">
+              <i data-lucide="zap"></i>
+            </div>
+            <div class="decision-card-title">Speed Priority</div>
+          </div>
+          <div class="decision-card-desc">
+            For AOG cases, the fastest confirmed option minimizes aircraft downtime. Premier Aviation Supply offers 4 days faster delivery than alternatives.
+          </div>
+        </div>
+
+        <div class="decision-card">
+          <div class="decision-card-header">
+            <div class="decision-card-icon">
+              <i data-lucide="shield-check"></i>
+            </div>
+            <div class="decision-card-title">Risk Assessment</div>
+          </div>
+          <div class="decision-card-desc">
+            All suppliers are verified and certified. Premier Aviation has the highest on-time delivery rate (98%) based on historical performance.
+          </div>
+        </div>
+
+        <div class="decision-card">
+          <div class="decision-card-header">
+            <div class="decision-card-icon">
+              <i data-lucide="dollar-sign"></i>
+            </div>
+            <div class="decision-card-title">Cost vs. Speed</div>
+          </div>
+          <div class="decision-card-desc">
+            The recommended option is $350 more than the lowest price but delivers 4 days faster, potentially saving significant operational costs.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/js/animations.js"></script>
+<script src="/js/aog-quote-comparison.js"></script>
+<script>
+  lucide.createIcons();
+  window.addEventListener('load', () => lucide.createIcons());
+</script>
+
+<%- include('partials/footer') %>

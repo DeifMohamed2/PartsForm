@@ -1,0 +1,306 @@
+<%- include('partials/header') %>
+<link rel="stylesheet" href="/css/buyerCSS/buyer-main.css">
+<link rel="stylesheet" href="/css/buyerCSS/aog-command-center.css">
+
+<%- include('partials/navbar') %>
+
+<!-- ====================================
+     AOG COMMAND CENTER
+     ==================================== -->
+<div class="aog-command-center">
+  <!-- Hero Header -->
+  <div class="command-hero">
+    <div class="command-hero-content">
+      <div class="command-badge">
+        <i data-lucide="alert-triangle"></i>
+        <span>AOG COMMAND CENTER</span>
+      </div>
+
+      <h1 class="command-hero-title">Case <%= caseId %></h1>
+      <p class="command-hero-subtitle">
+        Real-time monitoring and control for critical aircraft parts sourcing
+      </p>
+
+      <div class="command-hero-meta">
+        <div class="meta-item">
+          <i data-lucide="plane"></i>
+          <span>Boeing 737-800</span>
+        </div>
+        <div class="meta-item">
+          <i data-lucide="hash"></i>
+          <span>Tail N12345</span>
+        </div>
+        <div class="meta-item">
+          <i data-lucide="map-pin"></i>
+          <span>JFK Airport</span>
+        </div>
+        <div class="meta-item status-critical">
+          <i data-lucide="zap"></i>
+          <span>AOG - CRITICAL</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="command-center-container">
+
+    <!-- SLA Timer -->
+    <div class="sla-timer-card">
+      <div class="sla-timer-content">
+        <div class="sla-label">Time Until Required Delivery</div>
+        <div class="sla-countdown" id="sla-countdown">
+          <div class="countdown-unit">
+            <div class="countdown-value" id="hours">22</div>
+            <div class="countdown-label">Hours</div>
+          </div>
+          <div class="countdown-unit">
+            <div class="countdown-value" id="minutes">45</div>
+            <div class="countdown-label">Minutes</div>
+          </div>
+          <div class="countdown-unit">
+            <div class="countdown-value" id="seconds">30</div>
+            <div class="countdown-label">Seconds</div>
+          </div>
+        </div>
+        <div class="sla-progress-bar">
+          <div class="sla-progress-fill" id="sla-progress" style="width: 75%;"></div>
+        </div>
+        <div class="sla-status-text">On track for on-time delivery</div>
+      </div>
+    </div>
+
+    <!-- Main Grid -->
+    <div class="command-grid">
+      <!-- Current Status -->
+      <div class="status-card">
+        <div class="status-card-header">
+          <i data-lucide="activity"></i>
+          <h2 class="status-card-title">Current Status</h2>
+        </div>
+
+        <div class="phase-timeline">
+          <!-- Completed Phase -->
+          <div class="phase-item completed">
+            <div class="phase-indicator">
+              <i data-lucide="check"></i>
+            </div>
+            <div class="phase-content">
+              <div class="phase-name">Case Created</div>
+              <div class="phase-desc">AOG case initiated and RFQs broadcast to suppliers</div>
+              <div class="phase-time">
+                <i data-lucide="clock"></i>
+                <span>Completed 2 hours ago</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Active Phase -->
+          <div class="phase-item active">
+            <div class="phase-indicator">
+              <i data-lucide="search"></i>
+            </div>
+            <div class="phase-content">
+              <div class="phase-name">Sourcing Parts</div>
+              <div class="phase-desc">Suppliers are preparing quotes and availability confirmations</div>
+              <div class="phase-time">
+                <i data-lucide="clock"></i>
+                <span>In progress - 5 quotes received</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pending Phase -->
+          <div class="phase-item">
+            <div class="phase-indicator">
+              <i data-lucide="file-text"></i>
+            </div>
+            <div class="phase-content">
+              <div class="phase-name">Quote Selection</div>
+              <div class="phase-desc">Review and select the best sourcing option</div>
+              <div class="phase-time">
+                <i data-lucide="clock"></i>
+                <span>Pending</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pending Phase -->
+          <div class="phase-item">
+            <div class="phase-indicator">
+              <i data-lucide="truck"></i>
+            </div>
+            <div class="phase-content">
+              <div class="phase-name">Shipping</div>
+              <div class="phase-desc">Parts in transit to destination</div>
+              <div class="phase-time">
+                <i data-lucide="clock"></i>
+                <span>Pending</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pending Phase -->
+          <div class="phase-item">
+            <div class="phase-indicator">
+              <i data-lucide="check-circle"></i>
+            </div>
+            <div class="phase-content">
+              <div class="phase-name">Delivered</div>
+              <div class="phase-desc">Parts delivered and aircraft released</div>
+              <div class="phase-time">
+                <i data-lucide="clock"></i>
+                <span>Pending</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Blocker & Quick Actions -->
+      <div>
+        <!-- Blocker Alert -->
+        <div class="blocker-card">
+          <div class="status-card-header">
+            <i data-lucide="alert-circle"></i>
+            <h2 class="status-card-title">What's Blocking Release?</h2>
+          </div>
+
+          <div class="blocker-alert none">
+            <div class="blocker-icon">
+              <i data-lucide="check-circle"></i>
+            </div>
+            <div class="blocker-content">
+              <div class="blocker-title">No Current Blockers</div>
+              <div class="blocker-desc">All processes are running smoothly. Quotes are being collected.</div>
+            </div>
+          </div>
+
+          <div class="status-card-header" style="margin-top: 2rem;">
+            <i data-lucide="zap"></i>
+            <h2 class="status-card-title">Quick Actions</h2>
+          </div>
+
+          <div class="quick-actions">
+            <a href="/buyer/aog/quote-comparison/<%= caseId %>" class="action-btn">
+              <div class="action-btn-content">
+                <div class="action-btn-icon">
+                  <i data-lucide="file-text"></i>
+                </div>
+                <div class="action-btn-text">
+                  <div class="action-btn-title">Compare Quotes</div>
+                  <div class="action-btn-desc">5 quotes available</div>
+                </div>
+              </div>
+              <i data-lucide="chevron-right" class="action-btn-arrow"></i>
+            </a>
+
+            <a href="/buyer/aog/case-tracking/<%= caseId %>" class="action-btn">
+              <div class="action-btn-content">
+                <div class="action-btn-icon">
+                  <i data-lucide="truck"></i>
+                </div>
+                <div class="action-btn-text">
+                  <div class="action-btn-title">Track Shipment</div>
+                  <div class="action-btn-desc">View delivery status</div>
+                </div>
+              </div>
+              <i data-lucide="chevron-right" class="action-btn-arrow"></i>
+            </a>
+
+            <a href="/buyer/contacts" class="action-btn">
+              <div class="action-btn-content">
+                <div class="action-btn-icon">
+                  <i data-lucide="headphones"></i>
+                </div>
+                <div class="action-btn-text">
+                  <div class="action-btn-title">Contact Support</div>
+                  <div class="action-btn-desc">Get immediate assistance</div>
+                </div>
+              </div>
+              <i data-lucide="chevron-right" class="action-btn-arrow"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Updates Feed -->
+    <div class="updates-card">
+      <div class="status-card-header">
+        <i data-lucide="bell"></i>
+        <h2 class="status-card-title">Recent Updates</h2>
+      </div>
+
+      <div class="updates-list">
+        <div class="update-item">
+          <div class="update-icon">
+            <i data-lucide="check-circle"></i>
+          </div>
+          <div class="update-content">
+            <div class="update-text">
+              <strong>Quote received</strong> from Skyline Aviation Parts - ETA 14 days
+            </div>
+            <div class="update-time">
+              <i data-lucide="clock"></i>
+              <span>5 minutes ago</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="update-item">
+          <div class="update-icon">
+            <i data-lucide="check-circle"></i>
+          </div>
+          <div class="update-content">
+            <div class="update-text">
+              <strong>Quote received</strong> from Premier Aviation Supply - ETA 10 days
+            </div>
+            <div class="update-time">
+              <i data-lucide="clock"></i>
+              <span>12 minutes ago</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="update-item">
+          <div class="update-icon">
+            <i data-lucide="send"></i>
+          </div>
+          <div class="update-content">
+            <div class="update-text">
+              <strong>RFQ broadcast</strong> sent to 12 verified aviation suppliers
+            </div>
+            <div class="update-time">
+              <i data-lucide="clock"></i>
+              <span>1 hour ago</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="update-item">
+          <div class="update-icon">
+            <i data-lucide="alert-triangle"></i>
+          </div>
+          <div class="update-content">
+            <div class="update-text">
+              <strong>AOG case created</strong> - Priority sourcing activated
+            </div>
+            <div class="update-time">
+              <i data-lucide="clock"></i>
+              <span>2 hours ago</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/js/animations.js"></script>
+<script src="/js/aog-command-center.js"></script>
+<script>
+  lucide.createIcons();
+  window.addEventListener('load', () => lucide.createIcons());
+</script>
+
+<%- include('partials/footer') %>

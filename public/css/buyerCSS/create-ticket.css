@@ -1,0 +1,696 @@
+/* ====================================
+   CREATE TICKET PAGE - PROFESSIONAL DESIGN
+   PARTSFORM Buyer Portal
+   ==================================== */
+
+/* ====================================
+   PAGE LAYOUT
+   ==================================== */
+.create-ticket-page {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    padding-top: 0;
+    position: relative;
+}
+
+/* Ensure navbar stays on top */
+.create-ticket-page .nav-bar {
+    z-index: 10001 !important;
+    position: fixed !important;
+    top: 0 !important;
+    width: 100% !important;
+    background: rgba(255, 255, 255, 0.98) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+    border-bottom: 1px solid rgba(59, 130, 246, 0.2) !important;
+    box-shadow: 0 4px 20px rgba(43, 82, 120, 0.08) !important;
+}
+
+/* ====================================
+   HERO SECTION
+   ==================================== */
+.create-ticket-hero {
+    padding: 8rem 0 4rem;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #1a2b3d 0%, #2b5278 50%, #1e3a54 100%);
+    margin-top: 0;
+    border-radius: 0 0 20px 20px;
+    box-shadow: 0 10px 30px rgba(43, 82, 120, 0.2);
+}
+
+.create-ticket-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80'),
+        linear-gradient(135deg, #1a2b3d 0%, #2b5278 100%);
+    background-size: cover;
+    background-position: center;
+    background-blend-mode: overlay;
+    opacity: 0.3;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.create-ticket-hero::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 15% 30%,
+            rgba(59, 130, 246, 0.25) 0%,
+            transparent 50%),
+        radial-gradient(circle at 85% 70%,
+            rgba(16, 185, 129, 0.2) 0%,
+            transparent 50%),
+        linear-gradient(180deg,
+            rgba(26, 43, 61, 0.3) 0%,
+            rgba(43, 82, 120, 0.6) 50%,
+            rgba(30, 58, 84, 0.8) 100%);
+    z-index: 1;
+    pointer-events: none;
+}
+
+.create-ticket-hero-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+.hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 1rem;
+    color: #ffffff;
+    font-weight: 500;
+    font-size: 0.85rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    animation: fadeInUp 0.6s ease-out forwards;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.hero-badge i {
+    width: 16px;
+    height: 16px;
+}
+
+.create-ticket-hero-title {
+    font-size: 3rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 1rem;
+    line-height: 1.2;
+    animation: fadeInUp 0.6s ease-out 0.1s backwards;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    letter-spacing: -0.01em;
+}
+
+.create-ticket-hero-subtitle {
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.6;
+    animation: fadeInUp 0.6s ease-out 0.2s backwards;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+    font-weight: 400;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* ====================================
+   MAIN CONTENT
+   ==================================== */
+.create-ticket-section {
+    padding: 3rem 0;
+}
+
+.create-ticket-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* Back Button */
+.btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    background: white;
+    color: #64748b;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    margin-bottom: 2rem;
+}
+
+.btn-back:hover {
+    background: #f8fafc;
+    color: #3b82f6;
+    border-color: #3b82f6;
+}
+
+.btn-back i {
+    width: 16px;
+    height: 16px;
+}
+
+/* ====================================
+   FORM CARD
+   ==================================== */
+.create-ticket-card {
+    background: white;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+    padding: 2.5rem;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+    margin-bottom: 2rem;
+}
+
+.card-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.card-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #1a2b3d;
+    margin-bottom: 0.5rem;
+}
+
+.card-subtitle {
+    font-size: 0.95rem;
+    color: #64748b;
+}
+
+/* ====================================
+   FORM ELEMENTS
+   ==================================== */
+.ticket-form {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.form-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #1a2b3d;
+}
+
+.form-label i {
+    width: 18px;
+    height: 18px;
+    color: #3b82f6;
+}
+
+.required {
+    color: #dc2626;
+    font-weight: 700;
+}
+
+.optional {
+    color: #94a3b8;
+    font-weight: 500;
+    font-size: 0.85rem;
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+    padding: 0.875rem 1.125rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    color: #1a2b3d;
+    background: #f8fafc;
+    transition: all 0.2s ease;
+    font-family: inherit;
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+    outline: none;
+    border-color: #3b82f6;
+    background: white;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+.form-textarea {
+    resize: vertical;
+    min-height: 150px;
+}
+
+.form-hint {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin-top: -0.25rem;
+}
+
+/* ====================================
+   PRIORITY OPTIONS
+   ==================================== */
+.priority-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+}
+
+.priority-option {
+    cursor: pointer;
+}
+
+.priority-option input[type="radio"] {
+    display: none;
+}
+
+.priority-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1.25rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    background: #f8fafc;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.priority-option input[type="radio"]:checked+.priority-card {
+    border-color: #3b82f6;
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+}
+
+.priority-card:hover {
+    border-color: #3b82f6;
+    transform: translateY(-2px);
+}
+
+.priority-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.priority-card.low .priority-icon {
+    background: #f1f5f9;
+}
+
+.priority-card.low .priority-icon i {
+    width: 20px;
+    height: 20px;
+    color: #64748b;
+}
+
+.priority-card.medium .priority-icon {
+    background: #dbeafe;
+}
+
+.priority-card.medium .priority-icon i {
+    width: 20px;
+    height: 20px;
+    color: #2563eb;
+}
+
+.priority-card.high .priority-icon {
+    background: #fef3c7;
+}
+
+.priority-card.high .priority-icon i {
+    width: 20px;
+    height: 20px;
+    color: #d97706;
+}
+
+.priority-card.urgent .priority-icon {
+    background: #fee2e2;
+}
+
+.priority-card.urgent .priority-icon i {
+    width: 20px;
+    height: 20px;
+    color: #dc2626;
+}
+
+.priority-label {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #1a2b3d;
+}
+
+.priority-desc {
+    font-size: 0.75rem;
+    color: #64748b;
+}
+
+/* ====================================
+   FILE UPLOAD
+   ==================================== */
+.file-upload-area {
+    border: 2px dashed #cbd5e1;
+    border-radius: 12px;
+    padding: 2rem;
+    background: #f8fafc;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.file-upload-area:hover,
+.file-upload-area.drag-over {
+    border-color: #3b82f6;
+    background: #eff6ff;
+}
+
+.file-upload-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.file-upload-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.file-upload-icon i {
+    width: 30px;
+    height: 30px;
+    color: #3b82f6;
+}
+
+.file-upload-text {
+    font-size: 0.95rem;
+    color: #475569;
+    margin: 0;
+}
+
+.file-upload-text strong {
+    color: #3b82f6;
+    font-weight: 600;
+}
+
+.file-upload-hint {
+    font-size: 0.85rem;
+    color: #94a3b8;
+    margin: 0;
+}
+
+/* File List */
+.file-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.file-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.875rem 1.125rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+}
+
+.file-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex: 1;
+}
+
+.file-info i {
+    width: 18px;
+    height: 18px;
+    color: #3b82f6;
+}
+
+.file-name {
+    font-size: 0.9rem;
+    color: #1a2b3d;
+    font-weight: 500;
+}
+
+.file-size {
+    font-size: 0.8rem;
+    color: #94a3b8;
+}
+
+.file-remove {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: #fee2e2;
+    color: #dc2626;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.file-remove:hover {
+    background: #dc2626;
+    color: white;
+}
+
+.file-remove i {
+    width: 16px;
+    height: 16px;
+}
+
+/* ====================================
+   FORM ACTIONS
+   ==================================== */
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #f1f5f9;
+}
+
+.btn-cancel,
+.btn-submit {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-cancel {
+    background: #f1f5f9;
+    color: #64748b;
+}
+
+.btn-cancel:hover {
+    background: #e2e8f0;
+    color: #475569;
+}
+
+.btn-submit {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.btn-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+}
+
+.btn-cancel i,
+.btn-submit i {
+    width: 18px;
+    height: 18px;
+}
+
+/* ====================================
+   HELP CARD
+   ==================================== */
+.help-card {
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    border-radius: 16px;
+    border: 1px solid #bfdbfe;
+    padding: 2rem;
+    display: flex;
+    gap: 1.5rem;
+}
+
+.help-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.help-icon i {
+    width: 24px;
+    height: 24px;
+    color: #3b82f6;
+}
+
+.help-content {
+    flex: 1;
+}
+
+.help-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1a2b3d;
+    margin-bottom: 0.5rem;
+}
+
+.help-text {
+    font-size: 0.95rem;
+    color: #475569;
+    margin-bottom: 1rem;
+}
+
+.help-contacts {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.help-contact {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: white;
+    border-radius: 10px;
+    color: #3b82f6;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+}
+
+.help-contact:hover {
+    background: #f8fafc;
+    transform: translateX(4px);
+}
+
+.help-contact i {
+    width: 18px;
+    height: 18px;
+}
+
+/* ====================================
+   RESPONSIVE DESIGN
+   ==================================== */
+@media (max-width: 768px) {
+    .create-ticket-hero {
+        padding: 7rem 0 3rem;
+    }
+
+    .create-ticket-hero-title {
+        font-size: 2.5rem;
+    }
+
+    .create-ticket-hero-subtitle {
+        font-size: 1rem;
+    }
+
+    .create-ticket-card {
+        padding: 1.75rem;
+    }
+
+    .card-title {
+        font-size: 1.5rem;
+    }
+
+    .priority-options {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .help-card {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 480px) {
+    .create-ticket-hero {
+        padding: 6rem 0 2.5rem;
+    }
+
+    .create-ticket-hero-title {
+        font-size: 2rem;
+    }
+
+    .create-ticket-card {
+        padding: 1.5rem;
+    }
+
+    .priority-options {
+        grid-template-columns: 1fr;
+    }
+}

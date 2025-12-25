@@ -374,9 +374,178 @@ const partsDatabase = {
   ],
 };
 
+// Mock database for support tickets
+const ticketsDatabase = [
+  {
+    id: 'TKT-001',
+    orderNumber: 'ORD-2025-001',
+    subject: 'Delayed Shipment - Hydraulic Pump',
+    category: 'Shipping Issue',
+    priority: 'high',
+    status: 'open',
+    createdAt: '2025-12-20T10:30:00Z',
+    updatedAt: '2025-12-23T14:20:00Z',
+    messages: [
+      {
+        id: 1,
+        sender: 'buyer',
+        senderName: 'John Smith',
+        message: 'My order ORD-2025-001 was supposed to arrive yesterday but I haven\'t received any tracking updates. Can you please check the status?',
+        timestamp: '2025-12-20T10:30:00Z',
+        attachments: []
+      },
+      {
+        id: 2,
+        sender: 'support',
+        senderName: 'Sarah Johnson',
+        message: 'Thank you for contacting us. I\'m looking into your order now. Let me check with our shipping department.',
+        timestamp: '2025-12-20T11:15:00Z',
+        attachments: []
+      },
+      {
+        id: 3,
+        sender: 'support',
+        senderName: 'Sarah Johnson',
+        message: 'I\'ve confirmed that your order is currently in transit. There was a slight delay at customs, but it should arrive within 2 business days. Here\'s your tracking number: TRK123456789',
+        timestamp: '2025-12-20T14:30:00Z',
+        attachments: []
+      },
+      {
+        id: 4,
+        sender: 'buyer',
+        senderName: 'John Smith',
+        message: 'Thank you for the update! I appreciate your help.',
+        timestamp: '2025-12-23T14:20:00Z',
+        attachments: []
+      }
+    ]
+  },
+  {
+    id: 'TKT-002',
+    orderNumber: 'ORD-2025-015',
+    subject: 'Wrong Part Received',
+    category: 'Order Issue',
+    priority: 'urgent',
+    status: 'in-progress',
+    createdAt: '2025-12-22T09:15:00Z',
+    updatedAt: '2025-12-23T16:45:00Z',
+    messages: [
+      {
+        id: 1,
+        sender: 'buyer',
+        senderName: 'Michael Chen',
+        message: 'I received my order today, but the part number doesn\'t match what I ordered. I ordered part #8471474 but received #8471475.',
+        timestamp: '2025-12-22T09:15:00Z',
+        attachments: ['photo1.jpg', 'photo2.jpg']
+      },
+      {
+        id: 2,
+        sender: 'support',
+        senderName: 'David Martinez',
+        message: 'I sincerely apologize for this error. We\'ll arrange for a replacement to be shipped immediately and provide a return label for the incorrect part.',
+        timestamp: '2025-12-22T10:30:00Z',
+        attachments: []
+      },
+      {
+        id: 3,
+        sender: 'support',
+        senderName: 'David Martinez',
+        message: 'Your replacement has been shipped with expedited delivery. Tracking number: EXP987654321. You should receive it tomorrow.',
+        timestamp: '2025-12-23T16:45:00Z',
+        attachments: ['return_label.pdf']
+      }
+    ]
+  },
+  {
+    id: 'TKT-003',
+    orderNumber: 'ORD-2025-008',
+    subject: 'Request for Technical Specifications',
+    category: 'Product Inquiry',
+    priority: 'medium',
+    status: 'resolved',
+    createdAt: '2025-12-18T13:20:00Z',
+    updatedAt: '2025-12-19T11:30:00Z',
+    messages: [
+      {
+        id: 1,
+        sender: 'buyer',
+        senderName: 'Emma Wilson',
+        message: 'Could you please provide the detailed technical specifications for the turbine blade set I ordered? I need the exact material composition and tolerances.',
+        timestamp: '2025-12-18T13:20:00Z',
+        attachments: []
+      },
+      {
+        id: 2,
+        sender: 'support',
+        senderName: 'Sarah Johnson',
+        message: 'Absolutely! I\'ve attached the complete technical specification sheet for your turbine blade set. It includes material composition, tolerances, and certification documents.',
+        timestamp: '2025-12-19T09:00:00Z',
+        attachments: ['tech_specs.pdf', 'certification.pdf']
+      },
+      {
+        id: 3,
+        sender: 'buyer',
+        senderName: 'Emma Wilson',
+        message: 'Perfect! This is exactly what I needed. Thank you so much for the quick response.',
+        timestamp: '2025-12-19T11:30:00Z',
+        attachments: []
+      }
+    ]
+  },
+  {
+    id: 'TKT-004',
+    orderNumber: 'ORD-2025-022',
+    subject: 'Payment Processing Issue',
+    category: 'Payment',
+    priority: 'high',
+    status: 'open',
+    createdAt: '2025-12-23T08:00:00Z',
+    updatedAt: '2025-12-23T08:00:00Z',
+    messages: [
+      {
+        id: 1,
+        sender: 'buyer',
+        senderName: 'Robert Taylor',
+        message: 'My payment was declined but the amount was charged to my card. Can you please investigate this issue?',
+        timestamp: '2025-12-23T08:00:00Z',
+        attachments: ['bank_statement.pdf']
+      }
+    ]
+  },
+  {
+    id: 'TKT-005',
+    orderNumber: 'ORD-2025-019',
+    subject: 'Request for Invoice Copy',
+    category: 'Documentation',
+    priority: 'low',
+    status: 'resolved',
+    createdAt: '2025-12-21T15:45:00Z',
+    updatedAt: '2025-12-21T16:30:00Z',
+    messages: [
+      {
+        id: 1,
+        sender: 'buyer',
+        senderName: 'Lisa Anderson',
+        message: 'I need a copy of the invoice for my recent order for accounting purposes.',
+        timestamp: '2025-12-21T15:45:00Z',
+        attachments: []
+      },
+      {
+        id: 2,
+        sender: 'support',
+        senderName: 'David Martinez',
+        message: 'I\'ve attached a copy of your invoice. Let me know if you need anything else!',
+        timestamp: '2025-12-21T16:30:00Z',
+        attachments: ['invoice_ORD-2025-019.pdf']
+      }
+    ]
+  }
+];
+
 // Set app locals for global access
 app.locals.sectors = sectors;
 app.locals.partsDatabase = partsDatabase;
+app.locals.ticketsDatabase = ticketsDatabase;
 
 // Routes
 const landingRoutes = require('./routes/landing');

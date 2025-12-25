@@ -1,0 +1,127 @@
+<%- include('partials/header') %>
+<link rel="stylesheet" href="/css/buyerCSS/buyer-main.css">
+<link rel="stylesheet" href="/css/buyerCSS/ticket-details.css">
+
+<%- include('partials/navbar') %>
+
+<!-- ====================================
+     TICKET DETAILS PAGE - CHAT INTERFACE
+     ==================================== -->
+<div class="ticket-details-page">
+  <!-- Ticket Header -->
+  <div class="ticket-header-bar">
+    <div class="buyer-container">
+      <div class="ticket-header-content">
+        <a href="/buyer/tickets" class="btn-back-header">
+          <i data-lucide="arrow-left"></i>
+          <span>Back to Tickets</span>
+        </a>
+        
+        <div class="ticket-header-info">
+          <div class="ticket-header-left">
+            <span class="ticket-id-header" id="ticket-id-header">TKT-001</span>
+            <h1 class="ticket-subject-header" id="ticket-subject-header">Loading...</h1>
+            <div class="ticket-meta-header">
+              <span class="meta-item">
+                <i data-lucide="package"></i>
+                <span id="ticket-order-header">ORD-2025-001</span>
+              </span>
+              <span class="meta-item">
+                <i data-lucide="calendar"></i>
+                <span id="ticket-created-header">Dec 20, 2025</span>
+              </span>
+            </div>
+          </div>
+          <div class="ticket-header-right">
+            <span class="status-badge-header" id="status-badge-header">Open</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="buyer-container">
+    <div class="ticket-details-section">
+      <div class="ticket-details-container">
+        <!-- Ticket Info Card -->
+        <div class="ticket-info-card">
+          <div class="info-card-header">
+            <h3 class="info-card-title">Ticket Information</h3>
+          </div>
+          <div class="info-card-body">
+            <div class="info-item">
+              <span class="info-label">Category</span>
+              <span class="info-value" id="ticket-category">
+                <i data-lucide="tag"></i>
+                <span>Shipping Issue</span>
+              </span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Status</span>
+              <span class="info-value" id="ticket-status-info">
+                <span class="status-badge-small" id="status-badge-small">Open</span>
+              </span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Last Updated</span>
+              <span class="info-value" id="ticket-updated">2 hours ago</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chat Messages -->
+        <div class="chat-container">
+          <div class="chat-header">
+            <div class="chat-header-icon">
+              <i data-lucide="message-circle"></i>
+            </div>
+            <div class="chat-header-text">
+              <h3 class="chat-title">Conversation</h3>
+              <p class="chat-subtitle">Chat with our support team</p>
+            </div>
+          </div>
+
+          <div class="chat-messages" id="chat-messages">
+            <!-- Messages will be populated by JavaScript -->
+          </div>
+
+          <div class="chat-input-container">
+            <form id="chat-form" class="chat-form">
+              <div class="chat-input-wrapper">
+                <textarea 
+                  id="message-input" 
+                  class="chat-input" 
+                  placeholder="Type your message..."
+                  rows="1"
+                ></textarea>
+                <button type="button" class="btn-attach" id="btn-attach">
+                  <i data-lucide="paperclip"></i>
+                </button>
+                <input type="file" id="file-input" multiple hidden>
+              </div>
+              <button type="submit" class="btn-send">
+                <i data-lucide="send"></i>
+                <span>Send</span>
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/quick-search') %>
+<%- include('partials/footer') %>
+
+<script src="/js/main.js"></script>
+<script src="/js/quick-search.js"></script>
+<script src="/js/cart.js"></script>
+<script src="/js/cart-badge-updater.js"></script>
+<script src="/js/ticket-details.js"></script>
+<script>
+  lucide.createIcons();
+  window.addEventListener('load', () => lucide.createIcons());
+</script>
+

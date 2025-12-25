@@ -162,7 +162,7 @@
           </div>
 
           <button class="tier-action">
-            <span>Upgrade to Silver</span>
+            <span>Learn More</span>
             <i data-lucide="arrow-right"></i>
           </button>
         </div>
@@ -228,7 +228,7 @@
           </div>
 
           <button class="tier-action">
-            <span>Upgrade to Gold</span>
+            <span>Learn More</span>
             <i data-lucide="arrow-right"></i>
           </button>
         </div>
@@ -295,7 +295,7 @@
           </div>
 
           <button class="tier-action">
-            <span>Upgrade to Platinum</span>
+            <span>Learn More</span>
             <i data-lucide="arrow-right"></i>
           </button>
         </div>
@@ -363,14 +363,14 @@
           </div>
 
           <button class="tier-action">
-            <span>Upgrade to Platinum+</span>
+            <span>Learn More</span>
             <i data-lucide="arrow-right"></i>
           </button>
         </div>
       </div>
 
       <!-- Info Section - Photo Based Design -->
-      <div class="affiliate-info-photo">
+      <div class="affiliate-info-photo" id="how-it-works">
         <div class="section-header">
           <h2 class="section-title">How It Works</h2>
           <p class="section-subtitle">
@@ -457,4 +457,21 @@
 <!-- Initialize Lucide Icons -->
 <script>
   lucide.createIcons();
+  
+  // Smooth scroll to the clicked card when clicking Learn More
+  document.addEventListener('DOMContentLoaded', () => {
+    const learnMoreButtons = document.querySelectorAll('.tier-action');
+    
+    learnMoreButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const card = button.closest('.tier-card');
+        if (card) {
+          card.scrollIntoView({ 
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+      });
+    });
+  });
 </script>
