@@ -1,0 +1,919 @@
+{
+  "nav": {
+    "search": "Search",
+    "myOrders": "My Orders",
+    "tickets": "Tickets",
+    "affiliate": "Affiliate",
+    "payment": "Payment",
+    "delivery": "Delivery",
+    "contacts": "Contacts",
+    "more": "More",
+    "searchDropdown": {
+      "automotive": {
+        "title": "Automotive",
+        "desc": "Vehicle parts & components"
+      },
+      "aviation": {
+        "title": "Aviation",
+        "desc": "Aircraft parts & systems"
+      },
+      "machinery": {
+        "title": "Heavy Machinery",
+        "desc": "Industrial equipment parts"
+      }
+    },
+    "cart": "Shopping Cart",
+    "quickSearch": "Quick Search",
+    "language": {
+      "english": "English",
+      "arabic": "Arabic",
+      "russian": "Russian",
+      "ukrainian": "Ukrainian",
+      "french": "French",
+      "spanish": "Spanish"
+    },
+    "user": {
+      "signIn": "Sign In",
+      "profile": "Profile",
+      "settings": "Settings",
+      "logout": "Logout"
+    }
+  },
+  "common": {
+    "buttons": {
+      "submit": "Submit",
+      "cancel": "Cancel",
+      "save": "Save",
+      "delete": "Delete",
+      "edit": "Edit",
+      "view": "View",
+      "download": "Download",
+      "upload": "Upload",
+      "search": "Search",
+      "filter": "Filter",
+      "clear": "Clear",
+      "apply": "Apply",
+      "back": "Back",
+      "next": "Next",
+      "previous": "Previous",
+      "close": "Close",
+      "confirm": "Confirm",
+      "viewDetails": "View Details",
+      "learnMore": "Learn More"
+    },
+    "status": {
+      "pending": "Pending",
+      "processing": "Processing",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "failed": "Failed",
+      "active": "Active",
+      "inactive": "Inactive",
+      "open": "Open",
+      "closed": "Closed",
+      "inProgress": "In Progress",
+      "resolved": "Resolved"
+    },
+    "time": {
+      "hours": "Hours",
+      "minutes": "Minutes",
+      "seconds": "Seconds",
+      "days": "Days",
+      "weeks": "Weeks",
+      "months": "Months",
+      "years": "Years",
+      "ago": "ago",
+      "justNow": "Just now"
+    },
+    "messages": {
+      "loading": "Loading...",
+      "noData": "No data available",
+      "error": "An error occurred",
+      "success": "Success!",
+      "confirmDelete": "Are you sure you want to delete this?",
+      "unsavedChanges": "You have unsaved changes"
+    }
+  },
+  "aog": {
+    "commandCenter": {
+      "badge": "AOG COMMAND CENTER",
+      "title": "Case {{caseId}}",
+      "subtitle": "Real-time monitoring and control for critical aircraft parts sourcing",
+      "meta": {
+        "aircraft": "Boeing 737-800",
+        "tail": "Tail N12345",
+        "location": "JFK Airport",
+        "status": "AOG - CRITICAL"
+      },
+      "sla": {
+        "title": "Time Until Required Delivery",
+        "onTrack": "On track for on-time delivery",
+        "delayed": "Delivery may be delayed",
+        "critical": "Critical - Immediate action required"
+      },
+      "status": {
+        "title": "Current Status",
+        "phases": {
+          "created": {
+            "name": "Case Created",
+            "desc": "AOG case initiated and RFQs broadcast to suppliers",
+            "completed": "Completed {{time}} ago"
+          },
+          "sourcing": {
+            "name": "Sourcing Parts",
+            "desc": "Suppliers are preparing quotes and availability confirmations",
+            "progress": "In progress - {{count}} quotes received"
+          },
+          "selection": {
+            "name": "Quote Selection",
+            "desc": "Review and select the best sourcing option"
+          },
+          "shipping": {
+            "name": "Shipping",
+            "desc": "Parts in transit to destination"
+          },
+          "delivered": {
+            "name": "Delivered",
+            "desc": "Parts delivered and aircraft released"
+          }
+        }
+      },
+      "blocker": {
+        "title": "What's Blocking Release?",
+        "none": {
+          "title": "No Current Blockers",
+          "desc": "All processes are running smoothly. Quotes are being collected."
+        }
+      },
+      "quickActions": {
+        "title": "Quick Actions",
+        "compareQuotes": {
+          "title": "Compare Quotes",
+          "desc": "{{count}} quotes available"
+        },
+        "trackShipment": {
+          "title": "Track Shipment",
+          "desc": "View delivery status"
+        },
+        "contactSupport": {
+          "title": "Contact Support",
+          "desc": "Get immediate assistance"
+        }
+      },
+      "updates": {
+        "title": "Recent Updates",
+        "quoteReceived": "Quote received",
+        "rfqBroadcast": "RFQ broadcast",
+        "caseCreated": "AOG case created",
+        "from": "from {{supplier}}",
+        "eta": "ETA {{days}} days",
+        "sentTo": "sent to {{count}} verified aviation suppliers",
+        "priorityActivated": "Priority sourcing activated"
+      }
+    },
+    "caseCreate": {
+      "badge": "AOG Case Management",
+      "title": "Create Emergency Case",
+      "subtitle": "Initiate priority sourcing for critical aircraft parts",
+      "caseType": {
+        "title": "Case Type",
+        "description": "Select the urgency level for this sourcing request",
+        "aog": "AOG",
+        "aogDesc": "Aircraft On Ground - Immediate action required",
+        "routine": "Routine",
+        "routineDesc": "Standard procurement timeline",
+        "scheduled": "Scheduled",
+        "scheduledDesc": "Planned maintenance request"
+      },
+      "urgency": {
+        "title": "Priority Sourcing Active",
+        "description": "SLA timers and escalation protocols will be activated"
+      },
+      "aircraftInfo": {
+        "title": "Aircraft Information",
+        "description": "Provide details about the affected aircraft",
+        "aircraftType": "Aircraft Type",
+        "tailNumber": "Tail Number",
+        "station": "Station/Location",
+        "requiredBy": "Required By",
+        "notes": "Additional Notes",
+        "notesPlaceholder": "Any additional information about this case..."
+      },
+      "selectedParts": {
+        "title": "Selected Parts",
+        "description": "Parts selected from aviation search",
+        "totalParts": "Total Parts:",
+        "estimatedTotal": "Estimated Total:"
+      },
+      "actions": {
+        "cancel": "Cancel",
+        "proceedToCheckout": "Proceed to Checkout"
+      }
+    },
+    "caseTracking": {
+      "title": "Case Tracking",
+      "subtitle": "Monitor your AOG case progress",
+      "timeline": "Timeline",
+      "shipmentDetails": "Shipment Details",
+      "estimatedDelivery": "Estimated Delivery"
+    },
+    "quoteComparison": {
+      "title": "Quote Comparison",
+      "subtitle": "Compare supplier quotes",
+      "supplier": "Supplier",
+      "price": "Price",
+      "delivery": "Delivery",
+      "availability": "Availability",
+      "selectQuote": "Select This Quote",
+      "bestValue": "Best Value",
+      "fastestDelivery": "Fastest Delivery"
+    }
+  },
+  "orders": {
+    "title": "My Orders",
+    "subtitle": "Track and manage all your orders in one place",
+    "stats": {
+      "pending": "Pending",
+      "processing": "Processing",
+      "completed": "Completed"
+    },
+    "filters": {
+      "status": "Status",
+      "allStatuses": "All Statuses",
+      "pending": "Pending",
+      "processing": "Processing",
+      "shipped": "Shipped",
+      "delivered": "Delivered",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "dateFrom": "Date From",
+      "dateTo": "Date To",
+      "searchOrder": "Search Order",
+      "searchPlaceholder": "Order number, part number...",
+      "applyFilters": "Apply Filters",
+      "reset": "Reset"
+    },
+    "table": {
+      "orderNumber": "Order Number",
+      "date": "Date",
+      "status": "Status",
+      "items": "Items",
+      "amount": "Amount",
+      "actions": "Actions"
+    },
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next",
+      "showing": "Showing",
+      "of": "of"
+    },
+    "emptyState": {
+      "title": "No Orders Yet",
+      "text": "You haven't placed any orders yet. Start shopping to see your orders here.",
+      "startShopping": "Start Shopping",
+      "backToMain": "Back to Main"
+    },
+    "actions": {
+      "viewOrder": "View Order",
+      "trackOrder": "Track Order"
+    }
+  },
+  "cart": {
+    "badge": "Shopping Cart",
+    "title": "Your Shopping Cart",
+    "subtitle": "Review and manage your selected parts before placing an order",
+    "emptyState": {
+      "title": "Your cart is empty",
+      "text": "Browse our extensive catalog and add parts to your cart",
+      "searchAutomotive": "Search Automotive Parts",
+      "searchAviation": "Search Aviation Parts",
+      "searchMachinery": "Search Machinery Parts"
+    },
+    "actions": {
+      "selectAll": "Select All",
+      "removeSelected": "Remove Selected",
+      "downloadExcel": "Download Excel",
+      "emptyCart": "Empty Cart"
+    },
+    "table": {
+      "brand": "Brand",
+      "partNumber": "Part Number",
+      "description": "Description",
+      "terms": "Terms",
+      "weight": "Weight",
+      "stock": "Stock",
+      "aircraft": "A/C Type",
+      "qty": "QTY",
+      "addPacking": "Add Packing",
+      "price": "Price",
+      "amount": "Amount",
+      "reference": "Reference",
+      "dateCreated": "Date Created"
+    },
+    "summary": {
+      "totalInCart": "Total in cart",
+      "pcs": "PCS.",
+      "forTheAmount": "for the amount",
+      "weight": "Weight",
+      "note": "Selected items will be stored in your cart for 30 days.",
+      "timeRemaining": "Time remaining:",
+      "total": "Total:"
+    },
+    "checkout": "Proceed to Checkout"
+  },
+  "checkout": {
+    "title": "Checkout",
+    "subtitle": "Review your order and select your preferred payment method",
+    "aogBadge": "AOG Case - Priority Processing",
+    "secureBadge": "Secure Checkout",
+    "steps": {
+      "paymentType": {
+        "title": "Payment Type",
+        "desc": "Choose payment plan"
+      },
+      "paymentMethod": {
+        "title": "Payment Method",
+        "desc": "Select payment option"
+      },
+      "confirmation": {
+        "title": "Confirmation",
+        "desc": "Review & complete"
+      }
+    },
+    "step1": {
+      "title": "Select Payment Type",
+      "subtitle": "Choose how you'd like to pay for your order",
+      "fullPayment": {
+        "title": "Full Payment",
+        "desc": "Pay the complete amount now and receive your order immediately",
+        "badge": "Best Value - No Additional Fees",
+        "totalAmount": "Total Amount:"
+      },
+      "partialPayment": {
+        "title": "Minimum Payment (20%)",
+        "desc": "Pay 20% now and the remaining 80% before delivery",
+        "payNow": "Pay Now (20%):",
+        "payLater": "Pay Later (80%):",
+        "dueNow": "Due Now:"
+      },
+      "continue": "Continue to Payment Method"
+    },
+    "step2": {
+      "title": "Select Payment Method",
+      "subtitle": "Choose your preferred payment option",
+      "card": {
+        "title": "Credit/Debit Card",
+        "desc": "Visa, Mastercard, American Express",
+        "fee": "Processing fee: 2.9% + 1.50 د.إ"
+      },
+      "bankDubai": {
+        "title": "Bank Transfer (UAE)",
+        "desc": "Direct bank transfer within UAE",
+        "noFees": "No Fees",
+        "processingTime": "Processing time: 1-2 business days"
+      },
+      "bankInternational": {
+        "title": "International Bank Transfer",
+        "desc": "SWIFT/Wire transfer from abroad",
+        "fee": "Bank fees: 25-50 د.إ (varies by bank)"
+      },
+      "paypal": {
+        "title": "PayPal",
+        "desc": "Pay securely with your PayPal account",
+        "fee": "Processing fee: 3.9% + 1.50 د.إ"
+      },
+      "cod": {
+        "title": "Cash on Delivery",
+        "desc": "Pay when you receive your order",
+        "fee": "Service fee: 15.00 د.إ",
+        "note": "Available in UAE only"
+      },
+      "back": "Back to Payment Type",
+      "reviewOrder": "Review Order"
+    },
+    "step3": {
+      "title": "Review & Confirm",
+      "subtitle": "Please review your order before completing payment",
+      "summary": {
+        "title": "Payment Summary",
+        "paymentType": "Payment Type:",
+        "paymentMethod": "Payment Method:",
+        "processingFee": "Processing Fee:",
+        "amountToPay": "Amount to Pay:"
+      },
+      "terms": "I agree to the Terms & Conditions and Privacy Policy",
+      "back": "Back to Payment Method",
+      "completePayment": "Complete Payment"
+    },
+    "orderSummary": {
+      "title": "Order Summary",
+      "subtotal": "Subtotal:",
+      "items": "Items:",
+      "totalWeight": "Total Weight:",
+      "processingFee": "Processing Fee:",
+      "totalAmount": "Total Amount:",
+      "security": "Secured by 256-bit SSL encryption"
+    },
+    "success": {
+      "title": "Payment Successful!",
+      "message": "Your order has been placed successfully",
+      "orderNumber": "Order Number:",
+      "paymentMethod": "Payment Method:",
+      "amountPaid": "Amount Paid:",
+      "viewOrders": "View My Orders",
+      "continueShopping": "Continue Shopping"
+    }
+  },
+  "payment": {
+    "title": "Payment & Billing",
+    "subtitle": "Manage your account balance and payment methods",
+    "addFunds": "Add Funds",
+    "balance": {
+      "title": "Account Balance",
+      "available": "Available Balance",
+      "readyToUse": "Ready to use",
+      "pending": "Pending Payment",
+      "processing": "Processing",
+      "totalSpent": "Total Spent",
+      "allTime": "All time"
+    },
+    "methods": {
+      "title": "Payment Methods",
+      "addMethod": "Add Method",
+      "emptyTitle": "No Payment Methods",
+      "emptyText": "Add a payment method to make purchases easier",
+      "addPaymentMethod": "Add Payment Method"
+    },
+    "transactions": {
+      "title": "Transaction History",
+      "all": "All",
+      "completed": "Completed",
+      "pending": "Pending",
+      "refunded": "Refunded",
+      "date": "Date",
+      "description": "Description",
+      "type": "Type",
+      "amount": "Amount",
+      "status": "Status",
+      "actions": "Actions",
+      "emptyTitle": "No Transactions Yet",
+      "emptyText": "Your transaction history will appear here"
+    },
+    "addFundsModal": {
+      "title": "Add Funds",
+      "subtitle": "Top up your account balance",
+      "amount": "Amount (USD)",
+      "paymentMethod": "Payment Method",
+      "selectPaymentMethod": "Select payment method",
+      "creditCard": "Credit/Debit Card",
+      "bankTransfer": "Bank Transfer",
+      "paypal": "PayPal",
+      "cancel": "Cancel",
+      "addFunds": "Add Funds"
+    },
+    "addMethodModal": {
+      "title": "Add Payment Method",
+      "subtitle": "Save a payment method for faster checkout",
+      "cardholderName": "Card Holder Name *",
+      "cardNumber": "Card Number *",
+      "expiryDate": "Expiry Date *",
+      "cvv": "CVV *",
+      "setDefault": "Set as default payment method",
+      "cancel": "Cancel",
+      "saveMethod": "Save Method"
+    }
+  },
+  "delivery": {
+    "title": "Delivery Addresses",
+    "subtitle": "Manage your delivery addresses and track shipments",
+    "addNewAddress": "Add New Address",
+    "savedAddresses": {
+      "title": "Saved Addresses",
+      "subtitle": "Manage your delivery locations"
+    },
+    "emptyState": {
+      "title": "No Addresses Yet",
+      "text": "Add your first delivery address to get started",
+      "addAddress": "Add Address"
+    },
+    "trackOrder": {
+      "title": "Track Your Order",
+      "subtitle": "Enter your order number to track shipment",
+      "placeholder": "Enter order number (e.g., ORD-123456)",
+      "track": "Track",
+      "viewAllOrders": "View All Orders"
+    },
+    "addAddressModal": {
+      "title": "Add New Address",
+      "editTitle": "Edit Address",
+      "subtitle": "Fill in the details below",
+      "addressLabel": "Address Label *",
+      "addressLabelPlaceholder": "e.g., Home, Office, Warehouse",
+      "fullName": "Full Name *",
+      "fullNamePlaceholder": "Recipient's full name",
+      "phone": "Phone Number *",
+      "phonePlaceholder": "+971 XX XXX XXXX",
+      "street": "Street Address *",
+      "streetPlaceholder": "Building number, street name",
+      "city": "City *",
+      "cityPlaceholder": "e.g., Dubai",
+      "state": "State/Emirate *",
+      "statePlaceholder": "e.g., Dubai",
+      "country": "Country *",
+      "countryPlaceholder": "e.g., United Arab Emirates",
+      "postalCode": "Postal Code",
+      "postalCodePlaceholder": "Optional",
+      "notes": "Additional Notes",
+      "notesPlaceholder": "Landmarks, special instructions, etc.",
+      "setDefault": "Set as default address",
+      "cancel": "Cancel",
+      "saveAddress": "Save Address"
+    },
+    "deleteModal": {
+      "title": "Delete Address?",
+      "message": "Are you sure you want to delete this address?",
+      "cancel": "Cancel",
+      "delete": "Delete"
+    }
+  },
+  "profile": {
+    "badge": "My Profile",
+    "title": "User Profile",
+    "subtitle": "Manage your personal information and account details",
+    "activeAccount": "Active Account",
+    "stats": {
+      "totalOrders": "Total Orders",
+      "memberSince": "Member Since"
+    },
+    "personalInfo": {
+      "title": "Personal Information",
+      "edit": "Edit",
+      "fullName": "Full Name",
+      "email": "Email Address",
+      "phone": "Phone Number",
+      "dateOfBirth": "Date of Birth"
+    },
+    "addressInfo": {
+      "title": "Address Information",
+      "edit": "Edit",
+      "street": "Street Address",
+      "city": "City",
+      "state": "State/Province",
+      "country": "Country",
+      "postalCode": "Postal Code"
+    },
+    "security": {
+      "title": "Account Security",
+      "password": "Password",
+      "lastChanged": "Last changed 30 days ago",
+      "changePassword": "Change Password",
+      "twoFactor": "Two-Factor Authentication",
+      "notEnabled": "Not enabled",
+      "enable2FA": "Enable 2FA"
+    }
+  },
+  "settings": {
+    "badge": "Account Settings",
+    "title": "Settings",
+    "subtitle": "Customize your account preferences and manage your settings",
+    "nav": {
+      "general": "General",
+      "notifications": "Notifications",
+      "privacy": "Privacy",
+      "security": "Security",
+      "preferences": "Preferences",
+      "billing": "Billing"
+    },
+    "general": {
+      "title": "General Settings",
+      "subtitle": "Manage your account general preferences",
+      "language": {
+        "title": "Language",
+        "desc": "Choose your preferred language for the interface",
+        "english": "English",
+        "arabic": "Arabic",
+        "russian": "Russian",
+        "ukrainian": "Ukrainian",
+        "french": "French",
+        "spanish": "Spanish"
+      },
+      "timezone": {
+        "title": "Timezone",
+        "desc": "Set your timezone for accurate time display"
+      },
+      "dateFormat": {
+        "title": "Date Format",
+        "desc": "Choose how dates are displayed"
+      }
+    },
+    "notifications": {
+      "title": "Notification Settings",
+      "subtitle": "Control how and when you receive notifications",
+      "email": {
+        "title": "Email Notifications",
+        "desc": "Receive email notifications for important updates"
+      },
+      "orderUpdates": {
+        "title": "Order Updates",
+        "desc": "Get notified when your order status changes"
+      },
+      "promotional": {
+        "title": "Promotional Emails",
+        "desc": "Receive emails about new products and special offers"
+      },
+      "sms": {
+        "title": "SMS Notifications",
+        "desc": "Receive SMS notifications for urgent updates"
+      }
+    },
+    "privacy": {
+      "title": "Privacy Settings",
+      "subtitle": "Manage your privacy and data preferences",
+      "profileVisibility": {
+        "title": "Profile Visibility",
+        "desc": "Control who can see your profile information",
+        "public": "Public",
+        "private": "Private",
+        "friendsOnly": "Friends Only"
+      },
+      "dataCollection": {
+        "title": "Data Collection",
+        "desc": "Allow us to collect analytics data to improve our service"
+      },
+      "cookies": {
+        "title": "Cookies",
+        "desc": "Accept cookies for a better browsing experience"
+      }
+    },
+    "security": {
+      "title": "Security Settings",
+      "subtitle": "Manage your account security and authentication",
+      "twoFactor": {
+        "title": "Two-Factor Authentication",
+        "desc": "Add an extra layer of security to your account",
+        "setup": "Setup 2FA"
+      },
+      "changePassword": {
+        "title": "Change Password",
+        "desc": "Update your account password regularly",
+        "button": "Change Password"
+      },
+      "sessions": {
+        "title": "Active Sessions",
+        "desc": "View and manage devices where you're logged in",
+        "view": "View Sessions"
+      }
+    },
+    "preferences": {
+      "title": "Preferences",
+      "subtitle": "Customize your experience",
+      "theme": {
+        "title": "Theme",
+        "desc": "Choose your preferred color theme",
+        "light": "Light",
+        "dark": "Dark",
+        "auto": "Auto (System)"
+      },
+      "itemsPerPage": {
+        "title": "Items Per Page",
+        "desc": "Number of items to display per page"
+      }
+    },
+    "billing": {
+      "title": "Billing Settings",
+      "subtitle": "Manage your payment methods and billing information",
+      "paymentMethods": {
+        "title": "Payment Methods",
+        "desc": "Manage your saved payment methods",
+        "manage": "Manage Payment Methods"
+      },
+      "billingAddress": {
+        "title": "Billing Address",
+        "desc": "Update your billing address",
+        "update": "Update Address"
+      },
+      "invoices": {
+        "title": "Invoice History",
+        "desc": "View and download your past invoices",
+        "view": "View Invoices"
+      }
+    },
+    "actions": {
+      "saveChanges": "Save Changes",
+      "resetToDefault": "Reset to Default"
+    }
+  },
+  "tickets": {
+    "title": "Support Tickets",
+    "subtitle": "Get help with your orders",
+    "createTicket": "Create Ticket",
+    "ticketNumber": "Ticket Number",
+    "subject": "Subject",
+    "category": "Category",
+    "priority": "Priority",
+    "status": "Status",
+    "created": "Created",
+    "updated": "Updated",
+    "noTickets": "No tickets found",
+    "categories": {
+      "shipping": "Shipping Issue",
+      "order": "Order Issue",
+      "product": "Product Inquiry",
+      "payment": "Payment",
+      "documentation": "Documentation",
+      "other": "Other"
+    },
+    "details": {
+      "title": "Ticket Details",
+      "messages": "Messages",
+      "reply": "Reply",
+      "attachments": "Attachments",
+      "addAttachment": "Add Attachment"
+    },
+    "create": {
+      "title": "Create Support Ticket",
+      "subtitle": "We're here to help",
+      "orderNumber": "Order Number",
+      "selectCategory": "Select Category",
+      "selectPriority": "Select Priority",
+      "describeIssue": "Describe your issue",
+      "attachFiles": "Attach Files"
+    }
+  },
+  "contacts": {
+    "badge": "24/7 Support",
+    "title": "Contact Us",
+    "subtitle": "Get in touch with our team",
+    "name": "Name",
+    "email": "Email",
+    "subject": "Subject",
+    "message": "Message",
+    "sendMessage": "Send Message",
+    "contactInfo": "Contact Information",
+    "address": "Address",
+    "phone": "Phone",
+    "emailAddress": "Email Address",
+    "businessHours": "Business Hours",
+    "website": "Website"
+  },
+  "affiliate": {
+    "badge": "Affiliate Program",
+    "title": "Loyalty Program for Our Clients",
+    "subtitle": "We value every client and offer top rewards who contribute to your brand. The more you progress with us, the more rewards you receive!",
+    "description": "Our program includes the following levels: BRONZE – improved conditions and additional discounts; SILVER – premium discounts and priority service; GOLD – exclusive pricing and dedicated support; PLATINUM – VIP benefits and personalized approach; PLATINUM+ – the highest level with VIP+ conditions, priority privileges, and unique offers.",
+    "tiers": {
+      "title": "Membership Tiers",
+      "subtitle": "Your loyalty determines the level of your purchase based on your order volume. The better the level, the more benefits you receive.",
+      "bronze": {
+        "name": "Bronze",
+        "range": "0-5 000$",
+        "revenue": "Monthly sales",
+        "discountLevel": "Discount level",
+        "orderingOption": "Ordering option",
+        "shipping": "Shipping",
+        "procurement": "Procurement",
+        "paySplit": "Pay split",
+        "freeStorage": "Free Storage",
+        "currentLevel": "Current Level"
+      },
+      "silver": {
+        "name": "Silver",
+        "range": "5 000-15 000$",
+        "revenue": "Monthly sales"
+      },
+      "gold": {
+        "name": "Gold",
+        "range": "15 000-50 000$",
+        "revenue": "Monthly sales"
+      },
+      "platinum": {
+        "name": "Platinum",
+        "range": "50 000-100 000$",
+        "revenue": "Monthly sales"
+      },
+      "platinumPlus": {
+        "name": "Platinum+",
+        "range": "100 000+ $",
+        "revenue": "Monthly sales",
+        "premiumBenefits": "Premium Benefits"
+      }
+    },
+    "stats": {
+      "discountLevel": "Discount level",
+      "orderingOption": "Ordering option",
+      "shipping": "Shipping",
+      "procurement": "Procurement",
+      "paySplit": "Pay split",
+      "freeStorage": "Free Storage",
+      "website": "Website",
+      "manual": "Manual",
+      "viaWebsite": "Via Website",
+      "viaManager": "Via Manager",
+      "days": "days",
+      "free": "Free",
+      "individual": "Individual"
+    },
+    "benefits": {
+      "title": "Benefits",
+      "managerSupport": "Manager support",
+      "freeStorage": "Free storage 5000$",
+      "analytics": "Analytics",
+      "trackAvailability": "Track availability and supplier",
+      "yes": "Yes",
+      "no": "No",
+      "unlimited": "Unlimited",
+      "advanced": "Advanced",
+      "realTime": "Real-time"
+    },
+    "howItWorks": {
+      "title": "How It Works",
+      "subtitle": "Simple and transparent process to maximize your benefits",
+      "placeOrders": {
+        "title": "Place Orders",
+        "description": "Continue purchasing parts through our platform as usual"
+      },
+      "growSales": {
+        "title": "Grow Sales",
+        "description": "Your monthly sales volume determines your tier level"
+      },
+      "earnRewards": {
+        "title": "Earn Rewards",
+        "description": "Unlock better discounts, priority support, and exclusive benefits"
+      }
+    },
+    "disclaimer": {
+      "note": "Note:",
+      "text": "Your tier level will be calculated based on your cumulative monthly purchase volume from when your account was created. Tier membership is updated monthly and all benefits are applied automatically to your qualified account."
+    },
+    "learnMore": "Learn More"
+  },
+  "search": {
+    "title": "Search Parts",
+    "subtitle": "Find the parts you need",
+    "partNumber": "Part Number",
+    "description": "Description",
+    "manufacturer": "Manufacturer",
+    "category": "Category",
+    "searchPlaceholder": "Enter part number or description",
+    "results": "Search Results",
+    "noResults": "No results found",
+    "refineSearch": "Refine your search",
+    "automotive": {
+      "title": "Automotive Parts",
+      "subtitle": "Search for vehicle parts and components"
+    },
+    "aviation": {
+      "title": "Aviation Parts",
+      "subtitle": "Search for aircraft parts and systems"
+    },
+    "machinery": {
+      "title": "Heavy Machinery Parts",
+      "subtitle": "Search for industrial equipment parts"
+    }
+  },
+  "footer": {
+    "tagline": "Global Sourcing Platform",
+    "description": "Connecting manufacturers with verified suppliers across 40+ countries. Built for enterprise scale, engineered for precision.",
+    "platform": "Platform",
+    "main": "Main",
+    "sectors": "Sectors",
+    "allSectors": "All Sectors",
+    "company": "Company",
+    "support": "Support",
+    "aboutUs": "About Us",
+    "helpCenter": "Help Center",
+    "resources": "Resources",
+    "documentation": "Documentation",
+    "apiReference": "API Reference",
+    "blog": "Blog",
+    "faq": "FAQ",
+    "copyright": "All rights reserved",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service",
+    "cookiePolicy": "Cookie Policy"
+  },
+  "quickSearch": {
+    "badge": "QUICK SEARCH",
+    "title": "Find Industrial Parts",
+    "subtitle": "Enter part number or description to search across all sectors",
+    "placeholder": "Enter part number or description...",
+    "selectCategory": "Select Category:",
+    "searchNow": "Search Now",
+    "recentSearches": "Recent Searches"
+  },
+  "searchResults": {
+    "title": "Search Results",
+    "showing": "Showing",
+    "results": "results for",
+    "sortBy": "Sort by:",
+    "relevance": "Relevance",
+    "priceLowHigh": "Price: Low to High",
+    "priceHighLow": "Price: High to Low",
+    "delivery": "Delivery Time",
+    "addToCart": "Add to Cart",
+    "viewDetails": "View Details",
+    "inStock": "In Stock",
+    "outOfStock": "Out of Stock",
+    "limitedStock": "Limited Stock"
+  }
+}

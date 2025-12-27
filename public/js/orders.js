@@ -140,10 +140,21 @@
     const itemsCount = order.itemsCount || (order.items ? order.items.reduce((sum, item) => sum + (parseInt(item.quantity) || 1), 0) : 0);
     const itemsPreview = order.itemsPreview || (order.items ? order.items.slice(0, 3).map(item => item.description || item.partNumber || item.code || 'Part') : []);
 
+    // Check if this is an AOG/Aviation order
+    const isAOGOrder = order.type === 'AOG' || order.type === 'Aviation' || 
+                       order.orderNumber.startsWith('AOG-') ||
+                       (order.category && (order.category.toLowerCase() === 'aog' || order.category.toLowerCase() === 'aviation'));
+    
+    // Determine the correct link based on order type
+    const orderLink = isAOGOrder 
+      ? `/buyer/aog/command-center/${encodeURIComponent(order.orderNumber)}`
+      : `/buyer/orders/${encodeURIComponent(order.orderNumber)}`;
+
     row.innerHTML = `
       <td data-label="Order Number">
-        <a href="/buyer/orders/${encodeURIComponent(order.orderNumber)}" class="order-number-link" data-order="${order.orderNumber}">
+        <a href="${orderLink}" class="order-number-link" data-order="${order.orderNumber}">
           <span class="order-number">${order.orderNumber}</span>
+          ${isAOGOrder ? '<span class="aog-badge">AOG</span>' : ''}
         </a>
       </td>
       <td data-label="Date">
@@ -172,7 +183,7 @@
       </td>
       <td data-label="Actions">
         <div class="order-actions">
-          <a href="/buyer/orders/${encodeURIComponent(order.orderNumber)}" class="btn-action view" data-order="${order.orderNumber}">
+          <a href="${orderLink}" class="btn-action view" data-order="${order.orderNumber}">
             <i data-lucide="eye"></i>
             <span>View</span>
           </a>
@@ -183,10 +194,12 @@
                 <span>Track</span>
               </button>
             ` : ''}
-            <button class="btn-action cancel" data-order="${order.orderNumber}" onclick="cancelOrder('${order.orderNumber}')">
-              <i data-lucide="x"></i>
-              <span>Cancel</span>
-            </button>
+            ${!isAOGOrder ? `
+              <button class="btn-action cancel" data-order="${order.orderNumber}" onclick="cancelOrder('${order.orderNumber}')">
+                <i data-lucide="x"></i>
+                <span>Cancel</span>
+              </button>
+            ` : ''}
           ` : ''}
         </div>
       </td>

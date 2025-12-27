@@ -1,0 +1,565 @@
+<!-- Admin Topbar Header with Module Selector -->
+<header class="admin-topbar" id="adminTopbar">
+  <div class="topbar-left">
+    <h1 class="topbar-title"><%= typeof pageTitle !== 'undefined' ? pageTitle : 'Dashboard' %></h1>
+    <div class="topbar-breadcrumb">
+      <span>Admin</span>
+      <i data-lucide="chevron-right" style="width: 14px; height: 14px;"></i>
+      <span><%= typeof pageTitle !== 'undefined' ? pageTitle : 'Dashboard' %></span>
+    </div>
+  </div>
+
+  <div class="topbar-right">
+    <!-- Module Selector -->
+    <div class="module-selector" id="moduleSelector">
+      <button class="module-selector-btn" id="moduleSelectorBtn">
+        <div class="module-selector-icon" id="moduleSelectorIcon">
+          <i data-lucide="<%= typeof currentModule !== 'undefined' && currentModule === 'automotive' ? 'car' : currentModule === 'aviation' ? 'plane' : currentModule === 'machinery' ? 'construction' : 'layers' %>"></i>
+        </div>
+        <div class="module-selector-text">
+          <div class="module-selector-label">Active Module</div>
+          <div class="module-selector-value" id="moduleSelectorValue">
+            <%= typeof currentModule !== 'undefined' && currentModule === 'automotive' ? 'Automotive' : currentModule === 'aviation' ? 'Aviation' : currentModule === 'machinery' ? 'Machinery' : 'All Modules' %>
+          </div>
+        </div>
+        <i data-lucide="chevron-down" class="module-selector-chevron"></i>
+      </button>
+
+      <div class="module-selector-dropdown" id="moduleSelectorDropdown">
+        <div class="module-option <%= typeof currentModule === 'undefined' || !currentModule ? 'active' : '' %>" data-module="" data-icon="layers" data-name="All Modules">
+          <div class="module-option-icon all">
+            <i data-lucide="layers"></i>
+          </div>
+          <div class="module-option-text">
+            <div class="module-option-name">All Modules</div>
+            <div class="module-option-desc">View combined data</div>
+          </div>
+          <i data-lucide="check" class="module-option-check"></i>
+        </div>
+        <div class="module-option <%= typeof currentModule !== 'undefined' && currentModule === 'automotive' ? 'active' : '' %>" data-module="automotive" data-icon="car" data-name="Automotive">
+          <div class="module-option-icon automotive">
+            <i data-lucide="car"></i>
+          </div>
+          <div class="module-option-text">
+            <div class="module-option-name">Automotive</div>
+            <div class="module-option-desc">Vehicle parts & components</div>
+          </div>
+          <i data-lucide="check" class="module-option-check"></i>
+        </div>
+        <div class="module-option <%= typeof currentModule !== 'undefined' && currentModule === 'aviation' ? 'active' : '' %>" data-module="aviation" data-icon="plane" data-name="Aviation">
+          <div class="module-option-icon aviation">
+            <i data-lucide="plane"></i>
+          </div>
+          <div class="module-option-text">
+            <div class="module-option-name">Aviation</div>
+            <div class="module-option-desc">Aircraft parts & AOG cases</div>
+          </div>
+          <i data-lucide="check" class="module-option-check"></i>
+        </div>
+        <div class="module-option <%= typeof currentModule !== 'undefined' && currentModule === 'machinery' ? 'active' : '' %>" data-module="machinery" data-icon="construction" data-name="Machinery">
+          <div class="module-option-icon machinery">
+            <i data-lucide="construction"></i>
+          </div>
+          <div class="module-option-text">
+            <div class="module-option-name">Heavy Machinery</div>
+            <div class="module-option-desc">Industrial equipment parts</div>
+          </div>
+          <i data-lucide="check" class="module-option-check"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Enhanced Search Bar - Complete Remake -->
+    <div style="position: relative; display: flex; align-items: center;">
+      <i data-lucide="search" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; color: #94a3b8; pointer-events: none; z-index: 2;"></i>
+      <input type="text" id="globalSearchInput" placeholder="Search orders, users, tickets..." autocomplete="off" style="width: 280px; padding: 0.7rem 3.5rem 0.7rem 2.75rem; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 12px; color: #1e293b; font-size: 0.9rem; outline: none; transition: all 0.2s;">
+      <span style="position: absolute; right: 14px; top: 50%; transform: translateY(-50%); font-size: 0.65rem; padding: 0.2rem 0.4rem; background: #e2e8f0; border-radius: 4px; color: #64748b; font-weight: 600; pointer-events: none;">⌘K</span>
+    </div>
+
+    <!-- Notifications with Dropdown -->
+    <div class="topbar-dropdown-wrapper" id="notificationsWrapper">
+      <button class="topbar-icon-btn" id="notificationsBtn">
+        <i data-lucide="bell"></i>
+        <span class="topbar-badge">3</span>
+      </button>
+      <div class="topbar-dropdown" id="notificationsDropdown">
+        <div class="topbar-dropdown-header">
+          <span class="topbar-dropdown-title">Notifications</span>
+          <button class="topbar-dropdown-action">Mark all read</button>
+        </div>
+        <div class="topbar-dropdown-list">
+          <div class="topbar-dropdown-item unread">
+            <div class="dropdown-item-icon success">
+              <i data-lucide="check-circle"></i>
+            </div>
+            <div class="dropdown-item-content">
+              <div class="dropdown-item-text">Order <strong>#ORD-2025-1247</strong> shipped successfully</div>
+              <div class="dropdown-item-time">2 minutes ago</div>
+            </div>
+          </div>
+          <div class="topbar-dropdown-item unread">
+            <div class="dropdown-item-icon warning">
+              <i data-lucide="alert-triangle"></i>
+            </div>
+            <div class="dropdown-item-content">
+              <div class="dropdown-item-text">New AOG case requires immediate attention</div>
+              <div class="dropdown-item-time">15 minutes ago</div>
+            </div>
+          </div>
+          <div class="topbar-dropdown-item unread">
+            <div class="dropdown-item-icon info">
+              <i data-lucide="user-plus"></i>
+            </div>
+            <div class="dropdown-item-content">
+              <div class="dropdown-item-text">New user <strong>Aerotech Industries</strong> registered</div>
+              <div class="dropdown-item-time">1 hour ago</div>
+            </div>
+          </div>
+        </div>
+        <a href="/admin/notifications" class="topbar-dropdown-footer">View all notifications</a>
+      </div>
+    </div>
+
+    <!-- Messages with Dropdown -->
+    <div class="topbar-dropdown-wrapper" id="messagesWrapper">
+      <button class="topbar-icon-btn" id="messagesBtn">
+        <i data-lucide="message-square"></i>
+        <span class="topbar-badge">7</span>
+      </button>
+      <div class="topbar-dropdown" id="messagesDropdown">
+        <div class="topbar-dropdown-header">
+          <span class="topbar-dropdown-title">Messages</span>
+          <button class="topbar-dropdown-action">Mark all read</button>
+        </div>
+        <div class="topbar-dropdown-list">
+          <div class="topbar-dropdown-item unread">
+            <div class="dropdown-item-avatar">JD</div>
+            <div class="dropdown-item-content">
+              <div class="dropdown-item-text"><strong>John Doe</strong> replied to ticket #TKT-001</div>
+              <div class="dropdown-item-time">5 minutes ago</div>
+            </div>
+          </div>
+          <div class="topbar-dropdown-item unread">
+            <div class="dropdown-item-avatar" style="background: #0ea5e9;">AT</div>
+            <div class="dropdown-item-content">
+              <div class="dropdown-item-text"><strong>Aerotech Industries</strong> sent a new inquiry</div>
+              <div class="dropdown-item-time">20 minutes ago</div>
+            </div>
+          </div>
+          <div class="topbar-dropdown-item">
+            <div class="dropdown-item-avatar" style="background: #10b981;">SM</div>
+            <div class="dropdown-item-content">
+              <div class="dropdown-item-text"><strong>SkyMax Aviation</strong> confirmed order details</div>
+              <div class="dropdown-item-time">2 hours ago</div>
+            </div>
+          </div>
+        </div>
+        <a href="/admin/messages" class="topbar-dropdown-footer">View all messages</a>
+      </div>
+    </div>
+
+    <!-- Settings -->
+    <a href="/admin/settings" class="topbar-icon-btn">
+      <i data-lucide="settings"></i>
+    </a>
+
+    <!-- Logout with Confirmation -->
+    <button class="topbar-icon-btn" id="logoutBtn" title="Logout">
+      <i data-lucide="log-out"></i>
+    </button>
+  </div>
+</header>
+
+<!-- Logout Confirmation Modal -->
+<div class="logout-modal-overlay" id="logoutModalOverlay">
+  <div class="logout-modal">
+    <div class="logout-modal-icon">
+      <i data-lucide="log-out"></i>
+    </div>
+    <h3 class="logout-modal-title">Confirm Logout</h3>
+    <p class="logout-modal-text">Are you sure you want to log out of the admin panel?</p>
+    <div class="logout-modal-actions">
+      <button class="logout-modal-btn cancel" id="logoutCancelBtn">Cancel</button>
+      <button class="logout-modal-btn confirm" id="logoutConfirmBtn">Logout</button>
+    </div>
+  </div>
+</div>
+
+<style>
+/* Search Shortcut Badge */
+.search-shortcut {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.65rem;
+  padding: 0.2rem 0.4rem;
+  background: rgba(43, 82, 120, 0.1);
+  border: 1px solid var(--admin-border);
+  border-radius: 4px;
+  color: var(--admin-text-muted);
+  font-weight: 500;
+  pointer-events: none;
+}
+.topbar-search input {
+  padding-right: 55px !important;
+}
+
+/* Topbar Dropdown Wrapper */
+.topbar-dropdown-wrapper {
+  position: relative;
+}
+
+/* Topbar Dropdown */
+.topbar-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 340px;
+  background: var(--admin-bg-primary);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-radius-lg);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.2s ease;
+  z-index: 1000;
+}
+.topbar-dropdown-wrapper.open .topbar-dropdown {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+.topbar-dropdown-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid var(--admin-border);
+}
+.topbar-dropdown-title {
+  font-weight: 600;
+  color: var(--admin-text-primary);
+}
+.topbar-dropdown-action {
+  font-size: 0.75rem;
+  color: var(--admin-primary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+}
+.topbar-dropdown-action:hover {
+  text-decoration: underline;
+}
+.topbar-dropdown-list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+.topbar-dropdown-item {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  border-bottom: 1px solid var(--admin-border);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.topbar-dropdown-item:hover {
+  background: var(--admin-bg-secondary);
+}
+.topbar-dropdown-item.unread {
+  background: rgba(59, 130, 246, 0.04);
+}
+.topbar-dropdown-item.unread::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--admin-primary);
+}
+.topbar-dropdown-item {
+  position: relative;
+}
+.dropdown-item-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+.dropdown-item-icon.success {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+.dropdown-item-icon.warning {
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+}
+.dropdown-item-icon.info {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+.dropdown-item-icon i {
+  width: 18px;
+  height: 18px;
+}
+.dropdown-item-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: var(--admin-primary);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.dropdown-item-content {
+  flex: 1;
+  min-width: 0;
+}
+.dropdown-item-text {
+  font-size: 0.85rem;
+  color: var(--admin-text-primary);
+  line-height: 1.4;
+}
+.dropdown-item-time {
+  font-size: 0.75rem;
+  color: var(--admin-text-muted);
+  margin-top: 0.25rem;
+}
+.topbar-dropdown-footer {
+  display: block;
+  padding: 0.875rem 1rem;
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--admin-primary);
+  text-decoration: none;
+  border-top: 1px solid var(--admin-border);
+}
+.topbar-dropdown-footer:hover {
+  background: var(--admin-bg-secondary);
+}
+
+/* Logout Modal */
+.logout-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease;
+  z-index: 9999;
+}
+.logout-modal-overlay.open {
+  opacity: 1;
+  visibility: visible;
+}
+.logout-modal {
+  background: var(--admin-bg-primary);
+  border-radius: var(--admin-radius-xl);
+  padding: 2rem;
+  width: 380px;
+  text-align: center;
+  transform: scale(0.9);
+  transition: transform 0.2s ease;
+}
+.logout-modal-overlay.open .logout-modal {
+  transform: scale(1);
+}
+.logout-modal-icon {
+  width: 60px;
+  height: 60px;
+  background: rgba(239, 68, 68, 0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+  color: #ef4444;
+}
+.logout-modal-icon i {
+  width: 28px;
+  height: 28px;
+}
+.logout-modal-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--admin-text-primary);
+  margin-bottom: 0.5rem;
+}
+.logout-modal-text {
+  font-size: 0.9rem;
+  color: var(--admin-text-muted);
+  margin-bottom: 1.5rem;
+}
+.logout-modal-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+.logout-modal-btn {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border-radius: var(--admin-radius-lg);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.logout-modal-btn.cancel {
+  background: var(--admin-bg-secondary);
+  border: 1px solid var(--admin-border);
+  color: var(--admin-text-primary);
+}
+.logout-modal-btn.cancel:hover {
+  background: var(--admin-border);
+}
+.logout-modal-btn.confirm {
+  background: #ef4444;
+  border: none;
+  color: white;
+}
+.logout-modal-btn.confirm:hover {
+  background: #dc2626;
+}
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Module Selector Functionality
+    const moduleSelector = document.getElementById('moduleSelector');
+    const moduleSelectorBtn = document.getElementById('moduleSelectorBtn');
+    const moduleOptions = document.querySelectorAll('.module-option');
+
+    // Toggle dropdown
+    if (moduleSelectorBtn) {
+      moduleSelectorBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        moduleSelector.classList.toggle('open');
+        closeAllDropdowns('moduleSelector');
+      });
+    }
+
+    // Handle module selection
+    moduleOptions.forEach(option => {
+      option.addEventListener('click', function() {
+        const module = this.dataset.module;
+        const currentUrl = new URL(window.location.href);
+        
+        if (module) {
+          currentUrl.searchParams.set('module', module);
+        } else {
+          currentUrl.searchParams.delete('module');
+        }
+        
+        window.location.href = currentUrl.toString();
+      });
+    });
+
+    // Notifications Dropdown
+    const notificationsWrapper = document.getElementById('notificationsWrapper');
+    const notificationsBtn = document.getElementById('notificationsBtn');
+    
+    if (notificationsBtn) {
+      notificationsBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        notificationsWrapper.classList.toggle('open');
+        closeAllDropdowns('notificationsWrapper');
+      });
+    }
+
+    // Messages Dropdown
+    const messagesWrapper = document.getElementById('messagesWrapper');
+    const messagesBtn = document.getElementById('messagesBtn');
+    
+    if (messagesBtn) {
+      messagesBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        messagesWrapper.classList.toggle('open');
+        closeAllDropdowns('messagesWrapper');
+      });
+    }
+
+    // Close all dropdowns except the one specified
+    function closeAllDropdowns(except) {
+      if (except !== 'moduleSelector') moduleSelector?.classList.remove('open');
+      if (except !== 'notificationsWrapper') notificationsWrapper?.classList.remove('open');
+      if (except !== 'messagesWrapper') messagesWrapper?.classList.remove('open');
+    }
+
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', function(e) {
+      if (!moduleSelector?.contains(e.target)) moduleSelector?.classList.remove('open');
+      if (!notificationsWrapper?.contains(e.target)) notificationsWrapper?.classList.remove('open');
+      if (!messagesWrapper?.contains(e.target)) messagesWrapper?.classList.remove('open');
+    });
+
+    // Logout Modal
+    const logoutBtn = document.getElementById('logoutBtn');
+    const logoutModalOverlay = document.getElementById('logoutModalOverlay');
+    const logoutCancelBtn = document.getElementById('logoutCancelBtn');
+    const logoutConfirmBtn = document.getElementById('logoutConfirmBtn');
+
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        logoutModalOverlay.classList.add('open');
+        lucide.createIcons();
+      });
+    }
+
+    if (logoutCancelBtn) {
+      logoutCancelBtn.addEventListener('click', function() {
+        logoutModalOverlay.classList.remove('open');
+      });
+    }
+
+    if (logoutConfirmBtn) {
+      logoutConfirmBtn.addEventListener('click', function() {
+        window.location.href = '/';
+      });
+    }
+
+    // Close modal on overlay click
+    logoutModalOverlay?.addEventListener('click', function(e) {
+      if (e.target === logoutModalOverlay) {
+        logoutModalOverlay.classList.remove('open');
+      }
+    });
+
+    // Keyboard shortcut for search (Cmd+K / Ctrl+K)
+    document.addEventListener('keydown', function(e) {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        document.getElementById('globalSearchInput')?.focus();
+      }
+      // Close modal on Escape
+      if (e.key === 'Escape') {
+        logoutModalOverlay?.classList.remove('open');
+        closeAllDropdowns();
+      }
+    });
+
+    // Apply module theme to body
+    const currentModule = '<%= typeof currentModule !== "undefined" ? currentModule : "" %>';
+    if (currentModule) {
+      document.body.classList.add('module-' + currentModule);
+    }
+  });
+</script>

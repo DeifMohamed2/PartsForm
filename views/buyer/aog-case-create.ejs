@@ -14,12 +14,12 @@
       <div class="aog-hero-content">
         <div class="aog-badge">
           <i data-lucide="alert-triangle"></i>
-          <span>AOG Case Management</span>
+          <span><%= t('aog.caseCreate.badge') %></span>
         </div>
 
-        <h1 class="aog-hero-title">Create Emergency Case</h1>
+        <h1 class="aog-hero-title"><%= t('aog.caseCreate.title') %></h1>
         <p class="aog-hero-subtitle">
-          Initiate priority sourcing for critical aircraft parts
+          <%= t('aog.caseCreate.subtitle') %>
         </p>
       </div>
     </div>
@@ -32,10 +32,10 @@
       <div class="aog-form-header">
         <h2 class="aog-form-title">
           <i data-lucide="layers"></i>
-          Case Type
+          <%= t('aog.caseCreate.caseType.title') %>
         </h2>
         <p class="aog-form-description">
-          Select the urgency level for this sourcing request
+          <%= t('aog.caseCreate.caseType.description') %>
         </p>
       </div>
 
@@ -45,8 +45,8 @@
           <input type="radio" name="caseType" value="aog" checked>
           <div class="case-type-content">
             <i data-lucide="alert-octagon" class="case-type-icon"></i>
-            <div class="case-type-name">AOG</div>
-            <div class="case-type-desc">Aircraft On Ground - Immediate action required</div>
+            <div class="case-type-name"><%= t('aog.caseCreate.caseType.aog') %></div>
+            <div class="case-type-desc"><%= t('aog.caseCreate.caseType.aogDesc') %></div>
           </div>
         </label>
 
@@ -55,8 +55,8 @@
           <input type="radio" name="caseType" value="routine">
           <div class="case-type-content">
             <i data-lucide="clock" class="case-type-icon"></i>
-            <div class="case-type-name">Routine</div>
-            <div class="case-type-desc">Standard procurement timeline</div>
+            <div class="case-type-name"><%= t('aog.caseCreate.caseType.routine') %></div>
+            <div class="case-type-desc"><%= t('aog.caseCreate.caseType.routineDesc') %></div>
           </div>
         </label>
 
@@ -65,8 +65,8 @@
           <input type="radio" name="caseType" value="scheduled">
           <div class="case-type-content">
             <i data-lucide="calendar" class="case-type-icon"></i>
-            <div class="case-type-name">Scheduled</div>
-            <div class="case-type-desc">Planned maintenance request</div>
+            <div class="case-type-name"><%= t('aog.caseCreate.caseType.scheduled') %></div>
+            <div class="case-type-desc"><%= t('aog.caseCreate.caseType.scheduledDesc') %></div>
           </div>
         </label>
       </div>
@@ -77,8 +77,8 @@
           <i data-lucide="zap"></i>
         </div>
         <div class="urgency-text">
-          <div class="urgency-title">Priority Sourcing Active</div>
-          <div class="urgency-desc">SLA timers and escalation protocols will be activated</div>
+          <div class="urgency-title"><%= t('aog.caseCreate.urgency.title') %></div>
+          <div class="urgency-desc"><%= t('aog.caseCreate.urgency.description') %></div>
         </div>
       </div>
     </div>
@@ -88,10 +88,10 @@
       <div class="aog-form-header">
         <h2 class="aog-form-title">
           <i data-lucide="plane"></i>
-          Aircraft Information
+          <%= t('aog.caseCreate.aircraftInfo.title') %>
         </h2>
         <p class="aog-form-description">
-          Provide details about the affected aircraft
+          <%= t('aog.caseCreate.aircraftInfo.description') %>
         </p>
       </div>
 
@@ -99,7 +99,7 @@
         <div class="aog-form-group">
           <label class="aog-form-label">
             <i data-lucide="plane-takeoff"></i>
-            Aircraft Type <span class="required">*</span>
+            <%= t('aog.caseCreate.aircraftInfo.aircraftType') %> <span class="required">*</span>
           </label>
           <div class="aog-input-wrapper">
             <i data-lucide="plane" class="aog-input-icon"></i>
@@ -110,7 +110,7 @@
         <div class="aog-form-group">
           <label class="aog-form-label">
             <i data-lucide="hash"></i>
-            Tail Number <span class="required">*</span>
+            <%= t('aog.caseCreate.aircraftInfo.tailNumber') %> <span class="required">*</span>
           </label>
           <div class="aog-input-wrapper">
             <i data-lucide="hash" class="aog-input-icon"></i>
@@ -121,7 +121,7 @@
         <div class="aog-form-group">
           <label class="aog-form-label">
             <i data-lucide="map-pin"></i>
-            Station/Location <span class="required">*</span>
+            <%= t('aog.caseCreate.aircraftInfo.station') %> <span class="required">*</span>
           </label>
           <div class="aog-input-wrapper">
             <i data-lucide="map-pin" class="aog-input-icon"></i>
@@ -132,7 +132,7 @@
         <div class="aog-form-group">
           <label class="aog-form-label">
             <i data-lucide="calendar-clock"></i>
-            Required By <span class="required">*</span>
+            <%= t('aog.caseCreate.aircraftInfo.requiredBy') %> <span class="required">*</span>
           </label>
           <div class="aog-input-wrapper">
             <i data-lucide="calendar" class="aog-input-icon"></i>
@@ -143,11 +143,11 @@
         <div class="aog-form-group full-width">
           <label class="aog-form-label">
             <i data-lucide="file-text"></i>
-            Additional Notes
+            <%= t('aog.caseCreate.aircraftInfo.notes') %>
           </label>
           <div class="aog-input-wrapper">
             <i data-lucide="file-text" class="aog-input-icon"></i>
-            <textarea class="aog-input aog-textarea" id="notes" placeholder="Any additional information about this case..."></textarea>
+            <textarea class="aog-input aog-textarea" id="notes" placeholder="<%= t('aog.caseCreate.aircraftInfo.notesPlaceholder') %>"></textarea>
           </div>
         </div>
       </div>
@@ -158,10 +158,10 @@
       <div class="aog-form-header">
         <h2 class="aog-form-title">
           <i data-lucide="package"></i>
-          Selected Parts
+          <%= t('aog.caseCreate.selectedParts.title') %>
         </h2>
         <p class="aog-form-description">
-          Parts selected from aviation search
+          <%= t('aog.caseCreate.selectedParts.description') %>
         </p>
       </div>
 
@@ -170,11 +170,11 @@
       </div>
 
       <div class="parts-summary">
-        <div class="parts-summary-label">Total Parts:</div>
+        <div class="parts-summary-label"><%= t('aog.caseCreate.selectedParts.totalParts') %></div>
         <div class="parts-summary-value" id="total-parts-count">0</div>
       </div>
       <div class="parts-summary">
-        <div class="parts-summary-label">Estimated Total:</div>
+        <div class="parts-summary-label"><%= t('aog.caseCreate.selectedParts.estimatedTotal') %></div>
         <div class="parts-summary-value" id="total-parts-amount">0.00 AED</div>
       </div>
     </div>
@@ -183,10 +183,10 @@
     <div class="aog-form-card">
       <div class="aog-form-actions">
         <button class="btn-aog-cancel" id="btn-cancel">
-          Cancel
+          <%= t('aog.caseCreate.actions.cancel') %>
         </button>
         <button class="btn-aog-submit" id="btn-submit">
-          <span>Proceed to Checkout</span>
+          <span><%= t('aog.caseCreate.actions.proceedToCheckout') %></span>
           <i data-lucide="arrow-right"></i>
         </button>
       </div>
@@ -194,7 +194,12 @@
   </div>
 </div>
 
+<!-- Quick Search Modal -->
+<%- include('partials/quick-search') %>
+
 <script src="/js/animations.js"></script>
+<script src="/js/main.js"></script>
+<script src="/js/quick-search.js"></script>
 <script src="/js/aog-case-create.js"></script>
 <script>
   lucide.createIcons();

@@ -5,7 +5,7 @@
 
 document.addEventListener('DOMContentLoaded', () => {
   // ====================================
-  // SLA COUNTDOWN TIMER
+  // SLA COUNTDOWN TIMER (PERSISTENT)
   // ====================================
 
   const hoursElement = document.getElementById('hours');
@@ -13,22 +13,35 @@ document.addEventListener('DOMContentLoaded', () => {
   const secondsElement = document.getElementById('seconds');
   const progressBar = document.getElementById('sla-progress');
 
-  // Set target time (24 hours from now for demo)
-  const targetTime = new Date();
-  targetTime.setHours(targetTime.getHours() + 22);
-  targetTime.setMinutes(targetTime.getMinutes() + 45);
-  targetTime.setSeconds(targetTime.getSeconds() + 30);
+  // Get case ID from URL
+  const caseId = window.location.pathname.split('/').pop();
+  const targetTimeKey = `aog-sla-target-${caseId}`;
+
+  // Get or set the target time (24 hours from case creation)
+  let targetTime = localStorage.getItem(targetTimeKey);
+  
+  if (!targetTime) {
+    // If no target time exists, set it to 24 hours from now
+    const newTargetTime = new Date();
+    newTargetTime.setHours(newTargetTime.getHours() + 24);
+    targetTime = newTargetTime.getTime();
+    localStorage.setItem(targetTimeKey, targetTime);
+  } else {
+    targetTime = parseInt(targetTime);
+  }
 
   function updateCountdown() {
-    const now = new Date();
+    const now = new Date().getTime();
     const difference = targetTime - now;
 
     if (difference <= 0) {
-      hoursElement.textContent = '00';
-      minutesElement.textContent = '00';
-      secondsElement.textContent = '00';
-      progressBar.style.width = '0%';
-      progressBar.classList.add('critical');
+      if (hoursElement) hoursElement.textContent = '00';
+      if (minutesElement) minutesElement.textContent = '00';
+      if (secondsElement) secondsElement.textContent = '00';
+      if (progressBar) {
+        progressBar.style.width = '0%';
+        progressBar.classList.add('critical');
+      }
       return;
     }
 
@@ -38,31 +51,35 @@ document.addEventListener('DOMContentLoaded', () => {
     const seconds = Math.floor((difference % (1000 * 60)) / 1000);
 
     // Update display with leading zeros
-    hoursElement.textContent = String(hours).padStart(2, '0');
-    minutesElement.textContent = String(minutes).padStart(2, '0');
-    secondsElement.textContent = String(seconds).padStart(2, '0');
+    if (hoursElement) hoursElement.textContent = String(hours).padStart(2, '0');
+    if (minutesElement) minutesElement.textContent = String(minutes).padStart(2, '0');
+    if (secondsElement) secondsElement.textContent = String(seconds).padStart(2, '0');
 
     // Update progress bar
-    const totalTime = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
-    const elapsed = totalTime - difference;
-    const progress = (elapsed / totalTime) * 100;
-    progressBar.style.width = `${100 - progress}%`;
+    if (progressBar) {
+      const totalTime = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+      const elapsed = totalTime - difference;
+      const progress = (elapsed / totalTime) * 100;
+      progressBar.style.width = `${100 - progress}%`;
 
-    // Update progress bar color based on time remaining
-    if (progress > 75) {
-      progressBar.classList.add('critical');
-      progressBar.classList.remove('warning');
-    } else if (progress > 50) {
-      progressBar.classList.add('warning');
-      progressBar.classList.remove('critical');
-    } else {
-      progressBar.classList.remove('warning', 'critical');
+      // Update progress bar color based on time remaining
+      if (progress > 75) {
+        progressBar.classList.add('critical');
+        progressBar.classList.remove('warning');
+      } else if (progress > 50) {
+        progressBar.classList.add('warning');
+        progressBar.classList.remove('critical');
+      } else {
+        progressBar.classList.remove('warning', 'critical');
+      }
     }
   }
 
   // Update countdown every second
-  updateCountdown();
-  setInterval(updateCountdown, 1000);
+  if (hoursElement && minutesElement && secondsElement) {
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+  }
 
   // ====================================
   // SIMULATED REAL-TIME UPDATES
@@ -172,7 +189,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // LOAD CASE DATA FROM LOCALSTORAGE
   // ====================================
 
-  const caseId = window.location.pathname.split('/').pop();
+  // caseId already declared at the top of the file
   const caseData = localStorage.getItem(`aog-case-${caseId}`);
 
   if (caseData) {

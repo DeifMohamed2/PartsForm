@@ -25,45 +25,45 @@
       <!-- Search Dropdown -->
       <div class="nav-dropdown">
         <button class="nav-link dropdown-trigger" id="searchDropdownBtn">
-          <span>Search</span>
+          <span><%= t('nav.search') %></span>
           <i data-lucide="chevron-down" class="dropdown-chevron"></i>
         </button>
         <div class="nav-dropdown-menu" id="searchDropdownMenu">
           <a href="/buyer/search-automotive" class="nav-dropdown-item">
             <i data-lucide="car-front"></i>
             <div>
-              <span class="dropdown-item-title">Automotive</span>
-              <span class="dropdown-item-desc">Vehicle parts & components</span>
+              <span class="dropdown-item-title"><%= t('nav.searchDropdown.automotive.title') %></span>
+              <span class="dropdown-item-desc"><%= t('nav.searchDropdown.automotive.desc') %></span>
             </div>
           </a>
           <a href="/buyer/search-aviation" class="nav-dropdown-item">
             <i data-lucide="plane"></i>
             <div>
-              <span class="dropdown-item-title">Aviation</span>
-              <span class="dropdown-item-desc">Aircraft parts & systems</span>
+              <span class="dropdown-item-title"><%= t('nav.searchDropdown.aviation.title') %></span>
+              <span class="dropdown-item-desc"><%= t('nav.searchDropdown.aviation.desc') %></span>
             </div>
           </a>
           <a href="/buyer/search-machinery" class="nav-dropdown-item">
             <i data-lucide="construction"></i>
             <div>
-              <span class="dropdown-item-title">Heavy Machinery</span>
-              <span class="dropdown-item-desc">Industrial equipment parts</span>
+              <span class="dropdown-item-title"><%= t('nav.searchDropdown.machinery.title') %></span>
+              <span class="dropdown-item-desc"><%= t('nav.searchDropdown.machinery.desc') %></span>
             </div>
           </a>
         </div>
       </div>
 
-      <a href="/buyer/orders" class="nav-link" data-section="orders">My Orders</a>
-      <a href="/buyer/tickets" class="nav-link" data-section="tickets">Tickets</a>
-      <a href="/buyer/affiliate" class="nav-link" data-section="affiliate">Affiliate</a>
-      <a href="/buyer/payment" class="nav-link" data-section="payment">Payment</a>
-      <a href="/buyer/delivery" class="nav-link" data-section="delivery">Delivery</a>
-      <a href="/buyer/contacts" class="nav-link" data-section="contacts">Contacts</a>
+      <a href="/buyer/orders" class="nav-link" data-section="orders"><%= t('nav.myOrders') %></a>
+      <a href="/buyer/tickets" class="nav-link" data-section="tickets"><%= t('nav.tickets') %></a>
+      <a href="/buyer/affiliate" class="nav-link" data-section="affiliate"><%= t('nav.affiliate') %></a>
+      <a href="/buyer/payment" class="nav-link" data-section="payment"><%= t('nav.payment') %></a>
+      <a href="/buyer/delivery" class="nav-link" data-section="delivery"><%= t('nav.delivery') %></a>
+      <a href="/buyer/contacts" class="nav-link" data-section="contacts"><%= t('nav.contacts') %></a>
       
       <!-- More Dropdown for overflow items -->
       <div class="nav-dropdown nav-more-dropdown" id="moreDropdown" style="display: none;">
         <button class="nav-link dropdown-trigger" id="moreDropdownBtn">
-          <span>More</span>
+          <span><%= t('nav.more') %></span>
           <i data-lucide="chevron-down" class="dropdown-chevron"></i>
         </button>
         <div class="nav-dropdown-menu" id="moreDropdownMenu">
@@ -75,15 +75,15 @@
     <!-- Action Buttons -->
     <div class="nav-actions" id="navActions">
       <!-- Shopping Cart Button -->
-      <a href="/buyer/cart" class="btn-cart" id="cart-btn" title="Shopping Cart">
+      <a href="/buyer/cart" class="btn-cart" id="cart-btn" title="<%= t('nav.cart') %>">
         <i data-lucide="shopping-cart"></i>
         <span class="cart-badge" id="cart-badge" style="display: none;">0</span>
       </a>
 
       <!-- Quick Search Button -->
-      <button class="btn-quick-search" id="quick-search-btn" title="Quick Search">
+      <button class="btn-quick-search" id="quick-search-btn" title="<%= t('nav.quickSearch') %>">
         <i data-lucide="search"></i>
-        <span>Quick Search</span>
+        <span><%= t('nav.quickSearch') %></span>
       </button>
 
       <!-- Language Selector -->
@@ -94,29 +94,29 @@
           <i data-lucide="chevron-down" class="lang-chevron"></i>
         </button>
         <div class="language-dropdown" id="language-dropdown">
-          <button class="lang-option" data-lang="EN" data-flag="🇬🇧">
+          <button class="lang-option" data-lang="en" data-flag="🇬🇧">
             <span class="lang-flag">🇬🇧</span>
-            <span class="lang-name">English</span>
+            <span class="lang-name"><%= t('nav.language.english') %></span>
           </button>
-          <button class="lang-option" data-lang="AR" data-flag="🇸🇦">
+          <button class="lang-option" data-lang="ar" data-flag="🇸🇦">
             <span class="lang-flag">🇸🇦</span>
-            <span class="lang-name">Arabic</span>
+            <span class="lang-name"><%= t('nav.language.arabic') %></span>
           </button>
-          <button class="lang-option" data-lang="RU" data-flag="🇷🇺">
+          <button class="lang-option" data-lang="ru" data-flag="🇷🇺">
             <span class="lang-flag">🇷🇺</span>
-            <span class="lang-name">Russian</span>
+            <span class="lang-name"><%= t('nav.language.russian') %></span>
           </button>
-          <button class="lang-option" data-lang="UA" data-flag="🇺🇦">
+          <button class="lang-option" data-lang="ua" data-flag="🇺🇦">
             <span class="lang-flag">🇺🇦</span>
-            <span class="lang-name">Ukrainian</span>
+            <span class="lang-name"><%= t('nav.language.ukrainian') %></span>
           </button>
-          <button class="lang-option" data-lang="FR" data-flag="🇫🇷">
+          <button class="lang-option" data-lang="fr" data-flag="🇫🇷">
             <span class="lang-flag">🇫🇷</span>
-            <span class="lang-name">French</span>
+            <span class="lang-name"><%= t('nav.language.french') %></span>
           </button>
-          <button class="lang-option" data-lang="ES" data-flag="🇪🇸">
+          <button class="lang-option" data-lang="es" data-flag="🇪🇸">
             <span class="lang-flag">🇪🇸</span>
-            <span class="lang-name">Spanish</span>
+            <span class="lang-name"><%= t('nav.language.spanish') %></span>
           </button>
         </div>
       </div>
@@ -124,7 +124,7 @@
       <!-- Sign In Button (shown when not logged in) -->
       <button class="btn-secondary btn-sign-in" id="sign-in-btn" style="display: none;">
         <i data-lucide="user"></i>
-        <span>Sign In</span>
+        <span><%= t('nav.user.signIn') %></span>
       </button>
 
       <!-- User Profile Dropdown (shown when logged in) -->
@@ -139,16 +139,16 @@
         <div class="user-dropdown-menu" id="userDropdownMenu">
           <a href="/buyer/profile" class="user-dropdown-item">
             <i data-lucide="user"></i>
-            <span>Profile</span>
+            <span><%= t('nav.user.profile') %></span>
           </a>
           <a href="/buyer/settings" class="user-dropdown-item">
             <i data-lucide="settings"></i>
-            <span>Settings</span>
+            <span><%= t('nav.user.settings') %></span>
           </a>
           <div class="user-dropdown-divider"></div>
           <button class="user-dropdown-item" id="logoutBtn">
             <i data-lucide="log-out"></i>
-            <span>Logout</span>
+            <span><%= t('nav.user.logout') %></span>
           </button>
         </div>
       </div>
@@ -160,5 +160,6 @@
 <div class="mobile-backdrop" id="mobileBackdrop"></div>
 
 <!-- Navbar JavaScript -->
+<script src="/js/i18n.js"></script>
 <script src="/js/navbar.js"></script>
 <script src="/js/buyer-auth.js"></script>

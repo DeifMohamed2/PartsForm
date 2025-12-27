@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<%= currentLang %>" dir="<%= dir %>">
 
 <head>
   <meta charset="UTF-8">
@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="theme-color" content="#2B5278">
-  <title><%= typeof title !== 'undefined' ? title : 'PARTSFORM - Buyer Portal' %></title>
+  <title><%= typeof title !== 'undefined' ? title : t('common.messages.loading') + ' - PARTSFORM' %></title>
 
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙️</text></svg>">
@@ -24,6 +24,11 @@
   <!-- Main Stylesheet -->
   <link rel="stylesheet" href="/css/styles.css">
   <link rel="stylesheet" href="/css/styles-enhanced.css">
+  
+  <!-- RTL Stylesheet for Arabic -->
+  <% if (isRTL) { %>
+  <link rel="stylesheet" href="/css/rtl.css">
+  <% } %>
 </head>
 
 <body>

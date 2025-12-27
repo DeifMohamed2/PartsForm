@@ -1,0 +1,1407 @@
+<%- include('partials/header') %>
+<link rel="stylesheet" href="/css/adminCSS/admin-dashboard.css">
+<style>
+  /* Module-Specific Unique Designs */
+  
+  /* Automotive Module - Racing/Performance Theme */
+  .module-automotive .module-info-banner {
+    background: linear-gradient(135deg, rgba(220, 38, 38, 0.08) 0%, rgba(239, 68, 68, 0.04) 50%, transparent 100%);
+    border-color: rgba(220, 38, 38, 0.3);
+  }
+  .module-automotive .module-info-icon {
+    background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+  }
+  .module-automotive .stat-card.module-themed {
+    border-top: 3px solid #dc2626;
+    background: linear-gradient(135deg, rgba(220, 38, 38, 0.03) 0%, var(--admin-bg-primary) 100%);
+  }
+  .module-automotive .chart-card {
+    border-top: 3px solid #dc2626;
+  }
+  .module-automotive .hero-stat-grid .stat-icon {
+    background: linear-gradient(135deg, rgba(220, 38, 38, 0.15), rgba(220, 38, 38, 0.08));
+  }
+
+  /* Aviation Module - Sky/Professional Theme */
+  .module-aviation .module-info-banner {
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.08) 0%, rgba(59, 130, 246, 0.04) 50%, transparent 100%);
+    border-color: rgba(14, 165, 233, 0.3);
+  }
+  .module-aviation .module-info-icon {
+    background: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%);
+  }
+  .module-aviation .stat-card.module-themed {
+    border-top: 3px solid #0ea5e9;
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.03) 0%, var(--admin-bg-primary) 100%);
+  }
+  .module-aviation .chart-card {
+    border-top: 3px solid #0ea5e9;
+  }
+  .module-aviation .aog-alert-banner {
+    display: flex;
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.05));
+    border: 2px solid rgba(239, 68, 68, 0.3);
+    border-radius: var(--admin-radius-xl);
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+    align-items: center;
+    gap: 1rem;
+  }
+  .module-aviation .aog-alert-banner i { color: #ef4444; width: 28px; height: 28px; }
+  .module-aviation .aog-alert-banner .aog-alert-text { flex: 1; }
+  .module-aviation .aog-alert-banner h4 { color: #dc2626; font-size: 1rem; margin-bottom: 0.25rem; }
+  .module-aviation .aog-alert-banner p { color: #991b1b; font-size: 0.85rem; margin: 0; }
+
+  /* Machinery Module - Industrial/Solid Theme */
+  .module-machinery .module-info-banner {
+    background: linear-gradient(135deg, rgba(234, 179, 8, 0.08) 0%, rgba(202, 138, 4, 0.04) 50%, transparent 100%);
+    border-color: rgba(234, 179, 8, 0.3);
+  }
+  .module-machinery .module-info-icon {
+    background: linear-gradient(135deg, #eab308 0%, #a16207 100%);
+  }
+  .module-machinery .stat-card.module-themed {
+    border-top: 3px solid #eab308;
+    background: linear-gradient(135deg, rgba(234, 179, 8, 0.03) 0%, var(--admin-bg-primary) 100%);
+  }
+  .module-machinery .chart-card {
+    border-top: 3px solid #eab308;
+  }
+  .module-machinery .equipment-tracker {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .module-machinery .equipment-card {
+    background: var(--admin-bg-primary);
+    border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius-lg);
+    padding: 1.25rem;
+    text-align: center;
+    transition: var(--admin-transition);
+  }
+  .module-machinery .equipment-card:hover {
+    border-color: #eab308;
+    box-shadow: var(--admin-shadow-md);
+  }
+  .module-machinery .equipment-icon {
+    width: 50px;
+    height: 50px;
+    background: rgba(234, 179, 8, 0.12);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 0.75rem;
+    color: #eab308;
+  }
+  .module-machinery .equipment-name { font-weight: 600; color: var(--admin-text-primary); }
+  .module-machinery .equipment-count { font-size: 0.85rem; color: var(--admin-text-muted); }
+
+  /* Hero Stats Grid - More prominent */
+  .hero-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .hero-stat {
+    background: var(--admin-bg-primary);
+    border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius-lg);
+    padding: 1.25rem;
+    text-align: center;
+    transition: var(--admin-transition);
+    box-shadow: var(--admin-shadow-sm);
+  }
+  .hero-stat:hover {
+    border-color: var(--module-border);
+    transform: translateY(-2px);
+    box-shadow: var(--admin-shadow-md);
+  }
+  .hero-stat-icon {
+    width: 45px;
+    height: 45px;
+    background: var(--module-bg-accent);
+    border-radius: var(--admin-radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 0.75rem;
+    color: var(--module-primary);
+  }
+  .hero-stat-icon i { width: 22px; height: 22px; }
+  .hero-stat-value {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--admin-text-primary);
+    line-height: 1.2;
+  }
+  .hero-stat-label {
+    font-size: 0.75rem;
+    color: var(--admin-text-muted);
+    margin-top: 0.25rem;
+  }
+  .hero-stat-change {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    margin-top: 0.5rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 12px;
+  }
+  .hero-stat-change.positive { background: rgba(16, 185, 129, 0.12); color: #059669; }
+  .hero-stat-change.negative { background: rgba(239, 68, 68, 0.12); color: #dc2626; }
+  .hero-stat-change i { width: 12px; height: 12px; }
+
+  /* Multi Chart Grid */
+  .multi-chart-grid {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  .chart-card.full-width {
+    grid-column: span 2;
+  }
+  
+  /* Performance Metrics Row - Simplified */
+  .performance-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .performance-card {
+    background: var(--admin-bg-primary);
+    border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius-lg);
+    padding: 1.25rem;
+    box-shadow: var(--admin-shadow-sm);
+    transition: var(--admin-transition);
+  }
+  .performance-card:hover {
+    border-color: var(--admin-border-medium);
+    box-shadow: var(--admin-shadow-md);
+  }
+  .performance-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+  .performance-icon {
+    width: 36px;
+    height: 36px;
+    background: var(--admin-bg-tertiary);
+    border-radius: var(--admin-radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--admin-text-muted);
+  }
+  .performance-icon i { width: 18px; height: 18px; }
+  .performance-title {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--admin-text-muted);
+  }
+  .performance-value {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--admin-text-primary);
+    margin-bottom: 0.5rem;
+  }
+  .performance-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: var(--admin-text-muted);
+  }
+  .performance-meta .positive { color: #10b981; }
+  .performance-meta .negative { color: #ef4444; }
+
+  /* Responsive */
+  @media (max-width: 1400px) {
+    .hero-stat-grid { grid-template-columns: repeat(3, 1fr); }
+    .multi-chart-grid { grid-template-columns: 1fr 1fr; }
+    .multi-chart-grid .chart-card.full-width { grid-column: span 1; }
+    .performance-row { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 768px) {
+    .hero-stat-grid { grid-template-columns: repeat(2, 1fr); }
+    .multi-chart-grid { grid-template-columns: 1fr; }
+    .performance-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body class="<%= typeof currentModule !== 'undefined' && currentModule ? 'module-' + currentModule : '' %>">
+  <div class="admin-wrapper">
+    <%- include('partials/sidebar', { activePage: 'dashboard', currentModule: currentModule }) %>
+    
+    <main class="admin-main">
+      <%- include('partials/topbar', { pageTitle: 'Dashboard', currentModule: currentModule }) %>
+      
+      <div class="admin-content">
+        <% if (currentModule && moduleConfig) { %>
+        <!-- Module Info Banner -->
+        <div class="module-info-banner">
+          <div class="module-info-icon">
+            <i data-lucide="<%= moduleConfig.icon %>"></i>
+          </div>
+          <div class="module-info-content">
+            <div class="module-info-title"><%= moduleConfig.name %> Dashboard</div>
+            <div class="module-info-desc">Viewing <%= moduleConfig.name.toLowerCase() %> module data and analytics</div>
+          </div>
+          <div class="module-info-stats">
+            <div class="module-info-stat">
+              <div class="module-info-stat-value"><%= stats.totalOrders %></div>
+              <div class="module-info-stat-label">Orders</div>
+            </div>
+            <div class="module-info-stat">
+              <div class="module-info-stat-value">$<%= (stats.totalRevenue / 1000).toFixed(0) %>K</div>
+              <div class="module-info-stat-label">Revenue</div>
+            </div>
+            <div class="module-info-stat">
+              <div class="module-info-stat-value">+<%= stats.growth %>%</div>
+              <div class="module-info-stat-label">Growth</div>
+            </div>
+          </div>
+        </div>
+
+        <% if (currentModule === 'aviation') { %>
+        <!-- Aviation-Specific: AOG Alert Banner -->
+        <div class="aog-alert-banner">
+          <i data-lucide="alert-triangle"></i>
+          <div class="aog-alert-text">
+            <h4>3 Active AOG Cases Require Attention</h4>
+            <p>Critical aircraft parts needed - 2 cases are marked as urgent priority</p>
+          </div>
+          <a href="/admin/aog?module=aviation" class="admin-btn admin-btn-primary" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
+            <i data-lucide="external-link"></i>
+            View AOG Cases
+          </a>
+        </div>
+        <% } %>
+        <% } %>
+
+        <% if (!currentModule) { %>
+        <!-- MAIN DASHBOARD - Premium Overview Design -->
+        <div class="main-dashboard-hero" style="background: linear-gradient(135deg, #1e3a5f 0%, #2b5278 50%, #3d6a96 100%); border-radius: var(--admin-radius-xl); padding: 2rem; margin-bottom: 2rem; color: white; position: relative; overflow: hidden;">
+          <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: rgba(255,255,255,0.05); border-radius: 50%;"></div>
+          <div style="position: absolute; bottom: -30px; left: 30%; width: 150px; height: 150px; background: rgba(255,255,255,0.03); border-radius: 50%;"></div>
+          <div style="display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 1;">
+            <div>
+              <h2 style="font-size: 1.75rem; font-weight: 800; margin-bottom: 0.5rem;">Welcome to PARTSFORM Admin</h2>
+              <p style="opacity: 0.8; font-size: 0.95rem;">Complete overview of all industry modules and platform performance</p>
+            </div>
+            <div style="display: flex; gap: 1rem;">
+              <div style="text-align: center; padding: 1rem 1.5rem; background: rgba(255,255,255,0.1); border-radius: var(--admin-radius-lg); backdrop-filter: blur(10px);">
+                <div style="font-size: 1.75rem; font-weight: 800;"><%= stats.totalOrders.toLocaleString() %></div>
+                <div style="font-size: 0.75rem; opacity: 0.8;">Total Orders</div>
+              </div>
+              <div style="text-align: center; padding: 1rem 1.5rem; background: rgba(255,255,255,0.1); border-radius: var(--admin-radius-lg); backdrop-filter: blur(10px);">
+                <div style="font-size: 1.75rem; font-weight: 800;">$<%= (stats.totalRevenue / 1000000).toFixed(2) %>M</div>
+                <div style="font-size: 0.75rem; opacity: 0.8;">Total Revenue</div>
+              </div>
+              <div style="text-align: center; padding: 1rem 1.5rem; background: rgba(255,255,255,0.1); border-radius: var(--admin-radius-lg); backdrop-filter: blur(10px);">
+                <div style="font-size: 1.75rem; font-weight: 800;"><%= stats.activeUsers %></div>
+                <div style="font-size: 0.75rem; opacity: 0.8;">Active Users</div>
+              </div>
+              <div style="text-align: center; padding: 1rem 1.5rem; background: rgba(255,255,255,0.1); border-radius: var(--admin-radius-lg); backdrop-filter: blur(10px);">
+                <div style="font-size: 1.75rem; font-weight: 800;">47</div>
+                <div style="font-size: 0.75rem; opacity: 0.8;">Countries</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Industry Overview Cards - Main Dashboard Only -->
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 2rem;">
+          <a href="/admin?module=automotive" style="text-decoration: none;">
+            <div style="background: linear-gradient(135deg, rgba(220, 38, 38, 0.08) 0%, white 100%); border: 2px solid rgba(220, 38, 38, 0.2); border-radius: var(--admin-radius-xl); padding: 1.5rem; transition: all 0.3s ease; position: relative; overflow: hidden;">
+              <div style="position: absolute; top: -20px; right: -20px; width: 80px; height: 80px; background: rgba(220, 38, 38, 0.08); border-radius: 50%;"></div>
+              <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #dc2626, #991b1b); border-radius: var(--admin-radius-lg); display: flex; align-items: center; justify-content: center; color: white;">
+                  <i data-lucide="car" style="width: 26px; height: 26px;"></i>
+                </div>
+                <div>
+                  <h3 style="font-size: 1.125rem; font-weight: 700; color: #1e293b;">Automotive</h3>
+                  <p style="font-size: 0.8rem; color: #64748b; margin: 0;">Vehicle parts & components</p>
+                </div>
+              </div>
+              <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; text-align: center;">
+                <div>
+                  <div style="font-size: 1.25rem; font-weight: 800; color: #dc2626;"><%= stats.automotive.orders %></div>
+                  <div style="font-size: 0.7rem; color: #64748b;">Orders</div>
+                </div>
+                <div>
+                  <div style="font-size: 1.25rem; font-weight: 800; color: #dc2626;">$<%= (stats.automotive.revenue / 1000000).toFixed(1) %>M</div>
+                  <div style="font-size: 0.7rem; color: #64748b;">Revenue</div>
+                </div>
+                <div>
+                  <div style="font-size: 1.25rem; font-weight: 800; color: #10b981;">+<%= stats.automotive.growth %>%</div>
+                  <div style="font-size: 0.7rem; color: #64748b;">Growth</div>
+                </div>
+              </div>
+            </div>
+          </a>
+          <a href="/admin?module=aviation" style="text-decoration: none;">
+            <div style="background: linear-gradient(135deg, rgba(14, 165, 233, 0.08) 0%, white 100%); border: 2px solid rgba(14, 165, 233, 0.2); border-radius: var(--admin-radius-xl); padding: 1.5rem; transition: all 0.3s ease; position: relative; overflow: hidden;">
+              <div style="position: absolute; top: -20px; right: -20px; width: 80px; height: 80px; background: rgba(14, 165, 233, 0.08); border-radius: 50%;"></div>
+              <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #0ea5e9, #0369a1); border-radius: var(--admin-radius-lg); display: flex; align-items: center; justify-content: center; color: white;">
+                  <i data-lucide="plane" style="width: 26px; height: 26px;"></i>
+                </div>
+                <div>
+                  <h3 style="font-size: 1.125rem; font-weight: 700; color: #1e293b;">Aviation</h3>
+                  <p style="font-size: 0.8rem; color: #64748b; margin: 0;">Aircraft parts & AOG cases</p>
+                </div>
+              </div>
+              <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; text-align: center;">
+                <div>
+                  <div style="font-size: 1.25rem; font-weight: 800; color: #0ea5e9;"><%= stats.aviation.orders %></div>
+                  <div style="font-size: 0.7rem; color: #64748b;">Orders</div>
+                </div>
+                <div>
+                  <div style="font-size: 1.25rem; font-weight: 800; color: #0ea5e9;">$<%= (stats.aviation.revenue / 1000000).toFixed(1) %>M</div>
+                  <div style="font-size: 0.7rem; color: #64748b;">Revenue</div>
+                </div>
+                <div>
+                  <div style="font-size: 1.25rem; font-weight: 800; color: #10b981;">+<%= stats.aviation.growth %>%</div>
+                  <div style="font-size: 0.7rem; color: #64748b;">Growth</div>
+                </div>
+              </div>
+            </div>
+          </a>
+          <a href="/admin?module=machinery" style="text-decoration: none;">
+            <div style="background: linear-gradient(135deg, rgba(234, 179, 8, 0.08) 0%, white 100%); border: 2px solid rgba(234, 179, 8, 0.2); border-radius: var(--admin-radius-xl); padding: 1.5rem; transition: all 0.3s ease; position: relative; overflow: hidden;">
+              <div style="position: absolute; top: -20px; right: -20px; width: 80px; height: 80px; background: rgba(234, 179, 8, 0.08); border-radius: 50%;"></div>
+              <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #eab308, #a16207); border-radius: var(--admin-radius-lg); display: flex; align-items: center; justify-content: center; color: white;">
+                  <i data-lucide="construction" style="width: 26px; height: 26px;"></i>
+                </div>
+                <div>
+                  <h3 style="font-size: 1.125rem; font-weight: 700; color: #1e293b;">Heavy Machinery</h3>
+                  <p style="font-size: 0.8rem; color: #64748b; margin: 0;">Industrial equipment parts</p>
+                </div>
+              </div>
+              <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; text-align: center;">
+                <div>
+                  <div style="font-size: 1.25rem; font-weight: 800; color: #eab308;"><%= stats.machinery.orders %></div>
+                  <div style="font-size: 0.7rem; color: #64748b;">Orders</div>
+                </div>
+                <div>
+                  <div style="font-size: 1.25rem; font-weight: 800; color: #eab308;">$<%= (stats.machinery.revenue / 1000000).toFixed(1) %>M</div>
+                  <div style="font-size: 0.7rem; color: #64748b;">Revenue</div>
+                </div>
+                <div>
+                  <div style="font-size: 1.25rem; font-weight: 800; color: #10b981;">+<%= stats.machinery.growth %>%</div>
+                  <div style="font-size: 0.7rem; color: #64748b;">Growth</div>
+                </div>
+              </div>
+            </div>
+          </a>
+        </div>
+        <% } else { %>
+        <!-- Module-Specific Hero Stats (without Active Users) -->
+        <div class="hero-stat-grid" style="grid-template-columns: repeat(5, 1fr);">
+          <div class="hero-stat">
+            <div class="hero-stat-icon">
+              <i data-lucide="shopping-cart"></i>
+            </div>
+            <div class="hero-stat-value"><%= typeof stats.totalOrders === 'number' ? stats.totalOrders.toLocaleString() : stats.totalOrders %></div>
+            <div class="hero-stat-label">Total Orders</div>
+            <div class="hero-stat-change positive">
+              <i data-lucide="trending-up"></i>
+              +12.5%
+            </div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-icon" style="background: rgba(16, 185, 129, 0.12); color: #10b981;">
+              <i data-lucide="dollar-sign"></i>
+            </div>
+            <div class="hero-stat-value">$<%= stats.totalRevenue >= 1000000 ? (stats.totalRevenue / 1000000).toFixed(2) + 'M' : (stats.totalRevenue / 1000).toFixed(0) + 'K' %></div>
+            <div class="hero-stat-label">Total Revenue</div>
+            <div class="hero-stat-change positive">
+              <i data-lucide="trending-up"></i>
+              +8.2%
+            </div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-icon" style="background: rgba(245, 158, 11, 0.12); color: #f59e0b;">
+              <i data-lucide="ticket"></i>
+            </div>
+            <div class="hero-stat-value"><%= stats.pendingTickets %></div>
+            <div class="hero-stat-label">Pending Tickets</div>
+            <div class="hero-stat-change negative">
+              <i data-lucide="trending-down"></i>
+              -25%
+            </div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-icon" style="background: rgba(6, 182, 212, 0.12); color: #06b6d4;">
+              <i data-lucide="package"></i>
+            </div>
+            <div class="hero-stat-value"><%= Math.floor(stats.totalProducts / 3) %></div>
+            <div class="hero-stat-label">Products</div>
+            <div class="hero-stat-change positive">
+              <i data-lucide="trending-up"></i>
+              +5.8%
+            </div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-icon" style="background: rgba(236, 72, 153, 0.12); color: #ec4899;">
+              <i data-lucide="star"></i>
+            </div>
+            <div class="hero-stat-value">4.8</div>
+            <div class="hero-stat-label">Avg Rating</div>
+            <div class="hero-stat-change positive">
+              <i data-lucide="trending-up"></i>
+              +0.3
+            </div>
+          </div>
+        </div>
+        <% } %>
+
+        <% if (currentModule === 'machinery') { %>
+        <!-- Machinery-Specific: Equipment Categories -->
+        <div class="equipment-tracker">
+          <div class="equipment-card">
+            <div class="equipment-icon"><i data-lucide="arrow-up-from-line"></i></div>
+            <div class="equipment-name">Cranes</div>
+            <div class="equipment-count">156 parts</div>
+          </div>
+          <div class="equipment-card">
+            <div class="equipment-icon"><i data-lucide="shovel"></i></div>
+            <div class="equipment-name">Excavators</div>
+            <div class="equipment-count">234 parts</div>
+          </div>
+          <div class="equipment-card">
+            <div class="equipment-icon"><i data-lucide="forklift"></i></div>
+            <div class="equipment-name">Loaders</div>
+            <div class="equipment-count">189 parts</div>
+          </div>
+        </div>
+        <% } %>
+
+        <% if (!currentModule) { %>
+        <!-- MAIN DASHBOARD - Unique Charts & Analytics Layout -->
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+          <!-- Left: Main Analytics -->
+          <div>
+            <!-- Revenue Trend - Full Width -->
+            <div class="chart-card" style="margin-bottom: 1.5rem;">
+              <div class="chart-header">
+                <div>
+                  <div class="chart-title">Platform Revenue Overview</div>
+                  <div class="chart-subtitle">All industries combined - 2025</div>
+                </div>
+                <div style="display: flex; gap: 0.5rem;">
+                  <button class="admin-btn admin-btn-secondary" style="padding: 0.4rem 0.75rem; font-size: 0.8rem;">Week</button>
+                  <button class="admin-btn admin-btn-primary" style="padding: 0.4rem 0.75rem; font-size: 0.8rem;">Month</button>
+                  <button class="admin-btn admin-btn-secondary" style="padding: 0.4rem 0.75rem; font-size: 0.8rem;">Year</button>
+                </div>
+              </div>
+              <div class="chart-container" style="height: 280px;">
+                <canvas id="revenueChart"></canvas>
+              </div>
+            </div>
+            
+            <!-- Industry Comparison Row -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+              <div class="chart-card">
+                <div class="chart-header">
+                  <div>
+                    <div class="chart-title">Industry Distribution</div>
+                    <div class="chart-subtitle">Orders by sector</div>
+                  </div>
+                </div>
+                <div class="chart-container" style="height: 200px;">
+                  <canvas id="ordersChart"></canvas>
+                </div>
+                <div style="display: flex; justify-content: center; gap: 1rem; padding-top: 0.5rem;">
+                  <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem;">
+                    <span style="width: 10px; height: 10px; background: #dc2626; border-radius: 50%;"></span>
+                    Automotive
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem;">
+                    <span style="width: 10px; height: 10px; background: #0ea5e9; border-radius: 50%;"></span>
+                    Aviation
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem;">
+                    <span style="width: 10px; height: 10px; background: #eab308; border-radius: 50%;"></span>
+                    Machinery
+                  </div>
+                </div>
+              </div>
+              <div class="chart-card">
+                <div class="chart-header">
+                  <div>
+                    <div class="chart-title">Global Reach</div>
+                    <div class="chart-subtitle">Top 5 countries</div>
+                  </div>
+                </div>
+                <div class="chart-container" style="height: 220px;">
+                  <canvas id="countriesChart"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Right: Live Activity & Stats Sidebar -->
+          <div>
+            <!-- Performance Summary Card -->
+            <div style="background: linear-gradient(135deg, #1e3a5f, #2b5278); border-radius: var(--admin-radius-xl); padding: 1.5rem; margin-bottom: 1rem; color: white;">
+              <h4 style="font-size: 0.95rem; font-weight: 600; margin-bottom: 1rem; opacity: 0.9;">📊 Platform Health</h4>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div style="text-align: center;">
+                  <div style="font-size: 1.5rem; font-weight: 800;">94.2%</div>
+                  <div style="font-size: 0.7rem; opacity: 0.7;">Fulfillment</div>
+                </div>
+                <div style="text-align: center;">
+                  <div style="font-size: 1.5rem; font-weight: 800;">4.8</div>
+                  <div style="font-size: 0.7rem; opacity: 0.7;">Avg Rating</div>
+                </div>
+                <div style="text-align: center;">
+                  <div style="font-size: 1.5rem; font-weight: 800;">3.2d</div>
+                  <div style="font-size: 0.7rem; opacity: 0.7;">Delivery</div>
+                </div>
+                <div style="text-align: center;">
+                  <div style="font-size: 1.5rem; font-weight: 800;">&lt;2h</div>
+                  <div style="font-size: 0.7rem; opacity: 0.7;">Response</div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Weekly Overview -->
+            <div class="chart-card" style="margin-bottom: 1rem;">
+              <div class="chart-header">
+                <div>
+                  <div class="chart-title">This Week</div>
+                  <div class="chart-subtitle">Daily order volume</div>
+                </div>
+              </div>
+              <div class="chart-container" style="height: 140px;">
+                <canvas id="weeklyChart"></canvas>
+              </div>
+            </div>
+            
+            <!-- Order Status Mini -->
+            <div class="chart-card">
+              <div class="chart-header">
+                <div>
+                  <div class="chart-title">Order Pipeline</div>
+                  <div class="chart-subtitle">Current status</div>
+                </div>
+              </div>
+              <div class="chart-container" style="height: 140px;">
+                <canvas id="statusChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Main Dashboard: Recent Activity Row (2 columns) -->
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+          <!-- Recent Orders - Takes more space -->
+          <div class="orders-card" style="margin-bottom: 0;">
+            <div class="orders-header">
+              <h3 class="orders-title">Recent Orders</h3>
+              <a href="/admin/orders" class="admin-btn admin-btn-secondary">
+                <i data-lucide="external-link"></i>
+                View All
+              </a>
+            </div>
+            <div class="orders-body" style="max-height: 320px; overflow-y: auto;">
+              <!-- Table Header -->
+              <div style="display: flex; align-items: center; padding: 0.75rem 1rem; border-bottom: 2px solid var(--admin-border); background: var(--admin-bg-secondary); gap: 1rem; position: sticky; top: 0;">
+                <div style="min-width: 110px; font-weight: 600; font-size: 0.7rem; text-transform: uppercase; color: var(--admin-text-muted); letter-spacing: 0.5px;">Order ID</div>
+                <div style="flex: 1; font-weight: 600; font-size: 0.7rem; text-transform: uppercase; color: var(--admin-text-muted); letter-spacing: 0.5px;">Customer</div>
+                <div style="min-width: 90px; font-weight: 600; font-size: 0.7rem; text-transform: uppercase; color: var(--admin-text-muted); letter-spacing: 0.5px; text-align: right;">Amount</div>
+                <div style="min-width: 36px; font-weight: 600; font-size: 0.7rem; text-transform: uppercase; color: var(--admin-text-muted); letter-spacing: 0.5px; text-align: center;">Type</div>
+                <div style="min-width: 100px; font-weight: 600; font-size: 0.7rem; text-transform: uppercase; color: var(--admin-text-muted); letter-spacing: 0.5px;">Status</div>
+              </div>
+              <% recentOrders.slice(0, 8).forEach(function(order) { %>
+                <div class="order-row" style="display: flex; align-items: center; padding: 0.875rem 1rem; border-bottom: 1px solid var(--admin-border); gap: 1rem;">
+                  <div style="min-width: 110px; font-weight: 600; color: var(--admin-primary); font-size: 0.85rem;"><%= order.id %></div>
+                  <div style="flex: 1; font-weight: 500; color: var(--admin-text-primary);"><%= order.customer %></div>
+                  <div style="min-width: 90px; font-weight: 700; color: var(--admin-text-primary); text-align: right;">$<%= order.amount.toLocaleString() %></div>
+                  <div style="min-width: 36px; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: <%= order.industry === 'automotive' ? 'rgba(220, 38, 38, 0.12)' : order.industry === 'aviation' ? 'rgba(14, 165, 233, 0.12)' : 'rgba(234, 179, 8, 0.12)' %>; color: <%= order.industry === 'automotive' ? '#dc2626' : order.industry === 'aviation' ? '#0ea5e9' : '#eab308' %>;">
+                    <% if (order.industry === 'automotive') { %>
+                      <i data-lucide="car" style="width: 16px; height: 16px;"></i>
+                    <% } else if (order.industry === 'aviation') { %>
+                      <i data-lucide="plane" style="width: 16px; height: 16px;"></i>
+                    <% } else { %>
+                      <i data-lucide="construction" style="width: 16px; height: 16px;"></i>
+                    <% } %>
+                  </div>
+                  <div style="min-width: 100px; display: flex; align-items: center; gap: 0.4rem; padding: 0.35rem 0.75rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; background: <%= order.status === 'pending' ? 'rgba(245, 158, 11, 0.12)' : order.status === 'processing' ? 'rgba(59, 130, 246, 0.12)' : order.status === 'shipped' ? 'rgba(139, 92, 246, 0.12)' : 'rgba(16, 185, 129, 0.12)' %>; color: <%= order.status === 'pending' ? '#d97706' : order.status === 'processing' ? '#2563eb' : order.status === 'shipped' ? '#7c3aed' : '#059669' %>;">
+                    <% if (order.status === 'pending') { %>
+                      <i data-lucide="clock" style="width: 12px; height: 12px;"></i>
+                    <% } else if (order.status === 'processing') { %>
+                      <i data-lucide="loader" style="width: 12px; height: 12px;"></i>
+                    <% } else if (order.status === 'shipped') { %>
+                      <i data-lucide="truck" style="width: 12px; height: 12px;"></i>
+                    <% } else { %>
+                      <i data-lucide="check-circle" style="width: 12px; height: 12px;"></i>
+                    <% } %>
+                    <%= order.status.charAt(0).toUpperCase() + order.status.slice(1) %>
+                  </div>
+                </div>
+              <% }); %>
+            </div>
+          </div>
+          
+          <!-- Open Tickets -->
+          <div class="activity-card" style="margin-bottom: 0;">
+            <div class="activity-header">
+              <h3 class="activity-title">Open Tickets</h3>
+              <a href="/admin/tickets" class="admin-btn admin-btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">
+                View All
+              </a>
+            </div>
+            <div class="activity-list" style="max-height: 280px; overflow-y: auto;">
+              <% var openTickets = tickets.filter(function(t) { return t.status === 'open' || t.status === 'in-progress'; }); %>
+              <% openTickets.slice(0, 6).forEach(function(ticket) { %>
+                <div class="activity-item">
+                  <div class="activity-icon <%= ticket.status === 'open' ? 'warning' : '' %>">
+                    <i data-lucide="<%= ticket.priority === 'urgent' ? 'alert-circle' : 'message-square' %>"></i>
+                  </div>
+                  <div class="activity-content" style="flex: 1;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                      <div class="activity-text"><strong><%= ticket.id %></strong></div>
+                      <span style="font-size: 0.65rem; padding: 0.15rem 0.4rem; border-radius: 8px; background: <%= ticket.priority === 'urgent' ? 'rgba(239, 68, 68, 0.15)' : ticket.priority === 'high' ? 'rgba(245, 158, 11, 0.15)' : 'rgba(59, 130, 246, 0.15)' %>; color: <%= ticket.priority === 'urgent' ? '#dc2626' : ticket.priority === 'high' ? '#d97706' : '#3b82f6' %>;"><%= ticket.priority %></span>
+                    </div>
+                    <div class="activity-time" style="font-size: 0.75rem;"><%= ticket.subject.substring(0, 30) %><%= ticket.subject.length > 30 ? '...' : '' %></div>
+                  </div>
+                </div>
+              <% }); %>
+            </div>
+          </div>
+        </div>
+
+        <% } else { %>
+        <!-- MODULE-SPECIFIC: Original Layout for Individual Modules -->
+        
+        <!-- Performance Metrics Row - Simplified -->
+        <div class="performance-row">
+          <div class="performance-card">
+            <div class="performance-header">
+              <div class="performance-icon">
+                <i data-lucide="check-circle"></i>
+              </div>
+              <span class="performance-title">Order Fulfillment</span>
+            </div>
+            <div class="performance-value">94.2%</div>
+            <div class="performance-meta">
+              <span>Target: 95%</span>
+              <span class="positive">+2.1%</span>
+            </div>
+          </div>
+          <div class="performance-card">
+            <div class="performance-header">
+              <div class="performance-icon">
+                <i data-lucide="star"></i>
+              </div>
+              <span class="performance-title">Satisfaction</span>
+            </div>
+            <div class="performance-value">4.8/5.0</div>
+            <div class="performance-meta">
+              <span>2,847 reviews</span>
+              <span class="positive">+0.3</span>
+            </div>
+          </div>
+          <div class="performance-card">
+            <div class="performance-header">
+              <div class="performance-icon">
+                <i data-lucide="truck"></i>
+              </div>
+              <span class="performance-title">Delivery Time</span>
+            </div>
+            <div class="performance-value">3.2 days</div>
+            <div class="performance-meta">
+              <span>Target: 3 days</span>
+              <span class="positive">-0.5 days</span>
+            </div>
+          </div>
+          <div class="performance-card">
+            <div class="performance-header">
+              <div class="performance-icon">
+                <i data-lucide="message-circle"></i>
+              </div>
+              <span class="performance-title">Response Time</span>
+            </div>
+            <div class="performance-value">&lt; 2 hrs</div>
+            <div class="performance-meta">
+              <span>Target: 2 hrs</span>
+              <span class="positive">98% resolved</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Multi Chart Grid -->
+        <div class="multi-chart-grid">
+          <div class="chart-card full-width">
+            <div class="chart-header">
+              <div>
+                <div class="chart-title">Revenue & Orders Trend</div>
+                <div class="chart-subtitle">
+                  <%= moduleConfig.name %> performance over 12 months
+                </div>
+              </div>
+              <div style="display: flex; gap: 0.5rem;">
+                <button class="admin-btn admin-btn-secondary" style="padding: 0.4rem 0.75rem; font-size: 0.8rem;">Week</button>
+                <button class="admin-btn admin-btn-primary" style="padding: 0.4rem 0.75rem; font-size: 0.8rem;">Month</button>
+                <button class="admin-btn admin-btn-secondary" style="padding: 0.4rem 0.75rem; font-size: 0.8rem;">Year</button>
+              </div>
+            </div>
+            <div class="chart-container" style="height: 320px;">
+              <canvas id="revenueChart"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <div class="chart-header">
+              <div>
+                <div class="chart-title">Top Categories</div>
+                <div class="chart-subtitle">Distribution breakdown</div>
+              </div>
+            </div>
+            <div class="chart-container" style="height: 220px;">
+              <canvas id="ordersChart"></canvas>
+            </div>
+            <div class="chart-legend">
+              <% chartData.orderLabels.forEach(function(label, index) { %>
+                <div class="legend-item">
+                  <span class="legend-dot" style="background: <%= ['#3b82f6', '#8b5cf6', '#f59e0b', '#10b981', '#ec4899'][index % 5] %>;"></span>
+                  <span><%= label %></span>
+                </div>
+              <% }); %>
+            </div>
+          </div>
+        </div>
+        <% } %>
+
+        <% if (currentModule) { %>
+        <!-- Additional Charts Row - Module Specific (only for individual modules) -->
+        <div class="admin-grid admin-grid-3" style="margin-bottom: 2rem;">
+          <% if (currentModule !== 'machinery') { %>
+          <div class="chart-card">
+            <div class="chart-header">
+              <div>
+                <div class="chart-title">Order Status</div>
+                <div class="chart-subtitle">Current distribution</div>
+              </div>
+            </div>
+            <div class="chart-container" style="height: 180px;">
+              <canvas id="statusChart"></canvas>
+            </div>
+          </div>
+          <% } %>
+          <% if (currentModule !== 'aviation') { %>
+          <div class="chart-card">
+            <div class="chart-header">
+              <div>
+                <div class="chart-title">Weekly Orders</div>
+                <div class="chart-subtitle">Last 7 days trend</div>
+              </div>
+            </div>
+            <div class="chart-container" style="height: 180px;">
+              <canvas id="weeklyChart"></canvas>
+            </div>
+          </div>
+          <% } %>
+          <% if (currentModule === 'aviation') { %>
+          <div class="chart-card">
+            <div class="chart-header">
+              <div>
+                <div class="chart-title">AOG Cases</div>
+                <div class="chart-subtitle">Priority breakdown</div>
+              </div>
+            </div>
+            <div class="chart-container" style="height: 180px;">
+              <canvas id="aogChart"></canvas>
+            </div>
+          </div>
+          <% } %>
+          <% if (currentModule === 'machinery') { %>
+          <div class="chart-card">
+            <div class="chart-header">
+              <div>
+                <div class="chart-title">Equipment Types</div>
+                <div class="chart-subtitle">Parts by category</div>
+              </div>
+            </div>
+            <div class="chart-container" style="height: 180px;">
+              <canvas id="equipmentChart"></canvas>
+            </div>
+          </div>
+          <% } %>
+          <% if (currentModule !== 'automotive') { %>
+          <div class="chart-card">
+            <div class="chart-header">
+              <div>
+                <div class="chart-title">Top Countries</div>
+                <div class="chart-subtitle">By order volume</div>
+              </div>
+            </div>
+            <div class="chart-container" style="height: 180px;">
+              <canvas id="countriesChart"></canvas>
+            </div>
+          </div>
+          <% } %>
+          <% if (currentModule === 'automotive') { %>
+          <div class="chart-card">
+            <div class="chart-header">
+              <div>
+                <div class="chart-title">Vehicle Brands</div>
+                <div class="chart-subtitle">Top manufacturers</div>
+              </div>
+            </div>
+            <div class="chart-container" style="height: 180px;">
+            <canvas id="brandsChart"></canvas>
+            </div>
+          </div>
+          <% } %>
+        </div>
+        <% } %>
+
+        <% if (currentModule) { %>
+        <!-- Module-Specific: Orders & Tickets Row -->
+        <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+          <!-- Recent Orders -->
+          <div class="orders-card" style="margin-bottom: 0;">
+          <div class="orders-header">
+            <h3 class="orders-title">Recent Orders</h3>
+            <a href="/admin/orders<%= currentModule ? '?module=' + currentModule : '' %>" class="admin-btn admin-btn-secondary">
+              <i data-lucide="external-link"></i>
+              View All
+            </a>
+          </div>
+          <div class="orders-body">
+            <% if (recentOrders.length === 0) { %>
+              <div style="padding: 2rem; text-align: center; color: var(--admin-text-muted);">
+                No orders found for this module.
+              </div>
+            <% } else { %>
+              <!-- Table Header -->
+              <div style="display: flex; align-items: center; padding: 0.75rem 1rem; border-bottom: 2px solid var(--admin-border); background: var(--admin-bg-secondary); gap: 1rem;">
+                <div style="min-width: 120px; font-weight: 600; font-size: 0.7rem; text-transform: uppercase; color: var(--admin-text-muted); letter-spacing: 0.5px;">Order ID</div>
+                <div style="flex: 1; font-weight: 600; font-size: 0.7rem; text-transform: uppercase; color: var(--admin-text-muted); letter-spacing: 0.5px;">Customer</div>
+                <div style="min-width: 100px; font-weight: 600; font-size: 0.7rem; text-transform: uppercase; color: var(--admin-text-muted); letter-spacing: 0.5px; text-align: right;">Amount</div>
+                <div style="min-width: 110px; font-weight: 600; font-size: 0.7rem; text-transform: uppercase; color: var(--admin-text-muted); letter-spacing: 0.5px;">Status</div>
+                <div style="width: 76px; font-weight: 600; font-size: 0.7rem; text-transform: uppercase; color: var(--admin-text-muted); letter-spacing: 0.5px; text-align: center;">Actions</div>
+              </div>
+              <% recentOrders.slice(0, 6).forEach(function(order) { %>
+                <div class="order-row" style="display: flex; align-items: center; padding: 0.875rem 1rem; border-bottom: 1px solid var(--admin-border); gap: 1rem;">
+                  <div style="min-width: 120px; font-weight: 600; color: var(--module-primary); font-size: 0.85rem;"><%= order.id %></div>
+                  <div style="flex: 1; font-weight: 500; color: var(--admin-text-primary);"><%= order.customer %></div>
+                  <div style="min-width: 100px; font-weight: 700; color: var(--admin-text-primary); text-align: right;">$<%= order.amount.toLocaleString() %></div>
+                  <div style="min-width: 110px; display: flex; align-items: center; gap: 0.4rem; padding: 0.35rem 0.75rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; background: <%= order.status === 'pending' ? 'rgba(245, 158, 11, 0.12)' : order.status === 'processing' ? 'rgba(59, 130, 246, 0.12)' : order.status === 'shipped' ? 'rgba(139, 92, 246, 0.12)' : 'rgba(16, 185, 129, 0.12)' %>; color: <%= order.status === 'pending' ? '#d97706' : order.status === 'processing' ? '#2563eb' : order.status === 'shipped' ? '#7c3aed' : '#059669' %>;">
+                    <% if (order.status === 'pending') { %>
+                      <i data-lucide="clock" style="width: 12px; height: 12px;"></i>
+                    <% } else if (order.status === 'processing') { %>
+                      <i data-lucide="loader" style="width: 12px; height: 12px;"></i>
+                    <% } else if (order.status === 'shipped') { %>
+                      <i data-lucide="truck" style="width: 12px; height: 12px;"></i>
+                    <% } else { %>
+                      <i data-lucide="check-circle" style="width: 12px; height: 12px;"></i>
+                    <% } %>
+                    <%= order.status.charAt(0).toUpperCase() + order.status.slice(1) %>
+                  </div>
+                  <div style="display: flex; gap: 0.5rem;">
+                    <button style="width: 32px; height: 32px; border: 1px solid var(--admin-border); background: var(--admin-bg-primary); border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--admin-text-muted); transition: all 0.2s;" title="View Details">
+                      <i data-lucide="eye" style="width: 14px; height: 14px;"></i>
+                    </button>
+                    <button style="width: 32px; height: 32px; border: 1px solid var(--admin-border); background: var(--admin-bg-primary); border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--admin-text-muted); transition: all 0.2s;" title="Edit Order">
+                      <i data-lucide="edit-2" style="width: 14px; height: 14px;"></i>
+                    </button>
+                  </div>
+                </div>
+              <% }); %>
+            <% } %>
+          </div>
+          </div>
+          
+          <!-- Support Tickets -->
+          <div class="activity-card" style="margin-bottom: 0;">
+            <div class="activity-header">
+              <h3 class="activity-title">Support Tickets</h3>
+              <a href="/admin/tickets<%= currentModule ? '?module=' + currentModule : '' %>" class="admin-btn admin-btn-secondary">Manage</a>
+            </div>
+            <div class="activity-list" style="max-height: 300px; overflow-y: auto;">
+              <% if (tickets.length === 0) { %>
+                <div style="padding: 2rem; text-align: center; color: var(--admin-text-muted);">
+                  No tickets found.
+                </div>
+              <% } else { %>
+                <% tickets.slice(0, 5).forEach(function(ticket) { %>
+                  <div class="activity-item" style="padding: 0.875rem;">
+                    <div class="activity-icon <%= ticket.status === 'resolved' ? 'success' : ticket.status === 'open' ? 'warning' : '' %>">
+                      <i data-lucide="<%= ticket.status === 'resolved' ? 'check-circle' : 'mail' %>"></i>
+                    </div>
+                    <div class="activity-content" style="flex: 1;">
+                      <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div class="activity-text"><strong><%= ticket.id %></strong></div>
+                        <span style="font-size: 0.65rem; padding: 0.15rem 0.4rem; border-radius: 8px; background: <%= ticket.priority === 'urgent' ? 'rgba(239, 68, 68, 0.15)' : ticket.priority === 'high' ? 'rgba(245, 158, 11, 0.15)' : 'rgba(59, 130, 246, 0.15)' %>; color: <%= ticket.priority === 'urgent' ? '#dc2626' : ticket.priority === 'high' ? '#d97706' : '#3b82f6' %>;"><%= ticket.priority %></span>
+                      </div>
+                      <div class="activity-time"><%= ticket.subject.substring(0, 30) %><%= ticket.subject.length > 30 ? '...' : '' %></div>
+                      <div style="font-size: 0.7rem; color: var(--admin-text-muted); margin-top: 0.25rem;">
+                        <%= ticket.status.charAt(0).toUpperCase() + ticket.status.slice(1) %> • <%= ticket.category %>
+                      </div>
+                    </div>
+                  </div>
+                <% }); %>
+              <% } %>
+            </div>
+          </div>
+        </div>
+
+        <!-- Activity Feed -->
+        <div class="admin-grid admin-grid-2">
+          <div class="activity-card">
+            <div class="activity-header">
+              <h3 class="activity-title">Recent Activity</h3>
+              <button class="admin-btn admin-btn-secondary">View All</button>
+            </div>
+            <div class="activity-list">
+              <div class="activity-item">
+                <div class="activity-icon success">
+                  <i data-lucide="check-circle"></i>
+                </div>
+                <div class="activity-content">
+                  <div class="activity-text"><strong>Order #ORD-2025-1247</strong> was marked as shipped</div>
+                  <div class="activity-time">2 minutes ago</div>
+                </div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-icon">
+                  <i data-lucide="user-plus"></i>
+                </div>
+                <div class="activity-content">
+                  <div class="activity-text">New user <strong>Aerotech Industries</strong> registered</div>
+                  <div class="activity-time">15 minutes ago</div>
+                </div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-icon warning">
+                  <i data-lucide="alert-triangle"></i>
+                </div>
+                <div class="activity-content">
+                  <div class="activity-text"><strong>Ticket #TKT-004</strong> requires attention</div>
+                  <div class="activity-time">45 minutes ago</div>
+                </div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-icon success">
+                  <i data-lucide="dollar-sign"></i>
+                </div>
+                <div class="activity-content">
+                  <div class="activity-text">Payment of <strong>$156,000</strong> received</div>
+                  <div class="activity-time">1 hour ago</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="activity-card">
+            <div class="activity-header">
+              <h3 class="activity-title">Top Selling Parts</h3>
+              <a href="/admin/products<%= currentModule ? '?module=' + currentModule : '' %>" class="admin-btn admin-btn-secondary">View All</a>
+            </div>
+            <div class="activity-list">
+              <div class="activity-item" style="padding: 0.875rem;">
+                <div style="width: 40px; height: 40px; background: rgba(16, 185, 129, 0.12); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #10b981;">
+                  <i data-lucide="award"></i>
+                </div>
+                <div class="activity-content" style="flex: 1;">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div class="activity-text" style="font-weight: 600;">Brake Pads Premium</div>
+                    <span style="font-weight: 700; color: var(--module-primary);">$45,200</span>
+                  </div>
+                  <div class="activity-time">156 units sold</div>
+                </div>
+              </div>
+              <div class="activity-item" style="padding: 0.875rem;">
+                <div style="width: 40px; height: 40px; background: rgba(59, 130, 246, 0.12); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #3b82f6;">
+                  <i data-lucide="trending-up"></i>
+                </div>
+                <div class="activity-content" style="flex: 1;">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div class="activity-text" style="font-weight: 600;">Engine Filter Kit</div>
+                    <span style="font-weight: 700; color: var(--module-primary);">$38,500</span>
+                  </div>
+                  <div class="activity-time">124 units sold</div>
+                </div>
+              </div>
+              <div class="activity-item" style="padding: 0.875rem;">
+                <div style="width: 40px; height: 40px; background: rgba(139, 92, 246, 0.12); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #8b5cf6;">
+                  <i data-lucide="star"></i>
+                </div>
+                <div class="activity-content" style="flex: 1;">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div class="activity-text" style="font-weight: 600;">Suspension Springs</div>
+                    <span style="font-weight: 700; color: var(--module-primary);">$29,800</span>
+                  </div>
+                  <div class="activity-time">98 units sold</div>
+                </div>
+              </div>
+              <div class="activity-item" style="padding: 0.875rem;">
+                <div style="width: 40px; height: 40px; background: rgba(245, 158, 11, 0.12); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #f59e0b;">
+                  <i data-lucide="package"></i>
+                </div>
+                <div class="activity-content" style="flex: 1;">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div class="activity-text" style="font-weight: 600;">Hydraulic Pump</div>
+                    <span style="font-weight: 700; color: var(--module-primary);">$22,100</span>
+                  </div>
+                  <div class="activity-time">67 units sold</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <% } %>
+      </div>
+    </main>
+  </div>
+
+  <!-- Charts Initialization -->
+  <script>
+    // Get module-themed color
+    const moduleColor = getComputedStyle(document.documentElement).getPropertyValue('--module-primary').trim() || '#3b82f6';
+    const currentModule = '<%= typeof currentModule !== "undefined" ? currentModule : "" %>';
+
+    // Revenue Chart - Module-Specific Styling
+    const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+    
+    // Define unique chart configurations per module
+    const chartConfigs = {
+      automotive: {
+        type: 'bar',
+        primaryColor: '#dc2626',
+        secondaryColor: '#f97316',
+        gradient: ['#dc2626', '#ef4444', '#f87171'],
+        borderRadius: 8,
+        barThickness: 24
+      },
+      aviation: {
+        type: 'line',
+        primaryColor: '#0ea5e9',
+        secondaryColor: '#6366f1',
+        gradient: ['#0ea5e9', '#38bdf8', '#7dd3fc'],
+        tension: 0.5,
+        pointStyle: 'circle'
+      },
+      machinery: {
+        type: 'bar',
+        primaryColor: '#eab308',
+        secondaryColor: '#84cc16',
+        gradient: ['#eab308', '#facc15', '#fde047'],
+        borderRadius: 4,
+        barThickness: 20
+      },
+      default: {
+        type: 'line',
+        primaryColor: '#3b82f6',
+        secondaryColor: '#8b5cf6',
+        gradient: ['#3b82f6', '#60a5fa', '#93c5fd'],
+        tension: 0.4,
+        pointStyle: 'rectRounded'
+      }
+    };
+    
+    const config = chartConfigs[currentModule] || chartConfigs.default;
+    
+    // Create gradient for revenue
+    const revenueGradient = revenueCtx.createLinearGradient(0, 0, 0, 300);
+    revenueGradient.addColorStop(0, config.primaryColor + '40');
+    revenueGradient.addColorStop(1, config.primaryColor + '05');
+    
+    // Module-specific orders data
+    const ordersData = {
+      automotive: [38, 45, 42, 58, 65, 52, 72, 78, 62, 85, 95, 68],
+      aviation: [12, 15, 14, 22, 28, 20, 32, 35, 25, 42, 48, 30],
+      machinery: [25, 30, 28, 38, 45, 35, 52, 55, 42, 62, 70, 48],
+      default: [45, 52, 48, 65, 72, 58, 78, 85, 68, 92, 105, 75]
+    };
+    
+    new Chart(revenueCtx, {
+      type: config.type,
+      data: {
+        labels: <%- JSON.stringify(chartData.revenueLabels) %>,
+        datasets: [{
+          label: currentModule ? (currentModule.charAt(0).toUpperCase() + currentModule.slice(1) + ' Revenue ($K)') : 'Platform Revenue ($K)',
+          data: <%- JSON.stringify(chartData.revenueData.map(function(v) { return v / 1000; })) %>,
+          borderColor: config.primaryColor,
+          backgroundColor: config.type === 'bar' ? config.primaryColor : revenueGradient,
+          fill: config.type === 'line',
+          tension: config.tension || 0,
+          borderRadius: config.borderRadius || 0,
+          barThickness: config.barThickness,
+          pointBackgroundColor: config.primaryColor,
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          pointRadius: config.type === 'line' ? 5 : 0,
+          pointStyle: config.pointStyle || 'circle',
+          yAxisID: 'y',
+          order: 2
+        }, {
+          label: 'Orders',
+          data: ordersData[currentModule] || ordersData.default,
+          type: 'line',
+          borderColor: config.secondaryColor,
+          backgroundColor: 'transparent',
+          borderDash: currentModule === 'aviation' ? [] : [5, 5],
+          borderWidth: currentModule === 'aviation' ? 3 : 2,
+          tension: 0.4,
+          pointBackgroundColor: config.secondaryColor,
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          yAxisID: 'y1',
+          order: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: { 
+          legend: { 
+            display: true, 
+            position: 'top', 
+            labels: { 
+              usePointStyle: true, 
+              padding: 20,
+              font: { weight: '600' }
+            } 
+          },
+          tooltip: {
+            backgroundColor: 'rgba(30, 41, 59, 0.95)',
+            titleFont: { size: 14, weight: '600' },
+            bodyFont: { size: 13 },
+            padding: 12,
+            cornerRadius: 8,
+            displayColors: true
+          }
+        },
+        scales: {
+          y: {
+            type: 'linear',
+            display: true,
+            position: 'left',
+            grid: { color: 'rgba(43, 82, 120, 0.06)' },
+            ticks: { 
+              color: '#64748b', 
+              callback: value => '$' + value + 'K',
+              font: { weight: '500' }
+            }
+          },
+          y1: {
+            type: 'linear',
+            display: true,
+            position: 'right',
+            grid: { drawOnChartArea: false },
+            ticks: { 
+              color: config.secondaryColor,
+              font: { weight: '500' }
+            }
+          },
+          x: {
+            grid: { display: false },
+            ticks: { 
+              color: '#64748b',
+              font: { weight: '500' }
+            }
+          }
+        }
+      }
+    });
+
+    // Orders/Categories Chart
+    const ordersCtx = document.getElementById('ordersChart').getContext('2d');
+    new Chart(ordersCtx, {
+      type: 'doughnut',
+      data: {
+        labels: <%- JSON.stringify(chartData.orderLabels) %>,
+        datasets: [{
+          data: <%- JSON.stringify(chartData.orderData) %>,
+          backgroundColor: currentModule === 'automotive' 
+            ? ['#dc2626', '#ef4444', '#f87171', '#fca5a5', '#fecaca']
+            : currentModule === 'aviation'
+            ? ['#0ea5e9', '#38bdf8', '#7dd3fc', '#bae6fd', '#e0f2fe']
+            : currentModule === 'machinery'
+            ? ['#eab308', '#facc15', '#fde047', '#fef08a', '#fef9c3']
+            : ['#dc2626', '#0ea5e9', '#eab308', '#10b981', '#8b5cf6'],
+          borderWidth: 0,
+          hoverOffset: 10
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        cutout: '65%'
+      }
+    });
+
+    // Status Chart (main dashboard and all modules except machinery)
+    <% if (!currentModule || currentModule !== 'machinery') { %>
+    const statusCtx = document.getElementById('statusChart').getContext('2d');
+    new Chart(statusCtx, {
+      type: 'bar',
+      data: {
+        labels: ['Pending', 'Processing', 'Shipped', 'Delivered'],
+        datasets: [{
+          data: [24, 45, 32, 89],
+          backgroundColor: ['#f59e0b', '#3b82f6', '#8b5cf6', '#10b981'],
+          borderRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { display: false },
+          x: { grid: { display: false }, ticks: { color: '#64748b', font: { size: 10 } } }
+        }
+      }
+    });
+    <% } %>
+
+    // Weekly Chart (main dashboard and all modules except aviation)
+    <% if (!currentModule || currentModule !== 'aviation') { %>
+    const weeklyCtx = document.getElementById('weeklyChart').getContext('2d');
+    new Chart(weeklyCtx, {
+      type: 'line',
+      data: {
+        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        datasets: [{
+          data: [35, 42, 38, 55, 48, 32, 28],
+          borderColor: moduleColor,
+          backgroundColor: moduleColor + '20',
+          fill: true,
+          tension: 0.4,
+          pointRadius: 3
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { display: false },
+          x: { grid: { display: false }, ticks: { color: '#64748b', font: { size: 10 } } }
+        }
+      }
+    });
+    <% } %>
+
+    // AOG Cases Chart (Aviation only)
+    <% if (currentModule === 'aviation') { %>
+    const aogCtx = document.getElementById('aogChart').getContext('2d');
+    new Chart(aogCtx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Critical', 'High', 'Medium', 'Resolved'],
+        datasets: [{
+          data: [2, 3, 4, 12],
+          backgroundColor: ['#ef4444', '#f59e0b', '#3b82f6', '#10b981'],
+          borderWidth: 0
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: true, position: 'right', labels: { usePointStyle: true, font: { size: 10 } } } },
+        cutout: '50%'
+      }
+    });
+    <% } %>
+
+    // Equipment Types Chart (Machinery only)
+    <% if (currentModule === 'machinery') { %>
+    const equipmentCtx = document.getElementById('equipmentChart').getContext('2d');
+    new Chart(equipmentCtx, {
+      type: 'bar',
+      data: {
+        labels: ['Cranes', 'Excavators', 'Loaders', 'Dozers', 'Rollers'],
+        datasets: [{
+          data: [156, 234, 189, 98, 67],
+          backgroundColor: '#eab308',
+          borderRadius: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { display: false },
+          x: { grid: { display: false }, ticks: { color: '#64748b', font: { size: 10 } } }
+        }
+      }
+    });
+    <% } %>
+
+    // Countries Chart (main dashboard and all modules except automotive)
+    <% if (!currentModule || currentModule !== 'automotive') { %>
+    const countriesCtx = document.getElementById('countriesChart').getContext('2d');
+    new Chart(countriesCtx, {
+      type: 'bar',
+      data: {
+        labels: ['USA', 'Germany', 'UK', 'UAE', 'France'],
+        datasets: [{
+          data: [156, 98, 87, 65, 54],
+          backgroundColor: moduleColor,
+          borderRadius: 4
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { display: false },
+          y: { grid: { display: false }, ticks: { color: '#64748b', font: { size: 10 } } }
+        }
+      }
+    });
+    <% } %>
+
+    // Vehicle Brands Chart (Automotive only)
+    <% if (currentModule === 'automotive') { %>
+    const brandsCtx = document.getElementById('brandsChart').getContext('2d');
+    new Chart(brandsCtx, {
+      type: 'bar',
+      data: {
+        labels: ['BMW', 'Mercedes', 'Audi', 'Toyota', 'Ford'],
+        datasets: [{
+          data: [89, 76, 65, 54, 48],
+          backgroundColor: '#dc2626',
+          borderRadius: 4
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { display: false },
+          y: { grid: { display: false }, ticks: { color: '#64748b', font: { size: 10 } } }
+        }
+      }
+    });
+    <% } %>
+  </script>
+
+<%- include('partials/footer') %>

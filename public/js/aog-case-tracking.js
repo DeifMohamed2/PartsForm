@@ -5,6 +5,50 @@
 
 document.addEventListener('DOMContentLoaded', () => {
   // ====================================
+  // AOG PERSISTENT COUNTDOWN TIMER
+  // ====================================
+
+  const hoursElement = document.getElementById('aog-hours');
+  const minutesElement = document.getElementById('aog-minutes');
+  const secondsElement = document.getElementById('aog-seconds');
+
+  // Get case ID from URL
+  const caseId = window.location.pathname.split('/').pop();
+  const timerKey = `aog-timer-start-${caseId}`;
+
+  // Get or set the start time
+  let startTime = localStorage.getItem(timerKey);
+  
+  if (!startTime) {
+    // If no start time exists, set it to now
+    startTime = new Date().getTime();
+    localStorage.setItem(timerKey, startTime);
+  } else {
+    startTime = parseInt(startTime);
+  }
+
+  function updateAOGTimer() {
+    const now = new Date().getTime();
+    const elapsed = now - startTime;
+
+    // Calculate time units
+    const hours = Math.floor(elapsed / (1000 * 60 * 60));
+    const minutes = Math.floor((elapsed % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((elapsed % (1000 * 60)) / 1000);
+
+    // Update display with leading zeros
+    if (hoursElement) hoursElement.textContent = String(hours).padStart(2, '0');
+    if (minutesElement) minutesElement.textContent = String(minutes).padStart(2, '0');
+    if (secondsElement) secondsElement.textContent = String(seconds).padStart(2, '0');
+  }
+
+  // Update timer immediately and then every second
+  if (hoursElement && minutesElement && secondsElement) {
+    updateAOGTimer();
+    setInterval(updateAOGTimer, 1000);
+  }
+
+  // ====================================
   // TIMELINE ANIMATION
   // ====================================
 
@@ -108,7 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // LOAD CASE DATA
   // ====================================
 
-  const caseId = window.location.pathname.split('/').pop();
+  // caseId already declared at the top of the file
   const caseData = localStorage.getItem(`aog-case-${caseId}`);
   const quoteSelection = localStorage.getItem(`aog-quote-selection-${caseId}`);
 

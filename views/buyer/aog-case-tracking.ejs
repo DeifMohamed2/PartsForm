@@ -43,6 +43,33 @@
   </div>
 
   <div class="tracking-container">
+    <!-- AOG Timer Card - Compact -->
+    <div class="aog-timer-card-compact">
+      <div class="aog-timer-inline">
+        <div class="aog-timer-badge-small">
+          <i data-lucide="alert-triangle"></i>
+          <span>AOG CRITICAL</span>
+        </div>
+        <div class="aog-countdown-compact" id="aog-countdown">
+          <div class="countdown-unit-compact">
+            <div class="countdown-value-compact" id="aog-hours">00</div>
+            <div class="countdown-label-compact">hrs</div>
+          </div>
+          <span class="countdown-sep-compact">:</span>
+          <div class="countdown-unit-compact">
+            <div class="countdown-value-compact" id="aog-minutes">00</div>
+            <div class="countdown-label-compact">min</div>
+          </div>
+          <span class="countdown-sep-compact">:</span>
+          <div class="countdown-unit-compact">
+            <div class="countdown-value-compact" id="aog-seconds">00</div>
+            <div class="countdown-label-compact">sec</div>
+          </div>
+        </div>
+      </div>
+      <div class="aog-timer-caption">Time since AOG case created</div>
+    </div>
+
     <!-- Tracking Info Grid -->
     <div class="tracking-info-grid">
       <div class="tracking-info-card">
@@ -87,21 +114,58 @@
     </div>
 
 
-    <!-- Status Banner -->
-    <div class="status-banner">
-      <div class="status-banner-content">
-        <div class="status-banner-left">
-          <div class="status-banner-icon">
-            <i data-lucide="truck"></i>
-          </div>
-          <div class="status-banner-text">
-            <div class="status-banner-title">In Transit</div>
-            <div class="status-banner-desc">Your shipment is on the way and on schedule</div>
+    <!-- Current Status Card -->
+    <div class="current-status-card">
+      <div class="status-card-grid">
+        <!-- Status Info -->
+        <div class="status-info-section">
+
+          <div class="status-text-content">
+            <div class="status-phase">Current Phase</div>
+            <div class="status-title">Preparing Shipment</div>
+            <div class="status-description">Your order is being prepared for shipping</div>
           </div>
         </div>
-        <div class="status-banner-eta">
-          <div class="eta-label">Estimated Arrival</div>
-          <div class="eta-value">Jan 2, 2026</div>
+
+        <!-- Progress Bar -->
+        <div class="status-progress-section">
+          <div class="progress-header">
+            <span class="progress-label">Shipment Progress</span>
+            <span class="progress-percentage">40%</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" style="width: 40%"></div>
+          </div>
+          <div class="progress-steps">
+            <div class="progress-step completed">
+              <div class="step-dot"></div>
+              <div class="step-label">Confirmed</div>
+            </div>
+            <div class="progress-step active">
+              <div class="step-dot"></div>
+              <div class="step-label">Preparing</div>
+            </div>
+            <div class="progress-step">
+              <div class="step-dot"></div>
+              <div class="step-label">Shipped</div>
+            </div>
+            <div class="progress-step">
+              <div class="step-dot"></div>
+              <div class="step-label">Delivered</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ETA Card -->
+        <div class="status-eta-section">
+          <div class="eta-icon">
+            <i data-lucide="calendar"></i>
+          </div>
+          <div class="eta-content">
+            <div class="eta-label">Estimated Arrival</div>
+            <div class="eta-date">10 Days</div>
+            <div class="eta-subtext">Jan 4, 2026</div>
+          </div>
         </div>
       </div>
     </div>
@@ -352,7 +416,12 @@
   </div>
 </div>
 
+<!-- Quick Search Modal -->
+<%- include('partials/quick-search') %>
+
 <script src="/js/animations.js"></script>
+<script src="/js/main.js"></script>
+<script src="/js/quick-search.js"></script>
 <script src="/js/aog-case-tracking.js"></script>
 <script>
   lucide.createIcons();

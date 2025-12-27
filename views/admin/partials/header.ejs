@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="PARTSFORM Admin Panel - Enterprise Industrial Parts Management">
+  <title><%= title %></title>
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="/images/favicon.png">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <!-- Admin CSS -->
+  <link rel="stylesheet" href="/css/adminCSS/admin-main.css">
+
+  <!-- Module Transition Loader Styles -->
+  <style>
+    /* Loader Overlay - Visible by default on page load */
+    .module-loader-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 99999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 1;
+      visibility: visible;
+      transition: opacity 0.4s ease, visibility 0.4s ease;
+    }
+    
+    .module-loader-overlay.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    
+    /* Loader Background - Module Specific */
+    .module-loader-overlay.loader-default {
+      background: linear-gradient(135deg, #1e3a5f 0%, #2b5278 50%, #1e3a5f 100%);
+    }
+    .module-loader-overlay.loader-automotive {
+      background: linear-gradient(135deg, #7f1d1d 0%, #dc2626 50%, #7f1d1d 100%);
+    }
+    .module-loader-overlay.loader-aviation {
+      background: linear-gradient(135deg, #0c4a6e 0%, #0ea5e9 50%, #0c4a6e 100%);
+    }
+    .module-loader-overlay.loader-machinery {
+      background: linear-gradient(135deg, #713f12 0%, #eab308 50%, #713f12 100%);
+    }
+    
+    /* Loader Content */
+    .module-loader-content {
+      text-align: center;
+      color: white;
+    }
+    
+    /* Animated Icon Container */
+    .loader-icon-container {
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 1.5rem;
+      position: relative;
+    }
+    
+    /* Spinning Ring */
+    .loader-ring {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: 4px solid rgba(255, 255, 255, 0.2);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: loaderSpin 1s linear infinite;
+    }
+    
+    /* Icon Inside */
+    .loader-icon {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 48px;
+      height: 48px;
+      color: white;
+      animation: loaderPulse 1.5s ease-in-out infinite;
+    }
+    
+    /* Module-Specific Animations */
+    .loader-automotive .loader-icon {
+      animation: loaderDrive 1s ease-in-out infinite;
+    }
+    .loader-aviation .loader-icon {
+      animation: loaderFly 2s ease-in-out infinite;
+    }
+    .loader-machinery .loader-icon {
+      animation: loaderBuild 1.5s ease-in-out infinite;
+    }
+    
+    /* Loader Text */
+    .loader-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      letter-spacing: 0.5px;
+    }
+    
+    .loader-subtitle {
+      font-size: 0.9rem;
+      opacity: 0.8;
+      font-weight: 500;
+    }
+    
+    /* Progress Bar */
+    .loader-progress {
+      width: 200px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+      margin: 1.5rem auto 0;
+      overflow: hidden;
+    }
+    
+    .loader-progress-bar {
+      height: 100%;
+      background: white;
+      border-radius: 4px;
+      animation: loaderProgress 1.2s ease-in-out infinite;
+    }
+    
+    /* Keyframes */
+    @keyframes loaderSpin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    @keyframes loaderPulse {
+      0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+      50% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.8; }
+    }
+    
+    @keyframes loaderDrive {
+      0%, 100% { transform: translate(-50%, -50%) translateX(0); }
+      25% { transform: translate(-50%, -50%) translateX(-5px) rotate(-3deg); }
+      75% { transform: translate(-50%, -50%) translateX(5px) rotate(3deg); }
+    }
+    
+    @keyframes loaderFly {
+      0%, 100% { transform: translate(-50%, -50%) translateY(0) rotate(0deg); }
+      25% { transform: translate(-50%, -50%) translateY(-8px) rotate(-5deg); }
+      50% { transform: translate(-50%, -50%) translateY(0) rotate(0deg); }
+      75% { transform: translate(-50%, -50%) translateY(-4px) rotate(5deg); }
+    }
+    
+    @keyframes loaderBuild {
+      0%, 100% { transform: translate(-50%, -50%) rotate(0deg); }
+      25% { transform: translate(-50%, -50%) rotate(-10deg); }
+      75% { transform: translate(-50%, -50%) rotate(10deg); }
+    }
+    
+    @keyframes loaderProgress {
+      0% { width: 0%; margin-left: 0; }
+      50% { width: 70%; margin-left: 15%; }
+      100% { width: 0%; margin-left: 100%; }
+    }
+    
+    /* Particles Effect */
+    .loader-particles {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    
+    .loader-particle {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      animation: particleFloat 3s ease-in-out infinite;
+    }
+    
+    .loader-particle:nth-child(1) { left: 10%; animation-delay: 0s; }
+    .loader-particle:nth-child(2) { left: 25%; animation-delay: 0.5s; }
+    .loader-particle:nth-child(3) { left: 40%; animation-delay: 1s; }
+    .loader-particle:nth-child(4) { left: 55%; animation-delay: 1.5s; }
+    .loader-particle:nth-child(5) { left: 70%; animation-delay: 2s; }
+    .loader-particle:nth-child(6) { left: 85%; animation-delay: 2.5s; }
+    
+    @keyframes particleFloat {
+      0%, 100% { 
+        transform: translateY(100vh) scale(0);
+        opacity: 0;
+      }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { 
+        transform: translateY(-20px) scale(1);
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Module Transition Loader -->
+  <div class="module-loader-overlay loader-default" id="moduleLoaderOverlay">
+    <div class="loader-particles">
+      <div class="loader-particle"></div>
+      <div class="loader-particle"></div>
+      <div class="loader-particle"></div>
+      <div class="loader-particle"></div>
+      <div class="loader-particle"></div>
+      <div class="loader-particle"></div>
+    </div>
+    <div class="module-loader-content">
+      <div class="loader-icon-container">
+        <div class="loader-ring"></div>
+        <i data-lucide="layers" class="loader-icon" id="loaderIcon"></i>
+      </div>
+      <div class="loader-title" id="loaderTitle">Loading Dashboard</div>
+      <div class="loader-subtitle" id="loaderSubtitle">Please wait...</div>
+      <div class="loader-progress">
+        <div class="loader-progress-bar"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Module Loader System - Optimized
+    var ModuleLoader = {
+      overlay: null,
+      icon: null,
+      title: null,
+      subtitle: null,
+      hideTimer: null,
+      navTimer: null,
+      isNavigating: false,
+      
+      init: function() {
+        this.overlay = document.getElementById('moduleLoaderOverlay');
+        this.icon = document.getElementById('loaderIcon');
+        this.title = document.getElementById('loaderTitle');
+        this.subtitle = document.getElementById('loaderSubtitle');
+      },
+      
+      getModuleConfig: function(module) {
+        var configs = {
+          automotive: {
+            icon: 'car',
+            title: 'Loading Automotive',
+            subtitle: 'Preparing vehicle parts data...',
+            className: 'loader-automotive'
+          },
+          aviation: {
+            icon: 'plane',
+            title: 'Loading Aviation',
+            subtitle: 'Preparing aircraft parts & AOG...',
+            className: 'loader-aviation'
+          },
+          machinery: {
+            icon: 'construction',
+            title: 'Loading Machinery',
+            subtitle: 'Preparing industrial equipment...',
+            className: 'loader-machinery'
+          },
+          'default': {
+            icon: 'layers',
+            title: 'Loading Dashboard',
+            subtitle: 'Preparing all modules...',
+            className: 'loader-default'
+          }
+        };
+        return configs[module] || configs['default'];
+      },
+      
+      clearTimers: function() {
+        if (this.hideTimer) {
+          clearTimeout(this.hideTimer);
+          this.hideTimer = null;
+        }
+        if (this.navTimer) {
+          clearTimeout(this.navTimer);
+          this.navTimer = null;
+        }
+      },
+      
+      updateIcon: function(iconName) {
+        if (!this.icon) return;
+        // Clear existing SVG content completely
+        this.icon.innerHTML = '';
+        this.icon.setAttribute('data-lucide', iconName);
+        // Re-render lucide icons
+        if (typeof lucide !== 'undefined') {
+          lucide.createIcons({ nodes: [this.icon] });
+        }
+      },
+      
+      show: function(module) {
+        if (!this.overlay) this.init();
+        
+        // Clear any pending timers
+        this.clearTimers();
+        
+        var config = this.getModuleConfig(module);
+        
+        // Update content
+        this.updateIcon(config.icon);
+        if (this.title) this.title.textContent = config.title;
+        if (this.subtitle) this.subtitle.textContent = config.subtitle;
+        
+        // Update classes - remove hidden to show
+        if (this.overlay) {
+          this.overlay.className = 'module-loader-overlay ' + config.className;
+        }
+      },
+      
+      hide: function() {
+        var self = this;
+        if (this.overlay) {
+          this.overlay.classList.add('hidden');
+        }
+        this.isNavigating = false;
+      },
+      
+      showAndHide: function(module, duration) {
+        var self = this;
+        this.show(module);
+        this.hideTimer = setTimeout(function() {
+          self.hide();
+        }, duration || 1500);
+      }
+    };
+    
+    // Initialize on DOM ready
+    document.addEventListener('DOMContentLoaded', function() {
+      ModuleLoader.init();
+      
+      // Set correct module theme on loader (it's already visible by default CSS)
+      var currentUrl = new URL(window.location.href);
+      var currentModule = currentUrl.searchParams.get('module') || '';
+      
+      // Show loader with correct theme and hide after delay
+      ModuleLoader.showAndHide(currentModule, 1500);
+      
+      // Intercept module navigation clicks
+      document.addEventListener('click', function(e) {
+        var link = e.target.closest('a[href*="module="], .module-option');
+        
+        if (link && !ModuleLoader.isNavigating) {
+          var targetModule = '';
+          
+          if (link.classList.contains('module-option')) {
+            targetModule = link.dataset.module || '';
+          } else if (link.href) {
+            try {
+              var url = new URL(link.href, window.location.origin);
+              targetModule = url.searchParams.get('module') || '';
+            } catch(err) {
+              return;
+            }
+          }
+          
+          // Only show loader for actual navigation (not current page)
+          var pageUrl = new URL(window.location.href);
+          var pageModule = pageUrl.searchParams.get('module') || '';
+          
+          if (targetModule !== pageModule) {
+            e.preventDefault();
+            ModuleLoader.isNavigating = true;
+            ModuleLoader.show(targetModule);
+            
+            // Navigate after delay
+            var href = link.href || (link.dataset.module ? 
+              window.location.pathname + '?module=' + link.dataset.module : 
+              window.location.pathname);
+            
+            ModuleLoader.navTimer = setTimeout(function() {
+              window.location.href = href;
+            }, 1500);
+          }
+        }
+      });
+    });
+    
+    // Handle page show (back/forward navigation)
+    window.addEventListener('pageshow', function(event) {
+      if (event.persisted) {
+        // Page was restored from cache (back/forward)
+        ModuleLoader.init();
+        var currentUrl = new URL(window.location.href);
+        var currentModule = currentUrl.searchParams.get('module') || '';
+        ModuleLoader.showAndHide(currentModule, 1000);
+      }
+    });
+  </script>
+</body>

@@ -1,0 +1,146 @@
+<%- include('partials/header') %>
+<link rel="stylesheet" href="/css/adminCSS/admin-dashboard.css">
+</head>
+<body class="<%= typeof currentModule !== 'undefined' && currentModule ? 'module-' + currentModule : '' %>">
+  <div class="admin-wrapper">
+    <%- include('partials/sidebar', { activePage: 'orders', currentModule: currentModule }) %>
+    
+    <main class="admin-main">
+      <%- include('partials/topbar', { pageTitle: 'Orders', currentModule: currentModule }) %>
+      
+      <div class="admin-content">
+        <% if (currentModule && moduleConfig) { %>
+        <div class="module-info-banner">
+          <div class="module-info-icon">
+            <i data-lucide="<%= moduleConfig.icon %>"></i>
+          </div>
+          <div class="module-info-content">
+            <div class="module-info-title"><%= moduleConfig.name %> Orders</div>
+            <div class="module-info-desc">Viewing <%= moduleConfig.name.toLowerCase() %> orders only</div>
+          </div>
+          <div class="module-info-stats">
+            <div class="module-info-stat">
+              <div class="module-info-stat-value"><%= orders.length %></div>
+              <div class="module-info-stat-label">Orders</div>
+            </div>
+            <div class="module-info-stat">
+              <div class="module-info-stat-value">$<%= (orders.reduce((s, o) => s + o.amount, 0) / 1000).toFixed(0) %>K</div>
+              <div class="module-info-stat-label">Total</div>
+            </div>
+          </div>
+        </div>
+        <% } %>
+
+        <div class="page-header">
+          <h2><%= currentModule ? moduleConfig.name + ' Orders' : 'Orders Management' %></h2>
+          <button class="admin-btn admin-btn-primary">
+            <i data-lucide="plus"></i>
+            Create Order
+          </button>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters-row">
+          <div class="filter-group">
+            <span class="filter-label">Status:</span>
+            <select class="filter-select">
+              <option value="">All Status</option>
+              <option value="pending">Pending</option>
+              <option value="processing">Processing</option>
+              <option value="shipped">Shipped</option>
+              <option value="delivered">Delivered</option>
+            </select>
+          </div>
+          <% if (!currentModule) { %>
+          <div class="filter-group">
+            <span class="filter-label">Industry:</span>
+            <select class="filter-select">
+              <option value="">All Industries</option>
+              <option value="automotive">Automotive</option>
+              <option value="aviation">Aviation</option>
+              <option value="machinery">Machinery</option>
+            </select>
+          </div>
+          <% } %>
+          <div class="filter-group">
+            <span class="filter-label">Date:</span>
+            <select class="filter-select">
+              <option value="">All Time</option>
+              <option value="today">Today</option>
+              <option value="week">This Week</option>
+              <option value="month">This Month</option>
+            </select>
+          </div>
+          <div class="filter-search">
+            <i data-lucide="search"></i>
+            <input type="text" placeholder="Search orders...">
+          </div>
+        </div>
+
+        <!-- Orders Table -->
+        <div class="orders-card">
+          <div class="orders-body">
+            <div class="order-row" style="background: var(--admin-bg-tertiary); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--admin-text-muted);">
+              <div>Order ID</div>
+              <div>Customer</div>
+              <div>Amount</div>
+              <div>Industry</div>
+              <div>Status</div>
+              <div>Actions</div>
+            </div>
+            <% if (orders.length === 0) { %>
+              <div style="padding: 2rem; text-align: center; color: var(--admin-text-muted);">
+                No orders found.
+              </div>
+            <% } else { %>
+              <% orders.forEach(order => { %>
+                <div class="order-row">
+                  <div class="order-id"><%= order.id %></div>
+                  <div class="order-customer">
+                    <div><%= order.customer %></div>
+                    <div style="font-size: 0.8rem; color: var(--admin-text-muted);"><%= order.email %></div>
+                  </div>
+                  <div class="order-amount">$<%= order.amount.toLocaleString() %></div>
+                  <div class="order-industry <%= order.industry %>">
+                    <% if (order.industry === 'automotive') { %>
+                      <i data-lucide="car" style="width: 14px; height: 14px;"></i>
+                    <% } else if (order.industry === 'aviation') { %>
+                      <i data-lucide="plane" style="width: 14px; height: 14px;"></i>
+                    <% } else { %>
+                      <i data-lucide="construction" style="width: 14px; height: 14px;"></i>
+                    <% } %>
+                    <%= order.industry.charAt(0).toUpperCase() + order.industry.slice(1) %>
+                  </div>
+                  <div class="order-status <%= order.status %>">
+                    <% if (order.status === 'pending') { %>
+                      <i data-lucide="clock" style="width: 12px; height: 12px;"></i>
+                    <% } else if (order.status === 'processing') { %>
+                      <i data-lucide="loader" style="width: 12px; height: 12px;"></i>
+                    <% } else if (order.status === 'shipped') { %>
+                      <i data-lucide="truck" style="width: 12px; height: 12px;"></i>
+                    <% } else { %>
+                      <i data-lucide="check-circle" style="width: 12px; height: 12px;"></i>
+                    <% } %>
+                    <%= order.status.charAt(0).toUpperCase() + order.status.slice(1) %>
+                  </div>
+                  <div class="order-actions">
+                    <button class="order-action-btn" title="View Details">
+                      <i data-lucide="eye"></i>
+                    </button>
+                    <button class="order-action-btn" title="Edit Order">
+                      <i data-lucide="edit-2"></i>
+                    </button>
+                    <button class="order-action-btn" title="Delete Order">
+                      <i data-lucide="trash-2"></i>
+                    </button>
+                  </div>
+                </div>
+              <% }); %>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+<%- include('partials/footer') %>

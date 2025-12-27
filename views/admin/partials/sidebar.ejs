@@ -1,0 +1,247 @@
+<!-- Admin Sidebar Navigation - Light Mode -->
+<aside class="admin-sidebar" id="adminSidebar">
+  <!-- Sidebar Header -->
+  <div class="sidebar-header">
+    <a href="/admin" class="sidebar-logo">
+      <img src="/images/PARTSFORM-LOGO-CWstUpY1.webp" alt="PartsForm Logo">
+      <span class="sidebar-logo-badge">Admin</span>
+    </a>
+  </div>
+
+  <!-- Sidebar Navigation -->
+  <nav class="sidebar-nav">
+    <!-- Main Section -->
+    <div class="sidebar-nav-section">
+      <div class="sidebar-nav-title">Main</div>
+      <a href="/admin<%= typeof currentModule !== 'undefined' && currentModule ? '?module=' + currentModule : '' %>" class="sidebar-nav-item <%= typeof activePage !== 'undefined' && activePage === 'dashboard' ? 'active' : '' %>">
+        <i data-lucide="layout-dashboard"></i>
+        <span>Dashboard</span>
+      </a>
+    </div>
+
+    <!-- Management Section -->
+    <div class="sidebar-nav-section">
+      <div class="sidebar-nav-title">Management</div>
+      <a href="/admin/orders<%= typeof currentModule !== 'undefined' && currentModule ? '?module=' + currentModule : '' %>" class="sidebar-nav-item <%= typeof activePage !== 'undefined' && activePage === 'orders' ? 'active' : '' %>">
+        <i data-lucide="shopping-cart"></i>
+        <span>Orders</span>
+        <span class="sidebar-nav-badge">12</span>
+      </a>
+      <a href="/admin/tickets<%= typeof currentModule !== 'undefined' && currentModule ? '?module=' + currentModule : '' %>" class="sidebar-nav-item <%= typeof activePage !== 'undefined' && activePage === 'tickets' ? 'active' : '' %>">
+        <i data-lucide="ticket"></i>
+        <span>Tickets</span>
+        <span class="sidebar-nav-badge">5</span>
+      </a>
+      <a href="/admin/users<%= typeof currentModule !== 'undefined' && currentModule ? '?module=' + currentModule : '' %>" class="sidebar-nav-item <%= typeof activePage !== 'undefined' && activePage === 'users' ? 'active' : '' %>">
+        <i data-lucide="users"></i>
+        <span>Users</span>
+      </a>
+      <a href="/admin/payments<%= typeof currentModule !== 'undefined' && currentModule ? '?module=' + currentModule : '' %>" class="sidebar-nav-item <%= typeof activePage !== 'undefined' && activePage === 'payments' ? 'active' : '' %>">
+        <i data-lucide="credit-card"></i>
+        <span>Payments</span>
+      </a>
+      <% if (typeof currentModule === 'undefined' || !currentModule || currentModule === 'aviation') { %>
+      <a href="/admin/aog<%= typeof currentModule !== 'undefined' && currentModule ? '?module=' + currentModule : '' %>" class="sidebar-nav-item <%= typeof activePage !== 'undefined' && activePage === 'aog' ? 'active' : '' %>">
+        <i data-lucide="alert-triangle"></i>
+        <span>AOG Cases</span>
+        <span class="sidebar-nav-badge" style="background: #ef4444;">3</span>
+      </a>
+      <% } %>
+    </div>
+
+    <!-- Module Quick Switch (only show when not filtered) -->
+    <% if (typeof currentModule === 'undefined' || !currentModule) { %>
+    <div class="sidebar-nav-section">
+      <div class="sidebar-nav-title">Quick Module Switch</div>
+      <a href="/admin?module=automotive" class="sidebar-nav-item">
+        <i data-lucide="car"></i>
+        <span>Automotive</span>
+      </a>
+      <a href="/admin?module=aviation" class="sidebar-nav-item">
+        <i data-lucide="plane"></i>
+        <span>Aviation</span>
+      </a>
+      <a href="/admin?module=machinery" class="sidebar-nav-item">
+        <i data-lucide="construction"></i>
+        <span>Machinery</span>
+      </a>
+    </div>
+    <% } %>
+
+    <!-- Settings Section -->
+    <div class="sidebar-nav-section">
+      <div class="sidebar-nav-title">System</div>
+      <a href="/admin/settings" class="sidebar-nav-item <%= typeof activePage !== 'undefined' && activePage === 'settings' ? 'active' : '' %>">
+        <i data-lucide="settings"></i>
+        <span>Settings</span>
+      </a>
+    </div>
+  </nav>
+
+  <!-- Sidebar Footer - Clickable Admin User -->
+  <div class="sidebar-footer">
+    <div class="sidebar-user-wrapper" id="sidebarUserWrapper">
+      <div class="sidebar-user" id="sidebarUserBtn">
+        <div class="sidebar-user-avatar">
+          <span>A</span>
+        </div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name">Admin User</div>
+          <div class="sidebar-user-role">Administrator</div>
+        </div>
+        <i data-lucide="chevron-up" class="sidebar-user-chevron" style="width: 18px; height: 18px; color: var(--admin-text-muted); transition: transform 0.2s;"></i>
+      </div>
+      
+      <!-- User Dropdown Menu -->
+      <div class="sidebar-user-dropdown" id="sidebarUserDropdown">
+        <a href="/admin/profile" class="sidebar-user-menu-item">
+          <i data-lucide="user"></i>
+          <span>My Profile</span>
+        </a>
+        <a href="/admin/settings" class="sidebar-user-menu-item">
+          <i data-lucide="settings"></i>
+          <span>Account Settings</span>
+        </a>
+        <a href="/admin/activity" class="sidebar-user-menu-item">
+          <i data-lucide="activity"></i>
+          <span>Activity Log</span>
+        </a>
+        <div class="sidebar-user-menu-divider"></div>
+        <button class="sidebar-user-menu-item logout" id="sidebarLogoutBtn">
+          <i data-lucide="log-out"></i>
+          <span>Logout</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<style>
+/* Sidebar User Wrapper */
+.sidebar-user-wrapper {
+  position: relative;
+}
+
+.sidebar-user {
+  cursor: pointer;
+  transition: background 0.2s;
+  border-radius: var(--admin-radius-lg);
+  padding: 0.5rem;
+  margin: -0.5rem;
+}
+
+.sidebar-user:hover {
+  background: var(--admin-bg-secondary);
+}
+
+.sidebar-user-wrapper.open .sidebar-user {
+  background: var(--admin-bg-secondary);
+}
+
+.sidebar-user-wrapper.open .sidebar-user-chevron {
+  transform: rotate(180deg);
+}
+
+/* User Dropdown */
+.sidebar-user-dropdown {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background: var(--admin-bg-primary);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-radius-lg);
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.12);
+  padding: 0.5rem;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px);
+  transition: all 0.2s ease;
+}
+
+.sidebar-user-wrapper.open .sidebar-user-dropdown {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.sidebar-user-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 0.75rem;
+  border-radius: var(--admin-radius-md);
+  color: var(--admin-text-primary);
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s;
+  width: 100%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+.sidebar-user-menu-item:hover {
+  background: var(--admin-bg-secondary);
+}
+
+.sidebar-user-menu-item i {
+  width: 18px;
+  height: 18px;
+  color: var(--admin-text-muted);
+}
+
+.sidebar-user-menu-item.logout {
+  color: #ef4444;
+}
+
+.sidebar-user-menu-item.logout i {
+  color: #ef4444;
+}
+
+.sidebar-user-menu-item.logout:hover {
+  background: rgba(239, 68, 68, 0.08);
+}
+
+.sidebar-user-menu-divider {
+  height: 1px;
+  background: var(--admin-border);
+  margin: 0.5rem 0;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Sidebar User Dropdown
+  const sidebarUserWrapper = document.getElementById('sidebarUserWrapper');
+  const sidebarUserBtn = document.getElementById('sidebarUserBtn');
+  const sidebarLogoutBtn = document.getElementById('sidebarLogoutBtn');
+  const logoutModalOverlay = document.getElementById('logoutModalOverlay');
+
+  if (sidebarUserBtn) {
+    sidebarUserBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      sidebarUserWrapper.classList.toggle('open');
+    });
+  }
+
+  // Close dropdown on outside click
+  document.addEventListener('click', function(e) {
+    if (!sidebarUserWrapper?.contains(e.target)) {
+      sidebarUserWrapper?.classList.remove('open');
+    }
+  });
+
+  // Sidebar logout button
+  if (sidebarLogoutBtn) {
+    sidebarLogoutBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      sidebarUserWrapper.classList.remove('open');
+      logoutModalOverlay?.classList.add('open');
+      lucide.createIcons();
+    });
+  }
+});
+</script>

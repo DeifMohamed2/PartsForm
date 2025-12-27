@@ -945,5 +945,75 @@
   } else {
     startCounterAnimations();
   }
+
+  // ====================================
+  // LOGIN ROUTING - Admin vs Buyer
+  // ====================================
+  const signInForm = document.getElementById('sign-in-form');
+  if (signInForm) {
+    signInForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const emailInput = signInForm.querySelector('input[type="email"]');
+      const passwordInput = signInForm.querySelector('input[type="password"]');
+      const submitBtn = signInForm.querySelector('button[type="submit"]');
+      
+      const email = emailInput.value.trim().toLowerCase();
+      const password = passwordInput.value;
+      
+      // Admin credentials
+      const ADMIN_EMAIL = 'admin@partsform.com';
+      const ADMIN_PASSWORD = 'admin123';
+      
+      // Show loading state
+      const originalBtnContent = submitBtn.innerHTML;
+      submitBtn.innerHTML = '<span>Signing in...</span><i data-lucide="loader" class="spin"></i>';
+      submitBtn.disabled = true;
+      lucide.createIcons();
+      
+      // Simulate authentication delay
+      setTimeout(() => {
+        // Check if admin credentials
+        if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+          // Store admin session
+          localStorage.setItem('userRole', 'admin');
+          localStorage.setItem('userName', 'Admin User');
+          localStorage.setItem('userEmail', email);
+          localStorage.setItem('isLoggedIn', 'true');
+          
+          // Redirect to admin dashboard
+          window.location.href = '/admin';
+        } else if (email && password) {
+          // Treat as buyer credentials
+          localStorage.setItem('userRole', 'buyer');
+          localStorage.setItem('userName', email.split('@')[0].charAt(0).toUpperCase() + email.split('@')[0].slice(1));
+          localStorage.setItem('userEmail', email);
+          localStorage.setItem('isLoggedIn', 'true');
+          
+          // Redirect to buyer portal
+          window.location.href = '/buyer';
+        } else {
+          // Reset button on error
+          submitBtn.innerHTML = originalBtnContent;
+          submitBtn.disabled = false;
+          lucide.createIcons();
+          alert('Please enter valid credentials');
+        }
+      }, 1000);
+    });
+  }
+
+  // Add spinner animation style
+  const style = document.createElement('style');
+  style.textContent = `
+    .spin {
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+  `;
+  document.head.appendChild(style);
 </script>
 <%- include('partials/footer') %>

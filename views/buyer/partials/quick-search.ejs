@@ -14,10 +14,10 @@
       <div class="quick-search-header">
         <div class="quick-search-badge">
           <i data-lucide="zap"></i>
-          <span>QUICK SEARCH</span>
+          <span><%= t('quickSearch.badge') %></span>
         </div>
-        <h3 class="quick-search-title">Find Industrial Parts</h3>
-        <p class="quick-search-subtitle">Enter part number or description to search across all sectors</p>
+        <h3 class="quick-search-title"><%= t('quickSearch.title') %></h3>
+        <p class="quick-search-subtitle"><%= t('quickSearch.subtitle') %></p>
       </div>
 
       <!-- Search Form -->
@@ -28,7 +28,7 @@
             type="text" 
             class="quick-search-input" 
             id="quick-search-input" 
-            placeholder="Enter part number or description..." 
+            placeholder="<%= t('quickSearch.placeholder') %>" 
             autocomplete="off"
           >
           <button class="quick-search-clear" id="quick-search-clear" style="display: none;">
@@ -38,26 +38,26 @@
 
         <!-- Category Selection -->
         <div class="quick-search-categories">
-          <p class="category-label">Select Category:</p>
+          <p class="category-label"><%= t('quickSearch.selectCategory') %></p>
           <div class="category-options">
             <button class="category-option active" data-category="automotive">
               <i data-lucide="car-front"></i>
-              <span>Automotive</span>
+              <span><%= t('nav.searchDropdown.automotive.title') %></span>
             </button>
             <button class="category-option" data-category="aviation">
               <i data-lucide="plane"></i>
-              <span>Aviation</span>
+              <span><%= t('nav.searchDropdown.aviation.title') %></span>
             </button>
             <button class="category-option" data-category="machinery">
               <i data-lucide="construction"></i>
-              <span>Heavy Machinery</span>
+              <span><%= t('nav.searchDropdown.machinery.title') %></span>
             </button>
           </div>
         </div>
 
         <!-- Search Button -->
         <button class="quick-search-submit" id="quick-search-submit">
-          <span>Search Now</span>
+          <span><%= t('quickSearch.searchNow') %></span>
           <i data-lucide="arrow-right"></i>
         </button>
       </div>
@@ -66,7 +66,7 @@
       <div class="quick-search-recent" id="quick-search-recent" style="display: none;">
         <p class="recent-label">
           <i data-lucide="clock"></i>
-          <span>Recent Searches</span>
+          <span><%= t('quickSearch.recentSearches') %></span>
         </p>
         <div class="recent-items" id="recent-items"></div>
       </div>

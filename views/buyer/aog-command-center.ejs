@@ -13,12 +13,12 @@
     <div class="command-hero-content">
       <div class="command-badge">
         <i data-lucide="alert-triangle"></i>
-        <span>AOG COMMAND CENTER</span>
+        <span><%= t('aog.commandCenter.badge') %></span>
       </div>
 
-      <h1 class="command-hero-title">Case <%= caseId %></h1>
+      <h1 class="command-hero-title"><%= t('aog.commandCenter.title', { caseId: caseId }) %></h1>
       <p class="command-hero-subtitle">
-        Real-time monitoring and control for critical aircraft parts sourcing
+        <%= t('aog.commandCenter.subtitle') %>
       </p>
 
       <div class="command-hero-meta">
@@ -47,25 +47,25 @@
     <!-- SLA Timer -->
     <div class="sla-timer-card">
       <div class="sla-timer-content">
-        <div class="sla-label">Time Until Required Delivery</div>
+        <div class="sla-label"><%= t('aog.commandCenter.sla.title') %></div>
         <div class="sla-countdown" id="sla-countdown">
           <div class="countdown-unit">
             <div class="countdown-value" id="hours">22</div>
-            <div class="countdown-label">Hours</div>
+            <div class="countdown-label"><%= t('common.time.hours') %></div>
           </div>
           <div class="countdown-unit">
             <div class="countdown-value" id="minutes">45</div>
-            <div class="countdown-label">Minutes</div>
+            <div class="countdown-label"><%= t('common.time.minutes') %></div>
           </div>
           <div class="countdown-unit">
             <div class="countdown-value" id="seconds">30</div>
-            <div class="countdown-label">Seconds</div>
+            <div class="countdown-label"><%= t('common.time.seconds') %></div>
           </div>
         </div>
         <div class="sla-progress-bar">
           <div class="sla-progress-fill" id="sla-progress" style="width: 75%;"></div>
         </div>
-        <div class="sla-status-text">On track for on-time delivery</div>
+        <div class="sla-status-text"><%= t('aog.commandCenter.sla.onTrack') %></div>
       </div>
     </div>
 
@@ -75,7 +75,7 @@
       <div class="status-card">
         <div class="status-card-header">
           <i data-lucide="activity"></i>
-          <h2 class="status-card-title">Current Status</h2>
+          <h2 class="status-card-title"><%= t('aog.commandCenter.status.title') %></h2>
         </div>
 
         <div class="phase-timeline">
@@ -85,11 +85,11 @@
               <i data-lucide="check"></i>
             </div>
             <div class="phase-content">
-              <div class="phase-name">Case Created</div>
-              <div class="phase-desc">AOG case initiated and RFQs broadcast to suppliers</div>
+              <div class="phase-name"><%= t('aog.commandCenter.status.phases.created.name') %></div>
+              <div class="phase-desc"><%= t('aog.commandCenter.status.phases.created.desc') %></div>
               <div class="phase-time">
                 <i data-lucide="clock"></i>
-                <span>Completed 2 hours ago</span>
+                <span><%= t('aog.commandCenter.status.phases.created.completed', { time: '2 hours' }) %></span>
               </div>
             </div>
           </div>
@@ -100,11 +100,11 @@
               <i data-lucide="search"></i>
             </div>
             <div class="phase-content">
-              <div class="phase-name">Sourcing Parts</div>
-              <div class="phase-desc">Suppliers are preparing quotes and availability confirmations</div>
+              <div class="phase-name"><%= t('aog.commandCenter.status.phases.sourcing.name') %></div>
+              <div class="phase-desc"><%= t('aog.commandCenter.status.phases.sourcing.desc') %></div>
               <div class="phase-time">
                 <i data-lucide="clock"></i>
-                <span>In progress - 5 quotes received</span>
+                <span><%= t('aog.commandCenter.status.phases.sourcing.progress', { count: 5 }) %></span>
               </div>
             </div>
           </div>
@@ -115,11 +115,11 @@
               <i data-lucide="file-text"></i>
             </div>
             <div class="phase-content">
-              <div class="phase-name">Quote Selection</div>
-              <div class="phase-desc">Review and select the best sourcing option</div>
+              <div class="phase-name"><%= t('aog.commandCenter.status.phases.selection.name') %></div>
+              <div class="phase-desc"><%= t('aog.commandCenter.status.phases.selection.desc') %></div>
               <div class="phase-time">
                 <i data-lucide="clock"></i>
-                <span>Pending</span>
+                <span><%= t('common.status.pending') %></span>
               </div>
             </div>
           </div>
@@ -130,11 +130,11 @@
               <i data-lucide="truck"></i>
             </div>
             <div class="phase-content">
-              <div class="phase-name">Shipping</div>
-              <div class="phase-desc">Parts in transit to destination</div>
+              <div class="phase-name"><%= t('aog.commandCenter.status.phases.shipping.name') %></div>
+              <div class="phase-desc"><%= t('aog.commandCenter.status.phases.shipping.desc') %></div>
               <div class="phase-time">
                 <i data-lucide="clock"></i>
-                <span>Pending</span>
+                <span><%= t('common.status.pending') %></span>
               </div>
             </div>
           </div>
@@ -145,11 +145,11 @@
               <i data-lucide="check-circle"></i>
             </div>
             <div class="phase-content">
-              <div class="phase-name">Delivered</div>
-              <div class="phase-desc">Parts delivered and aircraft released</div>
+              <div class="phase-name"><%= t('aog.commandCenter.status.phases.delivered.name') %></div>
+              <div class="phase-desc"><%= t('aog.commandCenter.status.phases.delivered.desc') %></div>
               <div class="phase-time">
                 <i data-lucide="clock"></i>
-                <span>Pending</span>
+                <span><%= t('common.status.pending') %></span>
               </div>
             </div>
           </div>
@@ -162,7 +162,7 @@
         <div class="blocker-card">
           <div class="status-card-header">
             <i data-lucide="alert-circle"></i>
-            <h2 class="status-card-title">What's Blocking Release?</h2>
+            <h2 class="status-card-title"><%= t('aog.commandCenter.blocker.title') %></h2>
           </div>
 
           <div class="blocker-alert none">
@@ -170,14 +170,14 @@
               <i data-lucide="check-circle"></i>
             </div>
             <div class="blocker-content">
-              <div class="blocker-title">No Current Blockers</div>
-              <div class="blocker-desc">All processes are running smoothly. Quotes are being collected.</div>
+              <div class="blocker-title"><%= t('aog.commandCenter.blocker.none.title') %></div>
+              <div class="blocker-desc"><%= t('aog.commandCenter.blocker.none.desc') %></div>
             </div>
           </div>
 
           <div class="status-card-header" style="margin-top: 2rem;">
             <i data-lucide="zap"></i>
-            <h2 class="status-card-title">Quick Actions</h2>
+            <h2 class="status-card-title"><%= t('aog.commandCenter.quickActions.title') %></h2>
           </div>
 
           <div class="quick-actions">
@@ -187,8 +187,8 @@
                   <i data-lucide="file-text"></i>
                 </div>
                 <div class="action-btn-text">
-                  <div class="action-btn-title">Compare Quotes</div>
-                  <div class="action-btn-desc">5 quotes available</div>
+                  <div class="action-btn-title"><%= t('aog.commandCenter.quickActions.compareQuotes.title') %></div>
+                  <div class="action-btn-desc"><%= t('aog.commandCenter.quickActions.compareQuotes.desc', { count: 5 }) %></div>
                 </div>
               </div>
               <i data-lucide="chevron-right" class="action-btn-arrow"></i>
@@ -200,8 +200,8 @@
                   <i data-lucide="truck"></i>
                 </div>
                 <div class="action-btn-text">
-                  <div class="action-btn-title">Track Shipment</div>
-                  <div class="action-btn-desc">View delivery status</div>
+                  <div class="action-btn-title"><%= t('aog.commandCenter.quickActions.trackShipment.title') %></div>
+                  <div class="action-btn-desc"><%= t('aog.commandCenter.quickActions.trackShipment.desc') %></div>
                 </div>
               </div>
               <i data-lucide="chevron-right" class="action-btn-arrow"></i>
@@ -213,8 +213,8 @@
                   <i data-lucide="headphones"></i>
                 </div>
                 <div class="action-btn-text">
-                  <div class="action-btn-title">Contact Support</div>
-                  <div class="action-btn-desc">Get immediate assistance</div>
+                  <div class="action-btn-title"><%= t('aog.commandCenter.quickActions.contactSupport.title') %></div>
+                  <div class="action-btn-desc"><%= t('aog.commandCenter.quickActions.contactSupport.desc') %></div>
                 </div>
               </div>
               <i data-lucide="chevron-right" class="action-btn-arrow"></i>
@@ -228,7 +228,7 @@
     <div class="updates-card">
       <div class="status-card-header">
         <i data-lucide="bell"></i>
-        <h2 class="status-card-title">Recent Updates</h2>
+        <h2 class="status-card-title"><%= t('aog.commandCenter.updates.title') %></h2>
       </div>
 
       <div class="updates-list">
@@ -296,7 +296,12 @@
   </div>
 </div>
 
+<!-- Quick Search Modal -->
+<%- include('partials/quick-search') %>
+
 <script src="/js/animations.js"></script>
+<script src="/js/main.js"></script>
+<script src="/js/quick-search.js"></script>
 <script src="/js/aog-command-center.js"></script>
 <script>
   lucide.createIcons();

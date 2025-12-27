@@ -1,0 +1,258 @@
+<%- include('partials/header') %>
+<link rel="stylesheet" href="/css/adminCSS/admin-dashboard.css">
+<style>
+  .user-card {
+    background: var(--admin-bg-primary);
+    border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius-lg);
+    padding: 1.25rem;
+    display: grid;
+    grid-template-columns: auto 1fr auto auto auto auto auto;
+    gap: 1.5rem;
+    align-items: center;
+    margin-bottom: 1rem;
+    transition: var(--admin-transition);
+    box-shadow: var(--admin-shadow-sm);
+  }
+  .user-card:hover {
+    border-color: var(--module-primary);
+    box-shadow: var(--admin-shadow-md);
+  }
+  .user-avatar {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, var(--module-primary), var(--module-primary-dark));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 1.25rem;
+  }
+  .user-info h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--admin-text-primary);
+    margin-bottom: 0.25rem;
+  }
+  .user-info p {
+    font-size: 0.85rem;
+    color: var(--admin-text-muted);
+    margin: 0;
+  }
+  .user-company {
+    font-size: 0.9rem;
+    color: var(--admin-text-secondary);
+  }
+  .user-stat {
+    text-align: center;
+  }
+  .user-stat-value {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--admin-text-primary);
+  }
+  .user-stat-label {
+    font-size: 0.7rem;
+    color: var(--admin-text-muted);
+    text-transform: uppercase;
+  }
+  .user-industry {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: var(--admin-radius-sm);
+    font-size: 0.8rem;
+    font-weight: 500;
+  }
+  .user-industry.automotive {
+    background: rgba(220, 38, 38, 0.1);
+    color: #dc2626;
+  }
+  .user-industry.aviation {
+    background: rgba(14, 165, 233, 0.1);
+    color: #0ea5e9;
+  }
+  .user-industry.machinery {
+    background: rgba(234, 179, 8, 0.1);
+    color: #ca8a04;
+  }
+  .user-status {
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+  .user-status.active {
+    background: rgba(16, 185, 129, 0.12);
+    color: #059669;
+  }
+  .user-status.inactive {
+    background: rgba(239, 68, 68, 0.12);
+    color: #dc2626;
+  }
+  .user-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+</style>
+</head>
+<body class="<%= typeof currentModule !== 'undefined' && currentModule ? 'module-' + currentModule : '' %>">
+  <div class="admin-wrapper">
+    <%- include('partials/sidebar', { activePage: 'users', currentModule: currentModule }) %>
+    
+    <main class="admin-main">
+      <%- include('partials/topbar', { pageTitle: 'Users', currentModule: currentModule }) %>
+      
+      <div class="admin-content">
+        <% if (currentModule && moduleConfig) { %>
+        <div class="module-info-banner">
+          <div class="module-info-icon">
+            <i data-lucide="<%= moduleConfig.icon %>"></i>
+          </div>
+          <div class="module-info-content">
+            <div class="module-info-title"><%= moduleConfig.name %> Users</div>
+            <div class="module-info-desc">Viewing <%= moduleConfig.name.toLowerCase() %> buyers and customers</div>
+          </div>
+          <div class="module-info-stats">
+            <div class="module-info-stat">
+              <div class="module-info-stat-value"><%= users.length %></div>
+              <div class="module-info-stat-label">Users</div>
+            </div>
+            <div class="module-info-stat">
+              <div class="module-info-stat-value"><%= users.reduce((s, u) => s + u.orders, 0) %></div>
+              <div class="module-info-stat-label">Orders</div>
+            </div>
+          </div>
+        </div>
+        <% } %>
+
+        <div class="page-header">
+          <h2><%= currentModule ? moduleConfig.name + ' Users' : 'Users Management' %></h2>
+          <button class="admin-btn admin-btn-primary">
+            <i data-lucide="user-plus"></i>
+            Add User
+          </button>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-grid" style="margin-bottom: 2rem;">
+          <div class="stat-card module-themed">
+            <div class="stat-icon">
+              <i data-lucide="users"></i>
+            </div>
+            <div class="stat-content">
+              <div class="stat-value"><%= users.length %></div>
+              <div class="stat-label">Total Users</div>
+            </div>
+          </div>
+          <div class="stat-card green">
+            <div class="stat-icon">
+              <i data-lucide="user-check"></i>
+            </div>
+            <div class="stat-content">
+              <div class="stat-value"><%= users.filter(u => u.status === 'active').length %></div>
+              <div class="stat-label">Active Users</div>
+            </div>
+          </div>
+          <div class="stat-card purple">
+            <div class="stat-icon">
+              <i data-lucide="shopping-bag"></i>
+            </div>
+            <div class="stat-content">
+              <div class="stat-value"><%= users.reduce((sum, u) => sum + u.orders, 0) %></div>
+              <div class="stat-label">Total Orders</div>
+            </div>
+          </div>
+          <div class="stat-card orange">
+            <div class="stat-icon">
+              <i data-lucide="dollar-sign"></i>
+            </div>
+            <div class="stat-content">
+              <div class="stat-value">$<%= (users.reduce((sum, u) => sum + u.totalSpent, 0) / 1000000).toFixed(1) %>M</div>
+              <div class="stat-label">Total Revenue</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters-row">
+          <div class="filter-group">
+            <span class="filter-label">Status:</span>
+            <select class="filter-select">
+              <option value="">All Status</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <span class="filter-label">Sort By:</span>
+            <select class="filter-select">
+              <option value="recent">Most Recent</option>
+              <option value="orders">Most Orders</option>
+              <option value="spent">Highest Spent</option>
+              <option value="name">Name A-Z</option>
+            </select>
+          </div>
+          <div class="filter-search">
+            <i data-lucide="search"></i>
+            <input type="text" placeholder="Search users...">
+          </div>
+        </div>
+
+        <!-- Users List -->
+        <% if (users.length === 0) { %>
+          <div style="padding: 3rem; text-align: center; color: var(--admin-text-muted); background: var(--admin-bg-primary); border-radius: var(--admin-radius-lg);">
+            No users found.
+          </div>
+        <% } else { %>
+          <% users.forEach(user => { %>
+            <div class="user-card">
+              <div class="user-avatar"><%= user.name.charAt(0) %></div>
+              <div class="user-info">
+                <h4><%= user.name %></h4>
+                <p><%= user.email %></p>
+              </div>
+              <div class="user-company"><%= user.company %></div>
+              <div class="user-industry <%= user.industry %>">
+                <% if (user.industry === 'automotive') { %>
+                  <i data-lucide="car" style="width: 14px; height: 14px;"></i>
+                <% } else if (user.industry === 'aviation') { %>
+                  <i data-lucide="plane" style="width: 14px; height: 14px;"></i>
+                <% } else { %>
+                  <i data-lucide="construction" style="width: 14px; height: 14px;"></i>
+                <% } %>
+                <%= user.industry.charAt(0).toUpperCase() + user.industry.slice(1) %>
+              </div>
+              <div class="user-stat">
+                <div class="user-stat-value"><%= user.orders %></div>
+                <div class="user-stat-label">Orders</div>
+              </div>
+              <div class="user-stat">
+                <div class="user-stat-value">$<%= (user.totalSpent / 1000).toFixed(0) %>K</div>
+                <div class="user-stat-label">Total Spent</div>
+              </div>
+              <div class="user-status <%= user.status %>">
+                <%= user.status.charAt(0).toUpperCase() + user.status.slice(1) %>
+              </div>
+              <div class="user-actions">
+                <button class="order-action-btn" title="View User">
+                  <i data-lucide="eye"></i>
+                </button>
+                <button class="order-action-btn" title="Edit User">
+                  <i data-lucide="edit-2"></i>
+                </button>
+                <button class="order-action-btn" title="View Orders">
+                  <i data-lucide="shopping-bag"></i>
+                </button>
+              </div>
+            </div>
+          <% }); %>
+        <% } %>
+      </div>
+    </main>
+  </div>
+
+<%- include('partials/footer') %>
