@@ -1,103 +1,6 @@
 <%- include('partials/header') %>
 <link rel="stylesheet" href="/css/adminCSS/admin-dashboard.css">
-<style>
-  .user-card {
-    background: var(--admin-bg-primary);
-    border: 1px solid var(--admin-border);
-    border-radius: var(--admin-radius-lg);
-    padding: 1.25rem;
-    display: grid;
-    grid-template-columns: auto 1fr auto auto auto auto auto;
-    gap: 1.5rem;
-    align-items: center;
-    margin-bottom: 1rem;
-    transition: var(--admin-transition);
-    box-shadow: var(--admin-shadow-sm);
-  }
-  .user-card:hover {
-    border-color: var(--module-primary);
-    box-shadow: var(--admin-shadow-md);
-  }
-  .user-avatar {
-    width: 50px;
-    height: 50px;
-    background: linear-gradient(135deg, var(--module-primary), var(--module-primary-dark));
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-weight: 700;
-    font-size: 1.25rem;
-  }
-  .user-info h4 {
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--admin-text-primary);
-    margin-bottom: 0.25rem;
-  }
-  .user-info p {
-    font-size: 0.85rem;
-    color: var(--admin-text-muted);
-    margin: 0;
-  }
-  .user-company {
-    font-size: 0.9rem;
-    color: var(--admin-text-secondary);
-  }
-  .user-stat {
-    text-align: center;
-  }
-  .user-stat-value {
-    font-size: 1.125rem;
-    font-weight: 700;
-    color: var(--admin-text-primary);
-  }
-  .user-stat-label {
-    font-size: 0.7rem;
-    color: var(--admin-text-muted);
-    text-transform: uppercase;
-  }
-  .user-industry {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.375rem;
-    padding: 0.35rem 0.75rem;
-    border-radius: var(--admin-radius-sm);
-    font-size: 0.8rem;
-    font-weight: 500;
-  }
-  .user-industry.automotive {
-    background: rgba(220, 38, 38, 0.1);
-    color: #dc2626;
-  }
-  .user-industry.aviation {
-    background: rgba(14, 165, 233, 0.1);
-    color: #0ea5e9;
-  }
-  .user-industry.machinery {
-    background: rgba(234, 179, 8, 0.1);
-    color: #ca8a04;
-  }
-  .user-status {
-    padding: 0.35rem 0.75rem;
-    border-radius: 20px;
-    font-size: 0.75rem;
-    font-weight: 600;
-  }
-  .user-status.active {
-    background: rgba(16, 185, 129, 0.12);
-    color: #059669;
-  }
-  .user-status.inactive {
-    background: rgba(239, 68, 68, 0.12);
-    color: #dc2626;
-  }
-  .user-actions {
-    display: flex;
-    gap: 0.5rem;
-  }
-</style>
+<link rel="stylesheet" href="/css/adminCSS/admin-users.css">
 </head>
 <body class="<%= typeof currentModule !== 'undefined' && currentModule ? 'module-' + currentModule : '' %>">
   <div class="admin-wrapper">
@@ -107,38 +10,32 @@
       <%- include('partials/topbar', { pageTitle: 'Users', currentModule: currentModule }) %>
       
       <div class="admin-content">
-        <% if (currentModule && moduleConfig) { %>
-        <div class="module-info-banner">
-          <div class="module-info-icon">
-            <i data-lucide="<%= moduleConfig.icon %>"></i>
-          </div>
-          <div class="module-info-content">
-            <div class="module-info-title"><%= moduleConfig.name %> Users</div>
-            <div class="module-info-desc">Viewing <%= moduleConfig.name.toLowerCase() %> buyers and customers</div>
-          </div>
-          <div class="module-info-stats">
-            <div class="module-info-stat">
-              <div class="module-info-stat-value"><%= users.length %></div>
-              <div class="module-info-stat-label">Users</div>
+        <!-- Page Header -->
+        <div class="users-page-header">
+          <h2>Users Management</h2>
+          <div class="users-header-actions">
+            <div class="users-search-container">
+              <i data-lucide="search" class="search-icon"></i>
+              <input type="text" id="usersSearch" placeholder="Search users..." autocomplete="off">
             </div>
-            <div class="module-info-stat">
-              <div class="module-info-stat-value"><%= users.reduce((s, u) => s + u.orders, 0) %></div>
-              <div class="module-info-stat-label">Orders</div>
-            </div>
+            <a href="/admin/users/create" class="admin-btn admin-btn-primary">
+              <i data-lucide="user-plus"></i>
+              Add User
+            </a>
           </div>
-        </div>
-        <% } %>
-
-        <div class="page-header">
-          <h2><%= currentModule ? moduleConfig.name + ' Users' : 'Users Management' %></h2>
-          <button class="admin-btn admin-btn-primary">
-            <i data-lucide="user-plus"></i>
-            Add User
-          </button>
         </div>
 
         <!-- Stats Cards -->
-        <div class="stats-grid" style="margin-bottom: 2rem;">
+        <div class="stats-grid" style="margin-bottom: 1.5rem;">
+          <%
+            var activeCount = 0, inactiveCount = 0, totalOrders = 0, totalSpent = 0;
+            users.forEach(function(u) {
+              if (u.status === 'active') activeCount++;
+              else inactiveCount++;
+              totalOrders += u.orders || 0;
+              totalSpent += u.totalSpent || 0;
+            });
+          %>
           <div class="stat-card module-themed">
             <div class="stat-icon">
               <i data-lucide="users"></i>
@@ -153,7 +50,7 @@
               <i data-lucide="user-check"></i>
             </div>
             <div class="stat-content">
-              <div class="stat-value"><%= users.filter(u => u.status === 'active').length %></div>
+              <div class="stat-value"><%= activeCount %></div>
               <div class="stat-label">Active Users</div>
             </div>
           </div>
@@ -162,7 +59,7 @@
               <i data-lucide="shopping-bag"></i>
             </div>
             <div class="stat-content">
-              <div class="stat-value"><%= users.reduce((sum, u) => sum + u.orders, 0) %></div>
+              <div class="stat-value"><%= totalOrders %></div>
               <div class="stat-label">Total Orders</div>
             </div>
           </div>
@@ -171,17 +68,17 @@
               <i data-lucide="dollar-sign"></i>
             </div>
             <div class="stat-content">
-              <div class="stat-value">$<%= (users.reduce((sum, u) => sum + u.totalSpent, 0) / 1000000).toFixed(1) %>M</div>
+              <div class="stat-value">$<%= (totalSpent / 1000000).toFixed(1) %>M</div>
               <div class="stat-label">Total Revenue</div>
             </div>
           </div>
         </div>
 
         <!-- Filters -->
-        <div class="filters-row">
+        <div class="users-filters">
           <div class="filter-group">
             <span class="filter-label">Status:</span>
-            <select class="filter-select">
+            <select class="filter-select" id="filterStatus">
               <option value="">All Status</option>
               <option value="active">Active</option>
               <option value="inactive">Inactive</option>
@@ -189,70 +86,278 @@
           </div>
           <div class="filter-group">
             <span class="filter-label">Sort By:</span>
-            <select class="filter-select">
+            <select class="filter-select" id="sortBy">
               <option value="recent">Most Recent</option>
               <option value="orders">Most Orders</option>
               <option value="spent">Highest Spent</option>
               <option value="name">Name A-Z</option>
             </select>
           </div>
-          <div class="filter-search">
-            <i data-lucide="search"></i>
-            <input type="text" placeholder="Search users...">
+          <div class="filters-spacer"></div>
+          <button class="filter-clear-btn" onclick="clearFilters()">
+            <i data-lucide="x"></i>
+            Clear
+          </button>
+        </div>
+
+        <!-- Bulk Action Bar -->
+        <div class="bulk-action-bar" id="bulkActionBar">
+          <span class="selected-count">
+            <i data-lucide="check-square"></i>
+            <span id="selectedCount">0</span> users selected
+          </span>
+          <div class="bulk-actions">
+            <button class="bulk-action-btn" onclick="bulkUpdateStatus('active')">
+              <i data-lucide="user-check"></i>
+              Activate
+            </button>
+            <button class="bulk-action-btn danger" onclick="bulkUpdateStatus('inactive')">
+              <i data-lucide="user-x"></i>
+              Deactivate
+            </button>
+            <button class="bulk-action-btn" onclick="clearSelection()">
+              <i data-lucide="x"></i>
+              Cancel
+            </button>
           </div>
         </div>
 
-        <!-- Users List -->
+        <!-- Users Table -->
         <% if (users.length === 0) { %>
-          <div style="padding: 3rem; text-align: center; color: var(--admin-text-muted); background: var(--admin-bg-primary); border-radius: var(--admin-radius-lg);">
-            No users found.
+        <div class="users-empty">
+          <div class="users-empty-icon">
+            <i data-lucide="users"></i>
           </div>
+          <h3>No Users Found</h3>
+          <p>There are no users matching your criteria.</p>
+        </div>
         <% } else { %>
-          <% users.forEach(user => { %>
-            <div class="user-card">
-              <div class="user-avatar"><%= user.name.charAt(0) %></div>
-              <div class="user-info">
-                <h4><%= user.name %></h4>
-                <p><%= user.email %></p>
-              </div>
-              <div class="user-company"><%= user.company %></div>
-              <div class="user-industry <%= user.industry %>">
-                <% if (user.industry === 'automotive') { %>
-                  <i data-lucide="car" style="width: 14px; height: 14px;"></i>
-                <% } else if (user.industry === 'aviation') { %>
-                  <i data-lucide="plane" style="width: 14px; height: 14px;"></i>
-                <% } else { %>
-                  <i data-lucide="construction" style="width: 14px; height: 14px;"></i>
-                <% } %>
-                <%= user.industry.charAt(0).toUpperCase() + user.industry.slice(1) %>
-              </div>
-              <div class="user-stat">
-                <div class="user-stat-value"><%= user.orders %></div>
-                <div class="user-stat-label">Orders</div>
-              </div>
-              <div class="user-stat">
-                <div class="user-stat-value">$<%= (user.totalSpent / 1000).toFixed(0) %>K</div>
-                <div class="user-stat-label">Total Spent</div>
-              </div>
-              <div class="user-status <%= user.status %>">
-                <%= user.status.charAt(0).toUpperCase() + user.status.slice(1) %>
-              </div>
-              <div class="user-actions">
-                <button class="order-action-btn" title="View User">
-                  <i data-lucide="eye"></i>
-                </button>
-                <button class="order-action-btn" title="Edit User">
-                  <i data-lucide="edit-2"></i>
-                </button>
-                <button class="order-action-btn" title="View Orders">
-                  <i data-lucide="shopping-bag"></i>
-                </button>
-              </div>
-            </div>
-          <% }); %>
+        <div class="users-table-card">
+          <table class="users-table">
+            <thead>
+              <tr>
+                <th>
+                  <div class="user-checkbox" id="selectAll" onclick="toggleSelectAll()"></div>
+                </th>
+                <th>User</th>
+                <th>Company</th>
+                <th>Orders</th>
+                <th>Total Spent</th>
+                <th>Joined</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="usersTableBody">
+              <% users.forEach(function(user) { %>
+              <tr data-user-id="<%= user.id %>" data-status="<%= user.status %>" onclick="handleRowClick(event, <%= user.id %>)">
+                <td onclick="event.stopPropagation()">
+                  <div class="user-checkbox" data-id="<%= user.id %>" onclick="toggleUserSelection(<%= user.id %>)"></div>
+                </td>
+                <td>
+                  <div class="user-cell">
+                    <div class="user-avatar"><%= user.name.charAt(0) %></div>
+                    <div class="user-info">
+                      <h4><%= user.name %></h4>
+                      <p><%= user.email %></p>
+                    </div>
+                  </div>
+                </td>
+                <td><%= user.company %></td>
+                <td class="user-stat-cell">
+                  <div class="user-stat-value"><%= user.orders %></div>
+                </td>
+                <td class="user-stat-cell">
+                  <div class="user-stat-value">$<%= (user.totalSpent / 1000).toFixed(0) %>K</div>
+                </td>
+                <td><%= new Date(user.joined).toLocaleDateString() %></td>
+                <td>
+                  <span class="user-status-badge <%= user.status %>">
+                    <% if (user.status === 'active') { %>
+                      <i data-lucide="check-circle"></i>
+                    <% } else { %>
+                      <i data-lucide="x-circle"></i>
+                    <% } %>
+                    <%= user.status.charAt(0).toUpperCase() + user.status.slice(1) %>
+                  </span>
+                </td>
+                <td onclick="event.stopPropagation()">
+                  <div class="user-actions">
+                    <a href="/admin/users/<%= user.id %>" class="user-action-btn view" title="View Details">
+                      <i data-lucide="eye"></i>
+                    </a>
+                    <a href="/admin/users/<%= user.id %>/edit" class="user-action-btn edit" title="Edit User">
+                      <i data-lucide="edit-2"></i>
+                    </a>
+                    <button class="user-action-btn" title="Toggle Status" onclick="toggleUserStatus(<%= user.id %>, '<%= user.status %>')">
+                      <i data-lucide="<%= user.status === 'active' ? 'user-x' : 'user-check' %>"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
         <% } %>
       </div>
     </main>
   </div>
+
+  <script>
+    var selectedUsers = [];
+    
+    // Handle row click to navigate to user details
+    function handleRowClick(event, userId) {
+      window.location.href = '/admin/users/' + userId;
+    }
+    
+    // Toggle single user selection
+    function toggleUserSelection(userId) {
+      var checkbox = document.querySelector('.user-checkbox[data-id="' + userId + '"]');
+      var row = document.querySelector('tr[data-user-id="' + userId + '"]');
+      var index = selectedUsers.indexOf(userId);
+      
+      if (index > -1) {
+        selectedUsers.splice(index, 1);
+        checkbox.classList.remove('checked');
+        row.classList.remove('selected');
+      } else {
+        selectedUsers.push(userId);
+        checkbox.classList.add('checked');
+        row.classList.add('selected');
+      }
+      
+      updateBulkActionBar();
+    }
+    
+    // Toggle select all
+    function toggleSelectAll() {
+      var selectAllCheckbox = document.getElementById('selectAll');
+      var allCheckboxes = document.querySelectorAll('.user-checkbox[data-id]');
+      var allRows = document.querySelectorAll('#usersTableBody tr');
+      
+      if (selectAllCheckbox.classList.contains('checked')) {
+        // Deselect all
+        selectAllCheckbox.classList.remove('checked');
+        selectedUsers = [];
+        allCheckboxes.forEach(function(cb) { cb.classList.remove('checked'); });
+        allRows.forEach(function(row) { row.classList.remove('selected'); });
+      } else {
+        // Select all visible
+        selectAllCheckbox.classList.add('checked');
+        selectedUsers = [];
+        allRows.forEach(function(row) {
+          if (row.style.display !== 'none') {
+            var userId = parseInt(row.dataset.userId);
+            selectedUsers.push(userId);
+            row.classList.add('selected');
+            document.querySelector('.user-checkbox[data-id="' + userId + '"]').classList.add('checked');
+          }
+        });
+      }
+      
+      updateBulkActionBar();
+    }
+    
+    // Update bulk action bar visibility
+    function updateBulkActionBar() {
+      var bar = document.getElementById('bulkActionBar');
+      var countEl = document.getElementById('selectedCount');
+      
+      if (selectedUsers.length > 0) {
+        bar.classList.add('active');
+        countEl.textContent = selectedUsers.length;
+      } else {
+        bar.classList.remove('active');
+      }
+      
+      // Re-initialize lucide icons
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+    }
+    
+    // Clear selection
+    function clearSelection() {
+      var selectAllCheckbox = document.getElementById('selectAll');
+      var allCheckboxes = document.querySelectorAll('.user-checkbox[data-id]');
+      var allRows = document.querySelectorAll('#usersTableBody tr');
+      
+      selectAllCheckbox.classList.remove('checked');
+      selectedUsers = [];
+      allCheckboxes.forEach(function(cb) { cb.classList.remove('checked'); });
+      allRows.forEach(function(row) { row.classList.remove('selected'); });
+      updateBulkActionBar();
+    }
+    
+    // Bulk update status
+    function bulkUpdateStatus(newStatus) {
+      if (selectedUsers.length === 0) return;
+      
+      fetch('/admin/users/bulk', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userIds: selectedUsers, status: newStatus })
+      }).then(function(response) {
+        if (response.ok) {
+          location.reload();
+        }
+      }).catch(function(err) {
+        console.error('Error updating users:', err);
+      });
+    }
+    
+    // Toggle single user status
+    function toggleUserStatus(userId, currentStatus) {
+      var newStatus = currentStatus === 'active' ? 'inactive' : 'active';
+      
+      fetch('/admin/users/' + userId + '/status', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus })
+      }).then(function(response) {
+        if (response.ok) {
+          location.reload();
+        }
+      }).catch(function(err) {
+        console.error('Error updating user:', err);
+      });
+    }
+    
+    // Search functionality
+    document.getElementById('usersSearch').addEventListener('input', function(e) {
+      var searchTerm = e.target.value.toLowerCase();
+      var rows = document.querySelectorAll('#usersTableBody tr');
+      
+      rows.forEach(function(row) {
+        var text = row.textContent.toLowerCase();
+        row.style.display = text.includes(searchTerm) ? '' : 'none';
+      });
+    });
+    
+    // Filter by status
+    document.getElementById('filterStatus').addEventListener('change', function(e) {
+      var status = e.target.value;
+      var rows = document.querySelectorAll('#usersTableBody tr');
+      
+      rows.forEach(function(row) {
+        if (!status || row.dataset.status === status) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    });
+    
+    // Clear filters
+    function clearFilters() {
+      document.getElementById('filterStatus').value = '';
+      document.getElementById('sortBy').value = 'recent';
+      document.getElementById('usersSearch').value = '';
+      var rows = document.querySelectorAll('#usersTableBody tr');
+      rows.forEach(function(row) { row.style.display = ''; });
+    }
+  </script>
 
 <%- include('partials/footer') %>

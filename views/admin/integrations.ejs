@@ -1,0 +1,844 @@
+<%- include('partials/header') %>
+<link rel="stylesheet" href="/css/adminCSS/admin-dashboard.css">
+<link rel="stylesheet" href="/css/adminCSS/admin-integrations.css">
+</head>
+<body class="<%= typeof currentModule !== 'undefined' && currentModule ? 'module-' + currentModule : '' %>">
+  <div class="admin-wrapper">
+    <%- include('partials/sidebar', { activePage: 'integrations', currentModule: currentModule }) %>
+    
+    <main class="admin-main">
+      <%- include('partials/topbar', { pageTitle: 'Integrations', currentModule: currentModule }) %>
+      
+      <div class="admin-content">
+        <% if (!currentModule) { %>
+        <!-- Module Selection View (when no module is selected) -->
+        <div class="integrations-intro">
+          <div class="intro-header">
+            <div class="intro-badge">
+              <i data-lucide="plug"></i>
+              <span>Data Sources</span>
+            </div>
+            <h1>Manage Integrations</h1>
+            <p>Select a module to configure its FTP and API data sources</p>
+          </div>
+
+          <div class="module-selector-grid">
+            <a href="/admin/integrations?module=automotive" class="module-card automotive">
+              <div class="module-card-icon">
+                <i data-lucide="car"></i>
+              </div>
+              <div class="module-card-content">
+                <h3>Automotive</h3>
+                <p>FTP & API connections for automotive parts suppliers</p>
+                <div class="module-card-stats">
+                  <span class="stat"><i data-lucide="plug"></i> 3 FTP Sources</span>
+                  <span class="stat"><i data-lucide="database"></i> 2.4M Parts</span>
+                </div>
+              </div>
+              <div class="module-card-status connected">
+                <i data-lucide="check-circle"></i>
+                <span>4 Active</span>
+              </div>
+            </a>
+
+            <a href="/admin/integrations?module=aviation" class="module-card aviation">
+              <div class="module-card-icon">
+                <i data-lucide="plane"></i>
+              </div>
+              <div class="module-card-content">
+                <h3>Aviation</h3>
+                <p>FTP & API connections for aviation parts suppliers</p>
+                <div class="module-card-stats">
+                  <span class="stat"><i data-lucide="plug"></i> 5 FTP Sources</span>
+                  <span class="stat"><i data-lucide="database"></i> 8.7M Parts</span>
+                </div>
+              </div>
+              <div class="module-card-status connected">
+                <i data-lucide="check-circle"></i>
+                <span>6 Active</span>
+              </div>
+            </a>
+
+            <a href="/admin/integrations?module=machinery" class="module-card machinery">
+              <div class="module-card-icon">
+                <i data-lucide="cog"></i>
+              </div>
+              <div class="module-card-content">
+                <h3>Machinery</h3>
+                <p>FTP & API connections for heavy machinery suppliers</p>
+                <div class="module-card-stats">
+                  <span class="stat"><i data-lucide="plug"></i> 2 FTP Sources</span>
+                  <span class="stat"><i data-lucide="database"></i> 1.1M Parts</span>
+                </div>
+              </div>
+              <div class="module-card-status warning">
+                <i data-lucide="alert-circle"></i>
+                <span>1 Issue</span>
+              </div>
+            </a>
+          </div>
+
+          <!-- System Integrations (Global) -->
+          <div class="global-integrations">
+            <div class="section-header">
+              <h2><i data-lucide="server"></i> System Infrastructure</h2>
+              <p>Core services powering all modules</p>
+            </div>
+            
+            <div class="infrastructure-grid">
+              <div class="infra-card">
+                <div class="infra-status connected"></div>
+                <div class="infra-icon elasticsearch">
+                  <i data-lucide="search"></i>
+                </div>
+                <div class="infra-info">
+                  <h4>Elasticsearch</h4>
+                  <span class="infra-host">localhost:9200</span>
+                </div>
+                <div class="infra-stats">
+                  <div class="stat-item">
+                    <span class="stat-value">12.2M</span>
+                    <span class="stat-label">Documents</span>
+                  </div>
+                  <div class="stat-item">
+                    <span class="stat-value">~15ms</span>
+                    <span class="stat-label">Avg Query</span>
+                  </div>
+                </div>
+                <button class="infra-action-btn" onclick="openSystemConfig('elasticsearch')">
+                  <i data-lucide="settings"></i>
+                </button>
+              </div>
+
+              <div class="infra-card">
+                <div class="infra-status connected"></div>
+                <div class="infra-icon mongodb">
+                  <i data-lucide="database"></i>
+                </div>
+                <div class="infra-info">
+                  <h4>MongoDB</h4>
+                  <span class="infra-host">localhost:27017</span>
+                </div>
+                <div class="infra-stats">
+                  <div class="stat-item">
+                    <span class="stat-value">12.2M</span>
+                    <span class="stat-label">Records</span>
+                  </div>
+                  <div class="stat-item">
+                    <span class="stat-value">42GB</span>
+                    <span class="stat-label">Storage</span>
+                  </div>
+                </div>
+                <button class="infra-action-btn" onclick="openSystemConfig('mongodb')">
+                  <i data-lucide="settings"></i>
+                </button>
+              </div>
+
+              <div class="infra-card">
+                <div class="infra-status disconnected"></div>
+                <div class="infra-icon redis">
+                  <i data-lucide="zap"></i>
+                </div>
+                <div class="infra-info">
+                  <h4>Redis Cache</h4>
+                  <span class="infra-host">Not configured</span>
+                </div>
+                <div class="infra-stats">
+                  <div class="stat-item">
+                    <span class="stat-value">--</span>
+                    <span class="stat-label">Hit Rate</span>
+                  </div>
+                  <div class="stat-item">
+                    <span class="stat-value">--</span>
+                    <span class="stat-label">Memory</span>
+                  </div>
+                </div>
+                <button class="infra-action-btn" onclick="openSystemConfig('redis')">
+                  <i data-lucide="plus"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <% } else { %>
+        <!-- Module-Specific Integrations View -->
+        <div class="integrations-module-view">
+          <!-- Breadcrumb -->
+          <div class="integrations-breadcrumb">
+            <a href="/admin/integrations"><i data-lucide="plug"></i> Integrations</a>
+            <i data-lucide="chevron-right"></i>
+            <span><%= moduleConfig.name %></span>
+          </div>
+
+          <!-- Module Header -->
+          <div class="module-header">
+            <div class="module-header-icon <%= currentModule %>">
+              <i data-lucide="<%= moduleConfig.icon %>"></i>
+            </div>
+            <div class="module-header-info">
+              <h1><%= moduleConfig.name %> Integrations</h1>
+              <p>Manage FTP connections, API integrations, and data synchronization</p>
+            </div>
+            <div class="module-header-actions">
+              <button class="admin-btn admin-btn-secondary" onclick="syncAllSources()">
+                <i data-lucide="refresh-cw"></i>
+                Sync All
+              </button>
+              <a href="/admin/integrations/create?module=<%= currentModule %>" class="admin-btn admin-btn-primary">
+                <i data-lucide="plus"></i>
+                Add Connection
+              </a>
+            </div>
+          </div>
+
+          <!-- Connection Stats -->
+          <div class="connection-stats-row">
+            <div class="conn-stat-card">
+              <div class="conn-stat-icon green">
+                <i data-lucide="check-circle"></i>
+              </div>
+              <div class="conn-stat-content">
+                <span class="conn-stat-value">4</span>
+                <span class="conn-stat-label">Active Connections</span>
+              </div>
+            </div>
+            <div class="conn-stat-card">
+              <div class="conn-stat-icon blue">
+                <i data-lucide="database"></i>
+              </div>
+              <div class="conn-stat-content">
+                <span class="conn-stat-value"><%= currentModule === 'aviation' ? '8.7M' : currentModule === 'automotive' ? '2.4M' : '1.1M' %></span>
+                <span class="conn-stat-label">Total Parts</span>
+              </div>
+            </div>
+            <div class="conn-stat-card">
+              <div class="conn-stat-icon purple">
+                <i data-lucide="clock"></i>
+              </div>
+              <div class="conn-stat-content">
+                <span class="conn-stat-value">14 min ago</span>
+                <span class="conn-stat-label">Last Sync</span>
+              </div>
+            </div>
+            <div class="conn-stat-card">
+              <div class="conn-stat-icon orange">
+                <i data-lucide="calendar"></i>
+              </div>
+              <div class="conn-stat-content">
+                <span class="conn-stat-value">Every 6h</span>
+                <span class="conn-stat-label">Sync Interval</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tabs -->
+          <div class="integrations-tabs">
+            <button class="intg-tab active" data-tab="ftp">
+              <i data-lucide="folder"></i>
+              FTP Connections
+            </button>
+            <button class="intg-tab" data-tab="api">
+              <i data-lucide="code"></i>
+              API Connections
+            </button>
+            <button class="intg-tab" data-tab="sync">
+              <i data-lucide="refresh-cw"></i>
+              Sync History
+            </button>
+            <button class="intg-tab" data-tab="mapping">
+              <i data-lucide="git-branch"></i>
+              Field Mapping
+            </button>
+          </div>
+
+          <!-- FTP Connections Tab -->
+          <div class="intg-tab-content active" id="tab-ftp">
+            <div class="connections-list">
+              <% var ftpConnections = [
+                { id: 1, name: 'APM Group FTP', host: 'ftp.apm.group', user: 'user_1091', status: 'connected', lastSync: '14 min ago', files: 12, records: '1.2M', schedule: 'Every 6h' },
+                { id: 2, name: 'PartsBase FTP', host: 'ftp.partsbase.com', user: 'partsform_sync', status: 'connected', lastSync: '2 hours ago', files: 8, records: '890K', schedule: 'Every 12h' },
+                { id: 3, name: 'ILS Connect', host: 'ftp.ilsconnect.net', user: 'ils_import', status: 'connected', lastSync: '1 day ago', files: 5, records: '340K', schedule: 'Daily' },
+                { id: 4, name: 'Stock Market FTP', host: 'ftp.stockmarket.aero', user: 'sm_api', status: 'error', lastSync: 'Failed', files: 0, records: '0', schedule: 'Every 6h', error: 'Connection timeout' }
+              ]; %>
+              <% ftpConnections.forEach(function(conn) { %>
+              <div class="connection-card <%= conn.status %>">
+                <div class="conn-status-indicator"></div>
+                <div class="conn-icon">
+                  <i data-lucide="hard-drive"></i>
+                </div>
+                <div class="conn-main-info">
+                  <h3><%= conn.name %></h3>
+                  <div class="conn-details">
+                    <span class="conn-detail"><i data-lucide="server"></i> <%= conn.host %></span>
+                    <span class="conn-detail"><i data-lucide="user"></i> <%= conn.user %></span>
+                  </div>
+                </div>
+                <div class="conn-stats">
+                  <div class="conn-stat-mini">
+                    <span class="value"><%= conn.files %></span>
+                    <span class="label">Files</span>
+                  </div>
+                  <div class="conn-stat-mini">
+                    <span class="value"><%= conn.records %></span>
+                    <span class="label">Records</span>
+                  </div>
+                </div>
+                <div class="conn-sync-info">
+                  <% if (conn.status === 'error') { %>
+                  <span class="sync-error"><i data-lucide="alert-triangle"></i> <%= conn.error %></span>
+                  <% } else { %>
+                  <span class="sync-time"><i data-lucide="clock"></i> <%= conn.lastSync %></span>
+                  <% } %>
+                  <span class="sync-schedule"><i data-lucide="refresh-cw"></i> <%= conn.schedule %></span>
+                </div>
+                <div class="conn-actions">
+                  <button class="conn-action-btn" title="Sync Now" onclick="syncConnection(<%= conn.id %>)">
+                    <i data-lucide="refresh-cw"></i>
+                  </button>
+                  <button class="conn-action-btn" title="Test Connection" onclick="testConnection(<%= conn.id %>)">
+                    <i data-lucide="play"></i>
+                  </button>
+                  <button class="conn-action-btn" title="Edit" onclick="editConnection(<%= conn.id %>)">
+                    <i data-lucide="edit-2"></i>
+                  </button>
+                  <button class="conn-action-btn danger" title="Delete" onclick="deleteConnection(<%= conn.id %>)">
+                    <i data-lucide="trash-2"></i>
+                  </button>
+                </div>
+              </div>
+              <% }); %>
+            </div>
+          </div>
+
+          <!-- API Connections Tab -->
+          <div class="intg-tab-content" id="tab-api">
+            <div class="connections-list">
+              <% var apiConnections = [
+                { id: 1, name: 'PartsBase API', endpoint: 'https://api.partsbase.com/v2', auth: 'API Key', status: 'connected', requests: '2.4K/day', lastCall: '5 min ago' },
+                { id: 2, name: 'ILS WebService', endpoint: 'https://ws.ilsmart.com/soap', auth: 'OAuth 2.0', status: 'connected', requests: '890/day', lastCall: '12 min ago' }
+              ]; %>
+              <% apiConnections.forEach(function(api) { %>
+              <div class="connection-card <%= api.status %>">
+                <div class="conn-status-indicator"></div>
+                <div class="conn-icon api">
+                  <i data-lucide="code"></i>
+                </div>
+                <div class="conn-main-info">
+                  <h3><%= api.name %></h3>
+                  <div class="conn-details">
+                    <span class="conn-detail"><i data-lucide="link"></i> <%= api.endpoint %></span>
+                    <span class="conn-detail"><i data-lucide="key"></i> <%= api.auth %></span>
+                  </div>
+                </div>
+                <div class="conn-stats">
+                  <div class="conn-stat-mini">
+                    <span class="value"><%= api.requests %></span>
+                    <span class="label">Requests</span>
+                  </div>
+                </div>
+                <div class="conn-sync-info">
+                  <span class="sync-time"><i data-lucide="clock"></i> <%= api.lastCall %></span>
+                </div>
+                <div class="conn-actions">
+                  <button class="conn-action-btn" title="Test API" onclick="testApi(<%= api.id %>)">
+                    <i data-lucide="play"></i>
+                  </button>
+                  <button class="conn-action-btn" title="View Docs" onclick="viewApiDocs(<%= api.id %>)">
+                    <i data-lucide="book-open"></i>
+                  </button>
+                  <button class="conn-action-btn" title="Edit" onclick="editApi(<%= api.id %>)">
+                    <i data-lucide="edit-2"></i>
+                  </button>
+                </div>
+              </div>
+              <% }); %>
+
+              <button class="add-connection-btn" onclick="openAddApiModal()">
+                <i data-lucide="plus"></i>
+                <span>Add API Connection</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Sync History Tab -->
+          <div class="intg-tab-content" id="tab-sync">
+            <div class="sync-history-table">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Source</th>
+                    <th>Type</th>
+                    <th>Started</th>
+                    <th>Duration</th>
+                    <th>Records</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% var syncHistory = [
+                    { source: 'APM Group FTP', type: 'FTP', started: '14 min ago', duration: '4m 23s', records: '45,230', status: 'success' },
+                    { source: 'PartsBase API', type: 'API', started: '2 hours ago', duration: '1m 12s', records: '12,450', status: 'success' },
+                    { source: 'Stock Market FTP', type: 'FTP', started: '3 hours ago', duration: '--', records: '0', status: 'failed', error: 'Connection timeout' },
+                    { source: 'ILS Connect', type: 'FTP', started: '1 day ago', duration: '12m 45s', records: '340,120', status: 'success' }
+                  ]; %>
+                  <% syncHistory.forEach(function(sync) { %>
+                  <tr>
+                    <td><strong><%= sync.source %></strong></td>
+                    <td><span class="type-badge <%= sync.type.toLowerCase() %>"><%= sync.type %></span></td>
+                    <td><%= sync.started %></td>
+                    <td><%= sync.duration %></td>
+                    <td><%= sync.records %></td>
+                    <td>
+                      <span class="status-badge <%= sync.status %>">
+                        <% if (sync.status === 'success') { %>
+                        <i data-lucide="check-circle"></i>
+                        <% } else { %>
+                        <i data-lucide="x-circle"></i>
+                        <% } %>
+                        <%= sync.status.charAt(0).toUpperCase() + sync.status.slice(1) %>
+                      </span>
+                    </td>
+                    <td>
+                      <button class="table-action-btn" title="View Details">
+                        <i data-lucide="eye"></i>
+                      </button>
+                      <% if (sync.status === 'failed') { %>
+                      <button class="table-action-btn" title="Retry">
+                        <i data-lucide="refresh-cw"></i>
+                      </button>
+                      <% } %>
+                    </td>
+                  </tr>
+                  <% }); %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Field Mapping Tab -->
+          <div class="intg-tab-content" id="tab-mapping">
+            <div class="mapping-info">
+              <div class="mapping-header">
+                <h3><i data-lucide="git-branch"></i> CSV Field Mapping</h3>
+                <p>Configure how CSV columns are mapped to database fields</p>
+              </div>
+
+              <div class="mapping-grid">
+                <div class="mapping-card">
+                  <div class="mapping-card-header">
+                    <h4>Part Number</h4>
+                    <span class="mapping-required">Required</span>
+                  </div>
+                  <div class="mapping-sources">
+                    <span class="mapping-tag">Part Number</span>
+                    <span class="mapping-tag">PartNumber</span>
+                    <span class="mapping-tag">part_number</span>
+                    <span class="mapping-tag">SKU</span>
+                    <span class="mapping-tag">P/N</span>
+                  </div>
+                </div>
+
+                <div class="mapping-card">
+                  <div class="mapping-card-header">
+                    <h4>Description</h4>
+                    <span class="mapping-optional">Optional</span>
+                  </div>
+                  <div class="mapping-sources">
+                    <span class="mapping-tag">Description</span>
+                    <span class="mapping-tag">Product Description</span>
+                    <span class="mapping-tag">Item Description</span>
+                  </div>
+                </div>
+
+                <div class="mapping-card">
+                  <div class="mapping-card-header">
+                    <h4>Supplier</h4>
+                    <span class="mapping-optional">Optional</span>
+                  </div>
+                  <div class="mapping-sources">
+                    <span class="mapping-tag">Supplier</span>
+                    <span class="mapping-tag">Vendor</span>
+                    <span class="mapping-tag">Manufacturer</span>
+                  </div>
+                </div>
+
+                <div class="mapping-card">
+                  <div class="mapping-card-header">
+                    <h4>Price</h4>
+                    <span class="mapping-optional">Optional</span>
+                  </div>
+                  <div class="mapping-sources">
+                    <span class="mapping-tag">Price</span>
+                    <span class="mapping-tag">Cost</span>
+                    <span class="mapping-tag">Unit Price</span>
+                  </div>
+                </div>
+              </div>
+
+              <button class="admin-btn admin-btn-secondary" style="margin-top: 1.5rem;">
+                <i data-lucide="plus"></i>
+                Add Custom Mapping
+              </button>
+            </div>
+          </div>
+        </div>
+        <% } %>
+      </div>
+    </main>
+  </div>
+
+  <!-- Add Connection Modal -->
+  <div class="modal-overlay" id="addConnectionModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-icon">
+          <i data-lucide="plus"></i>
+        </div>
+        <div>
+          <h3>Add FTP Connection</h3>
+          <p>Configure a new FTP data source</p>
+        </div>
+        <button class="modal-close" onclick="closeModal('addConnectionModal')">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Connection Name</label>
+            <input type="text" class="form-input" placeholder="e.g., Main Supplier FTP">
+          </div>
+          <div class="form-group">
+            <label>FTP Host</label>
+            <input type="text" class="form-input" placeholder="ftp.example.com">
+          </div>
+          <div class="form-group">
+            <label>Port</label>
+            <input type="number" class="form-input" value="21">
+          </div>
+          <div class="form-group">
+            <label>Username</label>
+            <input type="text" class="form-input" placeholder="ftp_user">
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" class="form-input" placeholder="••••••••">
+          </div>
+          <div class="form-group">
+            <label>Remote Path</label>
+            <input type="text" class="form-input" placeholder="/data/csv/" value="/">
+          </div>
+          <div class="form-group">
+            <label>Sync Schedule</label>
+            <select class="form-input">
+              <option>Every 6 hours</option>
+              <option>Every 12 hours</option>
+              <option>Daily</option>
+              <option>Weekly</option>
+              <option>Manual only</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>File Pattern</label>
+            <input type="text" class="form-input" placeholder="*.csv" value="*.csv">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="admin-btn admin-btn-secondary" onclick="closeModal('addConnectionModal')">Cancel</button>
+        <button class="admin-btn" onclick="testNewConnection()" style="background: var(--admin-border); color: var(--admin-text-primary);">
+          <i data-lucide="play"></i>
+          Test Connection
+        </button>
+        <button class="admin-btn admin-btn-primary" onclick="saveConnection()">
+          <i data-lucide="save"></i>
+          Save Connection
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- System Config Modal -->
+  <div class="modal-overlay" id="systemConfigModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-icon" id="sysConfigIcon">
+          <i data-lucide="settings"></i>
+        </div>
+        <div>
+          <h3 id="sysConfigTitle">System Configuration</h3>
+          <p id="sysConfigSubtitle">Configure connection settings</p>
+        </div>
+        <button class="modal-close" onclick="closeModal('systemConfigModal')">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="modal-body" id="sysConfigBody">
+        <!-- Content injected via JS -->
+      </div>
+      <div class="modal-footer">
+        <button class="admin-btn admin-btn-secondary" onclick="closeModal('systemConfigModal')">Cancel</button>
+        <button class="admin-btn admin-btn-primary">
+          <i data-lucide="save"></i>
+          Save Changes
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sync Progress Modal -->
+  <div class="modal-overlay" id="syncProgressModal">
+    <div class="modal-content" style="max-width: 420px;">
+      <div class="modal-header">
+        <div class="modal-icon sync-icon">
+          <i data-lucide="refresh-cw" class="spin-icon"></i>
+        </div>
+        <div>
+          <h3 id="syncModalTitle">Syncing Connection</h3>
+          <p id="syncModalSubtitle">Please wait...</p>
+        </div>
+      </div>
+      <div class="modal-body" style="text-align: center; padding: 2rem;">
+        <div class="sync-progress">
+          <div class="sync-progress-bar"></div>
+        </div>
+        <div class="sync-status">
+          <p id="syncStatusText">Connecting to FTP server...</p>
+        </div>
+        <div class="sync-details" style="margin-top: 1.5rem; text-align: left; background: var(--admin-bg-secondary); padding: 1rem; border-radius: 10px;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+            <span style="color: var(--admin-text-muted); font-size: 0.85rem;">Files Found</span>
+            <strong id="syncFilesCount">--</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+            <span style="color: var(--admin-text-muted); font-size: 0.85rem;">Records Processed</span>
+            <strong id="syncRecordsCount">--</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <span style="color: var(--admin-text-muted); font-size: 0.85rem;">Elapsed Time</span>
+            <strong id="syncElapsedTime">0s</strong>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer" style="justify-content: center;">
+        <button class="admin-btn admin-btn-secondary" onclick="closeModal('syncProgressModal')">
+          <i data-lucide="x"></i>
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal-overlay" id="deleteConfirmModal">
+    <div class="modal-content" style="max-width: 400px;">
+      <div class="modal-header">
+        <div class="modal-icon" style="background: rgba(239, 68, 68, 0.12); color: #ef4444;">
+          <i data-lucide="trash-2"></i>
+        </div>
+        <div>
+          <h3>Delete Connection</h3>
+          <p>This action cannot be undone</p>
+        </div>
+        <button class="modal-close" onclick="closeModal('deleteConfirmModal')">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="modal-body" style="padding: 1.5rem;">
+        <p style="color: var(--admin-text-secondary); margin: 0;">Are you sure you want to delete <strong id="deleteConnName">this connection</strong>? All sync history and configuration will be permanently removed.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="admin-btn admin-btn-secondary" onclick="closeModal('deleteConfirmModal')">
+          Cancel
+        </button>
+        <button class="admin-btn" style="background: #ef4444; color: white;" onclick="confirmDelete()">
+          <i data-lucide="trash-2"></i>
+          Delete Connection
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Tab switching
+    document.querySelectorAll('.intg-tab').forEach(function(tab) {
+      tab.addEventListener('click', function() {
+        var tabName = this.dataset.tab;
+        document.querySelectorAll('.intg-tab').forEach(function(t) { t.classList.remove('active'); });
+        document.querySelectorAll('.intg-tab-content').forEach(function(c) { c.classList.remove('active'); });
+        this.classList.add('active');
+        document.getElementById('tab-' + tabName).classList.add('active');
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      });
+    });
+
+    // Modal functions
+    function openAddConnectionModal() {
+      document.getElementById('addConnectionModal').classList.add('active');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('active');
+    }
+
+    function openSystemConfig(type) {
+      var modal = document.getElementById('systemConfigModal');
+      var title = document.getElementById('sysConfigTitle');
+      var subtitle = document.getElementById('sysConfigSubtitle');
+      var body = document.getElementById('sysConfigBody');
+      
+      if (type === 'elasticsearch') {
+        title.textContent = 'Elasticsearch Configuration';
+        subtitle.textContent = 'Configure search engine connection';
+        body.innerHTML = '<div class="form-grid"><div class="form-group"><label>Node URL</label><input type="text" class="form-input" value="http://localhost:9200"></div><div class="form-group"><label>Index Name</label><input type="text" class="form-input" value="parts_index"></div><div class="form-group"><label>Username</label><input type="text" class="form-input" placeholder="elastic"></div><div class="form-group"><label>Password</label><input type="password" class="form-input" placeholder="••••••••"></div></div>';
+      } else if (type === 'mongodb') {
+        title.textContent = 'MongoDB Configuration';
+        subtitle.textContent = 'Configure database connection';
+        body.innerHTML = '<div class="form-grid"><div class="form-group full-width"><label>Connection String</label><input type="text" class="form-input" value="mongodb://localhost:27017"></div><div class="form-group"><label>Database Name</label><input type="text" class="form-input" value="csv_data_db"></div><div class="form-group"><label>Pool Size</label><input type="number" class="form-input" value="50"></div></div>';
+      } else if (type === 'redis') {
+        title.textContent = 'Redis Cache Configuration';
+        subtitle.textContent = 'Configure caching layer';
+        body.innerHTML = '<div class="form-grid"><div class="form-group"><label>Host</label><input type="text" class="form-input" value="localhost"></div><div class="form-group"><label>Port</label><input type="number" class="form-input" value="6379"></div><div class="form-group"><label>Password</label><input type="password" class="form-input" placeholder="Optional"></div><div class="form-group"><label>Database</label><input type="number" class="form-input" value="0"></div></div>';
+      }
+      
+      modal.classList.add('active');
+    }
+
+    // Close modal on overlay click
+    document.querySelectorAll('.modal-overlay').forEach(function(overlay) {
+      overlay.addEventListener('click', function(e) {
+        if (e.target === overlay) {
+          overlay.classList.remove('active');
+        }
+      });
+    });
+
+    // Connection actions - now using modals
+    function syncConnection(id) {
+      document.getElementById('syncModalTitle').textContent = 'Syncing Connection #' + id;
+      document.getElementById('syncModalSubtitle').textContent = 'Downloading and processing files...';
+      document.getElementById('syncStatusText').textContent = 'Connecting to FTP server...';
+      document.getElementById('syncFilesCount').textContent = '--';
+      document.getElementById('syncRecordsCount').textContent = '--';
+      document.getElementById('syncElapsedTime').textContent = '0s';
+      document.getElementById('syncProgressModal').classList.add('active');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+      
+      // Simulate sync progress
+      var startTime = Date.now();
+      var syncInterval = setInterval(function() {
+        var elapsed = Math.floor((Date.now() - startTime) / 1000);
+        document.getElementById('syncElapsedTime').textContent = elapsed + 's';
+        
+        if (elapsed > 1) {
+          document.getElementById('syncStatusText').textContent = 'Downloading CSV files...';
+          document.getElementById('syncFilesCount').textContent = Math.min(elapsed - 1, 12);
+        }
+        if (elapsed > 3) {
+          document.getElementById('syncStatusText').textContent = 'Processing records...';
+          document.getElementById('syncRecordsCount').textContent = (elapsed * 8500).toLocaleString();
+        }
+        if (elapsed > 6) {
+          clearInterval(syncInterval);
+          document.getElementById('syncStatusText').textContent = 'Sync completed successfully!';
+          document.querySelector('.sync-progress-bar').style.background = '#10b981';
+          document.querySelector('.spin-icon').classList.remove('spin-icon');
+        }
+      }, 1000);
+    }
+    
+    function testConnection(id) {
+      document.getElementById('syncModalTitle').textContent = 'Testing Connection #' + id;
+      document.getElementById('syncModalSubtitle').textContent = 'Verifying FTP credentials...';
+      document.getElementById('syncStatusText').textContent = 'Attempting to connect...';
+      document.getElementById('syncFilesCount').textContent = '--';
+      document.getElementById('syncRecordsCount').textContent = '--';
+      document.getElementById('syncElapsedTime').textContent = '0s';
+      document.getElementById('syncProgressModal').classList.add('active');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+      
+      setTimeout(function() {
+        document.getElementById('syncStatusText').textContent = 'Connection successful!';
+        document.querySelector('.sync-progress-bar').style.background = '#10b981';
+      }, 2000);
+    }
+    
+    function editConnection(id) {
+      openAddConnectionModal();
+    }
+    
+    var pendingDeleteId = null;
+    
+    function deleteConnection(id) {
+      pendingDeleteId = id;
+      var connNames = ['APM Group FTP', 'PartsBase FTP', 'ILS Connect', 'Stock Market FTP'];
+      document.getElementById('deleteConnName').textContent = connNames[id - 1] || 'Connection #' + id;
+      document.getElementById('deleteConfirmModal').classList.add('active');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+    
+    function confirmDelete() {
+      closeModal('deleteConfirmModal');
+      // UI Demo - connection would be deleted here
+      pendingDeleteId = null;
+    }
+    
+    function testNewConnection() {
+      document.getElementById('syncModalTitle').textContent = 'Testing New Connection';
+      document.getElementById('syncModalSubtitle').textContent = 'Verifying FTP credentials...';
+      document.getElementById('syncStatusText').textContent = 'Connecting...';
+      closeModal('addConnectionModal');
+      document.getElementById('syncProgressModal').classList.add('active');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+      
+      setTimeout(function() {
+        document.getElementById('syncStatusText').textContent = 'Connection successful!';
+        document.querySelector('.sync-progress-bar').style.background = '#10b981';
+      }, 2000);
+    }
+    
+    function saveConnection() {
+      closeModal('addConnectionModal');
+    }
+    
+    function syncAllSources() {
+      document.getElementById('syncModalTitle').textContent = 'Syncing All Sources';
+      document.getElementById('syncModalSubtitle').textContent = 'Processing 4 connections...';
+      document.getElementById('syncStatusText').textContent = 'Starting sync...';
+      document.getElementById('syncFilesCount').textContent = '0';
+      document.getElementById('syncRecordsCount').textContent = '0';
+      document.getElementById('syncElapsedTime').textContent = '0s';
+      document.getElementById('syncProgressModal').classList.add('active');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+    
+    function openAddApiModal() {
+      openAddConnectionModal();
+    }
+    
+    function testApi(id) {
+      document.getElementById('syncModalTitle').textContent = 'Testing API #' + id;
+      document.getElementById('syncModalSubtitle').textContent = 'Sending test request...';
+      document.getElementById('syncStatusText').textContent = 'Calling API endpoint...';
+      document.getElementById('syncProgressModal').classList.add('active');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+      
+      setTimeout(function() {
+        document.getElementById('syncStatusText').textContent = 'API responding correctly!';
+        document.querySelector('.sync-progress-bar').style.background = '#10b981';
+      }, 1500);
+    }
+    
+    function viewApiDocs(id) {
+      window.open('#', '_blank');
+    }
+    
+    function editApi(id) {
+      openAddConnectionModal();
+    }
+  </script>
+
+<%- include('partials/footer') %>

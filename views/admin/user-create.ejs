@@ -1,0 +1,187 @@
+<%- include('partials/header') %>
+<link rel="stylesheet" href="/css/adminCSS/admin-dashboard.css">
+<link rel="stylesheet" href="/css/adminCSS/admin-users.css">
+</head>
+<body class="<%= typeof currentModule !== 'undefined' && currentModule ? 'module-' + currentModule : '' %>">
+  <div class="admin-wrapper">
+    <%- include('partials/sidebar', { activePage: 'users', currentModule: currentModule }) %>
+    
+    <main class="admin-main">
+      <%- include('partials/topbar', { pageTitle: 'Add User', currentModule: currentModule }) %>
+      
+      <div class="admin-content">
+        <!-- Breadcrumb -->
+        <div style="margin-bottom: 1.5rem;">
+          <a href="/admin/users" style="color: var(--admin-text-muted); text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.9rem;">
+            <i data-lucide="arrow-left" style="width: 16px; height: 16px;"></i>
+            Back to Users
+          </a>
+        </div>
+
+        <!-- Page Header -->
+        <div class="users-page-header">
+          <h2>Create New User</h2>
+        </div>
+
+        <form id="createUserForm" class="user-form-container">
+          <!-- Personal Information -->
+          <div class="user-form-card">
+            <div class="user-form-card-header">
+              <i data-lucide="user"></i>
+              <h3>Personal Information</h3>
+            </div>
+            <div class="user-form-card-body">
+              <div class="user-form-grid">
+                <div class="user-form-group">
+                  <label>First Name <span class="required">*</span></label>
+                  <input type="text" class="user-form-input" name="firstName" placeholder="Enter first name" required>
+                </div>
+                <div class="user-form-group">
+                  <label>Last Name <span class="required">*</span></label>
+                  <input type="text" class="user-form-input" name="lastName" placeholder="Enter last name" required>
+                </div>
+                <div class="user-form-group">
+                  <label>Email Address <span class="required">*</span></label>
+                  <input type="email" class="user-form-input" name="email" placeholder="email@company.com" required>
+                </div>
+                <div class="user-form-group">
+                  <label>Phone Number</label>
+                  <input type="tel" class="user-form-input" name="phone" placeholder="+1 (555) 123-4567">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Company Information -->
+          <div class="user-form-card">
+            <div class="user-form-card-header">
+              <i data-lucide="building"></i>
+              <h3>Company Information</h3>
+            </div>
+            <div class="user-form-card-body">
+              <div class="user-form-grid">
+                <div class="user-form-group">
+                  <label>Company Name <span class="required">*</span></label>
+                  <input type="text" class="user-form-input" name="company" placeholder="Enter company name" required>
+                </div>
+                <div class="user-form-group">
+                  <label>Position/Title</label>
+                  <input type="text" class="user-form-input" name="position" placeholder="e.g. Procurement Manager">
+                </div>
+                <div class="user-form-group">
+                  <label>Industry</label>
+                  <select class="user-form-select" name="industry">
+                    <option value="">Select Industry</option>
+                    <option value="automotive">Automotive</option>
+                    <option value="aviation">Aviation</option>
+                    <option value="machinery">Machinery</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+                <div class="user-form-group">
+                  <label>Country</label>
+                  <select class="user-form-select" name="country">
+                    <option value="">Select Country</option>
+                    <option value="US">United States</option>
+                    <option value="DE">Germany</option>
+                    <option value="UK">United Kingdom</option>
+                    <option value="FR">France</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+                <div class="user-form-group full-width">
+                  <label>Company Address</label>
+                  <input type="text" class="user-form-input" name="address" placeholder="Enter full address">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Account Settings -->
+          <div class="user-form-card">
+            <div class="user-form-card-header">
+              <i data-lucide="settings"></i>
+              <h3>Account Settings</h3>
+            </div>
+            <div class="user-form-card-body">
+              <div class="user-form-grid">
+                <div class="user-form-group">
+                  <label>Account Status</label>
+                  <div class="status-toggle">
+                    <div class="status-toggle-switch active" id="statusToggle" onclick="toggleStatus()"></div>
+                    <span class="status-toggle-label" id="statusLabel">Active</span>
+                  </div>
+                  <input type="hidden" name="status" id="statusInput" value="active">
+                </div>
+                <div class="user-form-group">
+                  <label>Send Welcome Email</label>
+                  <div class="status-toggle">
+                    <div class="status-toggle-switch active" id="emailToggle" onclick="toggleEmail()"></div>
+                    <span class="status-toggle-label" id="emailLabel">Yes, send email</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Form Actions -->
+          <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem;">
+            <a href="/admin/users" class="admin-btn admin-btn-secondary">Cancel</a>
+            <button type="submit" class="admin-btn admin-btn-primary">
+              <i data-lucide="user-plus"></i>
+              Create User
+            </button>
+          </div>
+        </form>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    function toggleStatus() {
+      var toggle = document.getElementById('statusToggle');
+      var label = document.getElementById('statusLabel');
+      var input = document.getElementById('statusInput');
+      
+      if (toggle.classList.contains('active')) {
+        toggle.classList.remove('active');
+        label.textContent = 'Inactive';
+        input.value = 'inactive';
+      } else {
+        toggle.classList.add('active');
+        label.textContent = 'Active';
+        input.value = 'active';
+      }
+    }
+    
+    function toggleEmail() {
+      var toggle = document.getElementById('emailToggle');
+      var label = document.getElementById('emailLabel');
+      
+      if (toggle.classList.contains('active')) {
+        toggle.classList.remove('active');
+        label.textContent = 'No email';
+      } else {
+        toggle.classList.add('active');
+        label.textContent = 'Yes, send email';
+      }
+    }
+    
+    document.getElementById('createUserForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      var formData = new FormData(this);
+      var userData = {};
+      formData.forEach(function(value, key) {
+        userData[key] = value;
+      });
+      
+      // In production, send to server
+      console.log('Creating user:', userData);
+      
+      // Redirect to users list
+      window.location.href = '/admin/users';
+    });
+  </script>
+
+<%- include('partials/footer') %>

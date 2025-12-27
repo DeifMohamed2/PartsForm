@@ -1,91 +1,6 @@
 <%- include('partials/header') %>
 <link rel="stylesheet" href="/css/adminCSS/admin-dashboard.css">
-<style>
-  .ticket-card {
-    background: var(--admin-bg-primary);
-    border: 1px solid var(--admin-border);
-    border-radius: var(--admin-radius-lg);
-    padding: 1.25rem;
-    margin-bottom: 1rem;
-    display: grid;
-    grid-template-columns: auto 1fr auto auto;
-    gap: 1.5rem;
-    align-items: center;
-    transition: var(--admin-transition);
-    box-shadow: var(--admin-shadow-sm);
-  }
-  .ticket-card:hover {
-    border-color: var(--module-primary);
-    box-shadow: var(--admin-shadow-md);
-  }
-  .ticket-priority {
-    width: 4px;
-    height: 60px;
-    border-radius: 2px;
-  }
-  .ticket-priority.urgent { background: var(--admin-danger); }
-  .ticket-priority.high { background: var(--admin-warning); }
-  .ticket-priority.medium { background: var(--admin-info); }
-  .ticket-priority.low { background: var(--admin-success); }
-  .ticket-info h4 {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--admin-text-primary);
-    margin-bottom: 0.25rem;
-  }
-  .ticket-info h4 span {
-    font-weight: 600;
-    color: var(--module-primary);
-    font-size: 0.85rem;
-  }
-  .ticket-info p {
-    font-size: 0.85rem;
-    color: var(--admin-text-muted);
-    margin: 0;
-  }
-  .ticket-meta {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    font-size: 0.8rem;
-    color: var(--admin-text-muted);
-    margin-top: 0.5rem;
-  }
-  .ticket-meta span {
-    display: flex;
-    align-items: center;
-    gap: 0.375rem;
-  }
-  .ticket-meta i {
-    width: 14px;
-    height: 14px;
-  }
-  .ticket-status {
-    padding: 0.35rem 0.75rem;
-    border-radius: 20px;
-    font-size: 0.75rem;
-    font-weight: 600;
-  }
-  .ticket-status.open {
-    background: rgba(245, 158, 11, 0.12);
-    color: #d97706;
-  }
-  .ticket-status.in-progress {
-    background: rgba(59, 130, 246, 0.12);
-    color: #2563eb;
-  }
-  .ticket-status.resolved {
-    background: rgba(16, 185, 129, 0.12);
-    color: #059669;
-  }
-  .ticket-actions {
-    display: flex;
-    gap: 0.5rem;
-  }
-</style>
+<link rel="stylesheet" href="/css/adminCSS/admin-tickets.css">
 </head>
 <body class="<%= typeof currentModule !== 'undefined' && currentModule ? 'module-' + currentModule : '' %>">
   <div class="admin-wrapper">
@@ -107,22 +22,37 @@
         </div>
         <% } %>
 
-        <div class="page-header">
+        <!-- Page Header -->
+        <div class="tickets-page-header">
           <h2><%= currentModule ? moduleConfig.name + ' Tickets' : 'Support Tickets' %></h2>
-          <button class="admin-btn admin-btn-secondary">
-            <i data-lucide="download"></i>
-            Export
-          </button>
+          <div class="tickets-header-actions">
+            <div class="tickets-search-container">
+              <i data-lucide="search" class="search-icon"></i>
+              <input type="text" id="ticketsSearch" placeholder="Search tickets..." autocomplete="off">
+            </div>
+            <button class="admin-btn admin-btn-secondary">
+              <i data-lucide="download"></i>
+              Export
+            </button>
+          </div>
         </div>
 
         <!-- Stats Cards -->
-        <div class="stats-grid" style="margin-bottom: 2rem;">
+        <div class="stats-grid" style="margin-bottom: 1.5rem;">
+          <%
+            var openCount = 0, inProgressCount = 0, resolvedCount = 0;
+            tickets.forEach(function(t) {
+              if (t.status === 'open') openCount++;
+              else if (t.status === 'in-progress') inProgressCount++;
+              else if (t.status === 'resolved') resolvedCount++;
+            });
+          %>
           <div class="stat-card orange">
             <div class="stat-icon">
               <i data-lucide="inbox"></i>
             </div>
             <div class="stat-content">
-              <div class="stat-value"><%= tickets.filter(t => t.status === 'open').length %></div>
+              <div class="stat-value"><%= openCount %></div>
               <div class="stat-label">Open Tickets</div>
             </div>
           </div>
@@ -131,7 +61,7 @@
               <i data-lucide="loader"></i>
             </div>
             <div class="stat-content">
-              <div class="stat-value"><%= tickets.filter(t => t.status === 'in-progress').length %></div>
+              <div class="stat-value"><%= inProgressCount %></div>
               <div class="stat-label">In Progress</div>
             </div>
           </div>
@@ -140,7 +70,7 @@
               <i data-lucide="check-circle"></i>
             </div>
             <div class="stat-content">
-              <div class="stat-value"><%= tickets.filter(t => t.status === 'resolved').length %></div>
+              <div class="stat-value"><%= resolvedCount %></div>
               <div class="stat-label">Resolved</div>
             </div>
           </div>
@@ -156,10 +86,10 @@
         </div>
 
         <!-- Filters -->
-        <div class="filters-row">
+        <div class="tickets-filters">
           <div class="filter-group">
             <span class="filter-label">Status:</span>
-            <select class="filter-select">
+            <select class="filter-select" id="filterStatus">
               <option value="">All Status</option>
               <option value="open">Open</option>
               <option value="in-progress">In Progress</option>
@@ -168,7 +98,7 @@
           </div>
           <div class="filter-group">
             <span class="filter-label">Priority:</span>
-            <select class="filter-select">
+            <select class="filter-select" id="filterPriority">
               <option value="">All Priorities</option>
               <option value="urgent">Urgent</option>
               <option value="high">High</option>
@@ -176,60 +106,480 @@
               <option value="low">Low</option>
             </select>
           </div>
+          <div class="filter-group">
+            <span class="filter-label">Category:</span>
+            <select class="filter-select" id="filterCategory">
+              <option value="">All Categories</option>
+              <option value="Shipping Issue">Shipping Issue</option>
+              <option value="Product Quality">Product Quality</option>
+              <option value="Return Request">Return Request</option>
+              <option value="Technical Support">Technical Support</option>
+              <option value="Billing">Billing</option>
+            </select>
+          </div>
+          <div class="filters-spacer"></div>
+          <button class="filter-clear-btn" onclick="clearFilters()">
+            <i data-lucide="x"></i>
+            Clear
+          </button>
         </div>
 
         <!-- Tickets List -->
         <% if (tickets.length === 0) { %>
-          <div style="padding: 3rem; text-align: center; color: var(--admin-text-muted); background: var(--admin-bg-primary); border-radius: var(--admin-radius-lg);">
-            No tickets found.
+        <div class="tickets-empty">
+          <div class="tickets-empty-icon">
+            <i data-lucide="ticket"></i>
           </div>
+          <h3>No Tickets Found</h3>
+          <p>There are no support tickets matching your criteria.</p>
+        </div>
         <% } else { %>
-          <% tickets.forEach(ticket => { %>
-            <div class="ticket-card">
-              <div class="ticket-priority <%= ticket.priority || 'medium' %>"></div>
-              <div class="ticket-info">
-                <h4>
-                  <span><%= ticket.id %></span>
-                  <%= ticket.subject %>
-                </h4>
-                <div class="ticket-meta">
-                  <span>
-                    <i data-lucide="shopping-bag"></i>
-                    <%= ticket.orderNumber %>
-                  </span>
-                  <span>
-                    <i data-lucide="folder"></i>
-                    <%= ticket.category %>
-                  </span>
-                  <span>
-                    <i data-lucide="clock"></i>
-                    <%= new Date(ticket.createdAt).toLocaleDateString() %>
-                  </span>
-                  <span>
-                    <i data-lucide="message-circle"></i>
-                    <%= ticket.messages ? ticket.messages.length : 0 %> messages
-                  </span>
-                </div>
+        <div id="ticketsList">
+          <% tickets.forEach(function(ticket) { %>
+          <%
+            var unreadCount = ticket.unreadCount || 0;
+            var hasUnread = unreadCount > 0;
+            var lastMessage = ticket.lastMessage || (ticket.messages && ticket.messages.length > 0 ? ticket.messages[ticket.messages.length - 1] : null);
+            var lastMessageText = lastMessage ? (lastMessage.content || lastMessage.text || '') : '';
+            var lastMessageTime = lastMessage ? (lastMessage.time || lastMessage.createdAt || '') : '';
+          %>
+          <a href="/admin/tickets/<%= ticket.id %><%= currentModule ? '?module=' + currentModule : '' %>" 
+             class="ticket-card <%= hasUnread ? 'has-unread' : '' %>"
+             data-status="<%= ticket.status %>"
+             data-priority="<%= ticket.priority || 'medium' %>"
+             data-category="<%= ticket.category %>">
+            <div class="ticket-priority-bar <%= ticket.priority || 'medium' %>"></div>
+            <div class="ticket-content">
+              <div class="ticket-header-row">
+                <span class="ticket-id"><%= ticket.id %></span>
+                <h4 class="ticket-subject"><%= ticket.subject %></h4>
+                <% if (hasUnread) { %>
+                <span class="unread-badge"><%= unreadCount %></span>
+                <% } %>
               </div>
-              <div class="ticket-status <%= ticket.status %>">
-                <%= ticket.status.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') %>
+              <div class="ticket-customer">
+                <i data-lucide="user"></i>
+                <span><%= ticket.customerName || ticket.customer || 'Customer' %></span>
+                <span style="color: var(--admin-text-muted); margin-left: 0.5rem;">• <%= ticket.customerEmail || ticket.email || '' %></span>
               </div>
-              <div class="ticket-actions">
-                <button class="order-action-btn" title="View Ticket">
-                  <i data-lucide="eye"></i>
+              <% if (lastMessageText) { %>
+              <div class="ticket-last-message">
+                <i data-lucide="message-circle" style="width: 14px; height: 14px; flex-shrink: 0;"></i>
+                <span class="message-preview"><%= lastMessageText.substring(0, 80) %><%= lastMessageText.length > 80 ? '...' : '' %></span>
+                <% if (lastMessageTime) { %>
+                <span class="message-time">• <%= typeof lastMessageTime === 'string' ? lastMessageTime : new Date(lastMessageTime).toLocaleDateString() %></span>
+                <% } %>
+              </div>
+              <% } %>
+              <div class="ticket-meta-row">
+                <span>
+                  <i data-lucide="shopping-bag"></i>
+                  <%= ticket.orderNumber || 'N/A' %>
+                </span>
+                <span>
+                  <i data-lucide="folder"></i>
+                  <%= ticket.category %>
+                </span>
+                <span>
+                  <i data-lucide="clock"></i>
+                  <%= new Date(ticket.createdAt).toLocaleDateString() %>
+                </span>
+                <span>
+                  <i data-lucide="message-circle"></i>
+                  <%= ticket.messages ? ticket.messages.length : 0 %> messages
+                </span>
+              </div>
+            </div>
+            <div class="ticket-status-col">
+              <span class="ticket-status-badge <%= ticket.status %>">
+                <% if (ticket.status === 'open') { %>
+                  <i data-lucide="inbox"></i>
+                <% } else if (ticket.status === 'in-progress') { %>
+                  <i data-lucide="loader"></i>
+                <% } else { %>
+                  <i data-lucide="check-circle"></i>
+                <% } %>
+                <%= ticket.status.split('-').map(function(w) { return w.charAt(0).toUpperCase() + w.slice(1); }).join(' ') %>
+              </span>
+              <div class="ticket-actions" onclick="event.preventDefault(); event.stopPropagation();">
+                <button class="ticket-action-btn chat" title="Open Chat" onclick="window.location.href='/admin/tickets/<%= ticket.id %><%= currentModule ? '?module=' + currentModule : '' %>'">
+                  <i data-lucide="message-square"></i>
                 </button>
-                <button class="order-action-btn" title="Reply">
-                  <i data-lucide="reply"></i>
-                </button>
-                <button class="order-action-btn" title="Close Ticket">
-                  <i data-lucide="x-circle"></i>
+                <button class="ticket-action-btn" title="Change Status" onclick="openStatusModal('<%= ticket.id %>', '<%= ticket.status %>', '<%= ticket.subject %>')">
+                  <i data-lucide="refresh-cw"></i>
                 </button>
               </div>
             </div>
+          </a>
           <% }); %>
+        </div>
         <% } %>
       </div>
     </main>
   </div>
+
+  <!-- Status Change Modal -->
+  <div class="status-modal-overlay" id="statusModalOverlay" onclick="closeStatusModal()">
+    <div class="status-modal" onclick="event.stopPropagation()">
+      <div class="status-modal-header">
+        <div class="status-modal-icon">
+          <i data-lucide="refresh-cw"></i>
+        </div>
+        <div>
+          <h3>Update Ticket Status</h3>
+          <p id="statusModalTicketId">TKT-001</p>
+        </div>
+        <button class="status-modal-close" onclick="closeStatusModal()">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="status-modal-body">
+        <p class="status-modal-subject" id="statusModalSubject">Ticket Subject</p>
+        <div class="status-options">
+          <label class="status-option" data-status="open">
+            <input type="radio" name="newStatus" value="open">
+            <div class="status-option-content">
+              <div class="status-option-icon open">
+                <i data-lucide="inbox"></i>
+              </div>
+              <div class="status-option-info">
+                <span class="status-option-label">Open</span>
+                <span class="status-option-desc">Waiting for support response</span>
+              </div>
+            </div>
+          </label>
+          <label class="status-option" data-status="in-progress">
+            <input type="radio" name="newStatus" value="in-progress">
+            <div class="status-option-content">
+              <div class="status-option-icon in-progress">
+                <i data-lucide="loader"></i>
+              </div>
+              <div class="status-option-info">
+                <span class="status-option-label">In Progress</span>
+                <span class="status-option-desc">Being actively worked on</span>
+              </div>
+            </div>
+          </label>
+          <label class="status-option" data-status="resolved">
+            <input type="radio" name="newStatus" value="resolved">
+            <div class="status-option-content">
+              <div class="status-option-icon resolved">
+                <i data-lucide="check-circle"></i>
+              </div>
+              <div class="status-option-info">
+                <span class="status-option-label">Resolved</span>
+                <span class="status-option-desc">Issue has been resolved</span>
+              </div>
+            </div>
+          </label>
+          <label class="status-option" data-status="closed">
+            <input type="radio" name="newStatus" value="closed">
+            <div class="status-option-content">
+              <div class="status-option-icon closed">
+                <i data-lucide="x-circle"></i>
+              </div>
+              <div class="status-option-info">
+                <span class="status-option-label">Closed</span>
+                <span class="status-option-desc">Ticket has been closed</span>
+              </div>
+            </div>
+          </label>
+        </div>
+      </div>
+      <div class="status-modal-footer">
+        <button class="admin-btn admin-btn-secondary" onclick="closeStatusModal()">Cancel</button>
+        <button class="admin-btn admin-btn-primary" id="confirmStatusBtn" onclick="confirmStatusChange()">
+          <i data-lucide="check"></i>
+          Update Status
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    /* Status Modal Styles */
+    .status-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.25s ease;
+    }
+    .status-modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    .status-modal {
+      background: var(--admin-bg-primary);
+      border-radius: 20px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+      transform: scale(0.9) translateY(20px);
+      transition: all 0.25s ease;
+    }
+    .status-modal-overlay.active .status-modal {
+      transform: scale(1) translateY(0);
+    }
+    .status-modal-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--admin-border);
+    }
+    .status-modal-icon {
+      width: 48px;
+      height: 48px;
+      background: rgba(59, 130, 246, 0.1);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .status-modal-icon i {
+      width: 24px;
+      height: 24px;
+      color: var(--module-primary, #3b82f6);
+    }
+    .status-modal-header h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--admin-text-primary);
+      margin: 0 0 0.15rem;
+    }
+    .status-modal-header p {
+      font-size: 0.85rem;
+      color: var(--module-primary, #3b82f6);
+      margin: 0;
+      font-weight: 600;
+    }
+    .status-modal-close {
+      margin-left: auto;
+      width: 36px;
+      height: 36px;
+      border: none;
+      background: var(--admin-bg-secondary);
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--admin-text-muted);
+      transition: all 0.15s ease;
+    }
+    .status-modal-close:hover {
+      background: var(--admin-bg-tertiary);
+      color: var(--admin-text-primary);
+    }
+    .status-modal-close i {
+      width: 18px;
+      height: 18px;
+    }
+    .status-modal-body {
+      padding: 1.5rem;
+    }
+    .status-modal-subject {
+      font-size: 0.95rem;
+      color: var(--admin-text-secondary);
+      margin: 0 0 1.25rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--admin-border);
+    }
+    .status-options {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .status-option {
+      cursor: pointer;
+    }
+    .status-option input {
+      display: none;
+    }
+    .status-option-content {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem;
+      background: var(--admin-bg-secondary);
+      border: 2px solid var(--admin-border);
+      border-radius: 12px;
+      transition: all 0.2s ease;
+    }
+    .status-option:hover .status-option-content {
+      border-color: var(--admin-text-muted);
+    }
+    .status-option input:checked + .status-option-content {
+      border-color: var(--module-primary, #3b82f6);
+      background: rgba(59, 130, 246, 0.05);
+    }
+    .status-option-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .status-option-icon i {
+      width: 20px;
+      height: 20px;
+    }
+    .status-option-icon.open {
+      background: rgba(245, 158, 11, 0.12);
+      color: #d97706;
+    }
+    .status-option-icon.in-progress {
+      background: rgba(59, 130, 246, 0.12);
+      color: #2563eb;
+    }
+    .status-option-icon.resolved {
+      background: rgba(16, 185, 129, 0.12);
+      color: #059669;
+    }
+    .status-option-icon.closed {
+      background: var(--admin-bg-tertiary);
+      color: var(--admin-text-muted);
+    }
+    .status-option-info {
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+    .status-option-label {
+      font-weight: 600;
+      color: var(--admin-text-primary);
+    }
+    .status-option-desc {
+      font-size: 0.8rem;
+      color: var(--admin-text-muted);
+    }
+    .status-modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      padding: 1rem 1.5rem;
+      background: var(--admin-bg-secondary);
+      border-top: 1px solid var(--admin-border);
+      border-radius: 0 0 20px 20px;
+    }
+  </style>
+
+  <script>
+    var currentTicketId = null;
+    
+    // Search functionality
+    document.getElementById('ticketsSearch').addEventListener('input', function(e) {
+      var searchTerm = e.target.value.toLowerCase();
+      var cards = document.querySelectorAll('.ticket-card');
+      
+      cards.forEach(function(card) {
+        var text = card.textContent.toLowerCase();
+        card.style.display = text.includes(searchTerm) ? '' : 'none';
+      });
+    });
+
+    // Filter functionality
+    function applyFilters() {
+      var status = document.getElementById('filterStatus').value;
+      var priority = document.getElementById('filterPriority').value;
+      var category = document.getElementById('filterCategory').value;
+      var cards = document.querySelectorAll('.ticket-card');
+      
+      cards.forEach(function(card) {
+        var cardStatus = card.dataset.status;
+        var cardPriority = card.dataset.priority;
+        var cardCategory = card.dataset.category;
+        
+        var statusMatch = !status || cardStatus === status;
+        var priorityMatch = !priority || cardPriority === priority;
+        var categoryMatch = !category || cardCategory === category;
+        
+        card.style.display = (statusMatch && priorityMatch && categoryMatch) ? '' : 'none';
+      });
+    }
+
+    document.getElementById('filterStatus').addEventListener('change', applyFilters);
+    document.getElementById('filterPriority').addEventListener('change', applyFilters);
+    document.getElementById('filterCategory').addEventListener('change', applyFilters);
+
+    function clearFilters() {
+      document.getElementById('filterStatus').value = '';
+      document.getElementById('filterPriority').value = '';
+      document.getElementById('filterCategory').value = '';
+      document.getElementById('ticketsSearch').value = '';
+      var cards = document.querySelectorAll('.ticket-card');
+      cards.forEach(function(card) { card.style.display = ''; });
+    }
+
+    // Status Modal Functions
+    function openStatusModal(ticketId, currentStatus, subject) {
+      currentTicketId = ticketId;
+      document.getElementById('statusModalTicketId').textContent = ticketId;
+      document.getElementById('statusModalSubject').textContent = subject;
+      
+      // Select current status
+      var radios = document.querySelectorAll('input[name="newStatus"]');
+      radios.forEach(function(radio) {
+        radio.checked = radio.value === currentStatus;
+      });
+      
+      document.getElementById('statusModalOverlay').classList.add('active');
+      
+      // Re-initialize lucide icons in modal
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+    }
+    
+    function closeStatusModal() {
+      document.getElementById('statusModalOverlay').classList.remove('active');
+      currentTicketId = null;
+    }
+    
+    function confirmStatusChange() {
+      var selectedStatus = document.querySelector('input[name="newStatus"]:checked');
+      if (!selectedStatus || !currentTicketId) return;
+      
+      var newStatus = selectedStatus.value;
+      
+      // Show loading state
+      var btn = document.getElementById('confirmStatusBtn');
+      btn.innerHTML = '<i data-lucide="loader" class="spin"></i> Updating...';
+      btn.disabled = true;
+      
+      fetch('/admin/tickets/' + currentTicketId + '/status', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus })
+      }).then(function(response) {
+        if (response.ok) {
+          closeStatusModal();
+          location.reload();
+        }
+      }).catch(function(err) {
+        console.error('Error updating status:', err);
+        btn.innerHTML = '<i data-lucide="check"></i> Update Status';
+        btn.disabled = false;
+      });
+    }
+    
+    // Close modal with Escape key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closeStatusModal();
+      }
+    });
+  </script>
 
 <%- include('partials/footer') %>

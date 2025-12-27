@@ -71,6 +71,10 @@
     <!-- Settings Section -->
     <div class="sidebar-nav-section">
       <div class="sidebar-nav-title">System</div>
+      <a href="/admin/integrations<%= typeof currentModule !== 'undefined' && currentModule ? '?module=' + currentModule : '' %>" class="sidebar-nav-item <%= typeof activePage !== 'undefined' && activePage === 'integrations' ? 'active' : '' %>">
+        <i data-lucide="plug"></i>
+        <span>Integrations</span>
+      </a>
       <a href="/admin/settings" class="sidebar-nav-item <%= typeof activePage !== 'undefined' && activePage === 'settings' ? 'active' : '' %>">
         <i data-lucide="settings"></i>
         <span>Settings</span>

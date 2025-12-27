@@ -1,0 +1,830 @@
+<%- include('partials/header') %>
+<link rel="stylesheet" href="/css/adminCSS/admin-dashboard.css">
+<link rel="stylesheet" href="/css/adminCSS/admin-users.css">
+</head>
+<body class="<%= typeof currentModule !== 'undefined' && currentModule ? 'module-' + currentModule : '' %>">
+  <div class="admin-wrapper">
+    <%- include('partials/sidebar', { activePage: 'users', currentModule: currentModule }) %>
+    
+    <main class="admin-main">
+      <%- include('partials/topbar', { pageTitle: 'User Details', currentModule: currentModule }) %>
+      
+      <div class="admin-content">
+        <!-- Breadcrumb -->
+        <div style="margin-bottom: 1.5rem;">
+          <a href="/admin/users" class="breadcrumb-link">
+            <i data-lucide="arrow-left"></i>
+            Back to Users
+          </a>
+        </div>
+
+        <!-- User Header - Enhanced -->
+        <div class="user-profile-header">
+          <div class="user-profile-avatar"><%= user.name.charAt(0) %></div>
+          <div class="user-profile-main">
+            <div class="user-profile-name-row">
+              <h1><%= user.name %></h1>
+              <span class="user-status-badge <%= user.status %>">
+                <% if (user.status === 'active') { %>
+                  <i data-lucide="check-circle"></i>
+                <% } else { %>
+                  <i data-lucide="x-circle"></i>
+                <% } %>
+                <%= user.status.charAt(0).toUpperCase() + user.status.slice(1) %>
+              </span>
+            </div>
+            <p class="user-profile-email"><%= user.email %></p>
+            <div class="user-profile-tags">
+              <span class="user-tag">
+                <i data-lucide="building"></i>
+                <%= user.company %>
+              </span>
+              <span class="user-tag">
+                <i data-lucide="briefcase"></i>
+                <%= user.position || 'Procurement Manager' %>
+              </span>
+              <span class="user-tag industry <%= user.industry %>">
+                <% if (user.industry === 'automotive') { %>
+                  <i data-lucide="car"></i> Automotive
+                <% } else if (user.industry === 'aviation') { %>
+                  <i data-lucide="plane"></i> Aviation
+                <% } else { %>
+                  <i data-lucide="construction"></i> Machinery
+                <% } %>
+              </span>
+              <span class="user-tag">
+                <i data-lucide="calendar"></i>
+                Member since <%= new Date(user.joined).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) %>
+              </span>
+            </div>
+          </div>
+          <div class="user-profile-actions">
+            <a href="/admin/users/<%= user.id %>/edit" class="admin-btn admin-btn-primary">
+              <i data-lucide="edit-2"></i>
+              Edit Profile
+            </a>
+            <button class="admin-btn admin-btn-secondary" onclick="toggleUserStatus('<%= user.id %>', '<%= user.status %>')">
+              <i data-lucide="<%= user.status === 'active' ? 'user-x' : 'user-check' %>"></i>
+              <%= user.status === 'active' ? 'Deactivate' : 'Activate' %>
+            </button>
+            <button class="admin-btn icon-only" title="More Actions" onclick="toggleActionsMenu()">
+              <i data-lucide="more-vertical"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Stats Row - Enhanced with icons -->
+        <div class="user-quick-stats">
+          <div class="quick-stat-card blue">
+            <div class="quick-stat-icon">
+              <i data-lucide="shopping-bag"></i>
+            </div>
+            <div class="quick-stat-content">
+              <div class="quick-stat-value"><%= user.orders %></div>
+              <div class="quick-stat-label">Total Orders</div>
+            </div>
+          </div>
+          <div class="quick-stat-card green">
+            <div class="quick-stat-icon">
+              <i data-lucide="dollar-sign"></i>
+            </div>
+            <div class="quick-stat-content">
+              <div class="quick-stat-value">$<%= (user.totalSpent / 1000).toFixed(1) %>K</div>
+              <div class="quick-stat-label">Total Spent</div>
+            </div>
+          </div>
+          <div class="quick-stat-card orange">
+            <div class="quick-stat-icon">
+              <i data-lucide="ticket"></i>
+            </div>
+            <div class="quick-stat-content">
+              <div class="quick-stat-value"><%= user.tickets || 2 %></div>
+              <div class="quick-stat-label">Support Tickets</div>
+            </div>
+          </div>
+          <div class="quick-stat-card purple">
+            <div class="quick-stat-icon">
+              <i data-lucide="clock"></i>
+            </div>
+            <div class="quick-stat-content">
+              <div class="quick-stat-value"><%= Math.floor((new Date() - new Date(user.joined)) / (1000 * 60 * 60 * 24)) %></div>
+              <div class="quick-stat-label">Days as Customer</div>
+            </div>
+          </div>
+          <div class="quick-stat-card teal">
+            <div class="quick-stat-icon">
+              <i data-lucide="trending-up"></i>
+            </div>
+            <div class="quick-stat-content">
+              <div class="quick-stat-value">$<%= ((user.totalSpent / user.orders) / 1000).toFixed(1) %>K</div>
+              <div class="quick-stat-label">Avg Order Value</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="user-tabs">
+          <button class="user-tab active" data-tab="overview">
+            <i data-lucide="user"></i>
+            Overview
+          </button>
+          <button class="user-tab" data-tab="orders">
+            <i data-lucide="shopping-bag"></i>
+            Orders (<%= user.orders %>)
+          </button>
+          <button class="user-tab" data-tab="payments">
+            <i data-lucide="credit-card"></i>
+            Payments
+          </button>
+          <button class="user-tab" data-tab="tickets">
+            <i data-lucide="ticket"></i>
+            Tickets
+          </button>
+          <button class="user-tab" data-tab="activity">
+            <i data-lucide="activity"></i>
+            Activity
+          </button>
+        </div>
+
+        <!-- Overview Tab - Enhanced -->
+        <div class="user-tab-content active" id="tab-overview">
+          <div class="user-overview-layout">
+            <!-- Left Column -->
+            <div class="user-overview-main">
+              <!-- Contact Info -->
+              <div class="info-card">
+                <div class="info-card-header">
+                  <i data-lucide="phone"></i>
+                  <h3>Contact Information</h3>
+                </div>
+                <div class="info-card-body">
+                  <div class="info-item">
+                    <div class="info-icon"><i data-lucide="mail"></i></div>
+                    <div class="info-content">
+                      <span class="info-label">Email Address</span>
+                      <span class="info-value"><%= user.email %></span>
+                    </div>
+                    <a href="mailto:<%= user.email %>" class="info-action" title="Send Email">
+                      <i data-lucide="send"></i>
+                    </a>
+                  </div>
+                  <div class="info-item">
+                    <div class="info-icon"><i data-lucide="phone"></i></div>
+                    <div class="info-content">
+                      <span class="info-label">Phone Number</span>
+                      <span class="info-value"><%= user.phone || '+1 (555) 123-4567' %></span>
+                    </div>
+                    <a href="tel:<%= user.phone || '+15551234567' %>" class="info-action" title="Call">
+                      <i data-lucide="phone-call"></i>
+                    </a>
+                  </div>
+                  <div class="info-item">
+                    <div class="info-icon"><i data-lucide="globe"></i></div>
+                    <div class="info-content">
+                      <span class="info-label">Country</span>
+                      <span class="info-value"><%= user.country || 'United States' %></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Company Info -->
+              <div class="info-card">
+                <div class="info-card-header">
+                  <i data-lucide="building"></i>
+                  <h3>Company Details</h3>
+                </div>
+                <div class="info-card-body">
+                  <div class="info-item">
+                    <div class="info-icon"><i data-lucide="briefcase"></i></div>
+                    <div class="info-content">
+                      <span class="info-label">Company Name</span>
+                      <span class="info-value"><%= user.company %></span>
+                    </div>
+                  </div>
+                  <div class="info-item">
+                    <div class="info-icon"><i data-lucide="user-check"></i></div>
+                    <div class="info-content">
+                      <span class="info-label">Position</span>
+                      <span class="info-value"><%= user.position || 'Procurement Manager' %></span>
+                    </div>
+                  </div>
+                  <div class="info-item">
+                    <div class="info-icon"><i data-lucide="factory"></i></div>
+                    <div class="info-content">
+                      <span class="info-label">Industry</span>
+                      <span class="info-value"><%= user.industry ? user.industry.charAt(0).toUpperCase() + user.industry.slice(1) : 'N/A' %></span>
+                    </div>
+                  </div>
+                  <div class="info-item">
+                    <div class="info-icon"><i data-lucide="map-pin"></i></div>
+                    <div class="info-content">
+                      <span class="info-label">Address</span>
+                      <span class="info-value"><%= user.address || '123 Business Street, New York, NY 10001' %></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="user-overview-side">
+              <!-- Account Info -->
+              <div class="info-card">
+                <div class="info-card-header">
+                  <i data-lucide="settings"></i>
+                  <h3>Account Information</h3>
+                </div>
+                <div class="info-card-body compact">
+                  <div class="account-row">
+                    <span>User ID</span>
+                    <strong>#<%= user.id %></strong>
+                  </div>
+                  <div class="account-row">
+                    <span>Status</span>
+                    <span class="user-status-badge <%= user.status %>">
+                      <%= user.status.charAt(0).toUpperCase() + user.status.slice(1) %>
+                    </span>
+                  </div>
+                  <div class="account-row">
+                    <span>Joined</span>
+                    <strong><%= new Date(user.joined).toLocaleDateString() %></strong>
+                  </div>
+                  <div class="account-row">
+                    <span>Last Active</span>
+                    <strong>2 hours ago</strong>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Recent Activity Quick -->
+              <div class="info-card">
+                <div class="info-card-header">
+                  <i data-lucide="activity"></i>
+                  <h3>Recent Activity</h3>
+                  <a href="#" onclick="document.querySelector('[data-tab=activity]').click(); return false;" class="view-all-link">View All</a>
+                </div>
+                <div class="info-card-body">
+                  <div class="activity-timeline">
+                    <div class="activity-item">
+                      <div class="activity-dot blue"></div>
+                      <div class="activity-content">
+                        <span>Placed order ORD-2025-1247</span>
+                        <small>2 hours ago</small>
+                      </div>
+                    </div>
+                    <div class="activity-item">
+                      <div class="activity-dot green"></div>
+                      <div class="activity-content">
+                        <span>Payment completed</span>
+                        <small>2 days ago</small>
+                      </div>
+                    </div>
+                    <div class="activity-item">
+                      <div class="activity-dot orange"></div>
+                      <div class="activity-content">
+                        <span>Opened ticket TKT-001</span>
+                        <small>3 days ago</small>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Quick Actions -->
+              <div class="info-card">
+                <div class="info-card-header">
+                  <i data-lucide="zap"></i>
+                  <h3>Quick Actions</h3>
+                </div>
+                <div class="info-card-body">
+                  <div class="quick-actions-grid">
+                    <a href="mailto:<%= user.email %>" class="quick-action-btn">
+                      <i data-lucide="mail"></i>
+                      <span>Send Email</span>
+                    </a>
+                    <a href="#" class="quick-action-btn" onclick="document.querySelector('[data-tab=orders]').click(); return false;">
+                      <i data-lucide="shopping-bag"></i>
+                      <span>View Orders</span>
+                    </a>
+                    <a href="/admin/users/<%= user.id %>/edit" class="quick-action-btn">
+                      <i data-lucide="edit-2"></i>
+                      <span>Edit User</span>
+                    </a>
+                    <button class="quick-action-btn danger" onclick="toggleUserStatus('<%= user.id %>', '<%= user.status %>')">
+                      <i data-lucide="<%= user.status === 'active' ? 'user-x' : 'user-check' %>"></i>
+                      <span><%= user.status === 'active' ? 'Deactivate' : 'Activate' %></span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Orders Tab -->
+        <div class="user-tab-content" id="tab-orders">
+          <div class="users-table-card">
+            <table class="users-table">
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Date</th>
+                  <th>Items</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% var mockOrders = [
+                  { id: 'ORD-2025-1247', date: '2025-12-26', items: 3, amount: 45200, status: 'processing' },
+                  { id: 'ORD-2025-1246', date: '2025-12-24', items: 5, amount: 12800, status: 'shipped' },
+                  { id: 'ORD-2025-1245', date: '2025-12-20', items: 2, amount: 89500, status: 'delivered' },
+                  { id: 'ORD-2025-1240', date: '2025-12-15', items: 8, amount: 34200, status: 'delivered' },
+                  { id: 'ORD-2025-1235', date: '2025-12-10', items: 4, amount: 56800, status: 'delivered' }
+                ]; %>
+                <% mockOrders.forEach(function(order) { %>
+                <tr>
+                  <td><span class="id-badge order"><i data-lucide="shopping-bag"></i><%= order.id %></span></td>
+                  <td><%= order.date %></td>
+                  <td><%= order.items %> items</td>
+                  <td><strong>$<%= order.amount.toLocaleString() %></strong></td>
+                  <td>
+                    <span class="order-status <%= order.status %>"><%= order.status.charAt(0).toUpperCase() + order.status.slice(1) %></span>
+                  </td>
+                  <td>
+                    <a href="/admin/orders/<%= order.id %>" class="user-action-btn view">
+                      <i data-lucide="eye"></i>
+                    </a>
+                  </td>
+                </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Payments Tab -->
+        <div class="user-tab-content" id="tab-payments">
+          <div class="users-table-card">
+            <table class="users-table">
+              <thead>
+                <tr>
+                  <th>Payment ID</th>
+                  <th>Order</th>
+                  <th>Date</th>
+                  <th>Amount</th>
+                  <th>Method</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% var mockPayments = [
+                  { id: 'PAY-2025-001', order: 'ORD-2025-1247', date: '2025-12-26', amount: 45200, method: 'Wire Transfer', status: 'completed' },
+                  { id: 'PAY-2025-002', order: 'ORD-2025-1246', date: '2025-12-24', amount: 12800, method: 'Credit Card', status: 'completed' },
+                  { id: 'PAY-2025-003', order: 'ORD-2025-1245', date: '2025-12-20', amount: 89500, method: 'Wire Transfer', status: 'completed' }
+                ]; %>
+                <% mockPayments.forEach(function(payment) { %>
+                <tr>
+                  <td><span class="id-badge payment"><i data-lucide="credit-card"></i><%= payment.id %></span></td>
+                  <td><span class="id-badge order-ref"><%= payment.order %></span></td>
+                  <td><%= payment.date %></td>
+                  <td><strong>$<%= payment.amount.toLocaleString() %></strong></td>
+                  <td><%= payment.method %></td>
+                  <td>
+                    <span class="user-status-badge active"><%= payment.status.charAt(0).toUpperCase() + payment.status.slice(1) %></span>
+                  </td>
+                </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Tickets Tab -->
+        <div class="user-tab-content" id="tab-tickets">
+          <div class="users-table-card">
+            <table class="users-table">
+              <thead>
+                <tr>
+                  <th>Ticket ID</th>
+                  <th>Subject</th>
+                  <th>Category</th>
+                  <th>Date</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% var mockTickets = [
+                  { id: 'TKT-001', subject: 'Delayed Shipment Inquiry', category: 'Shipping', date: '2025-12-26', status: 'open' },
+                  { id: 'TKT-002', subject: 'Invoice Question', category: 'Billing', date: '2025-12-20', status: 'resolved' }
+                ]; %>
+                <% mockTickets.forEach(function(ticket) { %>
+                <tr>
+                  <td><span class="id-badge ticket"><i data-lucide="ticket"></i><%= ticket.id %></span></td>
+                  <td><%= ticket.subject %></td>
+                  <td><%= ticket.category %></td>
+                  <td><%= ticket.date %></td>
+                  <td>
+                    <span class="ticket-status-badge <%= ticket.status %>">
+                      <%= ticket.status.charAt(0).toUpperCase() + ticket.status.slice(1) %>
+                    </span>
+                  </td>
+                  <td>
+                    <a href="/admin/tickets/<%= ticket.id %>" class="user-action-btn view">
+                      <i data-lucide="eye"></i>
+                    </a>
+                  </td>
+                </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Activity Tab -->
+        <div class="user-tab-content" id="tab-activity">
+          <div class="activity-feed-card">
+            <div class="activity-feed">
+              <% var activities = [
+                { icon: 'shopping-bag', text: 'Placed order ORD-2025-1247', detail: '3 items, $45,200', time: '2 hours ago', color: 'blue' },
+                { icon: 'credit-card', text: 'Payment received', detail: 'Wire Transfer - $12,800', time: '2 days ago', color: 'green' },
+                { icon: 'ticket', text: 'Opened support ticket TKT-001', detail: 'Category: Shipping Issue', time: '3 days ago', color: 'orange' },
+                { icon: 'log-in', text: 'Logged in', detail: 'From New York, USA', time: '3 days ago', color: 'gray' },
+                { icon: 'shopping-cart', text: 'Added items to cart', detail: '5 items added', time: '4 days ago', color: 'purple' },
+                { icon: 'check-circle', text: 'Ticket resolved', detail: 'TKT-002 - Invoice Question', time: '5 days ago', color: 'green' },
+                { icon: 'package', text: 'Order delivered', detail: 'ORD-2025-1245', time: '1 week ago', color: 'teal' }
+              ]; %>
+              <% activities.forEach(function(activity) { %>
+              <div class="activity-feed-item">
+                <div class="activity-feed-icon <%= activity.color %>">
+                  <i data-lucide="<%= activity.icon %>"></i>
+                </div>
+                <div class="activity-feed-content">
+                  <div class="activity-feed-text"><%= activity.text %></div>
+                  <div class="activity-feed-detail"><%= activity.detail %></div>
+                </div>
+                <div class="activity-feed-time"><%= activity.time %></div>
+              </div>
+              <% }); %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <style>
+    /* Enhanced User Details Styles */
+    .breadcrumb-link {
+      color: var(--admin-text-muted);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+      transition: color 0.2s;
+    }
+    .breadcrumb-link:hover { color: var(--admin-text-primary); }
+    .breadcrumb-link i { width: 16px; height: 16px; }
+
+    /* Profile Header */
+    .user-profile-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 1.5rem;
+      padding: 1.75rem;
+      background: var(--admin-bg-secondary);
+      border: 1px solid var(--admin-border);
+      border-radius: 20px;
+      margin-bottom: 1.5rem;
+    }
+    .user-profile-avatar {
+      width: 90px;
+      height: 90px;
+      background: linear-gradient(135deg, var(--module-primary, #3b82f6), var(--module-primary-dark, #2563eb));
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      font-size: 2.25rem;
+      flex-shrink: 0;
+    }
+    .user-profile-main { flex: 1; }
+    .user-profile-name-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 0.35rem;
+    }
+    .user-profile-name-row h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--admin-text-primary);
+      margin: 0;
+    }
+    .user-profile-email {
+      font-size: 0.95rem;
+      color: var(--admin-text-muted);
+      margin: 0 0 0.75rem;
+    }
+    .user-profile-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .user-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.35rem 0.75rem;
+      background: var(--admin-bg-tertiary);
+      border-radius: 8px;
+      font-size: 0.8rem;
+      color: var(--admin-text-secondary);
+    }
+    .user-tag i { width: 14px; height: 14px; }
+    .user-tag.industry.automotive { background: rgba(220, 38, 38, 0.1); color: #dc2626; }
+    .user-tag.industry.aviation { background: rgba(14, 165, 233, 0.1); color: #0ea5e9; }
+    .user-tag.industry.machinery { background: rgba(234, 179, 8, 0.1); color: #ca8a04; }
+    .user-profile-actions {
+      display: flex;
+      gap: 0.5rem;
+      align-items: flex-start;
+    }
+    .admin-btn.icon-only {
+      width: 42px;
+      height: 42px;
+      padding: 0;
+      justify-content: center;
+    }
+
+    /* Quick Stats */
+    .user-quick-stats {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .quick-stat-card {
+      background: var(--admin-bg-secondary);
+      border: 1px solid var(--admin-border);
+      border-radius: 14px;
+      padding: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .quick-stat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .quick-stat-icon i { width: 24px; height: 24px; }
+    .quick-stat-card.blue .quick-stat-icon { background: rgba(59, 130, 246, 0.12); color: #3b82f6; }
+    .quick-stat-card.green .quick-stat-icon { background: rgba(16, 185, 129, 0.12); color: #10b981; }
+    .quick-stat-card.orange .quick-stat-icon { background: rgba(245, 158, 11, 0.12); color: #f59e0b; }
+    .quick-stat-card.purple .quick-stat-icon { background: rgba(139, 92, 246, 0.12); color: #8b5cf6; }
+    .quick-stat-card.teal .quick-stat-icon { background: rgba(20, 184, 166, 0.12); color: #14b8a6; }
+    .quick-stat-value { font-size: 1.5rem; font-weight: 700; color: var(--admin-text-primary); }
+    .quick-stat-label { font-size: 0.75rem; color: var(--admin-text-muted); text-transform: uppercase; }
+
+    /* Overview Layout */
+    .user-overview-layout {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 1.5rem;
+    }
+    .user-overview-main { display: flex; flex-direction: column; gap: 1rem; }
+    .user-overview-side { display: flex; flex-direction: column; gap: 1rem; }
+
+    /* Info Cards */
+    .info-card {
+      background: var(--admin-bg-secondary);
+      border: 1px solid var(--admin-border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .info-card-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1rem 1.25rem;
+      background: var(--admin-bg-tertiary);
+      border-bottom: 1px solid var(--admin-border);
+    }
+    .info-card-header i { width: 18px; height: 18px; color: var(--module-primary, #3b82f6); }
+    .info-card-header h3 { font-size: 0.9rem; font-weight: 600; color: var(--admin-text-primary); margin: 0; flex: 1; }
+    .view-all-link { font-size: 0.8rem; color: var(--module-primary, #3b82f6); text-decoration: none; }
+    .info-card-body { padding: 1rem 1.25rem; }
+    .info-card-body.compact { padding: 0.75rem 1.25rem; }
+
+    /* Info Items */
+    .info-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.875rem 0;
+      border-bottom: 1px solid var(--admin-border);
+    }
+    .info-item:last-child { border-bottom: none; }
+    .info-icon {
+      width: 38px;
+      height: 38px;
+      background: var(--admin-bg-tertiary);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .info-icon i { width: 18px; height: 18px; color: var(--admin-text-muted); }
+    .info-content { flex: 1; }
+    .info-label { display: block; font-size: 0.75rem; color: var(--admin-text-muted); margin-bottom: 0.15rem; }
+    .info-value { font-size: 0.9rem; font-weight: 600; color: var(--admin-text-primary); }
+    .info-action {
+      width: 34px;
+      height: 34px;
+      background: var(--admin-bg-tertiary);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--admin-text-muted);
+      transition: all 0.15s;
+    }
+    .info-action:hover { background: var(--module-primary, #3b82f6); color: white; }
+    .info-action i { width: 16px; height: 16px; }
+
+    /* Account Rows */
+    .account-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.6rem 0;
+      border-bottom: 1px solid var(--admin-border);
+    }
+    .account-row:last-child { border-bottom: none; }
+    .account-row span { font-size: 0.85rem; color: var(--admin-text-muted); }
+    .account-row strong { font-size: 0.85rem; color: var(--admin-text-primary); }
+
+    /* Activity Timeline */
+    .activity-timeline { display: flex; flex-direction: column; gap: 0.75rem; }
+    .activity-item { display: flex; align-items: flex-start; gap: 0.75rem; }
+    .activity-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-top: 5px;
+      flex-shrink: 0;
+    }
+    .activity-dot.blue { background: #3b82f6; }
+    .activity-dot.green { background: #10b981; }
+    .activity-dot.orange { background: #f59e0b; }
+    .activity-content span { display: block; font-size: 0.85rem; color: var(--admin-text-primary); }
+    .activity-content small { font-size: 0.75rem; color: var(--admin-text-muted); }
+
+    /* Quick Actions Grid */
+    .quick-actions-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
+    .quick-action-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.875rem;
+      background: var(--admin-bg-tertiary);
+      border: none;
+      border-radius: 10px;
+      font-size: 0.75rem;
+      color: var(--admin-text-secondary);
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .quick-action-btn:hover { background: var(--module-primary, #3b82f6); color: white; }
+    .quick-action-btn i { width: 20px; height: 20px; }
+    .quick-action-btn.danger:hover { background: #ef4444; }
+
+    /* ID Badges for Tables */
+    .id-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.4rem 0.75rem;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+      white-space: nowrap;
+    }
+    .id-badge i {
+      width: 14px;
+      height: 14px;
+    }
+    .id-badge.order {
+      background: rgba(59, 130, 246, 0.1);
+      color: #3b82f6;
+    }
+    .id-badge.payment {
+      background: rgba(16, 185, 129, 0.1);
+      color: #10b981;
+    }
+    .id-badge.order-ref {
+      background: var(--admin-bg-tertiary);
+      color: var(--admin-text-secondary);
+      font-size: 0.75rem;
+    }
+    .id-badge.ticket {
+      background: rgba(245, 158, 11, 0.1);
+      color: #f59e0b;
+    }
+
+    /* Activity Feed */
+    .activity-feed-card {
+      background: var(--admin-bg-secondary);
+      border: 1px solid var(--admin-border);
+      border-radius: 16px;
+      padding: 1.5rem;
+    }
+    .activity-feed { display: flex; flex-direction: column; gap: 0; }
+    .activity-feed-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 1rem 0;
+      border-bottom: 1px solid var(--admin-border);
+    }
+    .activity-feed-item:last-child { border-bottom: none; }
+    .activity-feed-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .activity-feed-icon i { width: 20px; height: 20px; }
+    .activity-feed-icon.blue { background: rgba(59, 130, 246, 0.12); color: #3b82f6; }
+    .activity-feed-icon.green { background: rgba(16, 185, 129, 0.12); color: #10b981; }
+    .activity-feed-icon.orange { background: rgba(245, 158, 11, 0.12); color: #f59e0b; }
+    .activity-feed-icon.gray { background: var(--admin-bg-tertiary); color: var(--admin-text-muted); }
+    .activity-feed-icon.purple { background: rgba(139, 92, 246, 0.12); color: #8b5cf6; }
+    .activity-feed-icon.teal { background: rgba(20, 184, 166, 0.12); color: #14b8a6; }
+    .activity-feed-content { flex: 1; }
+    .activity-feed-text { font-size: 0.9rem; font-weight: 500; color: var(--admin-text-primary); margin-bottom: 0.15rem; }
+    .activity-feed-detail { font-size: 0.8rem; color: var(--admin-text-muted); }
+    .activity-feed-time { font-size: 0.75rem; color: var(--admin-text-muted); white-space: nowrap; }
+
+    /* Status Badges */
+    .ticket-status-badge { display: inline-flex; padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }
+    .ticket-status-badge.open { background: rgba(245, 158, 11, 0.12); color: #d97706; }
+    .ticket-status-badge.resolved { background: rgba(16, 185, 129, 0.12); color: #059669; }
+    .order-status { display: inline-flex; padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }
+    .order-status.processing { background: rgba(59, 130, 246, 0.12); color: #2563eb; }
+    .order-status.shipped { background: rgba(139, 92, 246, 0.12); color: #7c3aed; }
+    .order-status.delivered { background: rgba(16, 185, 129, 0.12); color: #059669; }
+
+    /* Responsive */
+    @media (max-width: 1200px) {
+      .user-quick-stats { grid-template-columns: repeat(3, 1fr); }
+      .user-overview-layout { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 768px) {
+      .user-profile-header { flex-direction: column; text-align: center; }
+      .user-profile-actions { justify-content: center; margin-top: 1rem; }
+      .user-quick-stats { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+
+  <script>
+    // Tab switching
+    document.querySelectorAll('.user-tab').forEach(function(tab) {
+      tab.addEventListener('click', function() {
+        var tabName = this.dataset.tab;
+        document.querySelectorAll('.user-tab').forEach(function(t) { t.classList.remove('active'); });
+        document.querySelectorAll('.user-tab-content').forEach(function(c) { c.classList.remove('active'); });
+        this.classList.add('active');
+        document.getElementById('tab-' + tabName).classList.add('active');
+      });
+    });
+    
+    function toggleUserStatus(userId, currentStatus) {
+      var newStatus = currentStatus === 'active' ? 'inactive' : 'active';
+      fetch('/admin/users/' + userId + '/status', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus })
+      }).then(function(response) {
+        if (response.ok) { location.reload(); }
+      }).catch(function(err) { console.error('Error:', err); });
+    }
+  </script>
+
+<%- include('partials/footer') %>

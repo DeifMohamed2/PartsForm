@@ -1,5 +1,6 @@
 <%- include('partials/header') %>
 <link rel="stylesheet" href="/css/adminCSS/admin-dashboard.css">
+<link rel="stylesheet" href="/css/adminCSS/admin-orders.css">
 </head>
 <body class="<%= typeof currentModule !== 'undefined' && currentModule ? 'module-' + currentModule : '' %>">
   <div class="admin-wrapper">
@@ -24,26 +25,84 @@
               <div class="module-info-stat-label">Orders</div>
             </div>
             <div class="module-info-stat">
-              <div class="module-info-stat-value">$<%= (orders.reduce((s, o) => s + o.amount, 0) / 1000).toFixed(0) %>K</div>
+              <% var total = 0; orders.forEach(function(o) { total += o.amount; }); %>
+              <div class="module-info-stat-value">$<%= (total / 1000).toFixed(0) %>K</div>
               <div class="module-info-stat-label">Total</div>
             </div>
           </div>
         </div>
         <% } %>
 
-        <div class="page-header">
+        <!-- Page Header -->
+        <div class="orders-page-header">
           <h2><%= currentModule ? moduleConfig.name + ' Orders' : 'Orders Management' %></h2>
-          <button class="admin-btn admin-btn-primary">
-            <i data-lucide="plus"></i>
-            Create Order
-          </button>
+          <div class="orders-header-actions">
+            <div class="orders-search-container">
+              <i data-lucide="search" class="search-icon"></i>
+              <input type="text" id="ordersSearch" placeholder="Search orders, customers..." autocomplete="off">
+              <span class="search-shortcut">⌘K</span>
+            </div>
+            <a href="/admin/orders/create<%= currentModule ? '?module=' + currentModule : '' %>" class="admin-btn admin-btn-primary">
+              <i data-lucide="plus"></i>
+              Create Order
+            </a>
+          </div>
+        </div>
+
+        <!-- Stats Bar -->
+        <div class="orders-stats-bar">
+          <% 
+            var pendingCount = 0, processingCount = 0, shippedCount = 0, deliveredCount = 0;
+            orders.forEach(function(o) {
+              if (o.status === 'pending') pendingCount++;
+              else if (o.status === 'processing') processingCount++;
+              else if (o.status === 'shipped') shippedCount++;
+              else if (o.status === 'delivered') deliveredCount++;
+            });
+          %>
+          <div class="orders-stat-card">
+            <div class="orders-stat-icon pending">
+              <i data-lucide="clock"></i>
+            </div>
+            <div class="orders-stat-content">
+              <div class="orders-stat-value"><%= pendingCount %></div>
+              <div class="orders-stat-label">Pending</div>
+            </div>
+          </div>
+          <div class="orders-stat-card">
+            <div class="orders-stat-icon processing">
+              <i data-lucide="loader"></i>
+            </div>
+            <div class="orders-stat-content">
+              <div class="orders-stat-value"><%= processingCount %></div>
+              <div class="orders-stat-label">Processing</div>
+            </div>
+          </div>
+          <div class="orders-stat-card">
+            <div class="orders-stat-icon shipped">
+              <i data-lucide="truck"></i>
+            </div>
+            <div class="orders-stat-content">
+              <div class="orders-stat-value"><%= shippedCount %></div>
+              <div class="orders-stat-label">Shipped</div>
+            </div>
+          </div>
+          <div class="orders-stat-card">
+            <div class="orders-stat-icon delivered">
+              <i data-lucide="check-circle"></i>
+            </div>
+            <div class="orders-stat-content">
+              <div class="orders-stat-value"><%= deliveredCount %></div>
+              <div class="orders-stat-label">Delivered</div>
+            </div>
+          </div>
         </div>
 
         <!-- Filters -->
-        <div class="filters-row">
+        <div class="orders-filters">
           <div class="filter-group">
             <span class="filter-label">Status:</span>
-            <select class="filter-select">
+            <select id="filterStatus" class="filter-select">
               <option value="">All Status</option>
               <option value="pending">Pending</option>
               <option value="processing">Processing</option>
@@ -51,96 +110,306 @@
               <option value="delivered">Delivered</option>
             </select>
           </div>
+          <div class="filter-divider"></div>
           <% if (!currentModule) { %>
           <div class="filter-group">
             <span class="filter-label">Industry:</span>
-            <select class="filter-select">
+            <select id="filterIndustry" class="filter-select">
               <option value="">All Industries</option>
               <option value="automotive">Automotive</option>
               <option value="aviation">Aviation</option>
               <option value="machinery">Machinery</option>
             </select>
           </div>
+          <div class="filter-divider"></div>
           <% } %>
           <div class="filter-group">
+            <span class="filter-label">Priority:</span>
+            <select id="filterPriority" class="filter-select">
+              <option value="">All Priorities</option>
+              <option value="normal">Normal</option>
+              <option value="urgent">Urgent</option>
+              <option value="aog">AOG (Critical)</option>
+            </select>
+          </div>
+          <div class="filter-divider"></div>
+          <div class="filter-group">
             <span class="filter-label">Date:</span>
-            <select class="filter-select">
+            <select id="filterDate" class="filter-select">
               <option value="">All Time</option>
               <option value="today">Today</option>
               <option value="week">This Week</option>
               <option value="month">This Month</option>
             </select>
           </div>
-          <div class="filter-search">
-            <i data-lucide="search"></i>
-            <input type="text" placeholder="Search orders...">
-          </div>
+          <div class="filters-spacer"></div>
+          <button class="filter-clear-btn" onclick="clearFilters()">
+            <i data-lucide="x"></i>
+            Clear
+          </button>
         </div>
 
         <!-- Orders Table -->
-        <div class="orders-card">
-          <div class="orders-body">
-            <div class="order-row" style="background: var(--admin-bg-tertiary); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--admin-text-muted);">
-              <div>Order ID</div>
-              <div>Customer</div>
-              <div>Amount</div>
-              <div>Industry</div>
-              <div>Status</div>
-              <div>Actions</div>
+        <div class="orders-table-card">
+          <div class="orders-table-header">
+            <h3>
+              All Orders 
+              <span class="orders-count"><%= orders.length %></span>
+            </h3>
+            <div class="orders-table-actions">
+              <button title="Export CSV">
+                <i data-lucide="download"></i>
+                Export
+              </button>
+              <button title="Refresh">
+                <i data-lucide="refresh-cw"></i>
+              </button>
             </div>
-            <% if (orders.length === 0) { %>
-              <div style="padding: 2rem; text-align: center; color: var(--admin-text-muted);">
-                No orders found.
-              </div>
-            <% } else { %>
-              <% orders.forEach(order => { %>
-                <div class="order-row">
-                  <div class="order-id"><%= order.id %></div>
-                  <div class="order-customer">
-                    <div><%= order.customer %></div>
-                    <div style="font-size: 0.8rem; color: var(--admin-text-muted);"><%= order.email %></div>
-                  </div>
-                  <div class="order-amount">$<%= order.amount.toLocaleString() %></div>
-                  <div class="order-industry <%= order.industry %>">
+          </div>
+          
+          <% if (orders.length === 0) { %>
+          <div class="orders-empty">
+            <div class="orders-empty-icon">
+              <i data-lucide="package"></i>
+            </div>
+            <h3>No Orders Found</h3>
+            <p>There are no orders matching your criteria. Create a new order to get started.</p>
+            <a href="/admin/orders/create<%= currentModule ? '?module=' + currentModule : '' %>" class="admin-btn admin-btn-primary">
+              <i data-lucide="plus"></i>
+              Create Order
+            </a>
+          </div>
+          <% } else { %>
+          <table class="orders-table">
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Date</th>
+                <th>Items</th>
+                <th>Amount</th>
+                <% if (!currentModule) { %>
+                <th>Industry</th>
+                <% } %>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="ordersTableBody">
+              <% orders.forEach(function(order) { %>
+              <tr data-order-id="<%= order.id %>" data-status="<%= order.status %>" data-industry="<%= order.industry %>" data-priority="<%= order.priority || 'normal' %>">
+                <td class="order-id-cell">
+                  <a href="/admin/orders/<%= order.id %><%= currentModule ? '?module=' + currentModule : '' %>"><%= order.id %></a>
+                </td>
+                <td class="customer-cell">
+                  <div class="customer-name"><%= order.customer %></div>
+                  <div class="customer-email"><%= order.email %></div>
+                </td>
+                <td class="date-cell">
+                  <div class="date-main"><%= order.date %></div>
+                  <div class="date-time"><%= order.time || '09:30 AM' %></div>
+                </td>
+                <td class="items-cell">
+                  <span class="items-count">
+                    <i data-lucide="package"></i>
+                    <%= order.items %> parts
+                  </span>
+                </td>
+                <td class="amount-cell">$<%= order.amount.toLocaleString() %></td>
+                <% if (!currentModule) { %>
+                <td>
+                  <span class="industry-badge <%= order.industry %>">
                     <% if (order.industry === 'automotive') { %>
-                      <i data-lucide="car" style="width: 14px; height: 14px;"></i>
+                      <i data-lucide="car"></i>
                     <% } else if (order.industry === 'aviation') { %>
-                      <i data-lucide="plane" style="width: 14px; height: 14px;"></i>
+                      <i data-lucide="plane"></i>
                     <% } else { %>
-                      <i data-lucide="construction" style="width: 14px; height: 14px;"></i>
+                      <i data-lucide="construction"></i>
                     <% } %>
-                    <%= order.industry.charAt(0).toUpperCase() + order.industry.slice(1) %>
-                  </div>
-                  <div class="order-status <%= order.status %>">
+                    <%= order.industry %>
+                  </span>
+                </td>
+                <% } %>
+                <td>
+                  <% var priority = order.priority || 'normal'; %>
+                  <span class="priority-badge <%= priority %>">
+                    <% if (priority === 'urgent') { %>
+                      <i data-lucide="alert-triangle"></i>
+                    <% } else if (priority === 'aog') { %>
+                      <i data-lucide="alert-circle"></i>
+                    <% } %>
+                    <%= priority.toUpperCase() %>
+                  </span>
+                </td>
+                <td>
+                  <span class="status-badge <%= order.status %>">
                     <% if (order.status === 'pending') { %>
-                      <i data-lucide="clock" style="width: 12px; height: 12px;"></i>
+                      <i data-lucide="clock"></i>
                     <% } else if (order.status === 'processing') { %>
-                      <i data-lucide="loader" style="width: 12px; height: 12px;"></i>
+                      <i data-lucide="loader"></i>
                     <% } else if (order.status === 'shipped') { %>
-                      <i data-lucide="truck" style="width: 12px; height: 12px;"></i>
+                      <i data-lucide="truck"></i>
                     <% } else { %>
-                      <i data-lucide="check-circle" style="width: 12px; height: 12px;"></i>
+                      <i data-lucide="check-circle"></i>
                     <% } %>
-                    <%= order.status.charAt(0).toUpperCase() + order.status.slice(1) %>
-                  </div>
-                  <div class="order-actions">
-                    <button class="order-action-btn" title="View Details">
+                    <%= order.status %>
+                  </span>
+                </td>
+                <td class="actions-cell">
+                  <div class="actions-group">
+                    <a href="/admin/orders/<%= order.id %><%= currentModule ? '?module=' + currentModule : '' %>" class="action-btn view" title="View Details">
                       <i data-lucide="eye"></i>
-                    </button>
-                    <button class="order-action-btn" title="Edit Order">
+                    </a>
+                    <a href="/admin/orders/<%= order.id %>/edit<%= currentModule ? '?module=' + currentModule : '' %>" class="action-btn edit" title="Edit Order">
                       <i data-lucide="edit-2"></i>
-                    </button>
-                    <button class="order-action-btn" title="Delete Order">
+                    </a>
+                    <button class="action-btn delete" title="Delete Order" onclick="showDeleteModal('<%= order.id %>', '<%= order.customer %>')">
                       <i data-lucide="trash-2"></i>
                     </button>
                   </div>
-                </div>
+                </td>
+              </tr>
               <% }); %>
-            <% } %>
+            </tbody>
+          </table>
+          
+          <!-- Pagination -->
+          <div class="orders-pagination">
+            <div class="pagination-info">
+              Showing <strong>1-<%= Math.min(orders.length, 10) %></strong> of <strong><%= orders.length %></strong> orders
+            </div>
+            <div class="pagination-controls">
+              <button class="pagination-btn" disabled>
+                <i data-lucide="chevron-left"></i>
+              </button>
+              <button class="pagination-btn active">1</button>
+              <% if (orders.length > 10) { %>
+              <button class="pagination-btn">2</button>
+              <% } %>
+              <% if (orders.length > 20) { %>
+              <button class="pagination-btn">3</button>
+              <% } %>
+              <button class="pagination-btn" <%= orders.length <= 10 ? 'disabled' : '' %>>
+                <i data-lucide="chevron-right"></i>
+              </button>
+            </div>
           </div>
+          <% } %>
         </div>
       </div>
     </main>
   </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="delete-modal-overlay" id="deleteModal">
+    <div class="delete-modal">
+      <div class="delete-modal-icon">
+        <i data-lucide="trash-2"></i>
+      </div>
+      <h3>Delete Order</h3>
+      <p>Are you sure you want to delete order <span class="delete-modal-order" id="deleteOrderId"></span>? This action cannot be undone.</p>
+      <div class="delete-modal-actions">
+        <button class="delete-modal-cancel" onclick="hideDeleteModal()">Cancel</button>
+        <button class="delete-modal-confirm" id="confirmDeleteBtn">Delete Order</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Search functionality
+    document.getElementById('ordersSearch').addEventListener('input', function(e) {
+      var searchTerm = e.target.value.toLowerCase();
+      var rows = document.querySelectorAll('#ordersTableBody tr');
+      
+      rows.forEach(function(row) {
+        var text = row.textContent.toLowerCase();
+        row.style.display = text.includes(searchTerm) ? '' : 'none';
+      });
+    });
+
+    // Filter functionality
+    function applyFilters() {
+      var status = document.getElementById('filterStatus').value;
+      var industry = document.getElementById('filterIndustry') ? document.getElementById('filterIndustry').value : '';
+      var priority = document.getElementById('filterPriority').value;
+      var rows = document.querySelectorAll('#ordersTableBody tr');
+      
+      rows.forEach(function(row) {
+        var rowStatus = row.dataset.status;
+        var rowIndustry = row.dataset.industry;
+        var rowPriority = row.dataset.priority;
+        
+        var statusMatch = !status || rowStatus === status;
+        var industryMatch = !industry || rowIndustry === industry;
+        var priorityMatch = !priority || rowPriority === priority;
+        
+        row.style.display = (statusMatch && industryMatch && priorityMatch) ? '' : 'none';
+      });
+    }
+
+    document.getElementById('filterStatus').addEventListener('change', applyFilters);
+    if (document.getElementById('filterIndustry')) {
+      document.getElementById('filterIndustry').addEventListener('change', applyFilters);
+    }
+    document.getElementById('filterPriority').addEventListener('change', applyFilters);
+
+    function clearFilters() {
+      document.getElementById('filterStatus').value = '';
+      if (document.getElementById('filterIndustry')) {
+        document.getElementById('filterIndustry').value = '';
+      }
+      document.getElementById('filterPriority').value = '';
+      document.getElementById('filterDate').value = '';
+      document.getElementById('ordersSearch').value = '';
+      var rows = document.querySelectorAll('#ordersTableBody tr');
+      rows.forEach(function(row) { row.style.display = ''; });
+    }
+
+    // Delete modal
+    var currentDeleteId = '';
+    
+    function showDeleteModal(orderId, customerName) {
+      currentDeleteId = orderId;
+      document.getElementById('deleteOrderId').textContent = orderId + ' - ' + customerName;
+      document.getElementById('deleteModal').classList.add('active');
+    }
+    
+    function hideDeleteModal() {
+      document.getElementById('deleteModal').classList.remove('active');
+      currentDeleteId = '';
+    }
+    
+    document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
+      if (currentDeleteId) {
+        // In production, make an API call to delete
+        fetch('/admin/orders/' + currentDeleteId, {
+          method: 'DELETE'
+        }).then(function(response) {
+          if (response.ok) {
+            // Remove row from table
+            var row = document.querySelector('tr[data-order-id="' + currentDeleteId + '"]');
+            if (row) row.remove();
+            hideDeleteModal();
+          }
+        }).catch(function() {
+          // For demo, just remove the row
+          var row = document.querySelector('tr[data-order-id="' + currentDeleteId + '"]');
+          if (row) row.remove();
+          hideDeleteModal();
+        });
+      }
+    });
+    
+    // Close modal on outside click
+    document.getElementById('deleteModal').addEventListener('click', function(e) {
+      if (e.target === this) hideDeleteModal();
+    });
+    
+    // Close modal on Escape key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') hideDeleteModal();
+    });
+  </script>
 
 <%- include('partials/footer') %>

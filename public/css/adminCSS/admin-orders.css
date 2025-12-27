@@ -1,0 +1,874 @@
+/* Admin Orders Styles */
+/* Professional styling for orders management pages */
+
+/* ================================
+   Orders Page Header
+   ================================ */
+.orders-page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.orders-page-header h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--admin-text-primary);
+    margin: 0;
+}
+
+.orders-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+/* ================================
+   Enhanced Search Bar (Icon Inside)
+   ================================ */
+.orders-search-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 320px;
+}
+
+.orders-search-container .search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    color: var(--admin-text-muted);
+    pointer-events: none;
+    z-index: 2;
+}
+
+.orders-search-container input {
+    width: 100%;
+    padding: 0.7rem 2.5rem 0.7rem 2.75rem;
+    background: var(--admin-bg-secondary);
+    border: 1px solid var(--admin-border);
+    border-radius: 12px;
+    color: var(--admin-text-primary);
+    font-size: 0.9rem;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.orders-search-container input:focus {
+    border-color: var(--module-primary, var(--admin-primary));
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.orders-search-container input::placeholder {
+    color: var(--admin-text-muted);
+}
+
+.orders-search-container .search-shortcut {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.65rem;
+    padding: 0.2rem 0.4rem;
+    background: var(--admin-bg-tertiary);
+    border-radius: 4px;
+    color: var(--admin-text-muted);
+    font-weight: 600;
+    pointer-events: none;
+}
+
+/* ================================
+   Filters Section
+   ================================ */
+.orders-filters {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    background: var(--admin-bg-secondary);
+    border: 1px solid var(--admin-border);
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.filter-group .filter-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--admin-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.filter-group select {
+    padding: 0.5rem 2rem 0.5rem 0.75rem;
+    background: var(--admin-bg-primary);
+    border: 1px solid var(--admin-border);
+    border-radius: 8px;
+    color: var(--admin-text-primary);
+    font-size: 0.85rem;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    transition: all 0.2s ease;
+}
+
+.filter-group select:hover {
+    border-color: var(--module-primary, var(--admin-primary));
+}
+
+.filter-group select:focus {
+    outline: none;
+    border-color: var(--module-primary, var(--admin-primary));
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.filter-divider {
+    width: 1px;
+    height: 24px;
+    background: var(--admin-border);
+}
+
+.filters-spacer {
+    flex: 1;
+}
+
+.filter-clear-btn {
+    padding: 0.5rem 1rem;
+    background: transparent;
+    border: 1px solid var(--admin-border);
+    border-radius: 8px;
+    color: var(--admin-text-secondary);
+    font-size: 0.85rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: all 0.2s ease;
+}
+
+.filter-clear-btn:hover {
+    background: var(--admin-bg-tertiary);
+    color: var(--admin-text-primary);
+}
+
+.filter-clear-btn i {
+    width: 14px;
+    height: 14px;
+}
+
+/* ================================
+   Stats Bar
+   ================================ */
+.orders-stats-bar {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.orders-stat-card {
+    background: var(--admin-bg-secondary);
+    border: 1px solid var(--admin-border);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.orders-stat-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.orders-stat-icon i {
+    width: 22px;
+    height: 22px;
+}
+
+.orders-stat-icon.pending {
+    background: rgba(245, 158, 11, 0.12);
+    color: #f59e0b;
+}
+
+.orders-stat-icon.processing {
+    background: rgba(59, 130, 246, 0.12);
+    color: #3b82f6;
+}
+
+.orders-stat-icon.shipped {
+    background: rgba(139, 92, 246, 0.12);
+    color: #8b5cf6;
+}
+
+.orders-stat-icon.delivered {
+    background: rgba(16, 185, 129, 0.12);
+    color: #10b981;
+}
+
+.orders-stat-content {
+    flex: 1;
+}
+
+.orders-stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--admin-text-primary);
+    line-height: 1.2;
+}
+
+.orders-stat-label {
+    font-size: 0.8rem;
+    color: var(--admin-text-muted);
+    font-weight: 500;
+}
+
+/* ================================
+   Orders Table Card
+   ================================ */
+.orders-table-card {
+    background: var(--admin-bg-secondary);
+    border: 1px solid var(--admin-border);
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.orders-table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--admin-border);
+    background: var(--admin-bg-tertiary);
+}
+
+.orders-table-header h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--admin-text-primary);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.orders-table-header .orders-count {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.5rem;
+    background: var(--module-primary, var(--admin-primary));
+    color: white;
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+.orders-table-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.orders-table-actions button {
+    padding: 0.5rem 0.75rem;
+    background: var(--admin-bg-primary);
+    border: 1px solid var(--admin-border);
+    border-radius: 8px;
+    color: var(--admin-text-secondary);
+    font-size: 0.8rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: all 0.2s ease;
+}
+
+.orders-table-actions button:hover {
+    background: var(--admin-bg-secondary);
+    color: var(--admin-text-primary);
+    border-color: var(--module-primary, var(--admin-primary));
+}
+
+.orders-table-actions button i {
+    width: 14px;
+    height: 14px;
+}
+
+/* Table Styles */
+.orders-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.orders-table thead {
+    background: var(--admin-bg-tertiary);
+}
+
+.orders-table th {
+    padding: 0.875rem 1rem;
+    text-align: left;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--admin-text-muted);
+    border-bottom: 1px solid var(--admin-border);
+    white-space: nowrap;
+}
+
+.orders-table th:first-child {
+    padding-left: 1.5rem;
+}
+
+.orders-table th:last-child {
+    padding-right: 1.5rem;
+    text-align: center;
+}
+
+.orders-table tbody tr {
+    transition: background 0.15s ease;
+}
+
+.orders-table tbody tr:hover {
+    background: var(--admin-bg-tertiary);
+}
+
+.orders-table td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--admin-border);
+    vertical-align: middle;
+}
+
+.orders-table td:first-child {
+    padding-left: 1.5rem;
+}
+
+.orders-table td:last-child {
+    padding-right: 1.5rem;
+}
+
+.orders-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Order ID Cell */
+.order-id-cell {
+    font-weight: 600;
+    color: var(--module-primary, var(--admin-primary));
+    font-size: 0.9rem;
+}
+
+.order-id-cell a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.order-id-cell a:hover {
+    text-decoration: underline;
+}
+
+/* Customer Cell */
+.customer-cell {
+    min-width: 180px;
+}
+
+.customer-name {
+    font-weight: 600;
+    color: var(--admin-text-primary);
+    margin-bottom: 0.15rem;
+}
+
+.customer-email {
+    font-size: 0.8rem;
+    color: var(--admin-text-muted);
+}
+
+/* Date Cell */
+.date-cell {
+    white-space: nowrap;
+}
+
+.date-main {
+    font-weight: 500;
+    color: var(--admin-text-primary);
+    font-size: 0.9rem;
+}
+
+.date-time {
+    font-size: 0.75rem;
+    color: var(--admin-text-muted);
+}
+
+/* Items Count Cell */
+.items-cell {
+    text-align: center;
+}
+
+.items-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.35rem 0.65rem;
+    background: var(--admin-bg-tertiary);
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--admin-text-secondary);
+}
+
+.items-count i {
+    width: 14px;
+    height: 14px;
+}
+
+/* Amount Cell */
+.amount-cell {
+    font-weight: 700;
+    color: var(--admin-text-primary);
+    font-size: 0.95rem;
+}
+
+/* Industry Badge */
+.industry-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.65rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.industry-badge i {
+    width: 14px;
+    height: 14px;
+}
+
+.industry-badge.automotive {
+    background: rgba(220, 38, 38, 0.12);
+    color: #dc2626;
+}
+
+.industry-badge.aviation {
+    background: rgba(14, 165, 233, 0.12);
+    color: #0ea5e9;
+}
+
+.industry-badge.machinery {
+    background: rgba(234, 179, 8, 0.12);
+    color: #ca8a04;
+}
+
+/* Priority Badge */
+.priority-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.3rem 0.6rem;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.priority-badge.normal {
+    background: var(--admin-bg-tertiary);
+    color: var(--admin-text-secondary);
+}
+
+.priority-badge.urgent {
+    background: rgba(245, 158, 11, 0.15);
+    color: #d97706;
+}
+
+.priority-badge.aog {
+    background: rgba(239, 68, 68, 0.15);
+    color: #dc2626;
+}
+
+.priority-badge i {
+    width: 12px;
+    height: 12px;
+}
+
+/* Status Badge */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.4rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.status-badge i {
+    width: 12px;
+    height: 12px;
+}
+
+.status-badge.pending {
+    background: rgba(245, 158, 11, 0.12);
+    color: #d97706;
+}
+
+.status-badge.processing {
+    background: rgba(59, 130, 246, 0.12);
+    color: #2563eb;
+}
+
+.status-badge.shipped {
+    background: rgba(139, 92, 246, 0.12);
+    color: #7c3aed;
+}
+
+.status-badge.delivered {
+    background: rgba(16, 185, 129, 0.12);
+    color: #059669;
+}
+
+.status-badge.cancelled {
+    background: rgba(239, 68, 68, 0.12);
+    color: #dc2626;
+}
+
+/* Actions Cell */
+.actions-cell {
+    text-align: center;
+}
+
+.actions-group {
+    display: inline-flex;
+    gap: 0.25rem;
+}
+
+.action-btn {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--admin-text-muted);
+    transition: all 0.15s ease;
+}
+
+.action-btn i {
+    width: 16px;
+    height: 16px;
+}
+
+.action-btn:hover {
+    background: var(--admin-bg-tertiary);
+    color: var(--admin-text-primary);
+}
+
+.action-btn.view:hover {
+    color: #3b82f6;
+    background: rgba(59, 130, 246, 0.1);
+}
+
+.action-btn.edit:hover {
+    color: #f59e0b;
+    background: rgba(245, 158, 11, 0.1);
+}
+
+.action-btn.delete:hover {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+}
+
+/* ================================
+   Pagination
+   ================================ */
+.orders-pagination {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--admin-border);
+    background: var(--admin-bg-tertiary);
+}
+
+.pagination-info {
+    font-size: 0.85rem;
+    color: var(--admin-text-muted);
+}
+
+.pagination-info strong {
+    color: var(--admin-text-primary);
+    font-weight: 600;
+}
+
+.pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.pagination-btn {
+    min-width: 36px;
+    height: 36px;
+    border: 1px solid var(--admin-border);
+    background: var(--admin-bg-primary);
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--admin-text-secondary);
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.15s ease;
+    padding: 0 0.5rem;
+}
+
+.pagination-btn:hover:not(:disabled) {
+    background: var(--admin-bg-secondary);
+    border-color: var(--module-primary, var(--admin-primary));
+    color: var(--admin-text-primary);
+}
+
+.pagination-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pagination-btn.active {
+    background: var(--module-primary, var(--admin-primary));
+    border-color: var(--module-primary, var(--admin-primary));
+    color: white;
+}
+
+.pagination-btn i {
+    width: 16px;
+    height: 16px;
+}
+
+/* ================================
+   Delete Modal
+   ================================ */
+.delete-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+}
+
+.delete-modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.delete-modal {
+    background: var(--admin-bg-primary);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 420px;
+    padding: 2rem;
+    text-align: center;
+    transform: scale(0.9);
+    transition: transform 0.2s ease;
+}
+
+.delete-modal-overlay.active .delete-modal {
+    transform: scale(1);
+}
+
+.delete-modal-icon {
+    width: 64px;
+    height: 64px;
+    background: rgba(239, 68, 68, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.25rem;
+}
+
+.delete-modal-icon i {
+    width: 32px;
+    height: 32px;
+    color: #ef4444;
+}
+
+.delete-modal h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--admin-text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.delete-modal p {
+    color: var(--admin-text-muted);
+    margin-bottom: 1.5rem;
+    line-height: 1.5;
+}
+
+.delete-modal-order {
+    font-weight: 600;
+    color: var(--admin-text-primary);
+}
+
+.delete-modal-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+}
+
+.delete-modal-actions button {
+    padding: 0.75rem 1.5rem;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.delete-modal-cancel {
+    background: var(--admin-bg-secondary);
+    border: 1px solid var(--admin-border);
+    color: var(--admin-text-primary);
+}
+
+.delete-modal-cancel:hover {
+    background: var(--admin-bg-tertiary);
+}
+
+.delete-modal-confirm {
+    background: #ef4444;
+    border: none;
+    color: white;
+}
+
+.delete-modal-confirm:hover {
+    background: #dc2626;
+}
+
+/* ================================
+   Empty State
+   ================================ */
+.orders-empty {
+    padding: 4rem 2rem;
+    text-align: center;
+}
+
+.orders-empty-icon {
+    width: 80px;
+    height: 80px;
+    background: var(--admin-bg-tertiary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+}
+
+.orders-empty-icon i {
+    width: 40px;
+    height: 40px;
+    color: var(--admin-text-muted);
+}
+
+.orders-empty h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--admin-text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.orders-empty p {
+    color: var(--admin-text-muted);
+    margin-bottom: 1.5rem;
+}
+
+/* ================================
+   Responsive
+   ================================ */
+@media (max-width: 1200px) {
+    .orders-search-container {
+        width: 260px;
+    }
+}
+
+@media (max-width: 992px) {
+    .orders-filters {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filter-group {
+        width: 100%;
+    }
+
+    .filter-group select {
+        flex: 1;
+    }
+
+    .filter-divider {
+        display: none;
+    }
+
+    .filters-spacer {
+        display: none;
+    }
+
+    .orders-search-container {
+        width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    .orders-page-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .orders-header-actions {
+        flex-direction: column;
+    }
+
+    .orders-table-card {
+        overflow-x: auto;
+    }
+
+    .orders-table {
+        min-width: 900px;
+    }
+
+    .orders-pagination {
+        flex-direction: column;
+        gap: 1rem;
+    }
+}

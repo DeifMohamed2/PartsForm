@@ -1,0 +1,332 @@
+<%- include('partials/header') %>
+<link rel="stylesheet" href="/css/adminCSS/admin-dashboard.css">
+<link rel="stylesheet" href="/css/adminCSS/admin-users.css">
+</head>
+<body class="<%= typeof currentModule !== 'undefined' && currentModule ? 'module-' + currentModule : '' %>">
+  <div class="admin-wrapper">
+    <%- include('partials/sidebar', { activePage: 'users', currentModule: currentModule }) %>
+    
+    <main class="admin-main">
+      <%- include('partials/topbar', { pageTitle: 'Edit User', currentModule: currentModule }) %>
+      
+      <div class="admin-content">
+        <!-- Breadcrumb -->
+        <div style="margin-bottom: 1.5rem;">
+          <a href="/admin/users/<%= user.id %>" style="color: var(--admin-text-muted); text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.9rem;">
+            <i data-lucide="arrow-left" style="width: 16px; height: 16px;"></i>
+            Back to User Details
+          </a>
+        </div>
+
+        <!-- Page Header -->
+        <div class="users-page-header">
+          <h2>Edit User: <%= user.name %></h2>
+          <button class="admin-btn" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: none;" onclick="confirmDelete()">
+            <i data-lucide="trash-2"></i>
+            Delete User
+          </button>
+        </div>
+
+        <form id="editUserForm" class="user-form-container">
+          <!-- Personal Information -->
+          <div class="user-form-card">
+            <div class="user-form-card-header">
+              <i data-lucide="user"></i>
+              <h3>Personal Information</h3>
+            </div>
+            <div class="user-form-card-body">
+              <div class="user-form-grid">
+                <div class="user-form-group">
+                  <label>Full Name <span class="required">*</span></label>
+                  <input type="text" class="user-form-input" name="name" value="<%= user.name %>" required>
+                </div>
+                <div class="user-form-group">
+                  <label>Email Address <span class="required">*</span></label>
+                  <input type="email" class="user-form-input" name="email" value="<%= user.email %>" required>
+                </div>
+                <div class="user-form-group">
+                  <label>Phone Number</label>
+                  <input type="tel" class="user-form-input" name="phone" value="<%= user.phone || '+1 (555) 123-4567' %>">
+                </div>
+                <div class="user-form-group">
+                  <label>Country</label>
+                  <select class="user-form-select" name="country">
+                    <option value="US" <%= user.country === 'US' ? 'selected' : '' %>>United States</option>
+                    <option value="DE" <%= user.country === 'DE' ? 'selected' : '' %>>Germany</option>
+                    <option value="UK" <%= user.country === 'UK' ? 'selected' : '' %>>United Kingdom</option>
+                    <option value="FR" <%= user.country === 'FR' ? 'selected' : '' %>>France</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Company Information -->
+          <div class="user-form-card">
+            <div class="user-form-card-header">
+              <i data-lucide="building"></i>
+              <h3>Company Information</h3>
+            </div>
+            <div class="user-form-card-body">
+              <div class="user-form-grid">
+                <div class="user-form-group">
+                  <label>Company Name <span class="required">*</span></label>
+                  <input type="text" class="user-form-input" name="company" value="<%= user.company %>" required>
+                </div>
+                <div class="user-form-group">
+                  <label>Position/Title</label>
+                  <input type="text" class="user-form-input" name="position" value="<%= user.position || 'Procurement Manager' %>">
+                </div>
+                <div class="user-form-group">
+                  <label>Industry</label>
+                  <select class="user-form-select" name="industry">
+                    <option value="">Select Industry</option>
+                    <option value="automotive" <%= user.industry === 'automotive' ? 'selected' : '' %>>Automotive</option>
+                    <option value="aviation" <%= user.industry === 'aviation' ? 'selected' : '' %>>Aviation</option>
+                    <option value="machinery" <%= user.industry === 'machinery' ? 'selected' : '' %>>Machinery</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+                <div class="user-form-group">
+                  <label>Company Address</label>
+                  <input type="text" class="user-form-input" name="address" value="<%= user.address || '' %>">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Account Settings -->
+          <div class="user-form-card">
+            <div class="user-form-card-header">
+              <i data-lucide="settings"></i>
+              <h3>Account Settings</h3>
+            </div>
+            <div class="user-form-card-body">
+              <div class="user-form-grid">
+                <div class="user-form-group">
+                  <label>Account Status</label>
+                  <div class="status-toggle">
+                    <div class="status-toggle-switch <%= user.status === 'active' ? 'active' : '' %>" id="statusToggle" onclick="toggleStatus()"></div>
+                    <span class="status-toggle-label" id="statusLabel"><%= user.status === 'active' ? 'Active' : 'Inactive' %></span>
+                  </div>
+                  <input type="hidden" name="status" id="statusInput" value="<%= user.status %>">
+                </div>
+                <div class="user-form-group">
+                  <label>User ID</label>
+                  <input type="text" class="user-form-input" value="#<%= user.id %>" disabled style="background: var(--admin-bg-tertiary);">
+                </div>
+                <div class="user-form-group">
+                  <label>Member Since</label>
+                  <input type="text" class="user-form-input" value="<%= new Date(user.joined).toLocaleDateString() %>" disabled style="background: var(--admin-bg-tertiary);">
+                </div>
+                <div class="user-form-group">
+                  <label>Total Orders</label>
+                  <input type="text" class="user-form-input" value="<%= user.orders %> orders" disabled style="background: var(--admin-bg-tertiary);">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Form Actions -->
+          <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem;">
+            <a href="/admin/users/<%= user.id %>" class="admin-btn admin-btn-secondary">Cancel</a>
+            <button type="submit" class="admin-btn admin-btn-primary">
+              <i data-lucide="save"></i>
+              Save Changes
+            </button>
+          </div>
+        </form>
+      </div>
+    </main>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="status-modal-overlay" id="deleteModalOverlay" onclick="closeDeleteModal()">
+    <div class="status-modal" onclick="event.stopPropagation()" style="max-width: 400px;">
+      <div class="status-modal-header">
+        <div class="status-modal-icon" style="background: rgba(239, 68, 68, 0.1);">
+          <i data-lucide="trash-2" style="color: #ef4444;"></i>
+        </div>
+        <div>
+          <h3>Delete User</h3>
+          <p style="color: var(--admin-text-muted);">This action cannot be undone</p>
+        </div>
+        <button class="status-modal-close" onclick="closeDeleteModal()">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="status-modal-body">
+        <p style="color: var(--admin-text-secondary);">Are you sure you want to delete <strong><%= user.name %></strong>? All associated data including orders and tickets will be permanently removed.</p>
+      </div>
+      <div class="status-modal-footer">
+        <button class="admin-btn admin-btn-secondary" onclick="closeDeleteModal()">Cancel</button>
+        <button class="admin-btn" style="background: #ef4444; color: white; border: none;" onclick="deleteUser()">
+          <i data-lucide="trash-2"></i>
+          Delete User
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .status-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.25s ease;
+    }
+    .status-modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    .status-modal {
+      background: var(--admin-bg-primary);
+      border-radius: 20px;
+      width: 100%;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+      transform: scale(0.9);
+      transition: all 0.25s ease;
+    }
+    .status-modal-overlay.active .status-modal {
+      transform: scale(1);
+    }
+    .status-modal-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--admin-border);
+    }
+    .status-modal-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .status-modal-icon i {
+      width: 24px;
+      height: 24px;
+    }
+    .status-modal-header h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--admin-text-primary);
+      margin: 0 0 0.15rem;
+    }
+    .status-modal-close {
+      margin-left: auto;
+      width: 36px;
+      height: 36px;
+      border: none;
+      background: var(--admin-bg-secondary);
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--admin-text-muted);
+    }
+    .status-modal-close i {
+      width: 18px;
+      height: 18px;
+    }
+    .status-modal-body {
+      padding: 1.5rem;
+    }
+    .status-modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      padding: 1rem 1.5rem;
+      background: var(--admin-bg-secondary);
+      border-top: 1px solid var(--admin-border);
+      border-radius: 0 0 20px 20px;
+    }
+  </style>
+
+  <script>
+    var userId = '<%= user.id %>';
+    
+    function toggleStatus() {
+      var toggle = document.getElementById('statusToggle');
+      var label = document.getElementById('statusLabel');
+      var input = document.getElementById('statusInput');
+      
+      if (toggle.classList.contains('active')) {
+        toggle.classList.remove('active');
+        label.textContent = 'Inactive';
+        input.value = 'inactive';
+      } else {
+        toggle.classList.add('active');
+        label.textContent = 'Active';
+        input.value = 'active';
+      }
+    }
+    
+    function confirmDelete() {
+      document.getElementById('deleteModalOverlay').classList.add('active');
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+    }
+    
+    function closeDeleteModal() {
+      document.getElementById('deleteModalOverlay').classList.remove('active');
+    }
+    
+    function deleteUser() {
+      fetch('/admin/users/' + userId, {
+        method: 'DELETE'
+      }).then(function(response) {
+        if (response.ok) {
+          window.location.href = '/admin/users';
+        }
+      }).catch(function(err) {
+        console.error('Error deleting user:', err);
+      });
+    }
+    
+    document.getElementById('editUserForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      var formData = new FormData(this);
+      var userData = {};
+      formData.forEach(function(value, key) {
+        userData[key] = value;
+      });
+      
+      fetch('/admin/users/' + userId, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userData)
+      }).then(function(response) {
+        if (response.ok) {
+          window.location.href = '/admin/users/' + userId;
+        }
+      }).catch(function(err) {
+        console.error('Error updating user:', err);
+      });
+    });
+    
+    // Close modal with Escape key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closeDeleteModal();
+      }
+    });
+  </script>
+
+<%- include('partials/footer') %>

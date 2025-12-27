@@ -1,0 +1,862 @@
+/* Admin Users Styles */
+/* Professional styling for users management pages */
+
+/* ================================
+   Users Page Layout
+   ================================ */
+.users-page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.users-page-header h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--admin-text-primary);
+    margin: 0;
+}
+
+.users-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+/* ================================
+   Search Bar
+   ================================ */
+.users-search-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 320px;
+}
+
+.users-search-container .search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    color: var(--admin-text-muted);
+    pointer-events: none;
+    z-index: 2;
+}
+
+.users-search-container input {
+    width: 100%;
+    padding: 0.7rem 1rem 0.7rem 2.75rem;
+    background: var(--admin-bg-secondary);
+    border: 1px solid var(--admin-border);
+    border-radius: 12px;
+    color: var(--admin-text-primary);
+    font-size: 0.9rem;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.users-search-container input:focus {
+    border-color: var(--module-primary, var(--admin-primary));
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* ================================
+   Filters Section
+   ================================ */
+.users-filters {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    background: var(--admin-bg-secondary);
+    border: 1px solid var(--admin-border);
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.users-filters .filters-spacer {
+    flex: 1;
+}
+
+.filter-clear-btn {
+    padding: 0.5rem 1rem;
+    background: transparent;
+    border: 1px solid var(--admin-border);
+    border-radius: 8px;
+    color: var(--admin-text-secondary);
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: all 0.2s ease;
+}
+
+.filter-clear-btn:hover {
+    background: var(--admin-bg-tertiary);
+    color: var(--admin-text-primary);
+    border-color: var(--admin-text-muted);
+}
+
+.filter-clear-btn i {
+    width: 14px;
+    height: 14px;
+}
+
+/* ================================
+   Bulk Action Bar
+   ================================ */
+.bulk-action-bar {
+    display: none;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.875rem 1.25rem;
+    background: linear-gradient(135deg, var(--module-primary, #3b82f6), var(--module-primary-dark, #2563eb));
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    color: white;
+    animation: slideDown 0.25s ease;
+}
+
+.bulk-action-bar.active {
+    display: flex;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.bulk-action-bar .selected-count {
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.bulk-action-bar .selected-count i {
+    width: 18px;
+    height: 18px;
+}
+
+.bulk-action-bar .bulk-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-left: auto;
+}
+
+.bulk-action-btn {
+    padding: 0.5rem 1rem;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    color: white;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: all 0.15s ease;
+}
+
+.bulk-action-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+.bulk-action-btn i {
+    width: 16px;
+    height: 16px;
+}
+
+.bulk-action-btn.danger {
+    background: rgba(239, 68, 68, 0.3);
+    border-color: rgba(239, 68, 68, 0.5);
+}
+
+.bulk-action-btn.danger:hover {
+    background: rgba(239, 68, 68, 0.5);
+}
+
+/* ================================
+   Users Table
+   ================================ */
+.users-table-card {
+    background: var(--admin-bg-secondary);
+    border: 1px solid var(--admin-border);
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.users-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.users-table thead {
+    background: var(--admin-bg-tertiary);
+}
+
+.users-table th {
+    padding: 0.875rem 1rem;
+    text-align: left;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--admin-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--admin-border);
+}
+
+.users-table th:first-child {
+    padding-left: 1.25rem;
+    width: 50px;
+}
+
+.users-table td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--admin-border);
+    vertical-align: middle;
+}
+
+.users-table td:first-child {
+    padding-left: 1.25rem;
+}
+
+.users-table tbody tr {
+    transition: all 0.15s ease;
+    cursor: pointer;
+}
+
+.users-table tbody tr:hover {
+    background: var(--admin-bg-tertiary);
+}
+
+.users-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.users-table tbody tr.selected {
+    background: rgba(59, 130, 246, 0.05);
+}
+
+/* Custom Checkbox */
+.user-checkbox {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--admin-border);
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+    background: var(--admin-bg-primary);
+}
+
+.user-checkbox:hover {
+    border-color: var(--module-primary, #3b82f6);
+}
+
+.user-checkbox.checked {
+    background: var(--module-primary, #3b82f6);
+    border-color: var(--module-primary, #3b82f6);
+}
+
+.user-checkbox.checked::after {
+    content: '';
+    width: 6px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+    margin-bottom: 2px;
+}
+
+/* User Cell */
+.user-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+}
+
+.user-avatar {
+    width: 42px;
+    height: 42px;
+    background: linear-gradient(135deg, var(--module-primary, #3b82f6), var(--module-primary-dark, #2563eb));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.user-info h4 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--admin-text-primary);
+    margin: 0 0 0.15rem;
+}
+
+.user-info p {
+    font-size: 0.8rem;
+    color: var(--admin-text-muted);
+    margin: 0;
+}
+
+/* Stats Cells */
+.user-stat-cell {
+    text-align: center;
+}
+
+.user-stat-value {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--admin-text-primary);
+}
+
+.user-stat-label {
+    font-size: 0.7rem;
+    color: var(--admin-text-muted);
+    text-transform: uppercase;
+}
+
+/* Status Badge */
+.user-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.user-status-badge i {
+    width: 12px;
+    height: 12px;
+}
+
+.user-status-badge.active {
+    background: rgba(16, 185, 129, 0.12);
+    color: #059669;
+}
+
+.user-status-badge.inactive {
+    background: rgba(239, 68, 68, 0.12);
+    color: #dc2626;
+}
+
+/* Actions */
+.user-actions {
+    display: flex;
+    gap: 0.35rem;
+}
+
+.user-action-btn {
+    width: 34px;
+    height: 34px;
+    border: none;
+    background: transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--admin-text-muted);
+    transition: all 0.15s ease;
+}
+
+.user-action-btn i {
+    width: 16px;
+    height: 16px;
+}
+
+.user-action-btn:hover {
+    background: var(--admin-bg-primary);
+    color: var(--admin-text-primary);
+}
+
+.user-action-btn.view:hover {
+    color: #3b82f6;
+    background: rgba(59, 130, 246, 0.1);
+}
+
+.user-action-btn.edit:hover {
+    color: #f59e0b;
+    background: rgba(245, 158, 11, 0.1);
+}
+
+/* ================================
+   User Details Page
+   ================================ */
+.user-details-header {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    background: var(--admin-bg-secondary);
+    border: 1px solid var(--admin-border);
+    border-radius: 16px;
+    margin-bottom: 1.5rem;
+}
+
+.user-details-avatar {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, var(--module-primary, #3b82f6), var(--module-primary-dark, #2563eb));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 2rem;
+    flex-shrink: 0;
+}
+
+.user-details-info {
+    flex: 1;
+}
+
+.user-details-info h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--admin-text-primary);
+    margin: 0 0 0.25rem;
+}
+
+.user-details-info p {
+    font-size: 0.9rem;
+    color: var(--admin-text-muted);
+    margin: 0;
+}
+
+.user-details-meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 0.75rem;
+}
+
+.user-details-meta span {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.85rem;
+    color: var(--admin-text-secondary);
+}
+
+.user-details-meta i {
+    width: 16px;
+    height: 16px;
+}
+
+.user-details-actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+/* ================================
+   User Details Tabs
+   ================================ */
+.user-tabs {
+    display: flex;
+    gap: 0.25rem;
+    padding: 0.25rem;
+    background: var(--admin-bg-secondary);
+    border: 1px solid var(--admin-border);
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+}
+
+.user-tab {
+    padding: 0.75rem 1.25rem;
+    background: transparent;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--admin-text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.user-tab i {
+    width: 18px;
+    height: 18px;
+}
+
+.user-tab:hover {
+    color: var(--admin-text-primary);
+    background: var(--admin-bg-tertiary);
+}
+
+.user-tab.active {
+    background: var(--module-primary, #3b82f6);
+    color: white;
+}
+
+/* Tab Content */
+.user-tab-content {
+    display: none;
+}
+
+.user-tab-content.active {
+    display: block;
+}
+
+/* ================================
+   User Details Cards
+   ================================ */
+.user-details-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.user-detail-card {
+    background: var(--admin-bg-secondary);
+    border: 1px solid var(--admin-border);
+    border-radius: 16px;
+    padding: 1.25rem;
+}
+
+.user-detail-card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--admin-border);
+}
+
+.user-detail-card-header i {
+    width: 20px;
+    height: 20px;
+    color: var(--module-primary, #3b82f6);
+}
+
+.user-detail-card-header h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--admin-text-primary);
+    margin: 0;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.6rem 0;
+}
+
+.detail-row:not(:last-child) {
+    border-bottom: 1px solid var(--admin-border);
+}
+
+.detail-label {
+    font-size: 0.85rem;
+    color: var(--admin-text-muted);
+}
+
+.detail-value {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--admin-text-primary);
+}
+
+/* Stats Row */
+.user-stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.user-stat-card {
+    background: var(--admin-bg-secondary);
+    border: 1px solid var(--admin-border);
+    border-radius: 12px;
+    padding: 1.25rem;
+    text-align: center;
+}
+
+.user-stat-card .stat-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--admin-text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.user-stat-card .stat-label {
+    font-size: 0.8rem;
+    color: var(--admin-text-muted);
+    text-transform: uppercase;
+}
+
+/* ================================
+   User Form Styles
+   ================================ */
+.user-form-container {
+    width: 100%;
+}
+
+.user-form-card {
+    background: var(--admin-bg-secondary);
+    border: 1px solid var(--admin-border);
+    border-radius: 16px;
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+}
+
+.user-form-card-header {
+    padding: 1rem 1.5rem;
+    background: var(--admin-bg-tertiary);
+    border-bottom: 1px solid var(--admin-border);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.user-form-card-header i {
+    width: 20px;
+    height: 20px;
+    color: var(--module-primary, #3b82f6);
+}
+
+.user-form-card-header h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--admin-text-primary);
+    margin: 0;
+}
+
+.user-form-card-body {
+    padding: 1.5rem;
+}
+
+.user-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+}
+
+.user-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.user-form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.user-form-group label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--admin-text-secondary);
+}
+
+.user-form-group label .required {
+    color: #ef4444;
+}
+
+.user-form-input {
+    padding: 0.75rem 1rem;
+    background: var(--admin-bg-primary);
+    border: 1px solid var(--admin-border);
+    border-radius: 10px;
+    font-size: 0.9rem;
+    color: var(--admin-text-primary);
+    transition: all 0.2s ease;
+}
+
+.user-form-input:focus {
+    outline: none;
+    border-color: var(--module-primary, #3b82f6);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.user-form-select {
+    padding: 0.75rem 2.5rem 0.75rem 1rem;
+    background: var(--admin-bg-primary);
+    border: 1px solid var(--admin-border);
+    border-radius: 10px;
+    font-size: 0.9rem;
+    color: var(--admin-text-primary);
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+}
+
+/* Status Toggle */
+.status-toggle {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--admin-bg-tertiary);
+    border-radius: 12px;
+}
+
+.status-toggle-switch {
+    width: 50px;
+    height: 26px;
+    background: var(--admin-border);
+    border-radius: 13px;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.status-toggle-switch.active {
+    background: var(--admin-success, #10b981);
+}
+
+.status-toggle-switch::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 20px;
+    height: 20px;
+    background: white;
+    border-radius: 50%;
+    transition: all 0.25s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.status-toggle-switch.active::after {
+    left: 27px;
+}
+
+.status-toggle-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--admin-text-primary);
+}
+
+/* ================================
+   Empty State
+   ================================ */
+.users-empty {
+    padding: 4rem 2rem;
+    text-align: center;
+    background: var(--admin-bg-secondary);
+    border: 1px solid var(--admin-border);
+    border-radius: 16px;
+}
+
+.users-empty-icon {
+    width: 80px;
+    height: 80px;
+    background: var(--admin-bg-tertiary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+}
+
+.users-empty-icon i {
+    width: 40px;
+    height: 40px;
+    color: var(--admin-text-muted);
+}
+
+.users-empty h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--admin-text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.users-empty p {
+    color: var(--admin-text-muted);
+}
+
+/* ================================
+   Responsive
+   ================================ */
+@media (max-width: 1200px) {
+    .user-details-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .user-stats-row {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 992px) {
+    .users-table-card {
+        overflow-x: auto;
+    }
+
+    .users-table {
+        min-width: 900px;
+    }
+
+    .user-details-header {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .user-details-meta {
+        justify-content: center;
+    }
+
+    .user-details-actions {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 768px) {
+    .users-search-container {
+        width: 100%;
+    }
+
+    .users-filters {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .user-details-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .user-stats-row {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .user-form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .user-tabs {
+        overflow-x: auto;
+    }
+}

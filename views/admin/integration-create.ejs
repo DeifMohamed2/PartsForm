@@ -1,0 +1,356 @@
+<%- include('partials/header') %>
+<link rel="stylesheet" href="/css/adminCSS/admin-dashboard.css">
+<link rel="stylesheet" href="/css/adminCSS/admin-integrations.css">
+</head>
+<body class="<%= typeof currentModule !== 'undefined' && currentModule ? 'module-' + currentModule : '' %>">
+  <div class="admin-wrapper">
+    <%- include('partials/sidebar', { activePage: 'integrations', currentModule: currentModule }) %>
+    
+    <main class="admin-main">
+      <%- include('partials/topbar', { pageTitle: 'New Connection', currentModule: currentModule }) %>
+      
+      <div class="admin-content">
+        <div class="connection-create-page">
+          <!-- Breadcrumb -->
+          <div class="integrations-breadcrumb">
+            <a href="/admin/integrations"><i data-lucide="plug"></i> Integrations</a>
+            <i data-lucide="chevron-right"></i>
+            <% if (currentModule) { %>
+            <a href="/admin/integrations?module=<%= currentModule %>"><%= moduleConfig.name %></a>
+            <i data-lucide="chevron-right"></i>
+            <% } %>
+            <span>New Connection</span>
+          </div>
+
+          <!-- Page Header -->
+          <div class="create-header">
+            <div class="create-header-info">
+              <h1>Add New Connection</h1>
+              <p>Configure a new data source for <% if (currentModule) { %><%= moduleConfig.name %><% } else { %>your modules<% } %></p>
+            </div>
+          </div>
+
+          <!-- Connection Type Selection -->
+          <div class="create-section">
+            <div class="section-title">
+              <span class="step-number">1</span>
+              <h2>Select Connection Type</h2>
+            </div>
+            
+            <div class="connection-type-grid">
+              <label class="connection-type-card" data-type="ftp">
+                <input type="radio" name="connectionType" value="ftp" checked>
+                <div class="type-card-content">
+                  <div class="type-icon ftp">
+                    <i data-lucide="hard-drive"></i>
+                  </div>
+                  <div class="type-info">
+                    <h3>FTP / SFTP</h3>
+                    <p>Connect to FTP servers to import CSV files with parts data</p>
+                  </div>
+                  <div class="type-features">
+                    <span><i data-lucide="check"></i> Scheduled sync</span>
+                    <span><i data-lucide="check"></i> CSV parsing</span>
+                    <span><i data-lucide="check"></i> Bulk import</span>
+                  </div>
+                </div>
+                <div class="type-checked">
+                  <i data-lucide="check-circle"></i>
+                </div>
+              </label>
+
+              <label class="connection-type-card" data-type="api">
+                <input type="radio" name="connectionType" value="api">
+                <div class="type-card-content">
+                  <div class="type-icon api">
+                    <i data-lucide="code"></i>
+                  </div>
+                  <div class="type-info">
+                    <h3>REST API</h3>
+                    <p>Connect to REST APIs to fetch parts data in JSON format</p>
+                  </div>
+                  <div class="type-features">
+                    <span><i data-lucide="check"></i> Real-time data</span>
+                    <span><i data-lucide="check"></i> OAuth support</span>
+                    <span><i data-lucide="check"></i> Webhooks</span>
+                  </div>
+                </div>
+                <div class="type-checked">
+                  <i data-lucide="check-circle"></i>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- FTP Configuration -->
+          <div class="create-section config-section" id="config-ftp">
+            <div class="section-title">
+              <span class="step-number">2</span>
+              <h2>FTP Connection Details</h2>
+            </div>
+            
+            <div class="config-form">
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Connection Name <span class="required">*</span></label>
+                  <input type="text" class="form-input" placeholder="e.g., Main Supplier FTP">
+                  <span class="form-hint">A friendly name to identify this connection</span>
+                </div>
+                <div class="form-group">
+                  <label>Protocol</label>
+                  <select class="form-input">
+                    <option value="ftp">FTP (Standard)</option>
+                    <option value="ftps">FTPS (FTP over SSL)</option>
+                    <option value="sftp">SFTP (SSH File Transfer)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group flex-2">
+                  <label>Host / Server <span class="required">*</span></label>
+                  <input type="text" class="form-input" placeholder="ftp.example.com">
+                </div>
+                <div class="form-group">
+                  <label>Port</label>
+                  <input type="number" class="form-input" value="21">
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Username <span class="required">*</span></label>
+                  <input type="text" class="form-input" placeholder="ftp_user">
+                </div>
+                <div class="form-group">
+                  <label>Password <span class="required">*</span></label>
+                  <div class="input-with-action">
+                    <input type="password" class="form-input" placeholder="••••••••" id="ftpPassword">
+                    <button type="button" class="input-action-btn" onclick="togglePassword('ftpPassword')">
+                      <i data-lucide="eye"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Remote Directory</label>
+                  <input type="text" class="form-input" placeholder="/data/csv/" value="/">
+                  <span class="form-hint">Path to the directory containing your data files</span>
+                </div>
+                <div class="form-group">
+                  <label>File Pattern</label>
+                  <input type="text" class="form-input" placeholder="*.csv" value="*.csv">
+                  <span class="form-hint">Glob pattern to match files (e.g., *.csv, parts_*.txt)</span>
+                </div>
+              </div>
+
+              <div class="form-divider"></div>
+
+              <h3 class="subsection-title"><i data-lucide="clock"></i> Sync Schedule</h3>
+              
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Sync Frequency</label>
+                  <select class="form-input" id="syncFrequency">
+                    <option value="manual">Manual only</option>
+                    <option value="hourly">Every hour</option>
+                    <option value="6hours" selected>Every 6 hours</option>
+                    <option value="12hours">Every 12 hours</option>
+                    <option value="daily">Once daily</option>
+                    <option value="weekly">Once weekly</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Preferred Time</label>
+                  <input type="time" class="form-input" value="02:00">
+                  <span class="form-hint">Best time to run syncs (for daily/weekly)</span>
+                </div>
+              </div>
+
+              <div class="form-divider"></div>
+
+              <h3 class="subsection-title"><i data-lucide="sliders"></i> Advanced Options</h3>
+              
+              <div class="options-grid">
+                <label class="option-toggle">
+                  <input type="checkbox" checked>
+                  <span class="toggle-slider"></span>
+                  <div class="option-info">
+                    <span class="option-label">Enable connection</span>
+                    <span class="option-desc">Start syncing immediately after creation</span>
+                  </div>
+                </label>
+
+                <label class="option-toggle">
+                  <input type="checkbox" checked>
+                  <span class="toggle-slider"></span>
+                  <div class="option-info">
+                    <span class="option-label">Passive mode</span>
+                    <span class="option-desc">Use passive mode for FTP connections</span>
+                  </div>
+                </label>
+
+                <label class="option-toggle">
+                  <input type="checkbox">
+                  <span class="toggle-slider"></span>
+                  <div class="option-info">
+                    <span class="option-label">Delete after import</span>
+                    <span class="option-desc">Remove files from server after successful import</span>
+                  </div>
+                </label>
+
+                <label class="option-toggle">
+                  <input type="checkbox" checked>
+                  <span class="toggle-slider"></span>
+                  <div class="option-info">
+                    <span class="option-label">Send notifications</span>
+                    <span class="option-desc">Email alerts for sync failures</span>
+                  </div>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- API Configuration (hidden by default) -->
+          <div class="create-section config-section" id="config-api" style="display: none;">
+            <div class="section-title">
+              <span class="step-number">2</span>
+              <h2>API Connection Details</h2>
+            </div>
+            
+            <div class="config-form">
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Connection Name <span class="required">*</span></label>
+                  <input type="text" class="form-input" placeholder="e.g., PartsBase API">
+                </div>
+                <div class="form-group">
+                  <label>API Type</label>
+                  <select class="form-input">
+                    <option value="rest">REST API</option>
+                    <option value="graphql">GraphQL</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group full-width">
+                  <label>Base URL <span class="required">*</span></label>
+                  <input type="text" class="form-input" placeholder="https://api.example.com/v2">
+                </div>
+              </div>
+
+              <div class="form-divider"></div>
+
+              <h3 class="subsection-title"><i data-lucide="key"></i> Authentication</h3>
+              
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Auth Type</label>
+                  <select class="form-input" id="apiAuthType">
+                    <option value="none">No Authentication</option>
+                    <option value="apikey" selected>API Key</option>
+                    <option value="bearer">Bearer Token</option>
+                    <option value="oauth2">OAuth 2.0</option>
+                    <option value="basic">Basic Auth</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>API Key / Token</label>
+                  <div class="input-with-action">
+                    <input type="password" class="form-input" placeholder="••••••••" id="apiKey">
+                    <button type="button" class="input-action-btn" onclick="togglePassword('apiKey')">
+                      <i data-lucide="eye"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Header Name</label>
+                  <input type="text" class="form-input" placeholder="X-API-Key" value="Authorization">
+                  <span class="form-hint">Header to send the API key in</span>
+                </div>
+                <div class="form-group">
+                  <label>Rate Limit (req/min)</label>
+                  <input type="number" class="form-input" placeholder="60" value="60">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="create-actions">
+            <a href="/admin/integrations<%= currentModule ? '?module=' + currentModule : '' %>" class="admin-btn admin-btn-secondary">
+              <i data-lucide="arrow-left"></i>
+              Cancel
+            </a>
+            <button type="button" class="admin-btn" style="background: var(--admin-bg-tertiary); color: var(--admin-text-primary);" onclick="testConnection()">
+              <i data-lucide="play"></i>
+              Test Connection
+            </button>
+            <button type="button" class="admin-btn admin-btn-primary" onclick="saveConnection()">
+              <i data-lucide="save"></i>
+              Create Connection
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Connection type switching
+    document.querySelectorAll('input[name="connectionType"]').forEach(function(radio) {
+      radio.addEventListener('change', function() {
+        // Hide all config sections
+        document.querySelectorAll('.config-section').forEach(function(section) {
+          section.style.display = 'none';
+        });
+        // Show selected config section
+        var configId = 'config-' + this.value;
+        var configSection = document.getElementById(configId);
+        if (configSection) {
+          configSection.style.display = 'block';
+        }
+        // Update card styles
+        document.querySelectorAll('.connection-type-card').forEach(function(card) {
+          card.classList.remove('selected');
+        });
+        this.closest('.connection-type-card').classList.add('selected');
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      });
+    });
+
+    // Initialize first card as selected
+    document.querySelector('.connection-type-card').classList.add('selected');
+
+    // Toggle password visibility
+    function togglePassword(inputId) {
+      var input = document.getElementById(inputId);
+      var btn = input.nextElementSibling;
+      if (input.type === 'password') {
+        input.type = 'text';
+        btn.innerHTML = '<i data-lucide="eye-off"></i>';
+      } else {
+        input.type = 'password';
+        btn.innerHTML = '<i data-lucide="eye"></i>';
+      }
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    // Test connection
+    function testConnection() {
+      alert('Testing connection... (UI Demo - would test actual connection)');
+    }
+
+    // Save connection
+    function saveConnection() {
+      window.location.href = '/admin/integrations<%= currentModule ? "?module=" + currentModule : "" %>';
+    }
+  </script>
+
+<%- include('partials/footer') %>

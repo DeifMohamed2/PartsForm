@@ -31,8 +31,8 @@
     color: var(--admin-text-primary);
   }
   .settings-nav-item.active {
-    background: var(--module-bg-accent);
-    color: var(--module-primary);
+    background: var(--module-bg-accent, rgba(59, 130, 246, 0.1));
+    color: var(--module-primary, #3b82f6);
   }
   .settings-nav-item i {
     width: 20px;
@@ -44,6 +44,12 @@
     border-radius: var(--admin-radius-xl);
     padding: 2rem;
     box-shadow: var(--admin-shadow-sm);
+  }
+  .settings-panel {
+    display: none;
+  }
+  .settings-panel.active {
+    display: block;
   }
   .settings-section {
     margin-bottom: 2rem;
@@ -88,8 +94,8 @@
   }
   .settings-input:focus {
     outline: none;
-    border-color: var(--module-primary);
-    box-shadow: 0 0 0 3px var(--module-bg-accent);
+    border-color: var(--module-primary, #3b82f6);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
   }
   .settings-toggle {
     display: flex;
@@ -115,13 +121,13 @@
     position: relative;
     width: 50px;
     height: 28px;
-    background: var(--admin-border-medium);
+    background: var(--admin-border);
     border-radius: 14px;
     cursor: pointer;
-    transition: var(--admin-transition-fast);
+    transition: all 0.25s ease;
   }
   .toggle-switch.active {
-    background: var(--module-primary);
+    background: var(--module-primary, #10b981);
   }
   .toggle-switch::after {
     content: '';
@@ -132,8 +138,8 @@
     height: 22px;
     background: white;
     border-radius: 50%;
-    transition: var(--admin-transition-fast);
-    box-shadow: var(--admin-shadow-sm);
+    transition: all 0.25s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   }
   .toggle-switch.active::after {
     left: 25px;
@@ -142,6 +148,138 @@
     display: flex;
     gap: 1rem;
     margin-top: 2rem;
+  }
+  .settings-card {
+    background: var(--admin-bg-tertiary);
+    border: 1px solid var(--admin-border);
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+  }
+  .settings-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+  }
+  .settings-card-header h4 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--admin-text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .settings-card-header h4 i {
+    width: 18px;
+    height: 18px;
+    color: var(--module-primary, #3b82f6);
+  }
+  .settings-card p {
+    font-size: 0.85rem;
+    color: var(--admin-text-muted);
+    margin: 0;
+  }
+  .backup-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+  .backup-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    background: var(--admin-bg-tertiary);
+    border-radius: 10px;
+  }
+  .backup-item-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .backup-item-icon {
+    width: 42px;
+    height: 42px;
+    background: rgba(59, 130, 246, 0.1);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .backup-item-icon i {
+    width: 20px;
+    height: 20px;
+    color: #3b82f6;
+  }
+  .backup-item-details h4 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--admin-text-primary);
+    margin-bottom: 0.15rem;
+  }
+  .backup-item-details p {
+    font-size: 0.8rem;
+    color: var(--admin-text-muted);
+    margin: 0;
+  }
+  .backup-item-size {
+    font-size: 0.85rem;
+    color: var(--admin-text-secondary);
+    font-weight: 500;
+  }
+  .payment-method-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--admin-bg-tertiary);
+    border: 1px solid var(--admin-border);
+    border-radius: 12px;
+    margin-bottom: 0.75rem;
+  }
+  .payment-method-icon {
+    width: 48px;
+    height: 48px;
+    background: var(--admin-bg-primary);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .payment-method-icon i {
+    width: 24px;
+    height: 24px;
+    color: var(--admin-text-muted);
+  }
+  .payment-method-info {
+    flex: 1;
+  }
+  .payment-method-info h4 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--admin-text-primary);
+    margin-bottom: 0.15rem;
+  }
+  .payment-method-info p {
+    font-size: 0.8rem;
+    color: var(--admin-text-muted);
+    margin: 0;
+  }
+  .payment-method-status {
+    padding: 0.3rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+  .payment-method-status.enabled {
+    background: rgba(16, 185, 129, 0.12);
+    color: #059669;
+  }
+  .payment-method-status.disabled {
+    background: var(--admin-bg-primary);
+    color: var(--admin-text-muted);
   }
   @media (max-width: 1024px) {
     .settings-grid {
@@ -165,27 +303,27 @@
         <div class="settings-grid">
           <!-- Settings Navigation -->
           <nav class="settings-nav">
-            <div class="settings-nav-item active">
+            <div class="settings-nav-item active" data-tab="general">
               <i data-lucide="settings"></i>
               <span>General</span>
             </div>
-            <div class="settings-nav-item">
+            <div class="settings-nav-item" data-tab="notifications">
               <i data-lucide="bell"></i>
               <span>Notifications</span>
             </div>
-            <div class="settings-nav-item">
+            <div class="settings-nav-item" data-tab="security">
               <i data-lucide="shield"></i>
               <span>Security</span>
             </div>
-            <div class="settings-nav-item">
+            <div class="settings-nav-item" data-tab="email">
               <i data-lucide="mail"></i>
               <span>Email</span>
             </div>
-            <div class="settings-nav-item">
+            <div class="settings-nav-item" data-tab="payment">
               <i data-lucide="credit-card"></i>
               <span>Payment</span>
             </div>
-            <div class="settings-nav-item">
+            <div class="settings-nav-item" data-tab="backup">
               <i data-lucide="database"></i>
               <span>Backup</span>
             </div>
@@ -194,93 +332,355 @@
           <!-- Settings Content -->
           <div class="settings-content">
             <!-- General Settings -->
-            <div class="settings-section">
-              <h3 class="settings-section-title">General Settings</h3>
-              <p class="settings-section-desc">Configure the basic settings for your admin panel.</p>
-              
-              <div class="settings-form-group">
-                <label class="settings-label">Site Name</label>
-                <input type="text" class="settings-input" value="PARTSFORM">
+            <div class="settings-panel active" id="panel-general">
+              <div class="settings-section">
+                <h3 class="settings-section-title">General Settings</h3>
+                <p class="settings-section-desc">Configure the basic settings for your admin panel.</p>
+                
+                <div class="settings-form-group">
+                  <label class="settings-label">Site Name</label>
+                  <input type="text" class="settings-input" value="PARTSFORM">
+                </div>
+                <div class="settings-form-group">
+                  <label class="settings-label">Admin Email</label>
+                  <input type="email" class="settings-input" value="admin@partsform.com">
+                </div>
+                <div class="settings-form-group">
+                  <label class="settings-label">Timezone</label>
+                  <select class="settings-input">
+                    <option>UTC</option>
+                    <option selected>(GMT+2) Cairo</option>
+                    <option>(GMT+1) London</option>
+                    <option>(GMT-5) New York</option>
+                  </select>
+                </div>
+                <div class="settings-form-group">
+                  <label class="settings-label">Date Format</label>
+                  <select class="settings-input">
+                    <option>DD/MM/YYYY</option>
+                    <option>MM/DD/YYYY</option>
+                    <option>YYYY-MM-DD</option>
+                  </select>
+                </div>
+                <div class="settings-form-group">
+                  <label class="settings-label">Currency</label>
+                  <select class="settings-input">
+                    <option>USD ($)</option>
+                    <option>EUR (€)</option>
+                    <option>GBP (£)</option>
+                  </select>
+                </div>
               </div>
-              <div class="settings-form-group">
-                <label class="settings-label">Admin Email</label>
-                <input type="email" class="settings-input" value="admin@partsform.com">
-              </div>
-              <div class="settings-form-group">
-                <label class="settings-label">Timezone</label>
-                <select class="settings-input">
-                  <option>UTC</option>
-                  <option>(GMT+2) Cairo</option>
-                  <option>(GMT+1) London</option>
-                  <option>(GMT-5) New York</option>
-                </select>
+              <div class="settings-actions">
+                <button class="admin-btn admin-btn-primary"><i data-lucide="save"></i> Save Changes</button>
               </div>
             </div>
 
-            <!-- Notification Settings -->
-            <div class="settings-section">
-              <h3 class="settings-section-title">Notification Settings</h3>
-              <p class="settings-section-desc">Manage how you receive notifications.</p>
-              
-              <div class="settings-toggle">
-                <div class="settings-toggle-info">
-                  <h4>Email Notifications</h4>
-                  <p>Receive email notifications for new orders</p>
+            <!-- Notifications Settings -->
+            <div class="settings-panel" id="panel-notifications">
+              <div class="settings-section">
+                <h3 class="settings-section-title">Notification Settings</h3>
+                <p class="settings-section-desc">Manage how you receive notifications.</p>
+                
+                <div class="settings-toggle">
+                  <div class="settings-toggle-info">
+                    <h4>Email Notifications</h4>
+                    <p>Receive email notifications for new orders</p>
+                  </div>
+                  <div class="toggle-switch active"></div>
                 </div>
-                <div class="toggle-switch active"></div>
+                <div class="settings-toggle">
+                  <div class="settings-toggle-info">
+                    <h4>Ticket Alerts</h4>
+                    <p>Get notified when new support tickets are created</p>
+                  </div>
+                  <div class="toggle-switch active"></div>
+                </div>
+                <div class="settings-toggle">
+                  <div class="settings-toggle-info">
+                    <h4>AOG Notifications</h4>
+                    <p>Receive alerts for new AOG cases (Aviation)</p>
+                  </div>
+                  <div class="toggle-switch active"></div>
+                </div>
+                <div class="settings-toggle">
+                  <div class="settings-toggle-info">
+                    <h4>Weekly Reports</h4>
+                    <p>Receive weekly performance reports via email</p>
+                  </div>
+                  <div class="toggle-switch"></div>
+                </div>
+                <div class="settings-toggle">
+                  <div class="settings-toggle-info">
+                    <h4>Low Stock Alerts</h4>
+                    <p>Get notified when inventory is running low</p>
+                  </div>
+                  <div class="toggle-switch active"></div>
+                </div>
+                <div class="settings-toggle">
+                  <div class="settings-toggle-info">
+                    <h4>Payment Notifications</h4>
+                    <p>Notify when payments are received or pending</p>
+                  </div>
+                  <div class="toggle-switch active"></div>
+                </div>
               </div>
-              <div class="settings-toggle">
-                <div class="settings-toggle-info">
-                  <h4>Ticket Alerts</h4>
-                  <p>Get notified when new support tickets are created</p>
-                </div>
-                <div class="toggle-switch active"></div>
-              </div>
-              <div class="settings-toggle">
-                <div class="settings-toggle-info">
-                  <h4>AOG Notifications</h4>
-                  <p>Receive alerts for new AOG cases (Aviation)</p>
-                </div>
-                <div class="toggle-switch active"></div>
-              </div>
-              <div class="settings-toggle">
-                <div class="settings-toggle-info">
-                  <h4>Weekly Reports</h4>
-                  <p>Receive weekly performance reports via email</p>
-                </div>
-                <div class="toggle-switch"></div>
+              <div class="settings-actions">
+                <button class="admin-btn admin-btn-primary"><i data-lucide="save"></i> Save Changes</button>
               </div>
             </div>
 
             <!-- Security Settings -->
-            <div class="settings-section">
-              <h3 class="settings-section-title">Security Settings</h3>
-              <p class="settings-section-desc">Manage your account security preferences.</p>
-              
-              <div class="settings-form-group">
-                <label class="settings-label">Current Password</label>
-                <input type="password" class="settings-input" placeholder="Enter current password">
+            <div class="settings-panel" id="panel-security">
+              <div class="settings-section">
+                <h3 class="settings-section-title">Security Settings</h3>
+                <p class="settings-section-desc">Manage your account security preferences.</p>
+                
+                <div class="settings-form-group">
+                  <label class="settings-label">Current Password</label>
+                  <input type="password" class="settings-input" placeholder="Enter current password">
+                </div>
+                <div class="settings-form-group">
+                  <label class="settings-label">New Password</label>
+                  <input type="password" class="settings-input" placeholder="Enter new password">
+                </div>
+                <div class="settings-form-group">
+                  <label class="settings-label">Confirm New Password</label>
+                  <input type="password" class="settings-input" placeholder="Confirm new password">
+                </div>
               </div>
-              <div class="settings-form-group">
-                <label class="settings-label">New Password</label>
-                <input type="password" class="settings-input" placeholder="Enter new password">
+
+              <div class="settings-section">
+                <h3 class="settings-section-title">Two-Factor Authentication</h3>
+                <p class="settings-section-desc">Add an extra layer of security to your account.</p>
+                
+                <div class="settings-toggle">
+                  <div class="settings-toggle-info">
+                    <h4>Enable 2FA</h4>
+                    <p>Require verification code on login</p>
+                  </div>
+                  <div class="toggle-switch"></div>
+                </div>
               </div>
-              <div class="settings-form-group">
-                <label class="settings-label">Confirm New Password</label>
-                <input type="password" class="settings-input" placeholder="Confirm new password">
+
+              <div class="settings-section">
+                <h3 class="settings-section-title">Session Settings</h3>
+                <p class="settings-section-desc">Control how long sessions remain active.</p>
+                
+                <div class="settings-form-group">
+                  <label class="settings-label">Session Timeout</label>
+                  <select class="settings-input">
+                    <option>30 minutes</option>
+                    <option selected>1 hour</option>
+                    <option>4 hours</option>
+                    <option>24 hours</option>
+                  </select>
+                </div>
+              </div>
+              <div class="settings-actions">
+                <button class="admin-btn admin-btn-primary"><i data-lucide="save"></i> Save Changes</button>
               </div>
             </div>
 
-            <!-- Actions -->
-            <div class="settings-actions">
-              <button class="admin-btn admin-btn-primary">
-                <i data-lucide="save"></i>
-                Save Changes
-              </button>
-              <button class="admin-btn admin-btn-secondary">
-                <i data-lucide="x"></i>
-                Cancel
-              </button>
+            <!-- Email Settings -->
+            <div class="settings-panel" id="panel-email">
+              <div class="settings-section">
+                <h3 class="settings-section-title">SMTP Configuration</h3>
+                <p class="settings-section-desc">Configure your email server settings.</p>
+                
+                <div class="settings-form-group">
+                  <label class="settings-label">SMTP Host</label>
+                  <input type="text" class="settings-input" value="smtp.partsform.com">
+                </div>
+                <div class="settings-form-group">
+                  <label class="settings-label">SMTP Port</label>
+                  <input type="number" class="settings-input" value="587">
+                </div>
+                <div class="settings-form-group">
+                  <label class="settings-label">SMTP Username</label>
+                  <input type="text" class="settings-input" value="noreply@partsform.com">
+                </div>
+                <div class="settings-form-group">
+                  <label class="settings-label">SMTP Password</label>
+                  <input type="password" class="settings-input" placeholder="••••••••">
+                </div>
+                <div class="settings-toggle">
+                  <div class="settings-toggle-info">
+                    <h4>Use TLS/SSL</h4>
+                    <p>Enable secure email transmission</p>
+                  </div>
+                  <div class="toggle-switch active"></div>
+                </div>
+              </div>
+
+              <div class="settings-section">
+                <h3 class="settings-section-title">Email Templates</h3>
+                <p class="settings-section-desc">Manage email templates for automated messages.</p>
+                
+                <div class="settings-card">
+                  <div class="settings-card-header">
+                    <h4><i data-lucide="shopping-bag"></i> Order Confirmation</h4>
+                    <button class="admin-btn admin-btn-secondary" style="padding: 0.4rem 0.75rem; font-size: 0.8rem;">Edit</button>
+                  </div>
+                  <p>Sent when a customer places an order</p>
+                </div>
+                <div class="settings-card">
+                  <div class="settings-card-header">
+                    <h4><i data-lucide="truck"></i> Shipping Notification</h4>
+                    <button class="admin-btn admin-btn-secondary" style="padding: 0.4rem 0.75rem; font-size: 0.8rem;">Edit</button>
+                  </div>
+                  <p>Sent when an order is shipped</p>
+                </div>
+                <div class="settings-card">
+                  <div class="settings-card-header">
+                    <h4><i data-lucide="credit-card"></i> Payment Receipt</h4>
+                    <button class="admin-btn admin-btn-secondary" style="padding: 0.4rem 0.75rem; font-size: 0.8rem;">Edit</button>
+                  </div>
+                  <p>Sent when payment is confirmed</p>
+                </div>
+              </div>
+              <div class="settings-actions">
+                <button class="admin-btn admin-btn-primary"><i data-lucide="save"></i> Save Changes</button>
+                <button class="admin-btn admin-btn-secondary"><i data-lucide="send"></i> Test Email</button>
+              </div>
+            </div>
+
+            <!-- Payment Settings -->
+            <div class="settings-panel" id="panel-payment">
+              <div class="settings-section">
+                <h3 class="settings-section-title">Payment Methods</h3>
+                <p class="settings-section-desc">Configure accepted payment methods.</p>
+                
+                <div class="payment-method-card">
+                  <div class="payment-method-icon">
+                    <i data-lucide="credit-card"></i>
+                  </div>
+                  <div class="payment-method-info">
+                    <h4>Credit Card</h4>
+                    <p>Visa, Mastercard, American Express</p>
+                  </div>
+                  <span class="payment-method-status enabled">Enabled</span>
+                  <div class="toggle-switch active"></div>
+                </div>
+                <div class="payment-method-card">
+                  <div class="payment-method-icon">
+                    <i data-lucide="landmark"></i>
+                  </div>
+                  <div class="payment-method-info">
+                    <h4>Wire Transfer</h4>
+                    <p>Bank-to-bank transfers for large orders</p>
+                  </div>
+                  <span class="payment-method-status enabled">Enabled</span>
+                  <div class="toggle-switch active"></div>
+                </div>
+                <div class="payment-method-card">
+                  <div class="payment-method-icon">
+                    <i data-lucide="file-text"></i>
+                  </div>
+                  <div class="payment-method-info">
+                    <h4>Letter of Credit</h4>
+                    <p>For international B2B transactions</p>
+                  </div>
+                  <span class="payment-method-status enabled">Enabled</span>
+                  <div class="toggle-switch active"></div>
+                </div>
+                <div class="payment-method-card">
+                  <div class="payment-method-icon">
+                    <i data-lucide="wallet"></i>
+                  </div>
+                  <div class="payment-method-info">
+                    <h4>PayPal</h4>
+                    <p>Online payment platform</p>
+                  </div>
+                  <span class="payment-method-status disabled">Disabled</span>
+                  <div class="toggle-switch"></div>
+                </div>
+              </div>
+
+              <div class="settings-section">
+                <h3 class="settings-section-title">Tax Settings</h3>
+                <p class="settings-section-desc">Configure tax calculation for orders.</p>
+                
+                <div class="settings-toggle">
+                  <div class="settings-toggle-info">
+                    <h4>Enable Tax Calculation</h4>
+                    <p>Automatically calculate tax based on region</p>
+                  </div>
+                  <div class="toggle-switch active"></div>
+                </div>
+                <div class="settings-form-group" style="margin-top: 1rem;">
+                  <label class="settings-label">Default Tax Rate (%)</label>
+                  <input type="number" class="settings-input" value="14" style="max-width: 120px;">
+                </div>
+              </div>
+              <div class="settings-actions">
+                <button class="admin-btn admin-btn-primary"><i data-lucide="save"></i> Save Changes</button>
+              </div>
+            </div>
+
+            <!-- Backup Settings -->
+            <div class="settings-panel" id="panel-backup">
+              <div class="settings-section">
+                <h3 class="settings-section-title">Backup & Restore</h3>
+                <p class="settings-section-desc">Manage your data backups.</p>
+                
+                <div class="settings-toggle">
+                  <div class="settings-toggle-info">
+                    <h4>Automatic Backups</h4>
+                    <p>Create daily backups of your database</p>
+                  </div>
+                  <div class="toggle-switch active"></div>
+                </div>
+                <div class="settings-form-group" style="margin-top: 1rem;">
+                  <label class="settings-label">Backup Retention (days)</label>
+                  <input type="number" class="settings-input" value="30" style="max-width: 120px;">
+                </div>
+              </div>
+
+              <div class="settings-section">
+                <h3 class="settings-section-title">Recent Backups</h3>
+                <p class="settings-section-desc">View and manage your backup files.</p>
+                
+                <div class="backup-list">
+                  <div class="backup-item">
+                    <div class="backup-item-info">
+                      <div class="backup-item-icon"><i data-lucide="hard-drive"></i></div>
+                      <div class="backup-item-details">
+                        <h4>backup_2025-12-27.sql</h4>
+                        <p>Today, 2:00 AM • Automatic</p>
+                      </div>
+                    </div>
+                    <span class="backup-item-size">145 MB</span>
+                    <button class="admin-btn admin-btn-secondary" style="padding: 0.4rem 0.75rem; font-size: 0.8rem;"><i data-lucide="download"></i></button>
+                  </div>
+                  <div class="backup-item">
+                    <div class="backup-item-info">
+                      <div class="backup-item-icon"><i data-lucide="hard-drive"></i></div>
+                      <div class="backup-item-details">
+                        <h4>backup_2025-12-26.sql</h4>
+                        <p>Yesterday, 2:00 AM • Automatic</p>
+                      </div>
+                    </div>
+                    <span class="backup-item-size">142 MB</span>
+                    <button class="admin-btn admin-btn-secondary" style="padding: 0.4rem 0.75rem; font-size: 0.8rem;"><i data-lucide="download"></i></button>
+                  </div>
+                  <div class="backup-item">
+                    <div class="backup-item-info">
+                      <div class="backup-item-icon"><i data-lucide="hard-drive"></i></div>
+                      <div class="backup-item-details">
+                        <h4>backup_2025-12-25.sql</h4>
+                        <p>Dec 25, 2:00 AM • Automatic</p>
+                      </div>
+                    </div>
+                    <span class="backup-item-size">140 MB</span>
+                    <button class="admin-btn admin-btn-secondary" style="padding: 0.4rem 0.75rem; font-size: 0.8rem;"><i data-lucide="download"></i></button>
+                  </div>
+                </div>
+              </div>
+              <div class="settings-actions">
+                <button class="admin-btn admin-btn-primary"><i data-lucide="database"></i> Create Backup Now</button>
+                <button class="admin-btn admin-btn-secondary"><i data-lucide="upload"></i> Restore from Backup</button>
+              </div>
             </div>
           </div>
         </div>
@@ -289,10 +689,51 @@
   </div>
 
   <script>
+    // Tab Switching
+    document.querySelectorAll('.settings-nav-item').forEach(function(item) {
+      item.addEventListener('click', function() {
+        var tabName = this.dataset.tab;
+        
+        // Update nav items
+        document.querySelectorAll('.settings-nav-item').forEach(function(nav) {
+          nav.classList.remove('active');
+        });
+        this.classList.add('active');
+        
+        // Update panels
+        document.querySelectorAll('.settings-panel').forEach(function(panel) {
+          panel.classList.remove('active');
+        });
+        document.getElementById('panel-' + tabName).classList.add('active');
+        
+        // Reinitialize icons
+        if (typeof lucide !== 'undefined') {
+          lucide.createIcons();
+        }
+      });
+    });
+    
     // Toggle Switch Functionality
-    document.querySelectorAll('.toggle-switch').forEach(toggle => {
-      toggle.addEventListener('click', () => {
-        toggle.classList.toggle('active');
+    document.querySelectorAll('.toggle-switch').forEach(function(toggle) {
+      toggle.addEventListener('click', function() {
+        this.classList.toggle('active');
+        
+        // Update payment status labels if in payment section
+        var parentCard = this.closest('.payment-method-card');
+        if (parentCard) {
+          var statusLabel = parentCard.querySelector('.payment-method-status');
+          if (statusLabel) {
+            if (this.classList.contains('active')) {
+              statusLabel.textContent = 'Enabled';
+              statusLabel.classList.remove('disabled');
+              statusLabel.classList.add('enabled');
+            } else {
+              statusLabel.textContent = 'Disabled';
+              statusLabel.classList.remove('enabled');
+              statusLabel.classList.add('disabled');
+            }
+          }
+        }
       });
     });
   </script>
