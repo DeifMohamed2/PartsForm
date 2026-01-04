@@ -743,6 +743,63 @@ const getPaymentsManagement = async (req, res) => {
 };
 
 /**
+ * Get Payment Details page
+ */
+const getPaymentDetails = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { currentModule, moduleConfig } = getModuleData(req);
+    
+    const payments = {
+      'PAY-2025-001': { id: 'PAY-2025-001', orderId: 'ORD-2025-1247', customer: 'Aerotech Industries', amount: 45200, method: 'wire', status: 'completed', date: 'Dec 26, 2025' },
+      'PAY-2025-002': { id: 'PAY-2025-002', orderId: 'ORD-2025-1246', customer: 'AutoMax Germany', amount: 12800, method: 'credit_card', status: 'completed', date: 'Dec 26, 2025' },
+      'PAY-2025-003': { id: 'PAY-2025-003', orderId: 'ORD-2025-1245', customer: 'Heavy Duty Corp', amount: 89500, method: 'wire', status: 'pending', date: 'Dec 25, 2025' },
+      'PAY-2025-004': { id: 'PAY-2025-004', orderId: 'ORD-2025-1244', customer: 'SkyLine Aviation', amount: 156000, method: 'letter_of_credit', status: 'processing', date: 'Dec 25, 2025' },
+    };
+
+    const payment = payments[id] || {
+      id: id,
+      orderId: 'ORD-001',
+      customer: 'Unknown Customer',
+      amount: 0,
+      method: 'wire',
+      status: 'pending',
+      date: new Date().toLocaleDateString()
+    };
+
+    res.render('admin/payment-details', {
+      title: `Payment ${id} | PARTSFORM Admin`,
+      activePage: 'payments',
+      currentModule,
+      moduleConfig,
+      payment
+    });
+  } catch (error) {
+    console.error('Error in getPaymentDetails:', error);
+    res.status(500).render('error', { title: 'Error', error: 'Failed to load payment details' });
+  }
+};
+
+/**
+ * Get Payment Create page
+ */
+const getPaymentCreate = async (req, res) => {
+  try {
+    const { currentModule, moduleConfig } = getModuleData(req);
+
+    res.render('admin/payment-create', {
+      title: 'Record Payment | PARTSFORM Admin',
+      activePage: 'payments',
+      currentModule,
+      moduleConfig
+    });
+  } catch (error) {
+    console.error('Error in getPaymentCreate:', error);
+    res.status(500).render('error', { title: 'Error', error: 'Failed to load create page' });
+  }
+};
+
+/**
  * Get AOG Cases Management page (Aviation specific)
  */
 const getAOGManagement = async (req, res) => {
@@ -825,6 +882,103 @@ const getIntegrationCreate = async (req, res) => {
   }
 };
 
+/**
+ * Get AOG Case Details page
+ */
+const getAOGCaseDetails = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Mock AOG case data (in production, fetch from database)
+    const aogCases = {
+      'AOG-2025-001': { id: 'AOG-2025-001', aircraft: 'Boeing 737-800', registration: 'N12345', partNumber: 'PN-789456', description: 'Main Landing Gear Actuator', priority: 'critical', status: 'in_progress', customer: 'Delta Airlines', eta: '4 hours', created: '2025-12-26 14:30' },
+      'AOG-2025-002': { id: 'AOG-2025-002', aircraft: 'Airbus A320', registration: 'D-ABCD', partNumber: 'PN-123789', description: 'APU Starter Motor', priority: 'high', status: 'sourcing', customer: 'Lufthansa', eta: '8 hours', created: '2025-12-26 10:15' },
+      'AOG-2025-003': { id: 'AOG-2025-003', aircraft: 'Embraer E190', registration: 'PP-PJE', partNumber: 'PN-456123', description: 'Hydraulic Pump Assembly', priority: 'critical', status: 'shipped', customer: 'LATAM Airlines', eta: '2 hours', created: '2025-12-25 22:00' },
+      'AOG-2025-004': { id: 'AOG-2025-004', aircraft: 'Boeing 777-300', registration: 'HL7782', partNumber: 'PN-987654', description: 'Engine Bleed Air Valve', priority: 'medium', status: 'delivered', customer: 'Korean Air', eta: 'Delivered', created: '2025-12-25 08:45' },
+    };
+
+    const aogCase = aogCases[id] || {
+      id: id,
+      aircraft: 'Unknown Aircraft',
+      registration: 'N/A',
+      partNumber: 'N/A',
+      description: 'Case not found',
+      priority: 'medium',
+      status: 'sourcing',
+      customer: 'Unknown',
+      eta: 'N/A',
+      created: new Date().toISOString()
+    };
+
+    res.render('admin/aog-case-details', {
+      title: `AOG Case ${id} | PARTSFORM Admin`,
+      activePage: 'aog',
+      currentModule: 'aviation',
+      moduleConfig: { name: 'Aviation', icon: 'plane', color: '#0ea5e9' },
+      aogCase
+    });
+  } catch (error) {
+    console.error('Error in getAOGCaseDetails:', error);
+    res.status(500).render('error', { title: 'Error', error: 'Failed to load AOG case details' });
+  }
+};
+/**
+ * Get AOG Case Create page
+ */
+const getAOGCaseCreate = async (req, res) => {
+  try {
+    res.render('admin/aog-case-create', {
+      title: 'Create AOG Case | PARTSFORM Admin',
+      activePage: 'aog',
+      currentModule: 'aviation',
+      moduleConfig: { name: 'Aviation', icon: 'plane', color: '#0ea5e9' }
+    });
+  } catch (error) {
+    console.error('Error in getAOGCaseCreate:', error);
+    res.status(500).render('error', { title: 'Error', error: 'Failed to load create page' });
+  }
+};
+
+/**
+ * Get AOG Case Edit page
+ */
+const getAOGCaseEdit = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const aogCases = {
+      'AOG-2025-001': { id: 'AOG-2025-001', aircraft: 'Boeing 737-800', registration: 'N12345', partNumber: 'PN-789456', description: 'Main Landing Gear Actuator', priority: 'critical', status: 'in_progress', customer: 'Delta Airlines', eta: '4 hours', created: '2025-12-26 14:30' },
+      'AOG-2025-002': { id: 'AOG-2025-002', aircraft: 'Airbus A320', registration: 'D-ABCD', partNumber: 'PN-123789', description: 'APU Starter Motor', priority: 'high', status: 'sourcing', customer: 'Lufthansa', eta: '8 hours', created: '2025-12-26 10:15' },
+      'AOG-2025-003': { id: 'AOG-2025-003', aircraft: 'Embraer E190', registration: 'PP-PJE', partNumber: 'PN-456123', description: 'Hydraulic Pump Assembly', priority: 'critical', status: 'shipped', customer: 'LATAM Airlines', eta: '2 hours', created: '2025-12-25 22:00' },
+      'AOG-2025-004': { id: 'AOG-2025-004', aircraft: 'Boeing 777-300', registration: 'HL7782', partNumber: 'PN-987654', description: 'Engine Bleed Air Valve', priority: 'medium', status: 'delivered', customer: 'Korean Air', eta: 'Delivered', created: '2025-12-25 08:45' },
+    };
+
+    const aogCase = aogCases[id] || {
+      id: id,
+      aircraft: 'Unknown Aircraft',
+      registration: 'N/A',
+      partNumber: 'N/A',
+      description: 'Case not found',
+      priority: 'medium',
+      status: 'sourcing',
+      customer: 'Unknown',
+      eta: 'N/A',
+      created: new Date().toISOString()
+    };
+
+    res.render('admin/aog-case-edit', {
+      title: `Edit AOG Case ${id} | PARTSFORM Admin`,
+      activePage: 'aog',
+      currentModule: 'aviation',
+      moduleConfig: { name: 'Aviation', icon: 'plane', color: '#0ea5e9' },
+      aogCase
+    });
+  } catch (error) {
+    console.error('Error in getAOGCaseEdit:', error);
+    res.status(500).render('error', { title: 'Error', error: 'Failed to load edit page' });
+  }
+};
+
 // Export controller functions
 module.exports = {
   getAdminDashboard,
@@ -845,7 +999,12 @@ module.exports = {
   bulkUpdateUsers,
   deleteUser,
   getPaymentsManagement,
+  getPaymentDetails,
+  getPaymentCreate,
   getAOGManagement,
+  getAOGCaseDetails,
+  getAOGCaseCreate,
+  getAOGCaseEdit,
   getAdminSettings,
   getIntegrationsManagement,
   getIntegrationCreate

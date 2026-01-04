@@ -1,0 +1,348 @@
+<%- include('partials/header') %>
+<link rel="stylesheet" href="/css/adminCSS/admin-dashboard.css">
+<link rel="stylesheet" href="/css/adminCSS/admin-aog.css">
+</head>
+<body class="module-aviation">
+  <div class="admin-wrapper">
+    <%- include('partials/sidebar', { activePage: 'aog', currentModule: 'aviation' }) %>
+    
+    <main class="admin-main">
+      <%- include('partials/topbar', { pageTitle: 'AOG Case Details', currentModule: 'aviation' }) %>
+      
+      <div class="admin-content">
+        <div class="aog-details-page">
+          <!-- Breadcrumb -->
+          <div class="integrations-breadcrumb" style="margin-bottom: 1.5rem;">
+            <a href="/admin/aog"><i data-lucide="alert-triangle"></i> AOG Cases</a>
+            <i data-lucide="chevron-right"></i>
+            <span><%= aogCase.id %></span>
+          </div>
+
+          <!-- Header -->
+          <div class="aog-details-header">
+            <div class="aog-details-info">
+              <h1>
+                <span class="priority-badge <%= aogCase.priority %>">
+                  <i data-lucide="<%= aogCase.priority === 'critical' ? 'alert-circle' : 'alert-triangle' %>"></i>
+                  <%= aogCase.priority.toUpperCase() %>
+                </span>
+                <%= aogCase.id %>
+              </h1>
+              <div class="aog-details-meta">
+                <span><i data-lucide="plane"></i> <%= aogCase.aircraft %></span>
+                <span><i data-lucide="hash"></i> <%= aogCase.registration %></span>
+                <span><i data-lucide="building"></i> <%= aogCase.customer %></span>
+                <span><i data-lucide="calendar"></i> Created <%= aogCase.created %></span>
+              </div>
+            </div>
+            <div class="details-actions">
+              <button class="admin-btn admin-btn-secondary" onclick="window.print()">
+                <i data-lucide="printer"></i>
+                Print
+              </button>
+              <button class="admin-btn admin-btn-primary" onclick="updateCaseStatus()">
+                <i data-lucide="refresh-cw"></i>
+                Update Status
+              </button>
+            </div>
+          </div>
+
+          <!-- SLA Timer -->
+          <div class="sla-timer-card">
+            <div class="sla-timer-content">
+              <div class="sla-label">Time Remaining to SLA Deadline</div>
+              <div class="sla-countdown" id="sla-countdown">
+                <div class="countdown-unit">
+                  <div class="countdown-value" id="hours">--</div>
+                  <div class="countdown-label">Hours</div>
+                </div>
+                <div class="countdown-unit">
+                  <div class="countdown-value" id="minutes">--</div>
+                  <div class="countdown-label">Minutes</div>
+                </div>
+                <div class="countdown-unit">
+                  <div class="countdown-value" id="seconds">--</div>
+                  <div class="countdown-label">Seconds</div>
+                </div>
+              </div>
+              <div class="sla-progress-bar">
+                <div class="sla-progress-fill" id="sla-progress" style="width: 75%;"></div>
+              </div>
+              <div class="sla-status-text" id="sla-status">On Track - ETA: <%= aogCase.eta %></div>
+            </div>
+          </div>
+
+          <!-- Main Grid -->
+          <div class="aog-details-grid">
+            <!-- Left Column -->
+            <div>
+              <!-- Phase Timeline -->
+              <div class="phase-card">
+                <div class="phase-card-header">
+                  <i data-lucide="activity"></i>
+                  <h2>Case Progress</h2>
+                </div>
+                
+                <div class="phase-timeline">
+                  <div class="phase-item completed">
+                    <div class="phase-indicator">
+                      <i data-lucide="check"></i>
+                    </div>
+                    <div class="phase-content">
+                      <div class="phase-name">Case Created</div>
+                      <div class="phase-desc">AOG case submitted by customer</div>
+                      <div class="phase-time">
+                        <i data-lucide="clock"></i>
+                        <span>Completed - <%= aogCase.created %></span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="phase-item <%= aogCase.status === 'sourcing' ? 'active' : (aogCase.status !== 'sourcing' ? 'completed' : '') %>">
+                    <div class="phase-indicator">
+                      <i data-lucide="<%= aogCase.status === 'sourcing' ? 'search' : 'check' %>"></i>
+                    </div>
+                    <div class="phase-content">
+                      <div class="phase-name">Sourcing Parts</div>
+                      <div class="phase-desc">Contacting suppliers for availability</div>
+                      <div class="phase-time">
+                        <i data-lucide="clock"></i>
+                        <span><%= aogCase.status === 'sourcing' ? 'In Progress' : 'Completed' %></span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="phase-item <%= aogCase.status === 'quotes_received' ? 'active' : (['in_progress', 'shipped', 'delivered'].includes(aogCase.status) ? 'completed' : '') %>">
+                    <div class="phase-indicator">
+                      <i data-lucide="<%= ['in_progress', 'shipped', 'delivered'].includes(aogCase.status) ? 'check' : 'file-text' %>"></i>
+                    </div>
+                    <div class="phase-content">
+                      <div class="phase-name">Quotes Received</div>
+                      <div class="phase-desc">Select best supplier quote</div>
+                      <div class="phase-time">
+                        <i data-lucide="clock"></i>
+                        <span><%= aogCase.status === 'quotes_received' ? '5 quotes received' : (['in_progress', 'shipped', 'delivered'].includes(aogCase.status) ? 'Completed' : 'Pending') %></span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="phase-item <%= aogCase.status === 'shipped' ? 'active' : (aogCase.status === 'delivered' ? 'completed' : '') %>">
+                    <div class="phase-indicator">
+                      <i data-lucide="<%= aogCase.status === 'delivered' ? 'check' : 'truck' %>"></i>
+                    </div>
+                    <div class="phase-content">
+                      <div class="phase-name">Shipped</div>
+                      <div class="phase-desc">Parts dispatched to destination</div>
+                      <div class="phase-time">
+                        <i data-lucide="clock"></i>
+                        <span><%= aogCase.status === 'shipped' ? 'In Transit' : (aogCase.status === 'delivered' ? 'Completed' : 'Pending') %></span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="phase-item <%= aogCase.status === 'delivered' ? 'completed' : '' %>">
+                    <div class="phase-indicator">
+                      <i data-lucide="check-circle"></i>
+                    </div>
+                    <div class="phase-content">
+                      <div class="phase-name">Delivered</div>
+                      <div class="phase-desc">Parts received at destination</div>
+                      <div class="phase-time">
+                        <i data-lucide="clock"></i>
+                        <span><%= aogCase.status === 'delivered' ? 'Completed' : 'Pending' %></span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Activity Feed -->
+              <div class="activity-card" style="margin-top: 1.5rem;">
+                <div class="phase-card-header">
+                  <i data-lucide="bell"></i>
+                  <h2>Activity Feed</h2>
+                </div>
+                
+                <div class="activity-list">
+                  <div class="activity-item">
+                    <div class="activity-icon success">
+                      <i data-lucide="check-circle"></i>
+                    </div>
+                    <div class="activity-content">
+                      <div class="activity-text"><strong>Quote received</strong> from Premier Aviation Supply - $5,200</div>
+                      <div class="activity-time">
+                        <i data-lucide="clock"></i>
+                        <span>5 minutes ago</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="activity-item">
+                    <div class="activity-icon">
+                      <i data-lucide="check-circle"></i>
+                    </div>
+                    <div class="activity-content">
+                      <div class="activity-text"><strong>Quote received</strong> from Skyline Aviation - $4,850</div>
+                      <div class="activity-time">
+                        <i data-lucide="clock"></i>
+                        <span>12 minutes ago</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="activity-item">
+                    <div class="activity-icon">
+                      <i data-lucide="send"></i>
+                    </div>
+                    <div class="activity-content">
+                      <div class="activity-text"><strong>RFQ broadcast</strong> sent to 12 verified suppliers</div>
+                      <div class="activity-time">
+                        <i data-lucide="clock"></i>
+                        <span>1 hour ago</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="activity-item">
+                    <div class="activity-icon warning">
+                      <i data-lucide="alert-triangle"></i>
+                    </div>
+                    <div class="activity-content">
+                      <div class="activity-text"><strong>AOG case created</strong> - Priority sourcing activated</div>
+                      <div class="activity-time">
+                        <i data-lucide="clock"></i>
+                        <span><%= aogCase.created %></span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Column -->
+            <div>
+              <!-- Case Details -->
+              <div class="info-card">
+                <div class="info-card-header">
+                  <i data-lucide="info"></i>
+                  <h3>Case Details</h3>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Case ID</span>
+                  <span class="info-value"><%= aogCase.id %></span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Aircraft Type</span>
+                  <span class="info-value"><%= aogCase.aircraft %></span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Registration</span>
+                  <span class="info-value"><%= aogCase.registration %></span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Part Number</span>
+                  <span class="info-value"><%= aogCase.partNumber %></span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Description</span>
+                  <span class="info-value"><%= aogCase.description %></span>
+                </div>
+              </div>
+
+              <!-- Customer Info -->
+              <div class="info-card">
+                <div class="info-card-header">
+                  <i data-lucide="building"></i>
+                  <h3>Customer</h3>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Company</span>
+                  <span class="info-value"><%= aogCase.customer %></span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Contact</span>
+                  <span class="info-value">Operations Team</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Phone</span>
+                  <span class="info-value">+1 (555) 123-4567</span>
+                </div>
+              </div>
+
+              <!-- Quick Actions -->
+              <div class="info-card">
+                <div class="info-card-header">
+                  <i data-lucide="zap"></i>
+                  <h3>Quick Actions</h3>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 0.75rem; padding-top: 0.5rem;">
+                  <button class="admin-btn admin-btn-secondary" style="width: 100%; justify-content: center;">
+                    <i data-lucide="file-text"></i>
+                    View Quotes
+                  </button>
+                  <button class="admin-btn admin-btn-secondary" style="width: 100%; justify-content: center;">
+                    <i data-lucide="truck"></i>
+                    Update Shipping
+                  </button>
+                  <button class="admin-btn admin-btn-secondary" style="width: 100%; justify-content: center;">
+                    <i data-lucide="message-circle"></i>
+                    Contact Customer
+                  </button>
+                  <button class="admin-btn" style="width: 100%; justify-content: center; background: rgba(16, 185, 129, 0.12); color: #059669;">
+                    <i data-lucide="check-circle"></i>
+                    Close Case
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // SLA Countdown Timer
+    var deadlineMs = Date.now() + (22 * 60 * 60 * 1000) + (45 * 60 * 1000) + (30 * 1000); // Mock: ~22 hours remaining
+    
+    function updateCountdown() {
+      var now = Date.now();
+      var remaining = deadlineMs - now;
+      
+      if (remaining < 0) remaining = 0;
+      
+      var hours = Math.floor(remaining / (1000 * 60 * 60));
+      var minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+      var seconds = Math.floor((remaining % (1000 * 60)) / 1000);
+      
+      document.getElementById('hours').textContent = String(hours).padStart(2, '0');
+      document.getElementById('minutes').textContent = String(minutes).padStart(2, '0');
+      document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
+      
+      // Update progress bar (assume 48hr SLA)
+      var totalSlaMins = 48 * 60;
+      var remainingMins = remaining / (1000 * 60);
+      var progress = ((totalSlaMins - remainingMins) / totalSlaMins) * 100;
+      document.getElementById('sla-progress').style.width = Math.min(progress, 100) + '%';
+      
+      // Update status text
+      var statusEl = document.getElementById('sla-status');
+      if (hours < 2) {
+        statusEl.textContent = 'URGENT - Less than 2 hours remaining!';
+        statusEl.style.color = '#fef2f2';
+        document.querySelector('.sla-timer-card').style.background = 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
+      } else if (hours < 6) {
+        statusEl.textContent = 'Warning - Limited time remaining';
+        document.querySelector('.sla-timer-card').style.background = 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)';
+      }
+    }
+    
+    setInterval(updateCountdown, 1000);
+    updateCountdown();
+
+    function updateCaseStatus() {
+      alert('Opening status update modal... (UI Demo)');
+    }
+  </script>
+
+<%- include('partials/footer') %>

@@ -19,7 +19,12 @@ const {
   bulkUpdateUsers,
   deleteUser,
   getPaymentsManagement,
+  getPaymentDetails,
+  getPaymentCreate,
   getAOGManagement,
+  getAOGCaseDetails,
+  getAOGCaseCreate,
+  getAOGCaseEdit,
   getAdminSettings,
   getIntegrationsManagement,
   getIntegrationCreate
@@ -50,12 +55,22 @@ router.put('/users/:id/status', updateUserStatus);
 router.put('/users/bulk', bulkUpdateUsers);
 router.delete('/users/:id', deleteUser);
 
-// Other admin management pages
+// Payments management
+router.get('/payments/create', getPaymentCreate);
+router.get('/payments/:id', getPaymentDetails);
 router.get('/payments', getPaymentsManagement);
+
+// AOG management
+router.get('/aog/create', getAOGCaseCreate);
+router.get('/aog/:id/edit', getAOGCaseEdit);
+router.get('/aog/:id', getAOGCaseDetails);
 router.get('/aog', getAOGManagement);
+
+// Other admin pages
 router.get('/integrations/create', getIntegrationCreate);
 router.get('/integrations', getIntegrationsManagement);
 router.get('/settings', getAdminSettings);
 
 module.exports = router;
+
 

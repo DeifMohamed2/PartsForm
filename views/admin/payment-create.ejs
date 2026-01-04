@@ -1,0 +1,203 @@
+<%- include('partials/header') %>
+<link rel="stylesheet" href="/css/adminCSS/admin-dashboard.css">
+<link rel="stylesheet" href="/css/adminCSS/admin-payments.css">
+</head>
+<body class="<%= typeof currentModule !== 'undefined' && currentModule ? 'module-' + currentModule : '' %>">
+  <div class="admin-wrapper">
+    <%- include('partials/sidebar', { activePage: 'payments', currentModule: currentModule }) %>
+    
+    <main class="admin-main">
+      <%- include('partials/topbar', { pageTitle: 'Record Payment', currentModule: currentModule }) %>
+      
+      <div class="admin-content">
+        <!-- Breadcrumb -->
+        <div style="margin-bottom: 1.5rem;">
+          <a href="/admin/payments" style="color: var(--admin-text-muted); text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.9rem;">
+            <i data-lucide="arrow-left" style="width: 16px; height: 16px;"></i>
+            Back to Payments
+          </a>
+        </div>
+
+        <!-- Page Header -->
+        <div class="page-header" style="margin-bottom: 2rem;">
+          <div>
+            <h2 style="margin: 0 0 0.25rem 0;">Record New Payment</h2>
+            <p style="color: var(--admin-text-muted); margin: 0; font-size: 0.9rem;">Record a new payment transaction</p>
+          </div>
+        </div>
+
+        <form id="recordPaymentForm">
+          <div class="form-container">
+            <!-- Customer & Order Selection -->
+            <div class="form-card">
+              <div class="form-card-header">
+                <h3><i data-lucide="user"></i> Customer & Order</h3>
+              </div>
+              <div class="form-card-body">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Customer <span class="required">*</span></label>
+                    <select class="form-select" name="customer" required>
+                      <option value="">Select Customer</option>
+                      <option value="Delta Airlines">Delta Airlines</option>
+                      <option value="Lufthansa">Lufthansa</option>
+                      <option value="Emirates">Emirates</option>
+                      <option value="Air France">Air France</option>
+                      <option value="British Airways">British Airways</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Related Order</label>
+                    <select class="form-select" name="order">
+                      <option value="">Select Order (Optional)</option>
+                      <option value="ORD-2025-001">ORD-2025-001 - $12,500</option>
+                      <option value="ORD-2025-002">ORD-2025-002 - $8,750</option>
+                      <option value="ORD-2025-003">ORD-2025-003 - $45,000</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Payment Details -->
+            <div class="form-card">
+              <div class="form-card-header">
+                <h3><i data-lucide="dollar-sign"></i> Payment Details</h3>
+              </div>
+              <div class="form-card-body">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Payment Amount <span class="required">*</span></label>
+                    <div style="position: relative;">
+                      <span style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--admin-text-muted);">$</span>
+                      <input type="number" class="form-input" name="amount" placeholder="0.00" step="0.01" style="padding-left: 2rem;" required>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Currency</label>
+                    <select class="form-select" name="currency">
+                      <option value="USD">USD - US Dollar</option>
+                      <option value="EUR">EUR - Euro</option>
+                      <option value="GBP">GBP - British Pound</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Payment Method <span class="required">*</span></label>
+                    <select class="form-select" name="method" required>
+                      <option value="">Select Method</option>
+                      <option value="wire">Wire Transfer</option>
+                      <option value="credit_card">Credit Card</option>
+                      <option value="letter_of_credit">Letter of Credit</option>
+                      <option value="paypal">PayPal</option>
+                      <option value="check">Check</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Payment Date <span class="required">*</span></label>
+                    <input type="date" class="form-input" name="date" value="<%= new Date().toISOString().split('T')[0] %>" required>
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Transaction Reference</label>
+                    <input type="text" class="form-input" name="reference" placeholder="e.g., TXN-123456789">
+                    <span class="form-hint">Enter bank reference or transaction ID</span>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Status</label>
+                    <select class="form-select" name="status">
+                      <option value="completed">Completed</option>
+                      <option value="processing">Processing</option>
+                      <option value="pending">Pending</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Bank Details (for Wire Transfer) -->
+            <div class="form-card" id="bankDetailsCard" style="display: none;">
+              <div class="form-card-header">
+                <h3><i data-lucide="landmark"></i> Bank Details</h3>
+              </div>
+              <div class="form-card-body">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Bank Name</label>
+                    <input type="text" class="form-input" name="bankName" placeholder="e.g., Chase Bank">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Account Number (Last 4)</label>
+                    <input type="text" class="form-input" name="accountLast4" placeholder="e.g., 1234" maxlength="4">
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Routing Number</label>
+                    <input type="text" class="form-input" name="routing" placeholder="e.g., 021000021">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Wire Reference</label>
+                    <input type="text" class="form-input" name="wireRef" placeholder="Wire confirmation number">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Notes -->
+            <div class="form-card">
+              <div class="form-card-header">
+                <h3><i data-lucide="file-text"></i> Additional Notes</h3>
+              </div>
+              <div class="form-card-body">
+                <div class="form-group">
+                  <textarea class="form-textarea" name="notes" placeholder="Add any additional notes about this payment..."></textarea>
+                </div>
+              </div>
+              <div class="form-actions">
+                <a href="/admin/payments" class="admin-btn admin-btn-secondary">
+                  Cancel
+                </a>
+                <button type="button" class="admin-btn" style="background: rgba(139, 92, 246, 0.12); color: #8b5cf6;" onclick="saveDraft()">
+                  <i data-lucide="save"></i>
+                  Save as Draft
+                </button>
+                <button type="submit" class="admin-btn admin-btn-primary">
+                  <i data-lucide="check"></i>
+                  Record Payment
+                </button>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Show/hide bank details based on payment method
+    document.querySelector('select[name="method"]').addEventListener('change', function() {
+      var bankCard = document.getElementById('bankDetailsCard');
+      if (this.value === 'wire') {
+        bankCard.style.display = 'block';
+      } else {
+        bankCard.style.display = 'none';
+      }
+    });
+
+    function saveDraft() {
+      alert('Payment saved as draft! (UI Demo)');
+    }
+
+    document.getElementById('recordPaymentForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      var paymentId = 'PAY-2025-' + String(Math.floor(Math.random() * 900) + 100);
+      alert('Payment ' + paymentId + ' recorded successfully!');
+      window.location.href = '/admin/payments/' + paymentId;
+    });
+  </script>
+
+<%- include('partials/footer') %>

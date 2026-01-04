@@ -1,5 +1,6 @@
 <%- include('partials/header') %>
 <link rel="stylesheet" href="/css/adminCSS/admin-dashboard.css">
+<link rel="stylesheet" href="/css/adminCSS/admin-payments.css">
 </head>
 <body class="<%= typeof currentModule !== 'undefined' && currentModule ? 'module-' + currentModule : '' %>">
   <div class="admin-wrapper">
@@ -33,46 +34,46 @@
 
         <div class="page-header">
           <h2><%= currentModule ? moduleConfig.name + ' Payments' : 'Payments Management' %></h2>
-          <button class="admin-btn admin-btn-primary">
+          <a href="/admin/payments/create" class="admin-btn admin-btn-primary">
             <i data-lucide="plus"></i>
             Record Payment
-          </button>
+          </a>
         </div>
 
-        <!-- Stats Cards -->
-        <div class="stats-grid" style="margin-bottom: 2rem;">
-          <div class="stat-card green">
-            <div class="stat-icon">
+        <!-- Stats Row -->
+        <div class="payments-stats-row">
+          <div class="payment-stat-card">
+            <div class="payment-stat-icon completed">
               <i data-lucide="check-circle"></i>
             </div>
-            <div class="stat-content">
+            <div class="payment-stat-content">
               <div class="stat-value"><%= payments.filter(p => p.status === 'completed').length %></div>
               <div class="stat-label">Completed</div>
             </div>
           </div>
-          <div class="stat-card module-themed">
-            <div class="stat-icon">
+          <div class="payment-stat-card">
+            <div class="payment-stat-icon processing">
               <i data-lucide="loader"></i>
             </div>
-            <div class="stat-content">
+            <div class="payment-stat-content">
               <div class="stat-value"><%= payments.filter(p => p.status === 'processing').length %></div>
               <div class="stat-label">Processing</div>
             </div>
           </div>
-          <div class="stat-card orange">
-            <div class="stat-icon">
+          <div class="payment-stat-card">
+            <div class="payment-stat-icon pending">
               <i data-lucide="clock"></i>
             </div>
-            <div class="stat-content">
+            <div class="payment-stat-content">
               <div class="stat-value"><%= payments.filter(p => p.status === 'pending').length %></div>
               <div class="stat-label">Pending</div>
             </div>
           </div>
-          <div class="stat-card purple">
-            <div class="stat-icon">
+          <div class="payment-stat-card">
+            <div class="payment-stat-icon total">
               <i data-lucide="dollar-sign"></i>
             </div>
-            <div class="stat-content">
+            <div class="payment-stat-content">
               <div class="stat-value">$<%= (payments.reduce((s, p) => s + p.amount, 0) / 1000).toFixed(0) %>K</div>
               <div class="stat-label">Total Value</div>
             </div>
@@ -80,80 +81,208 @@
         </div>
 
         <!-- Filters -->
-        <div class="filters-row">
-          <div class="filter-group">
-            <span class="filter-label">Status:</span>
-            <select class="filter-select">
-              <option value="">All Status</option>
-              <option value="completed">Completed</option>
-              <option value="processing">Processing</option>
-              <option value="pending">Pending</option>
-            </select>
+        <div class="payments-filters">
+          <div class="payments-search-bar">
+            <button class="search-icon-btn" type="button">
+              <i data-lucide="search"></i>
+            </button>
+            <input type="text" class="search-input" placeholder="Search by Payment ID, Customer, or Reference..." id="paymentSearch">
           </div>
-          <div class="filter-group">
-            <span class="filter-label">Method:</span>
-            <select class="filter-select">
-              <option value="">All Methods</option>
-              <option value="wire">Wire Transfer</option>
-              <option value="credit_card">Credit Card</option>
-              <option value="letter_of_credit">Letter of Credit</option>
-            </select>
-          </div>
-          <div class="filter-search">
-            <i data-lucide="search"></i>
-            <input type="text" placeholder="Search payments...">
-          </div>
+          <select class="payments-filter-select" id="statusFilter">
+            <option value="">All Statuses</option>
+            <option value="completed">Completed</option>
+            <option value="processing">Processing</option>
+            <option value="pending">Pending</option>
+            <option value="failed">Failed</option>
+            <option value="refunded">Refunded</option>
+          </select>
+          <select class="payments-filter-select" id="methodFilter">
+            <option value="">All Methods</option>
+            <option value="wire">Wire Transfer</option>
+            <option value="credit_card">Credit Card</option>
+            <option value="letter_of_credit">Letter of Credit</option>
+            <option value="paypal">PayPal</option>
+          </select>
         </div>
 
         <!-- Payments Table -->
-        <div class="orders-card">
-          <div class="orders-body">
-            <div class="order-row" style="background: var(--admin-bg-tertiary); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--admin-text-muted);">
-              <div>Payment ID</div>
-              <div>Customer</div>
-              <div>Amount</div>
-              <div>Method</div>
-              <div>Status</div>
-              <div>Actions</div>
-            </div>
-            <% payments.forEach(payment => { %>
-              <div class="order-row">
-                <div class="order-id"><%= payment.id %></div>
-                <div class="order-customer"><%= payment.customer %></div>
-                <div class="order-amount">$<%= payment.amount.toLocaleString() %></div>
-                <div style="color: var(--admin-text-secondary);">
-                  <% if (payment.method === 'wire') { %>
-                    Wire Transfer
-                  <% } else if (payment.method === 'credit_card') { %>
-                    Credit Card
-                  <% } else { %>
-                    Letter of Credit
-                  <% } %>
-                </div>
-                <div class="order-status <%= payment.status === 'completed' ? 'delivered' : payment.status %>">
-                  <% if (payment.status === 'completed') { %>
-                    <i data-lucide="check-circle" style="width: 12px; height: 12px;"></i>
-                  <% } else if (payment.status === 'processing') { %>
-                    <i data-lucide="loader" style="width: 12px; height: 12px;"></i>
-                  <% } else { %>
-                    <i data-lucide="clock" style="width: 12px; height: 12px;"></i>
-                  <% } %>
-                  <%= payment.status.charAt(0).toUpperCase() + payment.status.slice(1) %>
-                </div>
-                <div class="order-actions">
-                  <button class="order-action-btn" title="View Details">
-                    <i data-lucide="eye"></i>
-                  </button>
-                  <button class="order-action-btn" title="Download Receipt">
-                    <i data-lucide="download"></i>
-                  </button>
-                </div>
-              </div>
-            <% }); %>
-          </div>
+        <div class="payments-table-container">
+          <table class="payments-table">
+            <thead>
+              <tr>
+                <th>Payment ID</th>
+                <th>Customer</th>
+                <th>Amount</th>
+                <th>Method</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="paymentsTableBody">
+              <% payments.forEach(payment => { %>
+              <tr data-status="<%= payment.status %>" data-method="<%= payment.method %>">
+                <td>
+                  <a href="/admin/payments/<%= payment.id %>" class="payment-id-link">
+                    <i data-lucide="receipt"></i>
+                    <%= payment.id %>
+                  </a>
+                </td>
+                <td>
+                  <div class="payment-customer">
+                    <span class="customer-name"><%= payment.customer %></span>
+                    <span class="customer-email">billing@<%= payment.customer.toLowerCase().replace(/\s+/g, '') %>.com</span>
+                  </div>
+                </td>
+                <td>
+                  <span class="payment-amount">$<%= payment.amount.toLocaleString() %></span>
+                </td>
+                <td>
+                  <span class="method-badge <%= payment.method %>">
+                    <% if (payment.method === 'wire') { %>
+                      <i data-lucide="landmark"></i> Wire Transfer
+                    <% } else if (payment.method === 'credit_card') { %>
+                      <i data-lucide="credit-card"></i> Credit Card
+                    <% } else if (payment.method === 'letter_of_credit') { %>
+                      <i data-lucide="file-text"></i> Letter of Credit
+                    <% } else { %>
+                      <i data-lucide="wallet"></i> PayPal
+                    <% } %>
+                  </span>
+                </td>
+                <td>
+                  <span style="color: var(--admin-text-secondary); font-size: 0.9rem;"><%= payment.date || 'Dec 26, 2025' %></span>
+                </td>
+                <td>
+                  <span class="payment-status <%= payment.status %>">
+                    <% if (payment.status === 'completed') { %>
+                      <i data-lucide="check-circle"></i>
+                    <% } else if (payment.status === 'processing') { %>
+                      <i data-lucide="loader"></i>
+                    <% } else if (payment.status === 'pending') { %>
+                      <i data-lucide="clock"></i>
+                    <% } else if (payment.status === 'failed') { %>
+                      <i data-lucide="x-circle"></i>
+                    <% } else { %>
+                      <i data-lucide="rotate-ccw"></i>
+                    <% } %>
+                    <%= payment.status.charAt(0).toUpperCase() + payment.status.slice(1) %>
+                  </span>
+                </td>
+                <td>
+                  <div class="payment-actions">
+                    <a href="/admin/payments/<%= payment.id %>" class="payment-action-btn view" title="View Details">
+                      <i data-lucide="eye"></i>
+                    </a>
+                    <button class="payment-action-btn download" title="Download Receipt" onclick="downloadReceipt('<%= payment.id %>')">
+                      <i data-lucide="download"></i>
+                    </button>
+                    <% if (payment.status === 'completed') { %>
+                    <button class="payment-action-btn refund" title="Refund" onclick="refundPayment('<%= payment.id %>')">
+                      <i data-lucide="rotate-ccw"></i>
+                    </button>
+                    <% } %>
+                  </div>
+                </td>
+              </tr>
+              <% }); %>
+            </tbody>
+          </table>
         </div>
       </div>
     </main>
   </div>
+
+  <!-- Refund Modal -->
+  <div class="modal-overlay" id="refundModal">
+    <div class="modal-content" style="max-width: 420px;">
+      <div class="modal-header">
+        <div class="modal-icon" style="background: rgba(239, 68, 68, 0.12); color: #ef4444;">
+          <i data-lucide="rotate-ccw"></i>
+        </div>
+        <div>
+          <h3>Process Refund</h3>
+          <p id="refundModalPayment">Payment PAY-001</p>
+        </div>
+        <button class="modal-close" onclick="closeModal()">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label class="form-label">Refund Amount</label>
+          <input type="number" class="form-input" id="refundAmount" placeholder="0.00" step="0.01">
+          <span class="form-hint">Enter partial or full refund amount</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Reason for Refund</label>
+          <textarea class="form-textarea" id="refundReason" rows="3" placeholder="Describe the reason for this refund..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="admin-btn admin-btn-secondary" onclick="closeModal()">Cancel</button>
+        <button class="admin-btn" style="background: #ef4444; color: white;" onclick="confirmRefund()">
+          <i data-lucide="rotate-ccw"></i>
+          Process Refund
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Search and Filter
+    function filterTable() {
+      var searchTerm = document.getElementById('paymentSearch').value.toLowerCase();
+      var statusFilter = document.getElementById('statusFilter').value;
+      var methodFilter = document.getElementById('methodFilter').value;
+      var rows = document.querySelectorAll('#paymentsTableBody tr');
+      
+      rows.forEach(function(row) {
+        var text = row.textContent.toLowerCase();
+        var status = row.dataset.status;
+        var method = row.dataset.method;
+        
+        var matchSearch = searchTerm === '' || text.includes(searchTerm);
+        var matchStatus = statusFilter === '' || status === statusFilter;
+        var matchMethod = methodFilter === '' || method === methodFilter;
+        
+        row.style.display = matchSearch && matchStatus && matchMethod ? '' : 'none';
+      });
+    }
+    
+    document.getElementById('paymentSearch').addEventListener('input', filterTable);
+    document.getElementById('statusFilter').addEventListener('change', filterTable);
+    document.getElementById('methodFilter').addEventListener('change', filterTable);
+    
+    // Download Receipt
+    function downloadReceipt(paymentId) {
+      alert('Downloading receipt for ' + paymentId + '... (UI Demo)');
+    }
+    
+    // Refund Modal
+    var currentRefundPayment = '';
+    
+    function refundPayment(paymentId) {
+      currentRefundPayment = paymentId;
+      document.getElementById('refundModalPayment').textContent = 'Payment ' + paymentId;
+      document.getElementById('refundModal').classList.add('active');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+    
+    function closeModal() {
+      document.getElementById('refundModal').classList.remove('active');
+    }
+    
+    function confirmRefund() {
+      var amount = document.getElementById('refundAmount').value;
+      var reason = document.getElementById('refundReason').value;
+      alert('Refund of $' + amount + ' processed for ' + currentRefundPayment + '! (UI Demo)');
+      closeModal();
+    }
+    
+    document.getElementById('refundModal').addEventListener('click', function(e) {
+      if (e.target === this) closeModal();
+    });
+  </script>
 
 <%- include('partials/footer') %>

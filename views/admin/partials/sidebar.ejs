@@ -1,5 +1,13 @@
+<!-- Sidebar Overlay for Mobile -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
 <!-- Admin Sidebar Navigation - Light Mode -->
 <aside class="admin-sidebar" id="adminSidebar">
+  <!-- Mobile Close Button -->
+  <button class="sidebar-close-btn" id="sidebarCloseBtn" aria-label="Close menu">
+    <i data-lucide="x"></i>
+  </button>
+
   <!-- Sidebar Header -->
   <div class="sidebar-header">
     <a href="/admin" class="sidebar-logo">
@@ -247,5 +255,61 @@ document.addEventListener('DOMContentLoaded', function() {
       lucide.createIcons();
     });
   }
+
+  // Mobile Menu Toggle
+  var mobileMenuToggle = document.getElementById('mobileMenuToggle');
+  var sidebar = document.getElementById('adminSidebar');
+  var sidebarOverlay = document.getElementById('sidebarOverlay');
+  var sidebarCloseBtn = document.getElementById('sidebarCloseBtn');
+
+  function openSidebar() {
+    sidebar?.classList.add('open');
+    sidebarOverlay?.classList.add('active');
+    document.body.classList.add('sidebar-open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeSidebar() {
+    sidebar?.classList.remove('open');
+    sidebarOverlay?.classList.remove('active');
+    document.body.classList.remove('sidebar-open');
+    document.body.style.overflow = '';
+  }
+
+  if (mobileMenuToggle) {
+    mobileMenuToggle.addEventListener('click', openSidebar);
+  }
+
+  if (sidebarCloseBtn) {
+    sidebarCloseBtn.addEventListener('click', closeSidebar);
+  }
+
+  if (sidebarOverlay) {
+    sidebarOverlay.addEventListener('click', closeSidebar);
+  }
+
+  // Close sidebar on navigation link click (mobile)
+  var navItems = document.querySelectorAll('.sidebar-nav-item');
+  navItems.forEach(function(item) {
+    item.addEventListener('click', function() {
+      if (window.innerWidth < 1200) {
+        closeSidebar();
+      }
+    });
+  });
+
+  // Close sidebar on Escape key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && sidebar?.classList.contains('open')) {
+      closeSidebar();
+    }
+  });
+
+  // Handle resize - close sidebar if resizing to desktop
+  window.addEventListener('resize', function() {
+    if (window.innerWidth >= 1200) {
+      closeSidebar();
+    }
+  });
 });
 </script>

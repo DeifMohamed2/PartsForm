@@ -1,0 +1,493 @@
+<%- include('partials/header') %>
+<link rel="stylesheet" href="/css/adminCSS/admin-dashboard.css">
+<link rel="stylesheet" href="/css/adminCSS/admin-payments.css">
+</head>
+<body class="<%= typeof currentModule !== 'undefined' && currentModule ? 'module-' + currentModule : '' %>">
+  <div class="admin-wrapper">
+    <%- include('partials/sidebar', { activePage: 'payments', currentModule: currentModule }) %>
+    
+    <main class="admin-main">
+      <%- include('partials/topbar', { pageTitle: 'Payment Details', currentModule: currentModule }) %>
+      
+      <div class="admin-content">
+        <div class="payment-details-page">
+          <!-- Breadcrumb -->
+          <div class="integrations-breadcrumb" style="margin-bottom: 1.5rem;">
+            <a href="/admin/payments"><i data-lucide="credit-card"></i> Payments</a>
+            <i data-lucide="chevron-right"></i>
+            <span><%= payment.id %></span>
+          </div>
+
+          <!-- Header -->
+          <div class="payment-details-header">
+            <div class="payment-details-info">
+              <h1>
+                <i data-lucide="receipt" style="color: #8b5cf6;"></i>
+                <%= payment.id %>
+              </h1>
+              <div class="payment-details-meta">
+                <span><i data-lucide="building"></i> <%= payment.customer %></span>
+                <span><i data-lucide="calendar"></i> <%= payment.date || 'Dec 26, 2025' %></span>
+                <span>
+                  <i data-lucide="<%= payment.method === 'wire' ? 'landmark' : (payment.method === 'credit_card' ? 'credit-card' : 'file-text') %>"></i>
+                  <%= payment.method === 'wire' ? 'Wire Transfer' : (payment.method === 'credit_card' ? 'Credit Card' : 'Letter of Credit') %>
+                </span>
+              </div>
+            </div>
+            <div class="details-actions">
+              <button class="admin-btn admin-btn-secondary" onclick="window.print()">
+                <i data-lucide="printer"></i>
+                Print
+              </button>
+              <button class="admin-btn admin-btn-secondary" onclick="downloadReceipt()">
+                <i data-lucide="download"></i>
+                Download Receipt
+              </button>
+              <% if (payment.status === 'completed') { %>
+              <button class="admin-btn" style="background: rgba(239, 68, 68, 0.12); color: #ef4444;" onclick="openRefundModal()">
+                <i data-lucide="rotate-ccw"></i>
+                Refund
+              </button>
+              <% } %>
+            </div>
+          </div>
+
+          <!-- Amount Display - Enhanced Design -->
+          <div class="amount-display-enhanced">
+            <div class="amount-display-main">
+              <div class="amount-display-left">
+                <div class="amount-icon-wrapper">
+                  <i data-lucide="<%= payment.status === 'completed' ? 'check-circle' : (payment.status === 'processing' ? 'loader' : 'clock') %>"></i>
+                </div>
+                <div class="amount-info">
+                  <span class="amount-label-text">Payment Amount</span>
+                  <span class="amount-value-text">$<%= payment.amount.toLocaleString() %></span>
+                </div>
+              </div>
+              <div class="amount-display-right">
+                <div class="amount-status-badge <%= payment.status %>">
+                  <i data-lucide="<%= payment.status === 'completed' ? 'check-circle' : (payment.status === 'processing' ? 'loader' : 'clock') %>"></i>
+                  <% if (payment.status === 'completed') { %>
+                    Payment Completed
+                  <% } else if (payment.status === 'processing') { %>
+                    Processing
+                  <% } else if (payment.status === 'pending') { %>
+                    Pending
+                  <% } else { %>
+                    <%= payment.status.charAt(0).toUpperCase() + payment.status.slice(1) %>
+                  <% } %>
+                </div>
+                <div class="amount-date">
+                  <i data-lucide="calendar"></i>
+                  <%= payment.date || 'Dec 26, 2025' %>
+                </div>
+              </div>
+            </div>
+            <div class="amount-display-details">
+              <div class="amount-detail-item">
+                <span class="detail-label">Method</span>
+                <span class="detail-value">
+                  <i data-lucide="<%= payment.method === 'wire' ? 'landmark' : (payment.method === 'credit_card' ? 'credit-card' : 'file-text') %>"></i>
+                  <%= payment.method === 'wire' ? 'Wire Transfer' : (payment.method === 'credit_card' ? 'Credit Card' : 'Letter of Credit') %>
+                </span>
+              </div>
+              <div class="amount-detail-item">
+                <span class="detail-label">Transaction ID</span>
+                <span class="detail-value">TXN-<%= payment.id.replace('PAY-', '') %></span>
+              </div>
+              <div class="amount-detail-item">
+                <span class="detail-label">Reference</span>
+                <span class="detail-value">INV-<%= payment.id.replace('PAY-', '') %></span>
+              </div>
+            </div>
+          </div>
+
+          <style>
+            .amount-display-enhanced {
+              background: var(--admin-bg-primary);
+              border: 1px solid var(--admin-border);
+              border-radius: 16px;
+              overflow: hidden;
+              margin-bottom: 1.5rem;
+            }
+            .amount-display-main {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              padding: 1.75rem;
+              background: var(--admin-bg-secondary);
+              border-bottom: 1px solid var(--admin-border);
+            }
+            .amount-display-left {
+              display: flex;
+              align-items: center;
+              gap: 1.25rem;
+            }
+            .amount-icon-wrapper {
+              width: 64px;
+              height: 64px;
+              border-radius: 16px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              background: rgba(16, 185, 129, 0.12);
+              color: #10b981;
+            }
+            .amount-icon-wrapper i {
+              width: 32px;
+              height: 32px;
+            }
+            .amount-info {
+              display: flex;
+              flex-direction: column;
+              gap: 0.25rem;
+            }
+            .amount-label-text {
+              font-size: 0.85rem;
+              color: var(--admin-text-muted);
+              font-weight: 500;
+            }
+            .amount-value-text {
+              font-size: 2.5rem;
+              font-weight: 700;
+              color: var(--admin-text-primary);
+              line-height: 1;
+            }
+            .amount-display-right {
+              display: flex;
+              flex-direction: column;
+              align-items: flex-end;
+              gap: 0.75rem;
+            }
+            .amount-status-badge {
+              display: inline-flex;
+              align-items: center;
+              gap: 0.5rem;
+              padding: 0.5rem 1rem;
+              border-radius: 24px;
+              font-size: 0.85rem;
+              font-weight: 600;
+            }
+            .amount-status-badge i {
+              width: 16px;
+              height: 16px;
+            }
+            .amount-status-badge.completed {
+              background: rgba(16, 185, 129, 0.12);
+              color: #10b981;
+            }
+            .amount-status-badge.processing {
+              background: rgba(14, 165, 233, 0.12);
+              color: #0ea5e9;
+            }
+            .amount-status-badge.pending {
+              background: rgba(245, 158, 11, 0.12);
+              color: #f59e0b;
+            }
+            .amount-status-badge.failed {
+              background: rgba(239, 68, 68, 0.12);
+              color: #ef4444;
+            }
+            .amount-date {
+              display: flex;
+              align-items: center;
+              gap: 0.35rem;
+              font-size: 0.85rem;
+              color: var(--admin-text-muted);
+            }
+            .amount-date i {
+              width: 14px;
+              height: 14px;
+            }
+            .amount-display-details {
+              display: grid;
+              grid-template-columns: repeat(3, 1fr);
+              gap: 0;
+            }
+            .amount-detail-item {
+              padding: 1.25rem 1.75rem;
+              border-right: 1px solid var(--admin-border);
+            }
+            .amount-detail-item:last-child {
+              border-right: none;
+            }
+            .amount-detail-item .detail-label {
+              display: block;
+              font-size: 0.75rem;
+              font-weight: 600;
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
+              color: var(--admin-text-muted);
+              margin-bottom: 0.5rem;
+            }
+            .amount-detail-item .detail-value {
+              display: flex;
+              align-items: center;
+              gap: 0.5rem;
+              font-size: 0.9rem;
+              font-weight: 600;
+              color: var(--admin-text-primary);
+            }
+            .amount-detail-item .detail-value i {
+              width: 16px;
+              height: 16px;
+              color: var(--admin-text-muted);
+            }
+            @media (max-width: 768px) {
+              .amount-display-main {
+                flex-direction: column;
+                gap: 1.5rem;
+                align-items: flex-start;
+              }
+              .amount-display-right {
+                align-items: flex-start;
+              }
+              .amount-display-details {
+                grid-template-columns: 1fr;
+              }
+              .amount-detail-item {
+                border-right: none;
+                border-bottom: 1px solid var(--admin-border);
+              }
+              .amount-detail-item:last-child {
+                border-bottom: none;
+              }
+            }
+          </style>
+
+          <!-- Main Grid -->
+          <div class="payment-details-grid">
+            <!-- Left Column -->
+            <div>
+              <!-- Payment Timeline -->
+              <div class="payment-info-card">
+                <div class="payment-info-card-header">
+                  <i data-lucide="activity"></i>
+                  <h3>Payment Timeline</h3>
+                </div>
+                
+                <div class="payment-timeline">
+                  <div class="timeline-item completed">
+                    <div class="timeline-indicator">
+                      <i data-lucide="check"></i>
+                    </div>
+                    <div class="timeline-content">
+                      <div class="timeline-title">Payment Initiated</div>
+                      <div class="timeline-time">
+                        <i data-lucide="clock"></i>
+                        <span>Dec 26, 2025 at 10:30 AM</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="timeline-item <%= payment.status !== 'pending' ? 'completed' : '' %>">
+                    <div class="timeline-indicator">
+                      <i data-lucide="<%= payment.status !== 'pending' ? 'check' : 'loader' %>"></i>
+                    </div>
+                    <div class="timeline-content">
+                      <div class="timeline-title">Payment Processing</div>
+                      <div class="timeline-time">
+                        <i data-lucide="clock"></i>
+                        <span><%= payment.status === 'pending' ? 'Pending...' : 'Dec 26, 2025 at 10:31 AM' %></span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="timeline-item <%= payment.status === 'completed' ? 'completed' : '' %>">
+                    <div class="timeline-indicator">
+                      <i data-lucide="<%= payment.status === 'completed' ? 'check' : 'credit-card' %>"></i>
+                    </div>
+                    <div class="timeline-content">
+                      <div class="timeline-title">Payment Completed</div>
+                      <div class="timeline-time">
+                        <i data-lucide="clock"></i>
+                        <span><%= payment.status === 'completed' ? 'Dec 26, 2025 at 10:35 AM' : 'Pending...' %></span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <% if (payment.status === 'completed') { %>
+                  <div class="timeline-item completed">
+                    <div class="timeline-indicator">
+                      <i data-lucide="check"></i>
+                    </div>
+                    <div class="timeline-content">
+                      <div class="timeline-title">Receipt Sent</div>
+                      <div class="timeline-time">
+                        <i data-lucide="clock"></i>
+                        <span>Dec 26, 2025 at 10:36 AM</span>
+                      </div>
+                    </div>
+                  </div>
+                  <% } %>
+                </div>
+              </div>
+
+              <!-- Related Order -->
+              <div class="payment-info-card">
+                <div class="payment-info-card-header">
+                  <i data-lucide="package"></i>
+                  <h3>Related Order</h3>
+                </div>
+                <div class="payment-info-row">
+                  <span class="payment-info-label">Order ID</span>
+                  <span class="payment-info-value"><a href="/admin/orders/ORD-001" style="color: #8b5cf6; text-decoration: none;">ORD-001</a></span>
+                </div>
+                <div class="payment-info-row">
+                  <span class="payment-info-label">Items</span>
+                  <span class="payment-info-value">3 Parts</span>
+                </div>
+                <div class="payment-info-row">
+                  <span class="payment-info-label">Order Status</span>
+                  <span class="payment-info-value" style="color: #10b981;">Shipped</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Column -->
+            <div>
+              <!-- Payment Details -->
+              <div class="payment-info-card">
+                <div class="payment-info-card-header">
+                  <i data-lucide="info"></i>
+                  <h3>Payment Details</h3>
+                </div>
+                <div class="payment-info-row">
+                  <span class="payment-info-label">Payment ID</span>
+                  <span class="payment-info-value"><%= payment.id %></span>
+                </div>
+                <div class="payment-info-row">
+                  <span class="payment-info-label">Amount</span>
+                  <span class="payment-info-value">$<%= payment.amount.toLocaleString() %></span>
+                </div>
+                <div class="payment-info-row">
+                  <span class="payment-info-label">Method</span>
+                  <span class="payment-info-value"><%= payment.method === 'wire' ? 'Wire Transfer' : (payment.method === 'credit_card' ? 'Credit Card' : 'Letter of Credit') %></span>
+                </div>
+                <div class="payment-info-row">
+                  <span class="payment-info-label">Status</span>
+                  <span class="payment-info-value" style="color: <%= payment.status === 'completed' ? '#10b981' : (payment.status === 'pending' ? '#f59e0b' : '#0ea5e9') %>;">
+                    <%= payment.status.charAt(0).toUpperCase() + payment.status.slice(1) %>
+                  </span>
+                </div>
+                <div class="payment-info-row">
+                  <span class="payment-info-label">Date</span>
+                  <span class="payment-info-value"><%= payment.date || 'Dec 26, 2025' %></span>
+                </div>
+              </div>
+
+              <!-- Customer Info -->
+              <div class="payment-info-card">
+                <div class="payment-info-card-header">
+                  <i data-lucide="building"></i>
+                  <h3>Customer</h3>
+                </div>
+                <div class="payment-info-row">
+                  <span class="payment-info-label">Company</span>
+                  <span class="payment-info-value"><%= payment.customer %></span>
+                </div>
+                <div class="payment-info-row">
+                  <span class="payment-info-label">Email</span>
+                  <span class="payment-info-value">billing@<%= payment.customer.toLowerCase().replace(/\s+/g, '') %>.com</span>
+                </div>
+                <div class="payment-info-row">
+                  <span class="payment-info-label">Phone</span>
+                  <span class="payment-info-value">+1 (555) 123-4567</span>
+                </div>
+              </div>
+
+              <!-- Quick Actions -->
+              <div class="payment-info-card">
+                <div class="payment-info-card-header">
+                  <i data-lucide="zap"></i>
+                  <h3>Quick Actions</h3>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 0.75rem; padding-top: 0.5rem;">
+                  <button class="admin-btn admin-btn-secondary" style="width: 100%; justify-content: center;" onclick="downloadReceipt()">
+                    <i data-lucide="download"></i>
+                    Download Receipt
+                  </button>
+                  <button class="admin-btn admin-btn-secondary" style="width: 100%; justify-content: center;" onclick="sendReceipt()">
+                    <i data-lucide="mail"></i>
+                    Send Receipt to Customer
+                  </button>
+                  <a href="/admin/users/<%= payment.customer.toLowerCase().replace(/\s+/g, '-') %>" class="admin-btn admin-btn-secondary" style="width: 100%; justify-content: center; text-decoration: none;">
+                    <i data-lucide="user"></i>
+                    View Customer
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Refund Modal -->
+  <div class="modal-overlay" id="refundModal">
+    <div class="modal-content" style="max-width: 420px;">
+      <div class="modal-header">
+        <div class="modal-icon" style="background: rgba(239, 68, 68, 0.12); color: #ef4444;">
+          <i data-lucide="rotate-ccw"></i>
+        </div>
+        <div>
+          <h3>Process Refund</h3>
+          <p><%= payment.id %></p>
+        </div>
+        <button class="modal-close" onclick="closeModal()">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label class="form-label">Refund Amount</label>
+          <input type="number" class="form-input" id="refundAmount" value="<%= payment.amount %>" step="0.01">
+          <span class="form-hint">Maximum refund: $<%= payment.amount.toLocaleString() %></span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Reason for Refund</label>
+          <textarea class="form-textarea" id="refundReason" rows="3" placeholder="Describe the reason..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="admin-btn admin-btn-secondary" onclick="closeModal()">Cancel</button>
+        <button class="admin-btn" style="background: #ef4444; color: white;" onclick="confirmRefund()">
+          <i data-lucide="rotate-ccw"></i>
+          Process Refund
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function downloadReceipt() {
+      alert('Downloading receipt for <%= payment.id %>... (UI Demo)');
+    }
+    
+    function sendReceipt() {
+      alert('Receipt sent to customer! (UI Demo)');
+    }
+    
+    function openRefundModal() {
+      document.getElementById('refundModal').classList.add('active');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+    
+    function closeModal() {
+      document.getElementById('refundModal').classList.remove('active');
+    }
+    
+    function confirmRefund() {
+      var amount = document.getElementById('refundAmount').value;
+      alert('Refund of $' + amount + ' processed! (UI Demo)');
+      closeModal();
+      window.location.href = '/admin/payments';
+    }
+    
+    document.getElementById('refundModal').addEventListener('click', function(e) {
+      if (e.target === this) closeModal();
+    });
+  </script>
+
+<%- include('partials/footer') %>
