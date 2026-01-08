@@ -417,9 +417,8 @@
               <% var priority = order.priority || 'normal'; %>
               <% if (priority !== 'normal') { %>
               <span class="priority-badge <%= priority %>">
-                <% if (priority === 'urgent') { %><i data-lucide="alert-triangle"></i><% } %>
-                <% if (priority === 'aog') { %><i data-lucide="alert-circle"></i><% } %>
-                <%= priority.toUpperCase() %>
+                <% if (priority === 'urgent' || priority === 'critical' || priority === 'aog') { %><i data-lucide="alert-triangle"></i><% } %>
+                <%= priority === 'aog' ? 'CRITICAL' : priority.toUpperCase() %>
               </span>
               <% } %>
             </div>
@@ -427,14 +426,8 @@
               <span><i data-lucide="calendar"></i> <%= order.date %></span>
               <span><i data-lucide="user"></i> <%= order.customer %></span>
               <span>
-                <% if (order.industry === 'automotive') { %>
-                  <i data-lucide="car"></i>
-                <% } else if (order.industry === 'aviation') { %>
-                  <i data-lucide="plane"></i>
-                <% } else { %>
-                  <i data-lucide="construction"></i>
-                <% } %>
-                <%= order.industry.charAt(0).toUpperCase() + order.industry.slice(1) %>
+                <i data-lucide="car"></i>
+                Automotive
               </span>
             </div>
           </div>
@@ -685,8 +678,8 @@
               </div>
               <div class="details-card-body">
                 <p style="color: var(--admin-text-muted); font-size: 0.9rem; line-height: 1.6; margin: 0;">
-                  <% if (order.priority === 'aog') { %>
-                  <strong style="color: #dc2626;">AOG PRIORITY:</strong> Aircraft on ground. Expedite immediately.<br><br>
+                  <% if (order.priority === 'critical' || order.priority === 'aog') { %>
+                  <strong style="color: #dc2626;">CRITICAL PRIORITY:</strong> Expedite immediately.<br><br>
                   <% } %>
                   Standard delivery terms apply. Contact customer for any questions regarding specifications.
                 </p>

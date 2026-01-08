@@ -43,14 +43,8 @@
                 <i data-lucide="briefcase"></i>
                 <%= user.position || 'Procurement Manager' %>
               </span>
-              <span class="user-tag industry <%= user.industry %>">
-                <% if (user.industry === 'automotive') { %>
-                  <i data-lucide="car"></i> Automotive
-                <% } else if (user.industry === 'aviation') { %>
-                  <i data-lucide="plane"></i> Aviation
-                <% } else { %>
-                  <i data-lucide="construction"></i> Machinery
-                <% } %>
+              <span class="user-tag industry automotive">
+                <i data-lucide="car"></i> Automotive
               </span>
               <span class="user-tag">
                 <i data-lucide="calendar"></i>
@@ -548,9 +542,7 @@
       color: var(--admin-text-secondary);
     }
     .user-tag i { width: 14px; height: 14px; }
-    .user-tag.industry.automotive { background: rgba(220, 38, 38, 0.1); color: #dc2626; }
-    .user-tag.industry.aviation { background: rgba(14, 165, 233, 0.1); color: #0ea5e9; }
-    .user-tag.industry.machinery { background: rgba(234, 179, 8, 0.1); color: #ca8a04; }
+    .user-tag.industry.automotive { background: rgba(14, 165, 233, 0.1); color: #0ea5e9; }
     .user-profile-actions {
       display: flex;
       gap: 0.5rem;

@@ -3,8 +3,6 @@ const router = express.Router();
 const {
   getBuyerMain,
   getAutomotiveSearchPage,
-  getAviationSearchPage,
-  getHeavyMachinerySearchPage,
   getAffiliatePage,
   getOrdersPage,
   getPaymentPage,
@@ -15,10 +13,6 @@ const {
   getOrderDetailsPage,
   getProfilePage,
   getSettingsPage,
-  getAOGCaseCreatePage,
-  getAOGCommandCenterPage,
-  getAOGQuoteComparisonPage,
-  getAOGCaseTrackingPage,
   getTicketsPage,
   getCreateTicketPage,
   getTicketDetailsPage,
@@ -39,25 +33,15 @@ router.get('/contacts', getContactsPage);
 router.get('/profile', getProfilePage);
 router.get('/settings', getSettingsPage);
 
-// Industry-specific themed search pages
+// Parts search - Automotive only
 router.get('/search/automotive', getAutomotiveSearchPage);
-router.get('/search/aviation', getAviationSearchPage);
-router.get('/search/machinery', getHeavyMachinerySearchPage);
-
-// Alternative routes for search pages (used by quick search)
 router.get('/search-automotive', getAutomotiveSearchPage);
-router.get('/search-aviation', getAviationSearchPage);
-router.get('/search-machinery', getHeavyMachinerySearchPage);
+router.get('/search', getAutomotiveSearchPage); // Default search goes to automotive
 
 // Support Tickets routes
 router.get('/tickets', getTicketsPage);
 router.get('/tickets/create', getCreateTicketPage);
 router.get('/tickets/:ticketId', getTicketDetailsPage);
 
-// AOG Case Management routes
-router.get('/aog/case-create', getAOGCaseCreatePage);
-router.get('/aog/command-center/:caseId', getAOGCommandCenterPage);
-router.get('/aog/quote-comparison/:caseId', getAOGQuoteComparisonPage);
-router.get('/aog/case-tracking/:caseId', getAOGCaseTrackingPage);
-
 module.exports = router;
+

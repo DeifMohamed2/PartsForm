@@ -22,36 +22,11 @@
 
     <!-- Navigation Links -->
     <div class="nav-links" id="navLinks">
-      <!-- Search Dropdown -->
-      <div class="nav-dropdown">
-        <button class="nav-link dropdown-trigger" id="searchDropdownBtn">
-          <span><%= t('nav.search') %></span>
-          <i data-lucide="chevron-down" class="dropdown-chevron"></i>
-        </button>
-        <div class="nav-dropdown-menu" id="searchDropdownMenu">
-          <a href="/buyer/search-automotive" class="nav-dropdown-item">
-            <i data-lucide="car-front"></i>
-            <div>
-              <span class="dropdown-item-title"><%= t('nav.searchDropdown.automotive.title') %></span>
-              <span class="dropdown-item-desc"><%= t('nav.searchDropdown.automotive.desc') %></span>
-            </div>
-          </a>
-          <a href="/buyer/search-aviation" class="nav-dropdown-item">
-            <i data-lucide="plane"></i>
-            <div>
-              <span class="dropdown-item-title"><%= t('nav.searchDropdown.aviation.title') %></span>
-              <span class="dropdown-item-desc"><%= t('nav.searchDropdown.aviation.desc') %></span>
-            </div>
-          </a>
-          <a href="/buyer/search-machinery" class="nav-dropdown-item">
-            <i data-lucide="construction"></i>
-            <div>
-              <span class="dropdown-item-title"><%= t('nav.searchDropdown.machinery.title') %></span>
-              <span class="dropdown-item-desc"><%= t('nav.searchDropdown.machinery.desc') %></span>
-            </div>
-          </a>
-        </div>
-      </div>
+      <!-- Parts Search - Direct link to automotive -->
+      <a href="/buyer/search-automotive" class="nav-link" data-section="search">
+        <i data-lucide="search" style="width: 16px; height: 16px; margin-right: 4px;"></i>
+        <%= t('nav.search') %>
+      </a>
 
       <a href="/buyer/orders" class="nav-link" data-section="orders"><%= t('nav.myOrders') %></a>
       <a href="/buyer/tickets" class="nav-link" data-section="tickets"><%= t('nav.tickets') %></a>

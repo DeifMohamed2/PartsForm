@@ -5,7 +5,7 @@ const i18next = require('./config/i18n');
 const middleware = require('i18next-http-middleware');
 
 const app = express();
-const PORT = process.env.PORT || 3300;
+const PORT = process.env.PORT || 3310;
 
 // Set view engine
 app.set('view engine', 'ejs');
@@ -30,23 +30,15 @@ app.use((req, res, next) => {
   next();
 });
 
-// Sectors data
+// Sectors data - Automotive only
 const sectors = [
   {
     id: 'automotive',
     name: 'Automotive',
   },
-  {
-    id: 'aviation',
-    name: 'Aviation',
-  },
-  {
-    id: 'heavy-machinery',
-    name: 'Heavy Machinery',
-  },
 ];
 
-// Mock database for parts
+// Mock database for automotive parts only
 const partsDatabase = {
   8471474: [
     {
@@ -99,85 +91,9 @@ const partsDatabase = {
       unitPrice: 3250.0,
     },
   ],
-  7825934: [
-    {
-      id: 5,
-      brand: 'Honeywell',
-      vendorCode: '7825934',
-      description: 'TURBINE BLADE SET - AEROSPACE GRADE TITANIUM',
-      supplier: 'Skyline Aviation Parts',
-      origin: 'USA',
-      stock: 12,
-      delivery: 14,
-      weight: 8.3,
-      unitPrice: 4850.0,
-    },
-    {
-      id: 6,
-      brand: 'Pratt & Whitney',
-      vendorCode: '7825934',
-      description: 'TURBINE BLADE SET - COMMERCIAL AVIATION',
-      supplier: 'Premier Aviation Supply',
-      origin: 'USA',
-      stock: 6,
-      delivery: 10,
-      weight: 8.7,
-      unitPrice: 5200.0,
-    },
-    {
-      id: 7,
-      brand: 'Rolls-Royce',
-      vendorCode: '7825934',
-      description: 'TURBINE BLADE SET - PREMIUM PERFORMANCE',
-      supplier: 'Global Aerospace Trading',
-      origin: 'UK',
-      stock: 4,
-      delivery: 21,
-      weight: 9.1,
-      unitPrice: 6500.0,
-    },
-  ],
-  9523847: [
-    {
-      id: 8,
-      brand: 'Caterpillar',
-      vendorCode: '9523847',
-      description: 'EXCAVATOR ARM ASSEMBLY - HEAVY DUTY MODEL',
-      supplier: 'Heavy Equipment Solutions',
-      origin: 'USA',
-      stock: 3,
-      delivery: 14,
-      weight: 285.0,
-      unitPrice: 18500.0,
-    },
-    {
-      id: 9,
-      brand: 'Komatsu',
-      vendorCode: '9523847',
-      description: 'EXCAVATOR ARM ASSEMBLY - INDUSTRIAL GRADE',
-      supplier: 'Machinery Parts Global',
-      origin: 'Japan',
-      stock: 5,
-      delivery: 21,
-      weight: 278.5,
-      unitPrice: 16800.0,
-    },
-    {
-      id: 10,
-      brand: 'Volvo',
-      vendorCode: '9523847',
-      description: 'EXCAVATOR ARM ASSEMBLY - PREMIUM CONSTRUCTION',
-      supplier: 'Nordic Heavy Parts',
-      origin: 'Sweden',
-      stock: 2,
-      delivery: 28,
-      weight: 292.0,
-      unitPrice: 19500.0,
-    },
-  ],
   3461928: [
     {
-      id: 11,
+      id: 5,
       brand: 'Denso',
       vendorCode: '3461928',
       description: 'FUEL INJECTION SYSTEM - DIRECT INJECTION MODULE',
@@ -189,7 +105,7 @@ const partsDatabase = {
       unitPrice: 875.0,
     },
     {
-      id: 12,
+      id: 6,
       brand: 'Bosch',
       vendorCode: '3461928',
       description: 'FUEL INJECTION SYSTEM - COMMON RAIL DIESEL',
@@ -201,7 +117,7 @@ const partsDatabase = {
       unitPrice: 920.0,
     },
     {
-      id: 13,
+      id: 7,
       brand: 'Continental',
       vendorCode: '3461928',
       description: 'FUEL INJECTION SYSTEM - GASOLINE DIRECT INJECTION',
@@ -213,7 +129,7 @@ const partsDatabase = {
       unitPrice: 850.0,
     },
     {
-      id: 14,
+      id: 8,
       brand: 'Delphi',
       vendorCode: '3461928',
       description: 'FUEL INJECTION SYSTEM - MULTI-POINT INJECTION',
@@ -225,85 +141,9 @@ const partsDatabase = {
       unitPrice: 780.0,
     },
   ],
-  5628194: [
-    {
-      id: 15,
-      brand: 'Airbus',
-      vendorCode: '5628194',
-      description: 'LANDING GEAR ACTUATOR - MAIN GEAR ASSEMBLY',
-      supplier: 'Aerospace Components Ltd',
-      origin: 'France',
-      stock: 8,
-      delivery: 30,
-      weight: 45.2,
-      unitPrice: 12800.0,
-    },
-    {
-      id: 16,
-      brand: 'Boeing',
-      vendorCode: '5628194',
-      description: 'LANDING GEAR ACTUATOR - HYDRAULIC CONTROL UNIT',
-      supplier: 'Aviation Parts Worldwide',
-      origin: 'USA',
-      stock: 5,
-      delivery: 35,
-      weight: 47.5,
-      unitPrice: 13500.0,
-    },
-    {
-      id: 17,
-      brand: 'Safran',
-      vendorCode: '5628194',
-      description: 'LANDING GEAR ACTUATOR - PREMIUM AVIATION GRADE',
-      supplier: 'European Aviation Supply',
-      origin: 'France',
-      stock: 3,
-      delivery: 42,
-      weight: 46.8,
-      unitPrice: 14200.0,
-    },
-  ],
-  1847265: [
-    {
-      id: 18,
-      brand: 'John Deere',
-      vendorCode: '1847265',
-      description: 'TRANSMISSION GEARBOX - AGRICULTURAL MACHINERY',
-      supplier: 'Farm Equipment Distributors',
-      origin: 'USA',
-      stock: 10,
-      delivery: 10,
-      weight: 156.0,
-      unitPrice: 8950.0,
-    },
-    {
-      id: 19,
-      brand: 'ZF',
-      vendorCode: '1847265',
-      description: 'TRANSMISSION GEARBOX - INDUSTRIAL HEAVY DUTY',
-      supplier: 'Industrial Power Systems',
-      origin: 'Germany',
-      stock: 7,
-      delivery: 14,
-      weight: 168.5,
-      unitPrice: 9800.0,
-    },
-    {
-      id: 20,
-      brand: 'Allison',
-      vendorCode: '1847265',
-      description: 'TRANSMISSION GEARBOX - AUTOMATIC CONSTRUCTION',
-      supplier: 'Heavy Machinery Solutions',
-      origin: 'USA',
-      stock: 6,
-      delivery: 12,
-      weight: 172.0,
-      unitPrice: 10500.0,
-    },
-  ],
   4729183: [
     {
-      id: 21,
+      id: 9,
       brand: 'Brembo',
       vendorCode: '4729183',
       description: 'BRAKE CALIPER ASSEMBLY - PERFORMANCE RACING',
@@ -315,7 +155,7 @@ const partsDatabase = {
       unitPrice: 1450.0,
     },
     {
-      id: 22,
+      id: 10,
       brand: 'Akebono',
       vendorCode: '4729183',
       description: 'BRAKE CALIPER ASSEMBLY - HEAVY DUTY COMMERCIAL',
@@ -327,7 +167,7 @@ const partsDatabase = {
       unitPrice: 1280.0,
     },
     {
-      id: 23,
+      id: 11,
       brand: 'Continental',
       vendorCode: '4729183',
       description: 'BRAKE CALIPER ASSEMBLY - ELECTRONIC PARKING BRAKE',
@@ -339,7 +179,7 @@ const partsDatabase = {
       unitPrice: 1320.0,
     },
     {
-      id: 24,
+      id: 12,
       brand: 'Bosch',
       vendorCode: '4729183',
       description: 'BRAKE CALIPER ASSEMBLY - STANDARD PASSENGER VEHICLE',
@@ -349,94 +189,6 @@ const partsDatabase = {
       delivery: 3,
       weight: 6.2,
       unitPrice: 1180.0,
-    },
-  ],
-  6293741: [
-    {
-      id: 25,
-      brand: 'GE Aviation',
-      vendorCode: '6293741',
-      description: 'ENGINE CONTROL MODULE - JET PROPULSION SYSTEM',
-      supplier: 'Aviation Electronics Systems',
-      origin: 'USA',
-      stock: 4,
-      delivery: 45,
-      weight: 18.5,
-      unitPrice: 22500.0,
-    },
-    {
-      id: 26,
-      brand: 'Honeywell',
-      vendorCode: '6293741',
-      description: 'ENGINE CONTROL MODULE - TURBOFAN ENGINE',
-      supplier: 'Aerospace Avionics Supply',
-      origin: 'USA',
-      stock: 6,
-      delivery: 40,
-      weight: 19.2,
-      unitPrice: 21800.0,
-    },
-    {
-      id: 27,
-      brand: 'Rolls-Royce',
-      vendorCode: '6293741',
-      description: 'ENGINE CONTROL MODULE - WIDE BODY AIRCRAFT',
-      supplier: 'International Aviation Parts',
-      origin: 'UK',
-      stock: 2,
-      delivery: 60,
-      weight: 20.1,
-      unitPrice: 24500.0,
-    },
-  ],
-  763823: [
-    {
-      id: 28,
-      brand: 'Boeing',
-      vendorCode: '763823',
-      description: 'AVIONICS CONTROL UNIT - FLIGHT MANAGEMENT SYSTEM',
-      supplier: 'Premier Aviation Supply',
-      origin: 'USA',
-      stock: 8,
-      delivery: 12,
-      weight: 15.3,
-      unitPrice: 18500.0,
-    },
-    {
-      id: 29,
-      brand: 'Honeywell',
-      vendorCode: '763823',
-      description: 'AVIONICS CONTROL UNIT - COMMERCIAL AIRCRAFT GRADE',
-      supplier: 'Skyline Aviation Parts',
-      origin: 'USA',
-      stock: 5,
-      delivery: 15,
-      weight: 14.8,
-      unitPrice: 17200.0,
-    },
-    {
-      id: 30,
-      brand: 'Collins Aerospace',
-      vendorCode: '763823',
-      description: 'AVIONICS CONTROL UNIT - CERTIFIED AEROSPACE COMPONENT',
-      supplier: 'Global Aerospace Trading',
-      origin: 'USA',
-      stock: 6,
-      delivery: 18,
-      weight: 15.1,
-      unitPrice: 19500.0,
-    },
-    {
-      id: 31,
-      brand: 'Thales',
-      vendorCode: '763823',
-      description: 'AVIONICS CONTROL UNIT - PREMIUM AVIATION SYSTEM',
-      supplier: 'European Aviation Supply',
-      origin: 'France',
-      stock: 4,
-      delivery: 20,
-      weight: 15.5,
-      unitPrice: 20100.0,
     },
   ],
 };

@@ -156,7 +156,7 @@
 }
 
 .module-card.automotive::before {
-    background: #dc2626;
+    background: #0ea5e9;
 }
 
 .module-card.aviation::before {
@@ -192,8 +192,8 @@
 }
 
 .module-card.automotive .module-card-icon {
-    background: rgba(220, 38, 38, 0.1);
-    color: #dc2626;
+    background: rgba(14, 165, 233, 0.1);
+    color: #0ea5e9;
 }
 
 .module-card.aviation .module-card-icon {
@@ -357,8 +357,8 @@
 }
 
 .infra-icon.redis {
-    background: rgba(220, 38, 38, 0.1);
-    color: #dc2626;
+    background: rgba(14, 165, 233, 0.1);
+    color: #0ea5e9;
 }
 
 .infra-info {
@@ -495,8 +495,8 @@
 }
 
 .module-header-icon.automotive {
-    background: rgba(220, 38, 38, 0.12);
-    color: #dc2626;
+    background: rgba(14, 165, 233, 0.12);
+    color: #0ea5e9;
 }
 
 .module-header-icon.aviation {
@@ -680,7 +680,7 @@
 }
 
 .connection-card.error .conn-status-indicator {
-    background: #ef4444;
+    background: #38bdf8;
 }
 
 .conn-icon {
@@ -785,7 +785,7 @@
     align-items: center;
     gap: 0.35rem;
     font-size: 0.8rem;
-    color: #ef4444;
+    color: #38bdf8;
 }
 
 .sync-error i {
@@ -823,8 +823,8 @@
 }
 
 .conn-action-btn.danger:hover {
-    background: rgba(239, 68, 68, 0.1);
-    color: #ef4444;
+    background: rgba(56, 189, 248, 0.1);
+    color: #38bdf8;
 }
 
 /* Add Connection Button */
@@ -931,8 +931,8 @@
 }
 
 .status-badge.failed {
-    background: rgba(239, 68, 68, 0.12);
-    color: #dc2626;
+    background: rgba(56, 189, 248, 0.12);
+    color: #0ea5e9;
 }
 
 .table-action-btn {
@@ -1022,8 +1022,8 @@
     font-weight: 600;
     padding: 0.2rem 0.5rem;
     border-radius: 4px;
-    background: rgba(239, 68, 68, 0.12);
-    color: #ef4444;
+    background: rgba(56, 189, 248, 0.12);
+    color: #38bdf8;
 }
 
 .mapping-optional {
@@ -1446,7 +1446,7 @@
 }
 
 .form-group label .required {
-    color: #ef4444;
+    color: #38bdf8;
 }
 
 .form-hint {
@@ -1587,6 +1587,96 @@
     justify-content: flex-end;
     gap: 0.75rem;
     padding-top: 1rem;
+}
+
+/* Connection Type Icon Colors */
+.type-icon.excel {
+    background: rgba(16, 185, 129, 0.1) !important;
+    color: #10b981 !important;
+}
+
+.type-icon.google-sheets {
+    background: rgba(59, 130, 246, 0.1) !important;
+    color: #3b82f6 !important;
+}
+
+/* File Upload Box Design */
+.file-upload-zone {
+    border: 2px dashed var(--admin-border);
+    border-radius: var(--admin-radius-lg);
+    padding: 3.5rem 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--admin-transition);
+    background: var(--admin-bg-secondary);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.25rem;
+    margin-top: 0.5rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.file-upload-zone:hover,
+.file-upload-zone.drag-active {
+    border-color: #0ea5e9;
+    background: rgba(14, 165, 233, 0.05);
+    box-shadow: var(--admin-shadow-md);
+}
+
+.file-upload-zone i {
+    width: 56px;
+    height: 56px;
+    color: #94a3b8;
+    transition: var(--admin-transition);
+}
+
+.file-upload-zone:hover i,
+.file-upload-zone.drag-active i {
+    color: #0ea5e9;
+    transform: translateY(-8px);
+}
+
+.upload-text p {
+    color: var(--admin-text-primary);
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+}
+
+.upload-text span {
+    color: var(--admin-text-muted);
+    font-size: 0.875rem;
+}
+
+/* Google Auth Info Box */
+.google-auth-info {
+    display: flex;
+    gap: 1rem;
+    padding: 1.25rem;
+    background: rgba(14, 165, 233, 0.08);
+    border: 1px solid rgba(14, 165, 233, 0.2);
+    border-radius: var(--admin-radius-lg);
+    color: #0369a1;
+    margin: 1rem 0;
+}
+
+/* Upload Container Box */
+.upload-container-box {
+    background: var(--admin-bg-primary);
+    border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius-lg);
+    padding: 1.5rem;
+    box-shadow: var(--admin-shadow-sm);
+}
+
+.upload-container-box label {
+    display: block;
+    margin-bottom: 1rem;
+    font-weight: 600;
+    color: var(--admin-text-primary);
 }
 
 @media (max-width: 768px) {

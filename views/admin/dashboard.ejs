@@ -3,23 +3,23 @@
 <style>
   /* Module-Specific Unique Designs */
   
-  /* Automotive Module - Racing/Performance Theme */
+  /* Automotive Module - Professional Blue Theme */
   .module-automotive .module-info-banner {
-    background: linear-gradient(135deg, rgba(220, 38, 38, 0.08) 0%, rgba(239, 68, 68, 0.04) 50%, transparent 100%);
-    border-color: rgba(220, 38, 38, 0.3);
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.08) 0%, rgba(59, 130, 246, 0.04) 50%, transparent 100%);
+    border-color: rgba(14, 165, 233, 0.3);
   }
   .module-automotive .module-info-icon {
-    background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+    background: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%);
   }
   .module-automotive .stat-card.module-themed {
-    border-top: 3px solid #dc2626;
-    background: linear-gradient(135deg, rgba(220, 38, 38, 0.03) 0%, var(--admin-bg-primary) 100%);
+    border-top: 3px solid #0ea5e9;
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.03) 0%, var(--admin-bg-primary) 100%);
   }
   .module-automotive .chart-card {
-    border-top: 3px solid #dc2626;
+    border-top: 3px solid #0ea5e9;
   }
   .module-automotive .hero-stat-grid .stat-icon {
-    background: linear-gradient(135deg, rgba(220, 38, 38, 0.15), rgba(220, 38, 38, 0.08));
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.15), rgba(14, 165, 233, 0.08));
   }
 
   /* Aviation Module - Sky/Professional Theme */
@@ -296,7 +296,7 @@
           <div style="display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 1;">
             <div>
               <h2 style="font-size: 1.75rem; font-weight: 800; margin-bottom: 0.5rem;">Welcome to PARTSFORM Admin</h2>
-              <p style="opacity: 0.8; font-size: 0.95rem;">Complete overview of all industry modules and platform performance</p>
+              <p style="opacity: 0.8; font-size: 0.95rem;">Automotive Parts Platform - Complete overview of platform performance</p>
             </div>
             <div style="display: flex; gap: 1rem;">
               <div style="text-align: center; padding: 1rem 1.5rem; background: rgba(255,255,255,0.1); border-radius: var(--admin-radius-lg); backdrop-filter: blur(10px);">
@@ -319,92 +319,36 @@
           </div>
         </div>
 
-        <!-- Industry Overview Cards - Main Dashboard Only -->
-        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 2rem;">
-          <a href="/admin?module=automotive" style="text-decoration: none;">
-            <div style="background: linear-gradient(135deg, rgba(220, 38, 38, 0.08) 0%, white 100%); border: 2px solid rgba(220, 38, 38, 0.2); border-radius: var(--admin-radius-xl); padding: 1.5rem; transition: all 0.3s ease; position: relative; overflow: hidden;">
-              <div style="position: absolute; top: -20px; right: -20px; width: 80px; height: 80px; background: rgba(220, 38, 38, 0.08); border-radius: 50%;"></div>
-              <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
-                <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #dc2626, #991b1b); border-radius: var(--admin-radius-lg); display: flex; align-items: center; justify-content: center; color: white;">
-                  <i data-lucide="car" style="width: 26px; height: 26px;"></i>
-                </div>
-                <div>
-                  <h3 style="font-size: 1.125rem; font-weight: 700; color: #1e293b;">Automotive</h3>
-                  <p style="font-size: 0.8rem; color: #64748b; margin: 0;">Vehicle parts & components</p>
-                </div>
-              </div>
-              <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; text-align: center;">
-                <div>
-                  <div style="font-size: 1.25rem; font-weight: 800; color: #dc2626;"><%= stats.automotive.orders %></div>
-                  <div style="font-size: 0.7rem; color: #64748b;">Orders</div>
-                </div>
-                <div>
-                  <div style="font-size: 1.25rem; font-weight: 800; color: #dc2626;">$<%= (stats.automotive.revenue / 1000000).toFixed(1) %>M</div>
-                  <div style="font-size: 0.7rem; color: #64748b;">Revenue</div>
-                </div>
-                <div>
-                  <div style="font-size: 1.25rem; font-weight: 800; color: #10b981;">+<%= stats.automotive.growth %>%</div>
-                  <div style="font-size: 0.7rem; color: #64748b;">Growth</div>
-                </div>
-              </div>
+        <!-- Automotive Stats Overview - Single Focus -->
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin-bottom: 2rem;">
+          <div style="background: linear-gradient(135deg, rgba(14, 165, 233, 0.08) 0%, white 100%); border: 2px solid rgba(14, 165, 233, 0.2); border-radius: var(--admin-radius-xl); padding: 1.5rem; text-align: center;">
+            <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #0ea5e9, #0369a1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; margin: 0 auto 1rem;">
+              <i data-lucide="shopping-cart" style="width: 24px; height: 24px;"></i>
             </div>
-          </a>
-          <a href="/admin?module=aviation" style="text-decoration: none;">
-            <div style="background: linear-gradient(135deg, rgba(14, 165, 233, 0.08) 0%, white 100%); border: 2px solid rgba(14, 165, 233, 0.2); border-radius: var(--admin-radius-xl); padding: 1.5rem; transition: all 0.3s ease; position: relative; overflow: hidden;">
-              <div style="position: absolute; top: -20px; right: -20px; width: 80px; height: 80px; background: rgba(14, 165, 233, 0.08); border-radius: 50%;"></div>
-              <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
-                <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #0ea5e9, #0369a1); border-radius: var(--admin-radius-lg); display: flex; align-items: center; justify-content: center; color: white;">
-                  <i data-lucide="plane" style="width: 26px; height: 26px;"></i>
-                </div>
-                <div>
-                  <h3 style="font-size: 1.125rem; font-weight: 700; color: #1e293b;">Aviation</h3>
-                  <p style="font-size: 0.8rem; color: #64748b; margin: 0;">Aircraft parts & AOG cases</p>
-                </div>
-              </div>
-              <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; text-align: center;">
-                <div>
-                  <div style="font-size: 1.25rem; font-weight: 800; color: #0ea5e9;"><%= stats.aviation.orders %></div>
-                  <div style="font-size: 0.7rem; color: #64748b;">Orders</div>
-                </div>
-                <div>
-                  <div style="font-size: 1.25rem; font-weight: 800; color: #0ea5e9;">$<%= (stats.aviation.revenue / 1000000).toFixed(1) %>M</div>
-                  <div style="font-size: 0.7rem; color: #64748b;">Revenue</div>
-                </div>
-                <div>
-                  <div style="font-size: 1.25rem; font-weight: 800; color: #10b981;">+<%= stats.aviation.growth %>%</div>
-                  <div style="font-size: 0.7rem; color: #64748b;">Growth</div>
-                </div>
-              </div>
+            <div style="font-size: 1.75rem; font-weight: 800; color: #0ea5e9;"><%= stats.totalOrders.toLocaleString() %></div>
+            <div style="font-size: 0.85rem; color: #64748b;">Total Orders</div>
+          </div>
+          <div style="background: linear-gradient(135deg, rgba(14, 165, 233, 0.08) 0%, white 100%); border: 2px solid rgba(14, 165, 233, 0.2); border-radius: var(--admin-radius-xl); padding: 1.5rem; text-align: center;">
+            <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #0ea5e9, #0369a1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; margin: 0 auto 1rem;">
+              <i data-lucide="dollar-sign" style="width: 24px; height: 24px;"></i>
             </div>
-          </a>
-          <a href="/admin?module=machinery" style="text-decoration: none;">
-            <div style="background: linear-gradient(135deg, rgba(234, 179, 8, 0.08) 0%, white 100%); border: 2px solid rgba(234, 179, 8, 0.2); border-radius: var(--admin-radius-xl); padding: 1.5rem; transition: all 0.3s ease; position: relative; overflow: hidden;">
-              <div style="position: absolute; top: -20px; right: -20px; width: 80px; height: 80px; background: rgba(234, 179, 8, 0.08); border-radius: 50%;"></div>
-              <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
-                <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #eab308, #a16207); border-radius: var(--admin-radius-lg); display: flex; align-items: center; justify-content: center; color: white;">
-                  <i data-lucide="construction" style="width: 26px; height: 26px;"></i>
-                </div>
-                <div>
-                  <h3 style="font-size: 1.125rem; font-weight: 700; color: #1e293b;">Heavy Machinery</h3>
-                  <p style="font-size: 0.8rem; color: #64748b; margin: 0;">Industrial equipment parts</p>
-                </div>
-              </div>
-              <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; text-align: center;">
-                <div>
-                  <div style="font-size: 1.25rem; font-weight: 800; color: #eab308;"><%= stats.machinery.orders %></div>
-                  <div style="font-size: 0.7rem; color: #64748b;">Orders</div>
-                </div>
-                <div>
-                  <div style="font-size: 1.25rem; font-weight: 800; color: #eab308;">$<%= (stats.machinery.revenue / 1000000).toFixed(1) %>M</div>
-                  <div style="font-size: 0.7rem; color: #64748b;">Revenue</div>
-                </div>
-                <div>
-                  <div style="font-size: 1.25rem; font-weight: 800; color: #10b981;">+<%= stats.machinery.growth %>%</div>
-                  <div style="font-size: 0.7rem; color: #64748b;">Growth</div>
-                </div>
-              </div>
+            <div style="font-size: 1.75rem; font-weight: 800; color: #0ea5e9;">$<%= (stats.totalRevenue / 1000000).toFixed(2) %>M</div>
+            <div style="font-size: 0.85rem; color: #64748b;">Total Revenue</div>
+          </div>
+          <div style="background: linear-gradient(135deg, rgba(14, 165, 233, 0.08) 0%, white 100%); border: 2px solid rgba(14, 165, 233, 0.2); border-radius: var(--admin-radius-xl); padding: 1.5rem; text-align: center;">
+            <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #0ea5e9, #0369a1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; margin: 0 auto 1rem;">
+              <i data-lucide="users" style="width: 24px; height: 24px;"></i>
             </div>
-          </a>
+            <div style="font-size: 1.75rem; font-weight: 800; color: #0ea5e9;"><%= stats.activeUsers %></div>
+            <div style="font-size: 0.85rem; color: #64748b;">Active Users</div>
+          </div>
+          <div style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, white 100%); border: 2px solid rgba(16, 185, 129, 0.2); border-radius: var(--admin-radius-xl); padding: 1.5rem; text-align: center;">
+            <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #10b981, #059669); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; margin: 0 auto 1rem;">
+              <i data-lucide="trending-up" style="width: 24px; height: 24px;"></i>
+            </div>
+            <div style="font-size: 1.75rem; font-weight: 800; color: #10b981;">+<%= stats.automotive.growth %>%</div>
+            <div style="font-size: 0.85rem; color: #64748b;">Growth</div>
+          </div>
         </div>
         <% } else { %>
         <!-- Module-Specific Hero Stats (without Active Users) -->
@@ -511,13 +455,12 @@
               </div>
             </div>
             
-            <!-- Industry Comparison Row -->
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
               <div class="chart-card">
                 <div class="chart-header">
                   <div>
-                    <div class="chart-title">Industry Distribution</div>
-                    <div class="chart-subtitle">Orders by sector</div>
+                    <div class="chart-title">Parts by Category</div>
+                    <div class="chart-subtitle">Orders by part type</div>
                   </div>
                 </div>
                 <div class="chart-container" style="height: 200px;">
@@ -525,16 +468,20 @@
                 </div>
                 <div style="display: flex; justify-content: center; gap: 1rem; padding-top: 0.5rem;">
                   <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem;">
-                    <span style="width: 10px; height: 10px; background: #dc2626; border-radius: 50%;"></span>
-                    Automotive
-                  </div>
-                  <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem;">
                     <span style="width: 10px; height: 10px; background: #0ea5e9; border-radius: 50%;"></span>
-                    Aviation
+                    Engine
                   </div>
                   <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem;">
-                    <span style="width: 10px; height: 10px; background: #eab308; border-radius: 50%;"></span>
-                    Machinery
+                    <span style="width: 10px; height: 10px; background: #10b981; border-radius: 50%;"></span>
+                    Brakes
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem;">
+                    <span style="width: 10px; height: 10px; background: #8b5cf6; border-radius: 50%;"></span>
+                    Suspension
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem;">
+                    <span style="width: 10px; height: 10px; background: #f59e0b; border-radius: 50%;"></span>
+                    Electrical
                   </div>
                 </div>
               </div>
@@ -680,6 +627,296 @@
                   </div>
                 </div>
               <% }); %>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============================================
+             AUTOMOTIVE ANALYTICS SECTION
+             ============================================ -->
+        
+        <!-- Top Buyers & Most Wanted Parts Row -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 2rem;">
+          
+          <!-- Top Buyers with Best Profit -->
+          <div class="chart-card">
+            <div class="chart-header">
+              <div>
+                <div class="chart-title" style="display: flex; align-items: center; gap: 0.5rem;">
+                  <i data-lucide="trophy" style="width: 18px; height: 18px; color: #f59e0b;"></i>
+                  Top Buyers by Revenue
+                </div>
+                <div class="chart-subtitle">Highest performing customers this month</div>
+              </div>
+              <a href="/admin/users" class="admin-btn admin-btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">View All</a>
+            </div>
+            <div style="padding: 0 1rem 1rem;">
+              <!-- Buyer 1 -->
+              <div style="display: flex; align-items: center; gap: 1rem; padding: 0.75rem; background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(234, 179, 8, 0.05)); border-radius: 12px; margin-bottom: 0.5rem;">
+                <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #f59e0b, #d97706); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800;">1</div>
+                <div style="flex: 1;">
+                  <div style="font-weight: 600; color: #1e293b;">AutoZone Central</div>
+                  <div style="font-size: 0.75rem; color: #64748b;">124 orders • 98% fulfillment</div>
+                </div>
+                <div style="text-align: right;">
+                  <div style="font-weight: 800; color: #10b981;">$248,500</div>
+                  <div style="font-size: 0.7rem; color: #64748b;">+18% vs last month</div>
+                </div>
+              </div>
+              <!-- Buyer 2 -->
+              <div style="display: flex; align-items: center; gap: 1rem; padding: 0.75rem; background: rgba(148, 163, 184, 0.08); border-radius: 12px; margin-bottom: 0.5rem;">
+                <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #94a3b8, #64748b); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800;">2</div>
+                <div style="flex: 1;">
+                  <div style="font-weight: 600; color: #1e293b;">Premium Motors Inc</div>
+                  <div style="font-size: 0.75rem; color: #64748b;">98 orders • 95% fulfillment</div>
+                </div>
+                <div style="text-align: right;">
+                  <div style="font-weight: 800; color: #10b981;">$186,750</div>
+                  <div style="font-size: 0.7rem; color: #64748b;">+12% vs last month</div>
+                </div>
+              </div>
+              <!-- Buyer 3 -->
+              <div style="display: flex; align-items: center; gap: 1rem; padding: 0.75rem; background: rgba(194, 120, 3, 0.08); border-radius: 12px; margin-bottom: 0.5rem;">
+                <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #cd7f32, #b8860b); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800;">3</div>
+                <div style="flex: 1;">
+                  <div style="font-weight: 600; color: #1e293b;">FastFix Auto Supply</div>
+                  <div style="font-size: 0.75rem; color: #64748b;">87 orders • 97% fulfillment</div>
+                </div>
+                <div style="text-align: right;">
+                  <div style="font-weight: 800; color: #10b981;">$142,300</div>
+                  <div style="font-size: 0.7rem; color: #64748b;">+8% vs last month</div>
+                </div>
+              </div>
+              <!-- Buyer 4 & 5 -->
+              <div style="display: flex; align-items: center; gap: 1rem; padding: 0.75rem; border-radius: 12px; margin-bottom: 0.5rem; border: 1px solid #e2e8f0;">
+                <div style="width: 32px; height: 32px; background: #f1f5f9; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; color: #64748b;">4</div>
+                <div style="flex: 1; font-size: 0.9rem; color: #475569;">CarParts Direct</div>
+                <div style="font-weight: 700; color: #10b981;">$98,200</div>
+              </div>
+              <div style="display: flex; align-items: center; gap: 1rem; padding: 0.75rem; border-radius: 12px; border: 1px solid #e2e8f0;">
+                <div style="width: 32px; height: 32px; background: #f1f5f9; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; color: #64748b;">5</div>
+                <div style="flex: 1; font-size: 0.9rem; color: #475569;">MechPro Wholesale</div>
+                <div style="font-weight: 700; color: #10b981;">$87,450</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Most Wanted Parts -->
+          <div class="chart-card">
+            <div class="chart-header">
+              <div>
+                <div class="chart-title" style="display: flex; align-items: center; gap: 0.5rem;">
+                  <i data-lucide="flame" style="width: 18px; height: 18px; color: #ef4444;"></i>
+                  Most Wanted Parts
+                </div>
+                <div class="chart-subtitle">Trending items with highest demand</div>
+              </div>
+              <a href="/admin/orders" class="admin-btn admin-btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">View All</a>
+            </div>
+            <div style="padding: 0 1rem 1rem;">
+              <!-- Part 1 -->
+              <div style="display: flex; align-items: center; gap: 1rem; padding: 0.75rem; border-radius: 12px; margin-bottom: 0.5rem; border: 1px solid #e2e8f0; background: white;">
+                <div style="width: 45px; height: 45px; background: linear-gradient(135deg, rgba(14, 165, 233, 0.15), rgba(59, 130, 246, 0.1)); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                  <i data-lucide="disc" style="width: 22px; height: 22px; color: #0ea5e9;"></i>
+                </div>
+                <div style="flex: 1;">
+                  <div style="font-weight: 600; color: #1e293b;">Ceramic Brake Pads Set</div>
+                  <div style="font-size: 0.75rem; color: #64748b;">PN: BP-4521-CER</div>
+                </div>
+                <div style="text-align: right;">
+                  <div style="font-weight: 700; color: #0ea5e9;">847 orders</div>
+                  <span style="font-size: 0.65rem; padding: 0.2rem 0.5rem; background: rgba(16, 185, 129, 0.12); color: #059669; border-radius: 20px;">In Stock</span>
+                </div>
+              </div>
+              <!-- Part 2 -->
+              <div style="display: flex; align-items: center; gap: 1rem; padding: 0.75rem; border-radius: 12px; margin-bottom: 0.5rem; border: 1px solid #e2e8f0; background: white;">
+                <div style="width: 45px; height: 45px; background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.1)); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                  <i data-lucide="filter" style="width: 22px; height: 22px; color: #10b981;"></i>
+                </div>
+                <div style="flex: 1;">
+                  <div style="font-weight: 600; color: #1e293b;">Oil Filter Premium</div>
+                  <div style="font-size: 0.75rem; color: #64748b;">PN: OF-7890-PRO</div>
+                </div>
+                <div style="text-align: right;">
+                  <div style="font-weight: 700; color: #0ea5e9;">692 orders</div>
+                  <span style="font-size: 0.65rem; padding: 0.2rem 0.5rem; background: rgba(16, 185, 129, 0.12); color: #059669; border-radius: 20px;">In Stock</span>
+                </div>
+              </div>
+              <!-- Part 3 -->
+              <div style="display: flex; align-items: center; gap: 1rem; padding: 0.75rem; border-radius: 12px; margin-bottom: 0.5rem; border: 1px solid #e2e8f0; background: white;">
+                <div style="width: 45px; height: 45px; background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(124, 58, 237, 0.1)); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                  <i data-lucide="zap" style="width: 22px; height: 22px; color: #8b5cf6;"></i>
+                </div>
+                <div style="flex: 1;">
+                  <div style="font-weight: 600; color: #1e293b;">Spark Plug Platinum Set</div>
+                  <div style="font-size: 0.75rem; color: #64748b;">PN: SP-1234-PLT</div>
+                </div>
+                <div style="text-align: right;">
+                  <div style="font-weight: 700; color: #0ea5e9;">584 orders</div>
+                  <span style="font-size: 0.65rem; padding: 0.2rem 0.5rem; background: rgba(245, 158, 11, 0.12); color: #d97706; border-radius: 20px;">Low Stock</span>
+                </div>
+              </div>
+              <!-- Part 4 -->
+              <div style="display: flex; align-items: center; gap: 1rem; padding: 0.75rem; border-radius: 12px; margin-bottom: 0.5rem; border: 1px solid #e2e8f0; background: white;">
+                <div style="width: 45px; height: 45px; background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(217, 119, 6, 0.1)); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                  <i data-lucide="settings" style="width: 22px; height: 22px; color: #f59e0b;"></i>
+                </div>
+                <div style="flex: 1;">
+                  <div style="font-weight: 600; color: #1e293b;">Alternator Assembly</div>
+                  <div style="font-size: 0.75rem; color: #64748b;">PN: ALT-5678-ASM</div>
+                </div>
+                <div style="text-align: right;">
+                  <div style="font-weight: 700; color: #0ea5e9;">423 orders</div>
+                  <span style="font-size: 0.65rem; padding: 0.2rem 0.5rem; background: rgba(16, 185, 129, 0.12); color: #059669; border-radius: 20px;">In Stock</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Revenue by Vehicle Type Chart -->
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-top: 1.5rem;">
+          <div class="chart-card">
+            <div class="chart-header">
+              <div>
+                <div class="chart-title">Revenue by Vehicle Type</div>
+                <div class="chart-subtitle">Sales distribution across vehicle categories</div>
+              </div>
+            </div>
+            <div style="padding: 1rem;">
+              <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem;">
+                <div style="text-align: center; padding: 1.5rem; background: linear-gradient(135deg, rgba(14, 165, 233, 0.1), rgba(59, 130, 246, 0.05)); border-radius: 12px; border: 1px solid rgba(14, 165, 233, 0.2);">
+                  <i data-lucide="car" style="width: 28px; height: 28px; color: #0ea5e9; margin-bottom: 0.5rem;"></i>
+                  <div style="font-size: 1.5rem; font-weight: 800; color: #0ea5e9;">42%</div>
+                  <div style="font-size: 0.8rem; color: #64748b;">Sedans</div>
+                  <div style="font-size: 0.75rem; color: #10b981; margin-top: 0.25rem;">$1.2M</div>
+                </div>
+                <div style="text-align: center; padding: 1.5rem; background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.05)); border-radius: 12px; border: 1px solid rgba(16, 185, 129, 0.2);">
+                  <i data-lucide="truck" style="width: 28px; height: 28px; color: #10b981; margin-bottom: 0.5rem;"></i>
+                  <div style="font-size: 1.5rem; font-weight: 800; color: #10b981;">28%</div>
+                  <div style="font-size: 0.8rem; color: #64748b;">Trucks/SUVs</div>
+                  <div style="font-size: 0.75rem; color: #10b981; margin-top: 0.25rem;">$798K</div>
+                </div>
+                <div style="text-align: center; padding: 1.5rem; background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(124, 58, 237, 0.05)); border-radius: 12px; border: 1px solid rgba(139, 92, 246, 0.2);">
+                  <i data-lucide="bike" style="width: 28px; height: 28px; color: #8b5cf6; margin-bottom: 0.5rem;"></i>
+                  <div style="font-size: 1.5rem; font-weight: 800; color: #8b5cf6;">18%</div>
+                  <div style="font-size: 0.8rem; color: #64748b;">Motorcycles</div>
+                  <div style="font-size: 0.75rem; color: #10b981; margin-top: 0.25rem;">$513K</div>
+                </div>
+                <div style="text-align: center; padding: 1.5rem; background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(217, 119, 6, 0.05)); border-radius: 12px; border: 1px solid rgba(245, 158, 11, 0.2);">
+                  <i data-lucide="bus" style="width: 28px; height: 28px; color: #f59e0b; margin-bottom: 0.5rem;"></i>
+                  <div style="font-size: 1.5rem; font-weight: 800; color: #f59e0b;">12%</div>
+                  <div style="font-size: 0.8rem; color: #64748b;">Commercial</div>
+                  <div style="font-size: 0.75rem; color: #10b981; margin-top: 0.25rem;">$342K</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Quick Vehicle Stats -->
+          <div class="chart-card">
+            <div class="chart-header">
+              <div>
+                <div class="chart-title">Inventory Insights</div>
+                <div class="chart-subtitle">Stock health overview</div>
+              </div>
+            </div>
+            <div style="padding: 1rem;">
+              <div style="margin-bottom: 1rem;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                  <span style="font-size: 0.85rem; color: #64748b;">In Stock Items</span>
+                  <span style="font-weight: 700; color: #10b981;">2,847</span>
+                </div>
+                <div style="height: 8px; background: #e2e8f0; border-radius: 10px; overflow: hidden;">
+                  <div style="height: 100%; width: 78%; background: linear-gradient(90deg, #10b981, #059669); border-radius: 10px;"></div>
+                </div>
+              </div>
+              <div style="margin-bottom: 1rem;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                  <span style="font-size: 0.85rem; color: #64748b;">Low Stock Alerts</span>
+                  <span style="font-weight: 700; color: #f59e0b;">124</span>
+                </div>
+                <div style="height: 8px; background: #e2e8f0; border-radius: 10px; overflow: hidden;">
+                  <div style="height: 100%; width: 15%; background: linear-gradient(90deg, #f59e0b, #d97706); border-radius: 10px;"></div>
+                </div>
+              </div>
+              <div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                  <span style="font-size: 0.85rem; color: #64748b;">Out of Stock</span>
+                  <span style="font-weight: 700; color: #ef4444;">47</span>
+                </div>
+                <div style="height: 8px; background: #e2e8f0; border-radius: 10px; overflow: hidden;">
+                  <div style="height: 100%; width: 7%; background: linear-gradient(90deg, #ef4444, #dc2626); border-radius: 10px;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- AI Recommendations Section -->
+        <div style="margin-top: 2rem; background: linear-gradient(135deg, #1e3a5f 0%, #2b5278 30%, #0f172a 100%); border-radius: 20px; padding: 2rem; position: relative; overflow: hidden;">
+          <!-- Background decoration -->
+          <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: rgba(14, 165, 233, 0.1); border-radius: 50%;"></div>
+          <div style="position: absolute; bottom: -30px; left: 20%; width: 150px; height: 150px; background: rgba(59, 130, 246, 0.08); border-radius: 50%;"></div>
+          
+          <div style="position: relative; z-index: 1;">
+            <!-- Header -->
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+              <div style="display: flex; align-items: center; gap: 1rem;">
+                <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #0ea5e9, #3b82f6); border-radius: 14px; display: flex; align-items: center; justify-content: center;">
+                  <i data-lucide="sparkles" style="width: 26px; height: 26px; color: white;"></i>
+                </div>
+                <div>
+                  <h3 style="font-size: 1.25rem; font-weight: 700; color: white; margin: 0;">AI-Powered Insights</h3>
+                  <p style="font-size: 0.85rem; color: rgba(255,255,255,0.7); margin: 0;">Smart recommendations based on data analysis</p>
+                </div>
+              </div>
+              <span style="padding: 0.4rem 1rem; background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 20px; font-size: 0.75rem; color: #10b981; font-weight: 600;">
+                <i data-lucide="activity" style="width: 12px; height: 12px; display: inline;"></i>
+                Updated 2 min ago
+              </span>
+            </div>
+            
+            <!-- Recommendations Grid -->
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem;">
+              <!-- Recommendation 1 -->
+              <div style="background: rgba(255,255,255,0.08); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 1.25rem;">
+                <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+                  <div style="width: 38px; height: 38px; background: rgba(16, 185, 129, 0.2); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                    <i data-lucide="trending-up" style="width: 20px; height: 20px; color: #10b981;"></i>
+                  </div>
+                  <span style="font-size: 0.75rem; color: #10b981; font-weight: 600;">HIGH OPPORTUNITY</span>
+                </div>
+                <h4 style="font-size: 1rem; font-weight: 600; color: white; margin-bottom: 0.5rem;">Increase Brake Pads Stock</h4>
+                <p style="font-size: 0.8rem; color: rgba(255,255,255,0.6); line-height: 1.5; margin-bottom: 1rem;">Demand is projected to rise 35% next month. Consider increasing inventory by 500 units.</p>
+                <div style="font-size: 0.75rem; color: #0ea5e9;">Potential Revenue: +$42,500</div>
+              </div>
+              
+              <!-- Recommendation 2 -->
+              <div style="background: rgba(255,255,255,0.08); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 1.25rem;">
+                <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+                  <div style="width: 38px; height: 38px; background: rgba(245, 158, 11, 0.2); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                    <i data-lucide="users" style="width: 20px; height: 20px; color: #f59e0b;"></i>
+                  </div>
+                  <span style="font-size: 0.75rem; color: #f59e0b; font-weight: 600;">CUSTOMER INSIGHT</span>
+                </div>
+                <h4 style="font-size: 1rem; font-weight: 600; color: white; margin-bottom: 0.5rem;">Re-engage Top Buyers</h4>
+                <p style="font-size: 0.8rem; color: rgba(255,255,255,0.6); line-height: 1.5; margin-bottom: 1rem;">3 top customers haven't ordered in 15+ days. Send personalized offers to retain them.</p>
+                <div style="font-size: 0.75rem; color: #0ea5e9;">At-Risk Revenue: $127,000</div>
+              </div>
+              
+              <!-- Recommendation 3 -->
+              <div style="background: rgba(255,255,255,0.08); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 1.25rem;">
+                <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+                  <div style="width: 38px; height: 38px; background: rgba(139, 92, 246, 0.2); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                    <i data-lucide="package" style="width: 20px; height: 20px; color: #8b5cf6;"></i>
+                  </div>
+                  <span style="font-size: 0.75rem; color: #8b5cf6; font-weight: 600;">CROSS-SELL</span>
+                </div>
+                <h4 style="font-size: 1rem; font-weight: 600; color: white; margin-bottom: 0.5rem;">Bundle Oil Filters</h4>
+                <p style="font-size: 0.8rem; color: rgba(255,255,255,0.6); line-height: 1.5; margin-bottom: 1rem;">Customers buying oil filters also purchase oil 78% of the time. Create a bundle discount.</p>
+                <div style="font-size: 0.75rem; color: #0ea5e9;">Conversion Boost: +23%</div>
+              </div>
             </div>
           </div>
         </div>

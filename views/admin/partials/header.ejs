@@ -47,18 +47,10 @@
       pointer-events: none;
     }
     
-    /* Loader Background - Module Specific */
-    .module-loader-overlay.loader-default {
-      background: linear-gradient(135deg, #1e3a5f 0%, #2b5278 50%, #1e3a5f 100%);
-    }
+    /* Loader Background - Automotive Blue Theme */
+    .module-loader-overlay.loader-default,
     .module-loader-overlay.loader-automotive {
-      background: linear-gradient(135deg, #7f1d1d 0%, #dc2626 50%, #7f1d1d 100%);
-    }
-    .module-loader-overlay.loader-aviation {
       background: linear-gradient(135deg, #0c4a6e 0%, #0ea5e9 50%, #0c4a6e 100%);
-    }
-    .module-loader-overlay.loader-machinery {
-      background: linear-gradient(135deg, #713f12 0%, #eab308 50%, #713f12 100%);
     }
     
     /* Loader Content */
@@ -262,33 +254,13 @@
       },
       
       getModuleConfig: function(module) {
-        var configs = {
-          automotive: {
-            icon: 'car',
-            title: 'Loading Automotive',
-            subtitle: 'Preparing vehicle parts data...',
-            className: 'loader-automotive'
-          },
-          aviation: {
-            icon: 'plane',
-            title: 'Loading Aviation',
-            subtitle: 'Preparing aircraft parts & AOG...',
-            className: 'loader-aviation'
-          },
-          machinery: {
-            icon: 'construction',
-            title: 'Loading Machinery',
-            subtitle: 'Preparing industrial equipment...',
-            className: 'loader-machinery'
-          },
-          'default': {
-            icon: 'layers',
-            title: 'Loading Dashboard',
-            subtitle: 'Preparing all modules...',
-            className: 'loader-default'
-          }
+        // Simplified for automotive-only platform
+        return {
+          icon: 'car',
+          title: 'Loading Dashboard',
+          subtitle: 'Preparing your workspace...',
+          className: 'loader-automotive'
         };
-        return configs[module] || configs['default'];
       },
       
       clearTimers: function() {

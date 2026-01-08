@@ -10,165 +10,13 @@
       <%- include('partials/topbar', { pageTitle: 'Integrations', currentModule: currentModule }) %>
       
       <div class="admin-content">
-        <% if (!currentModule) { %>
-        <!-- Module Selection View (when no module is selected) -->
-        <div class="integrations-intro">
-          <div class="intro-header">
-            <div class="intro-badge">
-              <i data-lucide="plug"></i>
-              <span>Data Sources</span>
-            </div>
-            <h1>Manage Integrations</h1>
-            <p>Select a module to configure its FTP and API data sources</p>
-          </div>
-
-          <div class="module-selector-grid">
-            <a href="/admin/integrations?module=automotive" class="module-card automotive">
-              <div class="module-card-icon">
-                <i data-lucide="car"></i>
-              </div>
-              <div class="module-card-content">
-                <h3>Automotive</h3>
-                <p>FTP & API connections for automotive parts suppliers</p>
-                <div class="module-card-stats">
-                  <span class="stat"><i data-lucide="plug"></i> 3 FTP Sources</span>
-                  <span class="stat"><i data-lucide="database"></i> 2.4M Parts</span>
-                </div>
-              </div>
-              <div class="module-card-status connected">
-                <i data-lucide="check-circle"></i>
-                <span>4 Active</span>
-              </div>
-            </a>
-
-            <a href="/admin/integrations?module=aviation" class="module-card aviation">
-              <div class="module-card-icon">
-                <i data-lucide="plane"></i>
-              </div>
-              <div class="module-card-content">
-                <h3>Aviation</h3>
-                <p>FTP & API connections for aviation parts suppliers</p>
-                <div class="module-card-stats">
-                  <span class="stat"><i data-lucide="plug"></i> 5 FTP Sources</span>
-                  <span class="stat"><i data-lucide="database"></i> 8.7M Parts</span>
-                </div>
-              </div>
-              <div class="module-card-status connected">
-                <i data-lucide="check-circle"></i>
-                <span>6 Active</span>
-              </div>
-            </a>
-
-            <a href="/admin/integrations?module=machinery" class="module-card machinery">
-              <div class="module-card-icon">
-                <i data-lucide="cog"></i>
-              </div>
-              <div class="module-card-content">
-                <h3>Machinery</h3>
-                <p>FTP & API connections for heavy machinery suppliers</p>
-                <div class="module-card-stats">
-                  <span class="stat"><i data-lucide="plug"></i> 2 FTP Sources</span>
-                  <span class="stat"><i data-lucide="database"></i> 1.1M Parts</span>
-                </div>
-              </div>
-              <div class="module-card-status warning">
-                <i data-lucide="alert-circle"></i>
-                <span>1 Issue</span>
-              </div>
-            </a>
-          </div>
-
-          <!-- System Integrations (Global) -->
-          <div class="global-integrations">
-            <div class="section-header">
-              <h2><i data-lucide="server"></i> System Infrastructure</h2>
-              <p>Core services powering all modules</p>
-            </div>
-            
-            <div class="infrastructure-grid">
-              <div class="infra-card">
-                <div class="infra-status connected"></div>
-                <div class="infra-icon elasticsearch">
-                  <i data-lucide="search"></i>
-                </div>
-                <div class="infra-info">
-                  <h4>Elasticsearch</h4>
-                  <span class="infra-host">localhost:9200</span>
-                </div>
-                <div class="infra-stats">
-                  <div class="stat-item">
-                    <span class="stat-value">12.2M</span>
-                    <span class="stat-label">Documents</span>
-                  </div>
-                  <div class="stat-item">
-                    <span class="stat-value">~15ms</span>
-                    <span class="stat-label">Avg Query</span>
-                  </div>
-                </div>
-                <button class="infra-action-btn" onclick="openSystemConfig('elasticsearch')">
-                  <i data-lucide="settings"></i>
-                </button>
-              </div>
-
-              <div class="infra-card">
-                <div class="infra-status connected"></div>
-                <div class="infra-icon mongodb">
-                  <i data-lucide="database"></i>
-                </div>
-                <div class="infra-info">
-                  <h4>MongoDB</h4>
-                  <span class="infra-host">localhost:27017</span>
-                </div>
-                <div class="infra-stats">
-                  <div class="stat-item">
-                    <span class="stat-value">12.2M</span>
-                    <span class="stat-label">Records</span>
-                  </div>
-                  <div class="stat-item">
-                    <span class="stat-value">42GB</span>
-                    <span class="stat-label">Storage</span>
-                  </div>
-                </div>
-                <button class="infra-action-btn" onclick="openSystemConfig('mongodb')">
-                  <i data-lucide="settings"></i>
-                </button>
-              </div>
-
-              <div class="infra-card">
-                <div class="infra-status disconnected"></div>
-                <div class="infra-icon redis">
-                  <i data-lucide="zap"></i>
-                </div>
-                <div class="infra-info">
-                  <h4>Redis Cache</h4>
-                  <span class="infra-host">Not configured</span>
-                </div>
-                <div class="infra-stats">
-                  <div class="stat-item">
-                    <span class="stat-value">--</span>
-                    <span class="stat-label">Hit Rate</span>
-                  </div>
-                  <div class="stat-item">
-                    <span class="stat-value">--</span>
-                    <span class="stat-label">Memory</span>
-                  </div>
-                </div>
-                <button class="infra-action-btn" onclick="openSystemConfig('redis')">
-                  <i data-lucide="plus"></i>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <% } else { %>
         <!-- Module-Specific Integrations View -->
         <div class="integrations-module-view">
-          <!-- Breadcrumb -->
+          <!-- Simplified Breadcrumb (Removed selection link) -->
           <div class="integrations-breadcrumb">
-            <a href="/admin/integrations"><i data-lucide="plug"></i> Integrations</a>
+            <span class="breadcrumb-item"><i data-lucide="plug"></i> Integrations</span>
             <i data-lucide="chevron-right"></i>
-            <span><%= moduleConfig.name %></span>
+            <span><%= moduleConfig.name %> Connections</span>
           </div>
 
           <!-- Module Header -->
@@ -208,7 +56,7 @@
                 <i data-lucide="database"></i>
               </div>
               <div class="conn-stat-content">
-                <span class="conn-stat-value"><%= currentModule === 'aviation' ? '8.7M' : currentModule === 'automotive' ? '2.4M' : '1.1M' %></span>
+                <span class="conn-stat-value">2.4M</span>
                 <span class="conn-stat-label">Total Parts</span>
               </div>
             </div>
@@ -484,7 +332,6 @@
             </div>
           </div>
         </div>
-        <% } %>
       </div>
     </main>
   </div>

@@ -289,30 +289,22 @@
                 <h3><i data-lucide="settings"></i> Order Details</h3>
               </div>
               <div class="form-card-body">
+                <input type="hidden" name="industry" value="automotive">
                 <div class="form-row">
-                  <div class="form-group">
-                    <label class="form-label">Industry <span class="required">*</span></label>
-                    <select class="form-select" name="industry" required>
-                      <option value="">Select Industry</option>
-                      <option value="automotive" <%= currentModule === 'automotive' ? 'selected' : '' %>>Automotive</option>
-                      <option value="aviation" <%= currentModule === 'aviation' ? 'selected' : '' %>>Aviation</option>
-                      <option value="machinery" <%= currentModule === 'machinery' ? 'selected' : '' %>>Machinery</option>
-                    </select>
-                  </div>
                   <div class="form-group">
                     <label class="form-label">Priority <span class="required">*</span></label>
                     <select class="form-select" name="priority" required>
                       <option value="normal">Normal</option>
                       <option value="urgent">Urgent</option>
-                      <option value="aog">AOG (Aircraft on Ground)</option>
+                      <option value="critical">Critical</option>
                     </select>
                   </div>
-                </div>
-                <div class="form-row">
                   <div class="form-group">
                     <label class="form-label">Order Date</label>
                     <input type="date" class="form-input" name="date" value="<%= new Date().toISOString().split('T')[0] %>">
                   </div>
+                </div>
+                <div class="form-row">
                   <div class="form-group">
                     <label class="form-label">Reference Number</label>
                     <input type="text" class="form-input" name="reference" placeholder="PO-12345">

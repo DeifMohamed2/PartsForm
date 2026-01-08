@@ -339,22 +339,15 @@
                 <h3><i data-lucide="settings"></i> Order Details</h3>
               </div>
               <div class="form-card-body">
-                <div class="form-row triple">
-                  <div class="form-group">
-                    <label class="form-label">Industry <span class="required">*</span></label>
-                    <select class="form-select" name="industry" required>
-                      <option value="automotive" <%= order.industry === 'automotive' ? 'selected' : '' %>>Automotive</option>
-                      <option value="aviation" <%= order.industry === 'aviation' ? 'selected' : '' %>>Aviation</option>
-                      <option value="machinery" <%= order.industry === 'machinery' ? 'selected' : '' %>>Machinery</option>
-                    </select>
-                  </div>
+                <input type="hidden" name="industry" value="automotive">
+                <div class="form-row">
                   <div class="form-group">
                     <label class="form-label">Priority <span class="required">*</span></label>
                     <% var priority = order.priority || 'normal'; %>
                     <select class="form-select" name="priority" required>
                       <option value="normal" <%= priority === 'normal' ? 'selected' : '' %>>Normal</option>
                       <option value="urgent" <%= priority === 'urgent' ? 'selected' : '' %>>Urgent</option>
-                      <option value="aog" <%= priority === 'aog' ? 'selected' : '' %>>AOG (Aircraft on Ground)</option>
+                      <option value="critical" <%= priority === 'critical' || priority === 'aog' ? 'selected' : '' %>>Critical</option>
                     </select>
                   </div>
                   <div class="form-group">
@@ -466,7 +459,7 @@
               </div>
               <div class="form-card-body">
                 <div class="form-group">
-                  <textarea class="form-textarea" name="notes" placeholder="Special instructions, delivery notes, etc."><% if (order.priority === 'aog') { %>AOG PRIORITY: Aircraft on ground. Expedite immediately.<% } %></textarea>
+                  <textarea class="form-textarea" name="notes" placeholder="Special instructions, delivery notes, etc."><% if (order.priority === 'critical' || order.priority === 'aog') { %>CRITICAL PRIORITY: Expedite immediately.<% } %></textarea>
                 </div>
               </div>
               <div class="form-actions">

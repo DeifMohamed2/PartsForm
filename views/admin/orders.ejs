@@ -111,25 +111,13 @@
             </select>
           </div>
           <div class="filter-divider"></div>
-          <% if (!currentModule) { %>
-          <div class="filter-group">
-            <span class="filter-label">Industry:</span>
-            <select id="filterIndustry" class="filter-select">
-              <option value="">All Industries</option>
-              <option value="automotive">Automotive</option>
-              <option value="aviation">Aviation</option>
-              <option value="machinery">Machinery</option>
-            </select>
-          </div>
-          <div class="filter-divider"></div>
-          <% } %>
           <div class="filter-group">
             <span class="filter-label">Priority:</span>
             <select id="filterPriority" class="filter-select">
               <option value="">All Priorities</option>
               <option value="normal">Normal</option>
               <option value="urgent">Urgent</option>
-              <option value="aog">AOG (Critical)</option>
+              <option value="critical">Critical</option>
             </select>
           </div>
           <div class="filter-divider"></div>
@@ -188,9 +176,7 @@
                 <th>Date</th>
                 <th>Items</th>
                 <th>Amount</th>
-                <% if (!currentModule) { %>
-                <th>Industry</th>
-                <% } %>
+
                 <th>Priority</th>
                 <th>Status</th>
                 <th>Actions</th>
@@ -217,27 +203,12 @@
                   </span>
                 </td>
                 <td class="amount-cell">$<%= order.amount.toLocaleString() %></td>
-                <% if (!currentModule) { %>
-                <td>
-                  <span class="industry-badge <%= order.industry %>">
-                    <% if (order.industry === 'automotive') { %>
-                      <i data-lucide="car"></i>
-                    <% } else if (order.industry === 'aviation') { %>
-                      <i data-lucide="plane"></i>
-                    <% } else { %>
-                      <i data-lucide="construction"></i>
-                    <% } %>
-                    <%= order.industry %>
-                  </span>
-                </td>
-                <% } %>
+
                 <td>
                   <% var priority = order.priority || 'normal'; %>
                   <span class="priority-badge <%= priority %>">
-                    <% if (priority === 'urgent') { %>
+                    <% if (priority === 'urgent' || priority === 'critical') { %>
                       <i data-lucide="alert-triangle"></i>
-                    <% } else if (priority === 'aog') { %>
-                      <i data-lucide="alert-circle"></i>
                     <% } %>
                     <%= priority.toUpperCase() %>
                   </span>
@@ -331,34 +302,25 @@
     // Filter functionality
     function applyFilters() {
       var status = document.getElementById('filterStatus').value;
-      var industry = document.getElementById('filterIndustry') ? document.getElementById('filterIndustry').value : '';
       var priority = document.getElementById('filterPriority').value;
       var rows = document.querySelectorAll('#ordersTableBody tr');
       
       rows.forEach(function(row) {
         var rowStatus = row.dataset.status;
-        var rowIndustry = row.dataset.industry;
         var rowPriority = row.dataset.priority;
         
         var statusMatch = !status || rowStatus === status;
-        var industryMatch = !industry || rowIndustry === industry;
         var priorityMatch = !priority || rowPriority === priority;
         
-        row.style.display = (statusMatch && industryMatch && priorityMatch) ? '' : 'none';
+        row.style.display = (statusMatch && priorityMatch) ? '' : 'none';
       });
     }
 
     document.getElementById('filterStatus').addEventListener('change', applyFilters);
-    if (document.getElementById('filterIndustry')) {
-      document.getElementById('filterIndustry').addEventListener('change', applyFilters);
-    }
     document.getElementById('filterPriority').addEventListener('change', applyFilters);
 
     function clearFilters() {
       document.getElementById('filterStatus').value = '';
-      if (document.getElementById('filterIndustry')) {
-        document.getElementById('filterIndustry').value = '';
-      }
       document.getElementById('filterPriority').value = '';
       document.getElementById('filterDate').value = '';
       document.getElementById('ordersSearch').value = '';

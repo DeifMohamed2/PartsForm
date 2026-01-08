@@ -40,44 +40,6 @@ const getAutomotiveSearchPage = async (req, res) => {
 };
 
 /**
- * Get Aviation industry-specific search page
- */
-const getAviationSearchPage = async (req, res) => {
-  try {
-    res.render('buyer/search-aviation', {
-      title: 'Aviation Parts Search | PARTSFORM',
-      industry: 'aviation',
-      industryName: 'Aviation',
-    });
-  } catch (error) {
-    console.error('Error in getAviationSearchPage:', error);
-    res.status(500).render('error', {
-      title: 'Error | PARTSFORM',
-      error: 'Failed to load aviation search page',
-    });
-  }
-};
-
-/**
- * Get Heavy Machinery industry-specific search page
- */
-const getHeavyMachinerySearchPage = async (req, res) => {
-  try {
-    res.render('buyer/search-machinery', {
-      title: 'Heavy Machinery Parts Search | PARTSFORM',
-      industry: 'heavy-machinery',
-      industryName: 'Heavy Machinery',
-    });
-  } catch (error) {
-    console.error('Error in getHeavyMachinerySearchPage:', error);
-    res.status(500).render('error', {
-      title: 'Error | PARTSFORM',
-      error: 'Failed to load heavy machinery search page',
-    });
-  }
-};
-
-/**
  * Get Affiliate Program page
  */
 const getAffiliatePage = async (req, res) => {
@@ -249,80 +211,6 @@ const getSettingsPage = async (req, res) => {
 };
 
 /**
- * Get AOG Case Creation page
- */
-const getAOGCaseCreatePage = async (req, res) => {
-  try {
-    res.render('buyer/aog-case-create', {
-      title: 'Create AOG Case | PARTSFORM',
-    });
-  } catch (error) {
-    console.error('Error in getAOGCaseCreatePage:', error);
-    res.status(500).render('error', {
-      title: 'Error | PARTSFORM',
-      error: 'Failed to load AOG case creation page',
-    });
-  }
-};
-
-/**
- * Get AOG Command Center page
- */
-const getAOGCommandCenterPage = async (req, res) => {
-  try {
-    const caseId = req.params.caseId;
-    res.render('buyer/aog-command-center', {
-      title: `AOG Case ${caseId} | PARTSFORM`,
-      caseId: caseId,
-    });
-  } catch (error) {
-    console.error('Error in getAOGCommandCenterPage:', error);
-    res.status(500).render('error', {
-      title: 'Error | PARTSFORM',
-      error: 'Failed to load AOG command center',
-    });
-  }
-};
-
-/**
- * Get AOG Quote Comparison page
- */
-const getAOGQuoteComparisonPage = async (req, res) => {
-  try {
-    const caseId = req.params.caseId;
-    res.render('buyer/aog-quote-comparison', {
-      title: `Quote Comparison - Case ${caseId} | PARTSFORM`,
-      caseId: caseId,
-    });
-  } catch (error) {
-    console.error('Error in getAOGQuoteComparisonPage:', error);
-    res.status(500).render('error', {
-      title: 'Error | PARTSFORM',
-      error: 'Failed to load quote comparison page',
-    });
-  }
-};
-
-/**
- * Get AOG Case Tracking page
- */
-const getAOGCaseTrackingPage = async (req, res) => {
-  try {
-    const caseId = req.params.caseId;
-    res.render('buyer/aog-case-tracking', {
-      title: `Track Case ${caseId} | PARTSFORM`,
-      caseId: caseId,
-    });
-  } catch (error) {
-    console.error('Error in getAOGCaseTrackingPage:', error);
-    res.status(500).render('error', {
-      title: 'Error | PARTSFORM',
-      error: 'Failed to load case tracking page',
-    });
-  }
-};
-
-/**
  * Get Support Tickets page
  */
 const getTicketsPage = async (req, res) => {
@@ -379,8 +267,6 @@ const getTicketDetailsPage = async (req, res) => {
 module.exports = {
   getBuyerMain,
   getAutomotiveSearchPage,
-  getAviationSearchPage,
-  getHeavyMachinerySearchPage,
   getAffiliatePage,
   getOrdersPage,
   getPaymentPage,
@@ -391,11 +277,8 @@ module.exports = {
   getOrderDetailsPage,
   getProfilePage,
   getSettingsPage,
-  getAOGCaseCreatePage,
-  getAOGCommandCenterPage,
-  getAOGQuoteComparisonPage,
-  getAOGCaseTrackingPage,
   getTicketsPage,
   getCreateTicketPage,
   getTicketDetailsPage,
 };
+

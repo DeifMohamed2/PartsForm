@@ -44,37 +44,11 @@
         <i data-lucide="users"></i>
         <span>Users</span>
       </a>
-      <a href="/admin/payments<%= typeof currentModule !== 'undefined' && currentModule ? '?module=' + currentModule : '' %>" class="sidebar-nav-item <%= typeof activePage !== 'undefined' && activePage === 'payments' ? 'active' : '' %>">
+      <a href="/admin/payments" class="sidebar-nav-item <%= typeof activePage !== 'undefined' && activePage === 'payments' ? 'active' : '' %>">
         <i data-lucide="credit-card"></i>
         <span>Payments</span>
       </a>
-      <% if (typeof currentModule === 'undefined' || !currentModule || currentModule === 'aviation') { %>
-      <a href="/admin/aog<%= typeof currentModule !== 'undefined' && currentModule ? '?module=' + currentModule : '' %>" class="sidebar-nav-item <%= typeof activePage !== 'undefined' && activePage === 'aog' ? 'active' : '' %>">
-        <i data-lucide="alert-triangle"></i>
-        <span>AOG Cases</span>
-        <span class="sidebar-nav-badge" style="background: #ef4444;">3</span>
-      </a>
-      <% } %>
     </div>
-
-    <!-- Module Quick Switch (only show when not filtered) -->
-    <% if (typeof currentModule === 'undefined' || !currentModule) { %>
-    <div class="sidebar-nav-section">
-      <div class="sidebar-nav-title">Quick Module Switch</div>
-      <a href="/admin?module=automotive" class="sidebar-nav-item">
-        <i data-lucide="car"></i>
-        <span>Automotive</span>
-      </a>
-      <a href="/admin?module=aviation" class="sidebar-nav-item">
-        <i data-lucide="plane"></i>
-        <span>Aviation</span>
-      </a>
-      <a href="/admin?module=machinery" class="sidebar-nav-item">
-        <i data-lucide="construction"></i>
-        <span>Machinery</span>
-      </a>
-    </div>
-    <% } %>
 
     <!-- Settings Section -->
     <div class="sidebar-nav-section">

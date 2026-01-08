@@ -83,8 +83,7 @@
                   <select class="user-form-select" name="industry">
                     <option value="">Select Industry</option>
                     <option value="automotive" <%= user.industry === 'automotive' ? 'selected' : '' %>>Automotive</option>
-                    <option value="aviation" <%= user.industry === 'aviation' ? 'selected' : '' %>>Aviation</option>
-                    <option value="machinery" <%= user.industry === 'machinery' ? 'selected' : '' %>>Machinery</option>
+                    <option value="manufacturing" <%= user.industry === 'manufacturing' || user.industry === 'aviation' || user.industry === 'machinery' ? 'selected' : '' %>>Manufacturing</option>
                     <option value="other">Other</option>
                   </select>
                 </div>

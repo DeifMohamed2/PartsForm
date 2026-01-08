@@ -15,66 +15,7 @@
   </div>
 
   <div class="topbar-right">
-    <!-- Module Selector -->
-    <div class="module-selector" id="moduleSelector">
-      <button class="module-selector-btn" id="moduleSelectorBtn">
-        <div class="module-selector-icon" id="moduleSelectorIcon">
-          <i data-lucide="<%= typeof currentModule !== 'undefined' && currentModule === 'automotive' ? 'car' : currentModule === 'aviation' ? 'plane' : currentModule === 'machinery' ? 'construction' : 'layers' %>"></i>
-        </div>
-        <div class="module-selector-text">
-          <div class="module-selector-label">Active Module</div>
-          <div class="module-selector-value" id="moduleSelectorValue">
-            <%= typeof currentModule !== 'undefined' && currentModule === 'automotive' ? 'Automotive' : currentModule === 'aviation' ? 'Aviation' : currentModule === 'machinery' ? 'Machinery' : 'All Modules' %>
-          </div>
-        </div>
-        <i data-lucide="chevron-down" class="module-selector-chevron"></i>
-      </button>
-
-      <div class="module-selector-dropdown" id="moduleSelectorDropdown">
-        <div class="module-option <%= typeof currentModule === 'undefined' || !currentModule ? 'active' : '' %>" data-module="" data-icon="layers" data-name="All Modules">
-          <div class="module-option-icon all">
-            <i data-lucide="layers"></i>
-          </div>
-          <div class="module-option-text">
-            <div class="module-option-name">All Modules</div>
-            <div class="module-option-desc">View combined data</div>
-          </div>
-          <i data-lucide="check" class="module-option-check"></i>
-        </div>
-        <div class="module-option <%= typeof currentModule !== 'undefined' && currentModule === 'automotive' ? 'active' : '' %>" data-module="automotive" data-icon="car" data-name="Automotive">
-          <div class="module-option-icon automotive">
-            <i data-lucide="car"></i>
-          </div>
-          <div class="module-option-text">
-            <div class="module-option-name">Automotive</div>
-            <div class="module-option-desc">Vehicle parts & components</div>
-          </div>
-          <i data-lucide="check" class="module-option-check"></i>
-        </div>
-        <div class="module-option <%= typeof currentModule !== 'undefined' && currentModule === 'aviation' ? 'active' : '' %>" data-module="aviation" data-icon="plane" data-name="Aviation">
-          <div class="module-option-icon aviation">
-            <i data-lucide="plane"></i>
-          </div>
-          <div class="module-option-text">
-            <div class="module-option-name">Aviation</div>
-            <div class="module-option-desc">Aircraft parts & AOG cases</div>
-          </div>
-          <i data-lucide="check" class="module-option-check"></i>
-        </div>
-        <div class="module-option <%= typeof currentModule !== 'undefined' && currentModule === 'machinery' ? 'active' : '' %>" data-module="machinery" data-icon="construction" data-name="Machinery">
-          <div class="module-option-icon machinery">
-            <i data-lucide="construction"></i>
-          </div>
-          <div class="module-option-text">
-            <div class="module-option-name">Heavy Machinery</div>
-            <div class="module-option-desc">Industrial equipment parts</div>
-          </div>
-          <i data-lucide="check" class="module-option-check"></i>
-        </div>
-      </div>
-    </div>
-
-    <!-- Enhanced Search Bar - Complete Remake -->
+    <!-- Enhanced Search Bar -->
     <div style="position: relative; display: flex; align-items: center;">
       <i data-lucide="search" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; color: #94a3b8; pointer-events: none; z-index: 2;"></i>
       <input type="text" id="globalSearchInput" placeholder="Search orders, users, tickets..." autocomplete="off" style="width: 280px; padding: 0.7rem 3.5rem 0.7rem 2.75rem; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 12px; color: #1e293b; font-size: 0.9rem; outline: none; transition: all 0.2s;">
@@ -104,10 +45,10 @@
           </div>
           <div class="topbar-dropdown-item unread">
             <div class="dropdown-item-icon warning">
-              <i data-lucide="alert-triangle"></i>
+              <i data-lucide="package"></i>
             </div>
             <div class="dropdown-item-content">
-              <div class="dropdown-item-text">New AOG case requires immediate attention</div>
+              <div class="dropdown-item-text">Low stock alert: <strong>Brake Pads</strong> running low</div>
               <div class="dropdown-item-time">15 minutes ago</div>
             </div>
           </div>
@@ -116,7 +57,7 @@
               <i data-lucide="user-plus"></i>
             </div>
             <div class="dropdown-item-content">
-              <div class="dropdown-item-text">New user <strong>Aerotech Industries</strong> registered</div>
+              <div class="dropdown-item-text">New user <strong>AutoParts Pro</strong> registered</div>
               <div class="dropdown-item-time">1 hour ago</div>
             </div>
           </div>
@@ -147,14 +88,14 @@
           <div class="topbar-dropdown-item unread">
             <div class="dropdown-item-avatar" style="background: #0ea5e9;">AT</div>
             <div class="dropdown-item-content">
-              <div class="dropdown-item-text"><strong>Aerotech Industries</strong> sent a new inquiry</div>
+              <div class="dropdown-item-text"><strong>AutoParts Express</strong> sent a new inquiry</div>
               <div class="dropdown-item-time">20 minutes ago</div>
             </div>
           </div>
           <div class="topbar-dropdown-item">
             <div class="dropdown-item-avatar" style="background: #10b981;">SM</div>
             <div class="dropdown-item-content">
-              <div class="dropdown-item-text"><strong>SkyMax Aviation</strong> confirmed order details</div>
+              <div class="dropdown-item-text"><strong>Premium Motors Inc</strong> confirmed order details</div>
               <div class="dropdown-item-time">2 hours ago</div>
             </div>
           </div>
