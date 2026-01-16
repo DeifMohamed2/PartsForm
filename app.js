@@ -5,7 +5,7 @@ const i18next = require('./config/i18n');
 const middleware = require('i18next-http-middleware');
 
 const app = express();
-const PORT = process.env.PORT || 3310;
+const PORT = process.env.PORT || 3000;
 
 // Set view engine
 app.set('view engine', 'ejs');

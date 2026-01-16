@@ -4,19 +4,34 @@
     <!-- Backdrop for Filters Sidebar -->
     <div class="filters-backdrop" id="filters-backdrop"></div>
 
-    <!-- Advanced Filters Sidebar -->
+    <!-- Advanced Filters Sidebar (Enhanced) -->
     <aside class="filters-sidebar" id="filters-sidebar">
       <div class="filters-header">
-        <h3 class="filters-title">Advanced Filters</h3>
+        <h3 class="filters-title">
+          <i data-lucide="sliders-horizontal"></i>
+          Advanced Filters
+        </h3>
         <button class="filters-close" id="filters-close">
           <i data-lucide="x"></i>
         </button>
       </div>
 
       <div class="filters-content">
+        <!-- Active Filters Summary -->
+        <div class="active-filters-bar" id="active-filters-bar" style="display: none;">
+          <div class="active-filters-list" id="active-filters-list"></div>
+          <button class="clear-active-filters" id="clear-active-filters">
+            <i data-lucide="x"></i>
+            Clear All
+          </button>
+        </div>
+
         <!-- Price Range -->
         <div class="filter-group">
-          <h4 class="filter-group-title">Price Range (AED)</h4>
+          <h4 class="filter-group-title">
+            <i data-lucide="dollar-sign"></i>
+            Price Range (AED)
+          </h4>
           <div class="price-range-container">
             <div class="price-range-slider">
               <input type="range" id="price-min" min="0" max="500000" value="0" class="range-input">
@@ -37,7 +52,10 @@
 
         <!-- Weight Range -->
         <div class="filter-group">
-          <h4 class="filter-group-title">Weight Range (kg)</h4>
+          <h4 class="filter-group-title">
+            <i data-lucide="scale"></i>
+            Weight Range (kg)
+          </h4>
           <div class="weight-inputs">
             <div class="price-input-group">
               <label>Min Weight</label>
@@ -50,39 +68,154 @@
           </div>
         </div>
 
+        <!-- Brand Type -->
+        <div class="filter-group">
+          <h4 class="filter-group-title">
+            <i data-lucide="award"></i>
+            Brand Type
+          </h4>
+          <div class="filter-tags">
+            <button class="filter-tag active" data-filter="brand-type" data-value="All">All</button>
+            <button class="filter-tag" data-filter="brand-type" data-value="OEM">
+              <i data-lucide="shield-check"></i>
+              OEM
+            </button>
+            <button class="filter-tag" data-filter="brand-type" data-value="Genuine">
+              <i data-lucide="badge-check"></i>
+              Genuine
+            </button>
+            <button class="filter-tag" data-filter="brand-type" data-value="Aftermarket">
+              <i data-lucide="package"></i>
+              Aftermarket
+            </button>
+          </div>
+        </div>
+
         <!-- Brands -->
         <div class="filter-group">
-          <h4 class="filter-group-title">Brands</h4>
-          <div class="filter-tags">
+          <h4 class="filter-group-title">
+            <i data-lucide="building"></i>
+            Brands
+          </h4>
+          <div class="filter-search">
+            <i data-lucide="search"></i>
+            <input type="text" id="brand-filter-search" placeholder="Search brands...">
+          </div>
+          <div class="filter-tags scrollable" id="brand-filter-tags">
             <button class="filter-tag active" data-filter="brand" data-value="All">All</button>
-            <button class="filter-tag" data-filter="brand" data-value="OEM">OEM</button>
             <button class="filter-tag" data-filter="brand" data-value="Bosch">Bosch</button>
             <button class="filter-tag" data-filter="brand" data-value="SKF">SKF</button>
             <button class="filter-tag" data-filter="brand" data-value="Parker">Parker</button>
             <button class="filter-tag" data-filter="brand" data-value="Gates">Gates</button>
             <button class="filter-tag" data-filter="brand" data-value="Continental">Continental</button>
+            <button class="filter-tag" data-filter="brand" data-value="Denso">Denso</button>
+            <button class="filter-tag" data-filter="brand" data-value="Valeo">Valeo</button>
+            <button class="filter-tag" data-filter="brand" data-value="Delphi">Delphi</button>
+            <button class="filter-tag" data-filter="brand" data-value="Brembo">Brembo</button>
+            <button class="filter-tag" data-filter="brand" data-value="Sachs">Sachs</button>
+            <button class="filter-tag" data-filter="brand" data-value="Mann">Mann</button>
+            <button class="filter-tag" data-filter="brand" data-value="NGK">NGK</button>
             <button class="filter-tag" data-filter="brand" data-value="Caterpillar">Caterpillar</button>
             <button class="filter-tag" data-filter="brand" data-value="3K">3K</button>
-            <button class="filter-tag" data-filter="brand" data-value="Aftermarket">Aftermarket</button>
           </div>
         </div>
 
         <!-- Stock Status -->
         <div class="filter-group">
-          <h4 class="filter-group-title">Stock Status</h4>
+          <h4 class="filter-group-title">
+            <i data-lucide="package"></i>
+            Stock Status
+          </h4>
           <div class="filter-tags">
             <button class="filter-tag active" data-filter="stock" data-value="All">All</button>
-            <button class="filter-tag" data-filter="stock" data-value="ST1">ST1</button>
-            <button class="filter-tag" data-filter="stock" data-value="ST2">ST2</button>
-            <button class="filter-tag" data-filter="stock" data-value="ST3">ST3</button>
-            <button class="filter-tag" data-filter="stock" data-value="Low Stock">Low Stock</button>
+            <button class="filter-tag" data-filter="stock" data-value="ST1">
+              <span class="stock-indicator green"></span>
+              ST1 (In Stock)
+            </button>
+            <button class="filter-tag" data-filter="stock" data-value="ST2">
+              <span class="stock-indicator yellow"></span>
+              ST2 (Low Stock)
+            </button>
+            <button class="filter-tag" data-filter="stock" data-value="ST3">
+              <span class="stock-indicator red"></span>
+              ST3 (Limited)
+            </button>
           </div>
+        </div>
+
+        <!-- Country of Origin -->
+        <div class="filter-group">
+          <h4 class="filter-group-title">
+            <i data-lucide="globe"></i>
+            Country of Origin
+          </h4>
+          <div class="filter-tags">
+            <button class="filter-tag active" data-filter="origin" data-value="All">All</button>
+            <button class="filter-tag" data-filter="origin" data-value="Germany">🇩🇪 Germany</button>
+            <button class="filter-tag" data-filter="origin" data-value="USA">🇺🇸 USA</button>
+            <button class="filter-tag" data-filter="origin" data-value="Japan">🇯🇵 Japan</button>
+            <button class="filter-tag" data-filter="origin" data-value="UK">🇬🇧 UK</button>
+            <button class="filter-tag" data-filter="origin" data-value="France">🇫🇷 France</button>
+            <button class="filter-tag" data-filter="origin" data-value="Italy">🇮🇹 Italy</button>
+            <button class="filter-tag" data-filter="origin" data-value="China">🇨🇳 China</button>
+            <button class="filter-tag" data-filter="origin" data-value="Korea">🇰🇷 S. Korea</button>
+          </div>
+        </div>
+
+        <!-- Delivery Time -->
+        <div class="filter-group">
+          <h4 class="filter-group-title">
+            <i data-lucide="truck"></i>
+            Delivery Time
+          </h4>
+          <div class="filter-tags">
+            <button class="filter-tag active" data-filter="delivery" data-value="All">All</button>
+            <button class="filter-tag" data-filter="delivery" data-value="1-2">
+              <i data-lucide="zap"></i>
+              1-2 Days
+            </button>
+            <button class="filter-tag" data-filter="delivery" data-value="3-5">3-5 Days</button>
+            <button class="filter-tag" data-filter="delivery" data-value="7-14">7-14 Days</button>
+          </div>
+        </div>
+
+        <!-- Supplier Rating -->
+        <div class="filter-group">
+          <h4 class="filter-group-title">
+            <i data-lucide="star"></i>
+            Supplier Rating
+          </h4>
+          <div class="filter-tags">
+            <button class="filter-tag active" data-filter="rating" data-value="All">All</button>
+            <button class="filter-tag" data-filter="rating" data-value="5">⭐⭐⭐⭐⭐</button>
+            <button class="filter-tag" data-filter="rating" data-value="4">⭐⭐⭐⭐+</button>
+            <button class="filter-tag" data-filter="rating" data-value="3">⭐⭐⭐+</button>
+          </div>
+        </div>
+
+        <!-- Verified Suppliers -->
+        <div class="filter-group">
+          <h4 class="filter-group-title">
+            <i data-lucide="shield-check"></i>
+            Verified Suppliers
+          </h4>
+          <label class="filter-toggle">
+            <input type="checkbox" id="verified-suppliers-only" checked>
+            <span class="toggle-slider"></span>
+            <span class="toggle-label">Show only verified suppliers</span>
+          </label>
         </div>
       </div>
 
       <div class="filters-footer">
-        <button class="filter-btn-clear" id="clear-filters">Clear All</button>
-        <button class="filter-btn-apply" id="apply-filters">Apply Filters</button>
+        <button class="filter-btn-clear" id="clear-filters">
+          <i data-lucide="trash-2"></i>
+          Clear All
+        </button>
+        <button class="filter-btn-apply" id="apply-filters">
+          <i data-lucide="check"></i>
+          Apply Filters
+        </button>
       </div>
     </aside>
 
@@ -90,6 +223,7 @@
     <div class="search-results-main">
       <!-- Results Header -->
       <div class="results-header" id="results-header" style="display: none;">
+        <div class="results-header-left">
         <p class="results-count">
           Found <strong id="results-count">0</strong> parts matching your search
         </p>
@@ -100,9 +234,16 @@
             <span id="selected-items-count">0</span> Selected
           </span>
         </p>
+        </div>
+        <div class="results-header-right">
         <div class="selected-total-box">
           <span class="selected-total-label">Selected Total</span>
           <span class="selected-total-amount" id="selected-total">0.00 AED</span>
+          </div>
+          <button class="filter-toggle-btn" id="mobile-filter-toggle">
+            <i data-lucide="sliders-horizontal"></i>
+            <span>Filters</span>
+          </button>
         </div>
       </div>
 
@@ -135,9 +276,16 @@
 
         <!-- Results Footer -->
         <div class="results-footer">
-          <button class="btn-add-to-cart" id="add-to-cart-btn">
+          <div class="results-footer-left">
+            <button class="btn-add-to-cart" id="add-to-cart-btn" disabled>
+              <i data-lucide="shopping-cart"></i>
             Add Selected to Cart (<span id="selected-count">0</span>)
           </button>
+            <button class="btn-create-aog-case" id="create-aog-btn" disabled style="display: none;">
+              <i data-lucide="alert-triangle"></i>
+              Create AOG Case
+            </button>
+          </div>
           <div class="selected-total-footer">
             <span class="selected-total-label-footer">SELECTED TOTAL:</span>
             <span class="selected-total-amount-footer" id="selected-total-footer">0.00 AED</span>
@@ -154,6 +302,53 @@
         <p class="empty-state-description">
           Enter a part number, brand name, or description to find parts from verified suppliers worldwide.
         </p>
+
+        <!-- Popular Searches -->
+        <div class="popular-searches">
+          <h4 class="popular-searches-title">Popular Searches</h4>
+          <div class="popular-chips">
+            <button class="popular-chip" data-search="8471474">
+              <i data-lucide="trending-up"></i>
+              8471474
+            </button>
+            <button class="popular-chip" data-search="brake pads">
+              <i data-lucide="circle-stop"></i>
+              Brake Pads
+            </button>
+            <button class="popular-chip" data-search="oil filter">
+              <i data-lucide="filter"></i>
+              Oil Filter
+            </button>
+            <button class="popular-chip" data-search="alternator">
+              <i data-lucide="zap"></i>
+              Alternator
+            </button>
+            <button class="popular-chip" data-search="water pump">
+              <i data-lucide="droplets"></i>
+              Water Pump
+            </button>
+          </div>
+        </div>
+
+        <!-- Feature Highlights -->
+        <div class="empty-state-features">
+          <div class="feature-item">
+            <i data-lucide="shield-check"></i>
+            <span>Verified Suppliers</span>
+          </div>
+          <div class="feature-item">
+            <i data-lucide="globe"></i>
+            <span>Global Network</span>
+          </div>
+          <div class="feature-item">
+            <i data-lucide="zap"></i>
+            <span>Fast Delivery</span>
+          </div>
+          <div class="feature-item">
+            <i data-lucide="award"></i>
+            <span>Quality Guaranteed</span>
+          </div>
+        </div>
       </div>
 
       <!-- No Results State -->
@@ -166,6 +361,28 @@
           We couldn't find any parts matching "<strong id="no-results-query"></strong>".
           Try a different part number or contact our team for assistance.
         </p>
+
+        <div class="no-results-actions">
+          <button class="btn-try-again" id="try-again-btn">
+            <i data-lucide="refresh-cw"></i>
+            Try Again
+          </button>
+          <button class="btn-contact-support">
+            <i data-lucide="message-circle"></i>
+            Contact Support
+          </button>
+        </div>
+
+        <!-- Suggestions -->
+        <div class="no-results-suggestions">
+          <h4>Suggestions:</h4>
+          <ul>
+            <li>Check the spelling of your search term</li>
+            <li>Try using a different part number format</li>
+            <li>Use fewer or more general keywords</li>
+            <li>Clear filters to broaden your search</li>
+          </ul>
+        </div>
       </div>
     </div>
   </div>
@@ -234,5 +451,520 @@
   </div>
 </div>
 
+<!-- Recent Searches Modal -->
+<div class="modal" id="recent-searches-modal">
+  <div class="modal-overlay" id="recent-searches-overlay"></div>
+  <div class="modal-container modal-sm">
+    <div class="modal-header">
+      <h3 class="modal-title">
+        <i data-lucide="clock"></i>
+        <span>Recent Searches</span>
+      </h3>
+      <button class="modal-close" id="recent-searches-close">
+        <i data-lucide="x"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="recent-searches-list" id="recent-searches-list">
+        <!-- Recent searches will be populated here -->
+        <div class="recent-search-empty">
+          <i data-lucide="search"></i>
+          <p>No recent searches yet</p>
+        </div>
+      </div>
+      <button class="btn-clear-history" id="clear-search-history" style="display: none;">
+        <i data-lucide="trash-2"></i>
+        Clear History
+      </button>
+    </div>
+  </div>
+</div>
 
+<style>
+/* Additional styles for enhanced filter sidebar */
+.filter-search {
+  position: relative;
+  margin-bottom: 0.75rem;
+}
 
+.filter-search i {
+  position: absolute;
+  left: 0.875rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  color: var(--text-muted);
+}
+
+.filter-search input {
+  width: 100%;
+  padding: 0.75rem 1rem 0.75rem 2.5rem;
+  background: var(--bg-secondary);
+  border: 1.5px solid var(--border-color);
+  border-radius: 0.5rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.filter-search input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.filter-tags.scrollable {
+  max-height: 200px;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+.filter-tags.scrollable::-webkit-scrollbar {
+  width: 4px;
+}
+
+.filter-tags.scrollable::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+  border-radius: 2px;
+}
+
+.filter-tags.scrollable::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 2px;
+}
+
+.filter-tag i {
+  width: 14px;
+  height: 14px;
+  margin-right: 4px;
+}
+
+.stock-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 6px;
+}
+
+.stock-indicator.green {
+  background: #22c55e;
+  box-shadow: 0 0 6px rgba(34, 197, 94, 0.5);
+}
+
+.stock-indicator.yellow {
+  background: #f59e0b;
+  box-shadow: 0 0 6px rgba(245, 158, 11, 0.5);
+}
+
+.stock-indicator.red {
+  background: #ef4444;
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.5);
+}
+
+.filter-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+}
+
+.filter-toggle input {
+  display: none;
+}
+
+.filter-toggle .toggle-slider {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  background: var(--border-color);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.filter-toggle .toggle-slider::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  background: #fff;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.filter-toggle input:checked + .toggle-slider {
+  background: var(--primary);
+}
+
+.filter-toggle input:checked + .toggle-slider::before {
+  transform: translateX(20px);
+}
+
+.filter-toggle .toggle-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.active-filters-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background: rgba(59, 130, 246, 0.05);
+  border: 1px solid rgba(59, 130, 246, 0.15);
+  border-radius: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.active-filters-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.active-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  background: var(--primary);
+  border-radius: 1rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #fff;
+}
+
+.active-filter-chip button {
+  width: 14px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 50%;
+  color: #fff;
+  cursor: pointer;
+  margin-left: 0.25rem;
+}
+
+.clear-active-filters {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  background: transparent;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 0.375rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #ef4444;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.clear-active-filters:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.clear-active-filters i {
+  width: 12px;
+  height: 12px;
+}
+
+.filter-group-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.filter-group-title i {
+  width: 16px;
+  height: 16px;
+  color: var(--primary);
+}
+
+.results-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.results-header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.results-header-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.filter-toggle-btn {
+  display: none;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background: var(--bg-secondary);
+  border: 1.5px solid var(--border-color);
+  border-radius: 0.5rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filter-toggle-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.filter-toggle-btn i {
+  width: 16px;
+  height: 16px;
+}
+
+.results-footer-left {
+  display: flex;
+  gap: 1rem;
+}
+
+.no-results-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.btn-try-again,
+.btn-contact-support {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1.5rem;
+  border-radius: 0.5rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-try-again {
+  background: var(--primary);
+  border: none;
+  color: #fff;
+}
+
+.btn-try-again:hover {
+  background: var(--primary-dark);
+  transform: translateY(-2px);
+}
+
+.btn-contact-support {
+  background: transparent;
+  border: 1.5px solid var(--border-color);
+  color: var(--text-primary);
+}
+
+.btn-contact-support:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.btn-try-again i,
+.btn-contact-support i {
+  width: 18px;
+  height: 18px;
+}
+
+.no-results-suggestions {
+  margin-top: 2rem;
+  text-align: left;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.no-results-suggestions h4 {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.75rem;
+}
+
+.no-results-suggestions ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.no-results-suggestions li {
+  padding: 0.5rem 0;
+  padding-left: 1.5rem;
+  position: relative;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.no-results-suggestions li::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: var(--primary);
+}
+
+.modal-sm {
+  max-width: 480px;
+}
+
+.recent-searches-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.recent-search-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.875rem 1rem;
+  background: var(--bg-secondary);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.recent-search-item:hover {
+  background: rgba(59, 130, 246, 0.08);
+}
+
+.recent-search-item-content {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.recent-search-item-content i {
+  width: 16px;
+  height: 16px;
+  color: var(--text-muted);
+}
+
+.recent-search-item-text {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9375rem;
+  color: var(--text-primary);
+}
+
+.recent-search-item-time {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.recent-search-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 2rem;
+  text-align: center;
+}
+
+.recent-search-empty i {
+  width: 32px;
+  height: 32px;
+  color: var(--text-muted);
+}
+
+.recent-search-empty p {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9375rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.btn-clear-history {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.875rem;
+  background: transparent;
+  border: 1.5px solid rgba(239, 68, 68, 0.3);
+  border-radius: 0.5rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #ef4444;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 1rem;
+}
+
+.btn-clear-history:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.btn-clear-history i {
+  width: 16px;
+  height: 16px;
+}
+
+@media (max-width: 1199px) {
+  .filter-toggle-btn {
+    display: flex;
+  }
+}
+
+@media (max-width: 767px) {
+  .results-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .results-header-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .results-footer-left {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .btn-add-to-cart,
+  .btn-create-aog-case {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .no-results-actions {
+    flex-direction: column;
+  }
+  
+  .btn-try-again,
+  .btn-contact-support {
+    width: 100%;
+    justify-content: center;
+  }
+}
+</style>

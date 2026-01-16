@@ -23,7 +23,8 @@ const {
   getPaymentCreate,
   getAdminSettings,
   getIntegrationsManagement,
-  getIntegrationCreate
+  getIntegrationCreate,
+  getPartsAnalytics
 } = require('../controllers/adminController');
 
 // Admin dashboard
@@ -60,6 +61,9 @@ router.get('/payments', getPaymentsManagement);
 router.get('/integrations/create', getIntegrationCreate);
 router.get('/integrations', getIntegrationsManagement);
 router.get('/settings', getAdminSettings);
+
+// Parts Analytics
+router.get('/parts-analytics', getPartsAnalytics);
 
 module.exports = router;
 

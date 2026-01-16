@@ -9,14 +9,26 @@
   // AUTHENTICATION STATE
   // ====================================
   const Auth = {
-    // Credentials (mock)
-    credentials: {
-      email: 'deifmohamed21@gmail.com',
-      password: '12345678'
-    },
+    // Buyer accounts (synced with landing page)
+    BUYER_ACCOUNTS: [
+      { email: 'buyer@partsform.com', password: 'buyer123', name: 'Demo Buyer', fullName: 'Demo Buyer' },
+      { email: 'john.smith@automax.com', password: 'buyer123', name: 'John Smith', fullName: 'John Smith' },
+      { email: 'maria@premiumauto.com', password: 'buyer123', name: 'Maria Garcia', fullName: 'Maria Garcia' },
+      { email: 'sarah@partsworld.com', password: 'buyer123', name: 'Sarah Johnson', fullName: 'Sarah Johnson' },
+      { email: 'robert@euroauto.eu', password: 'buyer123', name: 'Robert Chen', fullName: 'Robert Chen' }
+    ],
 
-    // Check if user is logged in
+    // Check if user is logged in (check both session types for compatibility)
     isLoggedIn() {
+      // Check new unified session first
+      const isLoggedIn = localStorage.getItem('isLoggedIn');
+      const userRole = localStorage.getItem('userRole');
+      
+      if (isLoggedIn === 'true' && userRole === 'buyer') {
+        return true;
+      }
+      
+      // Fallback to old buyerSession for backwards compatibility
       const session = localStorage.getItem('buyerSession');
       if (!session) return false;
       
@@ -35,6 +47,20 @@
 
     // Get current user
     getCurrentUser() {
+      // Check new unified session first
+      const userName = localStorage.getItem('userName');
+      const userEmail = localStorage.getItem('userEmail');
+      const userRole = localStorage.getItem('userRole');
+      
+      if (userName && userEmail && userRole === 'buyer') {
+        return {
+          email: userEmail,
+          name: userName,
+          fullName: userName
+        };
+      }
+      
+      // Fallback to old buyerSession
       const session = localStorage.getItem('buyerSession');
       if (!session) return null;
       
@@ -48,20 +74,29 @@
 
     // Login
     login(email, password) {
-      // Mock authentication
-      if (email === this.credentials.email && password === this.credentials.password) {
+      // Find matching buyer account
+      const buyer = this.BUYER_ACCOUNTS.find(b => b.email === email && b.password === password);
+      
+      if (buyer) {
         const user = {
-          email: email,
-          name: email.split('@')[0],
-          fullName: 'Deif Mohamed'
+          email: buyer.email,
+          name: buyer.name,
+          fullName: buyer.fullName
         };
 
+        // Store in unified session format (compatible with landing page)
+        localStorage.setItem('userRole', 'buyer');
+        localStorage.setItem('userName', buyer.fullName);
+        localStorage.setItem('userEmail', buyer.email);
+        localStorage.setItem('isLoggedIn', 'true');
+
+        // Also keep old format for backwards compatibility
         const sessionData = {
           user: user,
           expiresAt: Date.now() + (24 * 60 * 60 * 1000) // 24 hours
         };
-
         localStorage.setItem('buyerSession', JSON.stringify(sessionData));
+        
         return { success: true, user: user };
       }
       return { success: false, message: 'Invalid email or password' };
@@ -69,7 +104,12 @@
 
     // Logout
     logout() {
+      // Clear all session data
       localStorage.removeItem('buyerSession');
+      localStorage.removeItem('userRole');
+      localStorage.removeItem('userName');
+      localStorage.removeItem('userEmail');
+      localStorage.removeItem('isLoggedIn');
       
       // Smooth logout with transitions
       const userDropdown = document.getElementById('userProfileDropdown');

@@ -76,27 +76,6 @@
                 </div>
               </label>
 
-              <label class="connection-type-card" data-type="excel">
-                <input type="radio" name="connectionType" value="excel">
-                <div class="type-card-content">
-                  <div class="type-icon excel">
-                    <i data-lucide="file-spreadsheet"></i>
-                  </div>
-                  <div class="type-info">
-                    <h3>Excel Upload</h3>
-                    <p>Upload .xlsx or .csv files with a set validity period</p>
-                  </div>
-                  <div class="type-features">
-                    <span><i data-lucide="check"></i> 1 week/month validity</span>
-                    <span><i data-lucide="check"></i> Auto-expiry</span>
-                    <span><i data-lucide="check"></i> Direct upload</span>
-                  </div>
-                </div>
-                <div class="type-checked">
-                  <i data-lucide="check-circle"></i>
-                </div>
-              </label>
-
               <label class="connection-type-card" data-type="google-sheets">
                 <input type="radio" name="connectionType" value="google-sheets">
                 <div class="type-card-content">
@@ -320,71 +299,6 @@
             </div>
           </div>
 
-          <!-- Excel Configuration (hidden by default) -->
-          <div class="create-section config-section" id="config-excel" style="display: none;">
-            <div class="section-title">
-              <span class="step-number">2</span>
-              <h2>Excel Upload Details</h2>
-            </div>
-            
-            <div class="config-form">
-              <div class="form-row">
-                <div class="form-group flex-2">
-                  <label>Export/Batch Name <span class="required">*</span></label>
-                  <input type="text" class="form-input" placeholder="e.g., Q1 Performance Parts Batch">
-                </div>
-                <div class="form-group">
-                  <label>Data Validity Period</label>
-                  <select class="form-input">
-                    <option value="1week">1 Week (Short-term)</option>
-                    <option value="2weeks">2 Weeks</option>
-                    <option value="1month" selected>1 Month (Standard)</option>
-                    <option value="quarter">1 Quarter</option>
-                    <option value="permanent">Permanent / Manual Delete</option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="form-row">
-                <div class="form-group full-width">
-                  <div class="upload-container-box">
-                    <label>Upload File (.xlsx, .xls, .csv)</label>
-                    <div class="file-upload-zone" id="excelUploadZone">
-                      <i data-lucide="upload-cloud"></i>
-                      <div class="upload-text">
-                        <p><strong>Click to upload</strong> or drag and drop</p>
-                        <span>Max file size: 50MB</span>
-                      </div>
-                      <input type="file" id="excelFileInput" hidden accept=".xlsx,.xls,.csv">
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="form-divider"></div>
-
-              <h3 class="subsection-title"><i data-lucide="layers"></i> Data Handling</h3>
-              <div class="options-grid">
-                <label class="option-toggle">
-                  <input type="checkbox" checked>
-                  <span class="toggle-slider"></span>
-                  <div class="option-info">
-                    <span class="option-label">Clear previous data</span>
-                    <span class="option-desc">Replace all previous items from this source</span>
-                  </div>
-                </label>
-                <label class="option-toggle">
-                  <input type="checkbox">
-                  <span class="toggle-slider"></span>
-                  <div class="option-info">
-                    <span class="option-label">Auto-notify buyers</span>
-                    <span class="option-desc">Alert buyers when significant price drops occur</span>
-                  </div>
-                </label>
-              </div>
-            </div>
-          </div>
-
           <!-- Google Sheets Configuration (hidden by default) -->
           <div class="create-section config-section" id="config-google-sheets" style="display: none;">
             <div class="section-title">
@@ -482,43 +396,6 @@
 
     // Initialize first card as selected
     document.querySelector('.connection-type-card').classList.add('selected');
-
-    // Excel Upload Zone Interaction
-    const uploadZone = document.getElementById('excelUploadZone');
-    const fileInput = document.getElementById('excelFileInput');
-
-    if (uploadZone && fileInput) {
-      uploadZone.addEventListener('click', () => fileInput.click());
-
-      uploadZone.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        uploadZone.classList.add('drag-active');
-      });
-
-      ['dragleave', 'drop'].forEach(eventName => {
-        uploadZone.addEventListener(eventName, () => {
-          uploadZone.classList.remove('drag-active');
-        });
-      });
-
-      uploadZone.addEventListener('drop', (e) => {
-        e.preventDefault();
-        const files = e.dataTransfer.files;
-        if (files.length) handleFiles(files);
-      });
-
-      fileInput.addEventListener('change', () => {
-        if (fileInput.files.length) handleFiles(fileInput.files);
-      });
-    }
-
-    function handleFiles(files) {
-      const file = files[0];
-      const uploadText = uploadZone.querySelector('.upload-text p');
-      uploadText.innerHTML = `<strong>Selected: ${file.name}</strong>`;
-      uploadZone.style.borderColor = 'var(--admin-success)';
-      uploadZone.style.background = 'var(--admin-success-light)';
-    }
 
     // Toggle password visibility
     function togglePassword(inputId) {

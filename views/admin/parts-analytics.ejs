@@ -1,0 +1,1354 @@
+<%- include('partials/header') %>
+<link rel="stylesheet" href="/css/adminCSS/admin-parts-analytics.css">
+</head>
+<body>
+  <div class="admin-wrapper">
+    <%- include('partials/sidebar', { activePage: 'parts-analytics', currentModule: currentModule }) %>
+    
+    <main class="admin-main">
+      <%- include('partials/topbar', { pageTitle: 'Parts Analytics', currentModule: currentModule }) %>
+      
+      <div class="admin-content">
+        
+        <!-- Analytics Hero Section -->
+        <div class="analytics-hero">
+          <div class="analytics-hero-content">
+            <div class="analytics-hero-left">
+              <div class="analytics-hero-icon">
+                <i data-lucide="bar-chart-3"></i>
+              </div>
+              <div>
+                <h1 class="analytics-hero-title">
+                  Parts Analytics
+                  <span class="analytics-hero-badge">AI-Powered</span>
+                </h1>
+                <p class="analytics-hero-subtitle">Deep insights into parts demand, search patterns, and purchase behavior</p>
+              </div>
+            </div>
+            <div class="analytics-hero-stats">
+              <div class="analytics-hero-stat">
+                <div class="analytics-hero-stat-value">47,892</div>
+                <div class="analytics-hero-stat-label">Total Searches</div>
+              </div>
+              <div class="analytics-hero-stat">
+                <div class="analytics-hero-stat-value">12,456</div>
+                <div class="analytics-hero-stat-label">Parts Viewed</div>
+              </div>
+              <div class="analytics-hero-stat">
+                <div class="analytics-hero-stat-value">3,847</div>
+                <div class="analytics-hero-stat-label">Purchases</div>
+              </div>
+              <div class="analytics-hero-stat">
+                <div class="analytics-hero-stat-value">23.4%</div>
+                <div class="analytics-hero-stat-label">Conversion Rate</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Quick Stats Grid -->
+        <div class="analytics-quick-stats">
+          <div class="quick-stat-card blue">
+            <div class="quick-stat-header">
+              <div class="quick-stat-icon">
+                <i data-lucide="search"></i>
+              </div>
+              <div class="quick-stat-change positive">
+                <i data-lucide="trending-up"></i>
+                +18.5%
+              </div>
+            </div>
+            <div class="quick-stat-value">47,892</div>
+            <div class="quick-stat-label">Total Searches This Month</div>
+          </div>
+          
+          <div class="quick-stat-card green">
+            <div class="quick-stat-header">
+              <div class="quick-stat-icon">
+                <i data-lucide="shopping-cart"></i>
+              </div>
+              <div class="quick-stat-change positive">
+                <i data-lucide="trending-up"></i>
+                +12.3%
+              </div>
+            </div>
+            <div class="quick-stat-value">3,847</div>
+            <div class="quick-stat-label">Parts Purchased</div>
+          </div>
+          
+          <div class="quick-stat-card purple">
+            <div class="quick-stat-header">
+              <div class="quick-stat-icon">
+                <i data-lucide="eye-off"></i>
+              </div>
+              <div class="quick-stat-change negative">
+                <i data-lucide="trending-down"></i>
+                -8.2%
+              </div>
+            </div>
+            <div class="quick-stat-value">1,234</div>
+            <div class="quick-stat-label">Searched Not Bought</div>
+          </div>
+          
+          <div class="quick-stat-card amber">
+            <div class="quick-stat-header">
+              <div class="quick-stat-icon">
+                <i data-lucide="alert-circle"></i>
+              </div>
+              <div class="quick-stat-change negative">
+                <i data-lucide="trending-up"></i>
+                +5.7%
+              </div>
+            </div>
+            <div class="quick-stat-value">567</div>
+            <div class="quick-stat-label">Missing Parts Requests</div>
+          </div>
+          
+          <div class="quick-stat-card cyan">
+            <div class="quick-stat-header">
+              <div class="quick-stat-icon">
+                <i data-lucide="flame"></i>
+              </div>
+              <div class="quick-stat-change positive">
+                <i data-lucide="trending-up"></i>
+                +24.1%
+              </div>
+            </div>
+            <div class="quick-stat-value">89</div>
+            <div class="quick-stat-label">Trending Parts</div>
+          </div>
+        </div>
+        
+        <!-- Analytics Tabs Navigation -->
+        <div class="analytics-tabs">
+          <button class="analytics-tab active" onclick="switchAnalyticsTab('search-behavior')">
+            <i data-lucide="search"></i>
+            <span>Search Behavior</span>
+          </button>
+          <button class="analytics-tab" onclick="switchAnalyticsTab('purchase-patterns')">
+            <i data-lucide="shopping-bag"></i>
+            <span>Purchase Patterns</span>
+          </button>
+          <button class="analytics-tab" onclick="switchAnalyticsTab('demand-forecast')">
+            <i data-lucide="trending-up"></i>
+            <span>Demand Forecast</span>
+          </button>
+          <button class="analytics-tab" onclick="switchAnalyticsTab('ai-insights')">
+            <i data-lucide="brain"></i>
+            <span>AI Insights</span>
+          </button>
+          <button class="analytics-tab" onclick="switchAnalyticsTab('ai-assistant')">
+            <i data-lucide="message-circle"></i>
+            <span>AI Assistant</span>
+          </button>
+        </div>
+        
+        <!-- ============================================
+             TAB 1: SEARCH BEHAVIOR
+             ============================================ -->
+        <div id="tab-search-behavior" class="analytics-panel active">
+          
+          <div class="search-analytics-grid">
+            <!-- Most Searched Parts -->
+            <div class="analytics-card">
+              <div class="analytics-card-header">
+                <div class="analytics-card-title">
+                  <div class="analytics-card-title-icon">
+                    <i data-lucide="search"></i>
+                  </div>
+                  <div>
+                    <h3>Most Searched Parts</h3>
+                    <p>Parts buyers are actively looking for</p>
+                  </div>
+                </div>
+                <select style="padding: 0.5rem 1rem; border: 1px solid var(--admin-border); border-radius: 8px; background: var(--admin-bg-tertiary); font-size: 0.85rem;">
+                  <option>Last 7 Days</option>
+                  <option>Last 30 Days</option>
+                  <option>Last 90 Days</option>
+                </select>
+              </div>
+              <div class="analytics-card-body">
+                <table class="searched-parts-table">
+                  <thead>
+                    <tr>
+                      <th>Part</th>
+                      <th>Searches</th>
+                      <th>Conversion</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>
+                        <div class="part-info">
+                          <div class="part-icon brake">
+                            <i data-lucide="disc"></i>
+                          </div>
+                          <div>
+                            <div class="part-name">Ceramic Brake Pads Set</div>
+                            <div class="part-number">PN: BP-4521-CER</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td><span class="search-count"><i data-lucide="search"></i> 2,847</span></td>
+                      <td><span class="conversion-rate high">68%</span></td>
+                      <td><span class="status-badge available">In Stock</span></td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div class="part-info">
+                          <div class="part-icon engine">
+                            <i data-lucide="settings"></i>
+                          </div>
+                          <div>
+                            <div class="part-name">Alternator Assembly 150A</div>
+                            <div class="part-number">PN: ALT-7890-PRO</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td><span class="search-count"><i data-lucide="search"></i> 2,156</span></td>
+                      <td><span class="conversion-rate high">72%</span></td>
+                      <td><span class="status-badge available">In Stock</span></td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div class="part-info">
+                          <div class="part-icon suspension">
+                            <i data-lucide="move-vertical"></i>
+                          </div>
+                          <div>
+                            <div class="part-name">Front Strut Assembly</div>
+                            <div class="part-number">PN: SUS-3456-FR</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td><span class="search-count"><i data-lucide="search"></i> 1,892</span></td>
+                      <td><span class="conversion-rate medium">45%</span></td>
+                      <td><span class="status-badge limited">Low Stock</span></td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div class="part-info">
+                          <div class="part-icon electrical">
+                            <i data-lucide="zap"></i>
+                          </div>
+                          <div>
+                            <div class="part-name">Spark Plug Platinum Set</div>
+                            <div class="part-number">PN: SP-1234-PLT</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td><span class="search-count"><i data-lucide="search"></i> 1,654</span></td>
+                      <td><span class="conversion-rate high">78%</span></td>
+                      <td><span class="status-badge available">In Stock</span></td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div class="part-info">
+                          <div class="part-icon body">
+                            <i data-lucide="filter"></i>
+                          </div>
+                          <div>
+                            <div class="part-name">Oil Filter Premium</div>
+                            <div class="part-number">PN: OF-7890-PRO</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td><span class="search-count"><i data-lucide="search"></i> 1,423</span></td>
+                      <td><span class="conversion-rate low">28%</span></td>
+                      <td><span class="status-badge out-of-stock">Out of Stock</span></td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div class="part-info">
+                          <div class="part-icon transmission">
+                            <i data-lucide="cog"></i>
+                          </div>
+                          <div>
+                            <div class="part-name">Transmission Fluid ATF</div>
+                            <div class="part-number">PN: TF-5678-ATF</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td><span class="search-count"><i data-lucide="search"></i> 1,287</span></td>
+                      <td><span class="conversion-rate medium">52%</span></td>
+                      <td><span class="status-badge available">In Stock</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            
+            <!-- Missed Opportunities -->
+            <div class="analytics-card">
+              <div class="analytics-card-header">
+                <div class="analytics-card-title">
+                  <div class="analytics-card-title-icon" style="background: #ef4444;">
+                    <i data-lucide="alert-triangle"></i>
+                  </div>
+                  <div>
+                    <h3>Missed Opportunities</h3>
+                    <p>Searched but not added to cart</p>
+                  </div>
+                </div>
+              </div>
+              <div class="analytics-card-body">
+                <div class="missed-opportunities-list">
+                  <div class="missed-opportunity-item">
+                    <div class="missed-opportunity-icon">
+                      <i data-lucide="x-circle"></i>
+                    </div>
+                    <div class="missed-opportunity-content">
+                      <div class="missed-opportunity-name">Turbocharger Assembly</div>
+                      <div class="missed-opportunity-meta">Not in inventory • High demand</div>
+                    </div>
+                    <div class="missed-opportunity-value">
+                      <div class="missed-opportunity-searches">847</div>
+                      <div class="missed-opportunity-label">searches</div>
+                    </div>
+                  </div>
+                  
+                  <div class="missed-opportunity-item">
+                    <div class="missed-opportunity-icon">
+                      <i data-lucide="x-circle"></i>
+                    </div>
+                    <div class="missed-opportunity-content">
+                      <div class="missed-opportunity-name">LED Headlight Kit</div>
+                      <div class="missed-opportunity-meta">Price too high • Lost to competitors</div>
+                    </div>
+                    <div class="missed-opportunity-value">
+                      <div class="missed-opportunity-searches">623</div>
+                      <div class="missed-opportunity-label">searches</div>
+                    </div>
+                  </div>
+                  
+                  <div class="missed-opportunity-item">
+                    <div class="missed-opportunity-icon">
+                      <i data-lucide="x-circle"></i>
+                    </div>
+                    <div class="missed-opportunity-content">
+                      <div class="missed-opportunity-name">Performance Exhaust System</div>
+                      <div class="missed-opportunity-meta">Out of stock frequently</div>
+                    </div>
+                    <div class="missed-opportunity-value">
+                      <div class="missed-opportunity-searches">512</div>
+                      <div class="missed-opportunity-label">searches</div>
+                    </div>
+                  </div>
+                  
+                  <div class="missed-opportunity-item">
+                    <div class="missed-opportunity-icon">
+                      <i data-lucide="x-circle"></i>
+                    </div>
+                    <div class="missed-opportunity-content">
+                      <div class="missed-opportunity-name">Cold Air Intake Kit</div>
+                      <div class="missed-opportunity-meta">Compatibility issues reported</div>
+                    </div>
+                    <div class="missed-opportunity-value">
+                      <div class="missed-opportunity-searches">398</div>
+                      <div class="missed-opportunity-label">searches</div>
+                    </div>
+                  </div>
+                  
+                  <div class="missed-opportunity-item">
+                    <div class="missed-opportunity-icon">
+                      <i data-lucide="x-circle"></i>
+                    </div>
+                    <div class="missed-opportunity-content">
+                      <div class="missed-opportunity-name">Racing Clutch Kit</div>
+                      <div class="missed-opportunity-meta">Limited fitment options</div>
+                    </div>
+                    <div class="missed-opportunity-value">
+                      <div class="missed-opportunity-searches">287</div>
+                      <div class="missed-opportunity-label">searches</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Search Trends Chart -->
+          <div class="analytics-card" style="margin-bottom: 2rem;">
+            <div class="analytics-card-header">
+              <div class="analytics-card-title">
+                <div class="analytics-card-title-icon" style="background: #8b5cf6;">
+                  <i data-lucide="activity"></i>
+                </div>
+                <div>
+                  <h3>Search Volume Trends</h3>
+                  <p>Daily search patterns over the last 30 days</p>
+                </div>
+              </div>
+              <div style="display: flex; gap: 0.5rem;">
+                <button class="admin-btn admin-btn-secondary" style="padding: 0.4rem 0.75rem; font-size: 0.8rem;">Week</button>
+                <button class="admin-btn admin-btn-primary" style="padding: 0.4rem 0.75rem; font-size: 0.8rem;">Month</button>
+                <button class="admin-btn admin-btn-secondary" style="padding: 0.4rem 0.75rem; font-size: 0.8rem;">Quarter</button>
+              </div>
+            </div>
+            <div class="analytics-card-body">
+              <div class="chart-wrapper">
+                <canvas id="searchTrendsChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- ============================================
+             TAB 2: PURCHASE PATTERNS
+             ============================================ -->
+        <div id="tab-purchase-patterns" class="analytics-panel">
+          
+          <!-- Top Purchased Parts Grid -->
+          <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--admin-text-primary); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem;">
+            <i data-lucide="trophy" style="width: 24px; height: 24px; color: #f59e0b;"></i>
+            Top Purchased Parts
+          </h3>
+          
+          <div class="top-parts-grid">
+            <div class="top-part-card">
+              <div class="top-part-rank gold">1</div>
+              <div class="top-part-icon" style="background: rgba(239, 68, 68, 0.12); color: #ef4444;">
+                <i data-lucide="disc"></i>
+              </div>
+              <div class="top-part-name">Ceramic Brake Pads Set</div>
+              <div class="top-part-category">Brake Systems</div>
+              <div class="top-part-stats">
+                <div class="top-part-stat">
+                  <div class="top-part-stat-value">1,847</div>
+                  <div class="top-part-stat-label">Orders</div>
+                </div>
+                <div class="top-part-stat">
+                  <div class="top-part-stat-value">$165K</div>
+                  <div class="top-part-stat-label">Revenue</div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="top-part-card">
+              <div class="top-part-rank silver">2</div>
+              <div class="top-part-icon" style="background: rgba(59, 130, 246, 0.12); color: #3b82f6;">
+                <i data-lucide="settings"></i>
+              </div>
+              <div class="top-part-name">Alternator Assembly</div>
+              <div class="top-part-category">Electrical</div>
+              <div class="top-part-stats">
+                <div class="top-part-stat">
+                  <div class="top-part-stat-value">1,456</div>
+                  <div class="top-part-stat-label">Orders</div>
+                </div>
+                <div class="top-part-stat">
+                  <div class="top-part-stat-value">$298K</div>
+                  <div class="top-part-stat-label">Revenue</div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="top-part-card">
+              <div class="top-part-rank bronze">3</div>
+              <div class="top-part-icon" style="background: rgba(16, 185, 129, 0.12); color: #10b981;">
+                <i data-lucide="filter"></i>
+              </div>
+              <div class="top-part-name">Oil Filter Premium</div>
+              <div class="top-part-category">Filters</div>
+              <div class="top-part-stats">
+                <div class="top-part-stat">
+                  <div class="top-part-stat-value">1,234</div>
+                  <div class="top-part-stat-label">Orders</div>
+                </div>
+                <div class="top-part-stat">
+                  <div class="top-part-stat-value">$24K</div>
+                  <div class="top-part-stat-label">Revenue</div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="top-part-card">
+              <div class="top-part-rank default">4</div>
+              <div class="top-part-icon" style="background: rgba(139, 92, 246, 0.12); color: #8b5cf6;">
+                <i data-lucide="move-vertical"></i>
+              </div>
+              <div class="top-part-name">Front Strut Assembly</div>
+              <div class="top-part-category">Suspension</div>
+              <div class="top-part-stats">
+                <div class="top-part-stat">
+                  <div class="top-part-stat-value">987</div>
+                  <div class="top-part-stat-label">Orders</div>
+                </div>
+                <div class="top-part-stat">
+                  <div class="top-part-stat-value">$145K</div>
+                  <div class="top-part-stat-label">Revenue</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Purchase Analytics Charts -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+            <div class="analytics-card">
+              <div class="analytics-card-header">
+                <div class="analytics-card-title">
+                  <div class="analytics-card-title-icon" style="background: #10b981;">
+                    <i data-lucide="pie-chart"></i>
+                  </div>
+                  <div>
+                    <h3>Sales by Category</h3>
+                    <p>Revenue distribution this month</p>
+                  </div>
+                </div>
+              </div>
+              <div class="analytics-card-body">
+                <div class="chart-wrapper" style="height: 280px;">
+                  <canvas id="categoryPieChart"></canvas>
+                </div>
+              </div>
+            </div>
+            
+            <div class="analytics-card">
+              <div class="analytics-card-header">
+                <div class="analytics-card-title">
+                  <div class="analytics-card-title-icon" style="background: #f59e0b;">
+                    <i data-lucide="bar-chart-2"></i>
+                  </div>
+                  <div>
+                    <h3>Purchase Frequency</h3>
+                    <p>Orders per customer segment</p>
+                  </div>
+                </div>
+              </div>
+              <div class="analytics-card-body">
+                <div class="chart-wrapper" style="height: 280px;">
+                  <canvas id="purchaseFrequencyChart"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Repeat Purchase Analysis -->
+          <div class="analytics-card">
+            <div class="analytics-card-header">
+              <div class="analytics-card-title">
+                <div class="analytics-card-title-icon" style="background: #06b6d4;">
+                  <i data-lucide="repeat"></i>
+                </div>
+                <div>
+                  <h3>Repeat Purchase Analysis</h3>
+                  <p>Parts frequently bought together or repurchased</p>
+                </div>
+              </div>
+            </div>
+            <div class="analytics-card-body">
+              <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+                <div style="padding: 1.5rem; background: var(--admin-bg-tertiary); border-radius: 16px; text-align: center;">
+                  <div style="font-size: 2rem; font-weight: 800; color: #3b82f6;">78%</div>
+                  <div style="font-size: 0.9rem; color: var(--admin-text-muted); margin-top: 0.5rem;">Brake Pads + Rotors</div>
+                  <div style="font-size: 0.8rem; color: var(--admin-text-secondary); margin-top: 0.25rem;">Bought together</div>
+                </div>
+                <div style="padding: 1.5rem; background: var(--admin-bg-tertiary); border-radius: 16px; text-align: center;">
+                  <div style="font-size: 2rem; font-weight: 800; color: #10b981;">65%</div>
+                  <div style="font-size: 0.9rem; color: var(--admin-text-muted); margin-top: 0.5rem;">Oil Filter + Oil</div>
+                  <div style="font-size: 0.8rem; color: var(--admin-text-secondary); margin-top: 0.25rem;">Bought together</div>
+                </div>
+                <div style="padding: 1.5rem; background: var(--admin-bg-tertiary); border-radius: 16px; text-align: center;">
+                  <div style="font-size: 2rem; font-weight: 800; color: #8b5cf6;">52%</div>
+                  <div style="font-size: 0.9rem; color: var(--admin-text-muted); margin-top: 0.5rem;">Spark Plugs + Ignition Coils</div>
+                  <div style="font-size: 0.8rem; color: var(--admin-text-secondary); margin-top: 0.25rem;">Bought together</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- ============================================
+             TAB 3: DEMAND FORECAST
+             ============================================ -->
+        <div id="tab-demand-forecast" class="analytics-panel">
+          
+          <div class="predictions-grid">
+            <!-- Main Forecast Chart -->
+            <div class="prediction-chart-card">
+              <div class="analytics-card-header">
+                <div class="analytics-card-title">
+                  <div class="analytics-card-title-icon" style="background: #3b82f6;">
+                    <i data-lucide="trending-up"></i>
+                  </div>
+                  <div>
+                    <h3>30-Day Demand Forecast</h3>
+                    <p>AI-predicted demand with 94.2% accuracy</p>
+                  </div>
+                </div>
+                <div style="display: flex; gap: 0.75rem;">
+                  <div style="display: flex; align-items: center; gap: 0.375rem;">
+                    <div style="width: 12px; height: 12px; background: #3b82f6; border-radius: 2px;"></div>
+                    <span style="font-size: 0.75rem; color: var(--admin-text-muted);">Historical</span>
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 0.375rem;">
+                    <div style="width: 12px; height: 12px; background: #10b981; border-radius: 2px;"></div>
+                    <span style="font-size: 0.75rem; color: var(--admin-text-muted);">Forecast</span>
+                  </div>
+                </div>
+              </div>
+              <div class="analytics-card-body">
+                <div class="chart-wrapper" style="height: 350px;">
+                  <canvas id="demandForecastChart"></canvas>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Forecast Metrics Sidebar -->
+            <div class="prediction-sidebar">
+              <div class="prediction-metric-card">
+                <div class="prediction-metric-header">
+                  <div class="prediction-metric-icon" style="background: rgba(16, 185, 129, 0.12); color: #10b981;">
+                    <i data-lucide="trending-up"></i>
+                  </div>
+                  <div class="prediction-metric-title">Expected Orders</div>
+                </div>
+                <div class="prediction-metric-value">4,892</div>
+                <div class="prediction-metric-change positive">
+                  <i data-lucide="arrow-up"></i>
+                  +18.5% vs last month
+                </div>
+              </div>
+              
+              <div class="prediction-metric-card">
+                <div class="prediction-metric-header">
+                  <div class="prediction-metric-icon" style="background: rgba(59, 130, 246, 0.12); color: #3b82f6;">
+                    <i data-lucide="dollar-sign"></i>
+                  </div>
+                  <div class="prediction-metric-title">Projected Revenue</div>
+                </div>
+                <div class="prediction-metric-value">$1.24M</div>
+                <div class="prediction-metric-change positive">
+                  <i data-lucide="arrow-up"></i>
+                  +12.3% growth
+                </div>
+              </div>
+              
+              <div class="prediction-metric-card">
+                <div class="prediction-metric-header">
+                  <div class="prediction-metric-icon" style="background: rgba(245, 158, 11, 0.12); color: #f59e0b;">
+                    <i data-lucide="package"></i>
+                  </div>
+                  <div class="prediction-metric-title">Stock Needed</div>
+                </div>
+                <div class="prediction-metric-value">12,456</div>
+                <div class="prediction-metric-change negative">
+                  <i data-lucide="alert-circle"></i>
+                  347 items low
+                </div>
+              </div>
+              
+              <div class="prediction-metric-card">
+                <div class="prediction-metric-header">
+                  <div class="prediction-metric-icon" style="background: rgba(139, 92, 246, 0.12); color: #8b5cf6;">
+                    <i data-lucide="target"></i>
+                  </div>
+                  <div class="prediction-metric-title">Model Accuracy</div>
+                </div>
+                <div class="prediction-metric-value">94.2%</div>
+                <div class="prediction-metric-change positive">
+                  <i data-lucide="arrow-up"></i>
+                  +2.1% improved
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- High Demand Parts Forecast -->
+          <div class="analytics-card" style="margin-top: 1.5rem;">
+            <div class="analytics-card-header">
+              <div class="analytics-card-title">
+                  <div class="analytics-card-title-icon" style="background: #ef4444;">
+                    <i data-lucide="flame"></i>
+                  </div>
+                <div>
+                  <h3>High Demand Parts Forecast</h3>
+                  <p>Parts predicted to have increased demand next 30 days</p>
+                </div>
+              </div>
+            </div>
+            <div class="analytics-card-body">
+              <table class="searched-parts-table">
+                <thead>
+                  <tr>
+                    <th>Part</th>
+                    <th>Current Stock</th>
+                    <th>Predicted Demand</th>
+                    <th>Stock Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <div class="part-info">
+                        <div class="part-icon brake">
+                          <i data-lucide="disc"></i>
+                        </div>
+                        <div>
+                          <div class="part-name">Ceramic Brake Pads Set</div>
+                          <div class="part-number">PN: BP-4521-CER</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td><span style="font-weight: 600;">456</span></td>
+                    <td><span style="font-weight: 700; color: #ef4444;">+892</span></td>
+                    <td><span class="status-badge limited">Restock Needed</span></td>
+                    <td><button class="admin-btn admin-btn-primary" style="padding: 0.4rem 0.75rem; font-size: 0.8rem;">Order Now</button></td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div class="part-info">
+                        <div class="part-icon engine">
+                          <i data-lucide="settings"></i>
+                        </div>
+                        <div>
+                          <div class="part-name">Alternator Assembly 150A</div>
+                          <div class="part-number">PN: ALT-7890-PRO</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td><span style="font-weight: 600;">234</span></td>
+                    <td><span style="font-weight: 700; color: #f59e0b;">+567</span></td>
+                    <td><span class="status-badge limited">Low Stock</span></td>
+                    <td><button class="admin-btn admin-btn-primary" style="padding: 0.4rem 0.75rem; font-size: 0.8rem;">Order Now</button></td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div class="part-info">
+                        <div class="part-icon electrical">
+                          <i data-lucide="zap"></i>
+                        </div>
+                        <div>
+                          <div class="part-name">Spark Plug Platinum Set</div>
+                          <div class="part-number">PN: SP-1234-PLT</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td><span style="font-weight: 600;">1,234</span></td>
+                    <td><span style="font-weight: 700; color: #10b981;">+423</span></td>
+                    <td><span class="status-badge available">Sufficient</span></td>
+                    <td><button class="admin-btn admin-btn-secondary" style="padding: 0.4rem 0.75rem; font-size: 0.8rem;">Monitor</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        
+        <!-- ============================================
+             TAB 4: AI INSIGHTS
+             ============================================ -->
+        <div id="tab-ai-insights" class="analytics-panel">
+          
+          <div class="ai-insights-section">
+            <!-- AI Insights Header -->
+            <div class="ai-insights-header">
+              <div class="ai-insights-header-content">
+                <div class="ai-insights-header-left">
+                  <div class="ai-insights-header-icon">
+                    <i data-lucide="brain"></i>
+                  </div>
+                  <div>
+                    <h2 class="ai-insights-header-title">AI-Powered Recommendations</h2>
+                    <p class="ai-insights-header-subtitle">Actionable insights based on parts analytics and market trends</p>
+                  </div>
+                </div>
+                <div class="ai-status-badge">
+                  <span>Model Active • Last updated 5 min ago</span>
+                </div>
+              </div>
+            </div>
+            
+            <!-- AI Recommendations Grid -->
+            <div class="ai-recommendations-grid">
+              
+              <!-- Opportunity Card -->
+              <div class="ai-recommendation-card opportunity">
+                <div class="ai-recommendation-header">
+                  <span class="ai-recommendation-type">High Opportunity</span>
+                  <div class="ai-recommendation-icon">
+                    <i data-lucide="trending-up"></i>
+                  </div>
+                </div>
+                <div class="ai-recommendation-body">
+                  <h4 class="ai-recommendation-title">Stock Turbocharger Assemblies</h4>
+                  <p class="ai-recommendation-description">847 searches with 0% conversion due to missing inventory. High demand detected from performance shops.</p>
+                  <div class="ai-recommendation-impact">
+                    <span class="ai-recommendation-impact-label">Potential Revenue</span>
+                    <span class="ai-recommendation-impact-value">+$127,500</span>
+                  </div>
+                  <button class="ai-recommendation-action">
+                    <i data-lucide="plus"></i>
+                    Add to Inventory
+                  </button>
+                </div>
+              </div>
+              
+              <!-- Warning Card -->
+              <div class="ai-recommendation-card warning">
+                <div class="ai-recommendation-header">
+                  <span class="ai-recommendation-type">Urgent Action</span>
+                  <div class="ai-recommendation-icon">
+                    <i data-lucide="alert-triangle"></i>
+                  </div>
+                </div>
+                <div class="ai-recommendation-body">
+                  <h4 class="ai-recommendation-title">Restock Brake Pads Immediately</h4>
+                  <p class="ai-recommendation-description">Current stock will run out in 5 days based on demand forecast. 35% demand surge predicted.</p>
+                  <div class="ai-recommendation-impact">
+                    <span class="ai-recommendation-impact-label">At-Risk Revenue</span>
+                    <span class="ai-recommendation-impact-value">$89,200</span>
+                  </div>
+                  <button class="ai-recommendation-action">
+                    <i data-lucide="shopping-cart"></i>
+                    Reorder Stock
+                  </button>
+                </div>
+              </div>
+              
+              <!-- Insight Card -->
+              <div class="ai-recommendation-card insight">
+                <div class="ai-recommendation-header">
+                  <span class="ai-recommendation-type">Bundle Opportunity</span>
+                  <div class="ai-recommendation-icon">
+                    <i data-lucide="gift"></i>
+                  </div>
+                </div>
+                <div class="ai-recommendation-body">
+                  <h4 class="ai-recommendation-title">Create Oil Change Bundle</h4>
+                  <p class="ai-recommendation-description">78% of oil filter buyers also purchase engine oil. Bundle discount could boost conversions by 23%.</p>
+                  <div class="ai-recommendation-impact">
+                    <span class="ai-recommendation-impact-label">Conversion Boost</span>
+                    <span class="ai-recommendation-impact-value">+23%</span>
+                  </div>
+                  <button class="ai-recommendation-action">
+                    <i data-lucide="package"></i>
+                    Create Bundle
+                  </button>
+                </div>
+              </div>
+              
+              <!-- Pricing Insight -->
+              <div class="ai-recommendation-card insight">
+                <div class="ai-recommendation-header">
+                  <span class="ai-recommendation-type">Pricing Insight</span>
+                  <div class="ai-recommendation-icon">
+                    <i data-lucide="dollar-sign"></i>
+                  </div>
+                </div>
+                <div class="ai-recommendation-body">
+                  <h4 class="ai-recommendation-title">Adjust LED Headlight Pricing</h4>
+                  <p class="ai-recommendation-description">Your price is 15% higher than market average. 623 lost searches due to price sensitivity.</p>
+                  <div class="ai-recommendation-impact">
+                    <span class="ai-recommendation-impact-label">Suggested Reduction</span>
+                    <span class="ai-recommendation-impact-value">-12%</span>
+                  </div>
+                  <button class="ai-recommendation-action">
+                    <i data-lucide="edit"></i>
+                    Adjust Price
+                  </button>
+                </div>
+              </div>
+              
+              <!-- Supplier Recommendation -->
+              <div class="ai-recommendation-card opportunity">
+                <div class="ai-recommendation-header">
+                  <span class="ai-recommendation-type">Supplier Insight</span>
+                  <div class="ai-recommendation-icon">
+                    <i data-lucide="truck"></i>
+                  </div>
+                </div>
+                <div class="ai-recommendation-body">
+                  <h4 class="ai-recommendation-title">Diversify Brake Pad Suppliers</h4>
+                  <p class="ai-recommendation-description">Single supplier risk detected. 3 alternative suppliers identified with better lead times.</p>
+                  <div class="ai-recommendation-impact">
+                    <span class="ai-recommendation-impact-label">Lead Time Savings</span>
+                    <span class="ai-recommendation-impact-value">-3 days</span>
+                  </div>
+                  <button class="ai-recommendation-action">
+                    <i data-lucide="users"></i>
+                    View Suppliers
+                  </button>
+                </div>
+              </div>
+              
+              <!-- Seasonal Trend -->
+              <div class="ai-recommendation-card warning">
+                <div class="ai-recommendation-header">
+                  <span class="ai-recommendation-type">Seasonal Alert</span>
+                  <div class="ai-recommendation-icon">
+                    <i data-lucide="calendar"></i>
+                  </div>
+                </div>
+                <div class="ai-recommendation-body">
+                  <h4 class="ai-recommendation-title">Winter Parts Demand Incoming</h4>
+                  <p class="ai-recommendation-description">Based on historical data, battery and wiper blade demand will spike 45% in 3 weeks.</p>
+                  <div class="ai-recommendation-impact">
+                    <span class="ai-recommendation-impact-label">Demand Increase</span>
+                    <span class="ai-recommendation-impact-value">+45%</span>
+                  </div>
+                  <button class="ai-recommendation-action">
+                    <i data-lucide="snowflake"></i>
+                    Prepare Stock
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- ============================================
+             TAB 5: AI ASSISTANT
+             ============================================ -->
+        <div id="tab-ai-assistant" class="analytics-panel">
+          
+          <div class="ai-chat-section">
+            <div class="ai-chat-header">
+              <div class="ai-chat-header-left">
+                <div class="ai-chat-avatar">
+                  <i data-lucide="bot"></i>
+                </div>
+                <div>
+                  <h3 class="ai-chat-title">Parts Analytics AI Assistant</h3>
+                  <p class="ai-chat-subtitle">Ask me anything about your parts data, trends, and recommendations</p>
+                </div>
+              </div>
+              <div class="ai-chat-status">
+                <span>Online</span>
+              </div>
+            </div>
+            
+            <div class="ai-chat-messages" id="aiChatMessages">
+              <!-- AI Welcome Message -->
+              <div class="ai-chat-message assistant">
+                <div class="ai-chat-message-avatar">
+                  <i data-lucide="bot"></i>
+                </div>
+                <div class="ai-chat-message-content">
+                  <p>👋 Hello! I'm your Parts Analytics AI Assistant. I can help you understand:</p>
+                  <ul style="margin: 0.75rem 0; padding-left: 1.25rem;">
+                    <li>Which parts are trending and why</li>
+                    <li>Demand forecasts and stock recommendations</li>
+                    <li>Pricing optimization suggestions</li>
+                    <li>Customer purchase patterns</li>
+                    <li>Missed sales opportunities</li>
+                  </ul>
+                  <p>What would you like to know about your parts analytics?</p>
+                  
+                  <div class="ai-chat-suggestions">
+                    <button class="ai-chat-suggestion" onclick="askAI('What are the top trending parts this week?')">Top trending parts</button>
+                    <button class="ai-chat-suggestion" onclick="askAI('Show me missed sales opportunities')">Missed opportunities</button>
+                    <button class="ai-chat-suggestion" onclick="askAI('What parts should I restock?')">Restock suggestions</button>
+                    <button class="ai-chat-suggestion" onclick="askAI('Analyze brake pads demand')">Brake pads analysis</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="ai-chat-input-wrapper">
+              <div class="ai-chat-input-container">
+                <input type="text" class="ai-chat-input" id="aiChatInput" placeholder="Ask about parts, trends, recommendations..." onkeypress="handleChatKeypress(event)">
+                <button class="ai-chat-send-btn" onclick="sendAIMessage()">
+                  <i data-lucide="send"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+          
+        </div>
+        
+      </div>
+    </main>
+  </div>
+
+  <!-- Chart.js Scripts -->
+  <script>
+    // Tab Switching Function
+    function switchAnalyticsTab(tabName) {
+      // Hide all panels
+      document.querySelectorAll('.analytics-panel').forEach(panel => {
+        panel.classList.remove('active');
+      });
+      
+      // Remove active from all tabs
+      document.querySelectorAll('.analytics-tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      
+      // Show selected panel
+      document.getElementById('tab-' + tabName).classList.add('active');
+      
+      // Add active to clicked tab
+      event.target.closest('.analytics-tab').classList.add('active');
+      
+      // Reinitialize Lucide icons
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+      
+      // Initialize charts for the tab if needed
+      if (tabName === 'search-behavior' && !window.searchTrendsChartInit) {
+        initSearchTrendsChart();
+        window.searchTrendsChartInit = true;
+      }
+      if (tabName === 'purchase-patterns' && !window.purchaseChartsInit) {
+        initPurchaseCharts();
+        window.purchaseChartsInit = true;
+      }
+      if (tabName === 'demand-forecast' && !window.demandForecastChartInit) {
+        initDemandForecastChart();
+        window.demandForecastChartInit = true;
+      }
+    }
+    
+    // Search Trends Chart
+    function initSearchTrendsChart() {
+      const ctx = document.getElementById('searchTrendsChart');
+      if (!ctx) return;
+      
+      const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 300);
+      gradient.addColorStop(0, 'rgba(59, 130, 246, 0.3)');
+      gradient.addColorStop(1, 'rgba(59, 130, 246, 0.02)');
+      
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: Array.from({length: 30}, (_, i) => 'Day ' + (i + 1)),
+          datasets: [{
+            label: 'Searches',
+            data: [1200, 1350, 1280, 1420, 1580, 1450, 1320, 1650, 1780, 1620, 1890, 1750, 1920, 2100, 1980, 2150, 2280, 2050, 2320, 2180, 2450, 2380, 2520, 2650, 2480, 2720, 2850, 2680, 2920, 3100],
+            borderColor: '#3b82f6',
+            backgroundColor: gradient,
+            borderWidth: 3,
+            fill: true,
+            tension: 0.4,
+            pointBackgroundColor: '#3b82f6',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            pointRadius: 0,
+            pointHoverRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: 'rgba(30, 41, 59, 0.95)',
+              padding: 12,
+              cornerRadius: 8
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: false,
+              grid: { color: 'rgba(0, 0, 0, 0.05)' },
+              ticks: { color: '#64748b' }
+            },
+            x: {
+              grid: { display: false },
+              ticks: { 
+                color: '#64748b',
+                maxTicksLimit: 10
+              }
+            }
+          }
+        }
+      });
+    }
+    
+    // Purchase Charts
+    function initPurchaseCharts() {
+      // Category Pie Chart
+      const pieCtx = document.getElementById('categoryPieChart');
+      if (pieCtx) {
+        new Chart(pieCtx, {
+          type: 'doughnut',
+          data: {
+            labels: ['Brake Systems', 'Electrical', 'Filters', 'Suspension', 'Engine Parts'],
+            datasets: [{
+              data: [28, 22, 18, 17, 15],
+              backgroundColor: ['#ef4444', '#3b82f6', '#10b981', '#8b5cf6', '#f59e0b'],
+              borderWidth: 0,
+              hoverOffset: 10
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'bottom',
+                labels: { usePointStyle: true, padding: 15 }
+              }
+            },
+            cutout: '60%'
+          }
+        });
+      }
+      
+      // Purchase Frequency Chart
+      const freqCtx = document.getElementById('purchaseFrequencyChart');
+      if (freqCtx) {
+        new Chart(freqCtx, {
+          type: 'bar',
+          data: {
+            labels: ['1-time', '2-3 times', '4-6 times', '7-10 times', '10+ times'],
+            datasets: [{
+              label: 'Customers',
+              data: [1245, 892, 567, 234, 156],
+              backgroundColor: ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444'],
+              borderRadius: 8
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                ticks: { color: '#64748b' }
+              },
+              x: {
+                grid: { display: false },
+                ticks: { color: '#64748b' }
+              }
+            }
+          }
+        });
+      }
+    }
+    
+    // Demand Forecast Chart
+    function initDemandForecastChart() {
+      const ctx = document.getElementById('demandForecastChart');
+      if (!ctx) return;
+      
+      const historicalData = [2100, 2250, 2180, 2350, 2480, 2520, 2650, 2780, 2850, 2920, null, null, null, null, null];
+      const forecastData = [null, null, null, null, null, null, null, null, null, 2920, 3050, 3180, 3320, 3480, 3650];
+      
+      const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 320);
+      gradient.addColorStop(0, 'rgba(59, 130, 246, 0.2)');
+      gradient.addColorStop(1, 'rgba(59, 130, 246, 0.02)');
+      
+      const forecastGradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 320);
+      forecastGradient.addColorStop(0, 'rgba(16, 185, 129, 0.3)');
+      forecastGradient.addColorStop(1, 'rgba(16, 185, 129, 0.02)');
+      
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['Week -4', 'Week -3', 'Week -2', 'Week -1', 'Current', 'Week +1', 'Week +2', 'Week +3', 'Week +4', 'Now', 'Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5'],
+          datasets: [
+            {
+              label: 'Historical Orders',
+              data: historicalData,
+              borderColor: '#3b82f6',
+              backgroundColor: gradient,
+              borderWidth: 3,
+              fill: true,
+              tension: 0.4,
+              pointBackgroundColor: '#3b82f6',
+              pointBorderColor: '#fff',
+              pointBorderWidth: 2,
+              pointRadius: 5
+            },
+            {
+              label: 'Forecast',
+              data: forecastData,
+              borderColor: '#10b981',
+              backgroundColor: forecastGradient,
+              borderWidth: 3,
+              borderDash: [5, 5],
+              fill: true,
+              tension: 0.4,
+              pointBackgroundColor: '#10b981',
+              pointBorderColor: '#fff',
+              pointBorderWidth: 2,
+              pointRadius: 5
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: 'rgba(30, 41, 59, 0.95)',
+              padding: 12,
+              cornerRadius: 8
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: false,
+              min: 1800,
+              grid: { color: 'rgba(0, 0, 0, 0.05)' },
+              ticks: { color: '#64748b' }
+            },
+            x: {
+              grid: { display: false },
+              ticks: { color: '#64748b' }
+            }
+          }
+        }
+      });
+    }
+    
+    // AI Chat Functions
+    function askAI(question) {
+      const input = document.getElementById('aiChatInput');
+      input.value = question;
+      sendAIMessage();
+    }
+    
+    function handleChatKeypress(event) {
+      if (event.key === 'Enter') {
+        sendAIMessage();
+      }
+    }
+    
+    function sendAIMessage() {
+      const input = document.getElementById('aiChatInput');
+      const messagesContainer = document.getElementById('aiChatMessages');
+      const message = input.value.trim();
+      
+      if (!message) return;
+      
+      // Add user message
+      const userMessageHTML = `
+        <div class="ai-chat-message user">
+          <div class="ai-chat-message-avatar">
+            <i data-lucide="user"></i>
+          </div>
+          <div class="ai-chat-message-content">
+            <p>${message}</p>
+          </div>
+        </div>
+      `;
+      messagesContainer.insertAdjacentHTML('beforeend', userMessageHTML);
+      
+      // Clear input
+      input.value = '';
+      
+      // Scroll to bottom
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      
+      // Simulate AI response
+      setTimeout(() => {
+        const aiResponse = getAIResponse(message);
+        const aiMessageHTML = `
+          <div class="ai-chat-message assistant">
+            <div class="ai-chat-message-avatar">
+              <i data-lucide="bot"></i>
+            </div>
+            <div class="ai-chat-message-content">
+              ${aiResponse}
+            </div>
+          </div>
+        `;
+        messagesContainer.insertAdjacentHTML('beforeend', aiMessageHTML);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        
+        // Reinitialize Lucide icons
+        if (typeof lucide !== 'undefined') {
+          lucide.createIcons();
+        }
+      }, 1000);
+    }
+    
+    function getAIResponse(question) {
+      const q = question.toLowerCase();
+      
+      if (q.includes('trending') || q.includes('top')) {
+        return `
+          <p><strong>📈 Top Trending Parts This Week:</strong></p>
+          <ol style="margin: 0.75rem 0; padding-left: 1.25rem;">
+            <li><strong>Ceramic Brake Pads</strong> - 2,847 searches (+24% vs last week)</li>
+            <li><strong>Alternator Assembly 150A</strong> - 2,156 searches (+18%)</li>
+            <li><strong>Front Strut Assembly</strong> - 1,892 searches (+15%)</li>
+            <li><strong>Spark Plug Platinum Set</strong> - 1,654 searches (+12%)</li>
+          </ol>
+          <p>The brake pads surge is likely due to seasonal winter preparation. I recommend increasing stock by 35%.</p>
+        `;
+      }
+      
+      if (q.includes('missed') || q.includes('opportunit')) {
+        return `
+          <p><strong>🚨 Top Missed Sales Opportunities:</strong></p>
+          <ul style="margin: 0.75rem 0; padding-left: 1.25rem;">
+            <li><strong>Turbocharger Assembly</strong> - 847 searches, 0% conversion (not in stock)</li>
+            <li><strong>LED Headlight Kit</strong> - 623 searches, 8% conversion (price too high)</li>
+            <li><strong>Performance Exhaust</strong> - 512 searches, 12% conversion (frequently out of stock)</li>
+          </ul>
+          <p><strong>💡 Recommendation:</strong> Adding Turbocharger Assemblies to inventory could generate an estimated <strong>$127,500</strong> in additional revenue based on current demand.</p>
+        `;
+      }
+      
+      if (q.includes('restock') || q.includes('stock')) {
+        return `
+          <p><strong>📦 Immediate Restock Recommendations:</strong></p>
+          <table style="width: 100%; margin: 0.75rem 0; font-size: 0.85rem;">
+            <tr style="border-bottom: 1px solid var(--admin-border);">
+              <td style="padding: 0.5rem 0;"><strong>Ceramic Brake Pads</strong></td>
+              <td style="padding: 0.5rem 0; color: #ef4444;">Critical - 5 days stock left</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--admin-border);">
+              <td style="padding: 0.5rem 0;"><strong>Alternator Assembly</strong></td>
+              <td style="padding: 0.5rem 0; color: #f59e0b;">Low - 12 days stock left</td>
+            </tr>
+            <tr>
+              <td style="padding: 0.5rem 0;"><strong>Oil Filter Premium</strong></td>
+              <td style="padding: 0.5rem 0; color: #f59e0b;">Low - 8 days stock left</td>
+            </tr>
+          </table>
+          <p>Based on the 30-day demand forecast, I recommend ordering <strong>500 units</strong> of brake pads and <strong>300 units</strong> of alternators immediately.</p>
+        `;
+      }
+      
+      if (q.includes('brake')) {
+        return `
+          <p><strong>🔍 Brake Pads Demand Analysis:</strong></p>
+          <ul style="margin: 0.75rem 0; padding-left: 1.25rem;">
+            <li><strong>Current Monthly Demand:</strong> 1,847 units</li>
+            <li><strong>30-Day Forecast:</strong> 2,492 units (+35%)</li>
+            <li><strong>Current Stock:</strong> 456 units</li>
+            <li><strong>Days Until Stockout:</strong> ~5 days</li>
+          </ul>
+          <p><strong>Why the surge?</strong> Winter season preparation typically increases brake system demand. Historical data shows 30-40% increase in Nov-Jan.</p>
+          <p><strong>💡 Action:</strong> Order at least 2,000 units to cover the next 30 days with safety buffer.</p>
+        `;
+      }
+      
+      // Default response
+      return `
+        <p>I analyzed your question about "${question}". Here's what I found:</p>
+        <p>Based on current analytics data, I can provide insights on:</p>
+        <ul style="margin: 0.75rem 0; padding-left: 1.25rem;">
+          <li>Parts search and purchase patterns</li>
+          <li>Demand forecasting and stock recommendations</li>
+          <li>Pricing optimization opportunities</li>
+          <li>Customer behavior analysis</li>
+        </ul>
+        <p>Could you be more specific about what aspect you'd like to explore?</p>
+      `;
+    }
+    
+    // Initialize first tab chart on load
+    document.addEventListener('DOMContentLoaded', function() {
+      setTimeout(function() {
+        initSearchTrendsChart();
+        window.searchTrendsChartInit = true;
+      }, 500);
+    });
+  </script>
+
+<%- include('partials/footer') %>

@@ -2,6 +2,7 @@
 <link rel="stylesheet" href="/css/buyerCSS/buyer-main.css">
 <link rel="stylesheet" href="/css/buyerCSS/search2.css">
 <link rel="stylesheet" href="/css/buyerCSS/search-automotive.css">
+<link rel="stylesheet" href="/css/buyerCSS/ai-filters.css">
 
 <%- include('partials/navbar') %>
 
@@ -62,11 +63,16 @@
           <div class="search2-autocomplete" id="search2-autocomplete"></div>
         </div>
 
-        <!-- Quick Actions -->
+        <!-- Quick Actions - Enhanced with AI -->
         <div class="search2-quick-actions">
           <button class="quick-action-btn" id="excel-upload-trigger">
             <i data-lucide="file-spreadsheet"></i>
             <span>Upload Excel</span>
+          </button>
+          <button class="quick-action-btn ai-filter-btn" id="ai-filter-trigger">
+            <div class="ai-glow"></div>
+            <i data-lucide="sparkles"></i>
+            <span>AI Smart Filter</span>
           </button>
           <button class="quick-action-btn" id="advanced-filter-trigger">
             <i data-lucide="sliders-horizontal"></i>
@@ -87,6 +93,147 @@
 
 <!-- Quick Search Modal -->
 <%- include('partials/quick-search') %>
+
+<!-- ====================================
+     AI SMART FILTER MODAL - PROFESSIONAL AIUX DESIGN
+     ==================================== -->
+<!-- AI Smart Filter Modal - Light Mode -->
+<div class="ai-filter-modal ai-filter-light" id="ai-filter-modal">
+  <div class="ai-filter-backdrop" id="ai-filter-backdrop"></div>
+  <div class="ai-filter-container">
+    <!-- Decorative Background Elements -->
+    <div class="ai-light-bg-elements">
+      <div class="ai-light-circle circle-1"></div>
+      <div class="ai-light-circle circle-2"></div>
+      <div class="ai-light-circle circle-3"></div>
+    </div>
+
+    <!-- AI Filter Header -->
+    <div class="ai-filter-header">
+      <div class="ai-filter-title-wrapper">
+        <div class="ai-icon-wrapper">
+          <i data-lucide="sparkles" class="ai-icon"></i>
+        </div>
+        <div class="ai-title-content">
+          <h2 class="ai-filter-title"><span class="title-ai">AI</span> Smart Filter</h2>
+          <p class="ai-filter-subtitle">Tell me what you're looking for and I'll help you find it</p>
+        </div>
+      </div>
+      <button class="ai-filter-close" id="ai-filter-close">
+        <i data-lucide="x"></i>
+      </button>
+    </div>
+
+    <!-- AI Chat Interface -->
+    <div class="ai-filter-body">
+      <!-- AI Input Section - Moved to Top -->
+      <div class="ai-input-section">
+        <div class="ai-input-wrapper">
+          <textarea 
+            class="ai-input" 
+            id="ai-filter-input" 
+            placeholder="Example: Find me Bosch brake pads under $500 from German suppliers..."
+            rows="2"
+          ></textarea>
+          <button class="ai-submit-btn" id="ai-submit-btn" title="Find Parts">
+            <i data-lucide="search"></i>
+          </button>
+        </div>
+        
+        <!-- Quick Suggestion Chips -->
+        <div class="ai-input-hints">
+          <span class="hint-label">Try:</span>
+          <div class="ai-hints-container">
+            <button class="ai-hint-chip" data-hint="Find OEM brake parts under $500 from verified suppliers">
+              OEM parts under $500
+            </button>
+            <button class="ai-hint-chip" data-hint="Show bearings from SKF in stock with express delivery">
+              SKF bearings with fast delivery
+            </button>
+            <button class="ai-hint-chip" data-hint="German suppliers with ISO certification">
+              German certified suppliers
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Response Section -->
+      <div class="ai-response-section" id="ai-response-section" style="display: none;">
+        <div class="ai-response-header">
+          <div class="ai-thinking-indicator" id="ai-thinking">
+            <div class="thinking-dots">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+            <span class="thinking-text">Analyzing your request...</span>
+          </div>
+          <div class="ai-response-title" id="ai-response-title" style="display: none;">
+            <i data-lucide="check-circle"></i>
+            <span>Found the perfect filters!</span>
+          </div>
+        </div>
+
+        <!-- AI Generated Filters Preview -->
+        <div class="ai-filters-preview" id="ai-filters-preview" style="display: none;">
+          <div class="ai-filters-grid" id="ai-filters-grid">
+            <!-- Dynamic filter cards will be inserted here -->
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Features Info -->
+      <div class="ai-features-info">
+        <div class="ai-feature-item">
+          <div class="ai-feature-icon">
+            <i data-lucide="brain"></i>
+          </div>
+          <div class="ai-feature-content">
+            <h4>Smart Search</h4>
+            <p>Understands natural language queries</p>
+          </div>
+        </div>
+        <div class="ai-feature-item">
+          <div class="ai-feature-icon">
+            <i data-lucide="sliders-horizontal"></i>
+          </div>
+          <div class="ai-feature-content">
+            <h4>Auto Filters</h4>
+            <p>Automatically applies relevant filters</p>
+          </div>
+        </div>
+        <div class="ai-feature-item">
+          <div class="ai-feature-icon">
+            <i data-lucide="zap"></i>
+          </div>
+          <div class="ai-feature-content">
+            <h4>Save Time</h4>
+            <p>Find parts faster than manual filtering</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI Filter Footer -->
+    <div class="ai-filter-footer">
+      <div class="ai-footer-info">
+        <i data-lucide="info"></i>
+        <span>Use sidebar for manual filters</span>
+      </div>
+      <div class="ai-filter-actions">
+        <button class="ai-btn-secondary" id="ai-clear-all">
+          <i data-lucide="rotate-ccw"></i>
+          <span>Reset</span>
+        </button>
+        <button class="ai-btn-primary" id="ai-apply-filters">
+          <i data-lucide="search"></i>
+          <span>Apply Filters</span>
+          <span class="results-count" id="results-preview">0</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- ====================================
      SIGN IN MODAL
@@ -164,6 +311,7 @@
 <script src="/js/quick-search.js"></script>
 <script src="/js/buyer-auth.js"></script>
 <script src="/js/cart-badge-updater.js"></script>
+<script src="/js/ai-filters.js"></script>
 <script>
   lucide.createIcons();
   window.addEventListener('load', () => lucide.createIcons());

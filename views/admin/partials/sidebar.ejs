@@ -11,7 +11,7 @@
   <!-- Sidebar Header -->
   <div class="sidebar-header">
     <a href="/admin" class="sidebar-logo">
-      <img src="/images/PARTSFORM-LOGO-CWstUpY1.webp" alt="PartsForm Logo">
+      <img src="/images/PARTSFORM-LOGO.webp" alt="PartsForm Logo">
       <span class="sidebar-logo-badge">Admin</span>
     </a>
   </div>
@@ -24,6 +24,11 @@
       <a href="/admin<%= typeof currentModule !== 'undefined' && currentModule ? '?module=' + currentModule : '' %>" class="sidebar-nav-item <%= typeof activePage !== 'undefined' && activePage === 'dashboard' ? 'active' : '' %>">
         <i data-lucide="layout-dashboard"></i>
         <span>Dashboard</span>
+      </a>
+      <a href="/admin/parts-analytics<%= typeof currentModule !== 'undefined' && currentModule ? '?module=' + currentModule : '' %>" class="sidebar-nav-item <%= typeof activePage !== 'undefined' && activePage === 'parts-analytics' ? 'active' : '' %>">
+        <i data-lucide="bar-chart-3"></i>
+        <span>Parts Analytics</span>
+        <span class="sidebar-nav-badge" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">AI</span>
       </a>
     </div>
 

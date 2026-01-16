@@ -2553,6 +2553,64 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
       </div>
 
+      <!-- Timeline Item 7 - Card Left, Description Right - AI SMART SEARCH -->
+      <div class="timeline-row" data-timeline-animate>
+        <div class="timeline-card-side left-side">
+          <div class="timeline-card-full">
+            <img src="https://images.unsplash.com/photo-1677442136019-21780ecad995?q=80&w=1600&auto=format&fit=crop" alt="AI Smart Search" loading="lazy">
+            <div class="card-glass-overlay">
+              <div class="card-icon-float">
+                <i data-lucide="sparkles"></i>
+              </div>
+              <span class="ai-badge-card">AI-Powered</span>
+            </div>
+          </div>
+        </div>
+        <div class="timeline-dot-center">
+          <div class="dot-inner"></div>
+        </div>
+        <div class="timeline-content-side right-side">
+          <div class="timeline-content-box">
+            <span class="content-number">07</span>
+            <h3 class="content-title">AI Smart Search</h3>
+            <p class="content-text">Find parts instantly using natural language. Simply describe what you need - "brake pads for 2020 Toyota Camry" - and our AI understands exactly what you're looking for. No more complex part numbers or endless filters.</p>
+            <div class="content-stat">
+              <span class="stat-value">95%</span>
+              <span class="stat-label">Search Accuracy</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Timeline Item 8 - Description Left, Card Right - AI ANALYTICS -->
+      <div class="timeline-row reverse" data-timeline-animate>
+        <div class="timeline-content-side left-side">
+          <div class="timeline-content-box">
+            <span class="content-number">08</span>
+            <h3 class="content-title">AI Analytics & Insights</h3>
+            <p class="content-text">Get intelligent predictions and recommendations powered by advanced AI. Track demand trends, optimize inventory, receive restock alerts, and discover pricing opportunities - all automated to maximize your business potential.</p>
+            <div class="content-stat">
+              <span class="stat-value">AI</span>
+              <span class="stat-label">Powered Predictions</span>
+            </div>
+          </div>
+        </div>
+        <div class="timeline-dot-center">
+          <div class="dot-inner"></div>
+        </div>
+        <div class="timeline-card-side right-side">
+          <div class="timeline-card-full">
+            <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1600&auto=format&fit=crop" alt="AI Analytics" loading="lazy">
+            <div class="card-glass-overlay">
+              <div class="card-icon-float">
+                <i data-lucide="brain"></i>
+              </div>
+              <span class="ai-badge-card">AI-Powered</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 </section>
@@ -2881,6 +2939,27 @@ document.addEventListener('DOMContentLoaded', function() {
     font-size: 0.9rem;
     color: #64748b;
     font-weight: 500;
+  }
+
+  /* ====================================
+     AI FEATURE CARDS - SAME AS OTHER CARDS
+     ==================================== */
+  
+  /* AI Badge on Card */
+  .ai-badge-card {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    padding: 8px 16px;
+    background: #3B82F6;
+    color: white;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-radius: 20px;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
   }
 
   /* ====================================
@@ -4339,6 +4418,15 @@ document.addEventListener('DOMContentLoaded', function() {
       const ADMIN_EMAIL = 'admin@partsform.com';
       const ADMIN_PASSWORD = 'admin123';
       
+      // Buyer accounts
+      const BUYER_ACCOUNTS = [
+        { email: 'buyer@partsform.com', password: 'buyer123', name: 'Demo Buyer' },
+        { email: 'john.smith@automax.com', password: 'buyer123', name: 'John Smith' },
+        { email: 'maria@premiumauto.com', password: 'buyer123', name: 'Maria Garcia' },
+        { email: 'sarah@partsworld.com', password: 'buyer123', name: 'Sarah Johnson' },
+        { email: 'robert@euroauto.eu', password: 'buyer123', name: 'Robert Chen' }
+      ];
+      
       // Show loading state
       const originalBtnContent = submitBtn.innerHTML;
       submitBtn.innerHTML = '<span>Signing in...</span><i data-lucide="loader" class="spin"></i>';
@@ -4357,21 +4445,26 @@ document.addEventListener('DOMContentLoaded', function() {
           
           // Redirect to admin dashboard
           window.location.href = '/admin';
-        } else if (email && password) {
-          // Treat as buyer credentials
-          localStorage.setItem('userRole', 'buyer');
-          localStorage.setItem('userName', email.split('@')[0].charAt(0).toUpperCase() + email.split('@')[0].slice(1));
-          localStorage.setItem('userEmail', email);
-          localStorage.setItem('isLoggedIn', 'true');
-          
-          // Redirect to buyer portal
-          window.location.href = '/buyer';
         } else {
-          // Reset button on error
-          submitBtn.innerHTML = originalBtnContent;
-          submitBtn.disabled = false;
-          lucide.createIcons();
-          alert('Please enter valid credentials');
+          // Check if buyer credentials
+          const buyer = BUYER_ACCOUNTS.find(b => b.email === email && b.password === password);
+          
+          if (buyer) {
+            // Store buyer session
+            localStorage.setItem('userRole', 'buyer');
+            localStorage.setItem('userName', buyer.name);
+            localStorage.setItem('userEmail', email);
+            localStorage.setItem('isLoggedIn', 'true');
+            
+            // Redirect to buyer portal
+            window.location.href = '/buyer';
+          } else {
+            // Reset button on error
+            submitBtn.innerHTML = originalBtnContent;
+            submitBtn.disabled = false;
+            lucide.createIcons();
+            alert('Invalid email or password. Please try again.');
+          }
         }
       }, 1000);
     });

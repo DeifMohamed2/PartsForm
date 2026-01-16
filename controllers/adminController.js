@@ -852,6 +852,65 @@ const getIntegrationCreate = async (req, res) => {
 };
 
 /**
+ * Get Parts Analytics page
+ */
+const getPartsAnalytics = async (req, res) => {
+  try {
+    const { currentModule, moduleConfig } = getModuleData(req);
+    
+    // Mock analytics data
+    const analyticsData = {
+      totalSearches: 47892,
+      partsViewed: 12456,
+      purchases: 3847,
+      conversionRate: 23.4,
+      missedOpportunities: 1234,
+      trendingParts: 89
+    };
+    
+    // Most searched parts
+    const mostSearchedParts = [
+      { name: 'Ceramic Brake Pads Set', partNumber: 'BP-4521-CER', searches: 2847, conversion: 68, status: 'available', category: 'brake' },
+      { name: 'Alternator Assembly 150A', partNumber: 'ALT-7890-PRO', searches: 2156, conversion: 72, status: 'available', category: 'engine' },
+      { name: 'Front Strut Assembly', partNumber: 'SUS-3456-FR', searches: 1892, conversion: 45, status: 'limited', category: 'suspension' },
+      { name: 'Spark Plug Platinum Set', partNumber: 'SP-1234-PLT', searches: 1654, conversion: 78, status: 'available', category: 'electrical' },
+      { name: 'Oil Filter Premium', partNumber: 'OF-7890-PRO', searches: 1423, conversion: 28, status: 'out-of-stock', category: 'body' }
+    ];
+    
+    // Missed opportunities (searched but not bought)
+    const missedOpportunities = [
+      { name: 'Turbocharger Assembly', reason: 'Not in inventory', searches: 847 },
+      { name: 'LED Headlight Kit', reason: 'Price too high', searches: 623 },
+      { name: 'Performance Exhaust System', reason: 'Out of stock frequently', searches: 512 },
+      { name: 'Cold Air Intake Kit', reason: 'Compatibility issues', searches: 398 },
+      { name: 'Racing Clutch Kit', reason: 'Limited fitment options', searches: 287 }
+    ];
+    
+    // Top purchased parts
+    const topPurchasedParts = [
+      { name: 'Ceramic Brake Pads Set', category: 'Brake Systems', orders: 1847, revenue: 165000 },
+      { name: 'Alternator Assembly', category: 'Electrical', orders: 1456, revenue: 298000 },
+      { name: 'Oil Filter Premium', category: 'Filters', orders: 1234, revenue: 24000 },
+      { name: 'Front Strut Assembly', category: 'Suspension', orders: 987, revenue: 145000 }
+    ];
+    
+    res.render('admin/parts-analytics', {
+      title: 'Parts Analytics | PARTSFORM Admin',
+      activePage: 'parts-analytics',
+      currentModule,
+      moduleConfig,
+      analyticsData,
+      mostSearchedParts,
+      missedOpportunities,
+      topPurchasedParts
+    });
+  } catch (error) {
+    console.error('Error in getPartsAnalytics:', error);
+    res.status(500).render('error', { title: 'Error', error: 'Failed to load parts analytics' });
+  }
+};
+
+/**
  * Get AOG Case Details page
  */
 const getAOGCaseDetails = async (req, res) => {
@@ -972,6 +1031,7 @@ module.exports = {
   getPaymentCreate,
   getAdminSettings,
   getIntegrationsManagement,
-  getIntegrationCreate
+  getIntegrationCreate,
+  getPartsAnalytics
 };
 
