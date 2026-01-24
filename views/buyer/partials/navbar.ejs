@@ -29,11 +29,56 @@
       </a>
 
       <a href="/buyer/orders" class="nav-link" data-section="orders"><%= t('nav.myOrders') %></a>
-      <a href="/buyer/tickets" class="nav-link" data-section="tickets"><%= t('nav.tickets') %></a>
+      
+      <!-- Account Dropdown -->
+      <div class="nav-dropdown" id="accountDropdown">
+        <button class="nav-link dropdown-trigger" id="accountDropdownBtn">
+          <span><%= t('nav.account') || 'Account' %></span>
+          <i data-lucide="chevron-down" class="dropdown-chevron"></i>
+        </button>
+        <div class="nav-dropdown-menu" id="accountDropdownMenu">
+          <a href="/buyer/payment" class="nav-dropdown-item" data-section="payment">
+            <i data-lucide="credit-card"></i>
+            <div>
+              <span class="dropdown-item-title"><%= t('nav.payment') %></span>
+              <span class="dropdown-item-desc"><%= t('nav.paymentDesc') || 'Manage payment methods' %></span>
+            </div>
+          </a>
+          <a href="/buyer/delivery" class="nav-dropdown-item" data-section="delivery">
+            <i data-lucide="truck"></i>
+            <div>
+              <span class="dropdown-item-title"><%= t('nav.delivery') %></span>
+              <span class="dropdown-item-desc"><%= t('nav.deliveryDesc') || 'Shipping addresses' %></span>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <!-- Support Dropdown -->
+      <div class="nav-dropdown" id="supportDropdown">
+        <button class="nav-link dropdown-trigger" id="supportDropdownBtn">
+          <span><%= t('nav.support') || 'Support' %></span>
+          <i data-lucide="chevron-down" class="dropdown-chevron"></i>
+        </button>
+        <div class="nav-dropdown-menu" id="supportDropdownMenu">
+          <a href="/buyer/tickets" class="nav-dropdown-item" data-section="tickets">
+            <i data-lucide="message-square"></i>
+            <div>
+              <span class="dropdown-item-title"><%= t('nav.tickets') %></span>
+              <span class="dropdown-item-desc"><%= t('nav.ticketsDesc') || 'Support tickets' %></span>
+            </div>
+          </a>
+          <a href="/buyer/contacts" class="nav-dropdown-item" data-section="contacts">
+            <i data-lucide="users"></i>
+            <div>
+              <span class="dropdown-item-title"><%= t('nav.contacts') %></span>
+              <span class="dropdown-item-desc"><%= t('nav.contactsDesc') || 'Contact information' %></span>
+            </div>
+          </a>
+        </div>
+      </div>
+
       <a href="/buyer/affiliate" class="nav-link" data-section="affiliate"><%= t('nav.affiliate') %></a>
-      <a href="/buyer/payment" class="nav-link" data-section="payment"><%= t('nav.payment') %></a>
-      <a href="/buyer/delivery" class="nav-link" data-section="delivery"><%= t('nav.delivery') %></a>
-      <a href="/buyer/contacts" class="nav-link" data-section="contacts"><%= t('nav.contacts') %></a>
       
       <!-- More Dropdown for overflow items -->
       <div class="nav-dropdown nav-more-dropdown" id="moreDropdown" style="display: none;">

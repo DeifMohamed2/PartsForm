@@ -1,5 +1,6 @@
 <%- include('partials/header') %>
 <%- include('partials/navbar') %>
+<%- include('partials/login-modal') %>
 
 <!-- ====================================
          HERO SECTION - PREMIUM CLEAN DESIGN
@@ -4189,6 +4190,25 @@ document.addEventListener('DOMContentLoaded', function() {
 <script src="/js/animations.js"></script>
 <script src="/js/main.js"></script>
 <script>
+  // Auto-open login modal if ?login=true in URL
+  document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('login') === 'true') {
+      const modal = document.getElementById('sign-in-modal');
+      if (modal) {
+        setTimeout(() => {
+          modal.classList.add('active');
+          document.body.style.overflow = 'hidden';
+          if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+          }
+          // Clean URL
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }, 300);
+      }
+    }
+  });
+
   // Initialize Lucide icons
   lucide.createIcons();
 

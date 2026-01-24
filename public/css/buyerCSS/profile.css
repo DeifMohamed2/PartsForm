@@ -263,6 +263,14 @@
     color: #3b82f6;
 }
 
+.profile-avatar .avatar-initials {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #3b82f6;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
 .avatar-edit-btn {
     position: absolute;
     bottom: 0;
@@ -301,12 +309,21 @@
 .profile-email {
     font-size: 0.95rem;
     color: #64748b;
+    margin-bottom: 0.25rem;
+}
+
+.profile-company {
+    font-size: 0.9rem;
+    color: #94a3b8;
     margin-bottom: 1rem;
+    font-weight: 500;
 }
 
 .profile-status {
     display: flex;
     justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
 }
 
 .status-badge {
@@ -322,6 +339,16 @@
 .status-badge.active {
     background: #d1fae5;
     color: #065f46;
+}
+
+.status-badge.inactive {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.status-badge.verified {
+    background: #dbeafe;
+    color: #1e40af;
 }
 
 .status-badge i {
@@ -646,6 +673,308 @@
 
     .info-card-title {
         font-size: 1.1rem;
+    }
+}
+
+/* ====================================
+   AVATAR IMAGE STYLES
+   ==================================== */
+
+.profile-avatar .avatar-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.profile-avatar .avatar-initials {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #3b82f6;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* ====================================
+   AVATAR UPLOAD MODAL
+   ==================================== */
+
+.avatar-upload-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 100000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.avatar-upload-modal.active {
+    display: flex;
+}
+
+.avatar-modal-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.avatar-modal-content {
+    position: relative;
+    background: white;
+    border-radius: 20px;
+    max-width: 480px;
+    width: 100%;
+    padding: 2rem;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.avatar-modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.05);
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.avatar-modal-close:hover {
+    background: rgba(0, 0, 0, 0.1);
+    transform: rotate(90deg);
+}
+
+.avatar-modal-close i {
+    width: 20px;
+    height: 20px;
+    color: #64748b;
+}
+
+.avatar-modal-header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.avatar-modal-header h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1a2b3d;
+    margin-bottom: 0.5rem;
+}
+
+.avatar-modal-header p {
+    font-size: 0.95rem;
+    color: #64748b;
+}
+
+.avatar-upload-area {
+    border: 2px dashed #cbd5e1;
+    border-radius: 16px;
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8fafc;
+    margin-bottom: 1.5rem;
+}
+
+.avatar-upload-area:hover,
+.avatar-upload-area.dragover {
+    border-color: #3b82f6;
+    background: rgba(59, 130, 246, 0.05);
+}
+
+.upload-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    color: #64748b;
+}
+
+.upload-placeholder i {
+    width: 48px;
+    height: 48px;
+    color: #3b82f6;
+}
+
+.upload-placeholder span {
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.upload-hint {
+    font-size: 0.85rem !important;
+    color: #94a3b8 !important;
+    font-weight: 400 !important;
+}
+
+.upload-preview {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 4px solid #3b82f6;
+    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+}
+
+.upload-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatar-modal-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+.btn-cancel {
+    padding: 0.75rem 1.5rem;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    background: #f1f5f9;
+    color: #64748b;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-cancel:hover {
+    background: #e2e8f0;
+    color: #475569;
+}
+
+.btn-upload {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    background: linear-gradient(135deg, #2b5278 0%, #3b82f6 100%);
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-upload:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.35);
+}
+
+.btn-upload:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-upload i {
+    width: 18px;
+    height: 18px;
+}
+
+.upload-progress {
+    margin-top: 1rem;
+}
+
+.progress-bar {
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(135deg, #2b5278 0%, #3b82f6 100%);
+    border-radius: 4px;
+    width: 0%;
+    transition: width 0.3s ease;
+    animation: progressPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes progressPulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+.progress-text {
+    font-size: 0.85rem;
+    color: #64748b;
+    text-align: center;
+    display: block;
+}
+
+/* Mobile responsive for modal */
+@media (max-width: 480px) {
+    .avatar-modal-content {
+        padding: 1.5rem;
+        margin: 1rem;
+    }
+
+    .avatar-upload-area {
+        padding: 1.5rem;
+        min-height: 160px;
+    }
+
+    .upload-preview {
+        width: 120px;
+        height: 120px;
+    }
+
+    .avatar-modal-actions {
+        flex-direction: column;
+    }
+
+    .btn-cancel,
+    .btn-upload {
+        width: 100%;
+        justify-content: center;
     }
 }
 

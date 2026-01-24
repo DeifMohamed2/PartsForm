@@ -1,6 +1,9 @@
 // Buyer Controller
 // This file contains all buyer-related controller functions
 
+const Buyer = require('../models/Buyer');
+const { processProfileImage, deleteOldProfileImage } = require('../utils/fileUploader');
+
 /**
  * Get buyer dashboard/main page
  */
@@ -181,8 +184,36 @@ const getOrderDetailsPage = async (req, res) => {
  */
 const getProfilePage = async (req, res) => {
   try {
+    const buyer = req.user;
+    
+    // Calculate member since year
+    const memberSince = buyer.createdAt ? new Date(buyer.createdAt).getFullYear() : new Date().getFullYear();
+    
+    // Format password last changed (use updatedAt as approximation or specific field if available)
+    const passwordLastChanged = buyer.updatedAt ? Math.floor((Date.now() - new Date(buyer.updatedAt)) / (1000 * 60 * 60 * 24)) : 30;
+    
     res.render('buyer/profile', {
       title: 'Profile | PARTSFORM',
+      buyer: {
+        id: buyer._id,
+        firstName: buyer.firstName,
+        lastName: buyer.lastName,
+        fullName: `${buyer.firstName} ${buyer.lastName}`,
+        email: buyer.email,
+        phone: buyer.phone,
+        companyName: buyer.companyName,
+        country: buyer.country,
+        city: buyer.city,
+        shippingAddress: buyer.shippingAddress,
+        isActive: buyer.isActive,
+        isVerified: buyer.isVerified,
+        newsletter: buyer.newsletter,
+        avatar: buyer.avatar,
+        memberSince: memberSince,
+        passwordLastChanged: passwordLastChanged,
+        createdAt: buyer.createdAt,
+        lastLogin: buyer.lastLogin,
+      },
     });
   } catch (error) {
     console.error('Error in getProfilePage:', error);
@@ -263,6 +294,116 @@ const getTicketDetailsPage = async (req, res) => {
   }
 };
 
+/**
+ * Upload avatar image
+ * POST /buyer/profile/avatar
+ */
+const uploadAvatar = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: 'No image file uploaded',
+      });
+    }
+
+    const buyer = req.user;
+    
+    // Process the uploaded file
+    const imageInfo = processProfileImage(req.file);
+    
+    if (!imageInfo) {
+      return res.status(400).json({
+        success: false,
+        message: 'Failed to process uploaded image',
+      });
+    }
+
+    // Delete old avatar if exists
+    if (buyer.avatar) {
+      await deleteOldProfileImage(buyer.avatar);
+    }
+
+    // Update buyer's avatar in database
+    buyer.avatar = imageInfo.url;
+    await buyer.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Profile image uploaded successfully',
+      data: {
+        avatar: imageInfo.url,
+        filename: imageInfo.filename,
+      },
+    });
+  } catch (error) {
+    console.error('Error in uploadAvatar:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to upload profile image. Please try again.',
+    });
+  }
+};
+
+/**
+ * Update profile information
+ * PUT /buyer/profile
+ */
+const updateProfile = async (req, res) => {
+  try {
+    const buyer = req.user;
+    const { firstName, lastName, phone, companyName, city, shippingAddress } = req.body;
+
+    // Fields that can be updated
+    const allowedUpdates = {};
+    
+    if (firstName) allowedUpdates.firstName = firstName.trim();
+    if (lastName) allowedUpdates.lastName = lastName.trim();
+    if (phone) allowedUpdates.phone = phone.trim();
+    if (companyName) allowedUpdates.companyName = companyName.trim();
+    if (city) allowedUpdates.city = city.trim();
+    if (shippingAddress) allowedUpdates.shippingAddress = shippingAddress.trim();
+
+    // Update buyer
+    Object.assign(buyer, allowedUpdates);
+    await buyer.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Profile updated successfully',
+      data: {
+        firstName: buyer.firstName,
+        lastName: buyer.lastName,
+        fullName: `${buyer.firstName} ${buyer.lastName}`,
+        phone: buyer.phone,
+        companyName: buyer.companyName,
+        city: buyer.city,
+        shippingAddress: buyer.shippingAddress,
+      },
+    });
+  } catch (error) {
+    console.error('Error in updateProfile:', error);
+    
+    // Handle validation errors
+    if (error.name === 'ValidationError') {
+      const errors = {};
+      Object.keys(error.errors).forEach((key) => {
+        errors[key] = error.errors[key].message;
+      });
+      return res.status(400).json({
+        success: false,
+        message: 'Validation failed',
+        errors,
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update profile. Please try again.',
+    });
+  }
+};
+
 // Export controller functions
 module.exports = {
   getBuyerMain,
@@ -280,5 +421,7 @@ module.exports = {
   getTicketsPage,
   getCreateTicketPage,
   getTicketDetailsPage,
+  uploadAvatar,
+  updateProfile,
 };
 

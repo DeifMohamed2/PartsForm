@@ -315,11 +315,11 @@
 .nav-dropdown .dropdown-trigger {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.35rem;
   background: none;
   border: none;
   cursor: pointer;
-  padding: 0.5rem 1rem;
+  padding: 0.5rem 0;
 }
 
 .nav-dropdown .dropdown-chevron {
@@ -398,20 +398,95 @@
   color: var(--buyer-text-muted);
 }
 
+/* Medium screens - reduce spacing in navbar */
+@media (max-width: 1200px) {
+  .nav-links {
+    gap: 0.75rem;
+    padding: 0 0.75rem;
+  }
+
+  .nav-link {
+    font-size: 0.875rem;
+    padding: 0.4rem 0;
+  }
+
+  .nav-dropdown .dropdown-trigger {
+    font-size: 0.875rem;
+  }
+}
+
+@media (max-width: 992px) {
+  .nav-links {
+    gap: 0.5rem;
+    padding: 0 0.5rem;
+  }
+
+  .nav-link {
+    font-size: 0.8125rem;
+  }
+
+  .nav-dropdown .dropdown-trigger {
+    font-size: 0.8125rem;
+    gap: 0.25rem;
+  }
+
+  .nav-dropdown .dropdown-chevron {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+/* Mobile responsive styles for nav dropdowns */
+@media (max-width: 768px) {
+  .nav-dropdown-menu {
+    position: static;
+    width: 100%;
+    border-radius: var(--buyer-radius-md);
+    margin-top: 0.5rem;
+    min-width: unset;
+  }
+
+  .nav-dropdown.open .nav-dropdown-menu {
+    transform: translateY(0);
+  }
+
+  .nav-dropdown {
+    width: 100%;
+  }
+
+  .nav-dropdown .dropdown-trigger {
+    width: 100%;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+  }
+
+  .nav-dropdown-item {
+    padding: 0.875rem 1rem;
+  }
+
+  .dropdown-item-title {
+    font-size: 0.9rem;
+  }
+
+  .dropdown-item-desc {
+    font-size: 0.7rem;
+  }
+}
+
 /* Quick Search Button in Navbar */
 .btn-quick-search {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.6rem 1rem;
+  gap: 0.4rem;
+  padding: 0.45rem 0.75rem;
   background: linear-gradient(135deg,
       var(--buyer-accent) 0%,
       var(--buyer-accent-light) 100%);
   color: white;
   border: none;
-  border-radius: var(--buyer-radius-md);
+  border-radius: var(--buyer-radius-sm);
   font-weight: 600;
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
@@ -446,8 +521,8 @@
 }
 
 .btn-quick-search i {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   transition: transform 0.3s ease;
 }
 
@@ -461,11 +536,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
+  width: 36px;
+  height: 36px;
   background: var(--buyer-bg-accent);
   color: var(--buyer-accent);
-  border-radius: var(--buyer-radius-md);
+  border-radius: var(--buyer-radius-sm);
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   text-decoration: none;
@@ -502,8 +577,8 @@
 }
 
 .btn-cart i {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   transition: transform 0.3s ease;
   position: relative;
   z-index: 1;
@@ -990,13 +1065,13 @@
 .btn-currency-converter {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.6rem 0.85rem;
+  gap: 0.3rem;
+  padding: 0.4rem 0.6rem;
   background: var(--buyer-bg-accent);
-  border: 2px solid transparent;
-  border-radius: var(--buyer-radius-md);
+  border: 1px solid transparent;
+  border-radius: var(--buyer-radius-sm);
   font-weight: 600;
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
@@ -1034,8 +1109,8 @@
 }
 
 .btn-currency-converter i {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   color: var(--buyer-accent);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   flex-shrink: 0;
@@ -1060,7 +1135,7 @@
 }
 
 .btn-currency-converter .currency-code-display {
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.5px;
   color: var(--buyer-accent);

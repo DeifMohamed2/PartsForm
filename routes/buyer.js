@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { requireAuth } = require('../middleware/auth');
 const {
   getBuyerMain,
   getAutomotiveSearchPage,
@@ -16,7 +17,13 @@ const {
   getTicketsPage,
   getCreateTicketPage,
   getTicketDetailsPage,
+  uploadAvatar,
+  updateProfile,
 } = require('../controllers/buyerController');
+const { handleProfileImageUpload } = require('../utils/fileUploader');
+
+// Apply authentication middleware to all buyer routes
+router.use(requireAuth);
 
 // Buyer main page
 router.get('/', getBuyerMain);
@@ -32,6 +39,10 @@ router.get('/delivery', getDeliveryPage);
 router.get('/contacts', getContactsPage);
 router.get('/profile', getProfilePage);
 router.get('/settings', getSettingsPage);
+
+// Profile API routes
+router.post('/profile/avatar', handleProfileImageUpload, uploadAvatar);
+router.put('/profile', updateProfile);
 
 // Parts search - Automotive only
 router.get('/search/automotive', getAutomotiveSearchPage);

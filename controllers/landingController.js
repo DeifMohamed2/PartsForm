@@ -69,6 +69,94 @@ const getSearch2Page = async (req, res) => {
 };
 
 /**
+ * Get registration page
+ */
+const getRegisterPage = async (req, res) => {
+  try {
+    res.render('Landing/register', {
+      title: 'Create Account | PARTSFORM',
+      pageClass: 'page-register',
+    });
+  } catch (error) {
+    console.error('Error in getRegisterPage:', error);
+    res.status(500).render('error', {
+      title: 'Error | PARTSFORM',
+      error: 'Failed to load registration page',
+    });
+  }
+};
+
+/**
+ * Handle user registration
+ * POST /register
+ */
+const registerUser = async (req, res) => {
+  try {
+    const {
+      firstName,
+      lastName,
+      email,
+      phone,
+      companyName,
+      country,
+      city,
+      shippingAddress,
+      password,
+      confirmPassword,
+      agreeTerms,
+      newsletter
+    } = req.body;
+
+    // Basic validation
+    if (!firstName || !lastName || !email || !phone || !companyName || !country || !city || !shippingAddress || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'All required fields must be filled',
+      });
+    }
+
+    if (password !== confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'Passwords do not match',
+      });
+    }
+
+    if (!agreeTerms) {
+      return res.status(400).json({
+        success: false,
+        message: 'You must agree to the terms and privacy policy',
+      });
+    }
+
+    // TODO: Add database user creation logic here
+    // For now, just return success
+    console.log('New user registration:', {
+      firstName,
+      lastName,
+      email,
+      phone,
+      companyName,
+      country,
+      city,
+      shippingAddress,
+      newsletter: newsletter === 'on'
+    });
+
+    res.json({
+      success: true,
+      message: 'Account created successfully',
+    });
+  } catch (error) {
+    console.error('Error in registerUser:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error creating account',
+    });
+  }
+};
+
+/**
  * Search for parts by part number
  * POST /api/search
  */
@@ -198,6 +286,8 @@ module.exports = {
   getLandingPage,
   getSearchPage,
   getSearch2Page,
+  getRegisterPage,
+  registerUser,
   searchParts,
   getSectors,
   downloadSampleExcel,

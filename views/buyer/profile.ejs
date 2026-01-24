@@ -32,19 +32,39 @@
           <div class="profile-avatar-section">
             <div class="profile-avatar-wrapper">
               <div class="profile-avatar" id="profileAvatar">
-                <i data-lucide="user"></i>
+                <% if (buyer.avatar) { %>
+                  <img src="<%= buyer.avatar %>" alt="Profile Avatar" class="avatar-image" id="avatarImage">
+                <% } else { %>
+                  <span class="avatar-initials" id="avatarInitials"><%= buyer.firstName.charAt(0).toUpperCase() %><%= buyer.lastName.charAt(0).toUpperCase() %></span>
+                <% } %>
               </div>
               <button class="avatar-edit-btn" id="avatarEditBtn" title="Change Avatar">
                 <i data-lucide="camera"></i>
               </button>
+              <!-- Hidden file input for avatar upload -->
+              <input type="file" id="avatarInput" accept="image/jpeg,image/jpg,image/png,image/webp,image/gif" style="display: none;">
             </div>
-            <h2 class="profile-name" id="profileName">John Doe</h2>
-            <p class="profile-email" id="profileEmail">john.doe@example.com</p>
+            <h2 class="profile-name" id="profileName"><%= buyer.fullName %></h2>
+            <p class="profile-email" id="profileEmail"><%= buyer.email %></p>
+            <p class="profile-company"><%= buyer.companyName %></p>
             <div class="profile-status">
+              <% if (buyer.isActive) { %>
               <span class="status-badge active">
                 <i data-lucide="check-circle"></i>
                 <span>Active Account</span>
               </span>
+              <% } else { %>
+              <span class="status-badge inactive">
+                <i data-lucide="x-circle"></i>
+                <span>Inactive Account</span>
+              </span>
+              <% } %>
+              <% if (buyer.isVerified) { %>
+              <span class="status-badge verified">
+                <i data-lucide="badge-check"></i>
+                <span>Verified</span>
+              </span>
+              <% } %>
             </div>
           </div>
 
@@ -63,7 +83,7 @@
                 <i data-lucide="calendar"></i>
               </div>
               <div class="stat-content">
-                <span class="stat-value" id="memberSince">2024</span>
+                <span class="stat-value" id="memberSince"><%= buyer.memberSince %></span>
                 <span class="stat-label">Member Since</span>
               </div>
             </div>
@@ -90,28 +110,28 @@
                   <i data-lucide="user"></i>
                   <span>Full Name</span>
                 </div>
-                <div class="info-value" id="fullNameValue">John Doe</div>
+                <div class="info-value" id="fullNameValue"><%= buyer.fullName %></div>
               </div>
               <div class="info-row">
                 <div class="info-label">
                   <i data-lucide="mail"></i>
                   <span>Email Address</span>
                 </div>
-                <div class="info-value" id="emailValue">john.doe@example.com</div>
+                <div class="info-value" id="emailValue"><%= buyer.email %></div>
               </div>
               <div class="info-row">
                 <div class="info-label">
                   <i data-lucide="phone"></i>
                   <span>Phone Number</span>
                 </div>
-                <div class="info-value" id="phoneValue">+1 (555) 123-4567</div>
+                <div class="info-value" id="phoneValue"><%= buyer.phone %></div>
               </div>
               <div class="info-row">
                 <div class="info-label">
-                  <i data-lucide="calendar"></i>
-                  <span>Date of Birth</span>
+                  <i data-lucide="building-2"></i>
+                  <span>Company</span>
                 </div>
-                <div class="info-value" id="dobValue">January 1, 1990</div>
+                <div class="info-value" id="companyValue"><%= buyer.companyName %></div>
               </div>
             </div>
           </div>
@@ -132,37 +152,23 @@
               <div class="info-row">
                 <div class="info-label">
                   <i data-lucide="map-pin"></i>
-                  <span>Street Address</span>
+                  <span>Shipping Address</span>
                 </div>
-                <div class="info-value" id="streetValue">123 Main Street</div>
+                <div class="info-value" id="streetValue"><%= buyer.shippingAddress %></div>
               </div>
               <div class="info-row">
                 <div class="info-label">
                   <i data-lucide="building"></i>
                   <span>City</span>
                 </div>
-                <div class="info-value" id="cityValue">New York</div>
-              </div>
-              <div class="info-row">
-                <div class="info-label">
-                  <i data-lucide="map"></i>
-                  <span>State/Province</span>
-                </div>
-                <div class="info-value" id="stateValue">NY</div>
+                <div class="info-value" id="cityValue"><%= buyer.city %></div>
               </div>
               <div class="info-row">
                 <div class="info-label">
                   <i data-lucide="globe"></i>
                   <span>Country</span>
                 </div>
-                <div class="info-value" id="countryValue">United States</div>
-              </div>
-              <div class="info-row">
-                <div class="info-label">
-                  <i data-lucide="hash"></i>
-                  <span>Postal Code</span>
-                </div>
-                <div class="info-value" id="postalValue">10001</div>
+                <div class="info-value" id="countryValue"><%= buyer.country %></div>
               </div>
             </div>
           </div>
@@ -182,7 +188,7 @@
                   <span>Password</span>
                 </div>
                 <div class="info-value-action">
-                  <span class="info-value-text">Last changed 30 days ago</span>
+                  <span class="info-value-text">Last changed <%= buyer.passwordLastChanged %> days ago</span>
                   <button class="info-action-btn" id="changePasswordBtn">
                     <i data-lucide="key"></i>
                     <span>Change Password</span>
@@ -202,6 +208,15 @@
                   </button>
                 </div>
               </div>
+              <div class="info-row">
+                <div class="info-label">
+                  <i data-lucide="mail-check"></i>
+                  <span>Newsletter</span>
+                </div>
+                <div class="info-value-action">
+                  <span class="info-value-text"><%= buyer.newsletter ? 'Subscribed' : 'Not subscribed' %></span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -213,6 +228,43 @@
 <%- include('partials/quick-search') %>
 <%- include('partials/footer') %>
 
+<!-- Avatar Upload Modal -->
+<div class="avatar-upload-modal" id="avatarUploadModal">
+  <div class="avatar-modal-backdrop" id="avatarModalBackdrop"></div>
+  <div class="avatar-modal-content">
+    <button class="avatar-modal-close" id="avatarModalClose">
+      <i data-lucide="x"></i>
+    </button>
+    <div class="avatar-modal-header">
+      <h3>Upload Profile Photo</h3>
+      <p>Choose a new profile picture</p>
+    </div>
+    <div class="avatar-upload-area" id="avatarUploadArea">
+      <div class="upload-preview" id="uploadPreview" style="display: none;">
+        <img src="" alt="Preview" id="previewImage">
+      </div>
+      <div class="upload-placeholder" id="uploadPlaceholder">
+        <i data-lucide="image-plus"></i>
+        <span>Drop image here or click to browse</span>
+        <span class="upload-hint">Supports: JPG, PNG, WebP, GIF (Max 5MB)</span>
+      </div>
+    </div>
+    <div class="avatar-modal-actions">
+      <button class="btn-cancel" id="avatarCancelBtn">Cancel</button>
+      <button class="btn-upload" id="avatarUploadBtn" disabled>
+        <i data-lucide="upload"></i>
+        <span>Upload Photo</span>
+      </button>
+    </div>
+    <div class="upload-progress" id="uploadProgress" style="display: none;">
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <span class="progress-text" id="progressText">Uploading...</span>
+    </div>
+  </div>
+</div>
+
 <script src="/js/main.js"></script>
 <script src="/js/quick-search.js"></script>
 <script src="/js/cart.js"></script>
@@ -220,6 +272,208 @@
 <script>
   lucide.createIcons();
   window.addEventListener('load', () => lucide.createIcons());
+
+  // ====================================
+  // AVATAR UPLOAD FUNCTIONALITY
+  // ====================================
+  (function() {
+    'use strict';
+
+    // Elements
+    const avatarEditBtn = document.getElementById('avatarEditBtn');
+    const avatarInput = document.getElementById('avatarInput');
+    const avatarUploadModal = document.getElementById('avatarUploadModal');
+    const avatarModalBackdrop = document.getElementById('avatarModalBackdrop');
+    const avatarModalClose = document.getElementById('avatarModalClose');
+    const avatarUploadArea = document.getElementById('avatarUploadArea');
+    const uploadPreview = document.getElementById('uploadPreview');
+    const previewImage = document.getElementById('previewImage');
+    const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+    const avatarCancelBtn = document.getElementById('avatarCancelBtn');
+    const avatarUploadBtn = document.getElementById('avatarUploadBtn');
+    const uploadProgress = document.getElementById('uploadProgress');
+    const progressFill = document.getElementById('progressFill');
+    const progressText = document.getElementById('progressText');
+    const profileAvatar = document.getElementById('profileAvatar');
+
+    let selectedFile = null;
+
+    // Open modal
+    function openModal() {
+      avatarUploadModal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+      lucide.createIcons();
+    }
+
+    // Close modal
+    function closeModal() {
+      avatarUploadModal.classList.remove('active');
+      document.body.style.overflow = '';
+      resetUpload();
+    }
+
+    // Reset upload state
+    function resetUpload() {
+      selectedFile = null;
+      previewImage.src = '';
+      uploadPreview.style.display = 'none';
+      uploadPlaceholder.style.display = 'flex';
+      avatarUploadBtn.disabled = true;
+      uploadProgress.style.display = 'none';
+      progressFill.style.width = '0%';
+      avatarInput.value = '';
+    }
+
+    // Handle file selection
+    function handleFileSelect(file) {
+      if (!file) return;
+
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
+      if (!allowedTypes.includes(file.type)) {
+        alert('Invalid file type. Please upload a JPG, PNG, WebP, or GIF image.');
+        return;
+      }
+
+      // Validate file size (5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('File too large. Maximum size is 5MB.');
+        return;
+      }
+
+      selectedFile = file;
+
+      // Show preview
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        previewImage.src = e.target.result;
+        uploadPreview.style.display = 'block';
+        uploadPlaceholder.style.display = 'none';
+        avatarUploadBtn.disabled = false;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // Upload avatar
+    async function uploadAvatar() {
+      if (!selectedFile) return;
+
+      const formData = new FormData();
+      formData.append('avatar', selectedFile);
+
+      // Show progress
+      avatarUploadBtn.disabled = true;
+      uploadProgress.style.display = 'block';
+
+      try {
+        const response = await fetch('/buyer/profile/avatar', {
+          method: 'POST',
+          body: formData,
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          progressFill.style.width = '100%';
+          progressText.textContent = 'Upload complete!';
+
+          // Update avatar display
+          const avatarInitials = document.getElementById('avatarInitials');
+          let avatarImage = document.getElementById('avatarImage');
+
+          if (avatarInitials) {
+            avatarInitials.style.display = 'none';
+          }
+
+          if (!avatarImage) {
+            avatarImage = document.createElement('img');
+            avatarImage.id = 'avatarImage';
+            avatarImage.className = 'avatar-image';
+            avatarImage.alt = 'Profile Avatar';
+            profileAvatar.appendChild(avatarImage);
+          }
+
+          avatarImage.src = result.data.avatar + '?t=' + Date.now();
+          avatarImage.style.display = 'block';
+
+          // Close modal after delay
+          setTimeout(() => {
+            closeModal();
+          }, 1000);
+        } else {
+          throw new Error(result.message || 'Upload failed');
+        }
+      } catch (error) {
+        console.error('Upload error:', error);
+        progressText.textContent = 'Upload failed. Please try again.';
+        progressFill.style.background = '#ef4444';
+        avatarUploadBtn.disabled = false;
+      }
+    }
+
+    // Event listeners
+    if (avatarEditBtn) {
+      avatarEditBtn.addEventListener('click', openModal);
+    }
+
+    if (avatarModalBackdrop) {
+      avatarModalBackdrop.addEventListener('click', closeModal);
+    }
+
+    if (avatarModalClose) {
+      avatarModalClose.addEventListener('click', closeModal);
+    }
+
+    if (avatarCancelBtn) {
+      avatarCancelBtn.addEventListener('click', closeModal);
+    }
+
+    if (avatarUploadBtn) {
+      avatarUploadBtn.addEventListener('click', uploadAvatar);
+    }
+
+    // File input change
+    if (avatarInput) {
+      avatarInput.addEventListener('change', (e) => {
+        if (e.target.files && e.target.files[0]) {
+          handleFileSelect(e.target.files[0]);
+        }
+      });
+    }
+
+    // Click on upload area
+    if (avatarUploadArea) {
+      avatarUploadArea.addEventListener('click', () => {
+        avatarInput.click();
+      });
+
+      // Drag and drop
+      avatarUploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        avatarUploadArea.classList.add('dragover');
+      });
+
+      avatarUploadArea.addEventListener('dragleave', () => {
+        avatarUploadArea.classList.remove('dragover');
+      });
+
+      avatarUploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        avatarUploadArea.classList.remove('dragover');
+        
+        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+          handleFileSelect(e.dataTransfer.files[0]);
+        }
+      });
+    }
+
+    // ESC key to close
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && avatarUploadModal.classList.contains('active')) {
+        closeModal();
+      }
+    });
+  })();
 </script>
 
 

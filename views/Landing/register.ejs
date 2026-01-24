@@ -1,0 +1,486 @@
+<%- include('partials/header') %>
+<%- include('partials/navbar-simple', { showLogin: true, showRegister: false }) %>
+<%- include('partials/login-modal') %>
+
+<!-- ====================================
+     REGISTRATION PAGE - PROFESSIONAL DESIGN
+     ==================================== -->
+<section class="register-section">
+  <!-- Background Elements -->
+  <div class="register-bg-elements">
+    <div class="register-gradient-orb orb-1"></div>
+    <div class="register-gradient-orb orb-2"></div>
+    <div class="register-grid-pattern"></div>
+    <!-- Floating Particles -->
+    <div class="register-particle particle-1"></div>
+    <div class="register-particle particle-2"></div>
+    <div class="register-particle particle-3"></div>
+    <div class="register-particle particle-4"></div>
+    <div class="register-particle particle-5"></div>
+    <div class="register-particle particle-6"></div>
+  </div>
+
+  <div class="container register-container">
+    <!-- Registration Form - Centered -->
+    <div class="register-form-wrapper">
+      <div class="register-card">
+        <div class="register-card-header">
+          <h2>Create Your Account</h2>
+          <p>Fill in your details to get started</p>
+        </div>
+
+        <!-- Error Message Display -->
+        <div class="form-message form-error" id="formError" style="display: none;">
+          <i data-lucide="alert-circle"></i>
+          <span id="errorMessage"></span>
+        </div>
+
+        <!-- Success Message Display -->
+        <div class="form-message form-success" id="formSuccess" style="display: none;">
+          <i data-lucide="check-circle"></i>
+          <span id="successMessage"></span>
+        </div>
+
+        <form class="register-form" id="registerForm" action="/register" method="POST">
+          <!-- Personal Information Section -->
+          <div class="form-section">
+            <div class="form-section-title">
+              <i data-lucide="user"></i>
+              <span>Personal Information</span>
+            </div>
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label for="firstName">First Name <span class="required">*</span></label>
+                <div class="input-wrapper">
+                  <i data-lucide="user" class="input-icon"></i>
+                  <input type="text" id="firstName" name="firstName" placeholder="Enter your first name" required>
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label for="lastName">Last Name <span class="required">*</span></label>
+                <div class="input-wrapper">
+                  <i data-lucide="user" class="input-icon"></i>
+                  <input type="text" id="lastName" name="lastName" placeholder="Enter your last name" required>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="email">Email Address <span class="required">*</span></label>
+                <div class="input-wrapper">
+                  <i data-lucide="mail" class="input-icon"></i>
+                  <input type="email" id="email" name="email" placeholder="you@company.com" required>
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label for="phone">Phone Number <span class="required">*</span></label>
+                <div class="input-wrapper">
+                  <i data-lucide="phone" class="input-icon"></i>
+                  <input type="tel" id="phone" name="phone" placeholder="+1 (555) 000-0000" required>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Company Information Section -->
+          <div class="form-section">
+            <div class="form-section-title">
+              <i data-lucide="building-2"></i>
+              <span>Company Information</span>
+            </div>
+            
+            <div class="form-group full-width">
+              <label for="companyName">Company Name <span class="required">*</span></label>
+              <div class="input-wrapper">
+                <i data-lucide="building-2" class="input-icon"></i>
+                <input type="text" id="companyName" name="companyName" placeholder="Your company name" required>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="country">Country <span class="required">*</span></label>
+                <div class="input-wrapper select-wrapper">
+                  <i data-lucide="globe" class="input-icon"></i>
+                  <select id="country" name="country" required>
+                    <option value="">Select your country</option>
+                    <option value="US">United States</option>
+                    <option value="CA">Canada</option>
+                    <option value="GB">United Kingdom</option>
+                    <option value="DE">Germany</option>
+                    <option value="FR">France</option>
+                    <option value="IT">Italy</option>
+                    <option value="ES">Spain</option>
+                    <option value="NL">Netherlands</option>
+                    <option value="BE">Belgium</option>
+                    <option value="AT">Austria</option>
+                    <option value="CH">Switzerland</option>
+                    <option value="PL">Poland</option>
+                    <option value="SE">Sweden</option>
+                    <option value="NO">Norway</option>
+                    <option value="DK">Denmark</option>
+                    <option value="FI">Finland</option>
+                    <option value="AU">Australia</option>
+                    <option value="NZ">New Zealand</option>
+                    <option value="JP">Japan</option>
+                    <option value="KR">South Korea</option>
+                    <option value="CN">China</option>
+                    <option value="IN">India</option>
+                    <option value="SG">Singapore</option>
+                    <option value="AE">United Arab Emirates</option>
+                    <option value="SA">Saudi Arabia</option>
+                    <option value="BR">Brazil</option>
+                    <option value="MX">Mexico</option>
+                    <option value="AR">Argentina</option>
+                    <option value="ZA">South Africa</option>
+                    <option value="RU">Russia</option>
+                    <option value="UA">Ukraine</option>
+                    <option value="TR">Turkey</option>
+                    <option value="EG">Egypt</option>
+                    <option value="IL">Israel</option>
+                    <option value="MY">Malaysia</option>
+                    <option value="TH">Thailand</option>
+                    <option value="VN">Vietnam</option>
+                    <option value="ID">Indonesia</option>
+                    <option value="PH">Philippines</option>
+                  </select>
+                  <i data-lucide="chevron-down" class="select-arrow"></i>
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label for="city">City <span class="required">*</span></label>
+                <div class="input-wrapper">
+                  <i data-lucide="map-pin" class="input-icon"></i>
+                  <input type="text" id="city" name="city" placeholder="Enter your city" required>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group full-width">
+              <label for="shippingAddress">Shipping Address <span class="required">*</span></label>
+              <div class="input-wrapper textarea-wrapper">
+                <i data-lucide="map" class="input-icon textarea-icon"></i>
+                <textarea id="shippingAddress" name="shippingAddress" rows="3" placeholder="Enter your complete shipping address" required></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- Security Section -->
+          <div class="form-section">
+            <div class="form-section-title">
+              <i data-lucide="lock"></i>
+              <span>Security</span>
+            </div>
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label for="password">Password <span class="required">*</span></label>
+                <div class="input-wrapper password-wrapper">
+                  <i data-lucide="lock" class="input-icon"></i>
+                  <input type="password" id="password" name="password" placeholder="Create a strong password" required minlength="8">
+                  <button type="button" class="password-toggle" onclick="togglePassword('password')">
+                    <i data-lucide="eye" class="eye-icon"></i>
+                    <i data-lucide="eye-off" class="eye-off-icon" style="display: none;"></i>
+                  </button>
+                </div>
+                <div class="password-strength" id="passwordStrength">
+                  <div class="strength-bar"><span></span></div>
+                  <p class="strength-text">Password strength</p>
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label for="confirmPassword">Confirm Password <span class="required">*</span></label>
+                <div class="input-wrapper password-wrapper">
+                  <i data-lucide="lock" class="input-icon"></i>
+                  <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm your password" required>
+                  <button type="button" class="password-toggle" onclick="togglePassword('confirmPassword')">
+                    <i data-lucide="eye" class="eye-icon"></i>
+                    <i data-lucide="eye-off" class="eye-off-icon" style="display: none;"></i>
+                  </button>
+                </div>
+                <p class="password-match-text" id="passwordMatch"></p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Terms & Agreement -->
+          <div class="form-section terms-section">
+            <div class="form-checkbox">
+              <input type="checkbox" id="agreeTerms" name="agreeTerms" required>
+              <label for="agreeTerms">
+                I agree to the processing of my personal data and accept the 
+                <a href="/privacy-policy" target="_blank">Privacy Policy</a> and 
+                <a href="/terms" target="_blank">Terms of Service</a>.
+              </label>
+            </div>
+            
+            <div class="form-checkbox">
+              <input type="checkbox" id="newsletter" name="newsletter">
+              <label for="newsletter">
+                I would like to receive updates about new features and promotions.
+              </label>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <button type="submit" class="register-submit-btn" id="registerSubmitBtn">
+            <span class="btn-text">Create Account</span>
+            <span class="btn-loader" style="display: none;">
+              <svg class="spinner" viewBox="0 0 24 24">
+                <circle class="spinner-circle" cx="12" cy="12" r="10" fill="none" stroke-width="3"></circle>
+              </svg>
+            </span>
+            <i data-lucide="arrow-right" class="btn-icon"></i>
+          </button>
+
+          <!-- Login Link -->
+          <div class="register-login-link">
+            <p>Already have an account? <a href="#" id="open-login-modal">Sign In</a></p>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Registration Page Scripts -->
+<script>
+// Open login modal from link
+document.addEventListener('DOMContentLoaded', function() {
+  const openLoginLink = document.getElementById('open-login-modal');
+  if (openLoginLink) {
+    openLoginLink.addEventListener('click', function(e) {
+      e.preventDefault();
+      const modal = document.getElementById('sign-in-modal');
+      if (modal) {
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        if (typeof lucide !== 'undefined') {
+          lucide.createIcons();
+        }
+      }
+    });
+  }
+});
+document.addEventListener('DOMContentLoaded', function() {
+  // Initialize Lucide icons
+  if (typeof lucide !== 'undefined') {
+    lucide.createIcons();
+  }
+
+  const form = document.getElementById('registerForm');
+  const passwordInput = document.getElementById('password');
+  const confirmPasswordInput = document.getElementById('confirmPassword');
+  const passwordStrength = document.getElementById('passwordStrength');
+  const passwordMatch = document.getElementById('passwordMatch');
+  const submitBtn = document.getElementById('registerSubmitBtn');
+  const formError = document.getElementById('formError');
+  const formSuccess = document.getElementById('formSuccess');
+  const errorMessage = document.getElementById('errorMessage');
+  const successMessage = document.getElementById('successMessage');
+
+  // Clear all errors
+  function clearErrors() {
+    formError.style.display = 'none';
+    formSuccess.style.display = 'none';
+    document.querySelectorAll('.field-error').forEach(el => el.textContent = '');
+    document.querySelectorAll('.input-wrapper').forEach(el => el.classList.remove('error'));
+  }
+
+  // Show error message
+  function showError(message, fieldErrors = {}) {
+    formSuccess.style.display = 'none';
+    formError.style.display = 'flex';
+    errorMessage.textContent = message;
+
+    // Show field-specific errors
+    Object.keys(fieldErrors).forEach(field => {
+      const errorEl = document.getElementById(`${field}Error`);
+      const inputWrapper = document.getElementById(field)?.closest('.input-wrapper');
+      if (errorEl) {
+        errorEl.textContent = fieldErrors[field];
+      }
+      if (inputWrapper) {
+        inputWrapper.classList.add('error');
+      }
+    });
+
+    // Scroll to error message
+    formError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    // Re-initialize icons
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+    }
+  }
+
+  // Show success message
+  function showSuccess(message) {
+    formError.style.display = 'none';
+    formSuccess.style.display = 'flex';
+    successMessage.textContent = message;
+
+    formSuccess.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+    }
+  }
+
+  // Set button loading state
+  function setLoading(loading) {
+    if (loading) {
+      submitBtn.classList.add('loading');
+      submitBtn.disabled = true;
+      submitBtn.querySelector('.btn-text').style.display = 'none';
+      submitBtn.querySelector('.btn-icon').style.display = 'none';
+      submitBtn.querySelector('.btn-loader').style.display = 'flex';
+    } else {
+      submitBtn.classList.remove('loading');
+      submitBtn.disabled = false;
+      submitBtn.querySelector('.btn-text').style.display = 'inline';
+      submitBtn.querySelector('.btn-icon').style.display = 'inline';
+      submitBtn.querySelector('.btn-loader').style.display = 'none';
+    }
+  }
+
+  // Password strength checker
+  passwordInput.addEventListener('input', function() {
+    const password = this.value;
+    const strengthBar = passwordStrength.querySelector('.strength-bar span');
+    const strengthText = passwordStrength.querySelector('.strength-text');
+    
+    let strength = 0;
+    if (password.length >= 8) strength++;
+    if (password.match(/[a-z]/) && password.match(/[A-Z]/)) strength++;
+    if (password.match(/\d/)) strength++;
+    if (password.match(/[^a-zA-Z\d]/)) strength++;
+
+    const strengthLevels = ['Weak', 'Fair', 'Good', 'Strong'];
+    const strengthColors = ['#dc2626', '#f59e0b', '#3b82f6', '#10b981'];
+    const strengthWidths = ['25%', '50%', '75%', '100%'];
+
+    if (password.length > 0) {
+      strengthBar.style.width = strengthWidths[strength - 1] || '0%';
+      strengthBar.style.background = strengthColors[strength - 1] || '#dc2626';
+      strengthText.textContent = strengthLevels[strength - 1] || 'Too short';
+      strengthText.style.color = strengthColors[strength - 1] || '#dc2626';
+    } else {
+      strengthBar.style.width = '0%';
+      strengthText.textContent = 'Password strength';
+      strengthText.style.color = '#64748b';
+    }
+
+    checkPasswordMatch();
+  });
+
+  // Password match checker
+  confirmPasswordInput.addEventListener('input', checkPasswordMatch);
+
+  function checkPasswordMatch() {
+    const password = passwordInput.value;
+    const confirmPassword = confirmPasswordInput.value;
+
+    if (confirmPassword.length > 0) {
+      if (password === confirmPassword) {
+        passwordMatch.textContent = '✓ Passwords match';
+        passwordMatch.style.color = '#10b981';
+        confirmPasswordInput.classList.remove('error');
+        confirmPasswordInput.classList.add('success');
+      } else {
+        passwordMatch.textContent = '✗ Passwords do not match';
+        passwordMatch.style.color = '#dc2626';
+        confirmPasswordInput.classList.remove('success');
+        confirmPasswordInput.classList.add('error');
+      }
+    } else {
+      passwordMatch.textContent = '';
+      confirmPasswordInput.classList.remove('error', 'success');
+    }
+  }
+
+  // Form submission
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    clearErrors();
+
+    // Validate passwords match (client-side)
+    if (passwordInput.value !== confirmPasswordInput.value) {
+      showError('Passwords do not match', { confirmPassword: 'Passwords do not match' });
+      return;
+    }
+
+    // Validate password length
+    if (passwordInput.value.length < 8) {
+      showError('Password must be at least 8 characters long', { password: 'Password too short' });
+      return;
+    }
+
+    // Show loading state
+    setLoading(true);
+
+    try {
+      // Collect form data
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData.entries());
+
+      // Send registration request
+      const response = await fetch('/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        showSuccess(result.message || 'Account created successfully! Redirecting...');
+        
+        // Redirect after short delay
+        setTimeout(() => {
+          window.location.href = result.data?.redirectUrl || '/buyer';
+        }, 1500);
+      } else {
+        showError(result.message || 'Registration failed', result.errors || {});
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
+      showError('An error occurred. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  });
+});
+
+// Toggle password visibility
+function togglePassword(inputId) {
+  const input = document.getElementById(inputId);
+  const wrapper = input.closest('.password-wrapper');
+  const eyeIcon = wrapper.querySelector('.eye-icon');
+  const eyeOffIcon = wrapper.querySelector('.eye-off-icon');
+
+  if (input.type === 'password') {
+    input.type = 'text';
+    eyeIcon.style.display = 'none';
+    eyeOffIcon.style.display = 'block';
+  } else {
+    input.type = 'password';
+    eyeIcon.style.display = 'block';
+    eyeOffIcon.style.display = 'none';
+  }
+}
+</script>
+
+<!-- Registration Page Styles -->
+<link rel="stylesheet" href="/css/register.css">
+
+<%- include('partials/footer') %>

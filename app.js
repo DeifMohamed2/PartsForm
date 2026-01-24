@@ -3,6 +3,14 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const i18next = require('./config/i18n');
 const middleware = require('i18next-http-middleware');
+const connectDB = require('./config/database');
+const { initializeUploadDirectories } = require('./utils/fileUploader');
+
+// Connect to MongoDB
+connectDB();
+
+// Initialize upload directories
+initializeUploadDirectories();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -370,9 +378,11 @@ app.locals.ticketsDatabase = ticketsDatabase;
 const landingRoutes = require('./routes/landing');
 const buyerRoutes = require('./routes/buyer');
 const adminRoutes = require('./routes/admin');
+const authRoutes = require('./routes/auth');
 
 // Use routes
 app.use('/', landingRoutes);
+app.use('/', authRoutes); // Auth routes at root level (/login, /register, /logout)
 app.use('/buyer', buyerRoutes);
 app.use('/admin', adminRoutes);
 

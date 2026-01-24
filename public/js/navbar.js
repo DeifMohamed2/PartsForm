@@ -10,6 +10,7 @@
   function initNavbar() {
     initMobileMenu();
     initLanguageSelector();
+    initNavDropdowns();
     initNavbarScroll();
     initSectionTracking();
     initSmoothScrolling();
@@ -157,6 +158,91 @@
       currentLang.textContent = savedLang;
       currentFlag.textContent = savedFlag;
     }
+  }
+
+  // ====================================
+  // NAVIGATION DROPDOWNS (Account, Support)
+  // ====================================
+  function initNavDropdowns() {
+    const dropdowns = document.querySelectorAll('.nav-dropdown');
+    
+    if (dropdowns.length === 0) {
+      return;
+    }
+
+    // Track currently open dropdown
+    let currentOpenDropdown = null;
+
+    dropdowns.forEach(dropdown => {
+      const trigger = dropdown.querySelector('.dropdown-trigger');
+      const menu = dropdown.querySelector('.nav-dropdown-menu');
+      
+      if (!trigger || !menu) return;
+
+      // Toggle dropdown on trigger click
+      trigger.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const isOpen = dropdown.classList.contains('open');
+        
+        // Close all dropdowns first
+        closeAllDropdowns();
+        
+        // Open this dropdown if it was closed
+        if (!isOpen) {
+          dropdown.classList.add('open');
+          currentOpenDropdown = dropdown;
+        } else {
+          currentOpenDropdown = null;
+        }
+      });
+
+      // Close dropdown when clicking a menu item
+      const menuItems = menu.querySelectorAll('.nav-dropdown-item');
+      menuItems.forEach(item => {
+        item.addEventListener('click', function() {
+          closeAllDropdowns();
+        });
+      });
+    });
+
+    // Close all dropdowns function
+    function closeAllDropdowns() {
+      dropdowns.forEach(dropdown => {
+        dropdown.classList.remove('open');
+      });
+      currentOpenDropdown = null;
+    }
+
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', function(e) {
+      const isInsideDropdown = Array.from(dropdowns).some(dropdown => 
+        dropdown.contains(e.target)
+      );
+      
+      if (!isInsideDropdown) {
+        closeAllDropdowns();
+      }
+    });
+
+    // Close dropdowns on ESC key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && currentOpenDropdown) {
+        closeAllDropdowns();
+      }
+    });
+
+    // Close dropdowns on window resize
+    let resizeTimer;
+    window.addEventListener('resize', function() {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(function() {
+        if (window.innerWidth <= 767) {
+          closeAllDropdowns();
+        }
+      }, 250);
+    });
   }
 
   // ====================================

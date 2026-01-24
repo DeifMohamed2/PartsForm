@@ -12,6 +12,8 @@ const {
 // Landing page routes
 router.get('/', getLandingPage);
 
+// Note: Registration routes are now handled by /routes/auth.js
+
 // Other search routes
 router.get('/search/:industry', getSearchPage);
 router.get('/search2', getSearch2Page);
