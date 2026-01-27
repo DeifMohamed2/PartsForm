@@ -43,12 +43,12 @@
 
         <div class="form-group">
           <label class="form-label">Password</label>
-          <div class="input-wrapper">
+          <div class="input-wrapper password-wrapper">
             <i data-lucide="lock" class="input-icon"></i>
-            <input type="password" id="modal-password" name="password" class="form-input" placeholder="••••••••" required>
-            <button type="button" class="password-toggle-modal" onclick="toggleModalPassword()">
-              <i data-lucide="eye" class="eye-icon"></i>
-              <i data-lucide="eye-off" class="eye-off-icon" style="display: none;"></i>
+            <input type="password" id="modal-password" name="password" class="form-input password-input" placeholder="••••••••" required>
+            <button type="button" class="password-toggle-btn" id="password-toggle-btn" aria-label="Toggle password visibility">
+              <i data-lucide="eye" class="eye-icon" id="eye-show"></i>
+              <i data-lucide="eye-off" class="eye-icon eye-hidden" id="eye-hide"></i>
             </button>
           </div>
         </div>
@@ -83,6 +83,17 @@
 
 <!-- Login Modal Styles -->
 <style>
+  /* Shake Animation for Error */
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+    20%, 40%, 60%, 80% { transform: translateX(4px); }
+  }
+
+  .shake {
+    animation: shake 0.5s ease-in-out;
+  }
+
   .modal {
     position: fixed;
     top: 0;
@@ -276,24 +287,57 @@
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
   }
 
-  .password-toggle-modal {
+  .password-wrapper {
+    position: relative;
+  }
+
+  .password-input {
+    padding-right: 3rem !important;
+  }
+
+  .password-toggle-btn {
     position: absolute;
-    right: 1rem;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
     background: none;
     border: none;
     cursor: pointer;
-    padding: 0.25rem;
-    color: #64748b;
-    transition: color 0.2s ease;
+    padding: 0.5rem;
+    color: #94a3b8;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
   }
 
-  .password-toggle-modal:hover {
+  .password-toggle-btn:hover {
     color: #2B5278;
+    background: rgba(43, 82, 120, 0.08);
   }
 
-  .password-toggle-modal i {
+  .password-toggle-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+  }
+
+  .password-toggle-btn .eye-icon {
     width: 18px;
     height: 18px;
+    transition: opacity 0.15s ease;
+  }
+
+  .password-toggle-btn .eye-hidden {
+    display: none;
+  }
+
+  .password-toggle-btn.active .eye-icon:first-child {
+    display: none;
+  }
+
+  .password-toggle-btn.active .eye-hidden {
+    display: block;
   }
 
   .form-footer {
@@ -458,18 +502,24 @@ document.addEventListener('DOMContentLoaded', function() {
     modalSuccess.style.display = 'none';
   }
 
-  // Show error
-  function showError(message) {
+  // Show error with inline message (better UX)
+  function showError(message, title = 'Error') {
     modalSuccess.style.display = 'none';
     modalError.style.display = 'flex';
     modalErrorMessage.textContent = message;
+    
+    // Shake animation for better feedback
+    modalError.classList.remove('shake');
+    void modalError.offsetWidth; // Trigger reflow
+    modalError.classList.add('shake');
+    
     if (typeof lucide !== 'undefined') {
       lucide.createIcons();
     }
   }
 
-  // Show success
-  function showSuccess(message) {
+  // Show success with inline message
+  function showSuccess(message, title = 'Success') {
     modalError.style.display = 'none';
     modalSuccess.style.display = 'flex';
     modalSuccessMessage.textContent = message;
@@ -493,6 +543,23 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
+  // Password visibility toggle
+  const passwordToggleBtn = document.getElementById('password-toggle-btn');
+  const passwordInput = document.getElementById('modal-password');
+  
+  if (passwordToggleBtn && passwordInput) {
+    passwordToggleBtn.addEventListener('click', function() {
+      const isPassword = passwordInput.type === 'password';
+      passwordInput.type = isPassword ? 'text' : 'password';
+      this.classList.toggle('active', isPassword);
+      
+      // Reinitialize lucide icons
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+    });
+  }
+
   // Handle form submission
   signInForm.addEventListener('submit', async function(e) {
     e.preventDefault();
@@ -502,7 +569,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const password = document.getElementById('modal-password').value;
 
     if (!email || !password) {
-      showError('Please enter both email and password');
+      showError('Please enter both email and password', 'Missing Information');
       return;
     }
 
@@ -521,37 +588,32 @@ document.addEventListener('DOMContentLoaded', function() {
       const data = await response.json();
 
       if (data.success) {
+        // Store user info in localStorage for navbar UI
+        const userData = data.data?.user || {};
+        const role = data.data?.role || 'buyer';
+        
+        localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('userRole', role);
+        localStorage.setItem('userName', `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || 'User');
+        localStorage.setItem('userEmail', userData.email || email);
+        
+        // Show success message inside modal
         showSuccess(data.message || 'Login successful! Redirecting...');
         
+        // Redirect after short delay
         setTimeout(() => {
           window.location.href = data.data?.redirectUrl || '/buyer';
         }, 1000);
       } else {
-        showError(data.message || 'Login failed');
+        // Show inline error message
+        showError(data.message || 'Login failed. Please check your credentials.');
       }
     } catch (error) {
       console.error('Login error:', error);
-      showError('An error occurred. Please try again.');
+      showError('An error occurred. Please check your connection and try again.', 'Connection Error');
     } finally {
       setLoading(false);
     }
   });
 });
-
-// Toggle password visibility in modal
-function toggleModalPassword() {
-  const input = document.getElementById('modal-password');
-  const eyeIcon = document.querySelector('.password-toggle-modal .eye-icon');
-  const eyeOffIcon = document.querySelector('.password-toggle-modal .eye-off-icon');
-
-  if (input.type === 'password') {
-    input.type = 'text';
-    eyeIcon.style.display = 'none';
-    eyeOffIcon.style.display = 'block';
-  } else {
-    input.type = 'password';
-    eyeIcon.style.display = 'block';
-    eyeOffIcon.style.display = 'none';
-  }
-}
 </script>

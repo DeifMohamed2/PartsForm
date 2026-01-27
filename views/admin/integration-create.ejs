@@ -110,12 +110,12 @@
               <div class="form-row">
                 <div class="form-group">
                   <label>Connection Name <span class="required">*</span></label>
-                  <input type="text" class="form-input" placeholder="e.g., Main Supplier FTP">
+                  <input type="text" class="form-input" id="ftpName" placeholder="e.g., Main Supplier FTP">
                   <span class="form-hint">A friendly name to identify this connection</span>
                 </div>
                 <div class="form-group">
                   <label>Protocol</label>
-                  <select class="form-input">
+                  <select class="form-input" id="ftpProtocol">
                     <option value="ftp">FTP (Standard)</option>
                     <option value="ftps">FTPS (FTP over SSL)</option>
                     <option value="sftp">SFTP (SSH File Transfer)</option>
@@ -124,20 +124,16 @@
               </div>
 
               <div class="form-row">
-                <div class="form-group flex-2">
+                <div class="form-group full-width">
                   <label>Host / Server <span class="required">*</span></label>
-                  <input type="text" class="form-input" placeholder="ftp.example.com">
-                </div>
-                <div class="form-group">
-                  <label>Port</label>
-                  <input type="number" class="form-input" value="21">
+                  <input type="text" class="form-input" id="ftpHost" placeholder="ftp.example.com">
                 </div>
               </div>
 
               <div class="form-row">
                 <div class="form-group">
                   <label>Username <span class="required">*</span></label>
-                  <input type="text" class="form-input" placeholder="ftp_user">
+                  <input type="text" class="form-input" id="ftpUsername" placeholder="ftp_user">
                 </div>
                 <div class="form-group">
                   <label>Password <span class="required">*</span></label>
@@ -147,19 +143,6 @@
                       <i data-lucide="eye"></i>
                     </button>
                   </div>
-                </div>
-              </div>
-
-              <div class="form-row">
-                <div class="form-group">
-                  <label>Remote Directory</label>
-                  <input type="text" class="form-input" placeholder="/data/csv/" value="/">
-                  <span class="form-hint">Path to the directory containing your data files</span>
-                </div>
-                <div class="form-group">
-                  <label>File Pattern</label>
-                  <input type="text" class="form-input" placeholder="*.csv" value="*.csv">
-                  <span class="form-hint">Glob pattern to match files (e.g., *.csv, parts_*.txt)</span>
                 </div>
               </div>
 
@@ -181,7 +164,7 @@
                 </div>
                 <div class="form-group">
                   <label>Preferred Time</label>
-                  <input type="time" class="form-input" value="02:00">
+                  <input type="time" class="form-input" id="syncTime" value="02:00">
                   <span class="form-hint">Best time to run syncs (for daily/weekly)</span>
                 </div>
               </div>
@@ -192,7 +175,7 @@
               
               <div class="options-grid">
                 <label class="option-toggle">
-                  <input type="checkbox" checked>
+                  <input type="checkbox" id="ftpEnabled" checked>
                   <span class="toggle-slider"></span>
                   <div class="option-info">
                     <span class="option-label">Enable connection</span>
@@ -201,7 +184,7 @@
                 </label>
 
                 <label class="option-toggle">
-                  <input type="checkbox" checked>
+                  <input type="checkbox" id="ftpPassive" checked>
                   <span class="toggle-slider"></span>
                   <div class="option-info">
                     <span class="option-label">Passive mode</span>
@@ -210,7 +193,7 @@
                 </label>
 
                 <label class="option-toggle">
-                  <input type="checkbox">
+                  <input type="checkbox" id="ftpDeleteAfterImport">
                   <span class="toggle-slider"></span>
                   <div class="option-info">
                     <span class="option-label">Delete after import</span>
@@ -219,7 +202,7 @@
                 </label>
 
                 <label class="option-toggle">
-                  <input type="checkbox" checked>
+                  <input type="checkbox" id="ftpNotifications" checked>
                   <span class="toggle-slider"></span>
                   <div class="option-info">
                     <span class="option-label">Send notifications</span>
@@ -241,11 +224,11 @@
               <div class="form-row">
                 <div class="form-group">
                   <label>Connection Name <span class="required">*</span></label>
-                  <input type="text" class="form-input" placeholder="e.g., PartsBase API">
+                  <input type="text" class="form-input" id="apiName" placeholder="e.g., PartsBase API">
                 </div>
                 <div class="form-group">
                   <label>API Type</label>
-                  <select class="form-input">
+                  <select class="form-input" id="apiType" onchange="toggleGraphQLOptions()">
                     <option value="rest">REST API</option>
                     <option value="graphql">GraphQL</option>
                   </select>
@@ -255,7 +238,8 @@
               <div class="form-row">
                 <div class="form-group full-width">
                   <label>Base URL <span class="required">*</span></label>
-                  <input type="text" class="form-input" placeholder="https://api.example.com/v2">
+                  <input type="text" class="form-input" id="apiBaseUrl" placeholder="https://api.example.com/v2">
+                  <span class="form-hint">The root URL of the API (without endpoint paths)</span>
                 </div>
               </div>
 
@@ -266,7 +250,7 @@
               <div class="form-row">
                 <div class="form-group">
                   <label>Auth Type</label>
-                  <select class="form-input" id="apiAuthType">
+                  <select class="form-input" id="apiAuthType" onchange="toggleAuthOptions()">
                     <option value="none">No Authentication</option>
                     <option value="apikey" selected>API Key</option>
                     <option value="bearer">Bearer Token</option>
@@ -274,7 +258,7 @@
                     <option value="basic">Basic Auth</option>
                   </select>
                 </div>
-                <div class="form-group">
+                <div class="form-group" id="apiKeyGroup">
                   <label>API Key / Token</label>
                   <div class="input-with-action">
                     <input type="password" class="form-input" placeholder="••••••••" id="apiKey">
@@ -285,15 +269,287 @@
                 </div>
               </div>
 
-              <div class="form-row">
+              <div class="form-row" id="apiKeyHeaderRow">
                 <div class="form-group">
                   <label>Header Name</label>
-                  <input type="text" class="form-input" placeholder="X-API-Key" value="Authorization">
+                  <input type="text" class="form-input" id="apiHeaderName" placeholder="X-API-Key" value="X-API-Key">
                   <span class="form-hint">Header to send the API key in</span>
                 </div>
                 <div class="form-group">
                   <label>Rate Limit (req/min)</label>
-                  <input type="number" class="form-input" placeholder="60" value="60">
+                  <input type="number" class="form-input" id="apiRateLimit" placeholder="60" value="60">
+                </div>
+              </div>
+
+              <!-- Basic Auth Fields (hidden by default) -->
+              <div class="form-row" id="basicAuthRow" style="display: none;">
+                <div class="form-group">
+                  <label>Username</label>
+                  <input type="text" class="form-input" id="apiUsername" placeholder="api_user">
+                </div>
+                <div class="form-group">
+                  <label>Password</label>
+                  <div class="input-with-action">
+                    <input type="password" class="form-input" placeholder="••••••••" id="apiPassword">
+                    <button type="button" class="input-action-btn" onclick="togglePassword('apiPassword')">
+                      <i data-lucide="eye"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- OAuth2 Fields (hidden by default) -->
+              <div id="oauth2Section" style="display: none;">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Client ID</label>
+                    <input type="text" class="form-input" id="oauth2ClientId" placeholder="client_id">
+                  </div>
+                  <div class="form-group">
+                    <label>Client Secret</label>
+                    <div class="input-with-action">
+                      <input type="password" class="form-input" placeholder="••••••••" id="oauth2ClientSecret">
+                      <button type="button" class="input-action-btn" onclick="togglePassword('oauth2ClientSecret')">
+                        <i data-lucide="eye"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Token URL</label>
+                    <input type="text" class="form-input" id="oauth2TokenUrl" placeholder="https://auth.example.com/oauth/token">
+                  </div>
+                  <div class="form-group">
+                    <label>Scope</label>
+                    <input type="text" class="form-input" id="oauth2Scope" placeholder="read write">
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-divider"></div>
+
+              <h3 class="subsection-title"><i data-lucide="link"></i> API Endpoints</h3>
+              
+              <div id="endpointsContainer">
+                <div class="endpoint-item" data-index="0">
+                  <div class="endpoint-header">
+                    <span class="endpoint-badge">Endpoint 1</span>
+                    <button type="button" class="endpoint-remove-btn" onclick="removeEndpoint(0)" style="display: none;">
+                      <i data-lucide="trash-2"></i>
+                    </button>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group" style="flex: 0 0 120px;">
+                      <label>Method</label>
+                      <select class="form-input" id="endpoint0Method">
+                        <option value="GET" selected>GET</option>
+                        <option value="POST">POST</option>
+                        <option value="PUT">PUT</option>
+                        <option value="PATCH">PATCH</option>
+                      </select>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                      <label>Path <span class="required">*</span></label>
+                      <input type="text" class="form-input" id="endpoint0Path" placeholder="/parts" value="/parts">
+                      <span class="form-hint">Relative path from base URL (e.g., /api/parts, /products)</span>
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group full-width">
+                      <label>Data Path</label>
+                      <input type="text" class="form-input" id="endpoint0DataPath" placeholder="data.items">
+                      <span class="form-hint">JSON path to array of records (e.g., data.items, results, response.parts)</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <button type="button" class="add-endpoint-btn" onclick="addEndpoint()">
+                <i data-lucide="plus"></i> Add Another Endpoint
+              </button>
+
+              <div class="form-divider"></div>
+
+              <h3 class="subsection-title"><i data-lucide="layers"></i> Pagination</h3>
+              
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Pagination Type</label>
+                  <select class="form-input" id="apiPaginationType" onchange="togglePaginationOptions()">
+                    <option value="none">No Pagination</option>
+                    <option value="page">Page-based (page=1, page=2...)</option>
+                    <option value="offset">Offset-based (offset=0, limit=100)</option>
+                    <option value="cursor">Cursor-based (next_cursor)</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Page Size</label>
+                  <input type="number" class="form-input" id="apiPageSize" placeholder="100" value="100">
+                  <span class="form-hint">Records per request</span>
+                </div>
+              </div>
+
+              <div id="paginationParamsRow" class="form-row" style="display: none;">
+                <div class="form-group" id="pageParamGroup">
+                  <label>Page Parameter</label>
+                  <input type="text" class="form-input" id="apiPageParam" placeholder="page" value="page">
+                </div>
+                <div class="form-group" id="offsetParamGroup" style="display: none;">
+                  <label>Offset Parameter</label>
+                  <input type="text" class="form-input" id="apiOffsetParam" placeholder="offset" value="offset">
+                </div>
+                <div class="form-group" id="limitParamGroup">
+                  <label>Limit Parameter</label>
+                  <input type="text" class="form-input" id="apiLimitParam" placeholder="limit" value="limit">
+                </div>
+                <div class="form-group" id="cursorParamGroup" style="display: none;">
+                  <label>Cursor Parameter</label>
+                  <input type="text" class="form-input" id="apiCursorParam" placeholder="cursor" value="cursor">
+                </div>
+              </div>
+
+              <div id="paginationPathsRow" class="form-row" style="display: none;">
+                <div class="form-group" id="totalPathGroup">
+                  <label>Total Count Path</label>
+                  <input type="text" class="form-input" id="apiTotalPath" placeholder="meta.total">
+                  <span class="form-hint">JSON path to total record count</span>
+                </div>
+                <div class="form-group" id="cursorPathGroup" style="display: none;">
+                  <label>Next Cursor Path</label>
+                  <input type="text" class="form-input" id="apiCursorPath" placeholder="meta.next_cursor">
+                  <span class="form-hint">JSON path to next page cursor</span>
+                </div>
+                <div class="form-group">
+                  <label>Max Pages</label>
+                  <input type="number" class="form-input" id="apiMaxPages" placeholder="100" value="100">
+                  <span class="form-hint">Safety limit</span>
+                </div>
+              </div>
+
+              <div class="form-divider"></div>
+
+              <h3 class="subsection-title"><i data-lucide="shuffle"></i> Field Mapping</h3>
+              <p class="section-desc">Map API response fields to parts database fields. Leave empty to auto-detect common field names.</p>
+              
+              <div class="field-mapping-grid">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Part Number Field</label>
+                    <input type="text" class="form-input" id="mapPartNumber" placeholder="partNumber, sku, id">
+                  </div>
+                  <div class="form-group">
+                    <label>Description Field</label>
+                    <input type="text" class="form-input" id="mapDescription" placeholder="description, name, title">
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Supplier Field</label>
+                    <input type="text" class="form-input" id="mapSupplier" placeholder="supplier, vendor">
+                  </div>
+                  <div class="form-group">
+                    <label>Price Field</label>
+                    <input type="text" class="form-input" id="mapPrice" placeholder="price, cost, unitPrice">
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Quantity Field</label>
+                    <input type="text" class="form-input" id="mapQuantity" placeholder="quantity, qty, stock">
+                  </div>
+                  <div class="form-group">
+                    <label>Condition Field</label>
+                    <input type="text" class="form-input" id="mapCondition" placeholder="condition, status">
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Brand Field</label>
+                    <input type="text" class="form-input" id="mapBrand" placeholder="brand, manufacturer">
+                  </div>
+                  <div class="form-group">
+                    <label>Category Field</label>
+                    <input type="text" class="form-input" id="mapCategory" placeholder="category, type, class">
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-divider"></div>
+
+              <h3 class="subsection-title"><i data-lucide="sliders"></i> Advanced Options</h3>
+              
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Request Timeout (ms)</label>
+                  <input type="number" class="form-input" id="apiTimeout" placeholder="30000" value="30000">
+                </div>
+                <div class="form-group">
+                  <label>Max Retries</label>
+                  <input type="number" class="form-input" id="apiMaxRetries" placeholder="3" value="3">
+                </div>
+              </div>
+
+              <div class="options-grid">
+                <label class="option-toggle">
+                  <input type="checkbox" id="apiRetryOnError" checked>
+                  <span class="toggle-slider"></span>
+                  <div class="option-info">
+                    <span class="option-label">Retry on Error</span>
+                    <span class="option-desc">Automatically retry failed requests with exponential backoff</span>
+                  </div>
+                </label>
+                
+                <label class="option-toggle">
+                  <input type="checkbox" id="apiAutoSync" checked>
+                  <span class="toggle-slider"></span>
+                  <div class="option-info">
+                    <span class="option-label">Auto-Sync After Creation</span>
+                    <span class="option-desc">Start fetching data immediately after connection is saved</span>
+                  </div>
+                </label>
+              </div>
+
+              <!-- GraphQL Section (hidden by default) -->
+              <div id="graphqlSection" style="display: none;">
+                <div class="form-divider"></div>
+                <h3 class="subsection-title"><i data-lucide="code-2"></i> GraphQL Query</h3>
+                
+                <div class="form-row">
+                  <div class="form-group full-width">
+                    <label>GraphQL Endpoint</label>
+                    <input type="text" class="form-input" id="graphqlEndpoint" placeholder="/graphql">
+                    <span class="form-hint">Usually /graphql - will be appended to base URL</span>
+                  </div>
+                </div>
+                
+                <div class="form-row">
+                  <div class="form-group full-width">
+                    <label>Query</label>
+                    <textarea class="form-input" id="graphqlQuery" rows="8" placeholder="query GetParts($first: Int, $after: String) {
+  parts(first: $first, after: $after) {
+    edges {
+      node {
+        partNumber
+        description
+        price
+        quantity
+      }
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+  }
+}"></textarea>
+                  </div>
+                </div>
+                
+                <div class="form-row">
+                  <div class="form-group full-width">
+                    <label>Variables (JSON)</label>
+                    <textarea class="form-input" id="graphqlVariables" rows="3" placeholder='{"first": 100}'></textarea>
+                  </div>
                 </div>
               </div>
             </div>
@@ -310,7 +566,7 @@
               <div class="form-row">
                 <div class="form-group full-width">
                   <label>Google Spreadsheet URL / ID <span class="required">*</span></label>
-                  <input type="text" class="form-input" placeholder="https://docs.google.com/spreadsheets/d/...">
+                  <input type="text" class="form-input" id="gsSpreadsheetId" placeholder="https://docs.google.com/spreadsheets/d/...">
                   <span class="form-hint">Ensure the sheet is shared with the service account email provided in settings.</span>
                 </div>
               </div>
@@ -318,11 +574,11 @@
               <div class="form-row">
                 <div class="form-group">
                   <label>Sheet Name / Tab</label>
-                  <input type="text" class="form-input" placeholder="Sheet1" value="Sheet1">
+                  <input type="text" class="form-input" id="gsSheetName" placeholder="Sheet1" value="Sheet1">
                 </div>
                 <div class="form-group">
                   <label>Sync Mode</label>
-                  <select class="form-input">
+                  <select class="form-input" id="gsSyncMode">
                     <option value="realtime" selected>Real-time (Auto-sync on edit)</option>
                     <option value="hourly">Every Hour</option>
                     <option value="daily">Daily Sync</option>
@@ -340,7 +596,7 @@
               
               <div class="options-grid" style="margin-top: 1.5rem;">
                 <label class="option-toggle">
-                  <input type="checkbox" checked>
+                  <input type="checkbox" id="gsBidirectional" checked>
                   <span class="toggle-slider"></span>
                   <div class="option-info">
                     <span class="option-label">Bidirectional Sync</span>
@@ -372,6 +628,9 @@
   </div>
 
   <script>
+    // Endpoint counter for dynamic endpoint management
+    let endpointCount = 1;
+
     // Connection type switching
     document.querySelectorAll('input[name="connectionType"]').forEach(function(radio) {
       radio.addEventListener('change', function() {
@@ -411,15 +670,468 @@
       if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 
+    // Toggle auth options based on auth type
+    function toggleAuthOptions() {
+      const authType = document.getElementById('apiAuthType').value;
+      const apiKeyGroup = document.getElementById('apiKeyGroup');
+      const apiKeyHeaderRow = document.getElementById('apiKeyHeaderRow');
+      const basicAuthRow = document.getElementById('basicAuthRow');
+      const oauth2Section = document.getElementById('oauth2Section');
+
+      // Hide all auth-specific sections first
+      if (basicAuthRow) basicAuthRow.style.display = 'none';
+      if (oauth2Section) oauth2Section.style.display = 'none';
+
+      switch (authType) {
+        case 'none':
+          if (apiKeyGroup) apiKeyGroup.style.display = 'none';
+          if (apiKeyHeaderRow) apiKeyHeaderRow.querySelector('#apiHeaderName').parentElement.style.display = 'none';
+          break;
+        case 'apikey':
+        case 'bearer':
+          if (apiKeyGroup) apiKeyGroup.style.display = 'block';
+          if (apiKeyHeaderRow) apiKeyHeaderRow.querySelector('#apiHeaderName').parentElement.style.display = 'block';
+          break;
+        case 'basic':
+          if (apiKeyGroup) apiKeyGroup.style.display = 'none';
+          if (basicAuthRow) basicAuthRow.style.display = 'flex';
+          break;
+        case 'oauth2':
+          if (apiKeyGroup) apiKeyGroup.style.display = 'none';
+          if (oauth2Section) oauth2Section.style.display = 'block';
+          break;
+      }
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    // Toggle GraphQL options
+    function toggleGraphQLOptions() {
+      const apiType = document.getElementById('apiType').value;
+      const graphqlSection = document.getElementById('graphqlSection');
+      const endpointsContainer = document.getElementById('endpointsContainer');
+      const addEndpointBtn = document.querySelector('.add-endpoint-btn');
+
+      if (apiType === 'graphql') {
+        if (graphqlSection) graphqlSection.style.display = 'block';
+        if (endpointsContainer) endpointsContainer.style.display = 'none';
+        if (addEndpointBtn) addEndpointBtn.style.display = 'none';
+      } else {
+        if (graphqlSection) graphqlSection.style.display = 'none';
+        if (endpointsContainer) endpointsContainer.style.display = 'block';
+        if (addEndpointBtn) addEndpointBtn.style.display = 'flex';
+      }
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    // Toggle pagination options
+    function togglePaginationOptions() {
+      const paginationType = document.getElementById('apiPaginationType').value;
+      const paginationParamsRow = document.getElementById('paginationParamsRow');
+      const paginationPathsRow = document.getElementById('paginationPathsRow');
+      const pageParamGroup = document.getElementById('pageParamGroup');
+      const offsetParamGroup = document.getElementById('offsetParamGroup');
+      const limitParamGroup = document.getElementById('limitParamGroup');
+      const cursorParamGroup = document.getElementById('cursorParamGroup');
+      const totalPathGroup = document.getElementById('totalPathGroup');
+      const cursorPathGroup = document.getElementById('cursorPathGroup');
+
+      if (paginationType === 'none') {
+        if (paginationParamsRow) paginationParamsRow.style.display = 'none';
+        if (paginationPathsRow) paginationPathsRow.style.display = 'none';
+      } else {
+        if (paginationParamsRow) paginationParamsRow.style.display = 'flex';
+        if (paginationPathsRow) paginationPathsRow.style.display = 'flex';
+
+        // Show/hide specific params based on type
+        if (pageParamGroup) pageParamGroup.style.display = paginationType === 'page' ? 'block' : 'none';
+        if (offsetParamGroup) offsetParamGroup.style.display = paginationType === 'offset' ? 'block' : 'none';
+        if (limitParamGroup) limitParamGroup.style.display = paginationType !== 'cursor' ? 'block' : 'none';
+        if (cursorParamGroup) cursorParamGroup.style.display = paginationType === 'cursor' ? 'block' : 'none';
+        if (cursorPathGroup) cursorPathGroup.style.display = paginationType === 'cursor' ? 'block' : 'none';
+        if (totalPathGroup) totalPathGroup.style.display = paginationType !== 'cursor' ? 'block' : 'none';
+      }
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    // Add new endpoint
+    function addEndpoint() {
+      const container = document.getElementById('endpointsContainer');
+      const index = endpointCount;
+      
+      const endpointHtml = `
+        <div class="endpoint-item" data-index="${index}">
+          <div class="endpoint-header">
+            <span class="endpoint-badge">Endpoint ${index + 1}</span>
+            <button type="button" class="endpoint-remove-btn" onclick="removeEndpoint(${index})">
+              <i data-lucide="trash-2"></i>
+            </button>
+          </div>
+          <div class="form-row">
+            <div class="form-group" style="flex: 0 0 120px;">
+              <label>Method</label>
+              <select class="form-input" id="endpoint${index}Method">
+                <option value="GET" selected>GET</option>
+                <option value="POST">POST</option>
+                <option value="PUT">PUT</option>
+                <option value="PATCH">PATCH</option>
+              </select>
+            </div>
+            <div class="form-group" style="flex: 1;">
+              <label>Path <span class="required">*</span></label>
+              <input type="text" class="form-input" id="endpoint${index}Path" placeholder="/parts">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group full-width">
+              <label>Data Path</label>
+              <input type="text" class="form-input" id="endpoint${index}DataPath" placeholder="data.items">
+              <span class="form-hint">JSON path to array of records</span>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      container.insertAdjacentHTML('beforeend', endpointHtml);
+      endpointCount++;
+      
+      // Show remove buttons on first endpoint if we have more than one
+      if (endpointCount > 1) {
+        document.querySelectorAll('.endpoint-remove-btn').forEach(btn => {
+          btn.style.display = 'flex';
+        });
+      }
+      
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    // Remove endpoint
+    function removeEndpoint(index) {
+      const endpoint = document.querySelector(`.endpoint-item[data-index="${index}"]`);
+      if (endpoint) {
+        endpoint.remove();
+        
+        // Re-number remaining endpoints
+        const remaining = document.querySelectorAll('.endpoint-item');
+        remaining.forEach((item, i) => {
+          item.querySelector('.endpoint-badge').textContent = `Endpoint ${i + 1}`;
+        });
+        
+        // Hide remove button if only one endpoint left
+        if (remaining.length === 1) {
+          remaining[0].querySelector('.endpoint-remove-btn').style.display = 'none';
+        }
+      }
+    }
+
+    // Collect endpoints data
+    function collectEndpoints() {
+      const endpoints = [];
+      document.querySelectorAll('.endpoint-item').forEach((item) => {
+        const index = item.dataset.index;
+        const path = document.getElementById(`endpoint${index}Path`)?.value;
+        const method = document.getElementById(`endpoint${index}Method`)?.value || 'GET';
+        const dataPath = document.getElementById(`endpoint${index}DataPath`)?.value;
+        
+        if (path) {
+          endpoints.push({
+            path,
+            method,
+            dataPath: dataPath || undefined,
+            isEnabled: true
+          });
+        }
+      });
+      return endpoints;
+    }
+
+    // Collect field mapping
+    function collectFieldMapping() {
+      const mapping = {};
+      
+      const fields = [
+        { id: 'mapPartNumber', target: 'partNumber' },
+        { id: 'mapDescription', target: 'description' },
+        { id: 'mapSupplier', target: 'supplier' },
+        { id: 'mapPrice', target: 'price' },
+        { id: 'mapQuantity', target: 'quantity' },
+        { id: 'mapCondition', target: 'condition' },
+        { id: 'mapBrand', target: 'brand' },
+        { id: 'mapCategory', target: 'category' }
+      ];
+      
+      fields.forEach(field => {
+        const value = document.getElementById(field.id)?.value?.trim();
+        if (value) {
+          mapping[field.target] = value;
+        }
+      });
+      
+      return Object.keys(mapping).length > 0 ? mapping : undefined;
+    }
+
+    // Get current module
+    const currentModule = '<%= typeof currentModule !== "undefined" ? currentModule : "automotive-parts" %>';
+
+    // Collect form data based on connection type
+    function collectFormData() {
+      const connectionType = document.querySelector('input[name="connectionType"]:checked').value;
+      const frequency = document.getElementById('syncFrequency').value;
+      
+      const formData = {
+        type: connectionType,
+        module: currentModule,
+        isEnabled: true,
+        syncSchedule: {
+          enabled: frequency !== 'manual',
+          frequency: frequency,
+          time: document.getElementById('syncTime') ? document.getElementById('syncTime').value : '02:00'
+        }
+      };
+
+      if (connectionType === 'ftp') {
+        formData.name = document.getElementById('ftpName').value;
+        formData.isEnabled = document.getElementById('ftpEnabled').checked;
+        formData.ftp = {
+          protocol: document.getElementById('ftpProtocol').value,
+          host: document.getElementById('ftpHost').value,
+          port: 21,
+          username: document.getElementById('ftpUsername').value,
+          password: document.getElementById('ftpPassword').value,
+          remotePath: '/',
+          filePattern: '*.csv',
+          passive: document.getElementById('ftpPassive').checked
+        };
+      } else if (connectionType === 'api') {
+        const apiType = document.getElementById('apiType').value;
+        const authType = document.getElementById('apiAuthType').value;
+        const paginationType = document.getElementById('apiPaginationType').value;
+        
+        formData.name = document.getElementById('apiName').value;
+        formData.options = {
+          autoSync: document.getElementById('apiAutoSync')?.checked ?? true,
+          retryOnFail: document.getElementById('apiRetryOnError')?.checked ?? true,
+          maxRetries: parseInt(document.getElementById('apiMaxRetries')?.value) || 3
+        };
+        
+        formData.api = {
+          apiType: apiType,
+          baseUrl: document.getElementById('apiBaseUrl').value,
+          authType: authType,
+          authHeader: document.getElementById('apiHeaderName')?.value || 'X-API-Key',
+          apiKey: document.getElementById('apiKey')?.value,
+          rateLimit: parseInt(document.getElementById('apiRateLimit')?.value) || 60,
+          timeout: parseInt(document.getElementById('apiTimeout')?.value) || 30000,
+          
+          // Endpoints (for REST)
+          endpoints: apiType === 'rest' ? collectEndpoints() : undefined,
+          
+          // Pagination
+          pagination: paginationType !== 'none' ? {
+            paginationType: paginationType,
+            pageParam: document.getElementById('apiPageParam')?.value || 'page',
+            offsetParam: document.getElementById('apiOffsetParam')?.value || 'offset',
+            limitParam: document.getElementById('apiLimitParam')?.value || 'limit',
+            cursorParam: document.getElementById('apiCursorParam')?.value || 'cursor',
+            pageSize: parseInt(document.getElementById('apiPageSize')?.value) || 100,
+            maxPages: parseInt(document.getElementById('apiMaxPages')?.value) || 100,
+            totalPath: document.getElementById('apiTotalPath')?.value,
+            cursorPath: document.getElementById('apiCursorPath')?.value
+          } : { paginationType: 'none' },
+          
+          // Field mapping
+          fieldMapping: collectFieldMapping(),
+          
+          // Error handling
+          errorHandling: {
+            retryOnError: document.getElementById('apiRetryOnError')?.checked ?? true,
+            maxRetries: parseInt(document.getElementById('apiMaxRetries')?.value) || 3,
+            retryDelay: 1000
+          }
+        };
+        
+        // Add basic auth credentials
+        if (authType === 'basic') {
+          formData.api.username = document.getElementById('apiUsername')?.value;
+          formData.api.password = document.getElementById('apiPassword')?.value;
+        }
+        
+        // Add OAuth2 configuration
+        if (authType === 'oauth2') {
+          formData.api.oauth2 = {
+            clientId: document.getElementById('oauth2ClientId')?.value,
+            clientSecret: document.getElementById('oauth2ClientSecret')?.value,
+            tokenUrl: document.getElementById('oauth2TokenUrl')?.value,
+            scope: document.getElementById('oauth2Scope')?.value
+          };
+        }
+        
+        // Add GraphQL configuration
+        if (apiType === 'graphql') {
+          formData.api.graphqlEndpoint = document.getElementById('graphqlEndpoint')?.value || '/graphql';
+          formData.api.graphqlQuery = document.getElementById('graphqlQuery')?.value;
+          try {
+            formData.api.graphqlVariables = JSON.parse(document.getElementById('graphqlVariables')?.value || '{}');
+          } catch (e) {
+            formData.api.graphqlVariables = {};
+          }
+        }
+      } else if (connectionType === 'google-sheets') {
+        const spreadsheetId = document.getElementById('gsSpreadsheetId').value;
+        const sheetName = document.getElementById('gsSheetName').value || 'Sheet1';
+        formData.name = 'Google Sheet - ' + sheetName;
+        formData.googleSheets = {
+          spreadsheetId: spreadsheetId,
+          sheetName: sheetName,
+          syncMode: document.getElementById('gsSyncMode').value
+        };
+      }
+
+      return formData;
+    }
+
     // Test connection
-    function testConnection() {
-      alert('Testing connection... (UI Demo - would test actual connection)');
+    async function testConnection() {
+      const formData = collectFormData();
+      
+      if (!formData.name) {
+        showNotification('Please enter a connection name', 'error');
+        return;
+      }
+
+      // Validate API-specific fields
+      if (formData.type === 'api') {
+        if (!formData.api.baseUrl) {
+          showNotification('Please enter the API base URL', 'error');
+          return;
+        }
+        
+        const endpoints = formData.api.endpoints || [];
+        if (formData.api.apiType === 'rest' && endpoints.length === 0) {
+          showNotification('Please add at least one API endpoint', 'error');
+          return;
+        }
+      }
+
+      // Show testing modal
+      const testBtn = document.querySelector('button[onclick="testConnection()"]');
+      const originalHTML = testBtn.innerHTML;
+      testBtn.innerHTML = '<i data-lucide="loader-2" class="spin-icon"></i> Testing...';
+      testBtn.disabled = true;
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+
+      try {
+        const response = await fetch('/admin/api/integrations/test', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(formData)
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          let successMessage = 'Connection test successful!';
+          if (result.estimatedRecords) {
+            successMessage += ` Found approximately ${result.estimatedRecords} records.`;
+          }
+          showNotification(successMessage, 'success');
+        } else {
+          showNotification('Connection test failed: ' + (result.error || 'Unknown error'), 'error');
+        }
+      } catch (error) {
+        showNotification('Connection test failed: ' + error.message, 'error');
+      } finally {
+        testBtn.innerHTML = originalHTML;
+        testBtn.disabled = false;
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      }
     }
 
     // Save connection
-    function saveConnection() {
-      window.location.href = '/admin/integrations<%= currentModule ? "?module=" + currentModule : "" %>';
+    async function saveConnection() {
+      const formData = collectFormData();
+      
+      if (!formData.name) {
+        showNotification('Please enter a connection name', 'error');
+        return;
+      }
+
+      // Validate based on type
+      if (formData.type === 'ftp' && (!formData.ftp.host || !formData.ftp.username)) {
+        showNotification('Please fill in all required FTP fields', 'error');
+        return;
+      }
+
+      if (formData.type === 'api') {
+        if (!formData.api.baseUrl) {
+          showNotification('Please enter the API base URL', 'error');
+          return;
+        }
+        
+        const endpoints = formData.api.endpoints || [];
+        if (formData.api.apiType === 'rest' && endpoints.length === 0) {
+          showNotification('Please add at least one API endpoint', 'error');
+          return;
+        }
+      }
+
+      if (formData.type === 'google-sheets' && !formData.googleSheets.spreadsheetId) {
+        showNotification('Please enter the Google Spreadsheet URL or ID', 'error');
+        return;
+      }
+
+      // Show saving state
+      const saveBtn = document.querySelector('button[onclick="saveConnection()"]');
+      const originalHTML = saveBtn.innerHTML;
+      saveBtn.innerHTML = '<i data-lucide="loader-2" class="spin-icon"></i> Saving...';
+      saveBtn.disabled = true;
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+
+      try {
+        const response = await fetch('/admin/api/integrations', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(formData)
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          const message = result.autoSyncStarted 
+            ? 'Connection created successfully! Auto-sync is starting...'
+            : 'Connection created successfully!';
+          showNotification(message, 'success');
+          // Redirect to integrations list after a short delay to show the sync starting
+          setTimeout(() => {
+            window.location.href = '/admin/integrations?module=' + currentModule + (result.autoSyncStarted ? '&syncStarted=' + result.integration._id : '');
+          }, 2000);
+        } else {
+          showNotification('Failed to create connection: ' + (result.error || 'Unknown error'), 'error');
+          saveBtn.innerHTML = originalHTML;
+          saveBtn.disabled = false;
+          if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+      } catch (error) {
+        showNotification('Failed to create connection: ' + error.message, 'error');
+        saveBtn.innerHTML = originalHTML;
+        saveBtn.disabled = false;
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      }
     }
+
+    // Initialize UI state
+    document.addEventListener('DOMContentLoaded', function() {
+      toggleAuthOptions();
+      togglePaginationOptions();
+      toggleGraphQLOptions();
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    });
+
+    // Note: showNotification() is now provided by /js/notifications.js
+    // The global notificationManager handles all toast notifications
   </script>
 
 <%- include('partials/footer') %>

@@ -1,6 +1,13 @@
 // Admin Controller
 // This file contains all admin-related controller functions
 
+const Integration = require('../models/Integration');
+const Part = require('../models/Part');
+const ftpService = require('../services/ftpService');
+const syncService = require('../services/syncService');
+const schedulerService = require('../services/schedulerService');
+const elasticsearchService = require('../services/elasticsearchService');
+
 /**
  * Get module from query parameter and get module-specific data
  */
@@ -817,11 +824,36 @@ const getIntegrationsManagement = async (req, res) => {
     const currentModule = queryModule || 'automotive';
     const { moduleConfig } = getModuleData({ query: { module: currentModule } });
     
+    // Get all integrations from database
+    const integrations = await Integration.find({}).sort({ createdAt: -1 }).lean();
+    
+    // Get statistics
+    const stats = {
+      totalConnections: integrations.length,
+      activeConnections: integrations.filter(i => i.status === 'active').length,
+      totalRecords: integrations.reduce((sum, i) => sum + (i.stats?.totalRecords || 0), 0),
+      lastSync: integrations.reduce((latest, i) => {
+        if (i.lastSync?.date && (!latest || new Date(i.lastSync.date) > new Date(latest))) {
+          return i.lastSync.date;
+        }
+        return latest;
+      }, null),
+    };
+    
+    // Get Elasticsearch stats if available
+    let esStats = null;
+    if (elasticsearchService.isAvailable) {
+      esStats = await elasticsearchService.getStats();
+    }
+    
     res.render('admin/integrations', {
       title: 'Integrations - Admin',
       activePage: 'integrations',
       currentModule,
-      moduleConfig
+      moduleConfig,
+      integrations,
+      stats,
+      esStats,
     });
   } catch (error) {
     console.error('Error in getIntegrationsManagement:', error);
@@ -843,11 +875,639 @@ const getIntegrationCreate = async (req, res) => {
       title: 'New Connection - Admin',
       activePage: 'integrations',
       currentModule,
-      moduleConfig
+      moduleConfig,
+      integration: null, // For create mode
     });
   } catch (error) {
     console.error('Error in getIntegrationCreate:', error);
     res.status(500).render('error', { title: 'Error', error: 'Failed to load connection create page' });
+  }
+};
+
+/**
+ * Get Integration Edit page
+ */
+const getIntegrationEdit = async (req, res) => {
+  try {
+    const { currentModule: queryModule } = getModuleData(req);
+    const currentModule = queryModule || 'automotive';
+    const { moduleConfig } = getModuleData({ query: { module: currentModule } });
+    
+    const integration = await Integration.findById(req.params.id);
+    if (!integration) {
+      return res.status(404).render('error', { title: 'Not Found', error: 'Integration not found' });
+    }
+    
+    res.render('admin/integration-create', {
+      title: 'Edit Connection - Admin',
+      activePage: 'integrations',
+      currentModule,
+      moduleConfig,
+      integration: integration.toSafeJSON(),
+    });
+  } catch (error) {
+    console.error('Error in getIntegrationEdit:', error);
+    res.status(500).render('error', { title: 'Error', error: 'Failed to load connection edit page' });
+  }
+};
+
+/**
+ * Create new integration (API)
+ */
+const createIntegration = async (req, res) => {
+  try {
+    const data = req.body;
+    
+    // Handle both nested format (from frontend) and flat format
+    const ftpData = data.ftp || {};
+    const apiData = data.api || {};
+    const googleSheetsData = data.googleSheets || {};
+    const syncScheduleData = data.syncSchedule || {};
+    const optionsData = data.options || {};
+    
+    const integration = new Integration({
+      name: data.name,
+      type: data.type || 'ftp',
+      status: data.isEnabled === false ? 'inactive' : 'active',
+      ftp: data.type === 'ftp' ? {
+        host: ftpData.host || data.ftpHost,
+        port: parseInt(ftpData.port || data.ftpPort) || 21,
+        username: ftpData.username || data.ftpUsername,
+        password: ftpData.password || data.ftpPassword,
+        secure: ftpData.protocol === 'ftps' || ftpData.protocol === 'sftp' || data.ftpSecure === true,
+        remotePath: ftpData.remotePath || data.ftpRemotePath || '/',
+        filePattern: ftpData.filePattern || data.ftpFilePattern || '*.csv',
+      } : undefined,
+      api: data.type === 'api' ? {
+        // Basic Configuration
+        name: apiData.name || data.apiName,
+        apiType: apiData.apiType || 'rest',
+        baseUrl: apiData.baseUrl || data.apiBaseUrl,
+        
+        // Authentication
+        authType: apiData.authType || data.apiAuthType || 'api-key',
+        authHeader: apiData.authHeader || data.apiAuthHeader || 'X-API-Key',
+        apiKey: apiData.apiKey || data.apiKey,
+        username: apiData.username,
+        password: apiData.password,
+        
+        // OAuth2 Configuration
+        oauth2: apiData.oauth2 || undefined,
+        
+        // Endpoints Configuration
+        endpoints: apiData.endpoints || [],
+        
+        // Pagination Configuration
+        pagination: apiData.pagination || { type: 'none' },
+        
+        // Data Configuration
+        dataPath: apiData.dataPath,
+        fieldMapping: apiData.fieldMapping,
+        
+        // Request Configuration
+        headers: apiData.headers || {},
+        rateLimit: parseInt(apiData.rateLimit) || 60,
+        timeout: parseInt(apiData.timeout) || 30000,
+        
+        // Error Handling
+        errorHandling: apiData.errorHandling || {
+          retryOnError: true,
+          maxRetries: 3,
+          retryDelay: 1000
+        },
+        
+        // GraphQL specific
+        graphqlEndpoint: apiData.graphqlEndpoint,
+        graphqlQuery: apiData.graphqlQuery,
+        graphqlVariables: apiData.graphqlVariables
+      } : undefined,
+      googleSheets: data.type === 'google-sheets' ? {
+        spreadsheetId: googleSheetsData.spreadsheetId || data.sheetsSpreadsheetId,
+        sheetName: googleSheetsData.sheetName || data.sheetsSheetName || 'Sheet1',
+        range: googleSheetsData.range || data.sheetsRange || 'A:Z',
+      } : undefined,
+      syncSchedule: {
+        enabled: syncScheduleData.enabled !== undefined ? syncScheduleData.enabled : (data.syncEnabled !== 'false' && data.syncEnabled !== false),
+        frequency: syncScheduleData.frequency || data.syncFrequency || 'daily',
+        time: syncScheduleData.time || data.syncTime || '08:00',
+      },
+      options: {
+        autoSync: optionsData.autoSync !== undefined ? optionsData.autoSync : (data.autoSync === 'true' || data.autoSync === true || data.isEnabled !== false),
+        notifyOnComplete: optionsData.notifyOnComplete !== undefined ? optionsData.notifyOnComplete : (data.notifyOnComplete !== 'false' && data.notifyOnComplete !== false),
+        deltaSync: optionsData.deltaSync !== undefined ? optionsData.deltaSync : (data.deltaSync === 'true' || data.deltaSync === true),
+        retryOnFail: optionsData.retryOnFail !== undefined ? optionsData.retryOnFail : (data.retryOnFail !== 'false' && data.retryOnFail !== false),
+        maxRetries: optionsData.maxRetries || 3,
+      },
+      createdBy: req.admin?._id,
+    });
+    
+    await integration.save();
+    
+    // Schedule if enabled
+    if (integration.syncSchedule.enabled) {
+      await schedulerService.scheduleIntegration(integration);
+    }
+
+    // Auto-sync immediately after creation if autoSync is enabled
+    if (integration.options.autoSync) {
+      console.log(`🚀 Starting automatic sync for newly created integration: ${integration.name}`);
+      // Fire and forget - don't wait for sync to complete
+      syncService.syncIntegration(integration._id).catch(error => {
+        console.error(`Auto-sync failed for ${integration._id}:`, error.message);
+      });
+    }
+    
+    res.status(201).json({
+      success: true,
+      message: 'Integration created successfully',
+      integration: integration.toSafeJSON(),
+      autoSyncStarted: integration.options.autoSync,
+    });
+  } catch (error) {
+    console.error('Error creating integration:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * Update integration (API)
+ */
+const updateIntegration = async (req, res) => {
+  try {
+    const data = req.body;
+    const integration = await Integration.findById(req.params.id);
+    
+    if (!integration) {
+      return res.status(404).json({ success: false, error: 'Integration not found' });
+    }
+    
+    // Handle both nested format (from frontend) and flat format
+    const ftpData = data.ftp || {};
+    const syncScheduleData = data.syncSchedule || {};
+    
+    // Update fields
+    integration.name = data.name || integration.name;
+    integration.status = data.isEnabled === false ? 'inactive' : (data.isEnabled === true ? 'active' : integration.status);
+    
+    if (integration.type === 'ftp') {
+      integration.ftp = {
+        ...integration.ftp,
+        host: ftpData.host || data.ftpHost || integration.ftp.host,
+        port: parseInt(ftpData.port || data.ftpPort) || integration.ftp.port,
+        username: ftpData.username || data.ftpUsername || integration.ftp.username,
+        password: ftpData.password || data.ftpPassword || integration.ftp.password,
+        secure: ftpData.protocol ? (ftpData.protocol === 'ftps' || ftpData.protocol === 'sftp') : 
+                (data.ftpSecure !== undefined ? (data.ftpSecure === 'true' || data.ftpSecure === true) : integration.ftp.secure),
+        remotePath: ftpData.remotePath || data.ftpRemotePath || integration.ftp.remotePath,
+        filePattern: ftpData.filePattern || data.ftpFilePattern || integration.ftp.filePattern,
+      };
+    }
+    
+    integration.syncSchedule = {
+      enabled: syncScheduleData.enabled !== undefined ? syncScheduleData.enabled : 
+               (data.syncEnabled !== 'false' && data.syncEnabled !== false),
+      frequency: syncScheduleData.frequency || data.syncFrequency || integration.syncSchedule.frequency,
+      time: syncScheduleData.time || data.syncTime || integration.syncSchedule.time,
+    };
+    
+    integration.options = {
+      autoSync: data.autoSync === 'true' || data.autoSync === true,
+      notifyOnComplete: data.notifyOnComplete !== 'false',
+      deltaSync: data.deltaSync === 'true' || data.deltaSync === true,
+      retryOnFail: data.retryOnFail !== 'false',
+    };
+    
+    integration.updatedBy = req.admin?._id;
+    await integration.save();
+    
+    // Reschedule
+    await schedulerService.rescheduleIntegration(integration._id);
+    
+    res.json({
+      success: true,
+      message: 'Integration updated successfully',
+      integration: integration.toSafeJSON(),
+    });
+  } catch (error) {
+    console.error('Error updating integration:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * Delete integration (API)
+ */
+const deleteIntegration = async (req, res) => {
+  try {
+    const integration = await Integration.findById(req.params.id);
+    
+    if (!integration) {
+      return res.status(404).json({ success: false, error: 'Integration not found' });
+    }
+    
+    // Stop scheduler
+    schedulerService.stopIntegration(integration._id);
+    
+    // Clear associated data
+    await syncService.clearIntegrationData(integration._id);
+    
+    // Delete integration
+    await Integration.findByIdAndDelete(req.params.id);
+    
+    res.json({
+      success: true,
+      message: 'Integration deleted successfully',
+    });
+  } catch (error) {
+    console.error('Error deleting integration:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * Test integration connection (API)
+ */
+const testIntegrationConnection = async (req, res) => {
+  try {
+    let data = req.body;
+    let result;
+    
+    // If testing an existing integration, fetch real credentials from DB (password is masked in toSafeJSON)
+    if (data._id) {
+      const existingIntegration = await Integration.findById(data._id);
+      if (existingIntegration) {
+        // Use real password from database, not the masked one
+        data = existingIntegration.toObject();
+      }
+    }
+    
+    // Handle nested ftp object from frontend
+    const ftpData = data.ftp || {};
+    
+    if (data.type === 'ftp' || (!data.type && (data.ftpHost || ftpData.host))) {
+      const credentials = {
+        host: ftpData.host || data.ftpHost,
+        port: parseInt(ftpData.port || data.ftpPort) || 21,
+        username: ftpData.username || data.ftpUsername,
+        password: ftpData.password || data.ftpPassword,
+        secure: ftpData.protocol ? (ftpData.protocol === 'ftps' || ftpData.protocol === 'sftp') : 
+                (data.ftpSecure === 'true' || data.ftpSecure === true),
+        remotePath: ftpData.remotePath || data.ftpRemotePath || '/',
+        filePattern: ftpData.filePattern || data.ftpFilePattern || '*.csv',
+      };
+      
+      console.log('Testing FTP connection:', { host: credentials.host, port: credentials.port, username: credentials.username });
+      result = await ftpService.testConnection(credentials);
+      
+      // Ensure proper response format
+      if (result.success) {
+        return res.json({
+          success: true,
+          message: result.message || 'Connection successful',
+          data: {
+            filesCount: result.filesFound || 0,
+            message: result.message
+          }
+        });
+      } else {
+        return res.json({
+          success: false,
+          error: result.message || result.error || 'Connection failed'
+        });
+      }
+    } else if (data.type === 'api') {
+      // API connection test - use the professional apiService
+      const apiService = require('../services/apiService');
+      const apiData = data.api || {};
+      
+      // Build test configuration
+      const testConfig = {
+        baseUrl: apiData.baseUrl || data.apiBaseUrl,
+        apiType: apiData.apiType || 'rest',
+        authType: apiData.authType || 'none',
+        authHeader: apiData.authHeader || 'X-API-Key',
+        apiKey: apiData.apiKey,
+        username: apiData.username,
+        password: apiData.password,
+        headers: apiData.headers || {},
+        // Use first endpoint path for testing if available
+        testEndpoint: apiData.endpoints && apiData.endpoints.length > 0 
+          ? apiData.endpoints[0].path 
+          : undefined,
+      };
+
+      // Handle OAuth2
+      if (apiData.oauth2) {
+        testConfig.oauth2 = apiData.oauth2;
+      }
+      
+      if (!testConfig.baseUrl) {
+        return res.json({
+          success: false,
+          error: 'API base URL is required'
+        });
+      }
+
+      console.log('Testing API connection:', { 
+        baseUrl: testConfig.baseUrl, 
+        authType: testConfig.authType,
+        testEndpoint: testConfig.testEndpoint 
+      });
+      
+      result = await apiService.testConnection(testConfig);
+      
+      return res.json({
+        success: result.success,
+        message: result.message || (result.success ? 'Connection successful' : 'Connection failed'),
+        error: result.error,
+        status: result.status,
+        estimatedRecords: result.estimatedRecords,
+        data: {
+          status: result.status,
+          contentType: result.contentType,
+          estimatedRecords: result.estimatedRecords,
+          details: result.details
+        }
+      });
+    } else if (data.type === 'google-sheets') {
+      // Google Sheets test - validate spreadsheet ID format
+      const gsData = data.googleSheets || {};
+      const spreadsheetId = gsData.spreadsheetId || data.gsSpreadsheetId;
+      
+      if (!spreadsheetId) {
+        return res.json({
+          success: false,
+          error: 'Spreadsheet ID is required'
+        });
+      }
+      
+      // Extract spreadsheet ID from URL if full URL is provided
+      let extractedId = spreadsheetId;
+      const urlMatch = spreadsheetId.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+      if (urlMatch) {
+        extractedId = urlMatch[1];
+      }
+      
+      // Basic validation of spreadsheet ID format
+      const isValidFormat = /^[a-zA-Z0-9_-]+$/.test(extractedId);
+      return res.json({
+        success: isValidFormat,
+        message: isValidFormat ? 'Spreadsheet ID format is valid' : 'Invalid spreadsheet ID format',
+        data: { spreadsheetId: extractedId }
+      });
+    } else {
+      return res.status(400).json({
+        success: false,
+        error: 'Unsupported integration type for testing',
+      });
+    }
+  } catch (error) {
+    console.error('Error testing connection:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * Sync integration (API)
+ */
+const syncIntegration = async (req, res) => {
+  try {
+    const integrationId = req.params.id;
+    
+    // Check if already syncing
+    if (syncService.isSyncing(integrationId)) {
+      return res.status(409).json({
+        success: false,
+        error: 'Sync already in progress',
+      });
+    }
+    
+    // Start sync in background
+    syncService.syncIntegration(integrationId).then(result => {
+      console.log('Sync completed:', result);
+    }).catch(error => {
+      console.error('Sync error:', error);
+    });
+    
+    res.json({
+      success: true,
+      message: 'Sync started',
+      integrationId,
+    });
+  } catch (error) {
+    console.error('Error starting sync:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * Get sync status (API) - includes real-time progress
+ */
+const getSyncStatus = async (req, res) => {
+  try {
+    const integration = await Integration.findById(req.params.id).lean();
+    
+    if (!integration) {
+      return res.status(404).json({ success: false, error: 'Integration not found' });
+    }
+    
+    const integrationId = integration._id.toString();
+    const isSyncing = syncService.isSyncing(integrationId);
+    const progress = syncService.getSyncProgress ? syncService.getSyncProgress(integrationId) : null;
+    
+    res.json({
+      success: true,
+      isSyncing,
+      progress: isSyncing ? progress : null,
+      lastSync: integration.lastSync,
+      status: integration.status,
+      stats: integration.stats,
+    });
+  } catch (error) {
+    console.error('Error getting sync status:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * Get real-time sync progress (API) - for polling
+ */
+const getSyncProgress = async (req, res) => {
+  try {
+    const integrationId = req.params.id;
+    const isSyncing = syncService.isSyncing(integrationId);
+    const progress = syncService.getSyncProgress ? syncService.getSyncProgress(integrationId) : null;
+    
+    if (!isSyncing && !progress) {
+      // If not syncing and no progress, check the integration for last sync info
+      const integration = await Integration.findById(integrationId).lean();
+      if (!integration) {
+        return res.status(404).json({ success: false, error: 'Integration not found' });
+      }
+      
+      return res.json({
+        success: true,
+        isSyncing: false,
+        progress: null,
+        lastSync: integration.lastSync,
+        status: integration.status,
+      });
+    }
+    
+    res.json({
+      success: true,
+      isSyncing,
+      progress,
+    });
+  } catch (error) {
+    console.error('Error getting sync progress:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * Get all integrations (API)
+ */
+const getIntegrations = async (req, res) => {
+  try {
+    const integrations = await Integration.find({}).sort({ createdAt: -1 });
+    
+    res.json({
+      success: true,
+      integrations: integrations.map(i => i.toSafeJSON()),
+    });
+  } catch (error) {
+    console.error('Error getting integrations:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * Get single integration (API)
+ */
+const getIntegration = async (req, res) => {
+  try {
+    const integration = await Integration.findById(req.params.id);
+    
+    if (!integration) {
+      return res.status(404).json({ success: false, error: 'Integration not found' });
+    }
+    
+    res.json({
+      success: true,
+      integration: integration.toSafeJSON(),
+    });
+  } catch (error) {
+    console.error('Error getting integration:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * Get detailed sync information including file sizes and estimated time (API)
+ */
+const getSyncDetails = async (req, res) => {
+  try {
+    const integration = await Integration.findById(req.params.id);
+    
+    if (!integration) {
+      return res.status(404).json({ success: false, error: 'Integration not found' });
+    }
+
+    // Calculate estimated sync time based on file sizes and past performance
+    let estimatedTime = 0;
+    let totalFileSize = 0;
+    const fileDetails = [];
+
+    if (integration.lastSync?.files && integration.lastSync.files.length > 0) {
+      // Calculate average sync speed (bytes per second)
+      const lastSyncDuration = integration.lastSync.duration || 1000; // Default 1 second
+      const lastTotalSize = integration.lastSync.files.reduce((sum, f) => sum + (f.size || 0), 0);
+      const avgSpeed = lastTotalSize > 0 ? lastTotalSize / (lastSyncDuration / 1000) : 1024 * 100; // 100KB/s default
+
+      // Process each file
+      for (const file of integration.lastSync.files) {
+        const fileSize = file.size || 0;
+        const fileSizeKB = (fileSize / 1024).toFixed(2);
+        const fileSizeMB = (fileSize / (1024 * 1024)).toFixed(2);
+        const estimatedFileTime = Math.ceil(fileSize / avgSpeed);
+
+        estimatedTime += estimatedFileTime;
+        totalFileSize += fileSize;
+
+        fileDetails.push({
+          name: file.name,
+          size: fileSize,
+          sizeFormatted: fileSize > 1024 * 1024 
+            ? `${fileSizeMB} MB` 
+            : fileSize > 1024 
+            ? `${fileSizeKB} KB` 
+            : `${fileSize} B`,
+          records: file.records || 0,
+          status: file.status || 'pending',
+          estimatedTime: estimatedFileTime,
+          estimatedTimeFormatted: formatDuration(estimatedFileTime),
+        });
+      }
+    }
+
+    const totalSizeFormatted = totalFileSize > 1024 * 1024
+      ? `${(totalFileSize / (1024 * 1024)).toFixed(2)} MB`
+      : totalFileSize > 1024
+      ? `${(totalFileSize / 1024).toFixed(2)} KB`
+      : `${totalFileSize} B`;
+
+    const estimatedTimeFormatted = formatDuration(estimatedTime);
+
+    res.json({
+      success: true,
+      integration: {
+        id: integration._id,
+        name: integration.name,
+        type: integration.type,
+        status: integration.status,
+      },
+      syncInfo: {
+        totalFileSize,
+        totalSizeFormatted,
+        estimatedTime, // in seconds
+        estimatedTimeFormatted,
+        fileCount: fileDetails.length,
+        totalRecords: fileDetails.reduce((sum, f) => sum + (f.records || 0), 0),
+        files: fileDetails,
+      },
+      lastSync: integration.lastSync ? {
+        date: integration.lastSync.date,
+        status: integration.lastSync.status,
+        duration: integration.lastSync.duration,
+        durationFormatted: formatDuration(integration.lastSync.duration / 1000),
+        recordsProcessed: integration.lastSync.recordsProcessed,
+        recordsInserted: integration.lastSync.recordsInserted,
+        recordsUpdated: integration.lastSync.recordsUpdated,
+      } : null,
+    });
+  } catch (error) {
+    console.error('Error getting sync details:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * Helper function to format duration
+ */
+const formatDuration = (seconds) => {
+  if (!seconds || seconds < 0) return '0s';
+  
+  if (seconds < 60) {
+    return `${Math.ceil(seconds)}s`;
+  } else if (seconds < 3600) {
+    const minutes = Math.floor(seconds / 60);
+    const secs = Math.ceil(seconds % 60);
+    return `${minutes}m ${secs}s`;
+  } else {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    return `${hours}h ${minutes}m`;
   }
 };
 
@@ -1032,6 +1692,18 @@ module.exports = {
   getAdminSettings,
   getIntegrationsManagement,
   getIntegrationCreate,
-  getPartsAnalytics
+  getIntegrationEdit,
+  getPartsAnalytics,
+  // Integration API functions
+  createIntegration,
+  updateIntegration,
+  deleteIntegration,
+  testIntegrationConnection,
+  syncIntegration,
+  getSyncStatus,
+  getSyncProgress,
+  getSyncDetails,
+  getIntegrations,
+  getIntegration,
 };
 

@@ -6,8 +6,27 @@ const middleware = require('i18next-http-middleware');
 const connectDB = require('./config/database');
 const { initializeUploadDirectories } = require('./utils/fileUploader');
 
+// Services
+const elasticsearchService = require('./services/elasticsearchService');
+const schedulerService = require('./services/schedulerService');
+
 // Connect to MongoDB
-connectDB();
+connectDB().then(async () => {
+  // Initialize Elasticsearch
+  try {
+    await elasticsearchService.initialize();
+  } catch (error) {
+    console.error('Elasticsearch initialization failed:', error.message);
+    console.log('⚠️  Falling back to MongoDB for search');
+  }
+  
+  // Initialize scheduler for integration syncs
+  try {
+    await schedulerService.initialize();
+  } catch (error) {
+    console.error('Scheduler initialization failed:', error.message);
+  }
+});
 
 // Initialize upload directories
 initializeUploadDirectories();

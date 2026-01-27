@@ -29,7 +29,8 @@
     <!-- Action Buttons -->
     <div class="nav-actions-logistiqo" id="navActions">
       <!-- Guest Actions (shown when not logged in) -->
-      <div class="guest-actions" id="guestActions" style="display: <%= (typeof user !== 'undefined' && user) ? 'none' : 'flex' %>;">
+      <% if (!user) { %>
+      <div class="guest-actions" id="guestActions">
         <a href="/register" class="btn-create-account" id="create-account-btn">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
@@ -48,23 +49,30 @@
           <span>Sign In</span>
         </button>
       </div>
+      <% } %>
 
       <!-- User Profile Dropdown (shown when logged in) -->
-      <div class="user-profile-dropdown-landing" id="userProfileDropdownLanding" style="display: <%= (typeof user !== 'undefined' && user) ? 'flex' : 'none' %>;">
+      <% if (user) { %>
+      <% const isAdmin = typeof userRole !== 'undefined' && userRole === 'admin'; %>
+      <div class="user-profile-dropdown-landing" id="userProfileDropdownLanding">
         <button type="button" class="user-profile-btn-landing" id="userProfileBtnLanding">
           <div class="user-avatar-landing">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-              <circle cx="12" cy="7" r="4"/>
-            </svg>
+            <% if (user.avatar) { %>
+              <img src="<%= user.avatar %>" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" />
+            <% } else { %>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+            <% } %>
           </div>
-          <span class="user-name-landing" id="userNameLanding"><%= (typeof user !== 'undefined' && user && user.firstName) ? user.firstName : 'User' %></span>
+          <span class="user-name-landing" id="userNameLanding"><%= user.firstName || 'User' %></span>
           <svg class="user-chevron-landing" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="6 9 12 15 18 9"/>
           </svg>
         </button>
         <div class="user-dropdown-menu-landing" id="userDropdownMenuLanding">
-          <a href="/buyer" class="user-dropdown-item-landing" id="dashboardLink">
+          <a href="<%= isAdmin ? '/admin' : '/buyer' %>" class="user-dropdown-item-landing" id="dashboardLink">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <rect x="3" y="3" width="7" height="9"/>
               <rect x="14" y="3" width="7" height="5"/>
@@ -73,6 +81,7 @@
             </svg>
             <span>Dashboard</span>
           </a>
+          <% if (!isAdmin) { %>
           <a href="/buyer/profile" class="user-dropdown-item-landing" id="profileLink">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
@@ -80,7 +89,8 @@
             </svg>
             <span>Profile</span>
           </a>
-          <a href="/buyer/settings" class="user-dropdown-item-landing" id="settingsLink">
+          <% } %>
+          <a href="<%= isAdmin ? '/admin/settings' : '/buyer/settings' %>" class="user-dropdown-item-landing" id="settingsLink">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="3"/>
               <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
@@ -98,6 +108,7 @@
           </button>
         </div>
       </div>
+      <% } %>
     </div>
   </div>
 </nav>
@@ -663,50 +674,6 @@
 (function() {
   'use strict';
 
-  // Check login state on page load
-  function checkLoginState() {
-    <% if (typeof user !== 'undefined' && user) { %>
-    // Sync server-side auth state
-    if (localStorage.getItem('isLoggedIn') !== 'true') {
-      localStorage.setItem('isLoggedIn', 'true');
-      localStorage.setItem('userName', '<%= user.firstName %>');
-      localStorage.setItem('userRole', 'buyer');
-    }
-    <% } %>
-    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-    const userRole = localStorage.getItem('userRole');
-    const userName = localStorage.getItem('userName');
-
-    const guestActions = document.getElementById('guestActions');
-    const userDropdown = document.getElementById('userProfileDropdownLanding');
-    const userNameEl = document.getElementById('userNameLanding');
-    const dashboardLink = document.getElementById('dashboardLink');
-    const profileLink = document.getElementById('profileLink');
-    const settingsLink = document.getElementById('settingsLink');
-
-    if (isLoggedIn && userRole) {
-      // User is logged in - show profile dropdown
-      if (guestActions) guestActions.style.display = 'none';
-      if (userDropdown) userDropdown.style.display = 'flex';
-      if (userNameEl) userNameEl.textContent = userName || 'User';
-
-      // Update links based on user role
-      if (userRole === 'admin') {
-        if (dashboardLink) dashboardLink.href = '/admin';
-        if (profileLink) profileLink.href = '/admin/settings';
-        if (settingsLink) settingsLink.href = '/admin/settings';
-      } else {
-        if (dashboardLink) dashboardLink.href = '/buyer';
-        if (profileLink) profileLink.href = '/buyer/profile';
-        if (settingsLink) settingsLink.href = '/buyer/settings';
-      }
-    } else {
-      // User is not logged in - show guest actions
-      if (guestActions) guestActions.style.display = 'flex';
-      if (userDropdown) userDropdown.style.display = 'none';
-    }
-  }
-
   // Toggle user dropdown
   function setupDropdown() {
     const userProfileBtn = document.getElementById('userProfileBtnLanding');
@@ -733,34 +700,54 @@
     const logoutBtn = document.getElementById('logoutBtnLanding');
     
     if (logoutBtn) {
-      logoutBtn.addEventListener('click', function(e) {
+      logoutBtn.addEventListener('click', async function(e) {
         e.preventDefault();
         
-        // Call server to logout (clear cookie)
-        fetch('/logout', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        })
-        .then(response => {
-          // Clear all session data regardless of response
+        try {
+          // Clear localStorage
           localStorage.removeItem('isLoggedIn');
           localStorage.removeItem('userRole');
           localStorage.removeItem('userName');
           localStorage.removeItem('userEmail');
-          localStorage.removeItem('buyerSession');
-          localStorage.removeItem('adminSession');
           
-          // Redirect to home or reload if already on home
-          window.location.href = '/';
-        })
-        .catch(err => {
+          // Call server to logout (clear cookie)
+          const response = await fetch('/logout', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            credentials: 'include'
+          });
+          
+          const data = await response.json();
+          
+          // Redirect to home
+          window.location.href = data.redirectUrl || '/';
+        } catch (err) {
           console.error('Logout error:', err);
-          // Force client-side logout anyway
-          localStorage.removeItem('isLoggedIn');
+          // Force redirect anyway
           window.location.href = '/';
-        });
+        }
+      });
+    }
+  }
+
+  // Handle sign-in button
+  function setupSignIn() {
+    const signInBtn = document.getElementById('sign-in-btn');
+    if (signInBtn) {
+      signInBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        // Open login modal
+        const modal = document.getElementById('sign-in-modal');
+        if (modal) {
+          modal.classList.add('active');
+          document.body.style.overflow = 'hidden';
+          if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+          }
+        }
       });
     }
   }
@@ -768,21 +755,14 @@
   // Initialize on DOM ready
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', function() {
-      checkLoginState();
       setupDropdown();
       setupLogout();
+      setupSignIn();
     });
   } else {
-    checkLoginState();
     setupDropdown();
     setupLogout();
+    setupSignIn();
   }
-
-  // Also check on storage change (for multi-tab support)
-  window.addEventListener('storage', function(e) {
-    if (e.key === 'isLoggedIn' || e.key === 'userRole' || e.key === 'userName') {
-      checkLoginState();
-    }
-  });
 })();
 </script>

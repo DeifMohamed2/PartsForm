@@ -477,8 +477,30 @@
     }
 
     if (logoutConfirmBtn) {
-      logoutConfirmBtn.addEventListener('click', function() {
-        window.location.href = '/';
+      logoutConfirmBtn.addEventListener('click', async function() {
+        try {
+          // Clear localStorage
+          localStorage.removeItem('isLoggedIn');
+          localStorage.removeItem('userRole');
+          localStorage.removeItem('userName');
+          localStorage.removeItem('userEmail');
+          
+          // Call logout API
+          const response = await fetch('/logout', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+            },
+          });
+          
+          // Redirect to home regardless of response
+          window.location.href = '/';
+        } catch (error) {
+          console.error('Logout error:', error);
+          // Still redirect even on error
+          window.location.href = '/';
+        }
       });
     }
 

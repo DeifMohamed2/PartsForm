@@ -1,15 +1,16 @@
 const jwt = require('jsonwebtoken');
 const Buyer = require('../models/Buyer');
+const Admin = require('../models/Admin');
 
 // JWT Secret - In production, use environment variable
 const JWT_SECRET = process.env.JWT_SECRET || 'partsform-secret-key-change-in-production';
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
 
 /**
- * Generate JWT token
+ * Generate JWT token with role
  */
-const generateToken = (userId) => {
-  return jwt.sign({ id: userId }, JWT_SECRET, {
+const generateToken = (userId, role = 'buyer') => {
+  return jwt.sign({ id: userId, role: role }, JWT_SECRET, {
     expiresIn: JWT_EXPIRES_IN,
   });
 };
@@ -30,17 +31,26 @@ const setTokenCookie = (res, token) => {
 
 /**
  * Handle validation errors from Mongoose
+ * Returns both field errors object and a formatted message
  */
 const handleValidationError = (error) => {
   const errors = {};
+  const errorMessages = [];
 
   if (error.name === 'ValidationError') {
     Object.keys(error.errors).forEach((key) => {
-      errors[key] = error.errors[key].message;
+      const message = error.errors[key].message;
+      errors[key] = message;
+      errorMessages.push(message);
     });
   }
 
-  return errors;
+  return {
+    errors,
+    message: errorMessages.length > 0 
+      ? `Validation failed: ${errorMessages.join(', ')}` 
+      : 'Validation failed'
+  };
 };
 
 /**
@@ -172,11 +182,11 @@ const register = async (req, res) => {
 
     // Handle Mongoose validation errors
     if (error.name === 'ValidationError') {
-      const errors = handleValidationError(error);
+      const validationResult = handleValidationError(error);
       return res.status(400).json({
         success: false,
-        message: 'Validation failed',
-        errors,
+        message: validationResult.message,
+        errors: validationResult.errors,
       });
     }
 
@@ -198,7 +208,7 @@ const register = async (req, res) => {
 };
 
 /**
- * Login buyer
+ * Login user (admin or buyer)
  * POST /login
  */
 const login = async (req, res) => {
@@ -217,8 +227,18 @@ const login = async (req, res) => {
       });
     }
 
-    // Find buyer with password
-    const buyer = await Buyer.findByEmailWithPassword(email.toLowerCase());
+    const normalizedEmail = email.toLowerCase();
+
+    // First, check if it's an admin account
+    const admin = await Admin.findByEmailWithPassword(normalizedEmail);
+
+    if (admin) {
+      // Handle admin login
+      return handleAdminLogin(admin, password, res);
+    }
+
+    // If not admin, try buyer login
+    const buyer = await Buyer.findByEmailWithPassword(normalizedEmail);
 
     if (!buyer) {
       return res.status(401).json({
@@ -228,63 +248,9 @@ const login = async (req, res) => {
       });
     }
 
-    // Check if account is locked
-    if (buyer.isLocked()) {
-      const lockTimeRemaining = Math.ceil((buyer.lockUntil - Date.now()) / (60 * 1000));
-      return res.status(423).json({
-        success: false,
-        message: `Account is temporarily locked. Please try again in ${lockTimeRemaining} minutes.`,
-        errors: { account: 'Account is locked' },
-      });
-    }
+    // Handle buyer login
+    return handleBuyerLogin(buyer, password, res);
 
-    // Check if account is active
-    if (!buyer.isActive) {
-      return res.status(403).json({
-        success: false,
-        message: 'Your account has been deactivated. Please contact support.',
-        errors: { account: 'Account is deactivated' },
-      });
-    }
-
-    // Verify password
-    const isPasswordValid = await buyer.comparePassword(password);
-
-    if (!isPasswordValid) {
-      // Increment login attempts
-      await buyer.incrementLoginAttempts();
-
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid email or password',
-        errors: { credentials: 'Invalid credentials' },
-      });
-    }
-
-    // Reset login attempts on successful login
-    await buyer.resetLoginAttempts();
-
-    // Generate token
-    const token = generateToken(buyer._id);
-
-    // Set cookie
-    setTokenCookie(res, token);
-
-    // Return success response
-    res.status(200).json({
-      success: true,
-      message: 'Login successful',
-      data: {
-        user: {
-          id: buyer._id,
-          firstName: buyer.firstName,
-          lastName: buyer.lastName,
-          email: buyer.email,
-          companyName: buyer.companyName,
-        },
-        redirectUrl: '/buyer',
-      },
-    });
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({
@@ -292,6 +258,130 @@ const login = async (req, res) => {
       message: 'An error occurred during login. Please try again.',
     });
   }
+};
+
+/**
+ * Handle admin login logic
+ */
+const handleAdminLogin = async (admin, password, res) => {
+  // Check if account is locked
+  if (admin.isLocked()) {
+    const lockTimeRemaining = Math.ceil((admin.lockUntil - Date.now()) / (60 * 1000));
+    return res.status(423).json({
+      success: false,
+      message: `Account is temporarily locked. Please try again in ${lockTimeRemaining} minutes.`,
+      errors: { account: 'Account is locked' },
+    });
+  }
+
+  // Check if account is active
+  if (!admin.isActive) {
+    return res.status(403).json({
+      success: false,
+      message: 'Your account has been deactivated. Please contact support.',
+      errors: { account: 'Account is deactivated' },
+    });
+  }
+
+  // Verify password
+  const isPasswordValid = await admin.comparePassword(password);
+
+  if (!isPasswordValid) {
+    await admin.incrementLoginAttempts();
+    return res.status(401).json({
+      success: false,
+      message: 'Invalid email or password',
+      errors: { credentials: 'Invalid credentials' },
+    });
+  }
+
+  // Reset login attempts on successful login
+  await admin.resetLoginAttempts();
+
+  // Generate token with admin role
+  const token = generateToken(admin._id, 'admin');
+
+  // Set cookie
+  setTokenCookie(res, token);
+
+  // Return success response
+  return res.status(200).json({
+    success: true,
+    message: 'Login successful',
+    data: {
+      user: {
+        id: admin._id,
+        firstName: admin.firstName,
+        lastName: admin.lastName,
+        email: admin.email,
+        role: admin.role,
+      },
+      role: 'admin',
+      redirectUrl: '/admin',
+    },
+  });
+};
+
+/**
+ * Handle buyer login logic
+ */
+const handleBuyerLogin = async (buyer, password, res) => {
+  // Check if account is locked
+  if (buyer.isLocked()) {
+    const lockTimeRemaining = Math.ceil((buyer.lockUntil - Date.now()) / (60 * 1000));
+    return res.status(423).json({
+      success: false,
+      message: `Account is temporarily locked. Please try again in ${lockTimeRemaining} minutes.`,
+      errors: { account: 'Account is locked' },
+    });
+  }
+
+  // Check if account is active
+  if (!buyer.isActive) {
+    return res.status(403).json({
+      success: false,
+      message: 'Your account has been deactivated. Please contact support.',
+      errors: { account: 'Account is deactivated' },
+    });
+  }
+
+  // Verify password
+  const isPasswordValid = await buyer.comparePassword(password);
+
+  if (!isPasswordValid) {
+    await buyer.incrementLoginAttempts();
+    return res.status(401).json({
+      success: false,
+      message: 'Invalid email or password',
+      errors: { credentials: 'Invalid credentials' },
+    });
+  }
+
+  // Reset login attempts on successful login
+  await buyer.resetLoginAttempts();
+
+  // Generate token with buyer role
+  const token = generateToken(buyer._id, 'buyer');
+
+  // Set cookie
+  setTokenCookie(res, token);
+
+  // Return success response
+  return res.status(200).json({
+    success: true,
+    message: 'Login successful',
+    data: {
+      user: {
+        id: buyer._id,
+        firstName: buyer.firstName,
+        lastName: buyer.lastName,
+        email: buyer.email,
+        companyName: buyer.companyName,
+      },
+      role: 'buyer',
+      redirectUrl: '/buyer',
+    },
+  });
 };
 
 /**

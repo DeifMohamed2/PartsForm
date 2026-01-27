@@ -1,6 +1,7 @@
 <%- include('partials/header') %>
 <link rel="stylesheet" href="/css/adminCSS/admin-dashboard.css">
 <link rel="stylesheet" href="/css/adminCSS/admin-integrations.css">
+<link rel="stylesheet" href="/css/adminCSS/sync-details-panel.css">
 </head>
 <body class="<%= typeof currentModule !== 'undefined' && currentModule ? 'module-' + currentModule : '' %>">
   <div class="admin-wrapper">
@@ -47,7 +48,7 @@
                 <i data-lucide="check-circle"></i>
               </div>
               <div class="conn-stat-content">
-                <span class="conn-stat-value">4</span>
+                <span class="conn-stat-value"><%= typeof stats !== 'undefined' ? stats.activeConnections : 0 %></span>
                 <span class="conn-stat-label">Active Connections</span>
               </div>
             </div>
@@ -56,7 +57,7 @@
                 <i data-lucide="database"></i>
               </div>
               <div class="conn-stat-content">
-                <span class="conn-stat-value">2.4M</span>
+                <span class="conn-stat-value"><%= typeof stats !== 'undefined' && stats.totalRecords ? (stats.totalRecords >= 1000000 ? (stats.totalRecords / 1000000).toFixed(1) + 'M' : stats.totalRecords >= 1000 ? (stats.totalRecords / 1000).toFixed(0) + 'K' : stats.totalRecords) : '0' %></span>
                 <span class="conn-stat-label">Total Parts</span>
               </div>
             </div>
@@ -65,7 +66,7 @@
                 <i data-lucide="clock"></i>
               </div>
               <div class="conn-stat-content">
-                <span class="conn-stat-value">14 min ago</span>
+                <span class="conn-stat-value"><%= typeof stats !== 'undefined' && stats.lastSync ? (function() { var d = new Date(stats.lastSync); var now = new Date(); var diff = Math.floor((now - d) / 60000); if (diff < 60) return diff + ' min ago'; if (diff < 1440) return Math.floor(diff / 60) + 'h ago'; return Math.floor(diff / 1440) + 'd ago'; })() : 'Never' %></span>
                 <span class="conn-stat-label">Last Sync</span>
               </div>
             </div>
@@ -74,8 +75,8 @@
                 <i data-lucide="calendar"></i>
               </div>
               <div class="conn-stat-content">
-                <span class="conn-stat-value">Every 6h</span>
-                <span class="conn-stat-label">Sync Interval</span>
+                <span class="conn-stat-value"><%= typeof stats !== 'undefined' ? stats.totalConnections : 0 %></span>
+                <span class="conn-stat-label">Total Connections</span>
               </div>
             </div>
           </div>
@@ -103,14 +104,34 @@
           <!-- FTP Connections Tab -->
           <div class="intg-tab-content active" id="tab-ftp">
             <div class="connections-list">
-              <% var ftpConnections = [
-                { id: 1, name: 'APM Group FTP', host: 'ftp.apm.group', user: 'user_1091', status: 'connected', lastSync: '14 min ago', files: 12, records: '1.2M', schedule: 'Every 6h' },
-                { id: 2, name: 'PartsBase FTP', host: 'ftp.partsbase.com', user: 'partsform_sync', status: 'connected', lastSync: '2 hours ago', files: 8, records: '890K', schedule: 'Every 12h' },
-                { id: 3, name: 'ILS Connect', host: 'ftp.ilsconnect.net', user: 'ils_import', status: 'connected', lastSync: '1 day ago', files: 5, records: '340K', schedule: 'Daily' },
-                { id: 4, name: 'Stock Market FTP', host: 'ftp.stockmarket.aero', user: 'sm_api', status: 'error', lastSync: 'Failed', files: 0, records: '0', schedule: 'Every 6h', error: 'Connection timeout' }
-              ]; %>
-              <% ftpConnections.forEach(function(conn) { %>
-              <div class="connection-card <%= conn.status %>">
+              <% 
+              var ftpConnections = (typeof integrations !== 'undefined' ? integrations : []).filter(function(i) { return i.type === 'ftp'; });
+              if (ftpConnections.length === 0) { %>
+              <div class="empty-connections" style="text-align: center; padding: 3rem; color: var(--admin-text-muted);">
+                <i data-lucide="hard-drive" style="width: 48px; height: 48px; margin-bottom: 1rem; opacity: 0.5;"></i>
+                <h3 style="margin-bottom: 0.5rem; color: var(--admin-text-secondary);">No FTP Connections</h3>
+                <p style="margin-bottom: 1.5rem;">Add your first FTP connection to start importing parts data.</p>
+                <a href="/admin/integrations/create?module=<%= currentModule %>" class="admin-btn admin-btn-primary">
+                  <i data-lucide="plus"></i>
+                  Add FTP Connection
+                </a>
+              </div>
+              <% } else { %>
+              <% ftpConnections.forEach(function(conn) { 
+                var statusClass = conn.status === 'active' ? 'connected' : conn.status === 'error' ? 'error' : 'disconnected';
+                var lastSyncText = 'Never';
+                if (conn.lastSync && conn.lastSync.date) {
+                  var d = new Date(conn.lastSync.date);
+                  var now = new Date();
+                  var diff = Math.floor((now - d) / 60000);
+                  if (diff < 60) lastSyncText = diff + ' min ago';
+                  else if (diff < 1440) lastSyncText = Math.floor(diff / 60) + 'h ago';
+                  else lastSyncText = Math.floor(diff / 1440) + ' days ago';
+                }
+                var scheduleText = conn.syncSchedule && conn.syncSchedule.enabled ? conn.syncSchedule.frequency : 'Manual';
+                var recordsText = conn.stats && conn.stats.totalRecords ? (conn.stats.totalRecords >= 1000000 ? (conn.stats.totalRecords / 1000000).toFixed(1) + 'M' : conn.stats.totalRecords >= 1000 ? Math.floor(conn.stats.totalRecords / 1000) + 'K' : conn.stats.totalRecords) : '0';
+              %>
+              <div class="connection-card <%= statusClass %>" data-id="<%= conn._id %>">
                 <div class="conn-status-indicator"></div>
                 <div class="conn-icon">
                   <i data-lucide="hard-drive"></i>
@@ -118,56 +139,236 @@
                 <div class="conn-main-info">
                   <h3><%= conn.name %></h3>
                   <div class="conn-details">
-                    <span class="conn-detail"><i data-lucide="server"></i> <%= conn.host %></span>
-                    <span class="conn-detail"><i data-lucide="user"></i> <%= conn.user %></span>
+                    <span class="conn-detail"><i data-lucide="server"></i> <%= conn.ftp ? conn.ftp.host : 'N/A' %></span>
+                    <span class="conn-detail"><i data-lucide="user"></i> <%= conn.ftp ? conn.ftp.username : 'N/A' %></span>
                   </div>
                 </div>
                 <div class="conn-stats">
                   <div class="conn-stat-mini">
-                    <span class="value"><%= conn.files %></span>
+                    <span class="value"><%= conn.stats && conn.stats.filesProcessed ? conn.stats.filesProcessed : 0 %></span>
                     <span class="label">Files</span>
                   </div>
                   <div class="conn-stat-mini">
-                    <span class="value"><%= conn.records %></span>
+                    <span class="value"><%= recordsText %></span>
                     <span class="label">Records</span>
                   </div>
                 </div>
                 <div class="conn-sync-info">
-                  <% if (conn.status === 'error') { %>
-                  <span class="sync-error"><i data-lucide="alert-triangle"></i> <%= conn.error %></span>
+                  <% if (conn.status === 'error' && conn.lastSync && conn.lastSync.error) { %>
+                  <span class="sync-error"><i data-lucide="alert-triangle"></i> <%= conn.lastSync.error.substring(0, 30) %></span>
                   <% } else { %>
-                  <span class="sync-time"><i data-lucide="clock"></i> <%= conn.lastSync %></span>
+                  <span class="sync-time"><i data-lucide="clock"></i> <%= lastSyncText %></span>
                   <% } %>
-                  <span class="sync-schedule"><i data-lucide="refresh-cw"></i> <%= conn.schedule %></span>
+                  <span class="sync-schedule"><i data-lucide="refresh-cw"></i> <%= scheduleText %></span>
                 </div>
                 <div class="conn-actions">
-                  <button class="conn-action-btn" title="Sync Now" onclick="syncConnection(<%= conn.id %>)">
+                  <button class="conn-action-btn" title="Sync Now" onclick="syncConnection('<%= conn._id %>')">
                     <i data-lucide="refresh-cw"></i>
                   </button>
-                  <button class="conn-action-btn" title="Test Connection" onclick="testConnection(<%= conn.id %>)">
+                  <button class="conn-action-btn" title="Test Connection" onclick="testConnection('<%= conn._id %>')">
                     <i data-lucide="play"></i>
                   </button>
-                  <button class="conn-action-btn" title="Edit" onclick="editConnection(<%= conn.id %>)">
+                  <button class="conn-action-btn" title="Edit" onclick="editConnection('<%= conn._id %>')">
                     <i data-lucide="edit-2"></i>
                   </button>
-                  <button class="conn-action-btn danger" title="Delete" onclick="deleteConnection(<%= conn.id %>)">
+                  <button class="conn-action-btn danger" title="Delete" onclick="deleteConnection('<%= conn._id %>', '<%= conn.name %>')">
                     <i data-lucide="trash-2"></i>
                   </button>
                 </div>
               </div>
+
+              <!-- Sync Details Panel -->
+              <div class="sync-details-panel collapsed" id="sync-panel-<%= conn._id %>" data-integration-id="<%= conn._id %>">
+                <div class="sync-panel-header" onclick="toggleSyncPanel(event, '<%= conn._id %>')">
+                  <div class="sync-panel-left">
+                    <div class="sync-panel-icon <%= conn.status === 'syncing' ? 'syncing' : conn.status === 'error' ? 'error' : '' %>">
+                      <i data-lucide="<%= conn.status === 'syncing' ? 'loader-2' : conn.status === 'error' ? 'alert-circle' : 'download' %>"></i>
+                    </div>
+                    <div class="sync-panel-info">
+                      <div class="sync-panel-title">
+                        Sync Details
+                        <span class="sync-status-badge <%= conn.status === 'syncing' ? 'syncing' : conn.status === 'error' ? 'error' : conn.lastSync ? 'completed' : 'pending' %>">
+                          <i data-lucide="<%= conn.status === 'syncing' ? 'loader-2' : conn.status === 'error' ? 'x-circle' : 'check-circle' %>"></i>
+                          <%= conn.status === 'syncing' ? 'Syncing' : conn.status === 'error' ? 'Error' : conn.lastSync ? 'Completed' : 'Pending' %>
+                        </span>
+                      </div>
+                      <div class="sync-panel-subtitle">
+                        <span class="sync-quick-stat">
+                          <i data-lucide="file"></i>
+                          <strong><%= conn.lastSync && conn.lastSync.files ? conn.lastSync.files.length : 0 %></strong> Files
+                        </span>
+                        <span class="sync-quick-stat">
+                          <i data-lucide="database"></i>
+                          <strong><%= conn.lastSync && conn.lastSync.recordsProcessed ? conn.lastSync.recordsProcessed : 0 %></strong> Records
+                        </span>
+                        <span class="sync-quick-stat">
+                          <i data-lucide="clock"></i>
+                          <strong><%= conn.lastSync && conn.lastSync.duration ? Math.ceil(conn.lastSync.duration / 1000) + 's' : '-' %></strong>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="sync-panel-right">
+                    <% if (conn.lastSync && conn.lastSync.files) { %>
+                    <div class="sync-progress-mini">
+                      <div class="sync-progress-mini-bar" style="width: 100%;"></div>
+                    </div>
+                    <% } %>
+                    <div class="sync-toggle-icon">
+                      <i data-lucide="chevron-down"></i>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="sync-panel-content">
+                  <div class="sync-content-inner">
+                    <% if (conn.lastSync) { %>
+                      <!-- Summary Grid -->
+                      <div class="sync-summary-grid">
+                        <div class="sync-summary-item">
+                          <div class="sync-summary-value">
+                            <i data-lucide="file"></i>
+                            <%= conn.lastSync.files ? conn.lastSync.files.length : 0 %>
+                          </div>
+                          <div class="sync-summary-label">Files Processed</div>
+                        </div>
+                        <div class="sync-summary-item">
+                          <div class="sync-summary-value">
+                            <i data-lucide="database"></i>
+                            <%= conn.lastSync.recordsProcessed || 0 %>
+                          </div>
+                          <div class="sync-summary-label">Total Records</div>
+                        </div>
+                        <div class="sync-summary-item">
+                          <div class="sync-summary-value">
+                            <%= conn.lastSync.recordsInserted || 0 %>
+                          </div>
+                          <div class="sync-summary-label">Inserted</div>
+                        </div>
+                        <div class="sync-summary-item">
+                          <div class="sync-summary-value">
+                            <%= conn.lastSync.recordsUpdated || 0 %>
+                          </div>
+                          <div class="sync-summary-label">Updated</div>
+                        </div>
+                      </div>
+
+                      <!-- Files List -->
+                      <% if (conn.lastSync.files && conn.lastSync.files.length > 0) { %>
+                      <div>
+                        <div class="sync-files-header">
+                          <div class="sync-files-title">
+                            <i data-lucide="file-text"></i>
+                            Files
+                          </div>
+                          <div class="sync-files-count"><%= conn.lastSync.files.length %></div>
+                        </div>
+                        <div class="sync-files-list">
+                          <% conn.lastSync.files.forEach(function(file) { 
+                            var sizeFormatted = file.size > (1024 * 1024) 
+                              ? (file.size / (1024 * 1024)).toFixed(2) + ' MB'
+                              : file.size > 1024
+                              ? (file.size / 1024).toFixed(2) + ' KB'
+                              : file.size + ' B';
+                          %>
+                          <div class="sync-file-item">
+                            <div class="sync-file-icon">
+                              <i data-lucide="file-text"></i>
+                            </div>
+                            <div class="sync-file-info">
+                              <div class="sync-file-name"><%= file.name %></div>
+                              <div class="sync-file-stats">
+                                <div class="sync-file-stat">
+                                  <i data-lucide="hard-drive"></i>
+                                  <strong><%= sizeFormatted %></strong>
+                                </div>
+                                <div class="sync-file-stat">
+                                  <i data-lucide="database"></i>
+                                  <strong><%= file.records || 0 %></strong> records
+                                </div>
+                              </div>
+                              <div class="sync-file-progress">
+                                <div class="sync-file-progress-bar" style="width: 100%;"></div>
+                              </div>
+                            </div>
+                            <div class="sync-file-status">
+                              <span class="sync-file-status-badge <%= file.status === 'success' ? 'completed' : 'pending' %>">
+                                <i data-lucide="<%= file.status === 'success' ? 'check-circle' : 'loader-2' %>"></i>
+                                <%= file.status === 'success' ? 'Completed' : 'Processing' %>
+                              </span>
+                            </div>
+                          </div>
+                          <% }); %>
+                        </div>
+                      </div>
+                      <% } %>
+
+                      <!-- Time Estimate -->
+                      <div class="sync-time-estimate">
+                        <div class="sync-time-estimate-content">
+                          <div class="sync-time-estimate-icon">
+                            <i data-lucide="clock"></i>
+                          </div>
+                          <div class="sync-time-estimate-info">
+                            <h4>Sync Duration</h4>
+                            <p>Last sync completed in <%= Math.ceil(conn.lastSync.duration / 1000) %>s</p>
+                          </div>
+                        </div>
+                        <div class="sync-time-estimate-value">
+                          <%= Math.ceil(conn.lastSync.duration / 1000) %>s
+                        </div>
+                      </div>
+
+                      <% if (conn.lastSync.error) { %>
+                      <div class="sync-error-message">
+                        <strong>Sync Error</strong>
+                        <p><%= conn.lastSync.error %></p>
+                      </div>
+                      <% } %>
+                    <% } else { %>
+                      <div style="text-align: center; padding: 2rem; color: var(--admin-text-muted);">
+                        <i data-lucide="inbox" style="width: 40px; height: 40px; margin-bottom: 1rem; opacity: 0.5;"></i>
+                        <p>No sync data available yet. Click "Sync Now" to start synchronization.</p>
+                      </div>
+                    <% } %>
+                  </div>
+                </div>
+              </div>
               <% }); %>
+              <% } %>
             </div>
           </div>
 
           <!-- API Connections Tab -->
           <div class="intg-tab-content" id="tab-api">
             <div class="connections-list">
-              <% var apiConnections = [
-                { id: 1, name: 'PartsBase API', endpoint: 'https://api.partsbase.com/v2', auth: 'API Key', status: 'connected', requests: '2.4K/day', lastCall: '5 min ago' },
-                { id: 2, name: 'ILS WebService', endpoint: 'https://ws.ilsmart.com/soap', auth: 'OAuth 2.0', status: 'connected', requests: '890/day', lastCall: '12 min ago' }
-              ]; %>
-              <% apiConnections.forEach(function(api) { %>
-              <div class="connection-card <%= api.status %>">
+              <% 
+              var apiConnections = (typeof integrations !== 'undefined' ? integrations : []).filter(function(i) { return i.type === 'api'; });
+              if (apiConnections.length === 0) { %>
+              <div class="empty-connections" style="text-align: center; padding: 3rem; color: var(--admin-text-muted);">
+                <i data-lucide="code" style="width: 48px; height: 48px; margin-bottom: 1rem; opacity: 0.5;"></i>
+                <h3 style="margin-bottom: 0.5rem; color: var(--admin-text-secondary);">No API Connections</h3>
+                <p style="margin-bottom: 1.5rem;">Add your first REST API connection to fetch parts data.</p>
+                <a href="/admin/integrations/create?module=<%= currentModule %>" class="admin-btn admin-btn-primary">
+                  <i data-lucide="plus"></i>
+                  Add API Connection
+                </a>
+              </div>
+              <% } else { %>
+              <% apiConnections.forEach(function(api) { 
+                var statusClass = api.status === 'active' ? 'connected' : api.status === 'error' ? 'error' : 'disconnected';
+                var lastCallText = 'Never';
+                if (api.lastSync && api.lastSync.date) {
+                  var d = new Date(api.lastSync.date);
+                  var now = new Date();
+                  var diff = Math.floor((now - d) / 60000);
+                  if (diff < 60) lastCallText = diff + ' min ago';
+                  else if (diff < 1440) lastCallText = Math.floor(diff / 60) + 'h ago';
+                  else lastCallText = Math.floor(diff / 1440) + ' days ago';
+                }
+                var requestsText = api.stats && api.stats.totalRecords ? api.stats.totalRecords + '/day' : '0/day';
+              %>
+              <div class="connection-card <%= statusClass %>" data-id="<%= api._id %>">
                 <div class="conn-status-indicator"></div>
                 <div class="conn-icon api">
                   <i data-lucide="code"></i>
@@ -175,34 +376,38 @@
                 <div class="conn-main-info">
                   <h3><%= api.name %></h3>
                   <div class="conn-details">
-                    <span class="conn-detail"><i data-lucide="link"></i> <%= api.endpoint %></span>
-                    <span class="conn-detail"><i data-lucide="key"></i> <%= api.auth %></span>
+                    <span class="conn-detail"><i data-lucide="link"></i> <%= api.api ? api.api.baseUrl : 'N/A' %></span>
+                    <span class="conn-detail"><i data-lucide="key"></i> <%= api.api ? api.api.authType : 'N/A' %></span>
                   </div>
                 </div>
                 <div class="conn-stats">
                   <div class="conn-stat-mini">
-                    <span class="value"><%= api.requests %></span>
+                    <span class="value"><%= requestsText %></span>
                     <span class="label">Requests</span>
                   </div>
                 </div>
                 <div class="conn-sync-info">
-                  <span class="sync-time"><i data-lucide="clock"></i> <%= api.lastCall %></span>
+                  <span class="sync-time"><i data-lucide="clock"></i> <%= lastCallText %></span>
                 </div>
                 <div class="conn-actions">
-                  <button class="conn-action-btn" title="Test API" onclick="testApi(<%= api.id %>)">
+                  <button class="conn-action-btn" title="Test API" onclick="testConnection('<%= api._id %>')">
                     <i data-lucide="play"></i>
                   </button>
-                  <button class="conn-action-btn" title="View Docs" onclick="viewApiDocs(<%= api.id %>)">
-                    <i data-lucide="book-open"></i>
+                  <button class="conn-action-btn" title="Sync Data" onclick="syncConnection('<%= api._id %>')">
+                    <i data-lucide="refresh-cw"></i>
                   </button>
-                  <button class="conn-action-btn" title="Edit" onclick="editApi(<%= api.id %>)">
+                  <button class="conn-action-btn" title="Edit" onclick="editConnection('<%= api._id %>')">
                     <i data-lucide="edit-2"></i>
+                  </button>
+                  <button class="conn-action-btn danger" title="Delete" onclick="deleteConnection('<%= api._id %>', '<%= api.name %>')">
+                    <i data-lucide="trash-2"></i>
                   </button>
                 </div>
               </div>
               <% }); %>
+              <% } %>
 
-              <button class="add-connection-btn" onclick="openAddApiModal()">
+              <button class="add-connection-btn" onclick="window.location.href='/admin/integrations/create?module=<%= currentModule %>'">
                 <i data-lucide="plus"></i>
                 <span>Add API Connection</span>
               </button>
@@ -225,12 +430,44 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <% var syncHistory = [
-                    { source: 'APM Group FTP', type: 'FTP', started: '14 min ago', duration: '4m 23s', records: '45,230', status: 'success' },
-                    { source: 'PartsBase API', type: 'API', started: '2 hours ago', duration: '1m 12s', records: '12,450', status: 'success' },
-                    { source: 'Stock Market FTP', type: 'FTP', started: '3 hours ago', duration: '--', records: '0', status: 'failed', error: 'Connection timeout' },
-                    { source: 'ILS Connect', type: 'FTP', started: '1 day ago', duration: '12m 45s', records: '340,120', status: 'success' }
-                  ]; %>
+                  <% 
+                  // Build sync history from all integrations
+                  var syncHistory = [];
+                  if (typeof integrations !== 'undefined') {
+                    integrations.forEach(function(intg) {
+                      if (intg.lastSync && intg.lastSync.date) {
+                        var startedText = 'Unknown';
+                        var d = new Date(intg.lastSync.date);
+                        var now = new Date();
+                        var diff = Math.floor((now - d) / 60000);
+                        if (diff < 60) startedText = diff + ' min ago';
+                        else if (diff < 1440) startedText = Math.floor(diff / 60) + ' hours ago';
+                        else startedText = Math.floor(diff / 1440) + ' days ago';
+                        
+                        var durationText = intg.lastSync.duration ? (Math.floor(intg.lastSync.duration / 60000) + 'm ' + Math.floor((intg.lastSync.duration % 60000) / 1000) + 's') : '--';
+                        var recordsText = intg.lastSync.recordsProcessed ? intg.lastSync.recordsProcessed.toLocaleString() : '0';
+                        
+                        syncHistory.push({
+                          source: intg.name,
+                          type: intg.type.toUpperCase(),
+                          started: startedText,
+                          duration: durationText,
+                          records: recordsText,
+                          status: intg.lastSync.success ? 'success' : 'failed',
+                          error: intg.lastSync.error || null,
+                          id: intg._id
+                        });
+                      }
+                    });
+                  }
+                  
+                  if (syncHistory.length === 0) { %>
+                  <tr>
+                    <td colspan="7" style="text-align: center; padding: 2rem; color: var(--admin-text-muted);">
+                      No sync history yet. Run a sync on one of your connections to see history here.
+                    </td>
+                  </tr>
+                  <% } else { %>
                   <% syncHistory.forEach(function(sync) { %>
                   <tr>
                     <td><strong><%= sync.source %></strong></td>
@@ -249,17 +486,18 @@
                       </span>
                     </td>
                     <td>
-                      <button class="table-action-btn" title="View Details">
+                      <button class="table-action-btn" title="View Details" onclick="viewSyncDetails('<%= sync.id %>')">
                         <i data-lucide="eye"></i>
                       </button>
                       <% if (sync.status === 'failed') { %>
-                      <button class="table-action-btn" title="Retry">
+                      <button class="table-action-btn" title="Retry" onclick="syncConnection('<%= sync.id %>')">
                         <i data-lucide="refresh-cw"></i>
                       </button>
                       <% } %>
                     </td>
                   </tr>
                   <% }); %>
+                  <% } %>
                 </tbody>
               </table>
             </div>
@@ -437,7 +675,7 @@
 
   <!-- Sync Progress Modal -->
   <div class="modal-overlay" id="syncProgressModal">
-    <div class="modal-content" style="max-width: 420px;">
+    <div class="modal-content" style="max-width: 480px;">
       <div class="modal-header">
         <div class="modal-icon sync-icon">
           <i data-lucide="refresh-cw" class="spin-icon"></i>
@@ -454,14 +692,19 @@
         <div class="sync-status">
           <p id="syncStatusText">Connecting to FTP server...</p>
         </div>
+        <p id="syncCurrentFile" style="font-size: 0.8rem; color: var(--admin-text-muted); margin-top: 0.5rem; word-break: break-all; display: none;"></p>
         <div class="sync-details" style="margin-top: 1.5rem; text-align: left; background: var(--admin-bg-secondary); padding: 1rem; border-radius: 10px;">
           <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-            <span style="color: var(--admin-text-muted); font-size: 0.85rem;">Files Found</span>
+            <span style="color: var(--admin-text-muted); font-size: 0.85rem;">Files Processed</span>
             <strong id="syncFilesCount">--</strong>
           </div>
           <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
             <span style="color: var(--admin-text-muted); font-size: 0.85rem;">Records Processed</span>
             <strong id="syncRecordsCount">--</strong>
+          </div>
+          <div id="syncErrorsRow" style="display: none; justify-content: space-between; margin-bottom: 0.5rem;">
+            <span style="color: var(--admin-text-muted); font-size: 0.85rem;">Skipped/Errors</span>
+            <strong id="syncErrorsCount" style="color: #f59e0b;">0</strong>
           </div>
           <div style="display: flex; justify-content: space-between;">
             <span style="color: var(--admin-text-muted); font-size: 0.85rem;">Elapsed Time</span>
@@ -509,6 +752,9 @@
   </div>
 
   <script>
+    // Current module
+    const currentModule = '<%= typeof currentModule !== "undefined" ? currentModule : "automotive-parts" %>';
+    
     // Tab switching
     document.querySelectorAll('.intg-tab').forEach(function(tab) {
       tab.addEventListener('click', function() {
@@ -523,8 +769,7 @@
 
     // Modal functions
     function openAddConnectionModal() {
-      document.getElementById('addConnectionModal').classList.add('active');
-      if (typeof lucide !== 'undefined') lucide.createIcons();
+      window.location.href = '/admin/integrations/create?module=' + currentModule;
     }
 
     function closeModal(id) {
@@ -563,129 +808,512 @@
       });
     });
 
-    // Connection actions - now using modals
-    function syncConnection(id) {
-      document.getElementById('syncModalTitle').textContent = 'Syncing Connection #' + id;
+    // Show notification - Enhanced modern toast design
+    function showNotification(message, type) {
+      // Use the global notificationManager from /js/notifications.js
+      if (window.notificationManager) {
+        window.notificationManager.show(message, type);
+      }
+    }
+
+    // Sync a connection with real-time progress polling
+    async function syncConnection(id) {
+      document.getElementById('syncModalTitle').textContent = 'Syncing Connection';
       document.getElementById('syncModalSubtitle').textContent = 'Downloading and processing files...';
-      document.getElementById('syncStatusText').textContent = 'Connecting to FTP server...';
-      document.getElementById('syncFilesCount').textContent = '--';
-      document.getElementById('syncRecordsCount').textContent = '--';
-      document.getElementById('syncElapsedTime').textContent = '0s';
-      document.getElementById('syncProgressModal').classList.add('active');
-      if (typeof lucide !== 'undefined') lucide.createIcons();
-      
-      // Simulate sync progress
-      var startTime = Date.now();
-      var syncInterval = setInterval(function() {
-        var elapsed = Math.floor((Date.now() - startTime) / 1000);
-        document.getElementById('syncElapsedTime').textContent = elapsed + 's';
-        
-        if (elapsed > 1) {
-          document.getElementById('syncStatusText').textContent = 'Downloading CSV files...';
-          document.getElementById('syncFilesCount').textContent = Math.min(elapsed - 1, 12);
-        }
-        if (elapsed > 3) {
-          document.getElementById('syncStatusText').textContent = 'Processing records...';
-          document.getElementById('syncRecordsCount').textContent = (elapsed * 8500).toLocaleString();
-        }
-        if (elapsed > 6) {
-          clearInterval(syncInterval);
-          document.getElementById('syncStatusText').textContent = 'Sync completed successfully!';
-          document.querySelector('.sync-progress-bar').style.background = '#10b981';
-          document.querySelector('.spin-icon').classList.remove('spin-icon');
-        }
-      }, 1000);
-    }
-    
-    function testConnection(id) {
-      document.getElementById('syncModalTitle').textContent = 'Testing Connection #' + id;
-      document.getElementById('syncModalSubtitle').textContent = 'Verifying FTP credentials...';
-      document.getElementById('syncStatusText').textContent = 'Attempting to connect...';
-      document.getElementById('syncFilesCount').textContent = '--';
-      document.getElementById('syncRecordsCount').textContent = '--';
-      document.getElementById('syncElapsedTime').textContent = '0s';
-      document.getElementById('syncProgressModal').classList.add('active');
-      if (typeof lucide !== 'undefined') lucide.createIcons();
-      
-      setTimeout(function() {
-        document.getElementById('syncStatusText').textContent = 'Connection successful!';
-        document.querySelector('.sync-progress-bar').style.background = '#10b981';
-      }, 2000);
-    }
-    
-    function editConnection(id) {
-      openAddConnectionModal();
-    }
-    
-    var pendingDeleteId = null;
-    
-    function deleteConnection(id) {
-      pendingDeleteId = id;
-      var connNames = ['APM Group FTP', 'PartsBase FTP', 'ILS Connect', 'Stock Market FTP'];
-      document.getElementById('deleteConnName').textContent = connNames[id - 1] || 'Connection #' + id;
-      document.getElementById('deleteConfirmModal').classList.add('active');
-      if (typeof lucide !== 'undefined') lucide.createIcons();
-    }
-    
-    function confirmDelete() {
-      closeModal('deleteConfirmModal');
-      // UI Demo - connection would be deleted here
-      pendingDeleteId = null;
-    }
-    
-    function testNewConnection() {
-      document.getElementById('syncModalTitle').textContent = 'Testing New Connection';
-      document.getElementById('syncModalSubtitle').textContent = 'Verifying FTP credentials...';
-      document.getElementById('syncStatusText').textContent = 'Connecting...';
-      closeModal('addConnectionModal');
-      document.getElementById('syncProgressModal').classList.add('active');
-      if (typeof lucide !== 'undefined') lucide.createIcons();
-      
-      setTimeout(function() {
-        document.getElementById('syncStatusText').textContent = 'Connection successful!';
-        document.querySelector('.sync-progress-bar').style.background = '#10b981';
-      }, 2000);
-    }
-    
-    function saveConnection() {
-      closeModal('addConnectionModal');
-    }
-    
-    function syncAllSources() {
-      document.getElementById('syncModalTitle').textContent = 'Syncing All Sources';
-      document.getElementById('syncModalSubtitle').textContent = 'Processing 4 connections...';
       document.getElementById('syncStatusText').textContent = 'Starting sync...';
       document.getElementById('syncFilesCount').textContent = '0';
       document.getElementById('syncRecordsCount').textContent = '0';
       document.getElementById('syncElapsedTime').textContent = '0s';
-      document.getElementById('syncProgressModal').classList.add('active');
-      if (typeof lucide !== 'undefined') lucide.createIcons();
-    }
-    
-    function openAddApiModal() {
-      openAddConnectionModal();
-    }
-    
-    function testApi(id) {
-      document.getElementById('syncModalTitle').textContent = 'Testing API #' + id;
-      document.getElementById('syncModalSubtitle').textContent = 'Sending test request...';
-      document.getElementById('syncStatusText').textContent = 'Calling API endpoint...';
+      document.getElementById('syncCurrentFile').textContent = '';
+      document.getElementById('syncCurrentFile').style.display = 'none';
+      document.getElementById('syncErrorsRow').style.display = 'none';
+      document.getElementById('syncErrorsCount').textContent = '0';
+      document.querySelector('.sync-progress-bar').style.background = 'var(--admin-accent)';
       document.getElementById('syncProgressModal').classList.add('active');
       if (typeof lucide !== 'undefined') lucide.createIcons();
       
-      setTimeout(function() {
-        document.getElementById('syncStatusText').textContent = 'API responding correctly!';
+      var startTime = Date.now();
+      var progressPollInterval = null;
+      var elapsedInterval = null;
+      
+      // Update elapsed time
+      elapsedInterval = setInterval(function() {
+        var elapsed = Math.floor((Date.now() - startTime) / 1000);
+        document.getElementById('syncElapsedTime').textContent = elapsed + 's';
+      }, 1000);
+      
+      // Poll for progress updates
+      async function pollProgress() {
+        try {
+          const response = await fetch('/admin/api/integrations/' + id + '/progress');
+          const data = await response.json();
+          
+          if (data.success && data.progress) {
+            const p = data.progress;
+            
+            // Update status text
+            if (p.message) {
+              document.getElementById('syncStatusText').textContent = p.message;
+            } else if (p.phase) {
+              const phaseMessages = {
+                'connecting': 'Connecting to server...',
+                'listing': 'Listing files on server...',
+                'downloading': 'Downloading files...',
+                'parsing': 'Processing CSV data...',
+                'fetching': 'Fetching data from API...',
+                'indexing': 'Indexing records...',
+                'done': 'Sync completed!',
+                'failed': 'Sync failed'
+              };
+              document.getElementById('syncStatusText').textContent = phaseMessages[p.phase] || p.phase;
+            }
+            
+            // Update subtitle based on phase
+            if (p.phase === 'downloading' || p.phase === 'parsing') {
+              document.getElementById('syncModalSubtitle').textContent = 'Processing files...';
+            } else if (p.phase === 'done') {
+              document.getElementById('syncModalSubtitle').textContent = 'Sync completed';
+            }
+            
+            // Show current file being processed
+            if (p.currentFile) {
+              const currentFileEl = document.getElementById('syncCurrentFile');
+              currentFileEl.textContent = '📄 ' + p.currentFile;
+              currentFileEl.style.display = 'block';
+            }
+            
+            // Update files count
+            if (p.filesProcessed !== undefined && p.filesTotal !== undefined) {
+              document.getElementById('syncFilesCount').textContent = p.filesProcessed + '/' + p.filesTotal;
+            } else if (p.filesTotal !== undefined) {
+              document.getElementById('syncFilesCount').textContent = '0/' + p.filesTotal;
+            }
+            
+            // Update records count
+            if (p.recordsProcessed !== undefined) {
+              document.getElementById('syncRecordsCount').textContent = p.recordsProcessed.toLocaleString();
+            }
+            
+            // Show errors/skipped count
+            if (p.errors && p.errors.length > 0) {
+              document.getElementById('syncErrorsRow').style.display = 'flex';
+              document.getElementById('syncErrorsCount').textContent = p.errors.length;
+            }
+            
+            // Check if completed
+            if (p.status === 'completed' || p.status === 'error') {
+              clearInterval(progressPollInterval);
+              clearInterval(elapsedInterval);
+              
+              // Hide current file
+              document.getElementById('syncCurrentFile').style.display = 'none';
+              
+              if (p.status === 'completed') {
+                document.getElementById('syncModalSubtitle').textContent = 'Sync completed successfully';
+                document.getElementById('syncStatusText').textContent = 'Sync completed successfully!';
+                document.querySelector('.sync-progress-bar').style.background = '#10b981';
+                document.querySelector('.spin-icon').classList.remove('spin-icon');
+                // Update final counts
+                if (p.recordsInserted !== undefined) {
+                  document.getElementById('syncRecordsCount').textContent = 
+                    p.recordsInserted.toLocaleString() + ' inserted, ' + 
+                    (p.recordsUpdated || 0).toLocaleString() + ' updated';
+                }
+              } else {
+                document.getElementById('syncModalSubtitle').textContent = 'Sync failed';
+                document.getElementById('syncStatusText').textContent = 'Sync failed: ' + (p.error || 'Unknown error');
+                document.querySelector('.sync-progress-bar').style.background = '#ef4444';
+                document.querySelector('.spin-icon').classList.remove('spin-icon');
+              }
+              
+              // Reload page after a delay
+              setTimeout(() => {
+                window.location.reload();
+              }, 3000);
+            }
+          } else if (!data.isSyncing && data.lastSync) {
+            // Sync finished, check last sync status
+            clearInterval(progressPollInterval);
+            clearInterval(elapsedInterval);
+            
+            // Hide current file
+            document.getElementById('syncCurrentFile').style.display = 'none';
+            
+            if (data.lastSync.status === 'success') {
+              document.getElementById('syncModalSubtitle').textContent = 'Sync completed successfully';
+              document.getElementById('syncStatusText').textContent = 'Sync completed successfully!';
+              document.getElementById('syncRecordsCount').textContent = 
+                (data.lastSync.recordsInserted || 0).toLocaleString() + ' inserted, ' +
+                (data.lastSync.recordsUpdated || 0).toLocaleString() + ' updated';
+              document.querySelector('.sync-progress-bar').style.background = '#10b981';
+            } else {
+              document.getElementById('syncModalSubtitle').textContent = 'Sync failed';
+              document.getElementById('syncStatusText').textContent = 'Sync failed: ' + (data.lastSync.error || 'Unknown error');
+              document.querySelector('.sync-progress-bar').style.background = '#ef4444';
+            }
+            
+            setTimeout(() => {
+              window.location.reload();
+            }, 3000);
+          }
+        } catch (error) {
+          console.error('Error polling progress:', error);
+        }
+      }
+
+      try {
+        // Start the sync
+        const response = await fetch('/admin/api/integrations/' + id + '/sync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          // Start polling for progress
+          progressPollInterval = setInterval(pollProgress, 1000);
+          // Initial poll
+          setTimeout(pollProgress, 500);
+        } else {
+          clearInterval(elapsedInterval);
+          document.getElementById('syncStatusText').textContent = 'Failed to start sync: ' + (result.error || 'Unknown error');
+          document.querySelector('.sync-progress-bar').style.background = '#ef4444';
+        }
+      } catch (error) {
+        clearInterval(elapsedInterval);
+        document.getElementById('syncStatusText').textContent = 'Sync failed: ' + error.message;
+        document.querySelector('.sync-progress-bar').style.background = '#ef4444';
+      }
+    }
+    
+    // Test a connection
+    async function testConnection(id) {
+      document.getElementById('syncModalTitle').textContent = 'Testing Connection';
+      document.getElementById('syncModalSubtitle').textContent = 'Verifying credentials...';
+      document.getElementById('syncStatusText').textContent = 'Attempting to connect...';
+      document.getElementById('syncFilesCount').textContent = '--';
+      document.getElementById('syncRecordsCount').textContent = '--';
+      document.getElementById('syncElapsedTime').textContent = '0s';
+      document.querySelector('.sync-progress-bar').style.background = 'var(--admin-accent)';
+      document.getElementById('syncProgressModal').classList.add('active');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+
+      try {
+        // Get the integration details first
+        const getResponse = await fetch('/admin/api/integrations/' + id);
+        const integrationData = await getResponse.json();
+        
+        if (!integrationData.success) {
+          throw new Error('Failed to get integration details');
+        }
+
+        // Use the integration object from response
+        const integration = integrationData.integration;
+
+        const response = await fetch('/admin/api/integrations/test', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(integration)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          document.getElementById('syncModalSubtitle').textContent = 'Test completed successfully';
+          document.getElementById('syncStatusText').textContent = 'Connection test successful!';
+          if (result.data && result.data.filesCount !== undefined) {
+            document.getElementById('syncFilesCount').textContent = result.data.filesCount;
+          }
+          if (result.estimatedRecords) {
+            document.getElementById('syncRecordsCount').textContent = '~' + result.estimatedRecords;
+          }
+          document.querySelector('.sync-progress-bar').style.background = '#10b981';
+        } else {
+          document.getElementById('syncModalSubtitle').textContent = 'Test failed';
+          document.getElementById('syncStatusText').textContent = 'Connection failed: ' + (result.error || 'Unknown error');
+          document.querySelector('.sync-progress-bar').style.background = '#ef4444';
+        }
+      } catch (error) {
+        document.getElementById('syncModalSubtitle').textContent = 'Test failed';
+        document.getElementById('syncStatusText').textContent = 'Connection failed: ' + error.message;
+        document.querySelector('.sync-progress-bar').style.background = '#ef4444';
+      }
+    }
+    
+    // Edit connection
+    function editConnection(id) {
+      window.location.href = '/admin/integrations/edit/' + id + '?module=' + currentModule;
+    }
+    
+    // Delete connection
+    var pendingDeleteId = null;
+    var pendingDeleteName = null;
+    
+    function deleteConnection(id, name) {
+      pendingDeleteId = id;
+      pendingDeleteName = name || 'this connection';
+      document.getElementById('deleteConnName').textContent = pendingDeleteName;
+      document.getElementById('deleteConfirmModal').classList.add('active');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+    
+    async function confirmDelete() {
+      if (!pendingDeleteId) return;
+      
+      closeModal('deleteConfirmModal');
+      
+      try {
+        const response = await fetch('/admin/api/integrations/' + pendingDeleteId, {
+          method: 'DELETE'
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          showNotification('Connection deleted successfully', 'success');
+          // Remove the card from the DOM
+          const card = document.querySelector('.connection-card[data-id="' + pendingDeleteId + '"]');
+          if (card) {
+            card.style.animation = 'fadeOut 0.3s ease';
+            setTimeout(() => card.remove(), 300);
+          }
+        } else {
+          showNotification('Failed to delete: ' + (result.error || 'Unknown error'), 'error');
+        }
+      } catch (error) {
+        showNotification('Failed to delete: ' + error.message, 'error');
+      }
+      
+      pendingDeleteId = null;
+      pendingDeleteName = null;
+    }
+    
+    // Sync all sources
+    async function syncAllSources() {
+      document.getElementById('syncModalTitle').textContent = 'Syncing All Sources';
+      document.getElementById('syncModalSubtitle').textContent = 'Processing all enabled connections...';
+      document.getElementById('syncStatusText').textContent = 'Starting sync...';
+      document.getElementById('syncFilesCount').textContent = '0';
+      document.getElementById('syncRecordsCount').textContent = '0';
+      document.getElementById('syncElapsedTime').textContent = '0s';
+      document.querySelector('.sync-progress-bar').style.background = 'var(--admin-accent)';
+      document.getElementById('syncProgressModal').classList.add('active');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+      
+      var startTime = Date.now();
+      var updateInterval = setInterval(function() {
+        var elapsed = Math.floor((Date.now() - startTime) / 1000);
+        document.getElementById('syncElapsedTime').textContent = elapsed + 's';
+      }, 1000);
+
+      try {
+        // Get all integrations and sync them one by one
+        const response = await fetch('/admin/api/integrations');
+        const integrations = await response.json();
+        
+        if (!integrations.success || !integrations.data) {
+          throw new Error('Failed to get integrations');
+        }
+
+        let totalFiles = 0;
+        let totalRecords = 0;
+        let syncedCount = 0;
+        const enabledIntegrations = integrations.data.filter(i => i.isEnabled);
+
+        for (const integration of enabledIntegrations) {
+          document.getElementById('syncStatusText').textContent = `Syncing ${integration.name}... (${++syncedCount}/${enabledIntegrations.length})`;
+          
+          const syncResponse = await fetch('/admin/api/integrations/' + integration._id + '/sync', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+          });
+          
+          const syncResult = await syncResponse.json();
+          
+          if (syncResult.success && syncResult.data) {
+            totalFiles += syncResult.data.filesProcessed || 0;
+            totalRecords += syncResult.data.recordsProcessed || 0;
+            document.getElementById('syncFilesCount').textContent = totalFiles;
+            document.getElementById('syncRecordsCount').textContent = totalRecords.toLocaleString();
+          }
+        }
+
+        clearInterval(updateInterval);
+        document.getElementById('syncStatusText').textContent = 'All syncs completed!';
         document.querySelector('.sync-progress-bar').style.background = '#10b981';
-      }, 1500);
+        
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      } catch (error) {
+        clearInterval(updateInterval);
+        document.getElementById('syncStatusText').textContent = 'Sync failed: ' + error.message;
+        document.querySelector('.sync-progress-bar').style.background = '#ef4444';
+      }
     }
     
-    function viewApiDocs(id) {
-      window.open('#', '_blank');
+    // View sync details
+    function viewSyncDetails(id) {
+      // For now, just redirect to edit page
+      editConnection(id);
+    }
+
+    // Toggle sync details panel
+    function toggleSyncPanel(event, id) {
+      event.stopPropagation();
+      const panel = document.getElementById('sync-panel-' + id);
+      const header = panel.querySelector('.sync-panel-header');
+      const content = panel.querySelector('.sync-panel-content');
+      
+      if (panel.classList.contains('expanded')) {
+        panel.classList.remove('expanded');
+        header.classList.remove('expanded');
+        content.classList.remove('expanded');
+      } else {
+        // Close all other panels first
+        document.querySelectorAll('.sync-details-panel.expanded').forEach(p => {
+          p.classList.remove('expanded');
+          p.querySelector('.sync-panel-header').classList.remove('expanded');
+          p.querySelector('.sync-panel-content').classList.remove('expanded');
+        });
+        
+        panel.classList.add('expanded');
+        header.classList.add('expanded');
+        content.classList.add('expanded');
+        
+        // Load fresh sync details
+        loadSyncDetails(id);
+      }
+      
+      if (typeof lucide !== 'undefined') lucide.createIcons();
     }
     
-    function editApi(id) {
-      openAddConnectionModal();
+    // Load sync details via API
+    async function loadSyncDetails(id) {
+      try {
+        const response = await fetch('/admin/api/integrations/' + id + '/sync-details');
+        const data = await response.json();
+        
+        if (data.success) {
+          updateSyncPanelUI(id, data);
+        }
+      } catch (error) {
+        console.error('Error loading sync details:', error);
+      }
     }
+    
+    // Update sync panel UI with new data
+    function updateSyncPanelUI(id, data) {
+      const panel = document.getElementById('sync-panel-' + id);
+      if (!panel) return;
+      
+      // Update status badge
+      const statusBadge = panel.querySelector('.sync-status-badge');
+      if (statusBadge && data.integration) {
+        const status = data.integration.status;
+        statusBadge.className = 'sync-status-badge ' + (status === 'syncing' ? 'syncing' : status === 'error' ? 'error' : 'completed');
+      }
+      
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+    
+    // Check if we just created a new connection that should start syncing
+    const urlParams = new URLSearchParams(window.location.search);
+    const syncStartedId = urlParams.get('syncStarted');
+    if (syncStartedId) {
+      showNotification('Auto-sync started for new connection!', 'success');
+      // Expand the sync panel for this connection
+      setTimeout(() => {
+        const panel = document.getElementById('sync-panel-' + syncStartedId);
+        if (panel) {
+          panel.classList.add('expanded');
+          const header = panel.querySelector('.sync-panel-header');
+          const content = panel.querySelector('.sync-panel-content');
+          if (header) header.classList.add('expanded');
+          if (content) content.classList.add('expanded');
+          panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          
+          // Start polling for sync status
+          pollSyncStatus(syncStartedId);
+        }
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      }, 500);
+      
+      // Clean up URL
+      const newUrl = window.location.pathname + window.location.search.replace(/[?&]syncStarted=[^&]+/, '').replace(/^&/, '?');
+      window.history.replaceState({}, '', newUrl.replace(/\?$/, ''));
+    }
+    
+    // Poll sync status for live updates
+    function pollSyncStatus(id) {
+      let pollInterval = setInterval(async () => {
+        try {
+          const response = await fetch('/admin/api/integrations/' + id);
+          const data = await response.json();
+          
+          if (data.success && data.integration) {
+            const integration = data.integration;
+            
+            // Update the sync panel status
+            const panel = document.getElementById('sync-panel-' + id);
+            if (panel) {
+              const statusBadge = panel.querySelector('.sync-status-badge');
+              const panelIcon = panel.querySelector('.sync-panel-icon');
+              
+              if (integration.status === 'syncing') {
+                if (statusBadge) {
+                  statusBadge.className = 'sync-status-badge syncing';
+                  statusBadge.innerHTML = '<i data-lucide="loader-2"></i> Syncing';
+                }
+                if (panelIcon) {
+                  panelIcon.classList.add('syncing');
+                }
+              } else {
+                // Sync completed
+                clearInterval(pollInterval);
+                
+                if (statusBadge) {
+                  statusBadge.className = 'sync-status-badge ' + (integration.status === 'error' ? 'error' : 'completed');
+                  statusBadge.innerHTML = '<i data-lucide="' + (integration.status === 'error' ? 'x-circle' : 'check-circle') + '"></i> ' + 
+                    (integration.status === 'error' ? 'Error' : 'Completed');
+                }
+                if (panelIcon) {
+                  panelIcon.classList.remove('syncing');
+                }
+                
+                showNotification(integration.status === 'error' ? 'Sync failed!' : 'Sync completed successfully!', 
+                  integration.status === 'error' ? 'error' : 'success');
+                
+                // Reload page after a delay to show updated data
+                setTimeout(() => window.location.reload(), 2000);
+              }
+              
+              if (typeof lucide !== 'undefined') lucide.createIcons();
+            }
+          }
+        } catch (error) {
+          console.error('Error polling sync status:', error);
+          clearInterval(pollInterval);
+        }
+      }, 2000); // Poll every 2 seconds
+      
+      // Stop polling after 5 minutes
+      setTimeout(() => clearInterval(pollInterval), 300000);
+    }
+
+    // Add CSS animations
+    const style = document.createElement('style');
+    style.textContent = `
+      .spin-icon {
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+    `;
+    document.head.appendChild(style);
   </script>
 
 <%- include('partials/footer') %>

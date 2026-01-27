@@ -149,21 +149,31 @@
       </div>
 
       <!-- Sign In Button (shown when not logged in) -->
-      <button class="btn-secondary btn-sign-in" id="sign-in-btn" style="display: none;">
+      <% if (!user) { %>
+      <button class="btn-secondary btn-sign-in" id="sign-in-btn">
         <i data-lucide="user"></i>
         <span><%= t('nav.user.signIn') %></span>
       </button>
+      <% } %>
 
       <!-- User Profile Dropdown (shown when logged in) -->
-      <div class="user-profile-dropdown" id="userProfileDropdown" style="display: none;">
-        <button type="button" class="user-profile-btn" id="userProfileBtn">
+      <% if (user) { %>
+      <div class="user-profile-dropdown" id="userProfileDropdown">
+        <button type="button" class="user-profile-btn user-profile-btn-compact" id="userProfileBtn" title="<%= user.firstName %> <%= user.lastName %>">
           <div class="user-avatar">
-            <i data-lucide="user"></i>
+            <% if (user.avatar) { %>
+              <img src="<%= user.avatar %>" alt="Avatar" class="avatar-image" />
+            <% } else { %>
+              <span class="avatar-initials"><%= user.firstName ? user.firstName.charAt(0).toUpperCase() : 'U' %><%= user.lastName ? user.lastName.charAt(0).toUpperCase() : '' %></span>
+            <% } %>
           </div>
-          <span class="user-name" id="userName">User</span>
-          <i data-lucide="chevron-down" class="user-chevron"></i>
         </button>
         <div class="user-dropdown-menu" id="userDropdownMenu">
+          <div class="user-dropdown-header">
+            <span class="user-dropdown-name"><%= user.firstName %> <%= user.lastName %></span>
+            <span class="user-dropdown-email"><%= user.email %></span>
+          </div>
+          <div class="user-dropdown-divider"></div>
           <a href="/buyer/profile" class="user-dropdown-item">
             <i data-lucide="user"></i>
             <span><%= t('nav.user.profile') %></span>
@@ -173,12 +183,16 @@
             <span><%= t('nav.user.settings') %></span>
           </a>
           <div class="user-dropdown-divider"></div>
-          <button class="user-dropdown-item" id="logoutBtn">
+          <button class="user-dropdown-item user-dropdown-logout" id="logoutBtn">
             <i data-lucide="log-out"></i>
             <span><%= t('nav.user.logout') %></span>
           </button>
         </div>
       </div>
+      <% } else { %>
+      <!-- Hidden dropdown for JS initialization when not logged in -->
+      <div class="user-profile-dropdown" id="userProfileDropdown" style="display: none;"></div>
+      <% } %>
     </div>
   </div>
 </nav>
@@ -352,6 +366,20 @@
 </div>
 
 <!-- Navbar JavaScript -->
+<% if (user) { %>
+<script>
+  // Pass user data to client-side for auth state management
+  window.__USER_DATA__ = {
+    id: '<%= user._id %>',
+    firstName: '<%= user.firstName %>',
+    lastName: '<%= user.lastName %>',
+    email: '<%= user.email %>',
+    fullName: '<%= user.firstName %> <%= user.lastName %>',
+    companyName: '<%= user.companyName || "" %>',
+    avatar: '<%= user.avatar || "" %>'
+  };
+</script>
+<% } %>
 <script src="/js/i18n.js"></script>
 <script src="/js/navbar.js"></script>
 <script src="/js/currency-converter.js"></script>

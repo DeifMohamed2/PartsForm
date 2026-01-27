@@ -20,6 +20,14 @@ const {
   uploadAvatar,
   updateProfile,
 } = require('../controllers/buyerController');
+const {
+  searchParts,
+  autocomplete,
+  getFilterOptions,
+  getPartById,
+  getPartsByNumber,
+  getSearchStats,
+} = require('../controllers/searchController');
 const { handleProfileImageUpload } = require('../utils/fileUploader');
 
 // Apply authentication middleware to all buyer routes
@@ -48,6 +56,14 @@ router.put('/profile', updateProfile);
 router.get('/search/automotive', getAutomotiveSearchPage);
 router.get('/search-automotive', getAutomotiveSearchPage);
 router.get('/search', getAutomotiveSearchPage); // Default search goes to automotive
+
+// Search API endpoints
+router.get('/api/search', searchParts);
+router.get('/api/search/autocomplete', autocomplete);
+router.get('/api/search/filters', getFilterOptions);
+router.get('/api/search/stats', getSearchStats);
+router.get('/api/parts/:id', getPartById);
+router.get('/api/parts/by-number/:partNumber', getPartsByNumber);
 
 // Support Tickets routes
 router.get('/tickets', getTicketsPage);

@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { requireAdminAuth, requireAdminRole } = require('../middleware/auth');
 const {
   getAdminDashboard,
   getOrdersManagement,
@@ -24,8 +25,23 @@ const {
   getAdminSettings,
   getIntegrationsManagement,
   getIntegrationCreate,
-  getPartsAnalytics
+  getIntegrationEdit,
+  getPartsAnalytics,
+  // Integration API functions
+  createIntegration,
+  updateIntegration,
+  deleteIntegration,
+  testIntegrationConnection,
+  syncIntegration,
+  getSyncStatus,
+  getSyncProgress,
+  getSyncDetails,
+  getIntegrations,
+  getIntegration,
 } = require('../controllers/adminController');
+
+// Apply admin auth middleware to all routes
+router.use(requireAdminAuth);
 
 // Admin dashboard
 router.get('/', getAdminDashboard);
@@ -57,9 +73,24 @@ router.get('/payments/create', getPaymentCreate);
 router.get('/payments/:id', getPaymentDetails);
 router.get('/payments', getPaymentsManagement);
 
-// Other admin pages
-router.get('/integrations/create', getIntegrationCreate);
+// Integrations management - Pages
 router.get('/integrations', getIntegrationsManagement);
+router.get('/integrations/create', getIntegrationCreate);
+router.get('/integrations/:id/edit', getIntegrationEdit);
+
+// Integrations API endpoints
+router.get('/api/integrations', getIntegrations);
+router.get('/api/integrations/:id', getIntegration);
+router.post('/api/integrations', createIntegration);
+router.put('/api/integrations/:id', updateIntegration);
+router.delete('/api/integrations/:id', deleteIntegration);
+router.post('/api/integrations/test', testIntegrationConnection);
+router.post('/api/integrations/:id/sync', syncIntegration);
+router.get('/api/integrations/:id/status', getSyncStatus);
+router.get('/api/integrations/:id/progress', getSyncProgress);
+router.get('/api/integrations/:id/sync-details', getSyncDetails);
+
+// Other admin pages
 router.get('/settings', getAdminSettings);
 
 // Parts Analytics

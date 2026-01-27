@@ -272,7 +272,11 @@ body {
    ==================================== */
 .user-profile-dropdown {
   position: relative;
-  display: none;
+  display: flex;
+}
+
+.user-profile-dropdown[style*="display: none"] {
+  display: none !important;
 }
 
 .user-profile-btn {
@@ -324,6 +328,69 @@ body {
   justify-content: center;
   width: 100%;
   height: 100%;
+}
+
+.user-avatar .avatar-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+/* Compact profile button - circle only */
+.user-profile-btn-compact {
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+}
+
+.user-profile-btn-compact .user-avatar {
+  width: 36px;
+  height: 36px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  transition: all 0.3s ease;
+}
+
+.nav-bar.scrolled .user-profile-btn-compact .user-avatar {
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.user-profile-btn-compact:hover .user-avatar {
+  border-color: rgba(59, 130, 246, 0.8);
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+}
+
+/* User dropdown header */
+.user-dropdown-header {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.user-dropdown-name {
+  font-weight: 600;
+  color: #1a2b3d;
+  font-size: 0.9rem;
+}
+
+.user-dropdown-email {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+/* Logout button styling */
+.user-dropdown-logout {
+  color: #dc2626;
+}
+
+.user-dropdown-logout:hover {
+  background: rgba(220, 38, 38, 0.08);
+  color: #dc2626;
 }
 
 .user-avatar i {

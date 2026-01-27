@@ -812,62 +812,91 @@
     // Clear table and show loading
     if (elements.resultsTableBody) {
       elements.resultsTableBody.innerHTML =
-        '<tr><td colspan="12" style="text-align: center; padding: 40px;">Searching...</td></tr>';
+        '<tr><td colspan="12" style="text-align: center; padding: 40px;"><div class="loading-spinner"></div> Searching...</td></tr>';
+    }
+
+    // Build query parameters
+    const params = new URLSearchParams({
+      q: query,
+      limit: 100,
+    });
+
+    // Add filters
+    if (state.selectedFilters.brand !== 'all') {
+      params.append('brand', state.selectedFilters.brand);
+    }
+    if (state.selectedFilters.minPrice > 0) {
+      params.append('minPrice', state.selectedFilters.minPrice);
+    }
+    if (state.selectedFilters.maxPrice < 100000) {
+      params.append('maxPrice', state.selectedFilters.maxPrice);
+    }
+    if (state.selectedFilters.stock === 'in-stock') {
+      params.append('inStock', 'true');
     }
 
     // Make API call to search for parts
-    fetch('/api/search', {
-      method: 'POST',
+    fetch(`/buyer/api/search?${params.toString()}`, {
+      method: 'GET',
       headers: {
-        'Content-Type': 'application/json',
+        'Accept': 'application/json',
       },
-      body: JSON.stringify({ partNumber: query }),
+      credentials: 'include', // Include cookies for authentication
     })
-      .then((response) => response.json())
+      .then((response) => {
+        // Check for authentication errors
+        if (response.status === 401) {
+          throw new Error('Authentication required. Please login.');
+        }
+        if (!response.ok) {
+          throw new Error(`Server error: ${response.status}`);
+        }
+        return response.json();
+      })
       .then((data) => {
+        console.log('Search API response:', data);
+        
         if (data.success && data.results && data.results.length > 0) {
-          // Apply client-side filters to API results
+          // Apply any remaining client-side filters
           const filteredResults = data.results.filter((part) => {
-            const matchesBrand =
-              state.selectedFilters.brand === 'all' ||
-              part.brand.toLowerCase() ===
-                state.selectedFilters.brand.toLowerCase();
-
-            const matchesStock =
-              state.selectedFilters.stock === 'all' ||
-              (part.stock > 10 && state.selectedFilters.stock === 'in-stock') ||
-              (part.stock <= 10 &&
-                part.stock > 5 &&
-                state.selectedFilters.stock === 'low-stock') ||
-              (part.stock <= 5 && state.selectedFilters.stock === 'out-stock');
-
             const matchesOrigin =
               state.selectedFilters.origin === 'all' ||
-              part.origin.toLowerCase() ===
-                state.selectedFilters.origin.toLowerCase();
+              (part.origin && part.origin.toLowerCase() ===
+                state.selectedFilters.origin.toLowerCase());
 
-            const matchesPrice =
-              part.unitPrice >= state.selectedFilters.minPrice &&
-              part.unitPrice <= state.selectedFilters.maxPrice;
-
-            return (
-              matchesBrand && matchesStock && matchesOrigin && matchesPrice
-            );
+            return matchesOrigin;
           });
 
           state.currentResults = filteredResults;
           displayResults(filteredResults);
+
+          // Show search info
+          if (data.searchTime) {
+            console.log(`Search completed in ${data.searchTime} (${data.source})`);
+          }
         } else {
           // No results found
+          console.log('No results found for query:', query);
           state.currentResults = [];
           displayResults([]);
         }
       })
       .catch((error) => {
         console.error('Search error:', error);
-        if (elements.resultsTableBody) {
-          elements.resultsTableBody.innerHTML =
-            '<tr><td colspan="12" style="text-align: center; padding: 40px; color: #e74c3c;">Error searching for parts. Please try again.</td></tr>';
+        if (error.message.includes('Authentication')) {
+          // Show login modal
+          if (typeof window.showLoginModal === 'function') {
+            window.showLoginModal();
+          }
+          if (elements.resultsTableBody) {
+            elements.resultsTableBody.innerHTML =
+              '<tr><td colspan="12" style="text-align: center; padding: 40px; color: #f39c12;">Please login to search for parts.</td></tr>';
+          }
+        } else {
+          if (elements.resultsTableBody) {
+            elements.resultsTableBody.innerHTML =
+              '<tr><td colspan="12" style="text-align: center; padding: 40px; color: #e74c3c;">Error searching for parts. Please try again.</td></tr>';
+          }
         }
       });
   }
@@ -908,62 +937,79 @@
   // AUTOCOMPLETE
   // ====================================
   function showAutocomplete(query) {
-    const queryLower = query.toLowerCase();
-
-    // Filter suggestions (match anywhere for better results)
-    const suggestions = mockPartsDatabase
-      .filter(
-        (part) =>
-          part.code.toLowerCase().includes(queryLower) ||
-          part.description.toLowerCase().includes(queryLower) ||
-          part.brand.toLowerCase().includes(queryLower)
-      )
-      .slice(0, 10);
-
-    if (suggestions.length === 0) {
+    if (query.length < 2) {
       hideAutocomplete();
       return;
     }
 
-    state.autocompleteResults = suggestions;
-    state.autocompleteIndex = -1;
+    // Fetch autocomplete suggestions from API
+    fetch(`/buyer/api/search/autocomplete?q=${encodeURIComponent(query)}&limit=10`, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+      },
+      credentials: 'include', // Include cookies for authentication
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Autocomplete request failed');
+        }
+        return response.json();
+      })
+      .then((data) => {
+        if (data.success && data.suggestions && data.suggestions.length > 0) {
+          state.autocompleteResults = data.suggestions.map((s) => ({
+            code: s.partNumber,
+            description: s.description || '',
+            brand: s.brand || '',
+            supplier: s.supplier || '',
+          }));
+          state.autocompleteIndex = -1;
 
-    // Render suggestions
-    elements.autocompleteContainer.innerHTML = suggestions
-      .map(
-        (part, index) => `
-            <div class="autocomplete-item" data-index="${index}">
-                <div class="autocomplete-icon">
-                    <i data-lucide="package"></i>
-                </div>
-                <div class="autocomplete-content">
-                    <div class="autocomplete-title">${highlightMatch(
-                      part.code,
-                      query
-                    )}</div>
-                    <div class="autocomplete-description">${highlightMatch(
-                      part.description,
-                      query
-                    )}</div>
-                </div>
-            </div>
-        `
-      )
-      .join('');
+          // Render suggestions
+          elements.autocompleteContainer.innerHTML = state.autocompleteResults
+            .map(
+              (part, index) => `
+                  <div class="autocomplete-item" data-index="${index}">
+                      <div class="autocomplete-icon">
+                          <i data-lucide="package"></i>
+                      </div>
+                      <div class="autocomplete-content">
+                          <div class="autocomplete-title">${highlightMatch(
+                            part.code,
+                            query
+                          )}</div>
+                          <div class="autocomplete-description">${highlightMatch(
+                            part.description,
+                            query
+                          )}</div>
+                      </div>
+                  </div>
+              `
+            )
+            .join('');
 
-    // Add click handlers
-    elements.autocompleteContainer
-      .querySelectorAll('.autocomplete-item')
-      .forEach((item, index) => {
-        item.addEventListener('click', () => selectAutocompleteItem(index));
+          // Add click handlers
+          elements.autocompleteContainer
+            .querySelectorAll('.autocomplete-item')
+            .forEach((item, index) => {
+              item.addEventListener('click', () => selectAutocompleteItem(index));
+            });
+
+          elements.autocompleteContainer.classList.add('show');
+
+          // Reinitialize Lucide icons
+          if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+          }
+        } else {
+          hideAutocomplete();
+        }
+      })
+      .catch((error) => {
+        console.error('Autocomplete error:', error);
+        hideAutocomplete();
       });
-
-    elements.autocompleteContainer.classList.add('show');
-
-    // Reinitialize Lucide icons
-    if (typeof lucide !== 'undefined') {
-      lucide.createIcons();
-    }
   }
 
   function hideAutocomplete() {
@@ -1033,36 +1079,47 @@
     if (tableContainer && tableBody) {
       tableContainer.style.display = 'block';
 
-      // Render table rows - Updated to use API data format
+      // Render table rows - Updated to use Elasticsearch/MongoDB API data format
       tableBody.innerHTML = results
         .map((part) => {
-          const price = part.unitPrice || part.price || 0;
-          const code = part.vendorCode || part.code || 'N/A';
-          const quantity = part.stock || part.qty || 0;
+          // Handle both API formats (new Elasticsearch format and legacy)
+          const price = part.price || part.unitPrice || 0;
+          const code = part.partNumber || part.vendorCode || part.code || 'N/A';
+          const quantity = part.quantity || part.stock || part.qty || 0;
           const weight = part.weight
             ? typeof part.weight === 'number'
               ? `${part.weight} kg`
               : part.weight
             : 'N/A';
-          const delivery = part.delivery
-            ? typeof part.delivery === 'number'
-              ? `${part.delivery} days`
-              : part.delivery
+          const deliveryDays = part.deliveryDays || part.delivery;
+          const delivery = deliveryDays
+            ? typeof deliveryDays === 'number'
+              ? `${deliveryDays} days`
+              : deliveryDays
             : 'N/A';
 
-          // Determine stock status
-          let stockStatus = 'in-stock';
+          // Determine stock status based on quantity or stock field
+          let stockStatus = part.stock || 'unknown';
           let stockBadge = 'ST1';
-          if (quantity <= 5) {
-            stockStatus = 'out-stock';
-            stockBadge = 'ST3';
-          } else if (quantity <= 10) {
-            stockStatus = 'low-stock';
-            stockBadge = 'ST2';
+          if (typeof stockStatus === 'string') {
+            if (stockStatus === 'out-of-stock') stockBadge = 'ST3';
+            else if (stockStatus === 'low-stock') stockBadge = 'ST2';
+            else stockBadge = 'ST1';
+          } else {
+            if (quantity <= 5) {
+              stockStatus = 'out-stock';
+              stockBadge = 'ST3';
+            } else if (quantity <= 10) {
+              stockStatus = 'low-stock';
+              stockBadge = 'ST2';
+            }
           }
 
+          // Get part ID for cart functionality
+          const partId = part._id || part.id || code;
+
           return `
-                <tr data-part-code="${code}" data-part-index="${results.indexOf(
+                <tr data-part-code="${code}" data-part-id="${partId}" data-part-index="${results.indexOf(
             part
           )}">
                     <td>
@@ -1071,7 +1128,7 @@
                     <td><strong>${part.brand || 'N/A'}</strong></td>
                     <td><strong>${code}</strong></td>
                     <td>${part.description || 'N/A'}</td>
-                    <td>${part.supplier || 'N/A'}</td>
+                    <td>${part.supplier || part.integrationName || 'N/A'}</td>
                     <td>${part.origin || 'N/A'}</td>
                     <td>${quantity}</td>
                     <td>
@@ -1082,14 +1139,14 @@
                     <td>
                         <div class="order-qty-controls">
                             <button class="qty-btn" onclick="decrementQty(this)">−</button>
-                            <input type="number" class="qty-input" value="1" min="1" max="${quantity}" onchange="updateRowTotal(this)" oninput="updateRowTotal(this)">
+                            <input type="number" class="qty-input" value="1" min="1" max="${Math.max(quantity, 999)}" onchange="updateRowTotal(this)" oninput="updateRowTotal(this)">
                             <button class="qty-btn" onclick="incrementQty(this)">+</button>
                         </div>
                     </td>
                     <td>
                         <strong class="row-total">${formatPrice(
                           price
-                        )}</strong> AED
+                        )}</strong> ${part.currency || 'USD'}
                     </td>
                     <td>
                         <button class="btn-add-single-to-cart" data-part-index="${results.indexOf(

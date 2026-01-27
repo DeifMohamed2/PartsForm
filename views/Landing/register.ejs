@@ -56,6 +56,7 @@
                   <i data-lucide="user" class="input-icon"></i>
                   <input type="text" id="firstName" name="firstName" placeholder="Enter your first name" required>
                 </div>
+                <span class="field-error" id="firstNameError"></span>
               </div>
               
               <div class="form-group">
@@ -64,6 +65,7 @@
                   <i data-lucide="user" class="input-icon"></i>
                   <input type="text" id="lastName" name="lastName" placeholder="Enter your last name" required>
                 </div>
+                <span class="field-error" id="lastNameError"></span>
               </div>
             </div>
 
@@ -74,6 +76,7 @@
                   <i data-lucide="mail" class="input-icon"></i>
                   <input type="email" id="email" name="email" placeholder="you@company.com" required>
                 </div>
+                <span class="field-error" id="emailError"></span>
               </div>
               
               <div class="form-group">
@@ -82,6 +85,7 @@
                   <i data-lucide="phone" class="input-icon"></i>
                   <input type="tel" id="phone" name="phone" placeholder="+1 (555) 000-0000" required>
                 </div>
+                <span class="field-error" id="phoneError"></span>
               </div>
             </div>
           </div>
@@ -99,6 +103,7 @@
                 <i data-lucide="building-2" class="input-icon"></i>
                 <input type="text" id="companyName" name="companyName" placeholder="Your company name" required>
               </div>
+              <span class="field-error" id="companyNameError"></span>
             </div>
 
             <div class="form-row">
@@ -150,6 +155,7 @@
                   </select>
                   <i data-lucide="chevron-down" class="select-arrow"></i>
                 </div>
+                <span class="field-error" id="countryError"></span>
               </div>
               
               <div class="form-group">
@@ -158,6 +164,7 @@
                   <i data-lucide="map-pin" class="input-icon"></i>
                   <input type="text" id="city" name="city" placeholder="Enter your city" required>
                 </div>
+                <span class="field-error" id="cityError"></span>
               </div>
             </div>
 
@@ -165,8 +172,9 @@
               <label for="shippingAddress">Shipping Address <span class="required">*</span></label>
               <div class="input-wrapper textarea-wrapper">
                 <i data-lucide="map" class="input-icon textarea-icon"></i>
-                <textarea id="shippingAddress" name="shippingAddress" rows="3" placeholder="Enter your complete shipping address" required></textarea>
+                <textarea id="shippingAddress" name="shippingAddress" rows="3" placeholder="Enter your complete shipping address (min. 10 characters)" required minlength="10"></textarea>
               </div>
+              <span class="field-error" id="shippingAddressError"></span>
             </div>
           </div>
 
@@ -188,6 +196,7 @@
                     <i data-lucide="eye-off" class="eye-off-icon" style="display: none;"></i>
                   </button>
                 </div>
+                <span class="field-error" id="passwordError"></span>
                 <div class="password-strength" id="passwordStrength">
                   <div class="strength-bar"><span></span></div>
                   <p class="strength-text">Password strength</p>
@@ -204,6 +213,7 @@
                     <i data-lucide="eye-off" class="eye-off-icon" style="display: none;"></i>
                   </button>
                 </div>
+                <span class="field-error" id="confirmPasswordError"></span>
                 <p class="password-match-text" id="passwordMatch"></p>
               </div>
             </div>

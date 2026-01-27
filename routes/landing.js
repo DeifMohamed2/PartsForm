@@ -8,6 +8,10 @@ const {
   getSectors,
   downloadSampleExcel,
 } = require('../controllers/landingController');
+const { attachUser } = require('../middleware/auth');
+
+// Apply attachUser middleware to make user available in all landing pages
+router.use(attachUser);
 
 // Landing page routes
 router.get('/', getLandingPage);

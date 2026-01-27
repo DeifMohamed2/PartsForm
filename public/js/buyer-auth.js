@@ -1,5 +1,5 @@
 // ====================================
-// BUYER AUTHENTICATION - MOCK SESSION MANAGEMENT
+// BUYER AUTHENTICATION - JWT Cookie Based
 // ====================================
 
 (function () {
@@ -9,393 +9,276 @@
   // AUTHENTICATION STATE
   // ====================================
   const Auth = {
-    // Buyer accounts (synced with landing page)
-    BUYER_ACCOUNTS: [
-      { email: 'buyer@partsform.com', password: 'buyer123', name: 'Demo Buyer', fullName: 'Demo Buyer' },
-      { email: 'john.smith@automax.com', password: 'buyer123', name: 'John Smith', fullName: 'John Smith' },
-      { email: 'maria@premiumauto.com', password: 'buyer123', name: 'Maria Garcia', fullName: 'Maria Garcia' },
-      { email: 'sarah@partsworld.com', password: 'buyer123', name: 'Sarah Johnson', fullName: 'Sarah Johnson' },
-      { email: 'robert@euroauto.eu', password: 'buyer123', name: 'Robert Chen', fullName: 'Robert Chen' }
-    ],
+    // User data from server (populated by navbar template)
+    _user: null,
 
-    // Check if user is logged in (check both session types for compatibility)
+    // Set user from server-side data
+    setUser(userData) {
+      this._user = userData;
+    },
+
+    // Check if user is logged in (based on server-side user data)
     isLoggedIn() {
-      // Check new unified session first
-      const isLoggedIn = localStorage.getItem('isLoggedIn');
-      const userRole = localStorage.getItem('userRole');
-      
-      if (isLoggedIn === 'true' && userRole === 'buyer') {
-        return true;
-      }
-      
-      // Fallback to old buyerSession for backwards compatibility
-      const session = localStorage.getItem('buyerSession');
-      if (!session) return false;
-      
-      try {
-        const sessionData = JSON.parse(session);
-        // Check if session is expired (24 hours)
-        if (Date.now() > sessionData.expiresAt) {
-          this.logout();
-          return false;
-        }
-        return true;
-      } catch (e) {
-        return false;
-      }
+      return this._user !== null && this._user !== undefined;
     },
 
     // Get current user
     getCurrentUser() {
-      // Check new unified session first
-      const userName = localStorage.getItem('userName');
-      const userEmail = localStorage.getItem('userEmail');
-      const userRole = localStorage.getItem('userRole');
-      
-      if (userName && userEmail && userRole === 'buyer') {
-        return {
-          email: userEmail,
-          name: userName,
-          fullName: userName
-        };
-      }
-      
-      // Fallback to old buyerSession
-      const session = localStorage.getItem('buyerSession');
-      if (!session) return null;
-      
+      return this._user;
+    },
+
+    // Login via API
+    async login(email, password) {
       try {
-        const sessionData = JSON.parse(session);
-        return sessionData.user;
-      } catch (e) {
-        return null;
-      }
-    },
+        const response = await fetch('/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          body: JSON.stringify({ email, password }),
+          credentials: 'include', // Important for cookies
+        });
 
-    // Login
-    login(email, password) {
-      // Find matching buyer account
-      const buyer = this.BUYER_ACCOUNTS.find(b => b.email === email && b.password === password);
-      
-      if (buyer) {
-        const user = {
-          email: buyer.email,
-          name: buyer.name,
-          fullName: buyer.fullName
-        };
+        const data = await response.json();
 
-        // Store in unified session format (compatible with landing page)
-        localStorage.setItem('userRole', 'buyer');
-        localStorage.setItem('userName', buyer.fullName);
-        localStorage.setItem('userEmail', buyer.email);
-        localStorage.setItem('isLoggedIn', 'true');
-
-        // Also keep old format for backwards compatibility
-        const sessionData = {
-          user: user,
-          expiresAt: Date.now() + (24 * 60 * 60 * 1000) // 24 hours
-        };
-        localStorage.setItem('buyerSession', JSON.stringify(sessionData));
-        
-        return { success: true, user: user };
-      }
-      return { success: false, message: 'Invalid email or password' };
-    },
-
-    // Logout
-    logout() {
-      // Clear all session data
-      localStorage.removeItem('buyerSession');
-      localStorage.removeItem('userRole');
-      localStorage.removeItem('userName');
-      localStorage.removeItem('userEmail');
-      localStorage.removeItem('isLoggedIn');
-      
-      // Smooth logout with transitions
-      const userDropdown = document.getElementById('userProfileDropdown');
-      const signInBtn = document.getElementById('sign-in-btn');
-      
-      // Fade out user dropdown
-      if (userDropdown) {
-        userDropdown.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-        userDropdown.style.opacity = '0';
-        userDropdown.style.transform = 'translateY(-10px)';
-        setTimeout(() => {
-          userDropdown.style.display = 'none';
-          userDropdown.style.opacity = '';
-          userDropdown.style.transform = '';
-        }, 300);
-      }
-      
-      // Fade in sign in button
-      if (signInBtn) {
-        signInBtn.style.display = 'flex';
-        signInBtn.style.opacity = '0';
-        signInBtn.style.transition = 'opacity 0.3s ease';
-        setTimeout(() => {
-          signInBtn.style.opacity = '1';
-        }, 50);
-        setTimeout(() => {
-          signInBtn.style.opacity = '';
-          signInBtn.style.transition = '';
-        }, 350);
-      }
-      
-      // Reset user interface
-      const userNameEl = document.getElementById('userName');
-      if (userNameEl) {
-        userNameEl.textContent = 'User';
-      }
-      
-      const userAvatar = document.querySelector('.user-avatar');
-      if (userAvatar) {
-        userAvatar.innerHTML = '<i data-lucide="user"></i>';
-        if (typeof lucide !== 'undefined') {
-          lucide.createIcons();
-        }
-      }
-      
-      // Close dropdown menu if open
-      const userDropdownMenu = document.getElementById('userDropdownMenu');
-      if (userDropdownMenu) {
-        userDropdownMenu.classList.remove('show');
-      }
-      
-      // Dispatch logout event
-      window.dispatchEvent(new CustomEvent('userLoggedOut'));
-      
-      // Show subtle notification
-      showNotification('Logged out successfully', 'success');
-      
-      // Only redirect if on a page that requires authentication
-      // Don't redirect from orders, cart, checkout, etc. - let user stay
-      const currentPath = window.location.pathname;
-      const protectedPages = ['/buyer/profile', '/buyer/settings'];
-      if (protectedPages.some(page => currentPath.includes(page))) {
-        setTimeout(() => {
-          window.location.href = '/buyer';
-        }, 500);
-      }
-    },
-
-    // Require login (returns promise that resolves when logged in)
-    requireLogin() {
-      return new Promise((resolve, reject) => {
-        if (this.isLoggedIn()) {
-          resolve(this.getCurrentUser());
+        if (data.success) {
+          this._user = data.data?.user || null;
+          return { 
+            success: true, 
+            user: this._user,
+            redirectUrl: data.data?.redirectUrl || '/buyer'
+          };
         } else {
-          // Show login modal
-          this.showLoginModal();
-          // Wait for login
-          const checkLogin = setInterval(() => {
-            if (this.isLoggedIn()) {
-              clearInterval(checkLogin);
-              resolve(this.getCurrentUser());
-            }
-          }, 100);
+          return { 
+            success: false, 
+            message: data.message || 'Login failed' 
+          };
         }
-      });
+      } catch (error) {
+        console.error('Login error:', error);
+        return { 
+          success: false, 
+          message: 'An error occurred. Please try again.' 
+        };
+      }
+    },
+
+    // Logout via API
+    async logout() {
+      try {
+        const response = await fetch('/logout', {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+          },
+          credentials: 'include',
+        });
+
+        const data = await response.json();
+        
+        // Clear local user state
+        this._user = null;
+
+        // Update UI
+        const userDropdown = document.getElementById('userProfileDropdown');
+        const signInBtn = document.getElementById('sign-in-btn');
+
+        // Fade out user dropdown
+        if (userDropdown) {
+          userDropdown.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+          userDropdown.style.opacity = '0';
+          userDropdown.style.transform = 'translateY(-10px)';
+          setTimeout(() => {
+            userDropdown.style.display = 'none';
+            userDropdown.style.opacity = '';
+            userDropdown.style.transform = '';
+          }, 300);
+        }
+
+        // Fade in sign in button
+        if (signInBtn) {
+          signInBtn.style.display = 'flex';
+          signInBtn.style.opacity = '0';
+          signInBtn.style.transition = 'opacity 0.3s ease';
+          setTimeout(() => {
+            signInBtn.style.opacity = '1';
+          }, 50);
+          setTimeout(() => {
+            signInBtn.style.opacity = '';
+            signInBtn.style.transition = '';
+          }, 350);
+        }
+
+        // Close dropdown menu if open
+        const userDropdownMenu = document.getElementById('userDropdownMenu');
+        if (userDropdownMenu) {
+          userDropdownMenu.classList.remove('show');
+        }
+
+        // Dispatch logout event
+        window.dispatchEvent(new CustomEvent('userLoggedOut'));
+
+        // Show notification
+        showNotification('Logged out successfully', 'success');
+
+        // Redirect to home
+        setTimeout(() => {
+          window.location.href = data.redirectUrl || '/';
+        }, 500);
+
+        return { success: true };
+      } catch (error) {
+        console.error('Logout error:', error);
+        // Force redirect anyway
+        window.location.href = '/';
+        return { success: false, message: 'Error during logout' };
+      }
+    },
+
+    // Show login modal
+    showLoginModal() {
+      LoginModal.show();
     }
   };
 
   // ====================================
-  // LOGIN MODAL MANAGEMENT
+  // LOGIN MODAL CONTROLLER
   // ====================================
   const LoginModal = {
     modal: null,
-    backdrop: null,
     form: null,
-    closeBtn: null,
+    submitBtn: null,
 
     init() {
-      this.modal = document.getElementById('sign-in-modal');
-      if (!this.modal) return;
+      this.modal = document.getElementById('sign-in-modal') || document.getElementById('login-modal');
+      this.form = document.getElementById('sign-in-form') || document.getElementById('login-form');
+      this.submitBtn = document.getElementById('modal-submit-btn') || document.getElementById('login-submit-btn');
 
-      this.backdrop = this.modal.querySelector('#modal-backdrop');
-      this.form = this.modal.querySelector('#sign-in-form');
-      this.closeBtn = this.modal.querySelector('#modal-close');
-
-      // Close handlers
-      if (this.backdrop) {
-        this.backdrop.addEventListener('click', () => this.hide());
-      }
-      if (this.closeBtn) {
-        this.closeBtn.addEventListener('click', () => this.hide());
-      }
-
-      // Form submission
       if (this.form) {
         this.form.addEventListener('submit', (e) => this.handleSubmit(e));
       }
-
-      // Close on Escape key
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && this.isVisible()) {
-          this.hide();
-        }
-      });
     },
 
     show() {
-      if (!this.modal) return;
-      
-      // Smooth fade in
-      this.modal.style.opacity = '0';
-      this.modal.style.transition = 'opacity 0.2s ease';
-      this.modal.classList.add('show', 'active');
-      document.body.style.overflow = 'hidden';
-      
-      requestAnimationFrame(() => {
-        setTimeout(() => {
-          this.modal.style.opacity = '1';
-        }, 10);
-      });
-
-      // Focus on email input
-      const emailInput = this.modal.querySelector('#login-email') || 
-                        this.modal.querySelector('input[type="email"]');
-      if (emailInput) {
-        setTimeout(() => emailInput.focus(), 150);
-      }
-      
-      // Reinitialize icons
-      if (typeof lucide !== 'undefined') {
-        lucide.createIcons();
+      if (this.modal) {
+        this.modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        if (typeof lucide !== 'undefined') {
+          lucide.createIcons();
+        }
       }
     },
 
     hide() {
-      if (!this.modal) return;
-      
-      // Smooth fade out
-      this.modal.style.transition = 'opacity 0.2s ease';
-      this.modal.style.opacity = '0';
-      
-      setTimeout(() => {
-        this.modal.classList.remove('show', 'active');
-        this.modal.style.opacity = '';
-        this.modal.style.transition = '';
+      if (this.modal) {
+        this.modal.classList.remove('active');
         document.body.style.overflow = '';
-        
-        // Reset form
-        if (this.form) {
-          this.form.reset();
-        }
-      }, 200);
+        this.clearErrors();
+      }
     },
 
-    isVisible() {
-      return this.modal && (this.modal.classList.contains('show') || this.modal.classList.contains('active'));
+    clearErrors() {
+      const errorEl = document.getElementById('modal-error');
+      const successEl = document.getElementById('modal-success');
+      if (errorEl) errorEl.style.display = 'none';
+      if (successEl) successEl.style.display = 'none';
+    },
+
+    showError(message) {
+      const errorEl = document.getElementById('modal-error');
+      const errorMsgEl = document.getElementById('modal-error-message');
+      const successEl = document.getElementById('modal-success');
+      
+      if (successEl) successEl.style.display = 'none';
+      if (errorEl && errorMsgEl) {
+        errorMsgEl.textContent = message;
+        errorEl.style.display = 'flex';
+        if (typeof lucide !== 'undefined') {
+          lucide.createIcons();
+        }
+      }
+    },
+
+    showSuccess(message) {
+      const errorEl = document.getElementById('modal-error');
+      const successEl = document.getElementById('modal-success');
+      const successMsgEl = document.getElementById('modal-success-message');
+      
+      if (errorEl) errorEl.style.display = 'none';
+      if (successEl && successMsgEl) {
+        successMsgEl.textContent = message;
+        successEl.style.display = 'flex';
+        if (typeof lucide !== 'undefined') {
+          lucide.createIcons();
+        }
+      }
+    },
+
+    setLoading(loading) {
+      if (!this.submitBtn) return;
+      
+      const btnText = this.submitBtn.querySelector('.btn-text');
+      const btnIcon = this.submitBtn.querySelector('.btn-icon');
+      const btnLoader = this.submitBtn.querySelector('.btn-loader');
+
+      if (loading) {
+        this.submitBtn.disabled = true;
+        if (btnText) btnText.style.display = 'none';
+        if (btnIcon) btnIcon.style.display = 'none';
+        if (btnLoader) btnLoader.style.display = 'flex';
+      } else {
+        this.submitBtn.disabled = false;
+        if (btnText) btnText.style.display = 'inline';
+        if (btnIcon) btnIcon.style.display = 'inline';
+        if (btnLoader) btnLoader.style.display = 'none';
+      }
     },
 
     async handleSubmit(e) {
       e.preventDefault();
-      
-      // Try to find email and password inputs (support both landing and buyer pages)
-      const emailInput = this.modal.querySelector('#login-email') || 
-                        this.modal.querySelector('input[type="email"]');
-      const passwordInput = this.modal.querySelector('#login-password') || 
-                           this.modal.querySelector('input[type="password"]');
-      const submitBtn = this.form.querySelector('button[type="submit"]');
-      
+      this.clearErrors();
+
+      const emailInput = document.getElementById('modal-email');
+      const passwordInput = document.getElementById('modal-password');
+
       if (!emailInput || !passwordInput) return;
 
       const email = emailInput.value.trim();
       const password = passwordInput.value;
 
-      // Disable submit button
-      if (submitBtn) {
-        submitBtn.disabled = true;
-        const btnSpan = submitBtn.querySelector('span');
-        if (btnSpan) {
-          btnSpan.textContent = 'Signing In...';
-        } else {
-          submitBtn.innerHTML = '<span>Signing In...</span>';
-        }
+      if (!email || !password) {
+        this.showError('Please enter both email and password');
+        return;
       }
 
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 500));
+      this.setLoading(true);
 
-      const result = Auth.login(email, password);
+      const result = await Auth.login(email, password);
 
       if (result.success) {
-        // Success - smooth login transition
+        this.showSuccess('Login successful! Redirecting...');
+
+        // Update UI before redirect
         const userDropdown = document.getElementById('userProfileDropdown');
         const signInBtn = document.getElementById('sign-in-btn');
-        
-        // Hide modal first with fade out
-        this.modal.style.transition = 'opacity 0.2s ease';
-        this.modal.style.opacity = '0';
-        setTimeout(() => {
-          this.hide();
-          this.modal.style.opacity = '';
-          this.modal.style.transition = '';
-        }, 200);
-        
-        // Fade out sign in button
+
         if (signInBtn) {
-          signInBtn.style.transition = 'opacity 0.2s ease';
-          signInBtn.style.opacity = '0';
-          setTimeout(() => {
-            signInBtn.style.display = 'none';
-            signInBtn.style.opacity = '';
-            signInBtn.style.transition = '';
-          }, 200);
+          signInBtn.style.display = 'none';
         }
-        
-        // Update user interface
-        updateUserInterface(result.user);
-        
-        // Fade in user dropdown
-        if (userDropdown) {
-          userDropdown.style.display = 'block';
-          userDropdown.style.opacity = '0';
-          userDropdown.style.transform = 'translateY(-10px)';
-          userDropdown.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-          setTimeout(() => {
-            userDropdown.style.opacity = '1';
-            userDropdown.style.transform = 'translateY(0)';
-          }, 250);
-          setTimeout(() => {
-            userDropdown.style.opacity = '';
-            userDropdown.style.transform = '';
-            userDropdown.style.transition = '';
-          }, 550);
-        }
-        
-        // Re-initialize user dropdown after login (important!)
+
+        // Dispatch login event
+        window.dispatchEvent(new CustomEvent('userLoggedIn', { 
+          detail: { user: result.user } 
+        }));
+
+        // Redirect after brief delay
         setTimeout(() => {
-          initUserDropdown();
-          initLogout();
-          // Re-initialize icons after DOM update
-          if (typeof lucide !== 'undefined') {
-            lucide.createIcons();
-          }
-        }, 300);
-        
-        // Dispatch custom event for login (so search can re-enable)
-        window.dispatchEvent(new CustomEvent('userLoggedIn', { detail: { user: result.user } }));
-        
-        // Show subtle success notification
-        setTimeout(() => {
-          showNotification('Welcome back!', 'success');
-        }, 400);
+          window.location.href = result.redirectUrl || '/buyer';
+        }, 1000);
       } else {
-        // Error
-        showNotification(result.message || 'Invalid credentials', 'error');
-        
-        // Re-enable submit button
-        if (submitBtn) {
-          submitBtn.disabled = false;
-          const btnSpan = submitBtn.querySelector('span');
-          if (btnSpan) {
-            btnSpan.textContent = 'Sign In';
-          } else {
-            submitBtn.innerHTML = '<span>Sign In</span><i data-lucide="arrow-right"></i>';
-          }
-          lucide.createIcons();
-        }
+        this.showError(result.message || 'Login failed');
+        this.setLoading(false);
       }
     }
   };
@@ -404,29 +287,31 @@
   // USER INTERFACE UPDATES
   // ====================================
   function updateUserInterface(user) {
+    if (!user) return;
+
     // Update user name in navbar
     const userNameEl = document.getElementById('userName');
-    if (userNameEl && user) {
-      userNameEl.textContent = user.fullName || user.name || 'User';
+    if (userNameEl) {
+      userNameEl.textContent = user.fullName || user.firstName || 'User';
     }
 
-    // Update user avatar
+    // Update user avatar with initials
     const userAvatar = document.querySelector('.user-avatar');
-    if (userAvatar && user) {
-      const initials = (user.fullName || user.name || 'U')
+    if (userAvatar) {
+      const fullName = user.fullName || `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'User';
+      const initials = fullName
         .split(' ')
         .map(n => n[0])
         .join('')
         .toUpperCase()
         .substring(0, 2);
-      
-      userAvatar.innerHTML = `<span class="avatar-initials">${initials}</span>`;
-    }
 
-    // Show user dropdown
-    const userDropdown = document.getElementById('userProfileDropdown');
-    if (userDropdown) {
-      userDropdown.style.display = 'block';
+      // Check if user has a custom avatar
+      if (user.avatar) {
+        userAvatar.innerHTML = `<img src="${user.avatar}" alt="Avatar" class="avatar-image" />`;
+      } else {
+        userAvatar.innerHTML = `<span class="avatar-initials">${initials}</span>`;
+      }
     }
   }
 
@@ -445,13 +330,16 @@
     notification.className = `auth-notification auth-notification-${type}`;
     notification.innerHTML = `
       <div class="notification-content">
-        <i data-lucide="${type === 'success' ? 'check-circle' : 'alert-circle'}"></i>
+        <i data-lucide="${type === 'success' ? 'check-circle' : type === 'error' ? 'alert-circle' : 'info'}"></i>
         <span>${message}</span>
       </div>
     `;
 
     document.body.appendChild(notification);
-    lucide.createIcons();
+    
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+    }
 
     // Animate in
     setTimeout(() => {
@@ -466,35 +354,27 @@
   }
 
   // ====================================
-  // SEARCH PROTECTION (REMOVED - Allow search without login)
-  // ====================================
-  function protectSearch() {
-    // Search is now allowed without login
-    // This function is kept for future use if needed
-  }
-
-  // ====================================
   // LOGOUT HANDLER
   // ====================================
   function initLogout() {
     const logoutBtn = document.getElementById('logoutBtn');
     if (logoutBtn) {
-      // Remove existing listeners to prevent duplicates
+      // Clone to remove existing listeners
       const newLogoutBtn = logoutBtn.cloneNode(true);
       logoutBtn.parentNode.replaceChild(newLogoutBtn, logoutBtn);
-      
-      newLogoutBtn.addEventListener('click', (e) => {
+
+      newLogoutBtn.addEventListener('click', async (e) => {
         e.preventDefault();
         e.stopPropagation();
-        
-        // Close dropdown menu smoothly
+
+        // Close dropdown menu
         const userDropdownMenu = document.getElementById('userDropdownMenu');
         if (userDropdownMenu) {
           userDropdownMenu.classList.remove('show');
         }
-        
-        // Smooth logout without confirmation
-        Auth.logout();
+
+        // Perform logout
+        await Auth.logout();
       });
     }
   }
@@ -534,117 +414,119 @@
 
       // Create outside click handler
       outsideClickHandler = (e) => {
-        if (userProfileDropdown && 
-            !userProfileDropdown.contains(e.target)) {
+        if (userProfileDropdown && !userProfileDropdown.contains(e.target)) {
           userDropdownMenu.classList.remove('show');
         }
       };
 
-      // Attach event listeners with capture to ensure it fires
+      // Attach event listeners
       userProfileBtn.addEventListener('click', dropdownClickHandler, true);
       document.addEventListener('click', outsideClickHandler, true);
-      
-      console.log('User dropdown initialized'); // Debug
-    } else {
-      console.log('User dropdown elements not found:', {
-        btn: !!userProfileBtn,
-        menu: !!userDropdownMenu,
-        container: !!userProfileDropdown
-      }); // Debug
     }
-  }
-
-  // ====================================
-  // INITIALIZATION
-  // ====================================
-  function init() {
-    // Initialize login modal
-    LoginModal.init();
-
-    // Check if user is logged in
-    if (Auth.isLoggedIn()) {
-      const user = Auth.getCurrentUser();
-      updateUserInterface(user);
-      // Show user dropdown, hide sign in button (smoothly on load)
-      const userDropdown = document.getElementById('userProfileDropdown');
-      const signInBtn = document.getElementById('sign-in-btn');
-      if (userDropdown) {
-        userDropdown.style.display = 'block';
-        userDropdown.style.opacity = '0';
-        userDropdown.style.transition = 'opacity 0.3s ease';
-        requestAnimationFrame(() => {
-          setTimeout(() => {
-            userDropdown.style.opacity = '1';
-            setTimeout(() => {
-              userDropdown.style.opacity = '';
-              userDropdown.style.transition = '';
-            }, 300);
-          }, 50);
-        });
-      }
-      if (signInBtn) {
-        signInBtn.style.display = 'none';
-      }
-      
-      // Initialize user dropdown after showing it
-      setTimeout(() => {
-        initUserDropdown();
-        initLogout();
-      }, 100);
-    } else {
-      // Hide user dropdown if not logged in, show sign in button
-      const userDropdown = document.getElementById('userProfileDropdown');
-      const signInBtn = document.getElementById('sign-in-btn');
-      if (userDropdown) {
-        userDropdown.style.display = 'none';
-      }
-      if (signInBtn) {
-        signInBtn.style.display = 'flex';
-        signInBtn.style.opacity = '0';
-        signInBtn.style.transition = 'opacity 0.3s ease';
-        requestAnimationFrame(() => {
-          setTimeout(() => {
-            signInBtn.style.opacity = '1';
-            setTimeout(() => {
-              signInBtn.style.opacity = '';
-              signInBtn.style.transition = '';
-            }, 300);
-          }, 50);
-        });
-      }
-    }
-
-    // Initialize sign in button
-    initSignInButton();
-
-    // Protect search functionality (now allows search without login)
-    protectSearch();
-
-    // Initialize logout (only if logged in)
-    if (Auth.isLoggedIn()) {
-      initLogout();
-    }
-
-    // Initialize user dropdown (only if logged in)
-    if (Auth.isLoggedIn()) {
-      // Already initialized above with setTimeout
-    }
-
-    // Expose Auth to window for global access
-    window.BuyerAuth = Auth;
-    window.showLoginModal = () => LoginModal.show();
   }
 
   // ====================================
   // SIGN IN BUTTON HANDLER
   // ====================================
   function initSignInButton() {
-    const signInBtn = document.getElementById('sign-in-btn');
-    if (signInBtn) {
-      signInBtn.addEventListener('click', () => {
+    const signInBtns = document.querySelectorAll('#sign-in-btn, .btn-sign-in');
+    signInBtns.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
         LoginModal.show();
       });
+    });
+  }
+
+  // ====================================
+  // HANDLE 401 RESPONSES GLOBALLY
+  // ====================================
+  function setupGlobalFetchInterceptor() {
+    const originalFetch = window.fetch;
+    window.fetch = async function(...args) {
+      const response = await originalFetch.apply(this, args);
+      
+      // Clone response to read it
+      const clonedResponse = response.clone();
+      
+      if (response.status === 401) {
+        try {
+          const data = await clonedResponse.json();
+          if (data.clearSession) {
+            // Clear any local state
+            Auth._user = null;
+            
+            // Show login if on protected page
+            if (window.location.pathname.startsWith('/buyer') || 
+                window.location.pathname.startsWith('/admin')) {
+              showNotification(data.message || 'Session expired. Please login again.', 'error');
+              setTimeout(() => {
+                window.location.href = data.redirectUrl || '/?login=true';
+              }, 1500);
+            }
+          }
+        } catch (e) {
+          // Not JSON response, ignore
+        }
+      }
+      
+      return response;
+    };
+  }
+
+  // ====================================
+  // INITIALIZATION
+  // ====================================
+  function init() {
+    // Get user data from window if set by server
+    if (window.__USER_DATA__) {
+      Auth.setUser(window.__USER_DATA__);
     }
+
+    // Initialize login modal
+    LoginModal.init();
+
+    // Check if user is logged in (from server-side rendered data)
+    const userDropdown = document.getElementById('userProfileDropdown');
+    const userProfileBtn = document.getElementById('userProfileBtn');
+    const signInBtn = document.getElementById('sign-in-btn');
+    
+    // Check if user is logged in by presence of user profile button
+    // (it only exists when user is logged in due to EJS conditionals)
+    if (userProfileBtn && userDropdown) {
+      // User is logged in - initialize dropdown and logout
+      initUserDropdown();
+      initLogout();
+      
+      // Update UI with user data if available
+      if (Auth.isLoggedIn()) {
+        updateUserInterface(Auth.getCurrentUser());
+      }
+    }
+
+    // Initialize sign in buttons
+    initSignInButton();
+
+    // Setup global fetch interceptor for 401 handling
+    setupGlobalFetchInterceptor();
+
+    // Check URL for login parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('login') === 'true') {
+      // Remove the parameter from URL
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, '', newUrl);
+      
+      // Show login modal
+      setTimeout(() => {
+        LoginModal.show();
+      }, 500);
+    }
+
+    // Expose Auth to window for global access
+    window.BuyerAuth = Auth;
+    window.showLoginModal = () => LoginModal.show();
+    window.showNotification = showNotification;
   }
 
   // Run on DOM ready
@@ -655,3 +537,88 @@
   }
 })();
 
+// ====================================
+// NOTIFICATION STYLES (inject if not present)
+// ====================================
+(function() {
+  if (document.getElementById('auth-notification-styles')) return;
+  
+  const style = document.createElement('style');
+  style.id = 'auth-notification-styles';
+  style.textContent = `
+    .auth-notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 100001;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+      padding: 16px 20px;
+      transform: translateX(120%);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      max-width: 400px;
+    }
+    
+    .auth-notification.show {
+      transform: translateX(0);
+    }
+    
+    .auth-notification .notification-content {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .auth-notification .notification-content i {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+    
+    .auth-notification-success {
+      border-left: 4px solid #10b981;
+    }
+    
+    .auth-notification-success i {
+      color: #10b981;
+    }
+    
+    .auth-notification-error {
+      border-left: 4px solid #ef4444;
+    }
+    
+    .auth-notification-error i {
+      color: #ef4444;
+    }
+    
+    .auth-notification-info {
+      border-left: 4px solid #3b82f6;
+    }
+    
+    .auth-notification-info i {
+      color: #3b82f6;
+    }
+
+    .avatar-initials {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      font-size: 12px;
+      font-weight: 600;
+      color: #2B5278;
+      background: linear-gradient(135deg, rgba(43, 82, 120, 0.1), rgba(59, 130, 246, 0.1));
+      border-radius: inherit;
+    }
+
+    .avatar-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: inherit;
+    }
+  `;
+  document.head.appendChild(style);
+})();
