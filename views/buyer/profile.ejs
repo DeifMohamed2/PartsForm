@@ -141,34 +141,19 @@
             <div class="info-card-header">
               <div class="info-card-title-wrapper">
                 <i data-lucide="map-pin"></i>
-                <h3 class="info-card-title">Address Information</h3>
+                <h3 class="info-card-title">My Addresses</h3>
               </div>
-              <button class="info-card-edit-btn" id="editAddressBtn">
-                <i data-lucide="edit"></i>
-                <span>Edit</span>
-              </button>
+              <a href="/buyer/delivery" class="info-card-edit-btn">
+                <i data-lucide="plus"></i>
+                <span>Manage</span>
+              </a>
             </div>
             <div class="info-card-body">
-              <div class="info-row">
-                <div class="info-label">
-                  <i data-lucide="map-pin"></i>
-                  <span>Shipping Address</span>
+              <div class="addresses-container" id="addressesContainer">
+                <div class="addresses-loading">
+                  <div class="spinner"></div>
+                  <span>Loading addresses...</span>
                 </div>
-                <div class="info-value" id="streetValue"><%= buyer.shippingAddress %></div>
-              </div>
-              <div class="info-row">
-                <div class="info-label">
-                  <i data-lucide="building"></i>
-                  <span>City</span>
-                </div>
-                <div class="info-value" id="cityValue"><%= buyer.city %></div>
-              </div>
-              <div class="info-row">
-                <div class="info-label">
-                  <i data-lucide="globe"></i>
-                  <span>Country</span>
-                </div>
-                <div class="info-value" id="countryValue"><%= buyer.country %></div>
               </div>
             </div>
           </div>
@@ -263,6 +248,134 @@
       <span class="progress-text" id="progressText">Uploading...</span>
     </div>
   </div>
+</div>
+
+<!-- Edit Profile Modal -->
+<div class="profile-modal" id="editProfileModal">
+  <div class="profile-modal-backdrop" id="editProfileBackdrop"></div>
+  <div class="profile-modal-content">
+    <button class="profile-modal-close" id="editProfileClose">
+      <i data-lucide="x"></i>
+    </button>
+    <div class="profile-modal-header">
+      <div class="modal-icon">
+        <i data-lucide="user-pen"></i>
+      </div>
+      <h3>Edit Personal Information</h3>
+      <p>Update your personal details below</p>
+    </div>
+    <form id="editProfileForm" class="profile-form">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="editFirstName">First Name</label>
+          <input type="text" id="editFirstName" name="firstName" value="<%= buyer.firstName %>" required>
+        </div>
+        <div class="form-group">
+          <label for="editLastName">Last Name</label>
+          <input type="text" id="editLastName" name="lastName" value="<%= buyer.lastName %>" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="editPhone">Phone Number</label>
+        <input type="tel" id="editPhone" name="phone" value="<%= buyer.phone %>" required>
+      </div>
+      <div class="form-group">
+        <label for="editCompanyName">Company Name</label>
+        <input type="text" id="editCompanyName" name="companyName" value="<%= buyer.companyName %>" required>
+      </div>
+      <div class="form-group">
+        <label for="editCity">City</label>
+        <input type="text" id="editCity" name="city" value="<%= buyer.city %>" required>
+      </div>
+      <div class="form-group">
+        <label for="editShippingAddress">Default Shipping Address</label>
+        <textarea id="editShippingAddress" name="shippingAddress" rows="3" required><%= buyer.shippingAddress %></textarea>
+      </div>
+      <div class="form-message" id="editProfileMessage"></div>
+      <div class="profile-modal-actions">
+        <button type="button" class="btn-cancel" id="editProfileCancelBtn">Cancel</button>
+        <button type="submit" class="btn-save" id="editProfileSaveBtn">
+          <i data-lucide="check"></i>
+          <span>Save Changes</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Change Password Modal -->
+<div class="profile-modal" id="changePasswordModal">
+  <div class="profile-modal-backdrop" id="changePasswordBackdrop"></div>
+  <div class="profile-modal-content">
+    <button class="profile-modal-close" id="changePasswordClose">
+      <i data-lucide="x"></i>
+    </button>
+    <div class="profile-modal-header">
+      <div class="modal-icon warning">
+        <i data-lucide="key-round"></i>
+      </div>
+      <h3>Change Password</h3>
+      <p>Enter your current password and choose a new one</p>
+    </div>
+    <form id="changePasswordForm" class="profile-form">
+      <div class="form-group">
+        <label for="currentPassword">Current Password</label>
+        <div class="password-input-wrapper">
+          <input type="password" id="currentPassword" name="currentPassword" required>
+          <button type="button" class="toggle-password" data-target="currentPassword">
+            <i data-lucide="eye"></i>
+          </button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="newPassword">New Password</label>
+        <div class="password-input-wrapper">
+          <input type="password" id="newPassword" name="newPassword" required minlength="8">
+          <button type="button" class="toggle-password" data-target="newPassword">
+            <i data-lucide="eye"></i>
+          </button>
+        </div>
+        <span class="form-hint">Minimum 8 characters</span>
+      </div>
+      <div class="form-group">
+        <label for="confirmPassword">Confirm New Password</label>
+        <div class="password-input-wrapper">
+          <input type="password" id="confirmPassword" name="confirmPassword" required minlength="8">
+          <button type="button" class="toggle-password" data-target="confirmPassword">
+            <i data-lucide="eye"></i>
+          </button>
+        </div>
+      </div>
+      <div class="password-requirements">
+        <p class="requirements-title">Password requirements:</p>
+        <ul>
+          <li id="reqLength"><i data-lucide="circle"></i> At least 8 characters</li>
+          <li id="reqMatch"><i data-lucide="circle"></i> Passwords match</li>
+        </ul>
+      </div>
+      <div class="form-message" id="changePasswordMessage"></div>
+      <div class="profile-modal-actions">
+        <button type="button" class="btn-cancel" id="changePasswordCancelBtn">Cancel</button>
+        <button type="submit" class="btn-save" id="changePasswordSaveBtn">
+          <i data-lucide="lock"></i>
+          <span>Update Password</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Notification Toast -->
+<div class="notification-toast" id="notificationToast">
+  <div class="notification-icon">
+    <i data-lucide="check-circle"></i>
+  </div>
+  <div class="notification-content">
+    <span class="notification-message" id="notificationMessage"></span>
+  </div>
+  <button class="notification-close" id="notificationClose">
+    <i data-lucide="x"></i>
+  </button>
 </div>
 
 <script src="/js/main.js"></script>
@@ -474,6 +587,417 @@
       }
     });
   })();
+
+  // ====================================
+  // PROFILE EDITING FUNCTIONALITY
+  // ====================================
+  (function() {
+    'use strict';
+
+    // Wait for DOM to be ready
+    function init() {
+      // ====================================
+      // NOTIFICATION SYSTEM
+      // ====================================
+      function showNotification(message, type = 'success') {
+        const toast = document.getElementById('notificationToast');
+        const msgEl = document.getElementById('notificationMessage');
+        const iconEl = toast.querySelector('.notification-icon i');
+        
+        if (!toast || !msgEl) return;
+
+        msgEl.textContent = message;
+        toast.className = 'notification-toast show ' + type;
+        
+        // Update icon based on type
+        if (iconEl) {
+          iconEl.setAttribute('data-lucide', type === 'success' ? 'check-circle' : type === 'error' ? 'x-circle' : 'alert-circle');
+          lucide.createIcons();
+        }
+
+        // Auto hide after 4 seconds
+        setTimeout(() => {
+          toast.classList.remove('show');
+        }, 4000);
+      }
+
+      // Close notification
+      const notificationClose = document.getElementById('notificationClose');
+      if (notificationClose) {
+        notificationClose.addEventListener('click', () => {
+          document.getElementById('notificationToast').classList.remove('show');
+        });
+      }
+
+      // ====================================
+      // LOAD ADDRESSES
+      // ====================================
+      async function loadAddresses() {
+        const container = document.getElementById('addressesContainer');
+        if (!container) {
+          console.error('Addresses container not found');
+          return;
+        }
+
+        try {
+          const response = await fetch('/buyer/api/addresses');
+          
+          if (!response.ok) {
+            throw new Error('Failed to fetch addresses');
+          }
+          
+          const result = await response.json();
+
+          if (result.success && result.addresses && result.addresses.length > 0) {
+            renderAddresses(result.addresses);
+          } else {
+            container.innerHTML = `
+              <div class="no-addresses">
+                <i data-lucide="map-pin-off"></i>
+                <p>No saved addresses</p>
+                <a href="/buyer/delivery" class="add-address-link">
+                  <i data-lucide="plus"></i>
+                  Add your first address
+                </a>
+              </div>
+            `;
+            lucide.createIcons();
+          }
+        } catch (error) {
+          console.error('Error loading addresses:', error);
+          container.innerHTML = `
+            <div class="addresses-error">
+              <i data-lucide="alert-triangle"></i>
+              <p>Failed to load addresses</p>
+            </div>
+          `;
+          lucide.createIcons();
+        }
+      }
+
+      function renderAddresses(addresses) {
+        const container = document.getElementById('addressesContainer');
+        if (!container) return;
+
+        const html = addresses.map(addr => `
+          <div class="address-item ${addr.isDefault ? 'default' : ''}">
+            <div class="address-item-header">
+              <span class="address-label">
+                <i data-lucide="tag"></i>
+                ${addr.label}
+              </span>
+              ${addr.isDefault ? '<span class="default-badge">Default</span>' : ''}
+            </div>
+            <div class="address-item-body">
+              <p class="address-name">${addr.fullName}</p>
+              <p class="address-line">${addr.street}</p>
+              <p class="address-line">${addr.city}, ${addr.state} ${addr.postalCode || ''}</p>
+              <p class="address-line">${addr.country}</p>
+              ${addr.phone ? `<p class="address-phone"><i data-lucide="phone"></i> ${addr.phone}</p>` : ''}
+            </div>
+          </div>
+        `).join('');
+
+        container.innerHTML = html;
+        lucide.createIcons();
+      }
+
+      // Load addresses on page load
+      loadAddresses();
+
+      // ====================================
+      // EDIT PROFILE MODAL
+      // ====================================
+      const editProfileModal = document.getElementById('editProfileModal');
+      const editProfileBackdrop = document.getElementById('editProfileBackdrop');
+      const editProfileClose = document.getElementById('editProfileClose');
+      const editProfileCancelBtn = document.getElementById('editProfileCancelBtn');
+      const editProfileForm = document.getElementById('editProfileForm');
+      const editProfileSaveBtn = document.getElementById('editProfileSaveBtn');
+      const editPersonalInfoBtn = document.getElementById('editPersonalInfoBtn');
+
+      function openEditProfileModal() {
+        if (editProfileModal) {
+          editProfileModal.classList.add('active');
+          document.body.style.overflow = 'hidden';
+          lucide.createIcons();
+        }
+      }
+
+      function closeEditProfileModal() {
+        if (editProfileModal) {
+          editProfileModal.classList.remove('active');
+          document.body.style.overflow = '';
+          // Clear message
+          const msg = document.getElementById('editProfileMessage');
+          if (msg) msg.innerHTML = '';
+        }
+      }
+
+      if (editPersonalInfoBtn) {
+        editPersonalInfoBtn.addEventListener('click', openEditProfileModal);
+      }
+
+      if (editProfileBackdrop) {
+        editProfileBackdrop.addEventListener('click', closeEditProfileModal);
+      }
+
+      if (editProfileClose) {
+        editProfileClose.addEventListener('click', closeEditProfileModal);
+      }
+
+      if (editProfileCancelBtn) {
+        editProfileCancelBtn.addEventListener('click', closeEditProfileModal);
+      }
+
+    // Handle profile form submission
+      if (editProfileForm) {
+        editProfileForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          
+          const saveBtn = editProfileSaveBtn;
+          const msgEl = document.getElementById('editProfileMessage');
+          
+          // Show loading
+          saveBtn.disabled = true;
+          saveBtn.innerHTML = '<div class="btn-spinner"></div><span>Saving...</span>';
+
+          const formData = {
+            firstName: document.getElementById('editFirstName').value.trim(),
+            lastName: document.getElementById('editLastName').value.trim(),
+            phone: document.getElementById('editPhone').value.trim(),
+            companyName: document.getElementById('editCompanyName').value.trim(),
+            city: document.getElementById('editCity').value.trim(),
+            shippingAddress: document.getElementById('editShippingAddress').value.trim()
+          };
+
+          try {
+            const response = await fetch('/buyer/profile', {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(formData)
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+              // Update page values
+              document.getElementById('fullNameValue').textContent = result.data.fullName;
+              document.getElementById('phoneValue').textContent = result.data.phone;
+              document.getElementById('companyValue').textContent = result.data.companyName;
+              document.getElementById('profileName').textContent = result.data.fullName;
+
+              showNotification('Profile updated successfully', 'success');
+              closeEditProfileModal();
+            } else {
+              throw new Error(result.message || 'Update failed');
+            }
+          } catch (error) {
+            console.error('Profile update error:', error);
+            if (msgEl) {
+              msgEl.innerHTML = `<div class="form-error"><i data-lucide="alert-circle"></i> ${error.message}</div>`;
+              lucide.createIcons();
+            }
+          } finally {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = '<i data-lucide="check"></i><span>Save Changes</span>';
+            lucide.createIcons();
+          }
+        });
+      }
+
+      // ====================================
+      // CHANGE PASSWORD MODAL
+      // ====================================
+      const changePasswordModal = document.getElementById('changePasswordModal');
+      const changePasswordBackdrop = document.getElementById('changePasswordBackdrop');
+      const changePasswordClose = document.getElementById('changePasswordClose');
+      const changePasswordCancelBtn = document.getElementById('changePasswordCancelBtn');
+      const changePasswordForm = document.getElementById('changePasswordForm');
+      const changePasswordSaveBtn = document.getElementById('changePasswordSaveBtn');
+      const changePasswordBtn = document.getElementById('changePasswordBtn');
+
+      function openChangePasswordModal() {
+        if (changePasswordModal) {
+          changePasswordModal.classList.add('active');
+          document.body.style.overflow = 'hidden';
+          // Reset form
+          if (changePasswordForm) changePasswordForm.reset();
+          updatePasswordRequirements();
+          lucide.createIcons();
+        }
+      }
+
+      function closeChangePasswordModal() {
+        if (changePasswordModal) {
+          changePasswordModal.classList.remove('active');
+          document.body.style.overflow = '';
+          // Clear message
+          const msg = document.getElementById('changePasswordMessage');
+          if (msg) msg.innerHTML = '';
+          // Reset form
+          if (changePasswordForm) changePasswordForm.reset();
+          updatePasswordRequirements();
+        }
+      }
+
+      if (changePasswordBtn) {
+        changePasswordBtn.addEventListener('click', openChangePasswordModal);
+      }
+
+      if (changePasswordBackdrop) {
+        changePasswordBackdrop.addEventListener('click', closeChangePasswordModal);
+      }
+
+      if (changePasswordClose) {
+        changePasswordClose.addEventListener('click', closeChangePasswordModal);
+      }
+
+      if (changePasswordCancelBtn) {
+        changePasswordCancelBtn.addEventListener('click', closeChangePasswordModal);
+      }
+
+      // Toggle password visibility
+      document.querySelectorAll('.toggle-password').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const targetId = btn.getAttribute('data-target');
+          const input = document.getElementById(targetId);
+          const icon = btn.querySelector('i');
+          
+          if (input) {
+            const isPassword = input.type === 'password';
+            input.type = isPassword ? 'text' : 'password';
+            if (icon) {
+              icon.setAttribute('data-lucide', isPassword ? 'eye-off' : 'eye');
+              lucide.createIcons();
+            }
+          }
+        });
+      });
+
+      // Password requirements validation
+      const newPasswordInput = document.getElementById('newPassword');
+      const confirmPasswordInput = document.getElementById('confirmPassword');
+
+      function updatePasswordRequirements() {
+        const newPass = newPasswordInput ? newPasswordInput.value : '';
+        const confirmPass = confirmPasswordInput ? confirmPasswordInput.value : '';
+
+        const reqLength = document.getElementById('reqLength');
+        const reqMatch = document.getElementById('reqMatch');
+
+        if (reqLength) {
+          const icon = reqLength.querySelector('i');
+          if (newPass.length >= 8) {
+            reqLength.classList.add('valid');
+            if (icon) icon.setAttribute('data-lucide', 'check-circle');
+          } else {
+            reqLength.classList.remove('valid');
+            if (icon) icon.setAttribute('data-lucide', 'circle');
+          }
+        }
+
+        if (reqMatch) {
+          const icon = reqMatch.querySelector('i');
+          if (newPass && confirmPass && newPass === confirmPass) {
+            reqMatch.classList.add('valid');
+            if (icon) icon.setAttribute('data-lucide', 'check-circle');
+          } else {
+            reqMatch.classList.remove('valid');
+            if (icon) icon.setAttribute('data-lucide', 'circle');
+          }
+        }
+
+        lucide.createIcons();
+      }
+
+      if (newPasswordInput) {
+        newPasswordInput.addEventListener('input', updatePasswordRequirements);
+      }
+      if (confirmPasswordInput) {
+        confirmPasswordInput.addEventListener('input', updatePasswordRequirements);
+      }
+
+      // Handle password change form submission
+      if (changePasswordForm) {
+        changePasswordForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          
+          const saveBtn = changePasswordSaveBtn;
+          const msgEl = document.getElementById('changePasswordMessage');
+          
+          const currentPassword = document.getElementById('currentPassword').value;
+          const newPassword = document.getElementById('newPassword').value;
+          const confirmPassword = document.getElementById('confirmPassword').value;
+
+          // Validate
+          if (newPassword.length < 8) {
+            msgEl.innerHTML = '<div class="form-error"><i data-lucide="alert-circle"></i> New password must be at least 8 characters</div>';
+            lucide.createIcons();
+            return;
+          }
+
+          if (newPassword !== confirmPassword) {
+            msgEl.innerHTML = '<div class="form-error"><i data-lucide="alert-circle"></i> Passwords do not match</div>';
+            lucide.createIcons();
+            return;
+          }
+
+          // Show loading
+          saveBtn.disabled = true;
+          saveBtn.innerHTML = '<div class="btn-spinner"></div><span>Updating...</span>';
+
+          try {
+            const response = await fetch('/buyer/profile/password', {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                currentPassword,
+                newPassword,
+                confirmPassword
+              })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+              showNotification('Password changed successfully', 'success');
+              closeChangePasswordModal();
+            } else {
+              throw new Error(result.message || 'Password change failed');
+            }
+          } catch (error) {
+            console.error('Password change error:', error);
+            if (msgEl) {
+              msgEl.innerHTML = `<div class="form-error"><i data-lucide="alert-circle"></i> ${error.message}</div>`;
+              lucide.createIcons();
+            }
+          } finally {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = '<i data-lucide="lock"></i><span>Update Password</span>';
+            lucide.createIcons();
+          }
+        });
+      }
+
+      // ESC key to close modals
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          if (editProfileModal && editProfileModal.classList.contains('active')) {
+            closeEditProfileModal();
+          }
+          if (changePasswordModal && changePasswordModal.classList.contains('active')) {
+            closeChangePasswordModal();
+          }
+        }
+      });
+    } // End of init function
+
+    // Run init when DOM is ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+  })();
 </script>
-
-

@@ -12,12 +12,29 @@
     searchQuery: '',
     selectedFilters: {
       brand: 'all',
-      stock: 'all',
+      supplier: 'all',
       origin: 'all',
+      stock: 'all',
+      delivery: 'all',
       minPrice: 0,
-      maxPrice: 100000,
+      maxPrice: 500000,
+      minWeight: 0,
+      maxWeight: 100,
+      minQuantity: 0,
+      minDeliveryDays: 0,
+      maxDeliveryDays: 30,
+    },
+    currentSort: {
+      field: 'relevance',
+      order: 'desc'
+    },
+    quickFilters: {
+      inStockOnly: false,
+      lowStockOnly: false
     },
     currentResults: [],
+    filteredResults: [],
+    recentSearches: JSON.parse(localStorage.getItem('recentSearches') || '[]'),
     autocompleteIndex: -1,
     autocompleteResults: [],
   };
@@ -478,6 +495,15 @@
     clearAllFilters: document.getElementById('clear-filters'),
     applyFilters: document.getElementById('apply-filters'),
     tryAgainBtn: document.getElementById('try-again-btn'),
+    // Quick Sort Bar
+    quickSortBar: document.getElementById('quick-sort-bar'),
+    // Recent Searches Modal
+    recentSearchesModal: document.getElementById('recent-searches-modal'),
+    recentSearchesOverlay: document.getElementById('recent-searches-overlay'),
+    recentSearchesClose: document.getElementById('recent-searches-close'),
+    recentSearchesList: document.getElementById('recent-searches-list'),
+    clearSearchHistory: document.getElementById('clear-search-history'),
+    recentSearchesTrigger: document.getElementById('recent-searches-trigger'),
   };
 
   // ====================================
@@ -486,6 +512,9 @@
   function init() {
     setupEventListeners();
     initializeFilters();
+    initializeQuickSortBar();
+    initializeRecentSearches();
+    initializeAdvancedFilters();
     checkAuthAndUpdateUI();
     console.log('Search2 page initialized');
   }
@@ -701,10 +730,16 @@
     // Drag and drop
     setupDragAndDrop();
 
-    // Add to Cart button
+    // Add to Cart button (footer)
     const addToCartBtn = document.getElementById('add-to-cart-btn');
     if (addToCartBtn) {
       addToCartBtn.addEventListener('click', handleAddToCart);
+    }
+
+    // Add to Cart button (header) - for easier access when scrolling
+    const addToCartBtnHeader = document.getElementById('add-to-cart-btn-header');
+    if (addToCartBtnHeader) {
+      addToCartBtnHeader.addEventListener('click', handleAddToCart);
     }
   }
 
@@ -801,6 +836,19 @@
     state.searchQuery = query;
     hideAutocomplete();
 
+    // Check if multi-part search (contains comma or semicolon)
+    const isMultiSearch = /[,;]/.test(query);
+    
+    if (isMultiSearch) {
+      performMultiSearch(query);
+      return;
+    }
+
+    // Single part search
+    performSingleSearch(query);
+  }
+
+  function performSingleSearch(query) {
     // Show loading state
     if (elements.resultsHeader) elements.resultsHeader.style.display = 'flex';
     if (elements.resultsTableContainer)
@@ -857,18 +905,19 @@
         console.log('Search API response:', data);
         
         if (data.success && data.results && data.results.length > 0) {
-          // Apply any remaining client-side filters
-          const filteredResults = data.results.filter((part) => {
-            const matchesOrigin =
-              state.selectedFilters.origin === 'all' ||
-              (part.origin && part.origin.toLowerCase() ===
-                state.selectedFilters.origin.toLowerCase());
+          // Store results (filtering now happens in applyAdvancedFiltersToResults)
+          state.currentResults = data.results;
+          state.filteredResults = data.results;
+          displayResults(data.results);
 
-            return matchesOrigin;
-          });
+          // Populate dynamic filters based on search results
+          populateFiltersFromResults(data.results);
 
-          state.currentResults = filteredResults;
-          displayResults(filteredResults);
+          // Save to recent searches
+          saveRecentSearch(query);
+
+          // Show quick sort bar
+          showQuickSortBar();
 
           // Show search info
           if (data.searchTime) {
@@ -878,7 +927,9 @@
           // No results found
           console.log('No results found for query:', query);
           state.currentResults = [];
+          state.filteredResults = [];
           displayResults([]);
+          hideQuickSortBar();
         }
       })
       .catch((error) => {
@@ -901,6 +952,209 @@
       });
   }
 
+  /**
+   * Perform multi-part search
+   * Handles comma or semicolon separated part numbers
+   */
+  function performMultiSearch(query) {
+    // Parse part numbers
+    const partNumbers = query
+      .split(/[,;]+/)
+      .map(p => p.trim())
+      .filter(p => p.length > 0);
+
+    if (partNumbers.length === 0) {
+      return;
+    }
+
+    console.log('Multi-part search:', partNumbers);
+
+    // Show loading state
+    if (elements.resultsHeader) elements.resultsHeader.style.display = 'flex';
+    if (elements.resultsTableContainer)
+      elements.resultsTableContainer.style.display = 'block';
+    if (elements.emptyState) elements.emptyState.style.display = 'none';
+    if (elements.noResultsState) elements.noResultsState.style.display = 'none';
+    if (elements.resetBtn) elements.resetBtn.style.display = 'inline-flex';
+
+    // Clear table and show loading
+    if (elements.resultsTableBody) {
+      elements.resultsTableBody.innerHTML =
+        `<tr><td colspan="12" style="text-align: center; padding: 40px;"><div class="loading-spinner"></div> Searching for ${partNumbers.length} part numbers...</td></tr>`;
+    }
+
+    // Make API call to multi-search endpoint
+    fetch(`/buyer/api/search/multi?q=${encodeURIComponent(query)}`, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+      },
+      credentials: 'include',
+    })
+      .then((response) => {
+        if (response.status === 401) {
+          throw new Error('Authentication required. Please login.');
+        }
+        if (!response.ok) {
+          throw new Error(`Server error: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then((data) => {
+        console.log('Multi-search API response:', data);
+        
+        if (data.success && data.results && data.results.length > 0) {
+          state.currentResults = data.results;
+          state.filteredResults = data.results;
+          displayResults(data.results);
+
+          // Populate dynamic filters based on search results
+          populateFiltersFromResults(data.results);
+
+          // Show quick sort bar
+          showQuickSortBar();
+
+          // Save to recent searches
+          saveRecentSearch(query);
+
+          // Show not-found banner if any parts weren't found
+          if (data.notFound && data.notFound.length > 0) {
+            showNotFoundBanner(data.notFound, 'Search');
+            showCartAlert('info', 'Some parts not found', 
+              `Found ${data.found.length} parts. ${data.notFound.length} not found.`);
+          } else {
+            hideNotFoundBanner();
+            showCartAlert('success', 'Search Complete', 
+              `Found ${data.results.length} results for ${data.partNumbers.length} part numbers`);
+          }
+        } else {
+          state.currentResults = [];
+          state.filteredResults = [];
+          displayResults([]);
+          hideQuickSortBar();
+          
+          if (data.notFound && data.notFound.length > 0) {
+            showNotFoundBanner(data.notFound, 'Search');
+          }
+          showCartAlert('warning', 'No Results', 'No parts found for the searched part numbers');
+        }
+      })
+      .catch((error) => {
+        console.error('Multi-search error:', error);
+        if (elements.resultsTableBody) {
+          elements.resultsTableBody.innerHTML =
+            '<tr><td colspan="12" style="text-align: center; padding: 40px; color: #e74c3c;">Error searching for parts. Please try again.</td></tr>';
+        }
+      });
+  }
+
+  /**
+   * Search from Excel upload
+   * Accepts array of part numbers
+   */
+  function searchFromExcel(partNumbers) {
+    if (!partNumbers || partNumbers.length === 0) {
+      showCartAlert('error', 'Error', 'No valid part numbers found in Excel file');
+      return;
+    }
+
+    // Check if user is logged in
+    if (typeof window.BuyerAuth === 'undefined' || !window.BuyerAuth.isLoggedIn()) {
+      if (typeof window.showLoginModal === 'function') {
+        window.showLoginModal();
+      }
+      return;
+    }
+
+    console.log('Searching parts from Excel:', partNumbers);
+
+    // Set the search input to show what we're searching
+    elements.searchInput.value = partNumbers.slice(0, 5).join(', ') + 
+      (partNumbers.length > 5 ? ` ... +${partNumbers.length - 5} more` : '');
+
+    // Show loading state
+    if (elements.resultsHeader) elements.resultsHeader.style.display = 'flex';
+    if (elements.resultsTableContainer)
+      elements.resultsTableContainer.style.display = 'block';
+    if (elements.emptyState) elements.emptyState.style.display = 'none';
+    if (elements.noResultsState) elements.noResultsState.style.display = 'none';
+    if (elements.resetBtn) elements.resetBtn.style.display = 'inline-flex';
+
+    if (elements.resultsTableBody) {
+      elements.resultsTableBody.innerHTML =
+        `<tr><td colspan="12" style="text-align: center; padding: 40px;"><div class="loading-spinner"></div> Searching for ${partNumbers.length} parts from Excel...</td></tr>`;
+    }
+
+    // Make API call with POST for larger data
+    fetch('/buyer/api/search/multi', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify({ partNumbers: partNumbers }),
+    })
+      .then((response) => {
+        if (response.status === 401) {
+          throw new Error('Authentication required');
+        }
+        if (!response.ok) {
+          throw new Error(`Server error: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then((data) => {
+        console.log('Excel search API response:', data);
+        
+        if (data.success && data.results && data.results.length > 0) {
+          state.currentResults = data.results;
+          state.filteredResults = data.results;
+          displayResults(data.results);
+
+          // Populate dynamic filters based on search results
+          populateFiltersFromResults(data.results);
+
+          // Show quick sort bar
+          showQuickSortBar();
+
+          // Save each part number to recent searches
+          saveRecentSearchFromExcel(partNumbers);
+
+          // Show not-found banner if any parts weren't found
+          if (data.notFound && data.notFound.length > 0) {
+            showNotFoundBanner(data.notFound, 'Excel');
+          } else {
+            hideNotFoundBanner();
+          }
+
+          // Show summary
+          const searchTime = data.searchTime ? ` in ${data.searchTime}ms` : '';
+          showCartAlert('success', 'Excel Search Complete', 
+            `Found ${data.results.length} results for ${data.found.length} parts${searchTime}`);
+        } else {
+          state.currentResults = [];
+          state.filteredResults = [];
+          displayResults([]);
+          hideNotFoundBanner();
+          hideQuickSortBar();
+          
+          if (data.notFound && data.notFound.length > 0) {
+            showNotFoundBanner(data.notFound, 'Excel');
+          }
+          showCartAlert('warning', 'No Results', 'No parts found for the uploaded Excel file');
+        }
+      })
+      .catch((error) => {
+        console.error('Excel search error:', error);
+        showCartAlert('error', 'Search Error', 'Failed to search parts from Excel');
+        if (elements.resultsTableBody) {
+          elements.resultsTableBody.innerHTML =
+            '<tr><td colspan="12" style="text-align: center; padding: 40px; color: #e74c3c;">Error searching for parts. Please try again.</td></tr>';
+        }
+      });
+  }
+
   function clearSearch() {
     elements.searchInput.value = '';
     elements.clearBtn.style.display = 'none';
@@ -917,6 +1171,12 @@
     // Hide autocomplete
     hideAutocomplete();
 
+    // Hide not-found banner
+    hideNotFoundBanner();
+
+    // Hide quick sort bar
+    hideQuickSortBar();
+
     // Hide results
     elements.resultsHeader.style.display = 'none';
     elements.resultsTableContainer.style.display = 'none';
@@ -928,21 +1188,25 @@
     // Clear state
     state.searchQuery = '';
     state.currentResults = [];
+    state.filteredResults = [];
+
+    // Reset filters
+    handleClearAdvancedFilters();
 
     // Focus input
     elements.searchInput.focus();
   }
 
   // ====================================
-  // AUTOCOMPLETE
+  // AUTOCOMPLETE - Part Number Only
   // ====================================
   function showAutocomplete(query) {
-    if (query.length < 2) {
+    if (query.length < 1) {
       hideAutocomplete();
       return;
     }
 
-    // Fetch autocomplete suggestions from API
+    // Fetch autocomplete suggestions from API - Part Number Only
     fetch(`/buyer/api/search/autocomplete?q=${encodeURIComponent(query)}&limit=10`, {
       method: 'GET',
       headers: {
@@ -959,14 +1223,14 @@
       .then((data) => {
         if (data.success && data.suggestions && data.suggestions.length > 0) {
           state.autocompleteResults = data.suggestions.map((s) => ({
+            partNumber: s.partNumber,
             code: s.partNumber,
-            description: s.description || '',
             brand: s.brand || '',
-            supplier: s.supplier || '',
+            count: s.count || 1,
           }));
           state.autocompleteIndex = -1;
 
-          // Render suggestions
+          // Render suggestions - Show part number prominently with supplier count
           elements.autocompleteContainer.innerHTML = state.autocompleteResults
             .map(
               (part, index) => `
@@ -976,13 +1240,10 @@
                       </div>
                       <div class="autocomplete-content">
                           <div class="autocomplete-title">${highlightMatch(
-                            part.code,
+                            part.partNumber,
                             query
                           )}</div>
-                          <div class="autocomplete-description">${highlightMatch(
-                            part.description,
-                            query
-                          )}</div>
+                          <div class="autocomplete-description">${part.brand || ''} ${part.count ? `• ${part.count} supplier${part.count > 1 ? 's' : ''}` : ''}</div>
                       </div>
                   </div>
               `
@@ -1029,7 +1290,8 @@
   function selectAutocompleteItem(index) {
     const selected = state.autocompleteResults[index];
     if (selected) {
-      elements.searchInput.value = selected.code;
+      // Use partNumber from API response
+      elements.searchInput.value = selected.partNumber || selected.code;
       hideAutocomplete();
       performSearch();
     }
@@ -1230,45 +1492,11 @@
   }
 
   function clearFilters() {
-    state.selectedFilters = {
-      brand: 'all',
-      stock: 'all',
-      origin: 'all',
-      minPrice: 0,
-      maxPrice: 100000,
-    };
-
-    // Reset UI
-    document.querySelectorAll('.filter-chip').forEach((chip) => {
-      chip.classList.remove('active');
-      if (chip.dataset.value === 'all') {
-        chip.classList.add('active');
-      }
-    });
-
-    const minPriceInput = document.getElementById('min-price');
-    const maxPriceInput = document.getElementById('max-price');
-    if (minPriceInput) minPriceInput.value = 0;
-    if (maxPriceInput) maxPriceInput.value = 100000;
+    handleClearAdvancedFilters();
   }
 
   function applyFilters() {
-    // Update price filters
-    const minPriceInput = document.getElementById('min-price');
-    const maxPriceInput = document.getElementById('max-price');
-
-    if (minPriceInput)
-      state.selectedFilters.minPrice = parseInt(minPriceInput.value) || 0;
-    if (maxPriceInput)
-      state.selectedFilters.maxPrice = parseInt(maxPriceInput.value) || 100000;
-
-    // Re-run search if there's a query
-    if (state.searchQuery) {
-      performSearch();
-    }
-
-    // Hide filters panel on mobile
-    hideFiltersPanel();
+    handleApplyAdvancedFilters();
   }
 
   function showFiltersPanel() {
@@ -1282,6 +1510,1773 @@
     elements.filtersBackdrop?.classList.remove('active');
     document.body.style.overflow = '';
   }
+
+  // ====================================
+  // QUICK SORT BAR
+  // ====================================
+  function initializeQuickSortBar() {
+    // Sort buttons
+    document.querySelectorAll('.quick-sort-btn').forEach(btn => {
+      btn.addEventListener('click', handleQuickSortClick);
+    });
+
+    // Quick filter buttons
+    document.querySelectorAll('.quick-filter-btn').forEach(btn => {
+      btn.addEventListener('click', handleQuickFilterClick);
+    });
+  }
+
+  function handleQuickSortClick(e) {
+    const btn = e.currentTarget;
+    const sortField = btn.dataset.sort;
+    const sortOrder = btn.dataset.order;
+
+    // Update active state
+    document.querySelectorAll('.quick-sort-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    // Update state
+    state.currentSort = { field: sortField, order: sortOrder };
+
+    // Apply sort to filtered results
+    applySortAndFilter();
+  }
+
+  function handleQuickFilterClick(e) {
+    const btn = e.currentTarget;
+    const filterType = btn.dataset.filter;
+
+    // Toggle active state
+    btn.classList.toggle('active');
+
+    // Update state
+    if (filterType === 'in-stock') {
+      state.quickFilters.inStockOnly = btn.classList.contains('active');
+    } else if (filterType === 'low-stock') {
+      state.quickFilters.lowStockOnly = btn.classList.contains('active');
+    }
+
+    // Apply filter
+    applySortAndFilter();
+  }
+
+  function applySortAndFilter() {
+    let results = [...state.currentResults];
+
+    // Apply quick filters
+    if (state.quickFilters.inStockOnly) {
+      results = results.filter(part => {
+        const stock = (part.stock || '').toLowerCase();
+        const qty = parseFloat(part.quantity) || 0;
+        return stock === 'in-stock' || qty > 0;
+      });
+    }
+
+    if (state.quickFilters.lowStockOnly) {
+      results = results.filter(part => {
+        const stock = (part.stock || '').toLowerCase();
+        return stock === 'low-stock';
+      });
+    }
+
+    // Apply sorting
+    if (state.currentSort.field !== 'relevance') {
+      results = sortResults(results, state.currentSort.field, state.currentSort.order);
+    }
+
+    // Store filtered results
+    state.filteredResults = results;
+
+    // Update display
+    displayResults(results);
+  }
+
+  function sortResults(results, field, order) {
+    return [...results].sort((a, b) => {
+      let aVal, bVal;
+
+      switch(field) {
+        case 'price':
+          aVal = parseFloat(a.price) || 0;
+          bVal = parseFloat(b.price) || 0;
+          break;
+        case 'deliveryDays':
+          aVal = parseInt(a.deliveryDays) || parseInt(a.terms) || 999;
+          bVal = parseInt(b.deliveryDays) || parseInt(b.terms) || 999;
+          break;
+        case 'quantity':
+          aVal = parseFloat(a.quantity) || parseFloat(a.qty) || 0;
+          bVal = parseFloat(b.quantity) || parseFloat(b.qty) || 0;
+          break;
+        default:
+          return 0;
+      }
+
+      if (order === 'asc') {
+        return aVal - bVal;
+      } else {
+        return bVal - aVal;
+      }
+    });
+  }
+
+  function showQuickSortBar() {
+    if (elements.quickSortBar) {
+      elements.quickSortBar.style.display = 'flex';
+      // Re-initialize lucide icons
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons({ nameAttr: 'data-lucide' });
+      }
+    }
+  }
+
+  function hideQuickSortBar() {
+    if (elements.quickSortBar) {
+      elements.quickSortBar.style.display = 'none';
+    }
+  }
+
+  // ====================================
+  // RECENT SEARCHES
+  // ====================================
+  const MAX_RECENT_SEARCHES = 10;
+
+  function initializeRecentSearches() {
+    // Load from localStorage
+    state.recentSearches = JSON.parse(localStorage.getItem('recentSearches') || '[]');
+
+    // Setup event listeners
+    if (elements.recentSearchesTrigger) {
+      elements.recentSearchesTrigger.addEventListener('click', showRecentSearchesModal);
+    }
+    if (elements.recentSearchesClose) {
+      elements.recentSearchesClose.addEventListener('click', hideRecentSearchesModal);
+    }
+    if (elements.recentSearchesOverlay) {
+      elements.recentSearchesOverlay.addEventListener('click', hideRecentSearchesModal);
+    }
+    if (elements.clearSearchHistory) {
+      elements.clearSearchHistory.addEventListener('click', clearRecentSearches);
+    }
+  }
+
+  function saveRecentSearch(query) {
+    if (!query || query.trim() === '') return;
+
+    const trimmedQuery = query.trim();
+
+    // Remove if already exists
+    state.recentSearches = state.recentSearches.filter(
+      item => item.query.toLowerCase() !== trimmedQuery.toLowerCase()
+    );
+
+    // Add to beginning
+    state.recentSearches.unshift({
+      query: trimmedQuery,
+      timestamp: Date.now(),
+      resultCount: state.currentResults.length,
+      type: 'single'
+    });
+
+    // Limit to max
+    if (state.recentSearches.length > MAX_RECENT_SEARCHES) {
+      state.recentSearches = state.recentSearches.slice(0, MAX_RECENT_SEARCHES);
+    }
+
+    // Save to localStorage
+    localStorage.setItem('recentSearches', JSON.stringify(state.recentSearches));
+  }
+
+  function saveRecentSearchFromExcel(partNumbers) {
+    if (!partNumbers || partNumbers.length === 0) return;
+
+    // Create a combined query string
+    const combinedQuery = partNumbers.join(', ');
+
+    // Remove if similar Excel search already exists
+    state.recentSearches = state.recentSearches.filter(
+      item => !(item.type === 'excel' && item.partNumbers && 
+                item.partNumbers.join(',') === partNumbers.join(','))
+    );
+
+    // Add to beginning as Excel type with all part numbers
+    state.recentSearches.unshift({
+      query: combinedQuery,
+      partNumbers: partNumbers,
+      timestamp: Date.now(),
+      resultCount: state.currentResults.length,
+      type: 'excel'
+    });
+
+    // Limit to max
+    if (state.recentSearches.length > MAX_RECENT_SEARCHES) {
+      state.recentSearches = state.recentSearches.slice(0, MAX_RECENT_SEARCHES);
+    }
+
+    // Save to localStorage
+    localStorage.setItem('recentSearches', JSON.stringify(state.recentSearches));
+  }
+
+  function renderRecentSearches() {
+    if (!elements.recentSearchesList) return;
+
+    if (state.recentSearches.length === 0) {
+      elements.recentSearchesList.innerHTML = `
+        <div class="recent-search-empty">
+          <i data-lucide="search"></i>
+          <p>No recent searches yet</p>
+        </div>
+      `;
+      if (elements.clearSearchHistory) {
+        elements.clearSearchHistory.style.display = 'none';
+      }
+    } else {
+      const searchesHTML = state.recentSearches.map((item, index) => {
+        if (item.type === 'excel' && item.partNumbers && item.partNumbers.length > 0) {
+          // Excel search with multiple part numbers
+          const partNumbersHTML = item.partNumbers.map(pn => `
+            <div class="recent-part-number" data-part="${escapeHtml(pn)}">
+              <i data-lucide="package"></i>
+              <span>${escapeHtml(pn)}</span>
+              <button class="recent-part-search-btn" data-part="${escapeHtml(pn)}" title="Search this part">
+                <i data-lucide="search"></i>
+              </button>
+            </div>
+          `).join('');
+
+          return `
+            <div class="recent-search-item recent-search-excel" data-index="${index}">
+              <div class="recent-search-excel-header">
+                <div class="recent-search-item-content">
+                  <i data-lucide="file-spreadsheet"></i>
+                  <span class="recent-search-item-text">Excel Upload (${item.partNumbers.length} parts)</span>
+                </div>
+                <div class="recent-search-excel-actions">
+                  <span class="recent-search-item-time">${formatTimeAgo(item.timestamp)}</span>
+                  <button class="recent-search-all-btn" data-query="${escapeHtml(item.query)}" title="Search all parts">
+                    <i data-lucide="search"></i>
+                    Search All
+                  </button>
+                </div>
+              </div>
+              <div class="recent-search-parts-list">
+                ${partNumbersHTML}
+              </div>
+            </div>
+          `;
+        } else {
+          // Regular single search
+          return `
+            <div class="recent-search-item" data-index="${index}" data-query="${escapeHtml(item.query)}">
+              <div class="recent-search-item-content">
+                <i data-lucide="clock"></i>
+                <span class="recent-search-item-text">${escapeHtml(item.query)}</span>
+              </div>
+              <span class="recent-search-item-time">${formatTimeAgo(item.timestamp)}</span>
+            </div>
+          `;
+        }
+      }).join('');
+
+      elements.recentSearchesList.innerHTML = searchesHTML;
+
+      // Add click handlers for regular searches
+      elements.recentSearchesList.querySelectorAll('.recent-search-item:not(.recent-search-excel)').forEach(item => {
+        item.addEventListener('click', () => {
+          const query = item.dataset.query;
+          if (elements.searchInput) {
+            elements.searchInput.value = query;
+          }
+          hideRecentSearchesModal();
+          performSearch();
+        });
+      });
+
+      // Add click handlers for "Search All" button on Excel searches
+      elements.recentSearchesList.querySelectorAll('.recent-search-all-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const query = btn.dataset.query;
+          if (elements.searchInput) {
+            elements.searchInput.value = query;
+          }
+          hideRecentSearchesModal();
+          performSearch();
+        });
+      });
+
+      // Add click handlers for individual part number search buttons
+      elements.recentSearchesList.querySelectorAll('.recent-part-search-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const partNumber = btn.dataset.part;
+          if (elements.searchInput) {
+            elements.searchInput.value = partNumber;
+          }
+          hideRecentSearchesModal();
+          performSearch();
+        });
+      });
+
+      // Add click handlers for clicking on part number row
+      elements.recentSearchesList.querySelectorAll('.recent-part-number').forEach(row => {
+        row.addEventListener('click', (e) => {
+          if (e.target.closest('.recent-part-search-btn')) return;
+          const partNumber = row.dataset.part;
+          if (elements.searchInput) {
+            elements.searchInput.value = partNumber;
+          }
+          hideRecentSearchesModal();
+          performSearch();
+        });
+      });
+
+      if (elements.clearSearchHistory) {
+        elements.clearSearchHistory.style.display = 'flex';
+      }
+    }
+
+    // Re-initialize lucide icons
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons({ nameAttr: 'data-lucide' });
+    }
+  }
+
+  function showRecentSearchesModal() {
+    renderRecentSearches();
+    if (elements.recentSearchesModal) {
+      elements.recentSearchesModal.classList.add('show');
+      document.body.style.overflow = 'hidden';
+    }
+  }
+
+  function hideRecentSearchesModal() {
+    if (elements.recentSearchesModal) {
+      elements.recentSearchesModal.classList.remove('show');
+      document.body.style.overflow = '';
+    }
+  }
+
+  function clearRecentSearches() {
+    state.recentSearches = [];
+    localStorage.removeItem('recentSearches');
+    renderRecentSearches();
+    showCartAlert('success', 'Cleared', 'Search history has been cleared');
+  }
+
+  function formatTimeAgo(timestamp) {
+    const now = Date.now();
+    const diff = now - timestamp;
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+
+    if (minutes < 1) return 'Just now';
+    if (minutes < 60) return `${minutes}m ago`;
+    if (hours < 24) return `${hours}h ago`;
+    if (days < 7) return `${days}d ago`;
+    return new Date(timestamp).toLocaleDateString();
+  }
+
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  // ====================================
+  // ENHANCED ADVANCED FILTERS WITH SLIDERS
+  // ====================================
+  
+  // Store original filter bounds from search results
+  const filterBounds = {
+    price: { min: 0, max: 500000 },
+    weight: { min: 0, max: 100 },
+    quantity: { min: 0, max: 1000 },
+    delivery: { min: 0, max: 30 }
+  };
+
+  function initializeAdvancedFilters() {
+    // Initialize all range sliders
+    initializePriceSlider();
+    initializeWeightSlider();
+    initializeQuantitySlider();
+    initializeDeliverySlider();
+    
+    // Initialize quick delivery buttons
+    initializeQuickDeliveryButtons();
+    
+    // Initialize search clear buttons
+    initializeSearchClearButtons();
+
+    // Price range inputs
+    const minPriceInput = document.getElementById('min-price-input');
+    const maxPriceInput = document.getElementById('max-price-input');
+
+    if (minPriceInput) {
+      minPriceInput.addEventListener('input', () => {
+        state.selectedFilters.minPrice = parseInt(minPriceInput.value) || 0;
+        updatePriceSliderFromInputs();
+        updateFilterPreviewCount();
+      });
+    }
+
+    if (maxPriceInput) {
+      maxPriceInput.addEventListener('input', () => {
+        state.selectedFilters.maxPrice = parseInt(maxPriceInput.value) || 500000;
+        updatePriceSliderFromInputs();
+        updateFilterPreviewCount();
+      });
+    }
+
+    // Weight range inputs
+    const minWeightInput = document.getElementById('min-weight-input');
+    const maxWeightInput = document.getElementById('max-weight-input');
+
+    if (minWeightInput) {
+      minWeightInput.addEventListener('input', () => {
+        state.selectedFilters.minWeight = parseFloat(minWeightInput.value) || 0;
+        updateWeightSliderFromInputs();
+        updateFilterPreviewCount();
+      });
+    }
+    if (maxWeightInput) {
+      maxWeightInput.addEventListener('input', () => {
+        state.selectedFilters.maxWeight = parseFloat(maxWeightInput.value) || 100;
+        updateWeightSliderFromInputs();
+        updateFilterPreviewCount();
+      });
+    }
+
+    // Min quantity input
+    const minQtyInput = document.getElementById('min-quantity-input');
+    if (minQtyInput) {
+      minQtyInput.addEventListener('input', () => {
+        state.selectedFilters.minQuantity = parseInt(minQtyInput.value) || 0;
+        updateQuantitySliderFromInputs();
+        updateFilterPreviewCount();
+      });
+    }
+
+    // Filter checkboxes
+    document.querySelectorAll('.filter-checkbox input').forEach(checkbox => {
+      checkbox.addEventListener('change', (e) => {
+        handleFilterCheckboxChange(e);
+        updateFilterPreviewCount();
+      });
+    });
+
+    // Brand search
+    const brandSearch = document.getElementById('brand-filter-search');
+    if (brandSearch) {
+      brandSearch.addEventListener('input', handleBrandSearch);
+    }
+
+    // Supplier search
+    const supplierSearch = document.getElementById('supplier-filter-search');
+    if (supplierSearch) {
+      supplierSearch.addEventListener('input', handleSupplierSearch);
+    }
+
+    // Apply filters button
+    const applyBtn = document.getElementById('apply-filters');
+    if (applyBtn) {
+      applyBtn.addEventListener('click', handleApplyAdvancedFilters);
+    }
+
+    // Clear filters button
+    const clearBtn = document.getElementById('clear-filters');
+    if (clearBtn) {
+      clearBtn.addEventListener('click', handleClearAdvancedFilters);
+    }
+  }
+
+  // ====================================
+  // RANGE SLIDER IMPLEMENTATIONS
+  // ====================================
+  
+  function initializePriceSlider() {
+    const sliderMin = document.getElementById('price-slider-min');
+    const sliderMax = document.getElementById('price-slider-max');
+    const sliderRange = document.getElementById('price-slider-range');
+    const minDisplay = document.getElementById('price-range-min-display');
+    const maxDisplay = document.getElementById('price-range-max-display');
+    const minInput = document.getElementById('min-price-input');
+    const maxInput = document.getElementById('max-price-input');
+
+    if (!sliderMin || !sliderMax) return;
+
+    function updateSlider() {
+      const minVal = parseInt(sliderMin.value);
+      const maxVal = parseInt(sliderMax.value);
+      const range = parseInt(sliderMax.max) - parseInt(sliderMin.min);
+      
+      // Prevent overlap
+      if (minVal >= maxVal) {
+        sliderMin.value = maxVal - 1;
+        return;
+      }
+
+      // Update range highlight
+      const minPercent = ((minVal - parseInt(sliderMin.min)) / range) * 100;
+      const maxPercent = ((maxVal - parseInt(sliderMin.min)) / range) * 100;
+      
+      if (sliderRange) {
+        sliderRange.style.left = minPercent + '%';
+        sliderRange.style.width = (maxPercent - minPercent) + '%';
+      }
+
+      // Update displays
+      if (minDisplay) minDisplay.textContent = formatNumber(minVal);
+      if (maxDisplay) maxDisplay.textContent = formatNumber(maxVal);
+
+      // Update inputs
+      if (minInput) minInput.value = minVal;
+      if (maxInput) maxInput.value = maxVal;
+
+      // Update state
+      state.selectedFilters.minPrice = minVal;
+      state.selectedFilters.maxPrice = maxVal;
+      
+      updateFilterPreviewCount();
+    }
+
+    sliderMin.addEventListener('input', updateSlider);
+    sliderMax.addEventListener('input', updateSlider);
+
+    // Initialize
+    updateSlider();
+  }
+
+  function updatePriceSliderFromInputs() {
+    const sliderMin = document.getElementById('price-slider-min');
+    const sliderMax = document.getElementById('price-slider-max');
+    const minInput = document.getElementById('min-price-input');
+    const maxInput = document.getElementById('max-price-input');
+
+    if (sliderMin && minInput) sliderMin.value = minInput.value;
+    if (sliderMax && maxInput) sliderMax.value = maxInput.value;
+
+    updateSliderRangeVisual('price');
+  }
+
+  function initializeWeightSlider() {
+    const sliderMin = document.getElementById('weight-slider-min');
+    const sliderMax = document.getElementById('weight-slider-max');
+    const sliderRange = document.getElementById('weight-slider-range');
+    const minDisplay = document.getElementById('weight-range-min-display');
+    const maxDisplay = document.getElementById('weight-range-max-display');
+    const minInput = document.getElementById('min-weight-input');
+    const maxInput = document.getElementById('max-weight-input');
+
+    if (!sliderMin || !sliderMax) return;
+
+    function updateSlider() {
+      const minVal = parseFloat(sliderMin.value);
+      const maxVal = parseFloat(sliderMax.value);
+      const range = parseFloat(sliderMax.max) - parseFloat(sliderMin.min);
+      
+      if (minVal >= maxVal) {
+        sliderMin.value = maxVal - 0.1;
+        return;
+      }
+
+      const minPercent = ((minVal - parseFloat(sliderMin.min)) / range) * 100;
+      const maxPercent = ((maxVal - parseFloat(sliderMin.min)) / range) * 100;
+      
+      if (sliderRange) {
+        sliderRange.style.left = minPercent + '%';
+        sliderRange.style.width = (maxPercent - minPercent) + '%';
+      }
+
+      if (minDisplay) minDisplay.textContent = minVal.toFixed(1);
+      if (maxDisplay) maxDisplay.textContent = maxVal.toFixed(1);
+
+      if (minInput) minInput.value = minVal;
+      if (maxInput) maxInput.value = maxVal;
+
+      state.selectedFilters.minWeight = minVal;
+      state.selectedFilters.maxWeight = maxVal;
+      
+      updateFilterPreviewCount();
+    }
+
+    sliderMin.addEventListener('input', updateSlider);
+    sliderMax.addEventListener('input', updateSlider);
+    updateSlider();
+  }
+
+  function updateWeightSliderFromInputs() {
+    const sliderMin = document.getElementById('weight-slider-min');
+    const sliderMax = document.getElementById('weight-slider-max');
+    const minInput = document.getElementById('min-weight-input');
+    const maxInput = document.getElementById('max-weight-input');
+
+    if (sliderMin && minInput) sliderMin.value = minInput.value;
+    if (sliderMax && maxInput) sliderMax.value = maxInput.value;
+
+    updateSliderRangeVisual('weight');
+  }
+
+  function initializeQuantitySlider() {
+    const sliderMin = document.getElementById('qty-slider-min');
+    const sliderMax = document.getElementById('qty-slider-max');
+    const sliderRange = document.getElementById('qty-slider-range');
+    const minDisplay = document.getElementById('qty-range-min-display');
+    const maxDisplay = document.getElementById('qty-range-max-display');
+    const minInput = document.getElementById('min-quantity-input');
+
+    if (!sliderMin || !sliderMax) return;
+
+    function updateSlider() {
+      const minVal = parseInt(sliderMin.value);
+      const maxVal = parseInt(sliderMax.value);
+      const range = parseInt(sliderMax.max) - parseInt(sliderMin.min);
+      
+      if (minVal >= maxVal) {
+        sliderMin.value = maxVal - 1;
+        return;
+      }
+
+      const minPercent = ((minVal - parseInt(sliderMin.min)) / range) * 100;
+      const maxPercent = ((maxVal - parseInt(sliderMin.min)) / range) * 100;
+      
+      if (sliderRange) {
+        sliderRange.style.left = minPercent + '%';
+        sliderRange.style.width = (maxPercent - minPercent) + '%';
+      }
+
+      if (minDisplay) minDisplay.textContent = formatNumber(minVal);
+      if (maxDisplay) maxDisplay.textContent = maxVal >= 1000 ? '1000+' : formatNumber(maxVal);
+
+      if (minInput) minInput.value = minVal;
+
+      state.selectedFilters.minQuantity = minVal;
+      
+      updateFilterPreviewCount();
+    }
+
+    sliderMin.addEventListener('input', updateSlider);
+    sliderMax.addEventListener('input', updateSlider);
+    updateSlider();
+  }
+
+  function updateQuantitySliderFromInputs() {
+    const sliderMin = document.getElementById('qty-slider-min');
+    const minInput = document.getElementById('min-quantity-input');
+
+    if (sliderMin && minInput) sliderMin.value = minInput.value;
+
+    updateSliderRangeVisual('qty');
+  }
+
+  function initializeDeliverySlider() {
+    const sliderMin = document.getElementById('delivery-slider-min');
+    const sliderMax = document.getElementById('delivery-slider-max');
+    const sliderRange = document.getElementById('delivery-slider-range');
+    const minDisplay = document.getElementById('delivery-range-min-display');
+    const maxDisplay = document.getElementById('delivery-range-max-display');
+
+    if (!sliderMin || !sliderMax) return;
+
+    function updateSlider() {
+      const minVal = parseInt(sliderMin.value);
+      const maxVal = parseInt(sliderMax.value);
+      const range = parseInt(sliderMax.max) - parseInt(sliderMin.min);
+      
+      if (minVal >= maxVal) {
+        sliderMin.value = maxVal - 1;
+        return;
+      }
+
+      const minPercent = ((minVal - parseInt(sliderMin.min)) / range) * 100;
+      const maxPercent = ((maxVal - parseInt(sliderMin.min)) / range) * 100;
+      
+      if (sliderRange) {
+        sliderRange.style.left = minPercent + '%';
+        sliderRange.style.width = (maxPercent - minPercent) + '%';
+      }
+
+      if (minDisplay) minDisplay.textContent = minVal;
+      if (maxDisplay) maxDisplay.textContent = maxVal >= 30 ? '30+' : maxVal;
+
+      // Update delivery filter based on slider values
+      if (maxVal <= 2) {
+        state.selectedFilters.delivery = '1-2';
+      } else if (maxVal <= 5) {
+        state.selectedFilters.delivery = '3-5';
+      } else if (maxVal <= 14) {
+        state.selectedFilters.delivery = '7-14';
+      } else {
+        state.selectedFilters.delivery = 'all';
+      }
+      
+      // Store actual values for filtering
+      state.selectedFilters.minDeliveryDays = minVal;
+      state.selectedFilters.maxDeliveryDays = maxVal;
+      
+      // Clear quick button active states
+      document.querySelectorAll('.filter-quick-btn').forEach(btn => btn.classList.remove('active'));
+      
+      updateFilterPreviewCount();
+    }
+
+    sliderMin.addEventListener('input', updateSlider);
+    sliderMax.addEventListener('input', updateSlider);
+    updateSlider();
+  }
+
+  function initializeQuickDeliveryButtons() {
+    document.querySelectorAll('.filter-quick-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const minDays = parseInt(btn.dataset.min) || 0;
+        const maxDays = parseInt(btn.dataset.max) || 30;
+        
+        const sliderMin = document.getElementById('delivery-slider-min');
+        const sliderMax = document.getElementById('delivery-slider-max');
+        
+        if (sliderMin) sliderMin.value = minDays;
+        if (sliderMax) sliderMax.value = maxDays;
+        
+        // Trigger slider update
+        sliderMin?.dispatchEvent(new Event('input'));
+        
+        // Toggle active state
+        document.querySelectorAll('.filter-quick-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
+  }
+
+  function initializeSearchClearButtons() {
+    const brandClear = document.getElementById('brand-search-clear');
+    const supplierClear = document.getElementById('supplier-search-clear');
+    const brandSearch = document.getElementById('brand-filter-search');
+    const supplierSearch = document.getElementById('supplier-filter-search');
+
+    if (brandClear && brandSearch) {
+      brandSearch.addEventListener('input', () => {
+        brandClear.style.display = brandSearch.value ? 'flex' : 'none';
+      });
+      brandClear.addEventListener('click', () => {
+        brandSearch.value = '';
+        brandClear.style.display = 'none';
+        handleBrandSearch({ target: brandSearch });
+      });
+    }
+
+    if (supplierClear && supplierSearch) {
+      supplierSearch.addEventListener('input', () => {
+        supplierClear.style.display = supplierSearch.value ? 'flex' : 'none';
+      });
+      supplierClear.addEventListener('click', () => {
+        supplierSearch.value = '';
+        supplierClear.style.display = 'none';
+        handleSupplierSearch({ target: supplierSearch });
+      });
+    }
+  }
+
+  function updateSliderRangeVisual(type) {
+    const sliderMin = document.getElementById(`${type}-slider-min`);
+    const sliderMax = document.getElementById(`${type}-slider-max`);
+    const sliderRange = document.getElementById(`${type}-slider-range`);
+
+    if (!sliderMin || !sliderMax || !sliderRange) return;
+
+    const minVal = parseFloat(sliderMin.value);
+    const maxVal = parseFloat(sliderMax.value);
+    const range = parseFloat(sliderMax.max) - parseFloat(sliderMin.min);
+
+    const minPercent = ((minVal - parseFloat(sliderMin.min)) / range) * 100;
+    const maxPercent = ((maxVal - parseFloat(sliderMin.min)) / range) * 100;
+
+    sliderRange.style.left = minPercent + '%';
+    sliderRange.style.width = (maxPercent - minPercent) + '%';
+  }
+
+  function formatNumber(num) {
+    return new Intl.NumberFormat().format(num);
+  }
+
+  // ====================================
+  // DYNAMIC FILTER POPULATION FROM SEARCH RESULTS
+  // ====================================
+  
+  function populateFiltersFromResults(results) {
+    if (!results || results.length === 0) return;
+
+    // Reset filter state to defaults for new search results
+    state.selectedFilters = {
+      brand: 'all',
+      supplier: 'all',
+      origin: 'all',
+      stock: 'all',
+      delivery: 'all',
+      minPrice: 0,
+      maxPrice: 500000,
+      minWeight: 0,
+      maxWeight: 100,
+      minQuantity: 0,
+      minDeliveryDays: 0,
+      maxDeliveryDays: 30,
+    };
+
+    // Reset checkbox UI
+    document.querySelectorAll('.filter-checkbox input').forEach(checkbox => {
+      if (checkbox.dataset.value === 'All') {
+        checkbox.checked = true;
+      } else {
+        checkbox.checked = false;
+      }
+    });
+
+    // Reset quick filter/delivery buttons
+    document.querySelectorAll('.filter-quick-btn').forEach(btn => {
+      btn.classList.remove('active');
+    });
+
+    // Show filter stats banner
+    const statsBanner = document.getElementById('filter-stats-banner');
+    const statsCount = document.getElementById('filter-stats-count');
+    if (statsBanner) statsBanner.style.display = 'flex';
+    if (statsCount) statsCount.textContent = results.length;
+
+    // Calculate bounds from results
+    calculateFilterBounds(results);
+
+    // Update slider ranges
+    updateSliderBounds();
+
+    // Populate dynamic filter options
+    populateBrandOptions(results);
+    populateSupplierOptions(results);
+    populateOriginOptions(results);
+    populateStockCounts(results);
+
+    // Generate price distribution
+    generatePriceDistribution(results);
+
+    // Update preview count
+    updateFilterPreviewCount();
+  }
+
+  function calculateFilterBounds(results) {
+    // Price bounds
+    const prices = results.map(r => parseFloat(r.price) || 0).filter(p => p > 0);
+    if (prices.length > 0) {
+      filterBounds.price.min = Math.floor(Math.min(...prices));
+      filterBounds.price.max = Math.ceil(Math.max(...prices));
+    }
+
+    // Weight bounds
+    const weights = results.map(r => parseFloat(r.weight) || 0).filter(w => w > 0);
+    if (weights.length > 0) {
+      filterBounds.weight.min = Math.floor(Math.min(...weights) * 10) / 10;
+      filterBounds.weight.max = Math.ceil(Math.max(...weights) * 10) / 10;
+    }
+
+    // Quantity bounds
+    const quantities = results.map(r => parseInt(r.quantity) || 0);
+    if (quantities.length > 0) {
+      filterBounds.quantity.min = 0;
+      filterBounds.quantity.max = Math.max(...quantities);
+    }
+
+    // Delivery bounds
+    const deliveries = results.map(r => parseInt(r.deliveryDays) || 0).filter(d => d > 0);
+    if (deliveries.length > 0) {
+      filterBounds.delivery.min = 0;
+      filterBounds.delivery.max = Math.max(...deliveries, 30);
+    }
+  }
+
+  function updateSliderBounds() {
+    // Update price slider
+    const priceSliderMin = document.getElementById('price-slider-min');
+    const priceSliderMax = document.getElementById('price-slider-max');
+    if (priceSliderMin && priceSliderMax) {
+      priceSliderMin.min = filterBounds.price.min;
+      priceSliderMin.max = filterBounds.price.max;
+      priceSliderMax.min = filterBounds.price.min;
+      priceSliderMax.max = filterBounds.price.max;
+      priceSliderMin.value = filterBounds.price.min;
+      priceSliderMax.value = filterBounds.price.max;
+      
+      // Update inputs
+      const minInput = document.getElementById('min-price-input');
+      const maxInput = document.getElementById('max-price-input');
+      if (minInput) minInput.value = filterBounds.price.min;
+      if (maxInput) maxInput.value = filterBounds.price.max;
+      
+      // Update displays
+      const minDisplay = document.getElementById('price-range-min-display');
+      const maxDisplay = document.getElementById('price-range-max-display');
+      if (minDisplay) minDisplay.textContent = formatNumber(filterBounds.price.min);
+      if (maxDisplay) maxDisplay.textContent = formatNumber(filterBounds.price.max);
+      
+      // Update state
+      state.selectedFilters.minPrice = filterBounds.price.min;
+      state.selectedFilters.maxPrice = filterBounds.price.max;
+      
+      updateSliderRangeVisual('price');
+    }
+
+    // Update weight slider
+    const weightSliderMin = document.getElementById('weight-slider-min');
+    const weightSliderMax = document.getElementById('weight-slider-max');
+    if (weightSliderMin && weightSliderMax) {
+      const maxWeight = Math.max(filterBounds.weight.max, 1);
+      weightSliderMin.min = 0;
+      weightSliderMin.max = maxWeight;
+      weightSliderMax.min = 0;
+      weightSliderMax.max = maxWeight;
+      weightSliderMin.value = 0;
+      weightSliderMax.value = maxWeight;
+      
+      const minInput = document.getElementById('min-weight-input');
+      const maxInput = document.getElementById('max-weight-input');
+      if (minInput) minInput.value = 0;
+      if (maxInput) maxInput.value = maxWeight;
+      
+      const minDisplay = document.getElementById('weight-range-min-display');
+      const maxDisplay = document.getElementById('weight-range-max-display');
+      if (minDisplay) minDisplay.textContent = '0';
+      if (maxDisplay) maxDisplay.textContent = maxWeight.toFixed(1);
+      
+      state.selectedFilters.minWeight = 0;
+      state.selectedFilters.maxWeight = maxWeight;
+      
+      updateSliderRangeVisual('weight');
+    }
+
+    // Update quantity slider
+    const qtySliderMin = document.getElementById('qty-slider-min');
+    const qtySliderMax = document.getElementById('qty-slider-max');
+    if (qtySliderMin && qtySliderMax) {
+      const maxQty = Math.max(filterBounds.quantity.max, 1);
+      qtySliderMin.min = 0;
+      qtySliderMin.max = maxQty;
+      qtySliderMax.min = 0;
+      qtySliderMax.max = maxQty;
+      qtySliderMin.value = 0;
+      qtySliderMax.value = maxQty;
+      
+      const minInput = document.getElementById('min-quantity-input');
+      if (minInput) minInput.value = 0;
+      
+      const minDisplay = document.getElementById('qty-range-min-display');
+      const maxDisplay = document.getElementById('qty-range-max-display');
+      if (minDisplay) minDisplay.textContent = '0';
+      if (maxDisplay) maxDisplay.textContent = maxQty >= 1000 ? '1000+' : formatNumber(maxQty);
+      
+      state.selectedFilters.minQuantity = 0;
+      
+      updateSliderRangeVisual('qty');
+    }
+  }
+
+  function populateBrandOptions(results) {
+    const container = document.getElementById('brand-filter-tags');
+    if (!container) return;
+
+    // Count brands
+    const brandCounts = {};
+    results.forEach(r => {
+      const brand = r.brand || 'Unknown';
+      brandCounts[brand] = (brandCounts[brand] || 0) + 1;
+    });
+
+    // Sort by count
+    const sortedBrands = Object.entries(brandCounts)
+      .sort((a, b) => b[1] - a[1]);
+
+    // Update total count badge
+    const totalBadge = document.getElementById('brand-total-count');
+    if (totalBadge) totalBadge.textContent = sortedBrands.length;
+
+    // Keep "All Brands" option, remove others
+    const allOption = container.querySelector('input[data-value="All"]')?.closest('.filter-checkbox');
+    container.innerHTML = '';
+    if (allOption) container.appendChild(allOption);
+
+    // Add dynamic brand options
+    sortedBrands.forEach(([brand, count]) => {
+      if (brand === 'Unknown' || brand === '') return;
+      
+      const label = document.createElement('label');
+      label.className = 'filter-checkbox';
+      label.innerHTML = `
+        <input type="checkbox" name="brand" value="${brand}" data-filter="brand" data-value="${brand}">
+        <span class="filter-checkbox-box"></span>
+        <span class="filter-checkbox-label">${brand}</span>
+        <span class="filter-item-count">${count}</span>
+      `;
+      container.appendChild(label);
+    });
+
+    // Re-attach event listeners
+    container.querySelectorAll('.filter-checkbox input').forEach(checkbox => {
+      checkbox.addEventListener('change', (e) => {
+        handleFilterCheckboxChange(e);
+        updateFilterPreviewCount();
+      });
+    });
+
+    // Reinitialize icons
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+
+  function populateSupplierOptions(results) {
+    const container = document.getElementById('supplier-filter-tags');
+    if (!container) return;
+
+    // Count suppliers
+    const supplierCounts = {};
+    results.forEach(r => {
+      const supplier = r.supplier || r.integrationName || 'Unknown';
+      supplierCounts[supplier] = (supplierCounts[supplier] || 0) + 1;
+    });
+
+    // Sort by count
+    const sortedSuppliers = Object.entries(supplierCounts)
+      .sort((a, b) => b[1] - a[1]);
+
+    // Update total count badge
+    const totalBadge = document.getElementById('supplier-total-count');
+    if (totalBadge) totalBadge.textContent = sortedSuppliers.length;
+
+    // Keep "All Suppliers" option
+    const allOption = container.querySelector('input[data-value="All"]')?.closest('.filter-checkbox');
+    container.innerHTML = '';
+    if (allOption) container.appendChild(allOption);
+
+    // Add dynamic supplier options
+    sortedSuppliers.forEach(([supplier, count]) => {
+      if (supplier === 'Unknown' || supplier === '') return;
+      
+      const label = document.createElement('label');
+      label.className = 'filter-checkbox';
+      label.innerHTML = `
+        <input type="checkbox" name="supplier" value="${supplier}" data-filter="supplier" data-value="${supplier}">
+        <span class="filter-checkbox-box"></span>
+        <span class="filter-checkbox-label">${supplier}</span>
+        <span class="filter-item-count">${count}</span>
+      `;
+      container.appendChild(label);
+    });
+
+    // Re-attach event listeners
+    container.querySelectorAll('.filter-checkbox input').forEach(checkbox => {
+      checkbox.addEventListener('change', (e) => {
+        handleFilterCheckboxChange(e);
+        updateFilterPreviewCount();
+      });
+    });
+  }
+
+  function populateOriginOptions(results) {
+    const container = document.getElementById('origin-filter-tags');
+    if (!container) return;
+
+    // Count origins
+    const originCounts = {};
+    results.forEach(r => {
+      const origin = r.origin || 'Unknown';
+      originCounts[origin] = (originCounts[origin] || 0) + 1;
+    });
+
+    // Sort by count
+    const sortedOrigins = Object.entries(originCounts)
+      .sort((a, b) => b[1] - a[1]);
+
+    // Update total count badge
+    const totalBadge = document.getElementById('origin-total-count');
+    if (totalBadge) totalBadge.textContent = sortedOrigins.length;
+
+    // Keep "All Countries" option
+    const allOption = container.querySelector('input[data-value="All"]')?.closest('.filter-checkbox');
+    container.innerHTML = '';
+    if (allOption) container.appendChild(allOption);
+
+    // Add dynamic origin options
+    sortedOrigins.forEach(([origin, count]) => {
+      if (origin === 'Unknown' || origin === '') return;
+      
+      const label = document.createElement('label');
+      label.className = 'filter-checkbox';
+      label.innerHTML = `
+        <input type="checkbox" name="origin" value="${origin}" data-filter="origin" data-value="${origin}">
+        <span class="filter-checkbox-box"></span>
+        <span class="filter-checkbox-label">${origin}</span>
+        <span class="filter-item-count">${count}</span>
+      `;
+      container.appendChild(label);
+    });
+
+    // Re-attach event listeners
+    container.querySelectorAll('.filter-checkbox input').forEach(checkbox => {
+      checkbox.addEventListener('change', (e) => {
+        handleFilterCheckboxChange(e);
+        updateFilterPreviewCount();
+      });
+    });
+  }
+
+  function populateStockCounts(results) {
+    let inStock = 0, lowStock = 0, outStock = 0;
+
+    results.forEach(r => {
+      const qty = parseInt(r.quantity) || 0;
+      const stock = r.stock || (qty > 10 ? 'in-stock' : qty > 0 ? 'low-stock' : 'out-of-stock');
+      
+      if (stock === 'in-stock') inStock++;
+      else if (stock === 'low-stock') lowStock++;
+      else outStock++;
+    });
+
+    const inCountEl = document.getElementById('stock-in-count');
+    const lowCountEl = document.getElementById('stock-low-count');
+    const outCountEl = document.getElementById('stock-out-count');
+
+    if (inCountEl) inCountEl.textContent = inStock;
+    if (lowCountEl) lowCountEl.textContent = lowStock;
+    if (outCountEl) outCountEl.textContent = outStock;
+  }
+
+  function generatePriceDistribution(results) {
+    const container = document.querySelector('#price-distribution .distribution-bars');
+    if (!container) return;
+
+    const prices = results.map(r => parseFloat(r.price) || 0).filter(p => p > 0);
+    if (prices.length === 0) {
+      container.innerHTML = '';
+      return;
+    }
+
+    const minPrice = Math.min(...prices);
+    const maxPrice = Math.max(...prices);
+    const range = maxPrice - minPrice || 1;
+    const bucketCount = 20;
+    const buckets = new Array(bucketCount).fill(0);
+
+    prices.forEach(price => {
+      const bucketIndex = Math.min(
+        Math.floor(((price - minPrice) / range) * bucketCount),
+        bucketCount - 1
+      );
+      buckets[bucketIndex]++;
+    });
+
+    const maxBucketCount = Math.max(...buckets, 1);
+
+    container.innerHTML = buckets.map((count, i) => {
+      const height = (count / maxBucketCount) * 100;
+      return `<div class="distribution-bar" style="height: ${Math.max(height, 10)}%;" title="${count} parts"></div>`;
+    }).join('');
+  }
+
+  function updateFilterPreviewCount() {
+    const previewCountEl = document.getElementById('filter-preview-count');
+    if (!previewCountEl || state.currentResults.length === 0) return;
+
+    // Calculate how many parts would match current filters
+    let count = 0;
+    state.currentResults.forEach(part => {
+      if (partMatchesFilters(part)) count++;
+    });
+
+    previewCountEl.textContent = count;
+  }
+
+  function partMatchesFilters(part) {
+    const price = parseFloat(part.price) || 0;
+    const weight = parseFloat(part.weight) || 0;
+    const qty = parseInt(part.quantity) || 0;
+    const days = parseInt(part.deliveryDays) || parseInt(part.terms) || 999;
+
+    // Price filter - only check if bounds have changed from defaults
+    const priceBoundsChanged = state.selectedFilters.minPrice > filterBounds.price.min || 
+                               state.selectedFilters.maxPrice < filterBounds.price.max;
+    if (priceBoundsChanged) {
+      if (price < state.selectedFilters.minPrice || price > state.selectedFilters.maxPrice) {
+        return false;
+      }
+    }
+
+    // Weight filter - only check if bounds have changed
+    const weightBoundsChanged = state.selectedFilters.minWeight > 0 || 
+                                state.selectedFilters.maxWeight < filterBounds.weight.max;
+    if (weightBoundsChanged) {
+      if (weight < state.selectedFilters.minWeight || weight > state.selectedFilters.maxWeight) {
+        return false;
+      }
+    }
+
+    // Quantity filter
+    if (state.selectedFilters.minQuantity > 0) {
+      if (qty < state.selectedFilters.minQuantity) {
+        return false;
+      }
+    }
+
+    // Delivery filter - use slider values
+    if (state.selectedFilters.minDeliveryDays !== undefined && state.selectedFilters.maxDeliveryDays !== undefined) {
+      const minDays = state.selectedFilters.minDeliveryDays;
+      const maxDays = state.selectedFilters.maxDeliveryDays;
+      if (minDays > 0 || maxDays < 30) {
+        if (days < minDays || days > maxDays) {
+          return false;
+        }
+      }
+    }
+
+    // Brand filter
+    if (state.selectedFilters.brand !== 'all') {
+      const brands = Array.isArray(state.selectedFilters.brand)
+        ? state.selectedFilters.brand
+        : [state.selectedFilters.brand];
+      const partBrand = (part.brand || '').toLowerCase();
+      if (!brands.some(b => partBrand.includes(b.toLowerCase()))) {
+        return false;
+      }
+    }
+
+    // Supplier filter
+    if (state.selectedFilters.supplier !== 'all') {
+      const suppliers = Array.isArray(state.selectedFilters.supplier)
+        ? state.selectedFilters.supplier
+        : [state.selectedFilters.supplier];
+      const partSupplier = (part.supplier || '').toLowerCase();
+      if (!suppliers.some(s => partSupplier.includes(s.toLowerCase()))) {
+        return false;
+      }
+    }
+
+    // Origin filter
+    if (state.selectedFilters.origin && state.selectedFilters.origin !== 'all') {
+      const origins = Array.isArray(state.selectedFilters.origin)
+        ? state.selectedFilters.origin
+        : [state.selectedFilters.origin];
+      const partOrigin = (part.origin || '').toLowerCase();
+      if (!origins.some(o => partOrigin.includes(o.toLowerCase()))) {
+        return false;
+      }
+    }
+
+    // Stock filter
+    if (state.selectedFilters.stock !== 'all') {
+      const stockStatuses = Array.isArray(state.selectedFilters.stock)
+        ? state.selectedFilters.stock
+        : [state.selectedFilters.stock];
+      const stock = part.stock || (qty > 10 ? 'in-stock' : qty > 0 ? 'low-stock' : 'out-of-stock');
+      if (!stockStatuses.includes(stock)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  function handleFilterCheckboxChange(e) {
+    const checkbox = e.target;
+    const filterType = checkbox.dataset.filter;
+    const filterValue = checkbox.dataset.value;
+    const group = checkbox.closest('.filter-options');
+
+    if (!group) return;
+
+    // Handle "All" checkbox
+    if (filterValue === 'All') {
+      if (checkbox.checked) {
+        // Uncheck all other checkboxes in this group
+        group.querySelectorAll('.filter-checkbox input').forEach(cb => {
+          if (cb !== checkbox) cb.checked = false;
+        });
+        // Reset state for this filter
+        state.selectedFilters[filterType] = 'all';
+      } else {
+        // Don't allow unchecking All if nothing else is selected
+        checkbox.checked = true;
+      }
+    } else {
+      // Uncheck "All" when selecting specific items
+      const allCheckbox = group.querySelector('.filter-checkbox input[data-value="All"]');
+      if (allCheckbox) allCheckbox.checked = false;
+
+      // Get all checked values
+      const checkedValues = Array.from(group.querySelectorAll('.filter-checkbox input:checked'))
+        .filter(cb => cb.dataset.value !== 'All')
+        .map(cb => cb.dataset.value);
+
+      if (checkedValues.length === 0) {
+        // If nothing selected, select All
+        if (allCheckbox) allCheckbox.checked = true;
+        state.selectedFilters[filterType] = 'all';
+      } else {
+        state.selectedFilters[filterType] = checkedValues;
+      }
+    }
+
+    updateActiveFiltersBar();
+    updateFilterPreviewCount();
+  }
+
+  // Legacy function for tag-based filters (kept for backwards compatibility)
+  function handleFilterTagClick(e) {
+    const tag = e.currentTarget;
+    const filterType = tag.dataset.filter;
+    const filterValue = tag.dataset.value;
+
+    // Get parent group
+    const group = tag.closest('.filter-tags');
+    if (!group) return;
+
+    // For 'All' selection, deselect others
+    if (filterValue === 'All') {
+      group.querySelectorAll('.filter-tag').forEach(t => t.classList.remove('active'));
+      tag.classList.add('active');
+      
+      // Update state
+      if (filterType === 'brand') state.selectedFilters.brand = 'all';
+      else if (filterType === 'supplier') state.selectedFilters.supplier = 'all';
+      else if (filterType === 'stock') state.selectedFilters.stock = 'all';
+      else if (filterType === 'delivery') state.selectedFilters.delivery = 'all';
+    } else {
+      // Deselect 'All' and toggle this one
+      group.querySelector('.filter-tag[data-value="All"]')?.classList.remove('active');
+      tag.classList.toggle('active');
+
+      // Update state based on active selections
+      const activeValues = Array.from(group.querySelectorAll('.filter-tag.active'))
+        .filter(t => t.dataset.value !== 'All')
+        .map(t => t.dataset.value);
+
+      if (activeValues.length === 0) {
+        // If nothing selected, select All
+        group.querySelector('.filter-tag[data-value="All"]')?.classList.add('active');
+        if (filterType === 'brand') state.selectedFilters.brand = 'all';
+        else if (filterType === 'supplier') state.selectedFilters.supplier = 'all';
+        else if (filterType === 'stock') state.selectedFilters.stock = 'all';
+        else if (filterType === 'delivery') state.selectedFilters.delivery = 'all';
+      } else {
+        // Store active values
+        if (filterType === 'brand') state.selectedFilters.brand = activeValues;
+        else if (filterType === 'supplier') state.selectedFilters.supplier = activeValues;
+        else if (filterType === 'stock') state.selectedFilters.stock = activeValues;
+        else if (filterType === 'delivery') state.selectedFilters.delivery = activeValues;
+      }
+    }
+
+    updateActiveFiltersBar();
+  }
+
+  function handleBrandSearch(e) {
+    const query = e.target.value.toLowerCase();
+    const brandContainer = document.getElementById('brand-filter-tags');
+    if (!brandContainer) return;
+
+    brandContainer.querySelectorAll('.filter-checkbox').forEach(checkbox => {
+      const label = checkbox.querySelector('.filter-checkbox-label');
+      const brandName = label ? label.textContent.toLowerCase() : '';
+      const value = checkbox.querySelector('input').dataset.value;
+      
+      if (brandName.includes(query) || value === 'All') {
+        checkbox.style.display = '';
+      } else {
+        checkbox.style.display = 'none';
+      }
+    });
+  }
+
+  function handleSupplierSearch(e) {
+    const query = e.target.value.toLowerCase();
+    const supplierContainer = document.getElementById('supplier-filter-tags');
+    if (!supplierContainer) return;
+
+    supplierContainer.querySelectorAll('.filter-checkbox').forEach(checkbox => {
+      const label = checkbox.querySelector('.filter-checkbox-label');
+      const supplierName = label ? label.textContent.toLowerCase() : '';
+      const value = checkbox.querySelector('input').dataset.value;
+      
+      if (supplierName.includes(query) || value === 'All') {
+        checkbox.style.display = '';
+      } else {
+        checkbox.style.display = 'none';
+      }
+    });
+  }
+
+  function handleApplyAdvancedFilters() {
+    // Apply filters to current results
+    applyAdvancedFiltersToResults();
+    hideFiltersPanel();
+  }
+
+  function applyAdvancedFiltersToResults() {
+    if (state.currentResults.length === 0) return;
+
+    let results = [...state.currentResults];
+
+    // Price filter - use dynamic bounds
+    const priceBoundsChanged = state.selectedFilters.minPrice > filterBounds.price.min || 
+                               state.selectedFilters.maxPrice < filterBounds.price.max;
+    if (priceBoundsChanged) {
+      results = results.filter(part => {
+        const price = parseFloat(part.price) || 0;
+        return price >= state.selectedFilters.minPrice && price <= state.selectedFilters.maxPrice;
+      });
+    }
+
+    // Weight filter - use dynamic bounds
+    const weightBoundsChanged = state.selectedFilters.minWeight > 0 || 
+                                state.selectedFilters.maxWeight < filterBounds.weight.max;
+    if (weightBoundsChanged) {
+      results = results.filter(part => {
+        const weight = parseFloat(part.weight) || 0;
+        return weight >= state.selectedFilters.minWeight && weight <= state.selectedFilters.maxWeight;
+      });
+    }
+
+    // Minimum quantity filter
+    if (state.selectedFilters.minQuantity > 0) {
+      results = results.filter(part => {
+        const qty = parseFloat(part.quantity) || 0;
+        return qty >= state.selectedFilters.minQuantity;
+      });
+    }
+
+    // Brand filter
+    if (state.selectedFilters.brand !== 'all') {
+      const brands = Array.isArray(state.selectedFilters.brand) 
+        ? state.selectedFilters.brand 
+        : [state.selectedFilters.brand];
+      results = results.filter(part => {
+        const partBrand = (part.brand || '').toLowerCase();
+        return brands.some(b => partBrand.toLowerCase().includes(b.toLowerCase()));
+      });
+    }
+
+    // Supplier filter
+    if (state.selectedFilters.supplier !== 'all') {
+      const suppliers = Array.isArray(state.selectedFilters.supplier) 
+        ? state.selectedFilters.supplier 
+        : [state.selectedFilters.supplier];
+      results = results.filter(part => {
+        const partSupplier = (part.supplier || '').toLowerCase();
+        return suppliers.some(s => partSupplier.toLowerCase().includes(s.toLowerCase()));
+      });
+    }
+
+    // Origin filter
+    if (state.selectedFilters.origin && state.selectedFilters.origin !== 'all') {
+      const origins = Array.isArray(state.selectedFilters.origin) 
+        ? state.selectedFilters.origin 
+        : [state.selectedFilters.origin];
+      results = results.filter(part => {
+        const partOrigin = (part.origin || '').toLowerCase();
+        return origins.some(o => partOrigin.toLowerCase().includes(o.toLowerCase()));
+      });
+    }
+
+    // Stock filter (using Part model stock values: in-stock, low-stock, out-of-stock)
+    if (state.selectedFilters.stock !== 'all') {
+      const stockStatuses = Array.isArray(state.selectedFilters.stock)
+        ? state.selectedFilters.stock
+        : [state.selectedFilters.stock];
+      results = results.filter(part => {
+        const qty = parseFloat(part.quantity) || 0;
+        const stock = part.stock || (qty > 10 ? 'in-stock' : qty > 0 ? 'low-stock' : 'out-of-stock');
+        return stockStatuses.includes(stock);
+      });
+    }
+
+    // Delivery filter - use slider values if set
+    if (state.selectedFilters.minDeliveryDays !== undefined && state.selectedFilters.maxDeliveryDays !== undefined) {
+      const minDays = state.selectedFilters.minDeliveryDays;
+      const maxDays = state.selectedFilters.maxDeliveryDays;
+      if (minDays > 0 || maxDays < 30) {
+        results = results.filter(part => {
+          const days = parseInt(part.deliveryDays) || parseInt(part.terms) || 999;
+          return days >= minDays && days <= maxDays;
+        });
+      }
+    } else if (state.selectedFilters.delivery !== 'all') {
+      // Fallback to checkbox-based delivery filter
+      const deliveryRanges = Array.isArray(state.selectedFilters.delivery)
+        ? state.selectedFilters.delivery
+        : [state.selectedFilters.delivery];
+      results = results.filter(part => {
+        const days = parseInt(part.deliveryDays) || parseInt(part.terms) || 999;
+        return deliveryRanges.some(range => {
+          if (range === '1-2') return days <= 2;
+          if (range === '3-5') return days >= 3 && days <= 5;
+          if (range === '7-14') return days >= 7 && days <= 14;
+          if (range === '14+') return days > 14;
+          return true;
+        });
+      });
+    }
+
+    // Apply current sort
+    if (state.currentSort.field !== 'relevance') {
+      results = sortResults(results, state.currentSort.field, state.currentSort.order);
+    }
+
+    state.filteredResults = results;
+    displayResults(results);
+
+    // Update results count
+    if (elements.resultsCount) {
+      elements.resultsCount.textContent = results.length;
+    }
+
+    showCartAlert('success', 'Filters Applied', `Showing ${results.length} of ${state.currentResults.length} parts`);
+  }
+
+  function handleClearAdvancedFilters() {
+    // Reset state to use current filter bounds
+    state.selectedFilters = {
+      brand: 'all',
+      supplier: 'all',
+      origin: 'all',
+      stock: 'all',
+      delivery: 'all',
+      minPrice: filterBounds.price.min,
+      maxPrice: filterBounds.price.max,
+      minWeight: 0,
+      maxWeight: filterBounds.weight.max,
+      minQuantity: 0,
+      minDeliveryDays: 0,
+      maxDeliveryDays: 30,
+    };
+
+    // Reset quick filters
+    state.quickFilters = {
+      inStockOnly: false,
+      lowStockOnly: false
+    };
+
+    // Reset sort
+    state.currentSort = { field: 'relevance', order: 'desc' };
+
+    // Reset checkbox UI
+    document.querySelectorAll('.filter-checkbox input').forEach(checkbox => {
+      if (checkbox.dataset.value === 'All') {
+        checkbox.checked = true;
+      } else {
+        checkbox.checked = false;
+      }
+    });
+
+    // Reset sort buttons
+    document.querySelectorAll('.quick-sort-btn').forEach(btn => {
+      btn.classList.remove('active');
+      if (btn.dataset.sort === 'relevance') {
+        btn.classList.add('active');
+      }
+    });
+
+    // Reset quick filter/delivery buttons
+    document.querySelectorAll('.quick-filter-btn, .filter-quick-btn').forEach(btn => {
+      btn.classList.remove('active');
+    });
+
+    // Reset price inputs and slider
+    const minPriceInput = document.getElementById('min-price-input');
+    const maxPriceInput = document.getElementById('max-price-input');
+    const priceSliderMin = document.getElementById('price-slider-min');
+    const priceSliderMax = document.getElementById('price-slider-max');
+    
+    if (minPriceInput) minPriceInput.value = filterBounds.price.min;
+    if (maxPriceInput) maxPriceInput.value = filterBounds.price.max;
+    if (priceSliderMin) priceSliderMin.value = filterBounds.price.min;
+    if (priceSliderMax) priceSliderMax.value = filterBounds.price.max;
+    
+    const minPriceDisplay = document.getElementById('price-range-min-display');
+    const maxPriceDisplay = document.getElementById('price-range-max-display');
+    if (minPriceDisplay) minPriceDisplay.textContent = formatNumber(filterBounds.price.min);
+    if (maxPriceDisplay) maxPriceDisplay.textContent = formatNumber(filterBounds.price.max);
+    updateSliderRangeVisual('price');
+
+    // Reset weight inputs and slider
+    const minWeightInput = document.getElementById('min-weight-input');
+    const maxWeightInput = document.getElementById('max-weight-input');
+    const weightSliderMin = document.getElementById('weight-slider-min');
+    const weightSliderMax = document.getElementById('weight-slider-max');
+    
+    if (minWeightInput) minWeightInput.value = 0;
+    if (maxWeightInput) maxWeightInput.value = filterBounds.weight.max;
+    if (weightSliderMin) weightSliderMin.value = 0;
+    if (weightSliderMax) weightSliderMax.value = filterBounds.weight.max;
+    
+    const minWeightDisplay = document.getElementById('weight-range-min-display');
+    const maxWeightDisplay = document.getElementById('weight-range-max-display');
+    if (minWeightDisplay) minWeightDisplay.textContent = '0';
+    if (maxWeightDisplay) maxWeightDisplay.textContent = filterBounds.weight.max.toFixed(1);
+    updateSliderRangeVisual('weight');
+
+    // Reset quantity inputs and slider
+    const minQtyInput = document.getElementById('min-quantity-input');
+    const qtySliderMin = document.getElementById('qty-slider-min');
+    const qtySliderMax = document.getElementById('qty-slider-max');
+    
+    if (minQtyInput) minQtyInput.value = 0;
+    if (qtySliderMin) qtySliderMin.value = 0;
+    if (qtySliderMax) qtySliderMax.value = filterBounds.quantity.max;
+    
+    const minQtyDisplay = document.getElementById('qty-range-min-display');
+    const maxQtyDisplay = document.getElementById('qty-range-max-display');
+    if (minQtyDisplay) minQtyDisplay.textContent = '0';
+    if (maxQtyDisplay) maxQtyDisplay.textContent = filterBounds.quantity.max >= 1000 ? '1000+' : formatNumber(filterBounds.quantity.max);
+    updateSliderRangeVisual('qty');
+
+    // Reset delivery slider
+    const deliverySliderMin = document.getElementById('delivery-slider-min');
+    const deliverySliderMax = document.getElementById('delivery-slider-max');
+    
+    if (deliverySliderMin) deliverySliderMin.value = 0;
+    if (deliverySliderMax) deliverySliderMax.value = 30;
+    
+    const minDeliveryDisplay = document.getElementById('delivery-range-min-display');
+    const maxDeliveryDisplay = document.getElementById('delivery-range-max-display');
+    if (minDeliveryDisplay) minDeliveryDisplay.textContent = '0';
+    if (maxDeliveryDisplay) maxDeliveryDisplay.textContent = '30+';
+    updateSliderRangeVisual('delivery');
+
+    // Hide active filters bar
+    const activeFiltersBar = document.getElementById('active-filters-bar');
+    if (activeFiltersBar) activeFiltersBar.style.display = 'none';
+
+    // Show all results
+    if (state.currentResults.length > 0) {
+      state.filteredResults = [...state.currentResults];
+      displayResults(state.currentResults);
+      updateFilterPreviewCount();
+    }
+
+    showCartAlert('success', 'Filters Cleared', 'All filters have been reset');
+  }
+
+  function updateActiveFiltersBar() {
+    const activeFiltersBar = document.getElementById('active-filters-bar');
+    const activeFiltersList = document.getElementById('active-filters-list');
+    if (!activeFiltersBar || !activeFiltersList) return;
+
+    const activeChips = [];
+
+    // Check each filter
+    if (state.selectedFilters.brand !== 'all') {
+      const values = Array.isArray(state.selectedFilters.brand)
+        ? state.selectedFilters.brand
+        : [state.selectedFilters.brand];
+      values.forEach(v => activeChips.push({ type: 'brand', value: v, label: `Brand: ${v}` }));
+    }
+
+    if (state.selectedFilters.supplier !== 'all') {
+      const values = Array.isArray(state.selectedFilters.supplier)
+        ? state.selectedFilters.supplier
+        : [state.selectedFilters.supplier];
+      values.forEach(v => activeChips.push({ type: 'supplier', value: v, label: `Supplier: ${v}` }));
+    }
+
+    if (state.selectedFilters.stock !== 'all') {
+      const values = Array.isArray(state.selectedFilters.stock)
+        ? state.selectedFilters.stock
+        : [state.selectedFilters.stock];
+      values.forEach(v => activeChips.push({ type: 'stock', value: v, label: v.replace('-', ' ') }));
+    }
+
+    if (state.selectedFilters.delivery !== 'all') {
+      const values = Array.isArray(state.selectedFilters.delivery)
+        ? state.selectedFilters.delivery
+        : [state.selectedFilters.delivery];
+      values.forEach(v => activeChips.push({ type: 'delivery', value: v, label: `${v} days` }));
+    }
+
+    if (state.selectedFilters.minPrice > 0) {
+      activeChips.push({ type: 'minPrice', value: state.selectedFilters.minPrice, label: `Min: ${state.selectedFilters.minPrice} AED` });
+    }
+
+    if (state.selectedFilters.maxPrice < 500000) {
+      activeChips.push({ type: 'maxPrice', value: state.selectedFilters.maxPrice, label: `Max: ${state.selectedFilters.maxPrice} AED` });
+    }
+
+    if (state.selectedFilters.minWeight > 0) {
+      activeChips.push({ type: 'minWeight', value: state.selectedFilters.minWeight, label: `Min Weight: ${state.selectedFilters.minWeight} kg` });
+    }
+
+    if (state.selectedFilters.maxWeight < 10000) {
+      activeChips.push({ type: 'maxWeight', value: state.selectedFilters.maxWeight, label: `Max Weight: ${state.selectedFilters.maxWeight} kg` });
+    }
+
+    if (state.selectedFilters.minQuantity > 0) {
+      activeChips.push({ type: 'minQuantity', value: state.selectedFilters.minQuantity, label: `Min Qty: ${state.selectedFilters.minQuantity}` });
+    }
+
+    if (activeChips.length > 0) {
+      activeFiltersBar.style.display = 'flex';
+      activeFiltersList.innerHTML = activeChips.map(chip => `
+        <span class="active-filter-chip" data-type="${chip.type}" data-value="${chip.value}">
+          ${chip.label}
+          <button onclick="removeActiveFilter('${chip.type}', '${chip.value}')">
+            <i data-lucide="x"></i>
+          </button>
+        </span>
+      `).join('');
+
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons({ nameAttr: 'data-lucide' });
+      }
+    } else {
+      activeFiltersBar.style.display = 'none';
+    }
+  }
+
+  // Remove a single active filter chip
+  function removeActiveFilter(type, value) {
+    if (type === 'minPrice') {
+      state.selectedFilters.minPrice = 0;
+      const input = document.getElementById('min-price-input');
+      if (input) input.value = 0;
+    } else if (type === 'maxPrice') {
+      state.selectedFilters.maxPrice = 500000;
+      const input = document.getElementById('max-price-input');
+      if (input) input.value = 500000;
+    } else if (type === 'minWeight') {
+      state.selectedFilters.minWeight = 0;
+      const input = document.getElementById('min-weight-input');
+      if (input) input.value = 0;
+    } else if (type === 'maxWeight') {
+      state.selectedFilters.maxWeight = 10000;
+      const input = document.getElementById('max-weight-input');
+      if (input) input.value = 10000;
+    } else if (type === 'minQuantity') {
+      state.selectedFilters.minQuantity = 0;
+      const input = document.getElementById('min-quantity-input');
+      if (input) input.value = 0;
+    } else {
+      // Multi-value filters (brand, supplier, stock, delivery)
+      if (Array.isArray(state.selectedFilters[type])) {
+        state.selectedFilters[type] = state.selectedFilters[type].filter(v => v !== value);
+        if (state.selectedFilters[type].length === 0) {
+          state.selectedFilters[type] = 'all';
+        }
+      } else {
+        state.selectedFilters[type] = 'all';
+      }
+      
+      // Uncheck the corresponding checkbox
+      const checkbox = document.querySelector(`.filter-checkbox input[data-filter="${type}"][data-value="${value}"]`);
+      if (checkbox) checkbox.checked = false;
+    }
+
+    applyAdvancedFiltersToResults();
+    updateActiveFiltersBar();
+  }
+
+  // Make removeActiveFilter globally accessible
+  window.removeActiveFilter = removeActiveFilter;
 
   // ====================================
   // EXCEL MODAL
@@ -1333,22 +3328,196 @@
     const fileExtension = fileName.substring(fileName.lastIndexOf('.'));
 
     if (!validTypes.includes(fileExtension)) {
-      alert('Please upload a valid Excel file (.xlsx, .xls, or .csv)');
+      showCartAlert('error', 'Invalid File', 'Please upload a valid Excel file (.xlsx, .xls, or .csv)');
       return;
     }
 
     // Validate file size (10MB)
     if (file.size > 10 * 1024 * 1024) {
-      alert('File size must be less than 10MB');
+      showCartAlert('error', 'File Too Large', 'File size must be less than 10MB');
       return;
     }
 
-    console.log('File uploaded:', file.name);
+    console.log('Processing file:', file.name);
+    showCartAlert('info', 'Processing', `Reading ${file.name}...`);
 
-    // TODO: Implement actual file upload to server
-    // For now, just show a message
-    alert(`File "${file.name}" ready for upload. Server integration pending.`);
+    // Use FileReader to read the file
+    const reader = new FileReader();
+    
+    reader.onload = function(e) {
+      try {
+        const data = e.target.result;
+        let partNumbers = [];
+
+        if (fileExtension === '.csv') {
+          // Parse CSV
+          partNumbers = parseCSV(data);
+        } else {
+          // Parse Excel using SheetJS
+          if (typeof XLSX === 'undefined') {
+            // Load SheetJS dynamically if not available
+            loadSheetJS().then(() => {
+              const workbook = XLSX.read(data, { type: 'array' });
+              partNumbers = parseExcelWorkbook(workbook);
+              processExtractedPartNumbers(partNumbers, file.name);
+            }).catch(err => {
+              console.error('Failed to load SheetJS:', err);
+              showCartAlert('error', 'Error', 'Failed to load Excel parser. Please try CSV format.');
+            });
+            return;
+          } else {
+            const workbook = XLSX.read(data, { type: 'array' });
+            partNumbers = parseExcelWorkbook(workbook);
+          }
+        }
+
+        processExtractedPartNumbers(partNumbers, file.name);
+      } catch (error) {
+        console.error('Error parsing file:', error);
+        showCartAlert('error', 'Parse Error', 'Failed to parse file. Please check the format.');
+      }
+    };
+
+    reader.onerror = function() {
+      showCartAlert('error', 'Read Error', 'Failed to read file.');
+    };
+
+    if (fileExtension === '.csv') {
+      reader.readAsText(file);
+    } else {
+      reader.readAsArrayBuffer(file);
+    }
+  }
+
+  /**
+   * Load SheetJS library dynamically
+   */
+  function loadSheetJS() {
+    return new Promise((resolve, reject) => {
+      if (typeof XLSX !== 'undefined') {
+        resolve();
+        return;
+      }
+      
+      const script = document.createElement('script');
+      script.src = 'https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js';
+      script.onload = resolve;
+      script.onerror = reject;
+      document.head.appendChild(script);
+    });
+  }
+
+  /**
+   * Parse Excel workbook and extract part numbers
+   */
+  function parseExcelWorkbook(workbook) {
+    const partNumbers = [];
+    const firstSheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[firstSheetName];
+    
+    // Convert to JSON
+    const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+    
+    // Find the column with part numbers
+    // Look for headers like "Part Number", "PartNumber", "Part", "Code", "Vendor Code"
+    let partNumberColIndex = 0;
+    const headerRow = jsonData[0] || [];
+    
+    for (let i = 0; i < headerRow.length; i++) {
+      const header = String(headerRow[i] || '').toLowerCase().trim();
+      if (header.includes('part') || header.includes('code') || header.includes('vendor') || header.includes('number')) {
+        partNumberColIndex = i;
+        break;
+      }
+    }
+
+    console.log('Using column index for part numbers:', partNumberColIndex, '- Header:', headerRow[partNumberColIndex]);
+
+    // Extract part numbers from the identified column (skip header row)
+    for (let i = 1; i < jsonData.length; i++) {
+      const row = jsonData[i];
+      if (row && row[partNumberColIndex]) {
+        const partNumber = String(row[partNumberColIndex]).trim();
+        if (partNumber && partNumber.length > 0 && !partNumber.toLowerCase().includes('part')) {
+          partNumbers.push(partNumber);
+        }
+      }
+    }
+
+    return partNumbers;
+  }
+
+  /**
+   * Parse CSV data and extract part numbers
+   */
+  function parseCSV(csvText) {
+    const partNumbers = [];
+    const lines = csvText.split(/\r?\n/);
+    
+    if (lines.length === 0) return partNumbers;
+
+    // Find delimiter (comma, semicolon, or tab)
+    const firstLine = lines[0];
+    let delimiter = ',';
+    if (firstLine.includes(';')) delimiter = ';';
+    else if (firstLine.includes('\t')) delimiter = '\t';
+
+    // Parse header to find part number column
+    const headers = firstLine.split(delimiter).map(h => h.trim().toLowerCase());
+    let partNumberColIndex = 0;
+    
+    for (let i = 0; i < headers.length; i++) {
+      if (headers[i].includes('part') || headers[i].includes('code') || headers[i].includes('vendor') || headers[i].includes('number')) {
+        partNumberColIndex = i;
+        break;
+      }
+    }
+
+    // Extract part numbers (skip header)
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (!line) continue;
+      
+      const columns = line.split(delimiter);
+      if (columns[partNumberColIndex]) {
+        const partNumber = columns[partNumberColIndex].trim().replace(/^["']|["']$/g, '');
+        if (partNumber && partNumber.length > 0) {
+          partNumbers.push(partNumber);
+        }
+      }
+    }
+
+    return partNumbers;
+  }
+
+  /**
+   * Process extracted part numbers and perform search
+   */
+  function processExtractedPartNumbers(partNumbers, fileName) {
+    // Remove duplicates
+    const uniquePartNumbers = [...new Set(partNumbers)];
+    
+    console.log(`Extracted ${uniquePartNumbers.length} unique part numbers from ${fileName}`);
+    
+    if (uniquePartNumbers.length === 0) {
+      showCartAlert('warning', 'No Parts Found', 'No valid part numbers found in the file. Please check the format.');
+      return;
+    }
+
+    // Limit to 50 parts
+    if (uniquePartNumbers.length > 50) {
+      showCartAlert('warning', 'Too Many Parts', `Found ${uniquePartNumbers.length} parts. Processing first 50.`);
+    }
+
+    const partsToSearch = uniquePartNumbers.slice(0, 50);
+    
+    showCartAlert('success', 'File Processed', `Found ${partsToSearch.length} part numbers. Searching...`);
+    
+    // Hide modal
     hideExcelModal();
+    
+    // Perform search
+    searchFromExcel(partsToSearch);
   }
 
   // ====================================
@@ -1438,11 +3607,13 @@
       'selected-total-footer'
     );
     const selectedCount = document.getElementById('selected-count');
+    const selectedCountHeader = document.getElementById('selected-count-header');
 
     if (selectedTotal) selectedTotal.textContent = formatPrice(total) + ' AED';
     if (selectedTotalFooter)
       selectedTotalFooter.textContent = formatPrice(total) + ' AED';
     if (selectedCount) selectedCount.textContent = count;
+    if (selectedCountHeader) selectedCountHeader.textContent = count;
 
     // Update selection badge
     const selectionStatus = document.getElementById('selection-status');
@@ -1458,10 +3629,14 @@
       if (selectedBadge) selectedBadge.style.display = 'none';
     }
 
-    // Enable/disable add to cart button
+    // Enable/disable add to cart buttons (both header and footer)
     const addToCartBtn = document.getElementById('add-to-cart-btn');
+    const addToCartBtnHeader = document.getElementById('add-to-cart-btn-header');
     if (addToCartBtn) {
       addToCartBtn.disabled = count === 0;
+    }
+    if (addToCartBtnHeader) {
+      addToCartBtnHeader.disabled = count === 0;
     }
   };
 
@@ -1512,17 +3687,22 @@
     const quantity = parseInt(qtyInput?.value) || 1;
     const pageCategory = determineCategory();
 
-    // Prepare cart item
+    // Prepare cart item - map all fields from Part model/Elasticsearch
+    // Get stock quantity (numeric) for status determination
+    const stockQty = parseInt(partData.quantity) || parseInt(partData.qty) || parseInt(partData.stock) || 0;
     const cartItem = {
-      code: partData.vendorCode || partData.code || 'N/A',
+      code: partData.partNumber || partData.vendorCode || partData.code || 'N/A',
       brand: partData.brand || 'N/A',
       description: partData.description || 'N/A',
-      terms: partData.terms || 'N/A',
+      supplier: partData.supplier || partData.integrationName || 'N/A',
+      terms: partData.deliveryDays ? `${partData.deliveryDays} days` : (partData.terms || 'N/A'),
       weight: parseFloat(partData.weight) || 0,
-      stock: determineStockStatus(partData.stock || partData.qty || 0),
-      aircraftType: partData.aircraftType || 'N/A',
+      stock: determineStockStatus(stockQty),
+      origin: partData.origin || 'N/A',
+      aircraftType: partData.aircraftType || partData.category || 'N/A',
       quantity: quantity,
       price: parseFloat(partData.unitPrice || partData.price) || 0,
+      currency: partData.currency || 'AED',
       reference: '',
       category: pageCategory,
     };
@@ -1586,17 +3766,22 @@
         // Determine current page category
         const pageCategory = determineCategory();
 
-        // Prepare cart item
+        // Prepare cart item - map all fields from Part model/Elasticsearch
+        // Get stock quantity (numeric) for status determination
+        const stockQty = parseInt(partData.quantity) || parseInt(partData.qty) || parseInt(partData.stock) || 0;
         const cartItem = {
-          code: partData.vendorCode || partData.code || 'N/A',
+          code: partData.partNumber || partData.vendorCode || partData.code || 'N/A',
           brand: partData.brand || 'N/A',
           description: partData.description || 'N/A',
-          terms: partData.terms || 'N/A',
+          supplier: partData.supplier || partData.integrationName || 'N/A',
+          terms: partData.deliveryDays ? `${partData.deliveryDays} days` : (partData.terms || 'N/A'),
           weight: parseFloat(partData.weight) || 0,
-          stock: determineStockStatus(partData.stock || partData.qty || 0),
-          aircraftType: partData.aircraftType || 'N/A',
+          stock: determineStockStatus(stockQty),
+          origin: partData.origin || 'N/A',
+          aircraftType: partData.aircraftType || partData.category || 'N/A',
           quantity: quantity,
           price: parseFloat(partData.unitPrice || partData.price) || 0,
+          currency: partData.currency || 'AED',
           reference: '',
           category: pageCategory,
         };
@@ -1633,12 +3818,164 @@
     return 'general';
   }
 
-  function determineStockStatus(quantity) {
-    const qty = parseInt(quantity) || 0;
+  function determineStockStatus(stockOrQty) {
+    // Handle string stock status from Part model
+    if (typeof stockOrQty === 'string') {
+      const stock = stockOrQty.toLowerCase();
+      if (stock === 'out-of-stock' || stock === 'out-stock') return 'ST3';
+      if (stock === 'low-stock') return 'ST2';
+      if (stock === 'in-stock') return 'ST1';
+      // If it's a numeric string, parse it
+      const qty = parseInt(stockOrQty);
+      if (!isNaN(qty)) {
+        if (qty <= 5) return 'ST3';
+        if (qty <= 10) return 'ST2';
+        return 'ST1';
+      }
+      return 'ST3'; // Default to out of stock for unknown strings
+    }
+    // Handle numeric quantity
+    const qty = parseInt(stockOrQty) || 0;
     if (qty <= 5) return 'ST3';
     if (qty <= 10) return 'ST2';
     return 'ST1';
   }
+
+  /**
+   * Show a persistent banner for parts not found from Excel/multi-search
+   */
+  function showNotFoundBanner(notFoundParts, source = 'Excel') {
+    // Remove existing banner if any
+    hideNotFoundBanner();
+    
+    if (!notFoundParts || notFoundParts.length === 0) return;
+
+    const banner = document.createElement('div');
+    banner.id = 'not-found-banner';
+    banner.className = 'not-found-banner';
+    
+    // Limit display to first 10 parts
+    const displayParts = notFoundParts.slice(0, 10);
+    const remainingCount = notFoundParts.length - displayParts.length;
+    
+    banner.innerHTML = `
+      <div class="not-found-banner-content">
+        <div class="not-found-icon">
+          <i data-lucide="alert-triangle"></i>
+        </div>
+        <div class="not-found-text">
+          <strong>${notFoundParts.length} part${notFoundParts.length > 1 ? 's' : ''} not found from ${source}:</strong>
+          <span class="not-found-parts">${displayParts.join(', ')}${remainingCount > 0 ? ` +${remainingCount} more` : ''}</span>
+        </div>
+        <button class="not-found-close" onclick="window.hideNotFoundBanner()">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+    `;
+    
+    // Add styles if not already present
+    if (!document.getElementById('not-found-banner-styles')) {
+      const style = document.createElement('style');
+      style.id = 'not-found-banner-styles';
+      style.textContent = `
+        .not-found-banner {
+          position: sticky;
+          top: 0;
+          z-index: 100;
+          background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+          border-bottom: 2px solid #f39c12;
+          padding: 12px 20px;
+          margin-bottom: 0;
+        }
+        .not-found-banner-content {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          max-width: 1400px;
+          margin: 0 auto;
+        }
+        .not-found-icon {
+          flex-shrink: 0;
+          width: 32px;
+          height: 32px;
+          background: #f39c12;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: white;
+        }
+        .not-found-icon svg {
+          width: 18px;
+          height: 18px;
+        }
+        .not-found-text {
+          flex: 1;
+          font-size: 14px;
+          color: #856404;
+        }
+        .not-found-text strong {
+          display: block;
+          margin-bottom: 2px;
+          color: #664d03;
+        }
+        .not-found-parts {
+          font-family: monospace;
+          background: rgba(0,0,0,0.05);
+          padding: 2px 6px;
+          border-radius: 4px;
+          font-size: 13px;
+        }
+        .not-found-close {
+          flex-shrink: 0;
+          width: 28px;
+          height: 28px;
+          border: none;
+          background: rgba(0,0,0,0.1);
+          border-radius: 50%;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: background 0.2s;
+        }
+        .not-found-close:hover {
+          background: rgba(0,0,0,0.2);
+        }
+        .not-found-close svg {
+          width: 16px;
+          height: 16px;
+        }
+      `;
+      document.head.appendChild(style);
+    }
+    
+    // Insert banner before results table
+    const resultsContainer = elements.resultsTableContainer;
+    if (resultsContainer) {
+      resultsContainer.parentNode.insertBefore(banner, resultsContainer);
+    } else {
+      document.body.insertBefore(banner, document.body.firstChild);
+    }
+    
+    // Initialize lucide icons in the banner
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+    }
+  }
+
+  /**
+   * Hide the not-found banner
+   */
+  function hideNotFoundBanner() {
+    const banner = document.getElementById('not-found-banner');
+    if (banner) {
+      banner.remove();
+    }
+  }
+
+  // Expose hideNotFoundBanner globally for the close button
+  window.hideNotFoundBanner = hideNotFoundBanner;
 
   function showCartAlert(type, title, message) {
     // Get or create a single persistent alerts container

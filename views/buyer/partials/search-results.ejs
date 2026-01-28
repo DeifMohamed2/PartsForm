@@ -4,13 +4,13 @@
     <!-- Backdrop for Filters Sidebar -->
     <div class="filters-backdrop" id="filters-backdrop"></div>
 
-    <!-- Advanced Filters Sidebar (Enhanced) -->
+    <!-- Advanced Filters Sidebar - Professional Design -->
     <aside class="filters-sidebar" id="filters-sidebar">
       <div class="filters-header">
-        <h3 class="filters-title">
-          <i data-lucide="sliders-horizontal"></i>
-          Advanced Filters
-        </h3>
+        <div class="filters-header-content">
+          <h3 class="filters-title">Filters</h3>
+          <span class="filters-subtitle">Refine your search results</span>
+        </div>
         <button class="filters-close" id="filters-close">
           <i data-lucide="x"></i>
         </button>
@@ -26,196 +26,325 @@
           </button>
         </div>
 
-        <!-- Price Range -->
-        <div class="filter-group">
-          <h4 class="filter-group-title">
-            <i data-lucide="dollar-sign"></i>
-            Price Range (AED)
-          </h4>
-          <div class="price-range-container">
-            <div class="price-range-slider">
-              <input type="range" id="price-min" min="0" max="500000" value="0" class="range-input">
-              <input type="range" id="price-max" min="0" max="500000" value="500000" class="range-input">
+        <!-- Dynamic Filter Stats Banner -->
+        <div class="filter-stats-banner" id="filter-stats-banner" style="display: none;">
+          <div class="filter-stats-header">
+            <i data-lucide="bar-chart-3"></i>
+            <span>Filter by Search Results</span>
+          </div>
+          <div class="filter-stats-info">
+            <span class="filter-stats-count" id="filter-stats-count">0</span> parts found
+          </div>
+        </div>
+
+        <!-- Price Range with Dual Slider -->
+        <div class="filter-section filter-section-enhanced">
+          <div class="filter-section-header">
+            <h4 class="filter-section-title">
+              <i data-lucide="banknote"></i>
+              Price Range
+            </h4>
+            <span class="filter-section-unit" id="price-currency">USD</span>
+          </div>
+          
+          <!-- Price Range Display -->
+          <div class="filter-range-display">
+            <span class="range-value-min" id="price-range-min-display">0</span>
+            <span class="range-separator">—</span>
+            <span class="range-value-max" id="price-range-max-display">500,000</span>
+          </div>
+          
+          <!-- Dual Range Slider -->
+          <div class="dual-range-slider" id="price-slider-container">
+            <div class="slider-track">
+              <div class="slider-range" id="price-slider-range"></div>
             </div>
-            <div class="price-inputs">
-              <div class="price-input-group">
-                <label>Min Price</label>
-                <input type="number" id="min-price-input" value="0" min="0" max="500000" class="price-input">
-              </div>
-              <div class="price-input-group">
-                <label>Max Price</label>
-                <input type="number" id="max-price-input" value="500000" min="0" max="500000" class="price-input">
-              </div>
+            <input type="range" class="slider-thumb slider-thumb-min" id="price-slider-min" min="0" max="500000" value="0" step="1">
+            <input type="range" class="slider-thumb slider-thumb-max" id="price-slider-max" min="0" max="500000" value="500000" step="1">
+          </div>
+          
+          <!-- Price Input Fields -->
+          <div class="filter-range-inputs compact">
+            <div class="filter-input-group">
+              <label>Min</label>
+              <input type="number" id="min-price-input" value="0" min="0" max="500000" placeholder="0">
+            </div>
+            <span class="filter-range-separator">–</span>
+            <div class="filter-input-group">
+              <label>Max</label>
+              <input type="number" id="max-price-input" value="500000" min="0" max="500000" placeholder="500,000">
+            </div>
+          </div>
+          
+          <!-- Price Distribution Preview -->
+          <div class="filter-distribution" id="price-distribution">
+            <div class="distribution-bars">
+              <!-- Bars will be generated dynamically -->
             </div>
           </div>
         </div>
 
-        <!-- Weight Range -->
-        <div class="filter-group">
-          <h4 class="filter-group-title">
-            <i data-lucide="scale"></i>
-            Weight Range (kg)
+        <!-- Stock Availability with Count Badges -->
+        <div class="filter-section filter-section-enhanced">
+          <h4 class="filter-section-title">
+            <i data-lucide="package-check"></i>
+            Availability
           </h4>
-          <div class="weight-inputs">
-            <div class="price-input-group">
-              <label>Min Weight</label>
-              <input type="number" id="min-weight-input" value="0" min="0" max="10000" class="price-input">
-            </div>
-            <div class="price-input-group">
-              <label>Max Weight</label>
-              <input type="number" id="max-weight-input" value="10000" min="0" max="10000" class="price-input">
-            </div>
+          <div class="filter-options filter-options-cards">
+            <label class="filter-checkbox filter-card">
+              <input type="checkbox" name="stock" value="in-stock" data-filter="stock" data-value="in-stock">
+              <span class="filter-card-content">
+                <span class="filter-card-icon green">
+                  <i data-lucide="check-circle"></i>
+                </span>
+                <span class="filter-card-label">In Stock</span>
+                <span class="filter-card-count" id="stock-in-count">0</span>
+              </span>
+            </label>
+            <label class="filter-checkbox filter-card">
+              <input type="checkbox" name="stock" value="low-stock" data-filter="stock" data-value="low-stock">
+              <span class="filter-card-content">
+                <span class="filter-card-icon yellow">
+                  <i data-lucide="alert-triangle"></i>
+                </span>
+                <span class="filter-card-label">Low Stock</span>
+                <span class="filter-card-count" id="stock-low-count">0</span>
+              </span>
+            </label>
+            <label class="filter-checkbox filter-card">
+              <input type="checkbox" name="stock" value="out-of-stock" data-filter="stock" data-value="out-of-stock">
+              <span class="filter-card-content">
+                <span class="filter-card-icon red">
+                  <i data-lucide="x-circle"></i>
+                </span>
+                <span class="filter-card-label">Out of Stock</span>
+                <span class="filter-card-count" id="stock-out-count">0</span>
+              </span>
+            </label>
           </div>
         </div>
 
-        <!-- Brand Type -->
-        <div class="filter-group">
-          <h4 class="filter-group-title">
-            <i data-lucide="award"></i>
-            Brand Type
-          </h4>
-          <div class="filter-tags">
-            <button class="filter-tag active" data-filter="brand-type" data-value="All">All</button>
-            <button class="filter-tag" data-filter="brand-type" data-value="OEM">
-              <i data-lucide="shield-check"></i>
-              OEM
-            </button>
-            <button class="filter-tag" data-filter="brand-type" data-value="Genuine">
-              <i data-lucide="badge-check"></i>
-              Genuine
-            </button>
-            <button class="filter-tag" data-filter="brand-type" data-value="Aftermarket">
-              <i data-lucide="package"></i>
-              Aftermarket
-            </button>
+        <!-- Brands with Dynamic Count -->
+        <div class="filter-section filter-section-enhanced">
+          <div class="filter-section-header">
+            <h4 class="filter-section-title">
+              <i data-lucide="award"></i>
+              Brand
+            </h4>
+            <span class="filter-count-badge" id="brand-total-count">0</span>
           </div>
-        </div>
-
-        <!-- Brands -->
-        <div class="filter-group">
-          <h4 class="filter-group-title">
-            <i data-lucide="building"></i>
-            Brands
-          </h4>
-          <div class="filter-search">
+          <div class="filter-search-box">
             <i data-lucide="search"></i>
             <input type="text" id="brand-filter-search" placeholder="Search brands...">
-          </div>
-          <div class="filter-tags scrollable" id="brand-filter-tags">
-            <button class="filter-tag active" data-filter="brand" data-value="All">All</button>
-            <button class="filter-tag" data-filter="brand" data-value="Bosch">Bosch</button>
-            <button class="filter-tag" data-filter="brand" data-value="SKF">SKF</button>
-            <button class="filter-tag" data-filter="brand" data-value="Parker">Parker</button>
-            <button class="filter-tag" data-filter="brand" data-value="Gates">Gates</button>
-            <button class="filter-tag" data-filter="brand" data-value="Continental">Continental</button>
-            <button class="filter-tag" data-filter="brand" data-value="Denso">Denso</button>
-            <button class="filter-tag" data-filter="brand" data-value="Valeo">Valeo</button>
-            <button class="filter-tag" data-filter="brand" data-value="Delphi">Delphi</button>
-            <button class="filter-tag" data-filter="brand" data-value="Brembo">Brembo</button>
-            <button class="filter-tag" data-filter="brand" data-value="Sachs">Sachs</button>
-            <button class="filter-tag" data-filter="brand" data-value="Mann">Mann</button>
-            <button class="filter-tag" data-filter="brand" data-value="NGK">NGK</button>
-            <button class="filter-tag" data-filter="brand" data-value="Caterpillar">Caterpillar</button>
-            <button class="filter-tag" data-filter="brand" data-value="3K">3K</button>
-          </div>
-        </div>
-
-        <!-- Stock Status -->
-        <div class="filter-group">
-          <h4 class="filter-group-title">
-            <i data-lucide="package"></i>
-            Stock Status
-          </h4>
-          <div class="filter-tags">
-            <button class="filter-tag active" data-filter="stock" data-value="All">All</button>
-            <button class="filter-tag" data-filter="stock" data-value="ST1">
-              <span class="stock-indicator green"></span>
-              ST1 (In Stock)
+            <button class="filter-search-clear" id="brand-search-clear" style="display: none;">
+              <i data-lucide="x"></i>
             </button>
-            <button class="filter-tag" data-filter="stock" data-value="ST2">
-              <span class="stock-indicator yellow"></span>
-              ST2 (Low Stock)
-            </button>
-            <button class="filter-tag" data-filter="stock" data-value="ST3">
-              <span class="stock-indicator red"></span>
-              ST3 (Limited)
+          </div>
+          <div class="filter-options scrollable filter-options-dynamic" id="brand-filter-tags">
+            <label class="filter-checkbox">
+              <input type="checkbox" name="brand" value="All" data-filter="brand" data-value="All" checked>
+              <span class="filter-checkbox-box"></span>
+              <span class="filter-checkbox-label">All Brands</span>
+              <span class="filter-item-count" id="brand-all-count"></span>
+            </label>
+            <!-- Dynamic brand options will be inserted here -->
+          </div>
+          <div class="filter-show-more" id="brand-show-more" style="display: none;">
+            <button class="show-more-btn" data-target="brand">
+              <span>Show more</span>
+              <i data-lucide="chevron-down"></i>
             </button>
           </div>
         </div>
 
-        <!-- Country of Origin -->
-        <div class="filter-group">
-          <h4 class="filter-group-title">
-            <i data-lucide="globe"></i>
-            Country of Origin
-          </h4>
-          <div class="filter-tags">
-            <button class="filter-tag active" data-filter="origin" data-value="All">All</button>
-            <button class="filter-tag" data-filter="origin" data-value="Germany">🇩🇪 Germany</button>
-            <button class="filter-tag" data-filter="origin" data-value="USA">🇺🇸 USA</button>
-            <button class="filter-tag" data-filter="origin" data-value="Japan">🇯🇵 Japan</button>
-            <button class="filter-tag" data-filter="origin" data-value="UK">🇬🇧 UK</button>
-            <button class="filter-tag" data-filter="origin" data-value="France">🇫🇷 France</button>
-            <button class="filter-tag" data-filter="origin" data-value="Italy">🇮🇹 Italy</button>
-            <button class="filter-tag" data-filter="origin" data-value="China">🇨🇳 China</button>
-            <button class="filter-tag" data-filter="origin" data-value="Korea">🇰🇷 S. Korea</button>
+        <!-- Supplier with Dynamic Count -->
+        <div class="filter-section filter-section-enhanced">
+          <div class="filter-section-header">
+            <h4 class="filter-section-title">
+              <i data-lucide="building-2"></i>
+              Supplier
+            </h4>
+            <span class="filter-count-badge" id="supplier-total-count">0</span>
+          </div>
+          <div class="filter-search-box">
+            <i data-lucide="search"></i>
+            <input type="text" id="supplier-filter-search" placeholder="Search suppliers...">
+            <button class="filter-search-clear" id="supplier-search-clear" style="display: none;">
+              <i data-lucide="x"></i>
+            </button>
+          </div>
+          <div class="filter-options scrollable filter-options-dynamic" id="supplier-filter-tags">
+            <label class="filter-checkbox">
+              <input type="checkbox" name="supplier" value="All" data-filter="supplier" data-value="All" checked>
+              <span class="filter-checkbox-box"></span>
+              <span class="filter-checkbox-label">All Suppliers</span>
+              <span class="filter-item-count" id="supplier-all-count"></span>
+            </label>
+            <!-- Dynamic supplier options will be inserted here -->
+          </div>
+          <div class="filter-show-more" id="supplier-show-more" style="display: none;">
+            <button class="show-more-btn" data-target="supplier">
+              <span>Show more</span>
+              <i data-lucide="chevron-down"></i>
+            </button>
           </div>
         </div>
 
-        <!-- Delivery Time -->
-        <div class="filter-group">
-          <h4 class="filter-group-title">
-            <i data-lucide="truck"></i>
-            Delivery Time
-          </h4>
-          <div class="filter-tags">
-            <button class="filter-tag active" data-filter="delivery" data-value="All">All</button>
-            <button class="filter-tag" data-filter="delivery" data-value="1-2">
+        <!-- Origin/Country Filter -->
+        <div class="filter-section filter-section-enhanced">
+          <div class="filter-section-header">
+            <h4 class="filter-section-title">
+              <i data-lucide="globe"></i>
+              Origin Country
+            </h4>
+            <span class="filter-count-badge" id="origin-total-count">0</span>
+          </div>
+          <div class="filter-options scrollable filter-options-dynamic" id="origin-filter-tags">
+            <label class="filter-checkbox">
+              <input type="checkbox" name="origin" value="All" data-filter="origin" data-value="All" checked>
+              <span class="filter-checkbox-box"></span>
+              <span class="filter-checkbox-label">All Countries</span>
+            </label>
+            <!-- Dynamic origin options will be inserted here -->
+          </div>
+        </div>
+
+        <!-- Delivery Time with Slider -->
+        <div class="filter-section filter-section-enhanced">
+          <div class="filter-section-header">
+            <h4 class="filter-section-title">
+              <i data-lucide="truck"></i>
+              Delivery Time
+            </h4>
+            <span class="filter-section-unit">days</span>
+          </div>
+          
+          <!-- Delivery Range Display -->
+          <div class="filter-range-display">
+            <span class="range-value-min" id="delivery-range-min-display">0</span>
+            <span class="range-separator">—</span>
+            <span class="range-value-max" id="delivery-range-max-display">30+</span>
+          </div>
+          
+          <!-- Delivery Slider -->
+          <div class="dual-range-slider" id="delivery-slider-container">
+            <div class="slider-track">
+              <div class="slider-range" id="delivery-slider-range"></div>
+            </div>
+            <input type="range" class="slider-thumb slider-thumb-min" id="delivery-slider-min" min="0" max="30" value="0" step="1">
+            <input type="range" class="slider-thumb slider-thumb-max" id="delivery-slider-max" min="0" max="30" value="30" step="1">
+          </div>
+          
+          <!-- Quick Delivery Options -->
+          <div class="filter-quick-options">
+            <button class="filter-quick-btn" data-delivery="express" data-min="0" data-max="2">
               <i data-lucide="zap"></i>
-              1-2 Days
+              Express (1-2 days)
             </button>
-            <button class="filter-tag" data-filter="delivery" data-value="3-5">3-5 Days</button>
-            <button class="filter-tag" data-filter="delivery" data-value="7-14">7-14 Days</button>
+            <button class="filter-quick-btn" data-delivery="fast" data-min="0" data-max="5">
+              <i data-lucide="clock"></i>
+              Fast (3-5 days)
+            </button>
+            <button class="filter-quick-btn" data-delivery="standard" data-min="0" data-max="14">
+              <i data-lucide="calendar"></i>
+              Standard (7-14 days)
+            </button>
           </div>
         </div>
 
-        <!-- Supplier Rating -->
-        <div class="filter-group">
-          <h4 class="filter-group-title">
-            <i data-lucide="star"></i>
-            Supplier Rating
-          </h4>
-          <div class="filter-tags">
-            <button class="filter-tag active" data-filter="rating" data-value="All">All</button>
-            <button class="filter-tag" data-filter="rating" data-value="5">⭐⭐⭐⭐⭐</button>
-            <button class="filter-tag" data-filter="rating" data-value="4">⭐⭐⭐⭐+</button>
-            <button class="filter-tag" data-filter="rating" data-value="3">⭐⭐⭐+</button>
+        <!-- Quantity Range with Slider -->
+        <div class="filter-section filter-section-enhanced">
+          <div class="filter-section-header">
+            <h4 class="filter-section-title">
+              <i data-lucide="layers"></i>
+              Available Quantity
+            </h4>
+            <span class="filter-section-unit">units</span>
+          </div>
+          
+          <!-- Quantity Range Display -->
+          <div class="filter-range-display">
+            <span class="range-value-min" id="qty-range-min-display">0</span>
+            <span class="range-separator">—</span>
+            <span class="range-value-max" id="qty-range-max-display">1000+</span>
+          </div>
+          
+          <!-- Quantity Slider -->
+          <div class="dual-range-slider" id="qty-slider-container">
+            <div class="slider-track">
+              <div class="slider-range" id="qty-slider-range"></div>
+            </div>
+            <input type="range" class="slider-thumb slider-thumb-min" id="qty-slider-min" min="0" max="1000" value="0" step="1">
+            <input type="range" class="slider-thumb slider-thumb-max" id="qty-slider-max" min="0" max="1000" value="1000" step="1">
+          </div>
+          
+          <!-- Min Quantity Input -->
+          <div class="filter-range-inputs compact">
+            <div class="filter-input-group full-width">
+              <label>Minimum Available</label>
+              <input type="number" id="min-quantity-input" value="0" min="0" placeholder="0">
+            </div>
           </div>
         </div>
 
-        <!-- Verified Suppliers -->
-        <div class="filter-group">
-          <h4 class="filter-group-title">
-            <i data-lucide="shield-check"></i>
-            Verified Suppliers
-          </h4>
-          <label class="filter-toggle">
-            <input type="checkbox" id="verified-suppliers-only" checked>
-            <span class="toggle-slider"></span>
-            <span class="toggle-label">Show only verified suppliers</span>
-          </label>
+        <!-- Weight Range with Slider -->
+        <div class="filter-section filter-section-enhanced">
+          <div class="filter-section-header">
+            <h4 class="filter-section-title">
+              <i data-lucide="weight"></i>
+              Weight
+            </h4>
+            <span class="filter-section-unit">kg</span>
+          </div>
+          
+          <!-- Weight Range Display -->
+          <div class="filter-range-display">
+            <span class="range-value-min" id="weight-range-min-display">0</span>
+            <span class="range-separator">—</span>
+            <span class="range-value-max" id="weight-range-max-display">100</span>
+          </div>
+          
+          <!-- Weight Slider -->
+          <div class="dual-range-slider" id="weight-slider-container">
+            <div class="slider-track">
+              <div class="slider-range" id="weight-slider-range"></div>
+            </div>
+            <input type="range" class="slider-thumb slider-thumb-min" id="weight-slider-min" min="0" max="100" value="0" step="0.1">
+            <input type="range" class="slider-thumb slider-thumb-max" id="weight-slider-max" min="0" max="100" value="100" step="0.1">
+          </div>
+          
+          <!-- Weight Inputs -->
+          <div class="filter-range-inputs compact">
+            <div class="filter-input-group">
+              <label>Min</label>
+              <input type="number" id="min-weight-input" value="0" min="0" step="0.1" placeholder="0">
+            </div>
+            <span class="filter-range-separator">–</span>
+            <div class="filter-input-group">
+              <label>Max</label>
+              <input type="number" id="max-weight-input" value="100" min="0" step="0.1" placeholder="100">
+            </div>
+          </div>
         </div>
       </div>
 
+      <!-- Filter Footer with Results Preview -->
       <div class="filters-footer">
-        <button class="filter-btn-clear" id="clear-filters">
-          <i data-lucide="trash-2"></i>
-          Clear All
-        </button>
-        <button class="filter-btn-apply" id="apply-filters">
-          <i data-lucide="check"></i>
-          Apply Filters
-        </button>
+        <div class="filter-results-preview">
+          <span class="preview-label">Matching:</span>
+          <span class="preview-count" id="filter-preview-count">0</span>
+          <span class="preview-label">parts</span>
+        </div>
+        <div class="filter-footer-actions">
+          <button class="filter-btn-clear" id="clear-filters">
+            <i data-lucide="rotate-ccw"></i>
+            Reset
+          </button>
+          <button class="filter-btn-apply" id="apply-filters">
+            <i data-lucide="check"></i>
+            Apply Filters
+          </button>
+        </div>
       </div>
     </aside>
 
@@ -240,9 +369,53 @@
           <span class="selected-total-label">Selected Total</span>
           <span class="selected-total-amount" id="selected-total">0.00 AED</span>
           </div>
+          <!-- Add to Cart Button in Header -->
+          <button class="btn-add-to-cart-header" id="add-to-cart-btn-header" disabled>
+            <i data-lucide="shopping-cart"></i>
+            <span>Add to Cart (<span id="selected-count-header">0</span>)</span>
+          </button>
           <button class="filter-toggle-btn" id="mobile-filter-toggle">
             <i data-lucide="sliders-horizontal"></i>
             <span>Filters</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Sort & Filter Bar -->
+      <div class="quick-sort-bar" id="quick-sort-bar" style="display: none;">
+        <div class="quick-sort-left">
+          <span class="quick-sort-label">Sort by:</span>
+          <div class="quick-sort-buttons">
+            <button class="quick-sort-btn active" data-sort="relevance" data-order="desc">
+              <i data-lucide="sparkles"></i>
+              <span>Relevance</span>
+            </button>
+            <button class="quick-sort-btn" data-sort="price" data-order="asc">
+              <i data-lucide="arrow-down-narrow-wide"></i>
+              <span>Cheapest</span>
+            </button>
+            <button class="quick-sort-btn" data-sort="price" data-order="desc">
+              <i data-lucide="arrow-up-narrow-wide"></i>
+              <span>Expensive</span>
+            </button>
+            <button class="quick-sort-btn" data-sort="deliveryDays" data-order="asc">
+              <i data-lucide="zap"></i>
+              <span>Fastest Delivery</span>
+            </button>
+            <button class="quick-sort-btn" data-sort="quantity" data-order="desc">
+              <i data-lucide="package-check"></i>
+              <span>Most Stock</span>
+            </button>
+          </div>
+        </div>
+        <div class="quick-sort-right">
+          <button class="quick-filter-btn" data-filter="in-stock">
+            <span class="stock-dot green"></span>
+            In Stock Only
+          </button>
+          <button class="quick-filter-btn" data-filter="low-stock">
+            <span class="stock-dot yellow"></span>
+            Low Stock
           </button>
         </div>
       </div>
@@ -900,6 +1073,150 @@
   margin: 0;
 }
 
+/* Excel Recent Search Styles */
+.recent-search-excel {
+  padding: 0 !important;
+  background: transparent !important;
+  flex-direction: column;
+  gap: 0;
+}
+
+.recent-search-excel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.875rem 1rem;
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.08) 0%, rgba(59, 130, 246, 0.08) 100%);
+  border-radius: 0.5rem 0.5rem 0 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.recent-search-excel-header .recent-search-item-content {
+  gap: 0.75rem;
+}
+
+.recent-search-excel-header .recent-search-item-content i {
+  color: #22c55e;
+}
+
+.recent-search-excel-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.recent-search-all-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  background: var(--primary);
+  border: none;
+  border-radius: 0.375rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.recent-search-all-btn:hover {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+}
+
+.recent-search-all-btn i {
+  width: 12px;
+  height: 12px;
+}
+
+.recent-search-parts-list {
+  display: flex;
+  flex-direction: column;
+  max-height: 200px;
+  overflow-y: auto;
+  background: var(--bg-secondary);
+  border-radius: 0 0 0.5rem 0.5rem;
+}
+
+.recent-search-parts-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.recent-search-parts-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.recent-search-parts-list::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 2px;
+}
+
+.recent-part-number {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.625rem 1rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.recent-part-number:last-child {
+  border-bottom: none;
+}
+
+.recent-part-number:hover {
+  background: rgba(59, 130, 246, 0.06);
+}
+
+.recent-part-number i {
+  width: 14px;
+  height: 14px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.recent-part-number span {
+  flex: 1;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.8125rem;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.recent-part-search-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: 0.25rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  opacity: 0;
+}
+
+.recent-part-number:hover .recent-part-search-btn {
+  opacity: 1;
+}
+
+.recent-part-search-btn:hover {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+}
+
+.recent-part-search-btn i {
+  width: 12px;
+  height: 12px;
+  color: inherit;
+}
+
 .btn-clear-history {
   display: flex;
   align-items: center;
@@ -926,6 +1243,11 @@
 .btn-clear-history i {
   width: 16px;
   height: 16px;
+}
+
+/* Make modal wider for Excel searches */
+.modal-container.modal-sm {
+  max-width: 480px;
 }
 
 @media (max-width: 1199px) {
@@ -965,6 +1287,234 @@
   .btn-contact-support {
     width: 100%;
     justify-content: center;
+  }
+}
+
+/* ====================================
+   QUICK SORT BAR STYLES
+   ==================================== */
+.quick-sort-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.875rem 1.25rem;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.04) 0%, rgba(99, 102, 241, 0.04) 100%);
+  border: 1px solid rgba(59, 130, 246, 0.12);
+  border-radius: 0.75rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.quick-sort-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.quick-sort-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.quick-sort-buttons {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.quick-sort-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 0.875rem;
+  background: white;
+  border: 1.5px solid var(--border-color);
+  border-radius: 2rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.quick-sort-btn i {
+  width: 14px;
+  height: 14px;
+}
+
+.quick-sort-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: rgba(59, 130, 246, 0.04);
+}
+
+.quick-sort-btn.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.25);
+}
+
+.quick-sort-btn.active:hover {
+  background: var(--primary-dark);
+  border-color: var(--primary-dark);
+  color: white;
+}
+
+.quick-sort-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.quick-filter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 0.875rem;
+  background: white;
+  border: 1.5px solid var(--border-color);
+  border-radius: 2rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.quick-filter-btn i {
+  width: 14px;
+  height: 14px;
+}
+
+.quick-filter-btn .stock-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 6px rgba(34, 197, 94, 0.4);
+}
+
+.quick-filter-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: rgba(59, 130, 246, 0.04);
+}
+
+.quick-filter-btn.active {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  border-color: #22c55e;
+  color: white;
+  box-shadow: 0 2px 8px rgba(34, 197, 94, 0.25);
+}
+
+.quick-filter-btn.active .stock-dot {
+  background: white;
+  box-shadow: none;
+}
+
+.quick-filter-btn.active:hover {
+  background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+}
+
+/* Low Stock button active state */
+.quick-filter-btn[data-filter="low-stock"].active {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  border-color: #f59e0b;
+}
+
+.quick-filter-btn[data-filter="low-stock"].active:hover {
+  background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+}
+
+/* ====================================
+   ENHANCED FILTERS SIDEBAR STYLES
+   ==================================== */
+.filters-sidebar {
+  width: 420px;
+  min-width: 420px;
+}
+
+@media (max-width: 1199px) {
+  .filters-sidebar {
+    width: 400px;
+    max-width: 90vw;
+  }
+}
+
+/* Dynamic brand tags from data */
+.filter-tags-dynamic {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  max-height: 180px;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+.filter-tags-dynamic::-webkit-scrollbar {
+  width: 4px;
+}
+
+.filter-tags-dynamic::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+  border-radius: 2px;
+}
+
+.filter-tags-dynamic::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 2px;
+}
+
+/* Quick Sort responsive */
+@media (max-width: 991px) {
+  .quick-sort-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  
+  .quick-sort-left,
+  .quick-sort-right {
+    width: 100%;
+  }
+  
+  .quick-sort-buttons {
+    width: 100%;
+  }
+}
+
+@media (max-width: 575px) {
+  .quick-sort-btn span {
+    display: none;
+  }
+  
+  .quick-sort-btn {
+    padding: 0.625rem;
+  }
+  
+  .quick-sort-btn i {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .quick-filter-btn span {
+    display: none;
+  }
+  
+  .quick-filter-btn {
+    padding: 0.625rem;
   }
 }
 </style>

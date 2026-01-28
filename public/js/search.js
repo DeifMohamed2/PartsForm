@@ -698,63 +698,60 @@
   // ====================================
   // AUTOCOMPLETE
   // ====================================
+  // AUTOCOMPLETE - Part Number Only (Uses API)
+  // ====================================
   function showAutocomplete(query) {
-    const queryLower = query.toLowerCase();
+    // Fetch suggestions from API - Part Number Only
+    fetch(`/buyer/api/search/autocomplete?q=${encodeURIComponent(query)}&limit=10`)
+      .then(response => response.json())
+      .then(data => {
+        if (!data.success || !data.suggestions || data.suggestions.length === 0) {
+          hideAutocomplete();
+          return;
+        }
 
-    // Filter suggestions (match anywhere for better results)
-    const suggestions = mockPartsDatabase
-      .filter(
-        (part) =>
-          part.code.toLowerCase().includes(queryLower) ||
-          part.description.toLowerCase().includes(queryLower) ||
-          part.brand.toLowerCase().includes(queryLower)
-      )
-      .slice(0, 10);
+        const suggestions = data.suggestions;
+        state.autocompleteResults = suggestions;
+        state.autocompleteIndex = -1;
 
-    if (suggestions.length === 0) {
-      hideAutocomplete();
-      return;
-    }
-
-    state.autocompleteResults = suggestions;
-    state.autocompleteIndex = -1;
-
-    // Render suggestions
-    elements.autocompleteContainer.innerHTML = suggestions
-      .map(
-        (part, index) => `
-            <div class="autocomplete-item" data-index="${index}">
-                <div class="autocomplete-icon">
-                    <i data-lucide="package"></i>
+        // Render suggestions - Show part number prominently with supplier count
+        elements.autocompleteContainer.innerHTML = suggestions
+          .map(
+            (part, index) => `
+                <div class="autocomplete-item" data-index="${index}">
+                    <div class="autocomplete-icon">
+                        <i data-lucide="package"></i>
+                    </div>
+                    <div class="autocomplete-content">
+                        <div class="autocomplete-title">${highlightMatch(
+                          part.partNumber,
+                          query
+                        )}</div>
+                        <div class="autocomplete-description">${part.brand || ''} ${part.count ? `• ${part.count} supplier${part.count > 1 ? 's' : ''}` : ''}</div>
+                    </div>
                 </div>
-                <div class="autocomplete-content">
-                    <div class="autocomplete-title">${highlightMatch(
-                      part.code,
-                      query
-                    )}</div>
-                    <div class="autocomplete-description">${highlightMatch(
-                      part.description,
-                      query
-                    )}</div>
-                </div>
-            </div>
-        `
-      )
-      .join('');
+            `
+          )
+          .join('');
 
-    // Add click handlers
-    elements.autocompleteContainer
-      .querySelectorAll('.autocomplete-item')
-      .forEach((item, index) => {
-        item.addEventListener('click', () => selectAutocompleteItem(index));
+        // Add click handlers
+        elements.autocompleteContainer
+          .querySelectorAll('.autocomplete-item')
+          .forEach((item, index) => {
+            item.addEventListener('click', () => selectAutocompleteItem(index));
+          });
+
+        elements.autocompleteContainer.classList.add('show');
+
+        // Reinitialize Lucide icons
+        if (typeof lucide !== 'undefined') {
+          lucide.createIcons();
+        }
+      })
+      .catch(error => {
+        console.error('Autocomplete error:', error);
+        hideAutocomplete();
       });
-
-    elements.autocompleteContainer.classList.add('show');
-
-    // Reinitialize Lucide icons
-    if (typeof lucide !== 'undefined') {
-      lucide.createIcons();
-    }
   }
 
   function hideAutocomplete() {
@@ -774,7 +771,8 @@
   function selectAutocompleteItem(index) {
     const selected = state.autocompleteResults[index];
     if (selected) {
-      elements.searchInput.value = selected.code;
+      // Use partNumber from API response
+      elements.searchInput.value = selected.partNumber || selected.code;
       hideAutocomplete();
       performSearch();
     }
@@ -829,7 +827,7 @@
         .map(
           (part) => {
             const price = part.unitPrice || part.price || 0;
-            const code = part.vendorCode || part.code || 'N/A';
+            const code = part.partNumber || part.vendorCode || part.code || 'N/A';
             const quantity = part.stock || part.qty || 0;
             const weight = part.weight ? (typeof part.weight === 'number' ? `${part.weight} kg` : part.weight) : 'N/A';
             const delivery = part.delivery ? (typeof part.delivery === 'number' ? `${part.delivery} days` : part.delivery) : 'N/A';

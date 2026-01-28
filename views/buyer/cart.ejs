@@ -1,171 +1,174 @@
 <%- include('partials/header') %>
-<link rel="stylesheet" href="/css/buyerCSS/buyer-main.css">
-<link rel="stylesheet" href="/css/buyerCSS/cart.css">
+  <link rel="stylesheet" href="/css/buyerCSS/buyer-main.css">
+  <link rel="stylesheet" href="/css/buyerCSS/cart.css">
 
-<%- include('partials/navbar') %>
+  <%- include('partials/navbar') %>
 
-<!-- ====================================
+    <!-- ====================================
      SHOPPING CART PAGE - PROFESSIONAL DESIGN
      ==================================== -->
-<div class="cart-page">
-  <!-- Cart Hero Section -->
-  <div class="cart-hero">
-    <div class="container">
-      <div class="cart-hero-content">
-        <div class="cart-badge">
-          <i data-lucide="shopping-cart"></i>
-          <span>Shopping Cart</span>
-        </div>
-        <h1 class="cart-hero-title">
-          Your <span class="highlight">Shopping Cart</span>
-        </h1>
-        <p class="cart-hero-subtitle">
-          Review and manage your selected parts before placing an order
-        </p>
-      </div>
-    </div>
-  </div>
-
-  <!-- Cart Content -->
-  <div class="cart-content">
-    <div class="container">
-      <!-- Empty Cart State -->
-      <div class="empty-cart" id="empty-cart-state" style="display: none;">
-        <div class="empty-cart-icon">
-          <i data-lucide="shopping-cart"></i>
-        </div>
-        <h2 class="empty-cart-title">Your cart is empty</h2>
-        <p class="empty-cart-text">
-          Browse our extensive catalog and add parts to your cart
-        </p>
-        <div class="empty-cart-actions">
-          <a href="/buyer/search-automotive" class="btn-primary">
-            <i data-lucide="car-front"></i>
-            <span>Search Automotive Parts</span>
-          </a>
+    <div class="cart-page">
+      <!-- Cart Hero Section -->
+      <div class="cart-hero">
+        <div class="container">
+          <div class="cart-hero-content">
+            <div class="cart-badge">
+              <i data-lucide="shopping-cart"></i>
+              <span>Shopping Cart</span>
+            </div>
+            <h1 class="cart-hero-title">
+              Your <span class="highlight">Shopping Cart</span>
+            </h1>
+            <p class="cart-hero-subtitle">
+              Review and manage your selected parts before placing an order
+            </p>
+          </div>
         </div>
       </div>
 
-      <!-- Cart Items -->
-      <div class="cart-items-container" id="cart-items-container" style="display: none;">
-        <!-- Cart Actions Bar -->
-        <div class="cart-actions-bar">
-          <div class="cart-actions-left">
-            <button class="btn-select-all" id="select-all-btn">
-              <i data-lucide="check-square"></i>
-              <span>Select All</span>
-            </button>
-            <button class="btn-remove-selected" id="remove-selected-btn" disabled>
-              <i data-lucide="trash-2"></i>
-              <span>Remove Selected</span>
-            </button>
-          </div>
-          <div class="cart-actions-right">
-            <button class="btn-download-excel" id="download-excel-btn">
-              <i data-lucide="download"></i>
-              <span>Download Excel</span>
-            </button>
-            <button class="btn-clear-cart" id="clear-cart-btn">
-              <i data-lucide="x-circle"></i>
-              <span>Empty Cart</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Cart Table -->
-        <div class="cart-table-wrapper">
-          <table class="cart-table">
-            <thead>
-              <tr>
-                <th class="th-checkbox">
-                  <input type="checkbox" id="header-checkbox" class="cart-checkbox">
-                </th>
-                <th class="th-brand">Brand</th>
-                <th class="th-part-number">Part Number</th>
-                <th class="th-description">Description</th>
-                <th class="th-terms">Terms</th>
-                <th class="th-weight">Weight</th>
-                <th class="th-stock">Stock</th>
-                <th class="th-aircraft">A/C Type</th>
-                <th class="th-qty">QTY</th>
-                <th class="th-packing">Add Packing</th>
-                <th class="th-price">Price</th>
-                <th class="th-amount">Amount</th>
-                <th class="th-reference">Reference</th>
-                <th class="th-date">Date Created</th>
-                <th class="th-actions"></th>
-              </tr>
-            </thead>
-            <tbody id="cart-table-body">
-              <!-- Cart items will be dynamically inserted here -->
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Cart Summary -->
-        <div class="cart-summary">
-          <div class="cart-summary-left">
-            <div class="cart-summary-info">
-              <p class="summary-text">
-                Total in cart <strong id="total-items-count">0</strong> PCS. for the amount
-                <strong id="total-amount-text">0.00</strong> د.إ | Weight: <strong id="total-weight-text">0.000</strong> kg
-              </p>
-              <p class="summary-note">
-                Selected items will be stored in your cart for 30 days.
-                <span id="cart-expiry-text">Time remaining: --</span>
-              </p>
+      <!-- Cart Content -->
+      <div class="cart-content">
+        <div class="container">
+          <!-- Empty Cart State -->
+          <div class="empty-cart" id="empty-cart-state" style="display: none;">
+            <div class="empty-cart-icon">
+              <i data-lucide="shopping-cart"></i>
+            </div>
+            <h2 class="empty-cart-title">Your cart is empty</h2>
+            <p class="empty-cart-text">
+              Browse our extensive catalog and add parts to your cart
+            </p>
+            <div class="empty-cart-actions">
+              <a href="/buyer/search-automotive" class="btn-primary">
+                <i data-lucide="car-front"></i>
+                <span>Search Automotive Parts</span>
+              </a>
             </div>
           </div>
-          <div class="cart-summary-right">
-            <div class="cart-total">
-              <span class="total-label">Total:</span>
-              <div class="total-details">
-                <span class="total-items"><strong id="total-items">0</strong> PCS.</span>
-                <span class="total-amount"><strong id="total-amount">0.00</strong> د.إ</span>
-                <span class="total-weight"><strong id="total-weight">0.000</strong> kg</span>
+
+          <!-- Cart Items -->
+          <div class="cart-items-container" id="cart-items-container" style="display: none;">
+            <!-- Cart Actions Bar -->
+            <div class="cart-actions-bar">
+              <div class="cart-actions-left">
+                <button class="btn-select-all" id="select-all-btn">
+                  <i data-lucide="check-square"></i>
+                  <span>Select All</span>
+                </button>
+                <button class="btn-remove-selected" id="remove-selected-btn" disabled>
+                  <i data-lucide="trash-2"></i>
+                  <span>Remove Selected</span>
+                </button>
+              </div>
+              <div class="cart-actions-right">
+                <button class="btn-download-excel" id="download-excel-btn">
+                  <i data-lucide="download"></i>
+                  <span>Download Excel</span>
+                </button>
+                <button class="btn-clear-cart" id="clear-cart-btn">
+                  <i data-lucide="x-circle"></i>
+                  <span>Empty Cart</span>
+                </button>
               </div>
             </div>
-            <button class="btn-checkout" id="checkout-btn" disabled>
-              <span>Proceed to Checkout</span>
-              <i data-lucide="arrow-right"></i>
-            </button>
+
+            <!-- Cart Table -->
+            <div class="cart-table-wrapper">
+              <table class="cart-table">
+                <thead>
+                  <tr>
+                    <th class="th-checkbox">
+                      <input type="checkbox" id="header-checkbox" class="cart-checkbox">
+                    </th>
+                    <th class="th-brand">Brand</th>
+                    <th class="th-part-number">Part Number</th>
+                    <th class="th-description">Description</th>
+                    <th class="th-supplier">Supplier</th>
+                    <th class="th-terms">Terms</th>
+                    <th class="th-weight">Weight</th>
+                    <th class="th-stock">Stock</th>
+                    <th class="th-aircraft">A/C Type</th>
+                    <th class="th-qty">QTY</th>
+                    <th class="th-packing">Add Packing</th>
+                    <th class="th-price">Price</th>
+                    <th class="th-amount">Amount</th>
+                    <th class="th-reference">Reference</th>
+                    <th class="th-date">Date Created</th>
+                    <th class="th-actions"></th>
+                  </tr>
+                </thead>
+                <tbody id="cart-table-body">
+                  <!-- Cart items will be dynamically inserted here -->
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Cart Summary -->
+            <div class="cart-summary">
+              <div class="cart-summary-left">
+                <div class="cart-summary-info">
+                  <p class="summary-text">
+                    Total in cart <strong id="total-items-count">0</strong> PCS. for the amount
+                    <strong id="total-amount-text">0.00</strong> د.إ | Weight: <strong
+                      id="total-weight-text">0.000</strong> kg
+                  </p>
+                  <p class="summary-note">
+                    Selected items will be stored in your cart for 30 days.
+                    <span id="cart-expiry-text">Time remaining: --</span>
+                  </p>
+                </div>
+              </div>
+              <div class="cart-summary-right">
+                <div class="cart-total">
+                  <span class="total-label">Total:</span>
+                  <div class="total-details">
+                    <span class="total-items"><strong id="total-items">0</strong> PCS.</span>
+                    <span class="total-amount"><strong id="total-amount">0.00</strong> د.إ</span>
+                    <span class="total-weight"><strong id="total-weight">0.000</strong> kg</span>
+                  </div>
+                </div>
+                <button class="btn-checkout" id="checkout-btn" disabled>
+                  <span>Proceed to Checkout</span>
+                  <i data-lucide="arrow-right"></i>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
+
+      <!-- Cart Alerts Container -->
+      <div class="cart-alerts" id="cart-alerts"></div>
     </div>
-  </div>
 
-  <!-- Cart Alerts Container -->
-  <div class="cart-alerts" id="cart-alerts"></div>
-</div>
+    <%- include('partials/quick-search') %>
 
-<%- include('partials/quick-search') %>
-
-<!-- Confirmation Modal -->
-<div class="modal" id="confirm-modal" style="display: none;">
-  <div class="modal-backdrop" id="confirm-backdrop"></div>
-  <div class="modal-content modal-confirm">
-    <div class="modal-body">
-      <div class="confirm-icon">
-        <i data-lucide="alert-circle"></i>
+      <!-- Confirmation Modal -->
+      <div class="modal" id="confirm-modal" style="display: none;">
+        <div class="modal-backdrop" id="confirm-backdrop"></div>
+        <div class="modal-content modal-confirm">
+          <div class="modal-body">
+            <div class="confirm-icon">
+              <i data-lucide="alert-circle"></i>
+            </div>
+            <h3 class="confirm-title" id="confirm-title">Confirm Action</h3>
+            <p class="confirm-message" id="confirm-message">Are you sure?</p>
+            <div class="confirm-actions">
+              <button class="btn-cancel" id="confirm-cancel">Cancel</button>
+              <button class="btn-confirm" id="confirm-ok">Confirm</button>
+            </div>
+          </div>
+        </div>
       </div>
-      <h3 class="confirm-title" id="confirm-title">Confirm Action</h3>
-      <p class="confirm-message" id="confirm-message">Are you sure?</p>
-      <div class="confirm-actions">
-        <button class="btn-cancel" id="confirm-cancel">Cancel</button>
-        <button class="btn-confirm" id="confirm-ok">Confirm</button>
-      </div>
-    </div>
-  </div>
-</div>
 
-<script src="/js/animations.js"></script>
-<script src="/js/main.js"></script>
-<script src="/js/quick-search.js"></script>
-<script src="/js/cart.js"></script>
-<script>
-  lucide.createIcons();
-  window.addEventListener('load', () => lucide.createIcons());
-</script>
+      <script src="/js/animations.js"></script>
+      <script src="/js/main.js"></script>
+      <script src="/js/quick-search.js"></script>
+      <script src="/js/api-integration.js"></script>
+      <script src="/js/cart.js"></script>
+      <script>
+        lucide.createIcons();
+        window.addEventListener('load', () => lucide.createIcons());
+      </script>
 
-<%- include('partials/footer') %>
+      <%- include('partials/footer') %>

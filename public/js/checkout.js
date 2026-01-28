@@ -1,6 +1,7 @@
 // ====================================
 // CHECKOUT PAGE - PROFESSIONAL FUNCTIONALITY
 // PARTSFORM Buyer Portal
+// Orders are created via backend API - no localStorage for orders
 // ====================================
 
 (function () {
@@ -17,12 +18,23 @@
       step1: document.getElementById('step-1'),
       step2: document.getElementById('step-2'),
       step3: document.getElementById('step-3'),
+      step4: document.getElementById('step-4'),
+
+      // Shipping Address Elements
+      addressesLoading: document.getElementById('addresses-loading'),
+      shippingAddresses: document.getElementById('shipping-addresses'),
+      noAddresses: document.getElementById('no-addresses'),
+      addAddressSection: document.getElementById('add-address-section'),
+      shippingAddressSummary: document.getElementById('shipping-address-summary'),
+      btnChangeAddress: document.getElementById('btn-change-address'),
 
       // Buttons
       btnToStep2: document.getElementById('btn-to-step-2'),
-      btnToStep1: document.getElementById('btn-to-step-1'),
+      btnToStep1Back: document.getElementById('btn-to-step-1-back'),
       btnToStep3: document.getElementById('btn-to-step-3'),
       btnToStep2Back: document.getElementById('btn-to-step-2-back'),
+      btnToStep4: document.getElementById('btn-to-step-4'),
+      btnToStep3Back: document.getElementById('btn-to-step-3-back'),
       btnComplete: document.getElementById('btn-complete-payment'),
 
       // Payment Type
@@ -62,6 +74,9 @@
       orderNumber: document.getElementById('order-number'),
       paymentMethodText: document.getElementById('payment-method-text'),
       amountPaid: document.getElementById('amount-paid'),
+      
+      // Error display
+      errorContainer: document.getElementById('checkout-error'),
     };
 
     // ====================================
@@ -74,6 +89,11 @@
     let selectedPaymentMethod = 'card';
     let isAOGCase = false;
     let aogCaseId = null;
+    let isSubmitting = false;
+    
+    // Shipping Address State
+    let addresses = [];
+    let selectedAddress = null;
 
     // Payment method fees
     const paymentFees = {
@@ -97,6 +117,7 @@
     // ====================================
     function init() {
       loadCartData();
+      loadShippingAddresses();
       renderOrderSummary();
       updatePaymentAmounts();
       attachEventListeners();
@@ -111,6 +132,163 @@
         if (secureBadge) secureBadge.style.display = 'none';
         if (subtitle) subtitle.textContent = 'Priority AOG case - Complete payment to activate sourcing';
       }
+    }
+
+    // ====================================
+    // LOAD SHIPPING ADDRESSES
+    // ====================================
+    async function loadShippingAddresses() {
+      try {
+        // Show loading state
+        if (DOM.addressesLoading) DOM.addressesLoading.style.display = 'flex';
+        if (DOM.shippingAddresses) DOM.shippingAddresses.style.display = 'none';
+        if (DOM.noAddresses) DOM.noAddresses.style.display = 'none';
+        if (DOM.addAddressSection) DOM.addAddressSection.style.display = 'none';
+
+        const response = await fetch('/buyer/api/addresses');
+        const data = await response.json();
+
+        if (DOM.addressesLoading) DOM.addressesLoading.style.display = 'none';
+
+        if (data.success && data.addresses && data.addresses.length > 0) {
+          addresses = data.addresses;
+          renderShippingAddresses();
+          
+          // Auto-select default address
+          const defaultAddress = addresses.find(a => a.isDefault) || addresses[0];
+          if (defaultAddress) {
+            selectAddress(defaultAddress._id);
+          }
+        } else {
+          // No addresses
+          if (DOM.noAddresses) DOM.noAddresses.style.display = 'flex';
+        }
+      } catch (error) {
+        console.error('Error loading addresses:', error);
+        if (DOM.addressesLoading) DOM.addressesLoading.style.display = 'none';
+        if (DOM.noAddresses) {
+          DOM.noAddresses.style.display = 'flex';
+          DOM.noAddresses.querySelector('.no-addresses-text').textContent = 
+            'Failed to load addresses. Please try again.';
+        }
+      }
+    }
+
+    // ====================================
+    // RENDER SHIPPING ADDRESSES
+    // ====================================
+    function renderShippingAddresses() {
+      if (!DOM.shippingAddresses) return;
+
+      DOM.shippingAddresses.style.display = 'grid';
+      if (DOM.addAddressSection) DOM.addAddressSection.style.display = 'block';
+
+      DOM.shippingAddresses.innerHTML = addresses.map(address => `
+        <div class="shipping-address-card ${address.isDefault ? 'default' : ''}" 
+             data-address-id="${address._id}">
+          <div class="address-radio">
+            <input type="radio" name="shipping-address" id="addr-${address._id}" 
+                   value="${address._id}" ${address.isDefault ? 'checked' : ''}>
+            <label for="addr-${address._id}"></label>
+          </div>
+          <div class="address-content">
+            <div class="address-header">
+              <span class="address-label">${escapeHtml(address.label)}</span>
+              ${address.isDefault ? '<span class="address-default-badge"><i data-lucide="star"></i> Default</span>' : ''}
+            </div>
+            <div class="address-details">
+              <div class="address-name">
+                <i data-lucide="user"></i>
+                <strong>${escapeHtml(address.fullName)}</strong>
+              </div>
+              <div class="address-phone">
+                <i data-lucide="phone"></i>
+                ${escapeHtml(address.phone)}
+              </div>
+              <div class="address-location">
+                <i data-lucide="map-pin"></i>
+                ${escapeHtml(address.street)}, ${escapeHtml(address.city)}, ${escapeHtml(address.state)}, ${escapeHtml(address.country)}${address.postalCode ? ' ' + escapeHtml(address.postalCode) : ''}
+              </div>
+              ${address.notes ? `
+              <div class="address-notes">
+                <i data-lucide="info"></i>
+                ${escapeHtml(address.notes)}
+              </div>
+              ` : ''}
+            </div>
+          </div>
+        </div>
+      `).join('');
+
+      // Reinitialize icons
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+
+      // Add click handlers
+      document.querySelectorAll('.shipping-address-card').forEach(card => {
+        card.addEventListener('click', () => {
+          const addressId = card.dataset.addressId;
+          selectAddress(addressId);
+        });
+      });
+    }
+
+    // ====================================
+    // SELECT ADDRESS
+    // ====================================
+    function selectAddress(addressId) {
+      selectedAddress = addresses.find(a => a._id === addressId);
+      
+      // Update UI
+      document.querySelectorAll('.shipping-address-card').forEach(card => {
+        card.classList.remove('selected');
+        const radio = card.querySelector('input[type="radio"]');
+        if (radio) radio.checked = false;
+      });
+
+      const selectedCard = document.querySelector(`[data-address-id="${addressId}"]`);
+      if (selectedCard) {
+        selectedCard.classList.add('selected');
+        const radio = selectedCard.querySelector('input[type="radio"]');
+        if (radio) radio.checked = true;
+      }
+
+      // Enable/disable continue button
+      if (DOM.btnToStep2) {
+        DOM.btnToStep2.disabled = !selectedAddress;
+      }
+
+      // Update confirmation summary
+      updateShippingAddressSummary();
+    }
+
+    // ====================================
+    // UPDATE SHIPPING ADDRESS SUMMARY
+    // ====================================
+    function updateShippingAddressSummary() {
+      if (!DOM.shippingAddressSummary || !selectedAddress) return;
+
+      DOM.shippingAddressSummary.innerHTML = `
+        <div class="summary-address-name">
+          <strong>${escapeHtml(selectedAddress.fullName)}</strong>
+          <span class="summary-address-label">${escapeHtml(selectedAddress.label)}</span>
+        </div>
+        <div class="summary-address-line">${escapeHtml(selectedAddress.phone)}</div>
+        <div class="summary-address-line">${escapeHtml(selectedAddress.street)}</div>
+        <div class="summary-address-line">${escapeHtml(selectedAddress.city)}, ${escapeHtml(selectedAddress.state)} ${selectedAddress.postalCode || ''}</div>
+        <div class="summary-address-line">${escapeHtml(selectedAddress.country)}</div>
+      `;
+    }
+
+    // ====================================
+    // ESCAPE HTML
+    // ====================================
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
     }
 
     // ====================================
@@ -150,11 +328,10 @@
             const parsed = JSON.parse(cartData);
             cartItems = parsed.items || [];
 
-            // Calculate total
+            // Calculate total - each item is individual (no quantity grouping)
             orderTotal = cartItems.reduce((sum, item) => {
-              const qty = parseInt(item.quantity) || 0;
               const price = parseFloat(item.price) || 0;
-              return sum + qty * price;
+              return sum + price;
             }, 0);
           }
         }
@@ -173,34 +350,29 @@
     // RENDER ORDER SUMMARY
     // ====================================
     function renderOrderSummary() {
-      // Render items
+      // Render items - each item is individual (no quantity grouping)
       DOM.summaryItems.innerHTML = cartItems
         .map(
           (item) => `
         <div class="summary-item">
           <div class="summary-item-info">
-            <div class="summary-item-title">${item.partNumber || 'N/A'}</div>
+            <div class="summary-item-title">${item.code || item.partNumber || 'N/A'}</div>
             <div class="summary-item-desc">${
               item.description || 'Industrial Part'
             }</div>
-            <div class="summary-item-qty">
-              <i data-lucide="package"></i>
-              <span>Qty: ${item.quantity}</span>
+            <div class="summary-item-brand">
+              <i data-lucide="tag"></i>
+              <span>${item.brand || 'N/A'}</span>
             </div>
           </div>
-          <div class="summary-item-price">${(
-            parseFloat(item.price) * parseInt(item.quantity)
-          ).toFixed(2)} د.إ</div>
+          <div class="summary-item-price">${parseFloat(item.price).toFixed(2)} د.إ</div>
         </div>
       `
         )
         .join('');
 
-      // Update totals
-      const totalItems = cartItems.reduce(
-        (sum, item) => sum + parseInt(item.quantity),
-        0
-      );
+      // Update totals - each item counts as 1 (no quantity field)
+      const totalItems = cartItems.length;
       const totalWeight = cartItems.reduce(
         (sum, item) => sum + (parseFloat(item.weight) || 0),
         0
@@ -279,6 +451,7 @@
       DOM.step1.style.display = 'none';
       DOM.step2.style.display = 'none';
       DOM.step3.style.display = 'none';
+      if (DOM.step4) DOM.step4.style.display = 'none';
 
       // Update step indicators
       DOM.steps.forEach((stepEl, index) => {
@@ -298,11 +471,15 @@
           break;
         case 2:
           DOM.step2.style.display = 'block';
-          updateConfirmation();
           break;
         case 3:
           DOM.step3.style.display = 'block';
           updateConfirmation();
+          break;
+        case 4:
+          if (DOM.step4) DOM.step4.style.display = 'block';
+          updateConfirmation();
+          updateShippingAddressSummary();
           break;
       }
 
@@ -329,80 +506,75 @@
     }
 
     // ====================================
-    // COMPLETE PAYMENT
+    // COMPLETE PAYMENT - BACKEND API
     // ====================================
-    function completePayment() {
+    async function completePayment() {
+      // Prevent double submission
+      if (isSubmitting) return;
+      isSubmitting = true;
+      
+      // Disable button and show loading state
+      if (DOM.btnComplete) {
+        DOM.btnComplete.disabled = true;
+        DOM.btnComplete.innerHTML = '<i data-lucide="loader" class="animate-spin"></i> Processing...';
+        if (typeof lucide !== 'undefined') {
+          lucide.createIcons();
+        }
+      }
+
       const baseAmount =
         selectedPaymentType === 'full' ? orderTotal : orderTotal * 0.2;
       const fee = calculateFee(selectedPaymentMethod, baseAmount);
       const total = baseAmount + fee;
 
-      // Generate order/case number
-      const orderNum = isAOGCase ? 'AOG-' + Date.now() : 'ORD-' + Date.now().toString().slice(-6);
-
-      // Save order to localStorage
       try {
-        const orders = JSON.parse(
-          localStorage.getItem('partsform_orders') || '[]'
-        );
-        
-        // Prepare items preview (first 3 item names)
-        const itemsPreview = cartItems
-          .slice(0, 3)
-          .map(item => item.description || item.partNumber || item.code || 'Part');
-        
-        // Calculate total items count
-        const itemsCount = cartItems.reduce(
-          (sum, item) => sum + (parseInt(item.quantity) || 1),
-          0
-        );
-        
-        const order = {
-          orderNumber: orderNum,
-          date: new Date().toISOString(),
+        // Validate shipping address
+        if (!selectedAddress) {
+          throw new Error('Please select a shipping address');
+        }
+
+        // Prepare order data for backend
+        const orderData = {
           items: cartItems,
-          itemsCount: itemsCount,
-          itemsPreview: itemsPreview,
           paymentType: selectedPaymentType,
           paymentMethod: selectedPaymentMethod,
-          subtotal: orderTotal,
           fee: fee,
-          amount: total,
-          total: total,
-          status: 'pending',
-          paymentStatus: selectedPaymentType === 'full' ? 'paid' : 'partial',
-          amountPaid: total,
-          amountDue: selectedPaymentType === 'full' ? 0 : orderTotal * 0.8,
           isAOG: isAOGCase,
+          notes: '',
+          shippingAddress: {
+            addressId: selectedAddress._id,
+            label: selectedAddress.label,
+            fullName: selectedAddress.fullName,
+            phone: selectedAddress.phone,
+            street: selectedAddress.street,
+            city: selectedAddress.city,
+            state: selectedAddress.state,
+            country: selectedAddress.country,
+            postalCode: selectedAddress.postalCode || '',
+            notes: selectedAddress.notes || ''
+          }
         };
 
-        orders.unshift(order);
-        localStorage.setItem('partsform_orders', JSON.stringify(orders));
+        // Call backend API to create order
+        const response = await fetch('/buyer/api/orders/create', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(orderData)
+        });
 
-        // If AOG case, create the case data
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+          throw new Error(result.message || 'Failed to create order');
+        }
+
+        // Order created successfully - get order number from backend
+        const orderNum = result.order.orderNumber;
+
+        // Clear local cart after successful order
         if (isAOGCase) {
-          aogCaseId = orderNum;
-          
-          // Load case info from sessionStorage
-          const caseInfoData = sessionStorage.getItem('aog-case-info');
-          const caseInfo = caseInfoData ? JSON.parse(caseInfoData) : {};
-          
-          const caseData = {
-            caseId: orderNum,
-            caseType: caseInfo.caseType || 'aog',
-            aircraftType: caseInfo.aircraftType || 'N/A',
-            tailNumber: caseInfo.tailNumber || 'N/A',
-            station: caseInfo.station || 'N/A',
-            requiredBy: caseInfo.requiredBy || new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-            notes: caseInfo.notes || '',
-            parts: cartItems,
-            createdAt: new Date().toISOString(),
-            paymentCompleted: true,
-            orderNumber: orderNum,
-            status: 'sourcing',
-          };
-          localStorage.setItem(`aog-case-${orderNum}`, JSON.stringify(caseData));
-          
           // Clear AOG session data
           sessionStorage.removeItem('aog-parts');
           sessionStorage.removeItem('is-aog-case');
@@ -410,8 +582,9 @@
           sessionStorage.removeItem('aog-case-info');
           sessionStorage.removeItem('aog-selected-parts');
           sessionStorage.removeItem('aog-parts-total');
+          aogCaseId = orderNum;
         } else {
-          // Clear regular cart
+          // Clear regular cart from localStorage
           localStorage.removeItem('partsform_shopping_cart');
         }
 
@@ -420,17 +593,69 @@
           window.PartsFormCart.updateBadge();
         }
 
-        // Show success modal
+        // Show success modal with real order number
         showSuccessModal(
           orderNum,
           paymentMethodNames[selectedPaymentMethod],
-          total
+          result.order.total || total
         );
+
       } catch (error) {
-        console.error('Error saving order:', error);
-        alert(
-          'An error occurred while processing your order. Please try again.'
-        );
+        console.error('Error creating order:', error);
+        
+        // Re-enable button
+        isSubmitting = false;
+        if (DOM.btnComplete) {
+          DOM.btnComplete.disabled = false;
+          DOM.btnComplete.innerHTML = '<i data-lucide="check-circle"></i> Complete Payment';
+          if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+          }
+        }
+        
+        // Show error message
+        showError(error.message || 'An error occurred while processing your order. Please try again.');
+      }
+    }
+
+    // ====================================
+    // SHOW ERROR MESSAGE
+    // ====================================
+    function showError(message) {
+      // Create or update error container
+      let errorEl = document.getElementById('checkout-error');
+      if (!errorEl) {
+        errorEl = document.createElement('div');
+        errorEl.id = 'checkout-error';
+        errorEl.className = 'checkout-error-message';
+        errorEl.style.cssText = `
+          background: #fee2e2;
+          border: 1px solid #ef4444;
+          color: #dc2626;
+          padding: 1rem;
+          border-radius: 8px;
+          margin-bottom: 1rem;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        `;
+        const step3 = document.getElementById('step-3');
+        if (step3) {
+          step3.insertBefore(errorEl, step3.firstChild);
+        }
+      }
+      
+      errorEl.innerHTML = `
+        <i data-lucide="alert-circle"></i>
+        <span>${message}</span>
+        <button onclick="this.parentElement.remove()" style="margin-left: auto; background: none; border: none; cursor: pointer;">
+          <i data-lucide="x"></i>
+        </button>
+      `;
+      errorEl.style.display = 'flex';
+      
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
       }
     }
 
@@ -475,18 +700,43 @@
     // EVENT LISTENERS
     // ====================================
     function attachEventListeners() {
-      // Navigation buttons
+      // Navigation buttons - Step 1 (Shipping) to Step 2 (Payment Type)
       if (DOM.btnToStep2) {
-        DOM.btnToStep2.addEventListener('click', () => goToStep(2));
+        DOM.btnToStep2.addEventListener('click', () => {
+          if (selectedAddress) {
+            goToStep(2);
+          }
+        });
       }
-      if (DOM.btnToStep1) {
-        DOM.btnToStep1.addEventListener('click', () => goToStep(1));
+      
+      // Step 2 back to Step 1
+      if (DOM.btnToStep1Back) {
+        DOM.btnToStep1Back.addEventListener('click', () => goToStep(1));
       }
+      
+      // Step 2 (Payment Type) to Step 3 (Payment Method)
       if (DOM.btnToStep3) {
         DOM.btnToStep3.addEventListener('click', () => goToStep(3));
       }
+      
+      // Step 3 back to Step 2
       if (DOM.btnToStep2Back) {
         DOM.btnToStep2Back.addEventListener('click', () => goToStep(2));
+      }
+      
+      // Step 3 (Payment Method) to Step 4 (Confirmation)
+      if (DOM.btnToStep4) {
+        DOM.btnToStep4.addEventListener('click', () => goToStep(4));
+      }
+      
+      // Step 4 back to Step 3
+      if (DOM.btnToStep3Back) {
+        DOM.btnToStep3Back.addEventListener('click', () => goToStep(3));
+      }
+
+      // Change address button in confirmation
+      if (DOM.btnChangeAddress) {
+        DOM.btnChangeAddress.addEventListener('click', () => goToStep(1));
       }
 
       // Payment type selection

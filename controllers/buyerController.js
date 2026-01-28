@@ -2,6 +2,7 @@
 // This file contains all buyer-related controller functions
 
 const Buyer = require('../models/Buyer');
+const Order = require('../models/Order');
 const { processProfileImage, deleteOldProfileImage } = require('../utils/fileUploader');
 
 /**
@@ -185,13 +186,13 @@ const getOrderDetailsPage = async (req, res) => {
 const getProfilePage = async (req, res) => {
   try {
     const buyer = req.user;
-    
+
     // Calculate member since year
     const memberSince = buyer.createdAt ? new Date(buyer.createdAt).getFullYear() : new Date().getFullYear();
-    
+
     // Format password last changed (use updatedAt as approximation or specific field if available)
     const passwordLastChanged = buyer.updatedAt ? Math.floor((Date.now() - new Date(buyer.updatedAt)) / (1000 * 60 * 60 * 24)) : 30;
-    
+
     res.render('buyer/profile', {
       title: 'Profile | PARTSFORM',
       buyer: {
@@ -308,10 +309,10 @@ const uploadAvatar = async (req, res) => {
     }
 
     const buyer = req.user;
-    
+
     // Process the uploaded file
     const imageInfo = processProfileImage(req.file);
-    
+
     if (!imageInfo) {
       return res.status(400).json({
         success: false,
@@ -356,7 +357,7 @@ const updateProfile = async (req, res) => {
 
     // Fields that can be updated
     const allowedUpdates = {};
-    
+
     if (firstName) allowedUpdates.firstName = firstName.trim();
     if (lastName) allowedUpdates.lastName = lastName.trim();
     if (phone) allowedUpdates.phone = phone.trim();
@@ -383,7 +384,7 @@ const updateProfile = async (req, res) => {
     });
   } catch (error) {
     console.error('Error in updateProfile:', error);
-    
+
     // Handle validation errors
     if (error.name === 'ValidationError') {
       const errors = {};
@@ -400,6 +401,797 @@ const updateProfile = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to update profile. Please try again.',
+    });
+  }
+};
+
+/**
+ * Change password
+ * PUT /buyer/profile/password
+ */
+const changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword, confirmPassword } = req.body;
+
+    // Validate input
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'All password fields are required',
+      });
+    }
+
+    // Check if new password matches confirmation
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'New password and confirmation do not match',
+      });
+    }
+
+    // Validate new password strength
+    if (newPassword.length < 8) {
+      return res.status(400).json({
+        success: false,
+        message: 'New password must be at least 8 characters long',
+      });
+    }
+
+    // Get buyer with password
+    const buyer = await Buyer.findById(req.user._id).select('+password');
+    if (!buyer) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found',
+      });
+    }
+
+    // Verify current password
+    const isMatch = await buyer.comparePassword(currentPassword);
+    if (!isMatch) {
+      return res.status(400).json({
+        success: false,
+        message: 'Current password is incorrect',
+      });
+    }
+
+    // Check if new password is same as current
+    const isSamePassword = await buyer.comparePassword(newPassword);
+    if (isSamePassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'New password must be different from current password',
+      });
+    }
+
+    // Update password
+    buyer.password = newPassword;
+    await buyer.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Password changed successfully',
+    });
+  } catch (error) {
+    console.error('Error in changePassword:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to change password. Please try again.',
+    });
+  }
+};
+
+// ====================================
+// ORDER MANAGEMENT API FUNCTIONS
+// ====================================
+
+/**
+ * Validate checkout - check cart items before proceeding
+ * POST /buyer/api/checkout/validate
+ * Expects cart items in request body
+ * Each item is individual (no quantity grouping)
+ */
+const validateCheckout = async (req, res) => {
+  try {
+    const { items } = req.body;
+
+    // Validate items array
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Your cart is empty'
+      });
+    }
+
+    // Validate each item has required fields
+    const invalidItems = items.filter(item => {
+      const price = parseFloat(item.price);
+      return !item.code && !item.partNumber || isNaN(price) || price <= 0;
+    });
+
+    if (invalidItems.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Some items in your cart have invalid pricing or missing part numbers',
+        invalidItems: invalidItems.map(item => item.code || item.partNumber || 'Unknown')
+      });
+    }
+
+    // Calculate totals - each item is individual (no quantity field)
+    const totalItems = items.length;
+    const totalAmount = items.reduce((sum, item) => sum + (parseFloat(item.price) || 0), 0);
+    const totalWeight = items.reduce((sum, item) => sum + (parseFloat(item.weight) || 0), 0);
+
+    res.json({
+      success: true,
+      message: 'Cart is valid for checkout',
+      cart: {
+        itemsCount: items.length,
+        totalItems,
+        totalAmount,
+        totalWeight
+      }
+    });
+  } catch (error) {
+    console.error('Error validating checkout:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to validate checkout',
+      error: error.message
+    });
+  }
+};
+
+/**
+ * Create order from cart items
+ * POST /buyer/api/orders/create
+ * Expects cart items and payment info in request body
+ * Each item is stored individually in the order
+ */
+const createOrder = async (req, res) => {
+  try {
+    const buyerId = req.user._id;
+    const { items, paymentType, paymentMethod, fee, isAOG, notes, shippingAddress } = req.body;
+
+    // Validate input
+    if (!paymentType || !paymentMethod) {
+      return res.status(400).json({
+        success: false,
+        message: 'Payment type and method are required'
+      });
+    }
+
+    // Validate items
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Cart items are required'
+      });
+    }
+
+    // Validate shipping address
+    if (!shippingAddress || !shippingAddress.fullName || !shippingAddress.street || !shippingAddress.city) {
+      return res.status(400).json({
+        success: false,
+        message: 'Shipping address is required'
+      });
+    }
+
+    // Get buyer
+    const buyer = await Buyer.findById(buyerId);
+    if (!buyer) {
+      return res.status(404).json({
+        success: false,
+        message: 'Buyer not found'
+      });
+    }
+
+    // Create order from cart items
+    const paymentInfo = {
+      type: paymentType,
+      method: paymentMethod,
+      fee: parseFloat(fee) || 0,
+      isAOG: isAOG || false,
+      notes: notes || '',
+      shippingAddress: {
+        addressId: shippingAddress.addressId,
+        label: shippingAddress.label,
+        fullName: shippingAddress.fullName,
+        phone: shippingAddress.phone,
+        street: shippingAddress.street,
+        city: shippingAddress.city,
+        state: shippingAddress.state,
+        country: shippingAddress.country,
+        postalCode: shippingAddress.postalCode || '',
+        notes: shippingAddress.notes || ''
+      }
+    };
+
+    const order = await Order.createFromCartItems(buyer, items, paymentInfo);
+
+    res.json({
+      success: true,
+      message: 'Order created successfully',
+      order: {
+        orderNumber: order.orderNumber,
+        status: order.status,
+        total: order.pricing.total,
+        subtotal: order.pricing.subtotal,
+        fee: order.pricing.processingFee,
+        paymentType: order.payment.type,
+        paymentMethod: order.payment.method,
+        amountDue: order.payment.amountDue,
+        itemsCount: order.totalItems,
+        createdAt: order.createdAt,
+        type: order.type,
+        shippingAddress: order.shipping
+      }
+    });
+  } catch (error) {
+    console.error('Error creating order:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to create order',
+      error: error.message
+    });
+  }
+};
+
+/**
+ * Get buyer's orders with filtering and pagination
+ * GET /buyer/api/orders
+ */
+const getOrders = async (req, res) => {
+  try {
+    const buyerId = req.user._id;
+    const {
+      status,
+      dateFrom,
+      dateTo,
+      search,
+      page = 1,
+      limit = 10
+    } = req.query;
+
+    // Build query
+    const query = { buyer: buyerId };
+
+    // Status filter
+    if (status) {
+      query.status = status;
+    }
+
+    // Date range filter
+    if (dateFrom || dateTo) {
+      query.createdAt = {};
+      if (dateFrom) {
+        query.createdAt.$gte = new Date(dateFrom + 'T00:00:00');
+      }
+      if (dateTo) {
+        query.createdAt.$lte = new Date(dateTo + 'T23:59:59');
+      }
+    }
+
+    // Search filter (order number or item description)
+    if (search) {
+      query.$or = [
+        { orderNumber: { $regex: search, $options: 'i' } },
+        { 'items.partNumber': { $regex: search, $options: 'i' } },
+        { 'items.description': { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    // Pagination
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    // Execute query
+    const [orders, total] = await Promise.all([
+      Order.find(query)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(parseInt(limit))
+        .lean(),
+      Order.countDocuments(query)
+    ]);
+
+    // Format orders for response
+    const formattedOrders = orders.map(order => ({
+      orderNumber: order.orderNumber,
+      date: order.createdAt,
+      status: order.status,
+      items: order.items,
+      itemsCount: order.totalItems,
+      itemsPreview: order.items.slice(0, 3).map(item => item.description || item.partNumber),
+      amount: order.pricing.total,
+      total: order.pricing.total,
+      paymentStatus: order.payment.status,
+      type: order.type,
+      category: order.type
+    }));
+
+    // Get status counts
+    const statusCounts = await Order.aggregate([
+      { $match: { buyer: buyerId } },
+      { $group: { _id: '$status', count: { $sum: 1 } } }
+    ]);
+
+    const stats = {
+      pending: 0,
+      processing: 0,
+      completed: 0
+    };
+
+    statusCounts.forEach(item => {
+      if (item._id === 'pending') stats.pending = item.count;
+      else if (item._id === 'processing') stats.processing = item.count;
+      else if (item._id === 'completed' || item._id === 'delivered') {
+        stats.completed += item.count;
+      }
+    });
+
+    res.json({
+      success: true,
+      orders: formattedOrders,
+      pagination: {
+        total,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        totalPages: Math.ceil(total / parseInt(limit))
+      },
+      stats
+    });
+  } catch (error) {
+    console.error('Error getting orders:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to retrieve orders',
+      error: error.message
+    });
+  }
+};
+
+/**
+ * Get order details
+ * GET /buyer/api/orders/:orderNumber
+ */
+const getOrderDetails = async (req, res) => {
+  try {
+    const buyerId = req.user._id;
+    const { orderNumber } = req.params;
+
+    // Find order
+    const order = await Order.findOne({
+      orderNumber,
+      buyer: buyerId
+    }).populate('buyer', 'firstName lastName email phone companyName');
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: 'Order not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      order: {
+        orderNumber: order.orderNumber,
+        status: order.status,
+        createdAt: order.createdAt,
+        updatedAt: order.updatedAt,
+
+        // Items with complete details
+        items: order.items,
+        totalItems: order.totalItems,
+        totalWeight: order.totalWeight,
+
+        // Pricing
+        pricing: order.pricing,
+
+        // Payment
+        payment: order.payment,
+
+        // Shipping
+        shipping: order.shipping,
+
+        // Timeline
+        timeline: order.timeline,
+
+        // Additional info
+        notes: order.notes,
+        type: order.type,
+        priority: order.priority,
+        cancellation: order.cancellation
+      }
+    });
+  } catch (error) {
+    console.error('Error getting order details:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to retrieve order details',
+      error: error.message
+    });
+  }
+};
+
+/**
+ * Cancel order
+ * PUT /buyer/api/orders/:orderNumber/cancel
+ */
+const cancelOrder = async (req, res) => {
+  try {
+    const buyerId = req.user._id;
+    const { orderNumber } = req.params;
+    const { reason } = req.body;
+
+    // Find order
+    const order = await Order.findOne({
+      orderNumber,
+      buyer: buyerId
+    });
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: 'Order not found'
+      });
+    }
+
+    // Cancel order
+    await order.cancelOrder(reason || 'Cancelled by buyer', 'Buyer');
+
+    res.json({
+      success: true,
+      message: 'Order cancelled successfully',
+      order: {
+        orderNumber: order.orderNumber,
+        status: order.status,
+        cancellation: order.cancellation
+      }
+    });
+  } catch (error) {
+    console.error('Error cancelling order:', error);
+
+    if (error.message === 'Order cannot be cancelled') {
+      return res.status(400).json({
+        success: false,
+        message: error.message
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      message: 'Failed to cancel order',
+      error: error.message
+    });
+  }
+};
+
+/**
+ * Process payment for order
+ * POST /buyer/api/orders/:orderNumber/payment
+ */
+const processPayment = async (req, res) => {
+  try {
+    const buyerId = req.user._id;
+    const { orderNumber } = req.params;
+    const { transactionId, amount, method, status, notes } = req.body;
+
+    // Find order
+    const order = await Order.findOne({
+      orderNumber,
+      buyer: buyerId
+    });
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: 'Order not found'
+      });
+    }
+
+    // Add payment transaction
+    order.addPaymentTransaction({
+      transactionId,
+      amount: parseFloat(amount),
+      method: method || order.payment.method,
+      status: status || 'completed',
+      notes: notes || ''
+    });
+
+    // Update order status if payment is completed
+    if (order.payment.status === 'paid' && order.status === 'pending') {
+      await order.updateStatus('processing', 'Payment received, order is being processed');
+    }
+
+    await order.save();
+
+    res.json({
+      success: true,
+      message: 'Payment processed successfully',
+      order: {
+        orderNumber: order.orderNumber,
+        paymentStatus: order.payment.status,
+        amountPaid: order.payment.amountPaid,
+        amountDue: order.payment.amountDue,
+        status: order.status
+      }
+    });
+  } catch (error) {
+    console.error('Error processing payment:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to process payment',
+      error: error.message
+    });
+  }
+};
+
+// ====================================
+// ADDRESS MANAGEMENT API
+// ====================================
+
+/**
+ * Get all addresses for the authenticated buyer
+ */
+const getAddresses = async (req, res) => {
+  try {
+    const buyer = await Buyer.findById(req.user._id);
+    
+    if (!buyer) {
+      return res.status(404).json({
+        success: false,
+        message: 'Buyer not found'
+      });
+    }
+
+    // Sort addresses: default first, then by creation date
+    const addresses = buyer.addresses.sort((a, b) => {
+      if (a.isDefault && !b.isDefault) return -1;
+      if (!a.isDefault && b.isDefault) return 1;
+      return new Date(b.createdAt) - new Date(a.createdAt);
+    });
+
+    res.json({
+      success: true,
+      addresses: addresses
+    });
+  } catch (error) {
+    console.error('Error getting addresses:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch addresses',
+      error: error.message
+    });
+  }
+};
+
+/**
+ * Add a new address
+ */
+const addAddress = async (req, res) => {
+  try {
+    const buyer = await Buyer.findById(req.user._id);
+    
+    if (!buyer) {
+      return res.status(404).json({
+        success: false,
+        message: 'Buyer not found'
+      });
+    }
+
+    const { label, fullName, phone, street, city, state, country, postalCode, notes, isDefault } = req.body;
+
+    // Validate required fields
+    if (!label || !fullName || !phone || !street || !city || !state || !country) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide all required fields'
+      });
+    }
+
+    // If this is the first address or marked as default, set it as default
+    const shouldBeDefault = buyer.addresses.length === 0 || isDefault;
+
+    // If new address is default, remove default from all others
+    if (shouldBeDefault) {
+      buyer.addresses.forEach(addr => {
+        addr.isDefault = false;
+      });
+    }
+
+    // Create new address
+    const newAddress = {
+      label,
+      fullName,
+      phone,
+      street,
+      city,
+      state,
+      country,
+      postalCode: postalCode || '',
+      notes: notes || '',
+      isDefault: shouldBeDefault
+    };
+
+    buyer.addresses.push(newAddress);
+    await buyer.save();
+
+    // Get the newly added address (it will be the last one)
+    const addedAddress = buyer.addresses[buyer.addresses.length - 1];
+
+    res.status(201).json({
+      success: true,
+      message: 'Address added successfully',
+      address: addedAddress
+    });
+  } catch (error) {
+    console.error('Error adding address:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to add address',
+      error: error.message
+    });
+  }
+};
+
+/**
+ * Update an existing address
+ */
+const updateAddress = async (req, res) => {
+  try {
+    const { addressId } = req.params;
+    const buyer = await Buyer.findById(req.user._id);
+    
+    if (!buyer) {
+      return res.status(404).json({
+        success: false,
+        message: 'Buyer not found'
+      });
+    }
+
+    const addressIndex = buyer.addresses.findIndex(addr => addr._id.toString() === addressId);
+    
+    if (addressIndex === -1) {
+      return res.status(404).json({
+        success: false,
+        message: 'Address not found'
+      });
+    }
+
+    const { label, fullName, phone, street, city, state, country, postalCode, notes, isDefault } = req.body;
+
+    // If this address is being set as default, remove default from others
+    if (isDefault) {
+      buyer.addresses.forEach(addr => {
+        addr.isDefault = false;
+      });
+    }
+
+    // Update address fields
+    if (label) buyer.addresses[addressIndex].label = label;
+    if (fullName) buyer.addresses[addressIndex].fullName = fullName;
+    if (phone) buyer.addresses[addressIndex].phone = phone;
+    if (street) buyer.addresses[addressIndex].street = street;
+    if (city) buyer.addresses[addressIndex].city = city;
+    if (state) buyer.addresses[addressIndex].state = state;
+    if (country) buyer.addresses[addressIndex].country = country;
+    buyer.addresses[addressIndex].postalCode = postalCode || '';
+    buyer.addresses[addressIndex].notes = notes || '';
+    buyer.addresses[addressIndex].isDefault = isDefault || false;
+
+    await buyer.save();
+
+    res.json({
+      success: true,
+      message: 'Address updated successfully',
+      address: buyer.addresses[addressIndex]
+    });
+  } catch (error) {
+    console.error('Error updating address:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update address',
+      error: error.message
+    });
+  }
+};
+
+/**
+ * Delete an address
+ */
+const deleteAddress = async (req, res) => {
+  try {
+    const { addressId } = req.params;
+    const buyer = await Buyer.findById(req.user._id);
+    
+    if (!buyer) {
+      return res.status(404).json({
+        success: false,
+        message: 'Buyer not found'
+      });
+    }
+
+    const addressIndex = buyer.addresses.findIndex(addr => addr._id.toString() === addressId);
+    
+    if (addressIndex === -1) {
+      return res.status(404).json({
+        success: false,
+        message: 'Address not found'
+      });
+    }
+
+    const wasDefault = buyer.addresses[addressIndex].isDefault;
+    
+    // Remove the address
+    buyer.addresses.splice(addressIndex, 1);
+
+    // If deleted address was default and there are other addresses, make the first one default
+    if (wasDefault && buyer.addresses.length > 0) {
+      buyer.addresses[0].isDefault = true;
+    }
+
+    await buyer.save();
+
+    res.json({
+      success: true,
+      message: 'Address deleted successfully'
+    });
+  } catch (error) {
+    console.error('Error deleting address:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete address',
+      error: error.message
+    });
+  }
+};
+
+/**
+ * Set an address as default
+ */
+const setDefaultAddress = async (req, res) => {
+  try {
+    const { addressId } = req.params;
+    const buyer = await Buyer.findById(req.user._id);
+    
+    if (!buyer) {
+      return res.status(404).json({
+        success: false,
+        message: 'Buyer not found'
+      });
+    }
+
+    const addressIndex = buyer.addresses.findIndex(addr => addr._id.toString() === addressId);
+    
+    if (addressIndex === -1) {
+      return res.status(404).json({
+        success: false,
+        message: 'Address not found'
+      });
+    }
+
+    // Remove default from all addresses
+    buyer.addresses.forEach(addr => {
+      addr.isDefault = false;
+    });
+
+    // Set the selected address as default
+    buyer.addresses[addressIndex].isDefault = true;
+
+    await buyer.save();
+
+    res.json({
+      success: true,
+      message: 'Default address updated successfully',
+      address: buyer.addresses[addressIndex]
+    });
+  } catch (error) {
+    console.error('Error setting default address:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to set default address',
+      error: error.message
     });
   }
 };
@@ -423,5 +1215,21 @@ module.exports = {
   getTicketDetailsPage,
   uploadAvatar,
   updateProfile,
+  changePassword,
+
+  // Order Management API
+  validateCheckout,
+  createOrder,
+  getOrders,
+  getOrderDetails,
+  cancelOrder,
+  processPayment,
+
+  // Address Management API
+  getAddresses,
+  addAddress,
+  updateAddress,
+  deleteAddress,
+  setDefaultAddress,
 };
 

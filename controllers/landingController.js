@@ -156,14 +156,18 @@ const registerUser = async (req, res) => {
   }
 };
 
+// Import required services for search
+const Part = require('../models/Part');
+const elasticsearchService = require('../services/elasticsearchService');
+
 /**
- * Search for parts by part number
+ * Search for parts by exact part number
  * POST /api/search
+ * Returns all parts with the same part number from different suppliers
  */
 const searchParts = async (req, res) => {
   try {
-    const { partNumber } = req.body;
-    const partsDatabase = req.app.locals.partsDatabase || {};
+    const { partNumber, sortBy = 'price', sortOrder = 'asc', limit = 100 } = req.body;
 
     if (!partNumber) {
       return res.status(400).json({
@@ -172,13 +176,86 @@ const searchParts = async (req, res) => {
       });
     }
 
-    const results = partsDatabase[partNumber] || [];
+    const trimmedPartNumber = partNumber.trim();
+    let results = [];
+    let total = 0;
+    let source = 'mongodb';
+
+    // Try Elasticsearch first
+    const useElasticsearch = await elasticsearchService.hasDocuments();
+
+    if (useElasticsearch) {
+      try {
+        const esResult = await elasticsearchService.searchByExactPartNumber(trimmedPartNumber, {
+          sortBy,
+          sortOrder,
+          limit: parseInt(limit, 10),
+        });
+        results = esResult.results;
+        total = esResult.total;
+        source = 'elasticsearch';
+      } catch (esError) {
+        console.error('Elasticsearch search failed, falling back to MongoDB:', esError.message);
+      }
+    }
+
+    // Fallback to MongoDB if Elasticsearch didn't return results
+    if (results.length === 0) {
+      // Escape special regex characters for safety
+      const escapedPartNumber = trimmedPartNumber.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      
+      const mongoResults = await Part.find({
+        // EXACT match only (case-insensitive)
+        partNumber: { $regex: `^${escapedPartNumber}$`, $options: 'i' },
+      })
+        .sort({ [sortBy]: sortOrder === 'asc' ? 1 : -1 })
+        .limit(parseInt(limit, 10))
+        .lean();
+
+      results = mongoResults.map((part) => ({
+        _id: part._id,
+        partNumber: part.partNumber,
+        description: part.description,
+        brand: part.brand,
+        supplier: part.supplier,
+        unitPrice: part.price,
+        price: part.price,
+        currency: part.currency || 'USD',
+        stock: part.quantity,
+        quantity: part.quantity,
+        origin: part.origin,
+        weight: part.weight,
+        delivery: part.deliveryDays,
+        deliveryDays: part.deliveryDays,
+      }));
+      total = results.length;
+      source = 'mongodb';
+    } else {
+      // Transform Elasticsearch results to match expected format
+      results = results.map((part) => ({
+        _id: part._id,
+        partNumber: part.partNumber,
+        description: part.description,
+        brand: part.brand,
+        supplier: part.supplier,
+        unitPrice: part.price,
+        price: part.price,
+        currency: part.currency || 'USD',
+        stock: part.quantity,
+        quantity: part.quantity,
+        origin: part.origin,
+        weight: part.weight,
+        delivery: part.deliveryDays,
+        deliveryDays: part.deliveryDays,
+      }));
+    }
 
     res.json({
       success: results.length > 0,
-      count: results.length,
-      partNumber: partNumber,
+      count: total,
+      partNumber: trimmedPartNumber,
       results: results,
+      source: source,
     });
   } catch (error) {
     console.error('Error in searchParts:', error);

@@ -311,7 +311,9 @@ class ElasticsearchService {
   }
 
   /**
-   * Autocomplete suggestions
+   * Autocomplete suggestions - Part Number Only (Prefix Match)
+   * Returns unique part numbers that START WITH the query
+   * NO description matching, NO fuzzy matching
    */
   async autocomplete(query, limit = 10) {
     if (!this.isAvailable || !query || !query.trim()) {
@@ -319,33 +321,195 @@ class ElasticsearchService {
     }
 
     try {
+      const searchTerm = query.trim();
+      
+      // Use prefix query on the keyword field - only matches part numbers that START with the query
       const response = await this.client.search({
         index: this.indexName,
         body: {
           query: {
             bool: {
               should: [
-                { prefix: { partNumber: { value: query.trim().toUpperCase(), boost: 10 } } },
-                { match: { 'partNumber.autocomplete': { query: query.trim(), boost: 5 } } },
-                { match_phrase_prefix: { description: { query: query.trim(), boost: 2 } } },
+                // Prefix match - as typed
+                { prefix: { partNumber: { value: searchTerm, case_insensitive: true } } },
+                // Prefix match - uppercase
+                { prefix: { partNumber: { value: searchTerm.toUpperCase() } } },
               ],
               minimum_should_match: 1,
             },
           },
-          size: limit,
-          _source: ['partNumber', 'description', 'brand', 'supplier'],
+          size: 0, // We don't need hits, just aggregations
+          aggs: {
+            unique_part_numbers: {
+              terms: {
+                field: 'partNumber',
+                size: limit,
+                order: { _key: 'asc' },
+              },
+              aggs: {
+                sample: {
+                  top_hits: {
+                    size: 1,
+                    _source: ['partNumber', 'brand'],
+                  },
+                },
+              },
+            },
+          },
         },
       });
 
-      return response.hits.hits.map((hit) => ({
-        partNumber: hit._source.partNumber,
-        description: hit._source.description,
-        brand: hit._source.brand,
-        supplier: hit._source.supplier,
+      // Extract unique part numbers from aggregations
+      const buckets = response.aggregations?.unique_part_numbers?.buckets || [];
+      return buckets.map((bucket) => ({
+        partNumber: bucket.key,
+        brand: bucket.sample.hits.hits[0]?._source?.brand || '',
+        count: bucket.doc_count, // Number of suppliers for this part
       }));
     } catch (error) {
       console.error('Autocomplete error:', error.message);
       return [];
+    }
+  }
+
+  /**
+   * Search by EXACT part number ONLY - returns all suppliers with the same part number
+   * This is the primary search method - NO fuzzy matching, NO description matching
+   * @param {string} partNumber - The exact part number to search for
+   * @param {object} filters - Optional filters (sortBy, sortOrder, limit, skip)
+   */
+  async searchByExactPartNumber(partNumber, filters = {}) {
+    if (!this.isAvailable || !partNumber || !partNumber.trim()) {
+      return { results: [], total: 0 };
+    }
+
+    try {
+      const limit = filters.limit || 100;
+      const skip = filters.skip || 0;
+      const sortBy = filters.sortBy || 'price';
+      const sortOrder = filters.sortOrder || 'asc';
+      
+      // Clean the part number - exact match only
+      const exactPartNumber = partNumber.trim();
+
+      // Use term query for EXACT match on the keyword field
+      // This ensures only parts with the EXACT same part number are returned
+      const response = await this.client.search({
+        index: this.indexName,
+        body: {
+          query: {
+            bool: {
+              should: [
+                // Exact match - case as provided
+                { term: { partNumber: exactPartNumber } },
+                // Exact match - uppercase
+                { term: { partNumber: exactPartNumber.toUpperCase() } },
+                // Exact match - lowercase
+                { term: { partNumber: exactPartNumber.toLowerCase() } },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+          sort: [{ [sortBy]: { order: sortOrder, missing: '_last' } }],
+          from: skip,
+          size: limit,
+          track_total_hits: true,
+        },
+      });
+
+      const results = response.hits.hits.map((hit) => ({
+        _id: hit._id,
+        ...hit._source,
+        _score: hit._score,
+      }));
+
+      console.log(`🔍 ES Exact Part Number Search: "${partNumber}" - ${response.hits.total.value} results (exact match only)`);
+
+      return {
+        results,
+        total: response.hits.total.value,
+        partNumber: exactPartNumber,
+      };
+    } catch (error) {
+      console.error('Exact part number search error:', error.message);
+      throw error;
+    }
+  }
+
+  /**
+   * Search multiple part numbers in a single query - FAST bulk search
+   * @param {string[]} partNumbers - Array of part numbers to search
+   * @param {object} options - Optional settings (limit per part)
+   * @returns {object} { results: [], found: [], notFound: [], total: number }
+   */
+  async searchMultiplePartNumbers(partNumbers, options = {}) {
+    if (!this.isAvailable || !partNumbers || partNumbers.length === 0) {
+      return { results: [], found: [], notFound: partNumbers || [], total: 0 };
+    }
+
+    try {
+      const limitPerPart = options.limitPerPart || 50;
+      const totalLimit = Math.min(partNumbers.length * limitPerPart, 1000);
+
+      // Build terms for all part numbers (with case variations)
+      const allTerms = [];
+      partNumbers.forEach(pn => {
+        const trimmed = pn.trim();
+        allTerms.push(trimmed);
+        allTerms.push(trimmed.toUpperCase());
+        allTerms.push(trimmed.toLowerCase());
+      });
+
+      // Single query to find all parts at once
+      const response = await this.client.search({
+        index: this.indexName,
+        body: {
+          query: {
+            terms: {
+              partNumber: allTerms,
+            },
+          },
+          size: totalLimit,
+          track_total_hits: true,
+        },
+      });
+
+      const results = response.hits.hits.map((hit) => ({
+        _id: hit._id,
+        ...hit._source,
+        _score: hit._score,
+      }));
+
+      // Determine which parts were found
+      const foundPartNumbers = new Set();
+      results.forEach(r => {
+        if (r.partNumber) {
+          foundPartNumbers.add(r.partNumber.toUpperCase());
+        }
+      });
+
+      const found = [];
+      const notFound = [];
+      partNumbers.forEach(pn => {
+        const upper = pn.trim().toUpperCase();
+        if (foundPartNumbers.has(upper)) {
+          found.push(pn);
+        } else {
+          notFound.push(pn);
+        }
+      });
+
+      console.log(`🔍 ES Multi-Part Search: ${partNumbers.length} parts requested, ${found.length} found, ${notFound.length} not found, ${results.length} total results`);
+
+      return {
+        results,
+        total: results.length,
+        found,
+        notFound,
+      };
+    } catch (error) {
+      console.error('Multi-part search error:', error.message);
+      return { results: [], found: [], notFound: partNumbers, total: 0 };
     }
   }
 

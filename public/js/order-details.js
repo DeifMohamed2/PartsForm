@@ -1,13 +1,13 @@
 // ====================================
 // ORDER DETAILS PAGE FUNCTIONALITY
-// Loads and displays order details from localStorage
+// Loads and displays order details from Backend API
 // ====================================
 
 (function () {
   'use strict';
 
-  const ORDERS_STORAGE_KEY = 'partsform_orders';
   let currentOrder = null;
+  let isLoading = false;
 
   // Initialize
   function init() {
@@ -15,7 +15,7 @@
     if (orderNumber) {
       loadOrderDetails(orderNumber);
     } else {
-      showError();
+      showError('Order number not found in URL');
     }
 
     initEventListeners();
@@ -31,27 +31,45 @@
   }
 
   // ====================================
-  // LOAD ORDER DETAILS
+  // LOAD ORDER DETAILS FROM BACKEND
   // ====================================
-  function loadOrderDetails(orderNumber) {
+  async function loadOrderDetails(orderNumber) {
+    if (isLoading) return;
+    isLoading = true;
+
+    // Show loading state
+    const loadingEl = document.getElementById('order-loading');
+    const contentEl = document.getElementById('order-content');
+    const errorEl = document.getElementById('order-error');
+
+    if (loadingEl) loadingEl.style.display = 'block';
+    if (contentEl) contentEl.style.display = 'none';
+    if (errorEl) errorEl.style.display = 'none';
+
     try {
-      const ordersData = localStorage.getItem(ORDERS_STORAGE_KEY);
-      if (!ordersData) {
-        showError();
-        return;
+      const response = await fetch(`/buyer/api/orders/${encodeURIComponent(orderNumber)}`);
+      
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error('Order not found');
+        }
+        throw new Error('Failed to fetch order details');
       }
 
-      const orders = JSON.parse(ordersData);
-      currentOrder = orders.find(order => order.orderNumber === orderNumber);
+      const data = await response.json();
 
-      if (currentOrder) {
+      if (data.success && data.order) {
+        currentOrder = data.order;
         renderOrderDetails(currentOrder);
       } else {
-        showError();
+        throw new Error(data.message || 'Failed to load order details');
       }
+
     } catch (error) {
       console.error('Error loading order:', error);
-      showError();
+      showError(error.message || 'Failed to load order details');
+    } finally {
+      isLoading = false;
     }
   }
 
@@ -60,11 +78,16 @@
   // ====================================
   function renderOrderDetails(order) {
     // Hide loading, show content
-    document.getElementById('order-loading').style.display = 'none';
-    document.getElementById('order-content').style.display = 'block';
+    const loadingEl = document.getElementById('order-loading');
+    const contentEl = document.getElementById('order-content');
+    
+    if (loadingEl) loadingEl.style.display = 'none';
+    if (contentEl) contentEl.style.display = 'block';
 
     // Update title and status
-    document.getElementById('order-details-title').textContent = `Order ${order.orderNumber}`;
+    const titleEl = document.getElementById('order-details-title');
+    if (titleEl) titleEl.textContent = `Order ${order.orderNumber}`;
+    
     updateStatusBadge(order.status);
 
     // Render items
@@ -78,6 +101,9 @@
 
     // Render timeline
     renderOrderTimeline(order);
+
+    // Render shipping info
+    renderShippingInfo(order);
 
     // Show/hide action buttons based on status
     updateActionButtons(order);
@@ -93,6 +119,8 @@
   // ====================================
   function updateStatusBadge(status) {
     const badge = document.getElementById('order-status-badge');
+    if (!badge) return;
+    
     badge.className = `order-details-status-badge ${status}`;
 
     const icon = getStatusIcon(status);
@@ -116,23 +144,25 @@
   // ====================================
   function renderOrderItems(items) {
     const tbody = document.getElementById('order-items-tbody');
+    if (!tbody) return;
+    
     tbody.innerHTML = '';
 
+    // Each item is individual - no quantity grouping
     items.forEach(item => {
-      const quantity = parseInt(item.quantity) || 1;
       const price = parseFloat(item.price) || 0;
-      const total = quantity * price;
 
       const row = document.createElement('tr');
       row.innerHTML = `
         <td>
-          <div class="order-item-part">${item.description || item.partNumber || item.code || 'N/A'}</div>
-          <div class="order-item-code">${item.code || item.partNumber || 'N/A'}</div>
-          ${item.brand ? `<div class="order-item-desc">Brand: ${item.brand}</div>` : ''}
+          <div class="order-item-part">${item.partNumber || 'N/A'}</div>
+          <div class="order-item-desc">${item.description || ''}</div>
+          ${item.brand && item.brand !== 'N/A' ? `<div class="order-item-brand">Brand: ${item.brand}</div>` : ''}
+          ${item.supplier ? `<div class="order-item-supplier">Supplier: ${item.supplier}</div>` : ''}
         </td>
-        <td style="text-align: center;" class="order-item-qty">${quantity}</td>
+        <td style="text-align: center;" class="order-item-weight">${(parseFloat(item.weight) || 0).toFixed(3)} kg</td>
+        <td style="text-align: center;" class="order-item-stock">${item.stock || 'N/A'}</td>
         <td style="text-align: right;" class="order-item-price">${price.toFixed(2)} د.إ</td>
-        <td style="text-align: right;" class="order-item-total">${total.toFixed(2)} د.إ</td>
       `;
       tbody.appendChild(row);
     });
@@ -143,6 +173,9 @@
   // ====================================
   function renderPaymentInfo(order) {
     const grid = document.getElementById('payment-info-grid');
+    if (!grid) return;
+    
+    const payment = order.payment || {};
     
     const paymentTypeNames = {
       full: 'Full Payment',
@@ -157,23 +190,88 @@
       cod: 'Cash on Delivery'
     };
 
+    const paymentStatusDisplay = {
+      pending: 'Pending',
+      paid: 'Paid',
+      partial: 'Partial Payment',
+      failed: 'Failed',
+      refunded: 'Refunded'
+    };
+
     grid.innerHTML = `
       <div class="payment-info-item">
         <div class="payment-info-label">Payment Type</div>
-        <div class="payment-info-value">${paymentTypeNames[order.paymentType] || order.paymentType}</div>
+        <div class="payment-info-value">${paymentTypeNames[payment.type] || payment.type || 'N/A'}</div>
       </div>
       <div class="payment-info-item">
         <div class="payment-info-label">Payment Method</div>
-        <div class="payment-info-value">${paymentMethodNames[order.paymentMethod] || order.paymentMethod}</div>
+        <div class="payment-info-value">${paymentMethodNames[payment.method] || payment.method || 'N/A'}</div>
       </div>
       <div class="payment-info-item">
         <div class="payment-info-label">Payment Status</div>
-        <div class="payment-info-value">${order.paymentStatus === 'paid' ? 'Paid' : order.paymentStatus === 'partial' ? 'Partial Payment' : 'Pending'}</div>
+        <div class="payment-info-value">${paymentStatusDisplay[payment.status] || payment.status || 'N/A'}</div>
       </div>
-      ${order.amountDue > 0 ? `
+      ${payment.amountDue > 0 ? `
       <div class="payment-info-item">
         <div class="payment-info-label">Amount Due</div>
-        <div class="payment-info-value">${order.amountDue.toFixed(2)} د.إ</div>
+        <div class="payment-info-value">${payment.amountDue.toFixed(2)} د.إ</div>
+      </div>
+      ` : ''}
+      ${payment.amountPaid > 0 ? `
+      <div class="payment-info-item">
+        <div class="payment-info-label">Amount Paid</div>
+        <div class="payment-info-value">${payment.amountPaid.toFixed(2)} د.إ</div>
+      </div>
+      ` : ''}
+    `;
+  }
+
+  // ====================================
+  // RENDER SHIPPING INFO
+  // ====================================
+  function renderShippingInfo(order) {
+    const container = document.getElementById('shipping-info-grid');
+    if (!container) return;
+    
+    const shipping = order.shipping || {};
+
+    container.innerHTML = `
+      <div class="shipping-info-item">
+        <div class="shipping-info-label">Name</div>
+        <div class="shipping-info-value">${shipping.firstName || ''} ${shipping.lastName || ''}</div>
+      </div>
+      ${shipping.companyName ? `
+      <div class="shipping-info-item">
+        <div class="shipping-info-label">Company</div>
+        <div class="shipping-info-value">${shipping.companyName}</div>
+      </div>
+      ` : ''}
+      ${shipping.address ? `
+      <div class="shipping-info-item">
+        <div class="shipping-info-label">Address</div>
+        <div class="shipping-info-value">${shipping.address}</div>
+      </div>
+      ` : ''}
+      <div class="shipping-info-item">
+        <div class="shipping-info-label">City / Country</div>
+        <div class="shipping-info-value">${shipping.city || ''}, ${shipping.country || ''}</div>
+      </div>
+      ${shipping.phone ? `
+      <div class="shipping-info-item">
+        <div class="shipping-info-label">Phone</div>
+        <div class="shipping-info-value">${shipping.phone}</div>
+      </div>
+      ` : ''}
+      ${shipping.email ? `
+      <div class="shipping-info-item">
+        <div class="shipping-info-label">Email</div>
+        <div class="shipping-info-value">${shipping.email}</div>
+      </div>
+      ` : ''}
+      ${shipping.trackingNumber ? `
+      <div class="shipping-info-item">
+        <div class="shipping-info-label">Tracking Number</div>
+        <div class="shipping-info-value">${shipping.trackingNumber}</div>
       </div>
       ` : ''}
     `;
@@ -184,17 +282,29 @@
   // ====================================
   function renderOrderSummary(order) {
     const summary = document.getElementById('order-summary-content');
+    if (!summary) return;
     
-    const subtotal = order.subtotal || order.amount || 0;
-    const fee = order.fee || 0;
-    const total = order.amount || order.total || subtotal + fee;
-    const itemsCount = order.itemsCount || (order.items ? order.items.reduce((sum, item) => sum + (parseInt(item.quantity) || 1), 0) : 0);
+    const pricing = order.pricing || {};
+    const subtotal = pricing.subtotal || 0;
+    const fee = pricing.processingFee || 0;
+    const shipping = pricing.shipping || 0;
+    const tax = pricing.tax || 0;
+    const discount = pricing.discount || 0;
+    const total = pricing.total || subtotal + fee;
+    const itemsCount = order.totalItems || 0;
+    const totalWeight = order.totalWeight || 0;
 
     summary.innerHTML = `
       <div class="order-summary-row">
         <span class="order-summary-label">Items</span>
         <span class="order-summary-value">${itemsCount} pcs</span>
       </div>
+      ${totalWeight > 0 ? `
+      <div class="order-summary-row">
+        <span class="order-summary-label">Total Weight</span>
+        <span class="order-summary-value">${totalWeight.toFixed(3)} kg</span>
+      </div>
+      ` : ''}
       <div class="order-summary-row">
         <span class="order-summary-label">Subtotal</span>
         <span class="order-summary-value">${subtotal.toFixed(2)} د.إ</span>
@@ -205,13 +315,31 @@
         <span class="order-summary-value">${fee.toFixed(2)} د.إ</span>
       </div>
       ` : ''}
+      ${shipping > 0 ? `
+      <div class="order-summary-row">
+        <span class="order-summary-label">Shipping</span>
+        <span class="order-summary-value">${shipping.toFixed(2)} د.إ</span>
+      </div>
+      ` : ''}
+      ${tax > 0 ? `
+      <div class="order-summary-row">
+        <span class="order-summary-label">Tax</span>
+        <span class="order-summary-value">${tax.toFixed(2)} د.إ</span>
+      </div>
+      ` : ''}
+      ${discount > 0 ? `
+      <div class="order-summary-row discount">
+        <span class="order-summary-label">Discount</span>
+        <span class="order-summary-value">-${discount.toFixed(2)} د.إ</span>
+      </div>
+      ` : ''}
       <div class="order-summary-row total">
         <span class="order-summary-label">Total</span>
         <span class="order-summary-value">${total.toFixed(2)} د.إ</span>
       </div>
       <div class="order-summary-row">
         <span class="order-summary-label">Order Date</span>
-        <span class="order-summary-value">${formatDate(order.date)}</span>
+        <span class="order-summary-value">${formatDate(order.createdAt)}</span>
       </div>
     `;
   }
@@ -221,8 +349,27 @@
   // ====================================
   function renderOrderTimeline(order) {
     const timeline = document.getElementById('order-timeline');
-    const orderDate = new Date(order.date);
+    if (!timeline) return;
     
+    // If order has timeline data from backend, use it
+    if (order.timeline && order.timeline.length > 0) {
+      let html = '';
+      order.timeline.forEach((event, index) => {
+        const isLatest = index === order.timeline.length - 1;
+        html += `
+          <div class="timeline-item ${isLatest ? 'active' : 'completed'}">
+            <div class="timeline-item-title">${event.status.charAt(0).toUpperCase() + event.status.slice(1)}</div>
+            <div class="timeline-item-date">${formatDate(event.timestamp)}</div>
+            <div class="timeline-item-desc">${event.message}</div>
+          </div>
+        `;
+      });
+      timeline.innerHTML = html;
+      return;
+    }
+
+    // Fallback: generate timeline based on current status
+    const orderDate = new Date(order.createdAt);
     const statusOrder = ['pending', 'processing', 'shipped', 'delivered', 'completed'];
     const currentStatusIndex = statusOrder.indexOf(order.status);
 
@@ -260,11 +407,12 @@
     });
 
     if (order.status === 'cancelled') {
+      const cancellation = order.cancellation || {};
       html += `
-        <div class="timeline-item">
+        <div class="timeline-item cancelled">
           <div class="timeline-item-title" style="color: #dc2626;">Order Cancelled</div>
-          <div class="timeline-item-date">${formatDate(orderDate)}</div>
-          <div class="timeline-item-desc">This order has been cancelled</div>
+          <div class="timeline-item-date">${formatDate(cancellation.cancelledAt || orderDate)}</div>
+          <div class="timeline-item-desc">${cancellation.reason || 'This order has been cancelled'}</div>
         </div>
       `;
     }
@@ -277,23 +425,36 @@
   // ====================================
   function updateActionButtons(order) {
     const headerActions = document.getElementById('order-header-actions');
+    if (!headerActions) return;
     
     // Show download invoice for completed/delivered orders
     const downloadBtn = document.getElementById('btn-download-invoice');
-    if (order.status === 'completed' || order.status === 'delivered') {
-      downloadBtn.style.display = 'inline-flex';
-    } else {
-      downloadBtn.style.display = 'none';
+    if (downloadBtn) {
+      if (order.status === 'completed' || order.status === 'delivered') {
+        downloadBtn.style.display = 'inline-flex';
+      } else {
+        downloadBtn.style.display = 'none';
+      }
+    }
+
+    // Remove any existing cancel button
+    const existingCancelBtn = document.getElementById('btn-cancel-order');
+    if (existingCancelBtn) {
+      existingCancelBtn.remove();
     }
 
     // Add cancel button for pending orders
-    if (order.status === 'pending' && !headerActions.querySelector('#btn-cancel-order')) {
+    if (order.status === 'pending') {
       const cancelBtn = document.createElement('button');
       cancelBtn.id = 'btn-cancel-order';
       cancelBtn.className = 'order-details-action-btn danger';
       cancelBtn.innerHTML = '<i data-lucide="x"></i><span>Cancel Order</span>';
       cancelBtn.addEventListener('click', () => cancelOrder(order.orderNumber));
       headerActions.appendChild(cancelBtn);
+      
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
     }
   }
 
@@ -321,27 +482,35 @@
   }
 
   // ====================================
-  // CANCEL ORDER
+  // CANCEL ORDER - BACKEND API
   // ====================================
-  window.cancelOrder = function(orderNumber) {
-    if (confirm(`Are you sure you want to cancel order ${orderNumber}?`)) {
-      try {
-        const orders = JSON.parse(localStorage.getItem(ORDERS_STORAGE_KEY) || '[]');
-        const orderIndex = orders.findIndex(o => o.orderNumber === orderNumber);
-        
-        if (orderIndex !== -1 && orders[orderIndex].status === 'pending') {
-          orders[orderIndex].status = 'cancelled';
-          localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(orders));
-          
-          // Reload the page to show updated status
-          window.location.reload();
-        } else {
-          alert('Only pending orders can be cancelled.');
-        }
-      } catch (error) {
-        console.error('Error cancelling order:', error);
-        alert('Error cancelling order. Please try again.');
+  window.cancelOrder = async function(orderNumber) {
+    if (!confirm(`Are you sure you want to cancel order ${orderNumber}?`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/buyer/api/orders/${encodeURIComponent(orderNumber)}/cancel`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ reason: 'Cancelled by customer' })
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || 'Failed to cancel order');
       }
+
+      alert(`Order ${orderNumber} has been cancelled.`);
+      // Reload to show updated status
+      window.location.reload();
+
+    } catch (error) {
+      console.error('Error cancelling order:', error);
+      alert(error.message || 'Error cancelling order. Please try again.');
     }
   };
 
@@ -361,26 +530,63 @@
   }
 
   function generateInvoiceText(order) {
+    const pricing = order.pricing || {};
+    
     let text = `INVOICE - ${order.orderNumber}\n`;
-    text += `Date: ${formatDate(order.date)}\n`;
+    text += `Date: ${formatDate(order.createdAt)}\n`;
     text += `Status: ${order.status.toUpperCase()}\n\n`;
+    
+    // Shipping info
+    if (order.shipping) {
+      text += `SHIPPING TO:\n`;
+      text += `${order.shipping.firstName || ''} ${order.shipping.lastName || ''}\n`;
+      if (order.shipping.companyName) text += `${order.shipping.companyName}\n`;
+      if (order.shipping.address) text += `${order.shipping.address}\n`;
+      text += `${order.shipping.city || ''}, ${order.shipping.country || ''}\n`;
+      if (order.shipping.phone) text += `Phone: ${order.shipping.phone}\n`;
+      text += `\n`;
+    }
+    
     text += `ITEMS:\n`;
     text += `${'='.repeat(60)}\n`;
     
-    order.items.forEach(item => {
+    (order.items || []).forEach(item => {
       const qty = parseInt(item.quantity) || 1;
       const price = parseFloat(item.price) || 0;
       text += `${item.description || item.partNumber || 'N/A'}\n`;
-      text += `  Code: ${item.code || item.partNumber || 'N/A'}\n`;
+      text += `  Part Number: ${item.partNumber || 'N/A'}\n`;
+      text += `  Brand: ${item.brand || 'N/A'}\n`;
       text += `  Quantity: ${qty} x ${price.toFixed(2)} = ${(qty * price).toFixed(2)} د.إ\n\n`;
     });
     
     text += `${'='.repeat(60)}\n`;
-    text += `Subtotal: ${(order.subtotal || 0).toFixed(2)} د.إ\n`;
-    if (order.fee > 0) {
-      text += `Fee: ${order.fee.toFixed(2)} د.إ\n`;
+    text += `Subtotal: ${(pricing.subtotal || 0).toFixed(2)} د.إ\n`;
+    if (pricing.processingFee > 0) {
+      text += `Processing Fee: ${pricing.processingFee.toFixed(2)} د.إ\n`;
     }
-    text += `TOTAL: ${(order.amount || order.total || 0).toFixed(2)} د.إ\n`;
+    if (pricing.shipping > 0) {
+      text += `Shipping: ${pricing.shipping.toFixed(2)} د.إ\n`;
+    }
+    if (pricing.tax > 0) {
+      text += `Tax: ${pricing.tax.toFixed(2)} د.إ\n`;
+    }
+    if (pricing.discount > 0) {
+      text += `Discount: -${pricing.discount.toFixed(2)} د.إ\n`;
+    }
+    text += `TOTAL: ${(pricing.total || 0).toFixed(2)} د.إ\n\n`;
+    
+    // Payment info
+    if (order.payment) {
+      text += `PAYMENT:\n`;
+      text += `Status: ${order.payment.status || 'N/A'}\n`;
+      text += `Method: ${order.payment.method || 'N/A'}\n`;
+      if (order.payment.amountPaid > 0) {
+        text += `Amount Paid: ${order.payment.amountPaid.toFixed(2)} د.إ\n`;
+      }
+      if (order.payment.amountDue > 0) {
+        text += `Amount Due: ${order.payment.amountDue.toFixed(2)} د.إ\n`;
+      }
+    }
     
     return text;
   }
@@ -388,10 +594,20 @@
   // ====================================
   // SHOW ERROR
   // ====================================
-  function showError() {
-    document.getElementById('order-loading').style.display = 'none';
-    document.getElementById('order-content').style.display = 'none';
-    document.getElementById('order-error').style.display = 'block';
+  function showError(message) {
+    const loadingEl = document.getElementById('order-loading');
+    const contentEl = document.getElementById('order-content');
+    const errorEl = document.getElementById('order-error');
+    
+    if (loadingEl) loadingEl.style.display = 'none';
+    if (contentEl) contentEl.style.display = 'none';
+    if (errorEl) {
+      errorEl.style.display = 'block';
+      const errorMessage = errorEl.querySelector('.error-message');
+      if (errorMessage) {
+        errorMessage.textContent = message || 'Failed to load order details';
+      }
+    }
     
     if (typeof lucide !== 'undefined') {
       lucide.createIcons();
@@ -402,6 +618,7 @@
   // FORMAT DATE
   // ====================================
   function formatDate(dateString) {
+    if (!dateString) return 'N/A';
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
       year: 'numeric',

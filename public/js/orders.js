@@ -1,13 +1,11 @@
 // ====================================
 // ORDERS PAGE FUNCTIONALITY
 // Filtering, Sorting, and Pagination
-// Loads orders from localStorage
+// Loads orders from Backend API (not localStorage)
 // ====================================
 
 (function () {
   'use strict';
-
-  const ORDERS_STORAGE_KEY = 'partsform_orders';
 
   // Store orders data
   let originalOrders = [];
@@ -15,6 +13,8 @@
   let currentPage = 1;
   const itemsPerPage = 10;
   let currentSort = { column: null, direction: 'asc' };
+  let isLoading = false;
+  let stats = { pending: 0, processing: 0, completed: 0 };
 
   // Status order for sorting (pending first)
   const statusOrder = {
@@ -35,37 +35,114 @@
   }
 
   // ====================================
-  // LOAD ORDERS FROM LOCALSTORAGE
+  // LOAD ORDERS FROM BACKEND API
   // ====================================
-  function loadOrders() {
+  async function loadOrders() {
+    if (isLoading) return;
+    isLoading = true;
+
+    // Show loading state
+    showLoading();
+
     try {
-      const ordersData = localStorage.getItem(ORDERS_STORAGE_KEY);
-      if (ordersData) {
-        originalOrders = JSON.parse(ordersData);
-        
-        // Sort orders: pending first, then by date (newest first)
-        originalOrders.sort((a, b) => {
-          const aStatus = statusOrder[a.status] ?? 999;
-          const bStatus = statusOrder[b.status] ?? 999;
-          if (aStatus !== bStatus) {
-            return aStatus - bStatus;
-          }
-          return new Date(b.date) - new Date(a.date);
-        });
-        
-        filteredOrders = [...originalOrders];
-      } else {
-        originalOrders = [];
-        filteredOrders = [];
+      // Build query params from filters
+      const filterStatus = document.getElementById('filter-status')?.value || '';
+      const filterDateFrom = document.getElementById('filter-date-from')?.value || '';
+      const filterDateTo = document.getElementById('filter-date-to')?.value || '';
+      const filterSearch = document.getElementById('filter-search')?.value || '';
+
+      const params = new URLSearchParams();
+      if (filterStatus) params.append('status', filterStatus);
+      if (filterDateFrom) params.append('dateFrom', filterDateFrom);
+      if (filterDateTo) params.append('dateTo', filterDateTo);
+      if (filterSearch) params.append('search', filterSearch);
+      params.append('page', currentPage);
+      params.append('limit', itemsPerPage);
+
+      const response = await fetch(`/buyer/api/orders?${params.toString()}`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch orders');
       }
+
+      const data = await response.json();
+
+      if (data.success) {
+        originalOrders = data.orders || [];
+        filteredOrders = [...originalOrders];
+        stats = data.stats || { pending: 0, processing: 0, completed: 0 };
+        
+        // Update pagination info from server
+        if (data.pagination) {
+          updatePaginationFromServer(data.pagination);
+        }
+      } else {
+        throw new Error(data.message || 'Failed to load orders');
+      }
+
     } catch (error) {
       console.error('Error loading orders:', error);
       originalOrders = [];
       filteredOrders = [];
+      showError('Failed to load orders. Please try again.');
+    } finally {
+      isLoading = false;
+      renderOrders();
+      updateStats();
     }
+  }
 
-    renderOrders();
-    updateStats();
+  // ====================================
+  // SHOW LOADING STATE
+  // ====================================
+  function showLoading() {
+    const tbody = document.getElementById('orders-tbody');
+    const tableContainer = document.getElementById('orders-table-container');
+    const emptyState = document.getElementById('orders-empty');
+
+    if (emptyState) emptyState.style.display = 'none';
+    if (tableContainer) tableContainer.style.display = 'block';
+    
+    if (tbody) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="6" style="text-align: center; padding: 3rem;">
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 1rem;">
+              <i data-lucide="loader" class="animate-spin" style="width: 2rem; height: 2rem; color: var(--color-accent);"></i>
+              <span style="color: var(--color-text-secondary);">Loading orders...</span>
+            </div>
+          </td>
+        </tr>
+      `;
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+    }
+  }
+
+  // ====================================
+  // SHOW ERROR MESSAGE
+  // ====================================
+  function showError(message) {
+    const tbody = document.getElementById('orders-tbody');
+    if (tbody) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="6" style="text-align: center; padding: 3rem;">
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 1rem; color: #ef4444;">
+              <i data-lucide="alert-circle" style="width: 2rem; height: 2rem;"></i>
+              <span>${message}</span>
+              <button onclick="location.reload()" style="padding: 0.5rem 1rem; background: var(--color-accent); color: white; border: none; border-radius: 6px; cursor: pointer;">
+                Retry
+              </button>
+            </div>
+          </td>
+        </tr>
+      `;
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+    }
   }
 
   // ====================================
@@ -95,13 +172,8 @@
     if (emptyState) emptyState.style.display = 'none';
     if (pagination) pagination.style.display = 'flex';
 
-    // Calculate pagination
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    const ordersToShow = filteredOrders.slice(startIndex, endIndex);
-
-    // Render orders
-    ordersToShow.forEach(order => {
+    // Render orders (already paginated from server)
+    filteredOrders.forEach(order => {
       const row = createOrderRow(order);
       tbody.appendChild(row);
     });
@@ -121,10 +193,10 @@
     const row = document.createElement('tr');
     row.dataset.orderId = order.orderNumber;
     row.dataset.status = order.status;
-    row.dataset.date = order.date;
+    row.dataset.date = order.date || order.createdAt;
     row.dataset.amount = order.amount || order.total || 0;
 
-    const orderDate = new Date(order.date);
+    const orderDate = new Date(order.date || order.createdAt);
     const dateStr = orderDate.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
@@ -137,8 +209,9 @@
 
     const statusIcon = getStatusIcon(order.status);
     const amount = order.amount || order.total || 0;
-    const itemsCount = order.itemsCount || (order.items ? order.items.reduce((sum, item) => sum + (parseInt(item.quantity) || 1), 0) : 0);
-    const itemsPreview = order.itemsPreview || (order.items ? order.items.slice(0, 3).map(item => item.description || item.partNumber || item.code || 'Part') : []);
+    // Each item is individual - count is simply the items array length
+    const itemsCount = order.totalItems || (order.items ? order.items.length : 0);
+    const itemsPreview = order.itemsPreview || (order.items ? order.items.slice(0, 3).map(item => item.partNumber || item.code || 'Part') : []);
 
     // Check if this is an AOG/Aviation order
     const isAOGOrder = order.type === 'AOG' || order.type === 'Aviation' || 
@@ -194,7 +267,7 @@
                 <span>Track</span>
               </button>
             ` : ''}
-            ${!isAOGOrder ? `
+            ${!isAOGOrder && order.status === 'pending' ? `
               <button class="btn-action cancel" data-order="${order.orderNumber}" onclick="cancelOrder('${order.orderNumber}')">
                 <i data-lucide="x"></i>
                 <span>Cancel</span>
@@ -246,68 +319,23 @@
   }
 
   function applyFilters() {
-    const filterStatus = document.getElementById('filter-status')?.value;
-    const filterDateFrom = document.getElementById('filter-date-from')?.value;
-    const filterDateTo = document.getElementById('filter-date-to')?.value;
-    const filterSearch = document.getElementById('filter-search')?.value.toLowerCase().trim();
-
-    filteredOrders = originalOrders.filter(order => {
-      // Status filter
-      if (filterStatus && order.status !== filterStatus) {
-        return false;
-      }
-
-      // Date range filter
-      if (filterDateFrom || filterDateTo) {
-        const orderDate = new Date(order.date);
-        if (filterDateFrom && orderDate < new Date(filterDateFrom + 'T00:00:00')) {
-          return false;
-        }
-        if (filterDateTo && orderDate > new Date(filterDateTo + 'T23:59:59')) {
-          return false;
-        }
-      }
-
-      // Search filter
-      if (filterSearch) {
-        const orderNumber = order.orderNumber.toLowerCase();
-        const searchText = `${orderNumber} ${order.itemsPreview ? order.itemsPreview.join(' ') : ''} ${order.items ? order.items.map(i => (i.description || i.partNumber || i.code || '')).join(' ') : ''}`.toLowerCase();
-        if (!searchText.includes(filterSearch)) {
-          return false;
-        }
-      }
-
-      return true;
-    });
-
     currentPage = 1;
-    
-    // Apply sorting
-    if (currentSort.column) {
-      sortOrders(currentSort.column, currentSort.direction, false);
-    } else {
-      renderOrders();
-    }
-
-    updateStats();
+    loadOrders(); // Reload from server with filters
   }
 
   function resetFilters() {
-    document.getElementById('filter-status').value = '';
-    document.getElementById('filter-date-from').value = '';
-    document.getElementById('filter-date-to').value = '';
-    document.getElementById('filter-search').value = '';
+    const filterStatus = document.getElementById('filter-status');
+    const filterDateFrom = document.getElementById('filter-date-from');
+    const filterDateTo = document.getElementById('filter-date-to');
+    const filterSearch = document.getElementById('filter-search');
 
-    filteredOrders = [...originalOrders];
+    if (filterStatus) filterStatus.value = '';
+    if (filterDateFrom) filterDateFrom.value = '';
+    if (filterDateTo) filterDateTo.value = '';
+    if (filterSearch) filterSearch.value = '';
+
     currentPage = 1;
-    
-    if (currentSort.column) {
-      sortOrders(currentSort.column, currentSort.direction, false);
-    } else {
-      renderOrders();
-    }
-
-    updateStats();
+    loadOrders(); // Reload from server without filters
   }
 
   // ====================================
@@ -342,6 +370,7 @@
       });
     }
 
+    // Sort locally (already paginated data from server)
     filteredOrders.sort((a, b) => {
       let aVal, bVal;
 
@@ -351,8 +380,8 @@
           bVal = b.orderNumber;
           break;
         case 'date':
-          aVal = new Date(a.date);
-          bVal = new Date(b.date);
+          aVal = new Date(a.date || a.createdAt);
+          bVal = new Date(b.date || b.createdAt);
           break;
         case 'amount':
           aVal = a.amount || a.total || 0;
@@ -373,6 +402,9 @@
   // ====================================
   // PAGINATION
   // ====================================
+  let totalItems = 0;
+  let totalPages = 0;
+
   function initPagination() {
     const btnPrev = document.getElementById('btn-prev');
     const btnNext = document.getElementById('btn-next');
@@ -381,33 +413,36 @@
       btnPrev.addEventListener('click', () => {
         if (currentPage > 1) {
           currentPage--;
-          renderOrders();
+          loadOrders();
         }
       });
     }
 
     if (btnNext) {
       btnNext.addEventListener('click', () => {
-        const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
         if (currentPage < totalPages) {
           currentPage++;
-          renderOrders();
+          loadOrders();
         }
       });
     }
   }
 
+  function updatePaginationFromServer(pagination) {
+    totalItems = pagination.total || 0;
+    totalPages = pagination.totalPages || 0;
+    currentPage = pagination.page || 1;
+  }
+
   function updatePagination() {
-    const totalItems = filteredOrders.length;
-    const totalPages = Math.ceil(totalItems / itemsPerPage);
-    const startIndex = (currentPage - 1) * itemsPerPage + 1;
+    const startIndex = totalItems > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0;
     const endIndex = Math.min(currentPage * itemsPerPage, totalItems);
 
     const paginationFrom = document.getElementById('pagination-from');
     const paginationTo = document.getElementById('pagination-to');
     const paginationTotal = document.getElementById('pagination-total');
 
-    if (paginationFrom) paginationFrom.textContent = totalItems > 0 ? startIndex : 0;
+    if (paginationFrom) paginationFrom.textContent = startIndex;
     if (paginationTo) paginationTo.textContent = endIndex;
     if (paginationTotal) paginationTotal.textContent = totalItems;
 
@@ -427,43 +462,53 @@
   // STATS UPDATE
   // ====================================
   function updateStats() {
-    const pendingCount = filteredOrders.filter(o => o.status === 'pending').length;
-    const processingCount = filteredOrders.filter(o => o.status === 'processing').length;
-    const completedCount = filteredOrders.filter(o => 
-      o.status === 'completed' || o.status === 'delivered'
-    ).length;
-
     const statPending = document.getElementById('stat-pending');
     const statProcessing = document.getElementById('stat-processing');
     const statCompleted = document.getElementById('stat-completed');
 
-    if (statPending) statPending.textContent = pendingCount;
-    if (statProcessing) statProcessing.textContent = processingCount;
-    if (statCompleted) statCompleted.textContent = completedCount;
+    if (statPending) statPending.textContent = stats.pending || 0;
+    if (statProcessing) statProcessing.textContent = stats.processing || 0;
+    if (statCompleted) statCompleted.textContent = stats.completed || 0;
   }
 
   // ====================================
-  // CANCEL ORDER
+  // CANCEL ORDER - BACKEND API
   // ====================================
-  window.cancelOrder = function(orderNumber) {
-    if (confirm(`Are you sure you want to cancel order ${orderNumber}?`)) {
-      try {
-        const orders = JSON.parse(localStorage.getItem(ORDERS_STORAGE_KEY) || '[]');
-        const orderIndex = orders.findIndex(o => o.orderNumber === orderNumber);
-        
-        if (orderIndex !== -1 && orders[orderIndex].status === 'pending') {
-          orders[orderIndex].status = 'cancelled';
-          localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(orders));
-          loadOrders();
-          alert(`Order ${orderNumber} has been cancelled.`);
-        } else {
-          alert('Only pending orders can be cancelled.');
-        }
-      } catch (error) {
-        console.error('Error cancelling order:', error);
-        alert('Error cancelling order. Please try again.');
-      }
+  window.cancelOrder = async function(orderNumber) {
+    if (!confirm(`Are you sure you want to cancel order ${orderNumber}?`)) {
+      return;
     }
+
+    try {
+      const response = await fetch(`/buyer/api/orders/${encodeURIComponent(orderNumber)}/cancel`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ reason: 'Cancelled by customer' })
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || 'Failed to cancel order');
+      }
+
+      alert(`Order ${orderNumber} has been cancelled.`);
+      loadOrders(); // Reload orders from server
+
+    } catch (error) {
+      console.error('Error cancelling order:', error);
+      alert(error.message || 'Error cancelling order. Please try again.');
+    }
+  };
+
+  // ====================================
+  // TRACK ORDER
+  // ====================================
+  window.trackOrder = function(orderNumber) {
+    // Navigate to order details for tracking
+    window.location.href = `/buyer/orders/${encodeURIComponent(orderNumber)}`;
   };
 
   // Initialize when DOM is ready

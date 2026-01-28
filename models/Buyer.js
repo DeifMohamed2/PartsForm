@@ -2,6 +2,70 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const validator = require('validator');
 
+// Address subdocument schema
+const addressSchema = new mongoose.Schema(
+  {
+    label: {
+      type: String,
+      required: [true, 'Address label is required'],
+      trim: true,
+      maxlength: [50, 'Label cannot exceed 50 characters'],
+    },
+    fullName: {
+      type: String,
+      required: [true, 'Full name is required'],
+      trim: true,
+      maxlength: [100, 'Full name cannot exceed 100 characters'],
+    },
+    phone: {
+      type: String,
+      required: [true, 'Phone number is required'],
+      trim: true,
+    },
+    street: {
+      type: String,
+      required: [true, 'Street address is required'],
+      trim: true,
+      maxlength: [200, 'Street address cannot exceed 200 characters'],
+    },
+    city: {
+      type: String,
+      required: [true, 'City is required'],
+      trim: true,
+      maxlength: [100, 'City cannot exceed 100 characters'],
+    },
+    state: {
+      type: String,
+      required: [true, 'State is required'],
+      trim: true,
+      maxlength: [100, 'State cannot exceed 100 characters'],
+    },
+    country: {
+      type: String,
+      required: [true, 'Country is required'],
+      trim: true,
+      maxlength: [100, 'Country cannot exceed 100 characters'],
+    },
+    postalCode: {
+      type: String,
+      trim: true,
+      maxlength: [20, 'Postal code cannot exceed 20 characters'],
+    },
+    notes: {
+      type: String,
+      trim: true,
+      maxlength: [500, 'Notes cannot exceed 500 characters'],
+    },
+    isDefault: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
 const buyerSchema = new mongoose.Schema(
   {
     // Personal Information
@@ -73,6 +137,9 @@ const buyerSchema = new mongoose.Schema(
       minlength: [10, 'Shipping address must be at least 10 characters'],
       maxlength: [500, 'Shipping address cannot exceed 500 characters'],
     },
+
+    // Delivery Addresses
+    addresses: [addressSchema],
 
     // Security
     password: {

@@ -125,40 +125,38 @@
   // CART OPERATIONS
   // ====================================
   function addToCart(item) {
-    // Check if item already exists (by part code and brand)
-    const existingIndex = cartState.items.findIndex(
-      (i) => i.code === item.code && i.brand === (item.brand || 'N/A')
-    );
-
-    if (existingIndex !== -1) {
-      // Update quantity
-      cartState.items[existingIndex].quantity += item.quantity || 1;
-      showAlert(
-        'success',
-        'Updated',
-        `Quantity updated to ${cartState.items[existingIndex].quantity} for ${item.code}`
-      );
-    } else {
-      // Add new item
+    // Each part is added as a separate item - NO grouping by code/brand
+    // If adding multiple quantities, add them as individual items
+    const quantity = item.quantity || 1;
+    
+    for (let i = 0; i < quantity; i++) {
+      // Add as new individual item - store all fields from search results
       const cartItem = {
         id: generateItemId(),
-        code: item.code,
+        code: item.code || item.partNumber || 'N/A',
         brand: item.brand || 'N/A',
-        description: item.description,
+        description: item.description || '',
+        supplier: item.supplier || '',
         terms: item.terms || 'N/A',
         weight: parseFloat(item.weight) || 0,
         stock: item.stock || 'N/A',
+        origin: item.origin || 'N/A',
         aircraftType: item.aircraftType || 'N/A',
-        quantity: item.quantity || 1,
-        addPacking: false,
         price: parseFloat(item.price) || 0,
+        currency: item.currency || 'AED',
         reference: item.reference || '',
         dateCreated: new Date().toISOString(),
         category: item.category || 'general',
+        addPacking: false,
       };
 
       cartState.items.push(cartItem);
-      showAlert('success', 'Added to Cart', `${item.code} added successfully`);
+    }
+    
+    if (quantity > 1) {
+      showAlert('success', 'Added to Cart', `${quantity} x ${item.code || item.partNumber} added successfully`);
+    } else {
+      showAlert('success', 'Added to Cart', `${item.code || item.partNumber} added successfully`);
     }
 
     saveCartToStorage();
@@ -234,13 +232,11 @@
     );
   }
 
+  // Note: updateItemQuantity is deprecated - each item is now individual
+  // Keeping function for backward compatibility but it's no longer used
   function updateItemQuantity(itemId, newQuantity) {
-    const item = cartState.items.find((i) => i.id === itemId);
-    if (item) {
-      item.quantity = Math.max(1, parseInt(newQuantity) || 1);
-      saveCartToStorage();
-      renderCart();
-    }
+    // Each item is individual - no quantity to update
+    console.warn('updateItemQuantity is deprecated - items are now individual');
   }
 
   function updateItemPacking(itemId, addPacking) {
@@ -338,8 +334,9 @@
       tr.classList.add('selected');
     }
 
-    const amount = item.price * item.quantity;
-    const totalWeight = item.weight * item.quantity;
+    // Each item is individual - no quantity grouping
+    const amount = item.price;
+    const itemWeight = item.weight;
 
     tr.innerHTML = `
       <td class="th-checkbox">
@@ -356,8 +353,11 @@
       <td class="th-description">
         <span class="part-description">${escapeHtml(item.description)}</span>
       </td>
+      <td class="th-supplier">
+        <span class="supplier-name">${escapeHtml(item.supplier || 'N/A')}</span>
+      </td>
       <td class="th-terms">${escapeHtml(item.terms)}</td>
-      <td class="th-weight">${totalWeight.toFixed(3)} kg</td>
+      <td class="th-weight">${itemWeight.toFixed(3)} kg</td>
       <td class="th-stock">
         <span class="stock-badge ${getStockClass(item.stock)}">
           <i data-lucide="${getStockIcon(item.stock)}"></i>
@@ -366,18 +366,7 @@
       </td>
       <td class="th-aircraft">${escapeHtml(item.aircraftType)}</td>
       <td class="th-qty">
-        <div class="qty-input-group">
-          <button class="qty-btn qty-decrease" data-item-id="${item.id}">
-            <i data-lucide="minus"></i>
-          </button>
-          <input type="number" class="qty-input" 
-                 value="${item.quantity}" 
-                 min="1" 
-                 data-item-id="${item.id}">
-          <button class="qty-btn qty-increase" data-item-id="${item.id}">
-            <i data-lucide="plus"></i>
-          </button>
-        </div>
+        <span class="qty-display">1</span>
       </td>
       <td class="th-packing">
         <div class="packing-checkbox-group">
@@ -426,28 +415,7 @@
     const checkbox = row.querySelector('.item-checkbox');
     checkbox.addEventListener('change', () => toggleItemSelection(itemId));
 
-    // Quantity buttons
-    const decreaseBtn = row.querySelector('.qty-decrease');
-    const increaseBtn = row.querySelector('.qty-increase');
-    const qtyInput = row.querySelector('.qty-input');
-
-    decreaseBtn.addEventListener('click', () => {
-      const item = cartState.items.find((i) => i.id === itemId);
-      if (item && item.quantity > 1) {
-        updateItemQuantity(itemId, item.quantity - 1);
-      }
-    });
-
-    increaseBtn.addEventListener('click', () => {
-      const item = cartState.items.find((i) => i.id === itemId);
-      if (item) {
-        updateItemQuantity(itemId, item.quantity + 1);
-      }
-    });
-
-    qtyInput.addEventListener('change', (e) => {
-      updateItemQuantity(itemId, e.target.value);
-    });
+    // No quantity buttons - each item is individual
 
     // Packing checkbox
     const packingCheckbox = row.querySelector('.packing-checkbox');
@@ -543,15 +511,10 @@
   }
 
   function calculateTotals() {
-    let totalItems = 0;
-    let totalAmount = 0;
-    let totalWeight = 0;
-
-    cartState.items.forEach((item) => {
-      totalItems += item.quantity;
-      totalAmount += item.price * item.quantity;
-      totalWeight += item.weight * item.quantity;
-    });
+    // Each item is individual - count each item as 1
+    const totalItems = cartState.items.length;
+    const totalAmount = cartState.items.reduce((sum, item) => sum + (parseFloat(item.price) || 0), 0);
+    const totalWeight = cartState.items.reduce((sum, item) => sum + (parseFloat(item.weight) || 0), 0);
 
     return { totalItems, totalAmount, totalWeight };
   }

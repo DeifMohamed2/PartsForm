@@ -1,22 +1,24 @@
 /**
  * Search Controller
  * Handles product search API endpoints for buyers
+ * IMPORTANT: Search is by EXACT part number only - returns all suppliers for that part number
  */
 const Part = require('../models/Part');
 const elasticsearchService = require('../services/elasticsearchService');
 
 /**
- * Search parts
+ * Search parts by EXACT part number
  * GET /api/search
+ * Returns all parts with the exact same part number from different suppliers
  */
 const searchParts = async (req, res) => {
   try {
     const {
       q: query,
       page = 1,
-      limit = 50,
-      sortBy = 'importedAt',
-      sortOrder = 'desc',
+      limit = 100,
+      sortBy = 'price',
+      sortOrder = 'asc',
       brand,
       supplier,
       minPrice,
@@ -24,51 +26,101 @@ const searchParts = async (req, res) => {
       inStock,
     } = req.query;
 
+    if (!query || !query.trim()) {
+      return res.json({
+        success: true,
+        query: '',
+        results: [],
+        total: 0,
+        page: 1,
+        limit: parseInt(limit, 10),
+        totalPages: 0,
+        hasMore: false,
+      });
+    }
+
+    const partNumber = query.trim();
     const pageNum = parseInt(page, 10) || 1;
-    const limitNum = Math.min(parseInt(limit, 10) || 50, 100);
+    const limitNum = Math.min(parseInt(limit, 10) || 100, 500);
     const skip = (pageNum - 1) * limitNum;
 
-    const filters = {
-      brand,
-      supplier,
-      minPrice: minPrice ? parseFloat(minPrice) : undefined,
-      maxPrice: maxPrice ? parseFloat(maxPrice) : undefined,
-      inStock: inStock === 'true',
-      limit: limitNum,
-      skip,
-      sortBy,
-      sortOrder,
-    };
+    let results = [];
+    let total = 0;
+    let source = 'mongodb';
 
-    let result;
     // Use cached check - much faster than calling getStats() every time
     const useElasticsearch = await elasticsearchService.hasDocuments();
 
-    // Use Elasticsearch if available AND has data, otherwise fallback to MongoDB
+    // Use Elasticsearch if available AND has data
     if (useElasticsearch) {
-      result = await elasticsearchService.search(query || '', filters);
-    } else {
-      // Fallback to MongoDB
-      result = await Part.searchParts(query || '', {
-        page: pageNum,
-        limit: limitNum,
-        sortBy,
-        sortOrder,
-        filters: { brand, supplier, minPrice, maxPrice, inStock: inStock === 'true' },
-      });
+      try {
+        const esResult = await elasticsearchService.searchByExactPartNumber(partNumber, {
+          limit: limitNum,
+          skip,
+          sortBy,
+          sortOrder,
+        });
+        results = esResult.results;
+        total = esResult.total;
+        source = 'elasticsearch';
+      } catch (esError) {
+        console.error('Elasticsearch search failed, falling back to MongoDB:', esError.message);
+      }
+    }
+
+    // Fallback to MongoDB if Elasticsearch didn't work
+    if (results.length === 0 && source === 'mongodb') {
+      // EXACT part number match only (case-insensitive)
+      const mongoQuery = {
+        partNumber: { $regex: `^${partNumber.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, $options: 'i' },
+      };
+
+      const mongoResults = await Part.find(mongoQuery)
+        .sort({ [sortBy]: sortOrder === 'asc' ? 1 : -1 })
+        .skip(skip)
+        .limit(limitNum)
+        .lean();
+
+      total = await Part.countDocuments(mongoQuery);
+      results = mongoResults;
+    }
+
+    // Apply additional filters (brand, supplier, price, stock) client-side if needed
+    let filteredResults = results;
+    
+    if (brand) {
+      filteredResults = filteredResults.filter(p => 
+        p.brand && p.brand.toLowerCase().includes(brand.toLowerCase())
+      );
+    }
+    if (supplier) {
+      filteredResults = filteredResults.filter(p => 
+        p.supplier && p.supplier.toLowerCase().includes(supplier.toLowerCase())
+      );
+    }
+    if (minPrice !== undefined) {
+      const min = parseFloat(minPrice);
+      filteredResults = filteredResults.filter(p => (p.price || 0) >= min);
+    }
+    if (maxPrice !== undefined) {
+      const max = parseFloat(maxPrice);
+      filteredResults = filteredResults.filter(p => (p.price || 0) <= max);
+    }
+    if (inStock === 'true') {
+      filteredResults = filteredResults.filter(p => (p.quantity || 0) > 0);
     }
 
     res.json({
       success: true,
-      query: query || '',
-      results: result.results,
-      total: result.total,
+      query: partNumber,
+      results: filteredResults,
+      total: filteredResults.length,
       page: pageNum,
       limit: limitNum,
-      totalPages: result.totalPages || Math.ceil(result.total / limitNum),
-      hasMore: result.hasMore,
-      searchTime: result.searchTime || null,
-      source: useElasticsearch ? 'elasticsearch' : 'mongodb',
+      totalPages: Math.ceil(filteredResults.length / limitNum),
+      hasMore: skip + filteredResults.length < total,
+      searchTime: null,
+      source,
     });
   } catch (error) {
     console.error('Search error:', error);
@@ -81,14 +133,14 @@ const searchParts = async (req, res) => {
 };
 
 /**
- * Autocomplete suggestions
+ * Autocomplete suggestions - Part Number Only
  * GET /api/search/autocomplete
  */
 const autocomplete = async (req, res) => {
   try {
     const { q: query, limit = 10 } = req.query;
 
-    if (!query || query.length < 2) {
+    if (!query || query.length < 1) {
       return res.json({ success: true, suggestions: [] });
     }
 
@@ -99,23 +151,32 @@ const autocomplete = async (req, res) => {
     if (useElasticsearch) {
       suggestions = await elasticsearchService.autocomplete(query, parseInt(limit, 10));
     } else {
-      // MongoDB fallback
+      // MongoDB fallback - Part Number Prefix Match Only
       const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const results = await Part.find({
-        $or: [
-          { partNumber: { $regex: escapedQuery, $options: 'i' } },
-          { description: { $regex: escapedQuery, $options: 'i' } },
-        ],
-      })
-        .select('partNumber description brand supplier')
-        .limit(parseInt(limit, 10))
-        .lean();
+      
+      // Aggregate to get unique part numbers that START WITH the query
+      const results = await Part.aggregate([
+        {
+          $match: {
+            // Only match part numbers that START with the query (prefix match)
+            partNumber: { $regex: `^${escapedQuery}`, $options: 'i' },
+          },
+        },
+        {
+          $group: {
+            _id: '$partNumber',
+            brand: { $first: '$brand' },
+            count: { $sum: 1 },
+          },
+        },
+        { $sort: { _id: 1 } },
+        { $limit: parseInt(limit, 10) },
+      ]);
 
       suggestions = results.map((r) => ({
-        partNumber: r.partNumber,
-        description: r.description,
+        partNumber: r._id,
         brand: r.brand,
-        supplier: r.supplier,
+        count: r.count,
       }));
     }
 
@@ -235,6 +296,148 @@ const getSearchStats = async (req, res) => {
   }
 };
 
+/**
+ * Search multiple parts at once - OPTIMIZED for speed
+ * POST /api/search/multi
+ * Body: { partNumbers: ['CAF-000267-KH', 'SAF-000033-BH', 'ICL-000013-AN'] }
+ * or query string: ?q=CAF-000267-KH,SAF-000033-BH,ICL-000013-AN
+ */
+const searchMultipleParts = async (req, res) => {
+  try {
+    let partNumbers = [];
+    
+    // Accept part numbers from body or query string
+    if (req.body && req.body.partNumbers && Array.isArray(req.body.partNumbers)) {
+      partNumbers = req.body.partNumbers;
+    } else if (req.query.q) {
+      // Parse comma or semicolon separated list
+      partNumbers = req.query.q
+        .split(/[,;]+/)
+        .map(p => p.trim())
+        .filter(p => p.length > 0);
+    }
+
+    if (partNumbers.length === 0) {
+      return res.json({
+        success: true,
+        results: [],
+        total: 0,
+        partNumbers: [],
+        found: [],
+        notFound: [],
+      });
+    }
+
+    // Limit to 100 parts at once
+    const originalCount = partNumbers.length;
+    if (partNumbers.length > 100) {
+      partNumbers = partNumbers.slice(0, 100);
+    }
+
+    console.log(`Searching for ${partNumbers.length} parts (from ${originalCount} requested)`);
+    const startTime = Date.now();
+
+    let allResults = [];
+    let found = [];
+    let notFound = [];
+    let source = 'mongodb';
+
+    // Try Elasticsearch first (FAST bulk search)
+    const useElasticsearch = await elasticsearchService.hasDocuments();
+    
+    if (useElasticsearch) {
+      try {
+        const esResult = await elasticsearchService.searchMultiplePartNumbers(partNumbers, {
+          limitPerPart: 50,
+        });
+        
+        allResults = esResult.results;
+        found = esResult.found;
+        notFound = esResult.notFound;
+        source = 'elasticsearch';
+        
+        console.log(`ES bulk search completed in ${Date.now() - startTime}ms`);
+        
+        // Skip MongoDB fallback when ES is available - ES is the source of truth
+        // Parts not in ES won't be in MongoDB either (they're synced)
+      } catch (esError) {
+        console.error('Elasticsearch multi-search failed:', esError.message);
+      }
+    }
+
+    // Only use MongoDB if ES is NOT available (not as fallback for not-found parts)
+    if (source === 'mongodb') {
+      const partsToSearchInMongo = partNumbers;
+      
+      if (partsToSearchInMongo.length > 0) {
+        console.log('Using MongoDB for search (ES not available)');
+        
+        // Use $in with exact matches instead of regex for speed
+        const upperCaseParts = partsToSearchInMongo.map(pn => pn.trim().toUpperCase());
+        const lowerCaseParts = partsToSearchInMongo.map(pn => pn.trim().toLowerCase());
+        const originalParts = partsToSearchInMongo.map(pn => pn.trim());
+        
+        // Combine all case variations
+        const allVariations = [...new Set([...upperCaseParts, ...lowerCaseParts, ...originalParts])];
+        
+        // Single MongoDB query with $in (faster than $or with regex)
+        const mongoQuery = {
+          partNumber: { $in: allVariations }
+        };
+        
+        const mongoResults = await Part.find(mongoQuery).limit(1000).lean();
+        
+        if (mongoResults.length > 0) {
+          // Determine which parts were found in MongoDB
+          const mongoFoundParts = new Set();
+          mongoResults.forEach(r => {
+            if (r.partNumber) {
+              mongoFoundParts.add(r.partNumber.toUpperCase());
+            }
+          });
+          
+          // Update found/notFound for MongoDB results
+          found = [];
+          notFound = [];
+          partNumbers.forEach(pn => {
+            if (mongoFoundParts.has(pn.trim().toUpperCase())) {
+              found.push(pn);
+            } else {
+              notFound.push(pn);
+            }
+          });
+          allResults = mongoResults;
+        } else {
+          notFound = partNumbers;
+        }
+        
+        console.log(`MongoDB search completed in ${Date.now() - startTime}ms`);
+      }
+    }
+
+    const searchTime = Date.now() - startTime;
+    console.log(`Multi-search complete: ${found.length} found, ${notFound.length} not found, ${allResults.length} results in ${searchTime}ms`);
+
+    res.json({
+      success: true,
+      results: allResults,
+      total: allResults.length,
+      partNumbers: partNumbers,
+      found: found,
+      notFound: notFound,
+      source,
+      searchTime,
+    });
+  } catch (error) {
+    console.error('Multi-search error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Multi-search failed',
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   searchParts,
   autocomplete,
@@ -242,4 +445,5 @@ module.exports = {
   getPartById,
   getPartsByNumber,
   getSearchStats,
+  searchMultipleParts,
 };

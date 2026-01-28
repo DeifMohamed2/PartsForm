@@ -1,181 +1,183 @@
 <%- include('partials/header') %>
-<link rel="stylesheet" href="/css/buyerCSS/buyer-main.css">
-<link rel="stylesheet" href="/css/buyerCSS/order-details.css">
+  <link rel="stylesheet" href="/css/buyerCSS/buyer-main.css">
+  <link rel="stylesheet" href="/css/buyerCSS/order-details.css">
 
-<%- include('partials/navbar') %>
+  <%- include('partials/navbar') %>
 
-<!-- ====================================
+    <!-- ====================================
      ORDER DETAILS PAGE - PROFESSIONAL DESIGN
      ==================================== -->
-<div class="order-details-page">
-  <!-- Header -->
-  <div class="order-details-header">
-    <div class="container">
-      <div class="order-details-header-content">
-        <div class="order-details-header-left">
-          <a href="/buyer/orders" class="order-details-back-btn">
-            <i data-lucide="arrow-left"></i>
-            <span>Back to Orders</span>
-          </a>
-          <div class="order-details-title-section">
-            <h1 class="order-details-title" id="order-details-title">Order Details</h1>
-            <span class="order-details-status-badge" id="order-status-badge">
-              <i data-lucide="clock"></i>
-              <span>Loading...</span>
-            </span>
+    <div class="order-details-page">
+      <!-- Header -->
+      <div class="order-details-header">
+        <div class="container">
+          <div class="order-details-header-content">
+            <div class="order-details-header-left">
+              <a href="/buyer/orders" class="order-details-back-btn">
+                <i data-lucide="arrow-left"></i>
+                <span>Back to Orders</span>
+              </a>
+              <div class="order-details-title-section">
+                <h1 class="order-details-title" id="order-details-title">Order Details</h1>
+                <span class="order-details-status-badge" id="order-status-badge">
+                  <i data-lucide="clock"></i>
+                  <span>Loading...</span>
+                </span>
+              </div>
+            </div>
+            <div class="order-details-header-right" id="order-header-actions">
+              <button class="order-details-action-btn secondary" id="btn-print-order">
+                <i data-lucide="printer"></i>
+                <span>Print</span>
+              </button>
+              <button class="order-details-action-btn secondary" id="btn-download-invoice" style="display: none;">
+                <i data-lucide="download"></i>
+                <span>Download Invoice</span>
+              </button>
+            </div>
           </div>
         </div>
-        <div class="order-details-header-right" id="order-header-actions">
-          <button class="order-details-action-btn secondary" id="btn-print-order">
-            <i data-lucide="printer"></i>
-            <span>Print</span>
-          </button>
-          <button class="order-details-action-btn secondary" id="btn-download-invoice" style="display: none;">
-            <i data-lucide="download"></i>
-            <span>Download Invoice</span>
-          </button>
+      </div>
+
+      <!-- Content -->
+      <div class="order-details-content">
+        <div class="container">
+          <!-- Loading State -->
+          <div class="order-details-loading" id="order-loading">
+            <div class="loading-spinner"></div>
+            <p class="loading-text">Loading order details...</p>
+          </div>
+
+          <!-- Order Content (hidden initially) -->
+          <div id="order-content" style="display: none;">
+            <!-- Order Info Grid -->
+            <div class="order-details-grid">
+              <!-- Left Column - Order Items -->
+              <div>
+                <!-- Order Items Section -->
+                <div class="order-details-section">
+                  <h2 class="order-details-section-title">
+                    <i data-lucide="package"></i>
+                    <span>Order Items</span>
+                  </h2>
+                  <div class="order-items-table-container">
+                    <table class="order-items-table" id="order-items-table">
+                      <thead>
+                        <tr>
+                          <th>Part Details</th>
+                          <th style="text-align: center;">Weight</th>
+                          <th style="text-align: center;">Stock</th>
+                          <th style="text-align: right;">Price</th>
+                        </tr>
+                      </thead>
+                      <tbody id="order-items-tbody">
+                        <!-- Items will be populated by JavaScript -->
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <!-- Payment Information -->
+                <div class="order-details-section">
+                  <h2 class="order-details-section-title">
+                    <i data-lucide="credit-card"></i>
+                    <span>Payment Information</span>
+                  </h2>
+                  <div class="payment-info-grid" id="payment-info-grid">
+                    <!-- Payment info will be populated by JavaScript -->
+                  </div>
+                </div>
+
+                <!-- Order Timeline -->
+                <div class="order-details-section">
+                  <h2 class="order-details-section-title">
+                    <i data-lucide="clock"></i>
+                    <span>Order Timeline</span>
+                  </h2>
+                  <div class="order-timeline" id="order-timeline">
+                    <!-- Timeline will be populated by JavaScript -->
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right Column - Order Summary -->
+              <div>
+                <div class="order-summary-card">
+                  <h3 class="order-details-section-title" style="margin-bottom: 1.5rem;">
+                    <i data-lucide="receipt"></i>
+                    <span>Order Summary</span>
+                  </h3>
+                  <div id="order-summary-content">
+                    <!-- Summary will be populated by JavaScript -->
+                  </div>
+                </div>
+
+                <!-- Shipping Information (if available) -->
+                <div class="order-details-section" id="shipping-section" style="display: none;">
+                  <h2 class="order-details-section-title">
+                    <i data-lucide="truck"></i>
+                    <span>Shipping Information</span>
+                  </h2>
+                  <div class="shipping-info-card" id="shipping-info-card">
+                    <!-- Shipping info will be populated by JavaScript -->
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Error State -->
+          <div class="order-details-section" id="order-error" style="display: none;">
+            <div style="text-align: center; padding: 3rem 2rem;">
+              <div
+                style="width: 80px; height: 80px; margin: 0 auto 1.5rem; background: #fee2e2; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                <i data-lucide="alert-circle" style="width: 40px; height: 40px; color: #dc2626;"></i>
+              </div>
+              <h2 style="font-size: 1.5rem; font-weight: 700; color: #1a2b3d; margin-bottom: 0.5rem;">Order Not Found
+              </h2>
+              <p style="color: #64748b; margin-bottom: 2rem;">The order you're looking for doesn't exist or has been
+                removed.</p>
+              <a href="/buyer/orders" class="order-details-action-btn primary">
+                <i data-lucide="arrow-left"></i>
+                <span>Back to Orders</span>
+              </a>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Content -->
-  <div class="order-details-content">
-    <div class="container">
-      <!-- Loading State -->
-      <div class="order-details-loading" id="order-loading">
-        <div class="loading-spinner"></div>
-        <p class="loading-text">Loading order details...</p>
-      </div>
+    <%- include('partials/quick-search') %>
+      <%- include('partials/footer') %>
 
-      <!-- Order Content (hidden initially) -->
-      <div id="order-content" style="display: none;">
-        <!-- Order Info Grid -->
-        <div class="order-details-grid">
-          <!-- Left Column - Order Items -->
-          <div>
-            <!-- Order Items Section -->
-            <div class="order-details-section">
-              <h2 class="order-details-section-title">
-                <i data-lucide="package"></i>
-                <span>Order Items</span>
-              </h2>
-              <div class="order-items-table-container">
-                <table class="order-items-table" id="order-items-table">
-                  <thead>
-                    <tr>
-                      <th>Item</th>
-                      <th style="text-align: center;">Quantity</th>
-                      <th style="text-align: right;">Unit Price</th>
-                      <th style="text-align: right;">Total</th>
-                    </tr>
-                  </thead>
-                  <tbody id="order-items-tbody">
-                    <!-- Items will be populated by JavaScript -->
-                  </tbody>
-                </table>
-              </div>
-            </div>
+        <script src="/js/main.js"></script>
+        <script src="/js/quick-search.js"></script>
+        <script src="/js/cart.js"></script>
+        <script src="/js/cart-badge-updater.js"></script>
+        <script src="/js/order-details.js"></script>
+        <script>
+          lucide.createIcons();
+          window.addEventListener('load', () => lucide.createIcons());
 
-            <!-- Payment Information -->
-            <div class="order-details-section">
-              <h2 class="order-details-section-title">
-                <i data-lucide="credit-card"></i>
-                <span>Payment Information</span>
-              </h2>
-              <div class="payment-info-grid" id="payment-info-grid">
-                <!-- Payment info will be populated by JavaScript -->
-              </div>
-            </div>
-
-            <!-- Order Timeline -->
-            <div class="order-details-section">
-              <h2 class="order-details-section-title">
-                <i data-lucide="clock"></i>
-                <span>Order Timeline</span>
-              </h2>
-              <div class="order-timeline" id="order-timeline">
-                <!-- Timeline will be populated by JavaScript -->
-              </div>
-            </div>
-          </div>
-
-          <!-- Right Column - Order Summary -->
-          <div>
-            <div class="order-summary-card">
-              <h3 class="order-details-section-title" style="margin-bottom: 1.5rem;">
-                <i data-lucide="receipt"></i>
-                <span>Order Summary</span>
-              </h3>
-              <div id="order-summary-content">
-                <!-- Summary will be populated by JavaScript -->
-              </div>
-            </div>
-
-            <!-- Shipping Information (if available) -->
-            <div class="order-details-section" id="shipping-section" style="display: none;">
-              <h2 class="order-details-section-title">
-                <i data-lucide="truck"></i>
-                <span>Shipping Information</span>
-              </h2>
-              <div class="shipping-info-card" id="shipping-info-card">
-                <!-- Shipping info will be populated by JavaScript -->
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Error State -->
-      <div class="order-details-section" id="order-error" style="display: none;">
-        <div style="text-align: center; padding: 3rem 2rem;">
-          <div style="width: 80px; height: 80px; margin: 0 auto 1.5rem; background: #fee2e2; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-            <i data-lucide="alert-circle" style="width: 40px; height: 40px; color: #dc2626;"></i>
-          </div>
-          <h2 style="font-size: 1.5rem; font-weight: 700; color: #1a2b3d; margin-bottom: 0.5rem;">Order Not Found</h2>
-          <p style="color: #64748b; margin-bottom: 2rem;">The order you're looking for doesn't exist or has been removed.</p>
-          <a href="/buyer/orders" class="order-details-action-btn primary">
-            <i data-lucide="arrow-left"></i>
-            <span>Back to Orders</span>
-          </a>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<%- include('partials/quick-search') %>
-<%- include('partials/footer') %>
-
-<script src="/js/main.js"></script>
-<script src="/js/quick-search.js"></script>
-<script src="/js/cart.js"></script>
-<script src="/js/cart-badge-updater.js"></script>
-<script src="/js/order-details.js"></script>
-<script>
-  lucide.createIcons();
-  window.addEventListener('load', () => lucide.createIcons());
-  
-  // Force navbar to always stay white on order details page
-  document.addEventListener('DOMContentLoaded', () => {
-    const navbar = document.getElementById('navbar');
-    if (navbar) {
-      navbar.classList.add('scrolled');
-      // Prevent other scripts from removing the scrolled class
-      const observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-          if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-            if (!navbar.classList.contains('scrolled')) {
+          // Force navbar to always stay white on order details page
+          document.addEventListener('DOMContentLoaded', () => {
+            const navbar = document.getElementById('navbar');
+            if (navbar) {
               navbar.classList.add('scrolled');
+              // Prevent other scripts from removing the scrolled class
+              const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                  if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                    if (!navbar.classList.contains('scrolled')) {
+                      navbar.classList.add('scrolled');
+                    }
+                  }
+                });
+              });
+              observer.observe(navbar, { attributes: true, attributeFilter: ['class'] });
+              // Also ensure on scroll
+              const ensureScrolled = () => navbar.classList.add('scrolled');
+              window.addEventListener('scroll', ensureScrolled, { passive: true });
             }
-          }
-        });
-      });
-      observer.observe(navbar, { attributes: true, attributeFilter: ['class'] });
-      // Also ensure on scroll
-      const ensureScrolled = () => navbar.classList.add('scrolled');
-      window.addEventListener('scroll', ensureScrolled, { passive: true });
-    }
-  });
-</script>
-
+          });
+        </script>

@@ -1,461 +1,543 @@
 <%- include('partials/header') %>
-<link rel="stylesheet" href="/css/buyerCSS/buyer-main.css">
-<link rel="stylesheet" href="/css/buyerCSS/checkout.css">
+  <link rel="stylesheet" href="/css/buyerCSS/buyer-main.css">
+  <link rel="stylesheet" href="/css/buyerCSS/checkout.css">
 
-<%- include('partials/navbar') %>
+  <%- include('partials/navbar') %>
 
-<!-- ====================================
+    <!-- ====================================
      CHECKOUT PAGE - PROFESSIONAL DESIGN
      ==================================== -->
-<div class="checkout-page">
-  <!-- Compact Header Bar -->
-  <div class="checkout-header-bar">
-    <div class="container">
-      <div class="header-bar-content">
-        <div class="header-left">
-          <h1 class="header-title">Checkout</h1>
-          <p class="header-subtitle" id="checkout-subtitle">Review your order and select your preferred payment method</p>
-        </div>
-        <div class="header-right">
-          <div class="checkout-badge" id="secure-badge">
-            <i data-lucide="shield-check"></i>
-            <span>Secure Checkout</span>
+    <div class="checkout-page">
+      <!-- Compact Header Bar -->
+      <div class="checkout-header-bar">
+        <div class="container">
+          <div class="header-bar-content">
+            <div class="header-left">
+              <h1 class="header-title">Checkout</h1>
+              <p class="header-subtitle" id="checkout-subtitle">Review your order and select your preferred payment
+                method</p>
+            </div>
+            <div class="header-right">
+              <div class="checkout-badge" id="secure-badge">
+                <i data-lucide="shield-check"></i>
+                <span>Secure Checkout</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  </div>
 
-  <!-- Checkout Content -->
-  <div class="checkout-content">
-    <div class="container">
-      <div class="checkout-grid">
-        <!-- Left Column - Payment Information -->
-        <div class="checkout-main">
-          <!-- Step Indicator -->
-          <div class="checkout-steps">
-            <div class="step-item active" data-step="1">
-              <div class="step-number">1</div>
-              <div class="step-info">
-                <span class="step-title">Payment Type</span>
-                <span class="step-desc">Choose payment plan</span>
-              </div>
-            </div>
-            <div class="step-item" data-step="2">
-              <div class="step-number">2</div>
-              <div class="step-info">
-                <span class="step-title">Payment Method</span>
-                <span class="step-desc">Select payment option</span>
-              </div>
-            </div>
-            <div class="step-item" data-step="3">
-              <div class="step-number">3</div>
-              <div class="step-info">
-                <span class="step-title">Confirmation</span>
-                <span class="step-desc">Review & complete</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Step 1: Payment Type Selection -->
-          <div class="checkout-section" id="step-1">
-            <div class="section-header">
-              <h2 class="section-title">
-                <i data-lucide="wallet"></i>
-                <span>Select Payment Type</span>
-              </h2>
-              <p class="section-subtitle">Choose how you'd like to pay for your order</p>
-            </div>
-
-            <div class="payment-types">
-              <div class="payment-type-card" data-type="full">
-                <div class="payment-type-radio">
-                  <input type="radio" name="payment-type" id="payment-full" value="full" checked>
-                  <label for="payment-full"></label>
+      <!-- Checkout Content -->
+      <div class="checkout-content">
+        <div class="container">
+          <div class="checkout-grid">
+            <!-- Left Column - Payment Information -->
+            <div class="checkout-main">
+              <!-- Step Indicator -->
+              <div class="checkout-steps">
+                <div class="step-item active" data-step="1">
+                  <div class="step-number">1</div>
+                  <div class="step-info">
+                    <span class="step-title">Shipping</span>
+                    <span class="step-desc">Select address</span>
+                  </div>
                 </div>
-                <div class="payment-type-content">
-                  <div class="payment-type-icon full">
-                    <i data-lucide="circle-check"></i>
+                <div class="step-item" data-step="2">
+                  <div class="step-number">2</div>
+                  <div class="step-info">
+                    <span class="step-title">Payment Type</span>
+                    <span class="step-desc">Choose payment plan</span>
                   </div>
-                  <h3 class="payment-type-title">Full Payment</h3>
-                  <p class="payment-type-desc">Pay the complete amount now and receive your order immediately</p>
-                  <div class="payment-type-badge">
-                    <i data-lucide="gift"></i>
-                    <span>Best Value - No Additional Fees</span>
+                </div>
+                <div class="step-item" data-step="3">
+                  <div class="step-number">3</div>
+                  <div class="step-info">
+                    <span class="step-title">Payment Method</span>
+                    <span class="step-desc">Select payment option</span>
                   </div>
-                  <div class="payment-type-amount">
-                    <span class="amount-label">Total Amount:</span>
-                    <span class="amount-value" id="full-amount">0.00 د.إ</span>
+                </div>
+                <div class="step-item" data-step="4">
+                  <div class="step-number">4</div>
+                  <div class="step-info">
+                    <span class="step-title">Confirmation</span>
+                    <span class="step-desc">Review & complete</span>
                   </div>
                 </div>
               </div>
 
-              <div class="payment-type-card" data-type="partial">
-                <div class="payment-type-radio">
-                  <input type="radio" name="payment-type" id="payment-partial" value="partial">
-                  <label for="payment-partial"></label>
-                </div>
-                <div class="payment-type-content">
-                  <div class="payment-type-icon partial">
-                    <i data-lucide="percent"></i>
-                  </div>
-                  <h3 class="payment-type-title">Minimum Payment (20%)</h3>
-                  <p class="payment-type-desc">Pay 20% now and the remaining 80% before delivery</p>
-                  <div class="payment-type-breakdown">
-                    <div class="breakdown-item">
-                      <span class="breakdown-label">Pay Now (20%):</span>
-                      <span class="breakdown-value" id="partial-now">0.00 د.إ</span>
-                    </div>
-                    <div class="breakdown-item">
-                      <span class="breakdown-label">Pay Later (80%):</span>
-                      <span class="breakdown-value" id="partial-later">0.00 د.إ</span>
-                    </div>
-                  </div>
-                  <div class="payment-type-amount">
-                    <span class="amount-label">Due Now:</span>
-                    <span class="amount-value" id="partial-amount">0.00 د.إ</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="section-actions">
-              <button class="btn-next" id="btn-to-step-2">
-                <span>Continue to Payment Method</span>
-                <i data-lucide="arrow-right"></i>
-              </button>
-            </div>
-          </div>
-
-          <!-- Step 2: Payment Method Selection -->
-          <div class="checkout-section" id="step-2" style="display: none;">
-            <div class="section-header">
-              <h2 class="section-title">
-                <i data-lucide="credit-card"></i>
-                <span>Select Payment Method</span>
-              </h2>
-              <p class="section-subtitle">Choose your preferred payment option</p>
-            </div>
-
-            <div class="payment-methods">
-              <!-- Credit/Debit Card -->
-              <div class="payment-method-card" data-method="card">
-                <div class="payment-method-radio">
-                  <input type="radio" name="payment-method" id="method-card" value="card" checked>
-                  <label for="method-card"></label>
-                </div>
-                <div class="payment-method-content">
-                  <div class="payment-method-header">
-                    <div class="payment-method-icon icon-card">
-                      <i data-lucide="credit-card"></i>
-                    </div>
-                    <div class="payment-method-info">
-                      <h3 class="payment-method-title">Credit/Debit Card</h3>
-                      <p class="payment-method-desc">Visa, Mastercard, American Express</p>
-                    </div>
-                  </div>
-                  <div class="payment-method-brands">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/0/04/Visa.svg" alt="Visa" class="brand-logo">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard" class="brand-logo">
-                  </div>
-                  <div class="payment-method-fee">
-                    <i data-lucide="info"></i>
-                    <span>Processing fee: 2.9% + 1.50 د.إ</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Bank Transfer - Dubai -->
-              <div class="payment-method-card" data-method="bank-dubai">
-                <div class="payment-method-radio">
-                  <input type="radio" name="payment-method" id="method-bank-dubai" value="bank-dubai">
-                  <label for="method-bank-dubai"></label>
-                </div>
-                <div class="payment-method-content">
-                  <div class="payment-method-header">
-                    <div class="payment-method-icon icon-bank">
-                      <i data-lucide="building-2"></i>
-                    </div>
-                    <div class="payment-method-info">
-                      <h3 class="payment-method-title">Bank Transfer (UAE)</h3>
-                      <p class="payment-method-desc">Direct bank transfer within UAE</p>
-                    </div>
-                    <div class="payment-method-badge free">
-                      <i data-lucide="check-circle"></i>
-                      <span>No Fees</span>
-                    </div>
-                  </div>
-                  <div class="payment-method-details">
-                    <div class="detail-item">
-                      <i data-lucide="clock"></i>
-                      <span>Processing time: 1-2 business days</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Bank Transfer - International -->
-              <div class="payment-method-card" data-method="bank-international">
-                <div class="payment-method-radio">
-                  <input type="radio" name="payment-method" id="method-bank-intl" value="bank-international">
-                  <label for="method-bank-intl"></label>
-                </div>
-                <div class="payment-method-content">
-                  <div class="payment-method-header">
-                    <div class="payment-method-icon icon-international">
-                      <i data-lucide="globe"></i>
-                    </div>
-                    <div class="payment-method-info">
-                      <h3 class="payment-method-title">International Bank Transfer</h3>
-                      <p class="payment-method-desc">SWIFT/Wire transfer from abroad</p>
-                    </div>
-                  </div>
-                  <div class="payment-method-fee">
-                    <i data-lucide="alert-circle"></i>
-                    <span>Bank fees: 25-50 د.إ (varies by bank)</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- PayPal -->
-              <div class="payment-method-card" data-method="paypal">
-                <div class="payment-method-radio">
-                  <input type="radio" name="payment-method" id="method-paypal" value="paypal">
-                  <label for="method-paypal"></label>
-                </div>
-                <div class="payment-method-content">
-                  <div class="payment-method-header">
-                    <div class="payment-method-icon icon-paypal">
-                      <i data-lucide="wallet"></i>
-                    </div>
-                    <div class="payment-method-info">
-                      <h3 class="payment-method-title">PayPal</h3>
-                      <p class="payment-method-desc">Pay securely with your PayPal account</p>
-                    </div>
-                  </div>
-                  <div class="payment-method-fee">
-                    <i data-lucide="info"></i>
-                    <span>Processing fee: 3.9% + 1.50 د.إ</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Cash on Delivery -->
-              <div class="payment-method-card" data-method="cod">
-                <div class="payment-method-radio">
-                  <input type="radio" name="payment-method" id="method-cod" value="cod">
-                  <label for="method-cod"></label>
-                </div>
-                <div class="payment-method-content">
-                  <div class="payment-method-header">
-                    <div class="payment-method-icon icon-cod">
-                      <i data-lucide="banknote"></i>
-                    </div>
-                    <div class="payment-method-info">
-                      <h3 class="payment-method-title">Cash on Delivery</h3>
-                      <p class="payment-method-desc">Pay when you receive your order</p>
-                    </div>
-                  </div>
-                  <div class="payment-method-fee">
-                    <i data-lucide="info"></i>
-                    <span>Service fee: 15.00 د.إ</span>
-                  </div>
-                  <div class="payment-method-note">
+              <!-- Step 1: Shipping Address Selection -->
+              <div class="checkout-section" id="step-1">
+                <div class="section-header">
+                  <h2 class="section-title">
                     <i data-lucide="map-pin"></i>
-                    <span>Available in UAE only</span>
+                    <span>Shipping Address</span>
+                  </h2>
+                  <p class="section-subtitle">Select where you'd like your order delivered</p>
+                </div>
+
+                <!-- Loading State -->
+                <div class="addresses-loading" id="addresses-loading">
+                  <div class="loading-spinner">
+                    <div class="spinner"></div>
+                  </div>
+                  <p class="loading-text">Loading your addresses...</p>
+                </div>
+
+                <!-- Addresses List -->
+                <div class="shipping-addresses" id="shipping-addresses" style="display: none;">
+                  <!-- Addresses will be populated by JavaScript -->
+                </div>
+
+                <!-- No Addresses State -->
+                <div class="no-addresses" id="no-addresses" style="display: none;">
+                  <div class="no-addresses-icon">
+                    <i data-lucide="map-pin-off"></i>
+                  </div>
+                  <h3 class="no-addresses-title">No Delivery Addresses</h3>
+                  <p class="no-addresses-text">You need to add a delivery address before placing your order</p>
+                  <a href="/buyer/delivery" class="btn-add-address-link">
+                    <i data-lucide="plus"></i>
+                    <span>Add New Address</span>
+                  </a>
+                </div>
+
+                <!-- Add New Address Link -->
+                <div class="add-address-section" id="add-address-section" style="display: none;">
+                  <a href="/buyer/delivery" class="add-address-link">
+                    <i data-lucide="plus-circle"></i>
+                    <span>Add New Address</span>
+                  </a>
+                </div>
+
+                <div class="section-actions">
+                  <button class="btn-next" id="btn-to-step-2" disabled>
+                    <span>Continue to Payment Type</span>
+                    <i data-lucide="arrow-right"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Step 2: Payment Type Selection -->
+              <div class="checkout-section" id="step-2" style="display: none;">
+                <div class="section-header">
+                  <h2 class="section-title">
+                    <i data-lucide="wallet"></i>
+                    <span>Select Payment Type</span>
+                  </h2>
+                  <p class="section-subtitle">Choose how you'd like to pay for your order</p>
+                </div>
+
+                <div class="payment-types">
+                  <div class="payment-type-card" data-type="full">
+                    <div class="payment-type-radio">
+                      <input type="radio" name="payment-type" id="payment-full" value="full" checked>
+                      <label for="payment-full"></label>
+                    </div>
+                    <div class="payment-type-content">
+                      <div class="payment-type-icon full">
+                        <i data-lucide="circle-check"></i>
+                      </div>
+                      <h3 class="payment-type-title">Full Payment</h3>
+                      <p class="payment-type-desc">Pay the complete amount now and receive your order immediately</p>
+                      <div class="payment-type-badge">
+                        <i data-lucide="gift"></i>
+                        <span>Best Value - No Additional Fees</span>
+                      </div>
+                      <div class="payment-type-amount">
+                        <span class="amount-label">Total Amount:</span>
+                        <span class="amount-value" id="full-amount">0.00 د.إ</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="payment-type-card" data-type="partial">
+                    <div class="payment-type-radio">
+                      <input type="radio" name="payment-type" id="payment-partial" value="partial">
+                      <label for="payment-partial"></label>
+                    </div>
+                    <div class="payment-type-content">
+                      <div class="payment-type-icon partial">
+                        <i data-lucide="percent"></i>
+                      </div>
+                      <h3 class="payment-type-title">Minimum Payment (20%)</h3>
+                      <p class="payment-type-desc">Pay 20% now and the remaining 80% before delivery</p>
+                      <div class="payment-type-breakdown">
+                        <div class="breakdown-item">
+                          <span class="breakdown-label">Pay Now (20%):</span>
+                          <span class="breakdown-value" id="partial-now">0.00 د.إ</span>
+                        </div>
+                        <div class="breakdown-item">
+                          <span class="breakdown-label">Pay Later (80%):</span>
+                          <span class="breakdown-value" id="partial-later">0.00 د.إ</span>
+                        </div>
+                      </div>
+                      <div class="payment-type-amount">
+                        <span class="amount-label">Due Now:</span>
+                        <span class="amount-value" id="partial-amount">0.00 د.إ</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
 
-            <div class="section-actions">
-              <button class="btn-back" id="btn-to-step-1">
-                <i data-lucide="arrow-left"></i>
-                <span>Back to Payment Type</span>
-              </button>
-              <button class="btn-next" id="btn-to-step-3">
-                <span>Review Order</span>
-                <i data-lucide="arrow-right"></i>
-              </button>
-            </div>
-          </div>
-
-          <!-- Step 3: Confirmation -->
-          <div class="checkout-section" id="step-3" style="display: none;">
-            <div class="section-header">
-              <h2 class="section-title">
-                <i data-lucide="check-circle"></i>
-                <span>Review & Confirm</span>
-              </h2>
-              <p class="section-subtitle">Please review your order before completing payment</p>
-            </div>
-
-            <div class="confirmation-details">
-              <div class="confirmation-card">
-                <h3 class="confirmation-title">Payment Summary</h3>
-                <div class="confirmation-item">
-                  <span class="confirmation-label">Payment Type:</span>
-                  <span class="confirmation-value" id="confirm-type">Full Payment</span>
-                </div>
-                <div class="confirmation-item">
-                  <span class="confirmation-label">Payment Method:</span>
-                  <span class="confirmation-value" id="confirm-method">Credit/Debit Card</span>
-                </div>
-                <div class="confirmation-item">
-                  <span class="confirmation-label">Processing Fee:</span>
-                  <span class="confirmation-value" id="confirm-fee">0.00 د.إ</span>
-                </div>
-                <div class="confirmation-divider"></div>
-                <div class="confirmation-item total">
-                  <span class="confirmation-label">Amount to Pay:</span>
-                  <span class="confirmation-value" id="confirm-total">0.00 د.إ</span>
+                <div class="section-actions">
+                  <button class="btn-back" id="btn-to-step-1-back">
+                    <i data-lucide="arrow-left"></i>
+                    <span>Back to Shipping</span>
+                  </button>
+                  <button class="btn-next" id="btn-to-step-3">
+                    <span>Continue to Payment Method</span>
+                    <i data-lucide="arrow-right"></i>
+                  </button>
                 </div>
               </div>
 
-              <div class="confirmation-terms">
-                <label class="checkbox-container">
-                  <input type="checkbox" id="terms-checkbox">
-                  <span class="checkbox-label">I agree to the <a href="#" class="link">Terms & Conditions</a> and <a href="#" class="link">Privacy Policy</a></span>
-                </label>
+              <!-- Step 3: Payment Method Selection -->
+              <div class="checkout-section" id="step-3" style="display: none;">
+                <div class="section-header">
+                  <h2 class="section-title">
+                    <i data-lucide="credit-card"></i>
+                    <span>Select Payment Method</span>
+                  </h2>
+                  <p class="section-subtitle">Choose your preferred payment option</p>
+                </div>
+
+                <div class="payment-methods">
+                  <!-- Credit/Debit Card -->
+                  <div class="payment-method-card" data-method="card">
+                    <div class="payment-method-radio">
+                      <input type="radio" name="payment-method" id="method-card" value="card" checked>
+                      <label for="method-card"></label>
+                    </div>
+                    <div class="payment-method-content">
+                      <div class="payment-method-header">
+                        <div class="payment-method-icon icon-card">
+                          <i data-lucide="credit-card"></i>
+                        </div>
+                        <div class="payment-method-info">
+                          <h3 class="payment-method-title">Credit/Debit Card</h3>
+                          <p class="payment-method-desc">Visa, Mastercard, American Express</p>
+                        </div>
+                      </div>
+                      <div class="payment-method-brands">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/0/04/Visa.svg" alt="Visa"
+                          class="brand-logo">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg"
+                          alt="Mastercard" class="brand-logo">
+                      </div>
+                      <div class="payment-method-fee">
+                        <i data-lucide="info"></i>
+                        <span>Processing fee: 2.9% + 1.50 د.إ</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Bank Transfer - Dubai -->
+                  <div class="payment-method-card" data-method="bank-dubai">
+                    <div class="payment-method-radio">
+                      <input type="radio" name="payment-method" id="method-bank-dubai" value="bank-dubai">
+                      <label for="method-bank-dubai"></label>
+                    </div>
+                    <div class="payment-method-content">
+                      <div class="payment-method-header">
+                        <div class="payment-method-icon icon-bank">
+                          <i data-lucide="building-2"></i>
+                        </div>
+                        <div class="payment-method-info">
+                          <h3 class="payment-method-title">Bank Transfer (UAE)</h3>
+                          <p class="payment-method-desc">Direct bank transfer within UAE</p>
+                        </div>
+                        <div class="payment-method-badge free">
+                          <i data-lucide="check-circle"></i>
+                          <span>No Fees</span>
+                        </div>
+                      </div>
+                      <div class="payment-method-details">
+                        <div class="detail-item">
+                          <i data-lucide="clock"></i>
+                          <span>Processing time: 1-2 business days</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Bank Transfer - International -->
+                  <div class="payment-method-card" data-method="bank-international">
+                    <div class="payment-method-radio">
+                      <input type="radio" name="payment-method" id="method-bank-intl" value="bank-international">
+                      <label for="method-bank-intl"></label>
+                    </div>
+                    <div class="payment-method-content">
+                      <div class="payment-method-header">
+                        <div class="payment-method-icon icon-international">
+                          <i data-lucide="globe"></i>
+                        </div>
+                        <div class="payment-method-info">
+                          <h3 class="payment-method-title">International Bank Transfer</h3>
+                          <p class="payment-method-desc">SWIFT/Wire transfer from abroad</p>
+                        </div>
+                      </div>
+                      <div class="payment-method-fee">
+                        <i data-lucide="alert-circle"></i>
+                        <span>Bank fees: 25-50 د.إ (varies by bank)</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- PayPal -->
+                  <div class="payment-method-card" data-method="paypal">
+                    <div class="payment-method-radio">
+                      <input type="radio" name="payment-method" id="method-paypal" value="paypal">
+                      <label for="method-paypal"></label>
+                    </div>
+                    <div class="payment-method-content">
+                      <div class="payment-method-header">
+                        <div class="payment-method-icon icon-paypal">
+                          <i data-lucide="wallet"></i>
+                        </div>
+                        <div class="payment-method-info">
+                          <h3 class="payment-method-title">PayPal</h3>
+                          <p class="payment-method-desc">Pay securely with your PayPal account</p>
+                        </div>
+                      </div>
+                      <div class="payment-method-fee">
+                        <i data-lucide="info"></i>
+                        <span>Processing fee: 3.9% + 1.50 د.إ</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Cash on Delivery -->
+                  <div class="payment-method-card" data-method="cod">
+                    <div class="payment-method-radio">
+                      <input type="radio" name="payment-method" id="method-cod" value="cod">
+                      <label for="method-cod"></label>
+                    </div>
+                    <div class="payment-method-content">
+                      <div class="payment-method-header">
+                        <div class="payment-method-icon icon-cod">
+                          <i data-lucide="banknote"></i>
+                        </div>
+                        <div class="payment-method-info">
+                          <h3 class="payment-method-title">Cash on Delivery</h3>
+                          <p class="payment-method-desc">Pay when you receive your order</p>
+                        </div>
+                      </div>
+                      <div class="payment-method-fee">
+                        <i data-lucide="info"></i>
+                        <span>Service fee: 15.00 د.إ</span>
+                      </div>
+                      <div class="payment-method-note">
+                        <i data-lucide="map-pin"></i>
+                        <span>Available in UAE only</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="section-actions">
+                  <button class="btn-back" id="btn-to-step-2-back">
+                    <i data-lucide="arrow-left"></i>
+                    <span>Back to Payment Type</span>
+                  </button>
+                  <button class="btn-next" id="btn-to-step-4">
+                    <span>Review Order</span>
+                    <i data-lucide="arrow-right"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Step 4: Confirmation -->
+              <div class="checkout-section" id="step-4" style="display: none;">
+                <div class="section-header">
+                  <h2 class="section-title">
+                    <i data-lucide="check-circle"></i>
+                    <span>Review & Confirm</span>
+                  </h2>
+                  <p class="section-subtitle">Please review your order before completing payment</p>
+                </div>
+
+                <div class="confirmation-details">
+                  <!-- Shipping Address Summary -->
+                  <div class="confirmation-card shipping-summary">
+                    <h3 class="confirmation-title">
+                      <i data-lucide="truck"></i>
+                      <span>Shipping To</span>
+                    </h3>
+                    <div class="shipping-address-summary" id="shipping-address-summary">
+                      <!-- Will be populated by JavaScript -->
+                    </div>
+                    <button class="btn-change-address" id="btn-change-address">
+                      <i data-lucide="edit-2"></i>
+                      <span>Change Address</span>
+                    </button>
+                  </div>
+
+                  <div class="confirmation-card">
+                    <h3 class="confirmation-title">Payment Summary</h3>
+                    <div class="confirmation-item">
+                      <span class="confirmation-label">Payment Type:</span>
+                      <span class="confirmation-value" id="confirm-type">Full Payment</span>
+                    </div>
+                    <div class="confirmation-item">
+                      <span class="confirmation-label">Payment Method:</span>
+                      <span class="confirmation-value" id="confirm-method">Credit/Debit Card</span>
+                    </div>
+                    <div class="confirmation-item">
+                      <span class="confirmation-label">Processing Fee:</span>
+                      <span class="confirmation-value" id="confirm-fee">0.00 د.إ</span>
+                    </div>
+                    <div class="confirmation-divider"></div>
+                    <div class="confirmation-item total">
+                      <span class="confirmation-label">Amount to Pay:</span>
+                      <span class="confirmation-value" id="confirm-total">0.00 د.إ</span>
+                    </div>
+                  </div>
+
+                  <div class="confirmation-terms">
+                    <label class="checkbox-container">
+                      <input type="checkbox" id="terms-checkbox">
+                      <span class="checkbox-label">I agree to the <a href="#" class="link">Terms & Conditions</a> and <a
+                          href="#" class="link">Privacy Policy</a></span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="section-actions">
+                  <button class="btn-back" id="btn-to-step-3-back">
+                    <i data-lucide="arrow-left"></i>
+                    <span>Back to Payment Method</span>
+                  </button>
+                  <button class="btn-complete" id="btn-complete-payment" disabled>
+                    <i data-lucide="lock"></i>
+                    <span>Complete Payment</span>
+                  </button>
+                </div>
               </div>
             </div>
 
-            <div class="section-actions">
-              <button class="btn-back" id="btn-to-step-2-back">
-                <i data-lucide="arrow-left"></i>
-                <span>Back to Payment Method</span>
-              </button>
-              <button class="btn-complete" id="btn-complete-payment" disabled>
-                <i data-lucide="lock"></i>
-                <span>Complete Payment</span>
-              </button>
+            <!-- Right Column - Order Summary -->
+            <div class="checkout-sidebar">
+              <div class="order-summary sticky">
+                <h3 class="summary-title">
+                  <i data-lucide="shopping-bag"></i>
+                  <span>Order Summary</span>
+                </h3>
+
+                <div class="summary-items" id="summary-items">
+                  <!-- Items will be populated by JavaScript -->
+                </div>
+
+                <div class="summary-divider"></div>
+
+                <div class="summary-totals">
+                  <div class="summary-row">
+                    <span class="summary-label">Subtotal:</span>
+                    <span class="summary-value" id="summary-subtotal">0.00 د.إ</span>
+                  </div>
+                  <div class="summary-row">
+                    <span class="summary-label">Items:</span>
+                    <span class="summary-value" id="summary-items-count">0 PCS</span>
+                  </div>
+                  <div class="summary-row">
+                    <span class="summary-label">Total Weight:</span>
+                    <span class="summary-value" id="summary-weight">0.000 kg</span>
+                  </div>
+                  <div class="summary-row fee" id="summary-fee-row" style="display: none;">
+                    <span class="summary-label">Processing Fee:</span>
+                    <span class="summary-value" id="summary-fee">0.00 د.إ</span>
+                  </div>
+                </div>
+
+                <div class="summary-divider"></div>
+
+                <div class="summary-total">
+                  <span class="total-label">Total Amount:</span>
+                  <span class="total-value" id="summary-total">0.00 د.إ</span>
+                </div>
+
+                <div class="summary-security">
+                  <i data-lucide="shield-check"></i>
+                  <span>Secured by 256-bit SSL encryption</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
+      </div>
+    </div>
 
-        <!-- Right Column - Order Summary -->
-        <div class="checkout-sidebar">
-          <div class="order-summary sticky">
-            <h3 class="summary-title">
-              <i data-lucide="shopping-bag"></i>
-              <span>Order Summary</span>
-            </h3>
-
-            <div class="summary-items" id="summary-items">
-              <!-- Items will be populated by JavaScript -->
-            </div>
-
-            <div class="summary-divider"></div>
-
-            <div class="summary-totals">
-              <div class="summary-row">
-                <span class="summary-label">Subtotal:</span>
-                <span class="summary-value" id="summary-subtotal">0.00 د.إ</span>
-              </div>
-              <div class="summary-row">
-                <span class="summary-label">Items:</span>
-                <span class="summary-value" id="summary-items-count">0 PCS</span>
-              </div>
-              <div class="summary-row">
-                <span class="summary-label">Total Weight:</span>
-                <span class="summary-value" id="summary-weight">0.000 kg</span>
-              </div>
-              <div class="summary-row fee" id="summary-fee-row" style="display: none;">
-                <span class="summary-label">Processing Fee:</span>
-                <span class="summary-value" id="summary-fee">0.00 د.إ</span>
-              </div>
-            </div>
-
-            <div class="summary-divider"></div>
-
-            <div class="summary-total">
-              <span class="total-label">Total Amount:</span>
-              <span class="total-value" id="summary-total">0.00 د.إ</span>
-            </div>
-
-            <div class="summary-security">
-              <i data-lucide="shield-check"></i>
-              <span>Secured by 256-bit SSL encryption</span>
-            </div>
+    <!-- Success Modal -->
+    <div class="success-modal" id="success-modal" style="display: none;">
+      <div class="success-backdrop"></div>
+      <div class="success-content">
+        <div class="success-animation">
+          <div class="success-checkmark">
+            <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+              <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none" />
+              <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8" />
+            </svg>
           </div>
+        </div>
+        <h2 class="success-title" id="success-title">Payment Successful!</h2>
+        <p class="success-message" id="success-message">Your order has been placed successfully</p>
+        <div class="success-details">
+          <div class="success-detail-item">
+            <span class="detail-label">Order Number:</span>
+            <span class="detail-value" id="order-number">ORD-000000</span>
+          </div>
+          <div class="success-detail-item">
+            <span class="detail-label">Payment Method:</span>
+            <span class="detail-value" id="payment-method-text">Credit Card</span>
+          </div>
+          <div class="success-detail-item">
+            <span class="detail-label">Amount Paid:</span>
+            <span class="detail-value" id="amount-paid">0.00 د.إ</span>
+          </div>
+        </div>
+        <div class="success-actions">
+          <a href="/buyer/orders" class="btn-view-orders">
+            <i data-lucide="package"></i>
+            <span>View My Orders</span>
+          </a>
+          <a href="/buyer/search-automotive" class="btn-continue-shopping">
+            <span>Continue Shopping</span>
+            <i data-lucide="arrow-right"></i>
+          </a>
         </div>
       </div>
     </div>
-  </div>
-</div>
 
-<!-- Success Modal -->
-<div class="success-modal" id="success-modal" style="display: none;">
-  <div class="success-backdrop"></div>
-  <div class="success-content">
-    <div class="success-animation">
-      <div class="success-checkmark">
-        <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
-          <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none" />
-          <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8" />
-        </svg>
-      </div>
-    </div>
-    <h2 class="success-title" id="success-title">Payment Successful!</h2>
-    <p class="success-message" id="success-message">Your order has been placed successfully</p>
-    <div class="success-details">
-      <div class="success-detail-item">
-        <span class="detail-label">Order Number:</span>
-        <span class="detail-value" id="order-number">ORD-000000</span>
-      </div>
-      <div class="success-detail-item">
-        <span class="detail-label">Payment Method:</span>
-        <span class="detail-value" id="payment-method-text">Credit Card</span>
-      </div>
-      <div class="success-detail-item">
-        <span class="detail-label">Amount Paid:</span>
-        <span class="detail-value" id="amount-paid">0.00 د.إ</span>
-      </div>
-    </div>
-    <div class="success-actions">
-      <a href="/buyer/orders" class="btn-view-orders">
-        <i data-lucide="package"></i>
-        <span>View My Orders</span>
-      </a>
-      <a href="/buyer/search-automotive" class="btn-continue-shopping">
-        <span>Continue Shopping</span>
-        <i data-lucide="arrow-right"></i>
-      </a>
-    </div>
-  </div>
-</div>
+    <%- include('partials/quick-search') %>
+      <%- include('partials/footer') %>
 
-<%- include('partials/quick-search') %>
-<%- include('partials/footer') %>
-
-<script src="/js/animations.js"></script>
-<script src="/js/main.js"></script>
-<script src="/js/quick-search.js"></script>
-<script src="/js/cart.js"></script>
-<script src="/js/cart-badge-updater.js"></script>
-<script src="/js/checkout.js"></script>
-<script>
-  lucide.createIcons();
-  window.addEventListener('load', () => lucide.createIcons());
-  // Force navbar to always stay white on checkout page
-  document.addEventListener('DOMContentLoaded', () => {
-    const navbar = document.getElementById('navbar');
-    if (navbar) {
-      navbar.classList.add('scrolled');
-      // Prevent other scripts from removing the scrolled class
-      const observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-          if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-            if (!navbar.classList.contains('scrolled')) {
+        <script src="/js/animations.js"></script>
+        <script src="/js/main.js"></script>
+        <script src="/js/quick-search.js"></script>
+        <script src="/js/cart.js"></script>
+        <script src="/js/cart-badge-updater.js"></script>
+        <script src="/js/checkout.js"></script>
+        <script>
+          lucide.createIcons();
+          window.addEventListener('load', () => lucide.createIcons());
+          // Force navbar to always stay white on checkout page
+          document.addEventListener('DOMContentLoaded', () => {
+            const navbar = document.getElementById('navbar');
+            if (navbar) {
               navbar.classList.add('scrolled');
+              // Prevent other scripts from removing the scrolled class
+              const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                  if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                    if (!navbar.classList.contains('scrolled')) {
+                      navbar.classList.add('scrolled');
+                    }
+                  }
+                });
+              });
+              observer.observe(navbar, { attributes: true, attributeFilter: ['class'] });
+              // Also ensure on scroll
+              const ensureScrolled = () => navbar.classList.add('scrolled');
+              window.addEventListener('scroll', ensureScrolled, { passive: true });
             }
-          }
-        });
-      });
-      observer.observe(navbar, { attributes: true, attributeFilter: ['class'] });
-      // Also ensure on scroll
-      const ensureScrolled = () => navbar.classList.add('scrolled');
-      window.addEventListener('scroll', ensureScrolled, { passive: true });
-    }
-  });
-</script>
+          });
+        </script>

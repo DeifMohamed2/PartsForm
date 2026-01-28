@@ -1056,3 +1056,309 @@ body.modal-open {
   width: 18px;
   height: 18px;
 }
+
+/* ====================================
+   LOADING STATES
+   ==================================== */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  gap: 1.5rem;
+}
+
+.loading-spinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid #e2e8f0;
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-text {
+  font-size: 1rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* ====================================
+   ERROR STATES
+   ==================================== */
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  gap: 1rem;
+  text-align: center;
+}
+
+.error-icon {
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.error-icon i {
+  width: 32px;
+  height: 32px;
+  color: #ef4444;
+}
+
+.error-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1a2b3d;
+  margin: 0;
+}
+
+.error-text {
+  font-size: 0.95rem;
+  color: #64748b;
+  max-width: 400px;
+}
+
+.btn-retry {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: white;
+  color: #3b82f6;
+  border: 2px solid #3b82f6;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 0.5rem;
+}
+
+.btn-retry:hover {
+  background: #3b82f6;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.btn-retry i {
+  width: 18px;
+  height: 18px;
+}
+
+/* ====================================
+   NOTIFICATION SYSTEM
+   ==================================== */
+.delivery-notification {
+  position: fixed;
+  top: 100px;
+  right: 24px;
+  z-index: 10100;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.08);
+  border-left: 4px solid #10b981;
+  animation: slideInNotification 0.3s ease-out;
+  max-width: 400px;
+}
+
+.delivery-notification.error {
+  border-left-color: #ef4444;
+}
+
+.delivery-notification.info {
+  border-left-color: #3b82f6;
+}
+
+.delivery-notification.hiding {
+  animation: slideOutNotification 0.3s ease-out forwards;
+}
+
+@keyframes slideInNotification {
+  from {
+    opacity: 0;
+    transform: translateX(100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideOutNotification {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(100px);
+  }
+}
+
+.notification-content {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+}
+
+.notification-content i {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+.delivery-notification.success .notification-content i {
+  color: #10b981;
+}
+
+.delivery-notification.error .notification-content i {
+  color: #ef4444;
+}
+
+.delivery-notification.info .notification-content i {
+  color: #3b82f6;
+}
+
+.notification-content span {
+  font-size: 0.9375rem;
+  color: #1a2b3d;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.notification-close {
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  color: #94a3b8;
+  transition: color 0.2s ease;
+  flex-shrink: 0;
+}
+
+.notification-close:hover {
+  color: #64748b;
+}
+
+.notification-close i {
+  width: 18px;
+  height: 18px;
+}
+
+/* ====================================
+   BUTTON LOADING STATE
+   ==================================== */
+.btn-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  display: inline-block;
+}
+
+.btn-save:disabled,
+.btn-confirm-delete:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* ====================================
+   ADDRESS CARD UPDATING STATE
+   ==================================== */
+.address-card.updating {
+  opacity: 0.6;
+  pointer-events: none;
+  position: relative;
+}
+
+.address-card.updating::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 32px;
+  height: 32px;
+  margin: -16px 0 0 -16px;
+  border: 3px solid #e2e8f0;
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* ====================================
+   ADDRESS INFO NOTES
+   ==================================== */
+.address-info-item.notes {
+  padding-top: 0.5rem;
+  margin-top: 0.5rem;
+  border-top: 1px dashed #e2e8f0;
+}
+
+.address-info-item.notes span {
+  font-style: italic;
+  color: #64748b;
+}
+
+/* ====================================
+   RESPONSIVE ADJUSTMENTS
+   ==================================== */
+@media (max-width: 768px) {
+  .delivery-notification {
+    left: 16px;
+    right: 16px;
+    top: auto;
+    bottom: 24px;
+    max-width: none;
+  }
+
+  @keyframes slideInNotification {
+    from {
+      opacity: 0;
+      transform: translateY(100px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideOutNotification {
+    from {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(100px);
+    }
+  }
+}

@@ -19,6 +19,19 @@ const {
   getTicketDetailsPage,
   uploadAvatar,
   updateProfile,
+  changePassword,
+  validateCheckout,
+  createOrder,
+  getOrders,
+  getOrderDetails,
+  cancelOrder,
+  processPayment,
+  // Address Management
+  getAddresses,
+  addAddress,
+  updateAddress,
+  deleteAddress,
+  setDefaultAddress,
 } = require('../controllers/buyerController');
 const {
   searchParts,
@@ -27,6 +40,7 @@ const {
   getPartById,
   getPartsByNumber,
   getSearchStats,
+  searchMultipleParts,
 } = require('../controllers/searchController');
 const { handleProfileImageUpload } = require('../utils/fileUploader');
 
@@ -51,6 +65,7 @@ router.get('/settings', getSettingsPage);
 // Profile API routes
 router.post('/profile/avatar', handleProfileImageUpload, uploadAvatar);
 router.put('/profile', updateProfile);
+router.put('/profile/password', changePassword);
 
 // Parts search - Automotive only
 router.get('/search/automotive', getAutomotiveSearchPage);
@@ -59,16 +74,33 @@ router.get('/search', getAutomotiveSearchPage); // Default search goes to automo
 
 // Search API endpoints
 router.get('/api/search', searchParts);
+router.post('/api/search/multi', searchMultipleParts);
+router.get('/api/search/multi', searchMultipleParts);
 router.get('/api/search/autocomplete', autocomplete);
 router.get('/api/search/filters', getFilterOptions);
 router.get('/api/search/stats', getSearchStats);
 router.get('/api/parts/:id', getPartById);
 router.get('/api/parts/by-number/:partNumber', getPartsByNumber);
 
+// Order API endpoints (cart is managed in localStorage on client-side)
+router.post('/api/checkout/validate', validateCheckout);
+router.post('/api/orders/create', createOrder);
+router.get('/api/orders', getOrders);
+router.get('/api/orders/:orderNumber', getOrderDetails);
+router.put('/api/orders/:orderNumber/cancel', cancelOrder);
+router.post('/api/orders/:orderNumber/payment', processPayment);
+
 // Support Tickets routes
 router.get('/tickets', getTicketsPage);
 router.get('/tickets/create', getCreateTicketPage);
 router.get('/tickets/:ticketId', getTicketDetailsPage);
+
+// Address Management API
+router.get('/api/addresses', getAddresses);
+router.post('/api/addresses', addAddress);
+router.put('/api/addresses/:addressId', updateAddress);
+router.delete('/api/addresses/:addressId', deleteAddress);
+router.put('/api/addresses/:addressId/default', setDefaultAddress);
 
 module.exports = router;
 

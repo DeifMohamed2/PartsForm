@@ -1,22 +1,20 @@
 // ====================================
 // DELIVERY PAGE - ADDRESS MANAGEMENT
 // PARTSFORM Buyer Portal
+// Real API Integration
 // ====================================
-
-// Storage key for addresses
-const ADDRESSES_STORAGE_KEY = 'partsform_delivery_addresses';
 
 // Global state
 let addresses = [];
 let editingAddressId = null;
+let isLoading = false;
 
 // ====================================
 // INITIALIZATION
 // ====================================
 document.addEventListener('DOMContentLoaded', () => {
-  loadAddresses();
-  renderAddresses();
   initializeEventListeners();
+  loadAddresses();
 });
 
 // ====================================
@@ -42,10 +40,8 @@ function initializeEventListeners() {
   }
 
   // Close modal on backdrop click
-  const modal = document.getElementById('address-modal');
   const backdrop = document.querySelector('.address-modal-backdrop');
-  
-  if (modal && backdrop) {
+  if (backdrop) {
     backdrop.addEventListener('click', closeAddressModal);
   }
 
@@ -70,29 +66,176 @@ function initializeEventListeners() {
       }
     });
   }
+
+  // Close modal on Escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeAddressModal();
+      closeConfirmModal();
+    }
+  });
 }
 
 // ====================================
-// ADDRESS MANAGEMENT
+// API FUNCTIONS
 // ====================================
-function loadAddresses() {
+async function apiRequest(url, options = {}) {
   try {
-    const stored = localStorage.getItem(ADDRESSES_STORAGE_KEY);
-    addresses = stored ? JSON.parse(stored) : [];
+    const response = await fetch(url, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...options.headers,
+      },
+      ...options,
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Request failed');
+    }
+
+    return data;
+  } catch (error) {
+    console.error('API Error:', error);
+    throw error;
+  }
+}
+
+async function loadAddresses() {
+  const grid = document.getElementById('addresses-grid');
+  const emptyState = document.getElementById('addresses-empty');
+  
+  if (!grid) return;
+
+  try {
+    showLoadingState(grid);
+    
+    const response = await apiRequest('/buyer/api/addresses');
+    
+    if (response.success) {
+      addresses = response.addresses || [];
+      renderAddresses();
+    } else {
+      throw new Error(response.message || 'Failed to load addresses');
+    }
   } catch (error) {
     console.error('Error loading addresses:', error);
+    showErrorState(grid, 'Failed to load addresses. Please try again.');
     addresses = [];
   }
 }
 
-function saveAddresses() {
-  try {
-    localStorage.setItem(ADDRESSES_STORAGE_KEY, JSON.stringify(addresses));
-  } catch (error) {
-    console.error('Error saving addresses:', error);
+async function saveAddress(addressData) {
+  if (editingAddressId) {
+    // Update existing address
+    return await apiRequest(`/buyer/api/addresses/${editingAddressId}`, {
+      method: 'PUT',
+      body: JSON.stringify(addressData),
+    });
+  } else {
+    // Create new address
+    return await apiRequest('/buyer/api/addresses', {
+      method: 'POST',
+      body: JSON.stringify(addressData),
+    });
   }
 }
 
+async function deleteAddressAPI(addressId) {
+  return await apiRequest(`/buyer/api/addresses/${addressId}`, {
+    method: 'DELETE',
+  });
+}
+
+async function setDefaultAddressAPI(addressId) {
+  return await apiRequest(`/buyer/api/addresses/${addressId}/default`, {
+    method: 'PUT',
+  });
+}
+
+// ====================================
+// UI STATES
+// ====================================
+function showLoadingState(container) {
+  container.innerHTML = `
+    <div class="loading-state">
+      <div class="loading-spinner">
+        <div class="spinner"></div>
+      </div>
+      <p class="loading-text">Loading addresses...</p>
+    </div>
+  `;
+  container.style.display = 'block';
+}
+
+function showErrorState(container, message) {
+  container.innerHTML = `
+    <div class="error-state">
+      <div class="error-icon">
+        <i data-lucide="alert-circle"></i>
+      </div>
+      <h3 class="error-title">Something went wrong</h3>
+      <p class="error-text">${message}</p>
+      <button class="btn-retry" onclick="loadAddresses()">
+        <i data-lucide="refresh-cw"></i>
+        <span>Try Again</span>
+      </button>
+    </div>
+  `;
+  lucide.createIcons();
+}
+
+function setButtonLoading(button, loading, originalText = 'Save Address') {
+  if (loading) {
+    button.disabled = true;
+    button.innerHTML = `
+      <span class="btn-spinner"></span>
+      <span>Saving...</span>
+    `;
+  } else {
+    button.disabled = false;
+    button.innerHTML = `
+      <i data-lucide="check"></i>
+      <span>${originalText}</span>
+    `;
+    lucide.createIcons();
+  }
+}
+
+// ====================================
+// NOTIFICATION SYSTEM
+// ====================================
+function showNotification(message, type = 'success') {
+  // Remove existing notifications
+  const existing = document.querySelectorAll('.delivery-notification');
+  existing.forEach(n => n.remove());
+
+  const notification = document.createElement('div');
+  notification.className = `delivery-notification ${type}`;
+  notification.innerHTML = `
+    <div class="notification-content">
+      <i data-lucide="${type === 'success' ? 'check-circle' : type === 'error' ? 'x-circle' : 'info'}"></i>
+      <span>${message}</span>
+    </div>
+    <button class="notification-close" onclick="this.parentElement.remove()">
+      <i data-lucide="x"></i>
+    </button>
+  `;
+
+  document.body.appendChild(notification);
+  lucide.createIcons();
+
+  // Auto remove after 5 seconds
+  setTimeout(() => {
+    notification.classList.add('hiding');
+    setTimeout(() => notification.remove(), 300);
+  }, 5000);
+}
+
+// ====================================
+// ADDRESS RENDERING
+// ====================================
 function renderAddresses() {
   const grid = document.getElementById('addresses-grid');
   const emptyState = document.getElementById('addresses-empty');
@@ -116,33 +259,34 @@ function renderAddresses() {
 
   // Add event listeners to action buttons
   addresses.forEach(address => {
-    const editBtn = document.getElementById(`edit-${address.id}`);
-    const deleteBtn = document.getElementById(`delete-${address.id}`);
-    const defaultBtn = document.getElementById(`default-${address.id}`);
+    const editBtn = document.getElementById(`edit-${address._id}`);
+    const deleteBtn = document.getElementById(`delete-${address._id}`);
+    const defaultBtn = document.getElementById(`default-${address._id}`);
 
     if (editBtn) {
-      editBtn.addEventListener('click', () => editAddress(address.id));
+      editBtn.addEventListener('click', () => editAddress(address._id));
     }
 
     if (deleteBtn) {
-      deleteBtn.addEventListener('click', () => deleteAddress(address.id));
+      deleteBtn.addEventListener('click', () => confirmDeleteAddress(address._id));
     }
 
     if (defaultBtn && !address.isDefault) {
-      defaultBtn.addEventListener('click', () => setDefaultAddress(address.id));
+      defaultBtn.addEventListener('click', () => setDefaultAddress(address._id));
     }
   });
 }
 
 function createAddressCard(address) {
   const isDefault = address.isDefault;
+  const addressId = address._id;
   
   return `
-    <div class="address-card ${isDefault ? 'default' : ''}">
+    <div class="address-card ${isDefault ? 'default' : ''}" data-address-id="${addressId}">
       <div class="address-card-header">
         <div class="address-card-label">
           <i data-lucide="${isDefault ? 'star' : 'map-pin'}"></i>
-          <span>${address.name}</span>
+          <span>${escapeHtml(address.label)}</span>
         </div>
         ${isDefault ? '<div class="default-badge"><i data-lucide="check-circle"></i><span>Default</span></div>' : ''}
       </div>
@@ -151,37 +295,37 @@ function createAddressCard(address) {
         <div class="address-info">
           <div class="address-info-item">
             <i data-lucide="user"></i>
-            <span><strong>${address.fullName}</strong></span>
+            <span><strong>${escapeHtml(address.fullName)}</strong></span>
           </div>
           <div class="address-info-item">
             <i data-lucide="phone"></i>
-            <span>${address.phone}</span>
+            <span>${escapeHtml(address.phone)}</span>
           </div>
           <div class="address-info-item">
             <i data-lucide="map-pin"></i>
-            <span>${address.street}, ${address.city}, ${address.state}, ${address.country}${address.postalCode ? ' ' + address.postalCode : ''}</span>
+            <span>${escapeHtml(address.street)}, ${escapeHtml(address.city)}, ${escapeHtml(address.state)}, ${escapeHtml(address.country)}${address.postalCode ? ' ' + escapeHtml(address.postalCode) : ''}</span>
           </div>
           ${address.notes ? `
-          <div class="address-info-item">
+          <div class="address-info-item notes">
             <i data-lucide="file-text"></i>
-            <span>${address.notes}</span>
+            <span>${escapeHtml(address.notes)}</span>
           </div>
           ` : ''}
         </div>
       </div>
       
       <div class="address-card-footer">
-        <button class="btn-address-action edit" id="edit-${address.id}">
+        <button class="btn-address-action edit" id="edit-${addressId}" title="Edit address">
           <i data-lucide="edit-2"></i>
           <span>Edit</span>
         </button>
         ${!isDefault ? `
-        <button class="btn-address-action set-default" id="default-${address.id}">
+        <button class="btn-address-action set-default" id="default-${addressId}" title="Set as default">
           <i data-lucide="star"></i>
           <span>Set Default</span>
         </button>
         ` : ''}
-        <button class="btn-address-action delete" id="delete-${address.id}">
+        <button class="btn-address-action delete" id="delete-${addressId}" title="Delete address">
           <i data-lucide="trash-2"></i>
           <span>Delete</span>
         </button>
@@ -190,6 +334,9 @@ function createAddressCard(address) {
   `;
 }
 
+// ====================================
+// ADDRESS MODAL
+// ====================================
 function openAddressModal(address = null) {
   const modal = document.getElementById('address-modal');
   const modalTitle = document.getElementById('modal-title');
@@ -197,35 +344,42 @@ function openAddressModal(address = null) {
 
   if (!modal || !modalTitle || !form) return;
 
-  editingAddressId = address ? address.id : null;
+  editingAddressId = address ? address._id : null;
 
   // Update modal title
   modalTitle.textContent = address ? 'Edit Address' : 'Add New Address';
 
   // Reset or populate form
   if (address) {
-    document.getElementById('address-id').value = address.id;
-    document.getElementById('address-name').value = address.name;
-    document.getElementById('address-fullname').value = address.fullName;
-    document.getElementById('address-phone').value = address.phone;
-    document.getElementById('address-street').value = address.street;
-    document.getElementById('address-city').value = address.city;
-    document.getElementById('address-state').value = address.state;
-    document.getElementById('address-country').value = address.country;
+    document.getElementById('address-id').value = address._id;
+    document.getElementById('address-name').value = address.label || '';
+    document.getElementById('address-fullname').value = address.fullName || '';
+    document.getElementById('address-phone').value = address.phone || '';
+    document.getElementById('address-street').value = address.street || '';
+    document.getElementById('address-city').value = address.city || '';
+    document.getElementById('address-state').value = address.state || '';
+    document.getElementById('address-country').value = address.country || '';
     document.getElementById('address-postal').value = address.postalCode || '';
     document.getElementById('address-notes').value = address.notes || '';
-    document.getElementById('address-default').checked = address.isDefault;
+    document.getElementById('address-default').checked = address.isDefault || false;
   } else {
     form.reset();
     document.getElementById('address-id').value = '';
+    // If no addresses exist, auto-check default
+    if (addresses.length === 0) {
+      document.getElementById('address-default').checked = true;
+    }
   }
 
   // Show modal
   modal.classList.add('active');
   document.body.classList.add('modal-open');
   
-  // Reinitialize icons
-  setTimeout(() => lucide.createIcons(), 100);
+  // Focus first input
+  setTimeout(() => {
+    document.getElementById('address-name').focus();
+    lucide.createIcons();
+  }, 100);
 }
 
 function closeAddressModal() {
@@ -237,12 +391,15 @@ function closeAddressModal() {
   editingAddressId = null;
 }
 
-function handleFormSubmit(e) {
+async function handleFormSubmit(e) {
   e.preventDefault();
 
+  if (isLoading) return;
+
+  const saveBtn = e.target.querySelector('.btn-save');
+  
   const formData = {
-    id: editingAddressId || Date.now().toString(),
-    name: document.getElementById('address-name').value.trim(),
+    label: document.getElementById('address-name').value.trim(),
     fullName: document.getElementById('address-fullname').value.trim(),
     phone: document.getElementById('address-phone').value.trim(),
     street: document.getElementById('address-street').value.trim(),
@@ -254,69 +411,104 @@ function handleFormSubmit(e) {
     isDefault: document.getElementById('address-default').checked,
   };
 
-  if (editingAddressId) {
-    // Update existing address
-    const index = addresses.findIndex(a => a.id === editingAddressId);
-    if (index !== -1) {
-      // If setting as default, remove default from others
-      if (formData.isDefault) {
-        addresses.forEach(a => a.isDefault = false);
-      }
-      addresses[index] = formData;
-    }
-  } else {
-    // Add new address
-    // If this is the first address or marked as default, make it default
-    if (addresses.length === 0 || formData.isDefault) {
-      addresses.forEach(a => a.isDefault = false);
-      formData.isDefault = true;
-    }
-    addresses.push(formData);
+  // Validate required fields
+  if (!formData.label || !formData.fullName || !formData.phone || 
+      !formData.street || !formData.city || !formData.state || !formData.country) {
+    showNotification('Please fill in all required fields', 'error');
+    return;
   }
 
-  saveAddresses();
-  renderAddresses();
-  closeAddressModal();
+  try {
+    isLoading = true;
+    setButtonLoading(saveBtn, true);
+
+    const response = await saveAddress(formData);
+
+    if (response.success) {
+      showNotification(
+        editingAddressId ? 'Address updated successfully' : 'Address added successfully',
+        'success'
+      );
+      closeAddressModal();
+      await loadAddresses(); // Reload addresses from server
+    } else {
+      throw new Error(response.message || 'Failed to save address');
+    }
+  } catch (error) {
+    console.error('Error saving address:', error);
+    showNotification(error.message || 'Failed to save address. Please try again.', 'error');
+  } finally {
+    isLoading = false;
+    setButtonLoading(saveBtn, false);
+  }
 }
 
 function editAddress(id) {
-  const address = addresses.find(a => a.id === id);
+  const address = addresses.find(a => a._id === id);
   if (address) {
     openAddressModal(address);
   }
 }
 
-function deleteAddress(id) {
-  const address = addresses.find(a => a.id === id);
+// ====================================
+// DELETE ADDRESS
+// ====================================
+function confirmDeleteAddress(id) {
+  const address = addresses.find(a => a._id === id);
   
   if (!address) return;
 
   const title = address.isDefault ? 'Delete Default Address?' : 'Delete Address?';
   const message = address.isDefault
-    ? `Are you sure you want to delete your default address "${address.name}"?\n\nIf you have other addresses, one will be set as default automatically.`
-    : `Are you sure you want to delete the address "${address.name}"? This action cannot be undone.`;
+    ? `Are you sure you want to delete your default address "${address.label}"? If you have other addresses, one will be set as default automatically.`
+    : `Are you sure you want to delete the address "${address.label}"? This action cannot be undone.`;
 
-  showConfirmModal(title, message, () => {
-    const wasDefault = address.isDefault;
-    addresses = addresses.filter(a => a.id !== id);
-
-    // If we deleted the default address and there are others, set the first one as default
-    if (wasDefault && addresses.length > 0) {
-      addresses[0].isDefault = true;
-    }
-
-    saveAddresses();
-    renderAddresses();
-  });
+  showConfirmModal(title, message, () => deleteAddress(id));
 }
 
-function setDefaultAddress(id) {
-  addresses.forEach(a => {
-    a.isDefault = a.id === id;
-  });
+async function deleteAddress(id) {
+  try {
+    const response = await deleteAddressAPI(id);
 
-  saveAddresses();
-  renderAddresses();
+    if (response.success) {
+      showNotification('Address deleted successfully', 'success');
+      await loadAddresses(); // Reload addresses from server
+    } else {
+      throw new Error(response.message || 'Failed to delete address');
+    }
+  } catch (error) {
+    console.error('Error deleting address:', error);
+    showNotification(error.message || 'Failed to delete address. Please try again.', 'error');
+  }
+}
+
+// ====================================
+// SET DEFAULT ADDRESS
+// ====================================
+async function setDefaultAddress(id) {
+  try {
+    const card = document.querySelector(`[data-address-id="${id}"]`);
+    if (card) {
+      card.classList.add('updating');
+    }
+
+    const response = await setDefaultAddressAPI(id);
+
+    if (response.success) {
+      showNotification('Default address updated', 'success');
+      await loadAddresses(); // Reload addresses from server
+    } else {
+      throw new Error(response.message || 'Failed to set default address');
+    }
+  } catch (error) {
+    console.error('Error setting default address:', error);
+    showNotification(error.message || 'Failed to set default address. Please try again.', 'error');
+    
+    const card = document.querySelector(`[data-address-id="${id}"]`);
+    if (card) {
+      card.classList.remove('updating');
+    }
+  }
 }
 
 // ====================================
@@ -341,21 +533,6 @@ function showConfirmModal(title, message, onConfirm) {
   modal.classList.add('active');
   document.body.classList.add('modal-open');
 
-  // Event listeners
-  const closeModal = () => {
-    modal.classList.remove('active');
-    document.body.classList.remove('modal-open');
-    confirmCallback = null;
-    setTimeout(() => lucide.createIcons(), 100);
-  };
-
-  const handleConfirm = () => {
-    if (confirmCallback) {
-      confirmCallback();
-    }
-    closeModal();
-  };
-
   // Remove old listeners and add new ones
   const newBtnCancel = btnCancel.cloneNode(true);
   const newBtnDelete = btnDelete.cloneNode(true);
@@ -365,11 +542,27 @@ function showConfirmModal(title, message, onConfirm) {
   btnDelete.parentNode.replaceChild(newBtnDelete, btnDelete);
   backdrop.parentNode.replaceChild(newBackdrop, backdrop);
 
-  newBtnCancel.addEventListener('click', closeModal);
-  newBtnDelete.addEventListener('click', handleConfirm);
-  newBackdrop.addEventListener('click', closeModal);
+  newBtnCancel.addEventListener('click', closeConfirmModal);
+  newBtnDelete.addEventListener('click', handleConfirmDelete);
+  newBackdrop.addEventListener('click', closeConfirmModal);
 
   setTimeout(() => lucide.createIcons(), 100);
+}
+
+function closeConfirmModal() {
+  const modal = document.getElementById('confirm-modal');
+  if (modal) {
+    modal.classList.remove('active');
+    document.body.classList.remove('modal-open');
+  }
+  confirmCallback = null;
+}
+
+async function handleConfirmDelete() {
+  if (confirmCallback) {
+    await confirmCallback();
+  }
+  closeConfirmModal();
 }
 
 // ====================================
@@ -383,7 +576,7 @@ function handleTrackOrder() {
   const orderNumber = trackingInput.value.trim();
 
   if (!orderNumber) {
-    alert('Please enter an order number to track.');
+    showNotification('Please enter an order number to track.', 'error');
     trackingInput.focus();
     return;
   }
@@ -395,6 +588,9 @@ function handleTrackOrder() {
 // ====================================
 // UTILITY FUNCTIONS
 // ====================================
-function generateAddressId() {
-  return `addr_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+function escapeHtml(text) {
+  if (!text) return '';
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
 }
