@@ -1,152 +1,151 @@
-// Tickets Page JavaScript
+// Tickets Page JavaScript - Buyer Side
 // Handles ticket list display, filtering, and statistics
 
-// Mock tickets data (in production, this would come from an API)
-const mockTickets = [
-  {
-    id: 'TKT-001',
-    orderNumber: 'ORD-2025-001',
-    subject: 'Delayed Shipment - Hydraulic Pump',
-    category: 'Shipping Issue',
-    priority: 'high',
-    status: 'open',
-    createdAt: '2025-12-20T10:30:00Z',
-    updatedAt: '2025-12-23T14:20:00Z',
-    messageCount: 4
-  },
-  {
-    id: 'TKT-002',
-    orderNumber: 'ORD-2025-015',
-    subject: 'Wrong Part Received',
-    category: 'Order Issue',
-    priority: 'urgent',
-    status: 'in-progress',
-    createdAt: '2025-12-22T09:15:00Z',
-    updatedAt: '2025-12-23T16:45:00Z',
-    messageCount: 3
-  },
-  {
-    id: 'TKT-003',
-    orderNumber: 'ORD-2025-008',
-    subject: 'Request for Technical Specifications',
-    category: 'Product Inquiry',
-    priority: 'medium',
-    status: 'resolved',
-    createdAt: '2025-12-18T13:20:00Z',
-    updatedAt: '2025-12-19T11:30:00Z',
-    messageCount: 3
-  },
-  {
-    id: 'TKT-004',
-    orderNumber: 'ORD-2025-022',
-    subject: 'Payment Processing Issue',
-    category: 'Payment',
-    priority: 'high',
-    status: 'open',
-    createdAt: '2025-12-23T08:00:00Z',
-    updatedAt: '2025-12-23T08:00:00Z',
-    messageCount: 1
-  },
-  {
-    id: 'TKT-005',
-    orderNumber: 'ORD-2025-019',
-    subject: 'Request for Invoice Copy',
-    category: 'Documentation',
-    priority: 'low',
-    status: 'resolved',
-    createdAt: '2025-12-21T15:45:00Z',
-    updatedAt: '2025-12-21T16:30:00Z',
-    messageCount: 2
-  }
-];
-
-let currentTickets = [...mockTickets];
+let allTickets = [];
+let currentTickets = [];
 let filters = {
   status: '',
   search: ''
 };
+let pagination = {
+  page: 1,
+  limit: 20,
+  total: 0
+};
+let stats = {
+  open: 0,
+  'in-progress': 0,
+  resolved: 0
+};
 
 // Initialize page
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', function() {
   initializeTickets();
   setupEventListeners();
 });
 
-function initializeTickets() {
-  updateStatistics();
-  renderTickets();
+async function initializeTickets() {
+  await loadTickets();
+}
+
+async function loadTickets() {
+  try {
+    // Show loading state
+    const ticketsList = document.getElementById('tickets-list');
+    if (ticketsList) {
+      ticketsList.innerHTML = '<div class="loading-state"><i data-lucide="loader-2" class="spin"></i><span>Loading tickets...</span></div>';
+    }
+    
+    // Build query params
+    const params = new URLSearchParams();
+    if (filters.status) params.append('status', filters.status);
+    if (filters.search) params.append('search', filters.search);
+    params.append('page', pagination.page);
+    params.append('limit', pagination.limit);
+    
+    const response = await fetch('/buyer/api/tickets?' + params.toString());
+    const data = await response.json();
+    
+    if (data.success) {
+      allTickets = data.tickets || [];
+      currentTickets = allTickets;
+      pagination = data.pagination || pagination;
+      stats = data.stats || stats;
+      
+      updateStatistics();
+      renderTickets();
+    } else {
+      allTickets = [];
+      currentTickets = [];
+      renderTickets();
+    }
+  } catch (error) {
+    console.error('Error loading tickets:', error);
+    allTickets = [];
+    currentTickets = [];
+    renderTickets();
+  }
 }
 
 function setupEventListeners() {
   // Filter buttons
-  document.getElementById('btn-apply-filters')?.addEventListener('click', applyFilters);
-  document.getElementById('btn-reset-filters')?.addEventListener('click', resetFilters);
+  const applyBtn = document.getElementById('btn-apply-filters');
+  const resetBtn = document.getElementById('btn-reset-filters');
+  const searchInput = document.getElementById('filter-search');
+  
+  if (applyBtn) {
+    applyBtn.addEventListener('click', applyFilters);
+  }
+  
+  if (resetBtn) {
+    resetBtn.addEventListener('click', resetFilters);
+  }
 
   // Enter key on search
-  document.getElementById('filter-search')?.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-      applyFilters();
-    }
-  });
+  if (searchInput) {
+    searchInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        applyFilters();
+      }
+    });
+  }
 }
 
 function updateStatistics() {
-  const stats = {
-    open: mockTickets.filter(t => t.status === 'open').length,
-    'in-progress': mockTickets.filter(t => t.status === 'in-progress').length,
-    resolved: mockTickets.filter(t => t.status === 'resolved').length
-  };
-
-  document.getElementById('stat-open').textContent = stats.open;
-  document.getElementById('stat-in-progress').textContent = stats['in-progress'];
-  document.getElementById('stat-resolved').textContent = stats.resolved;
+  const statOpen = document.getElementById('stat-open');
+  const statInProgress = document.getElementById('stat-in-progress');
+  const statResolved = document.getElementById('stat-resolved');
+  
+  if (statOpen) statOpen.textContent = stats.open || 0;
+  if (statInProgress) statInProgress.textContent = stats['in-progress'] || 0;
+  if (statResolved) statResolved.textContent = stats.resolved || 0;
 }
 
 function applyFilters() {
-  filters.status = document.getElementById('filter-status')?.value || '';
-  filters.search = document.getElementById('filter-search')?.value.toLowerCase() || '';
+  const statusSelect = document.getElementById('filter-status');
+  const searchInput = document.getElementById('filter-search');
+  
+  filters.status = statusSelect ? statusSelect.value : '';
+  filters.search = searchInput ? searchInput.value.toLowerCase() : '';
+  pagination.page = 1; // Reset to first page
 
-  currentTickets = mockTickets.filter(ticket => {
-    const matchesStatus = !filters.status || ticket.status === filters.status;
-    const matchesSearch = !filters.search || 
-      ticket.subject.toLowerCase().includes(filters.search) ||
-      ticket.id.toLowerCase().includes(filters.search) ||
-      ticket.orderNumber.toLowerCase().includes(filters.search) ||
-      ticket.category.toLowerCase().includes(filters.search);
-
-    return matchesStatus && matchesSearch;
-  });
-
-  renderTickets();
+  loadTickets();
 }
 
 function resetFilters() {
-  document.getElementById('filter-status').value = '';
-  document.getElementById('filter-search').value = '';
+  const statusSelect = document.getElementById('filter-status');
+  const searchInput = document.getElementById('filter-search');
+  
+  if (statusSelect) statusSelect.value = '';
+  if (searchInput) searchInput.value = '';
   
   filters = {
     status: '',
     search: ''
   };
+  pagination.page = 1;
 
-  currentTickets = [...mockTickets];
-  renderTickets();
+  loadTickets();
 }
 
 function renderTickets() {
   const ticketsList = document.getElementById('tickets-list');
   const ticketsEmpty = document.getElementById('tickets-empty');
 
+  if (!ticketsList) return;
+
   if (currentTickets.length === 0) {
     ticketsList.style.display = 'none';
-    ticketsEmpty.style.display = 'block';
+    if (ticketsEmpty) ticketsEmpty.style.display = 'block';
     return;
   }
 
   ticketsList.style.display = 'grid';
-  ticketsEmpty.style.display = 'none';
+  if (ticketsEmpty) ticketsEmpty.style.display = 'none';
 
-  ticketsList.innerHTML = currentTickets.map(ticket => createTicketCard(ticket)).join('');
+  ticketsList.innerHTML = currentTickets.map(function(ticket) {
+    return createTicketCard(ticket);
+  }).join('');
 
   // Re-initialize Lucide icons
   if (typeof lucide !== 'undefined') {
@@ -154,10 +153,11 @@ function renderTickets() {
   }
 
   // Add click handlers
-  document.querySelectorAll('.ticket-card').forEach(card => {
-    card.addEventListener('click', () => {
+  const cards = document.querySelectorAll('.ticket-card');
+  cards.forEach(function(card) {
+    card.addEventListener('click', function() {
       const ticketId = card.dataset.ticketId;
-      window.location.href = `/buyer/tickets/${ticketId}`;
+      window.location.href = '/buyer/tickets/' + ticketId;
     });
   });
 }
@@ -166,56 +166,57 @@ function createTicketCard(ticket) {
   const createdDate = formatDate(ticket.createdAt);
   const updatedDate = formatRelativeTime(ticket.updatedAt);
   const categoryIcon = getCategoryIcon(ticket.category);
+  const hasUnread = ticket.unreadCount > 0;
 
-  return `
-    <div class="ticket-card" data-ticket-id="${ticket.id}">
-      <div class="ticket-card-header">
-        <div class="ticket-card-left">
-          <div class="ticket-id">${ticket.id}</div>
-          <h3 class="ticket-subject">${ticket.subject}</h3>
-          <div class="ticket-order">
-            <i data-lucide="package"></i>
-            <span>${ticket.orderNumber}</span>
-          </div>
-        </div>
-        <div class="ticket-card-right">
-          <span class="ticket-status-badge ${ticket.status}">${formatStatus(ticket.status)}</span>
-        </div>
-      </div>
-      <div class="ticket-card-body">
-        <div class="ticket-category">
-          <i data-lucide="${categoryIcon}"></i>
-          <span>${ticket.category}</span>
-        </div>
-      </div>
-      <div class="ticket-card-footer">
-        <div class="ticket-meta">
-          <div class="ticket-meta-item">
-            <i data-lucide="calendar"></i>
-            <span>${createdDate}</span>
-          </div>
-          <div class="ticket-meta-item">
-            <i data-lucide="clock"></i>
-            <span>Updated ${updatedDate}</span>
-          </div>
-          <div class="ticket-meta-item">
-            <i data-lucide="message-circle"></i>
-            <span>${ticket.messageCount} ${ticket.messageCount === 1 ? 'message' : 'messages'}</span>
-          </div>
-        </div>
-        <div class="ticket-action">
-          <span>View Details</span>
-          <i data-lucide="arrow-right"></i>
-        </div>
-      </div>
-    </div>
-  `;
+  return '<div class="ticket-card' + (hasUnread ? ' has-unread' : '') + '" data-ticket-id="' + ticket.id + '">' +
+    '<div class="ticket-card-header">' +
+      '<div class="ticket-card-left">' +
+        '<div class="ticket-id">' + escapeHtml(ticket.id) + '</div>' +
+        '<h3 class="ticket-subject">' + escapeHtml(ticket.subject) + '</h3>' +
+        '<div class="ticket-order">' +
+          '<i data-lucide="package"></i>' +
+          '<span>' + escapeHtml(ticket.orderNumber || 'No Order') + '</span>' +
+        '</div>' +
+      '</div>' +
+      '<div class="ticket-card-right">' +
+        '<span class="ticket-status-badge ' + ticket.status + '">' + formatStatus(ticket.status) + '</span>' +
+        (hasUnread ? '<span class="unread-badge">' + ticket.unreadCount + '</span>' : '') +
+      '</div>' +
+    '</div>' +
+    '<div class="ticket-card-body">' +
+      '<div class="ticket-category">' +
+        '<i data-lucide="' + categoryIcon + '"></i>' +
+        '<span>' + escapeHtml(ticket.category) + '</span>' +
+      '</div>' +
+    '</div>' +
+    '<div class="ticket-card-footer">' +
+      '<div class="ticket-meta">' +
+        '<div class="ticket-meta-item">' +
+          '<i data-lucide="calendar"></i>' +
+          '<span>' + createdDate + '</span>' +
+        '</div>' +
+        '<div class="ticket-meta-item">' +
+          '<i data-lucide="clock"></i>' +
+          '<span>Updated ' + updatedDate + '</span>' +
+        '</div>' +
+        '<div class="ticket-meta-item">' +
+          '<i data-lucide="message-circle"></i>' +
+          '<span>' + ticket.messageCount + ' ' + (ticket.messageCount === 1 ? 'message' : 'messages') + '</span>' +
+        '</div>' +
+      '</div>' +
+      '<div class="ticket-action">' +
+        '<span>View Details</span>' +
+        '<i data-lucide="arrow-right"></i>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
 }
 
 function formatStatus(status) {
-  return status.split('-').map(word => 
-    word.charAt(0).toUpperCase() + word.slice(1)
-  ).join(' ');
+  if (!status) return 'Unknown';
+  return status.split('-').map(function(word) {
+    return word.charAt(0).toUpperCase() + word.slice(1);
+  }).join(' ');
 }
 
 function getCategoryIcon(category) {
@@ -226,18 +227,20 @@ function getCategoryIcon(category) {
     'Payment': 'credit-card',
     'Documentation': 'file-text',
     'Technical Issue': 'tool',
+    'Return Request': 'rotate-ccw',
     'General': 'message-square'
   };
   return icons[category] || 'message-square';
 }
 
 function formatDate(dateString) {
+  if (!dateString) return 'N/A';
   const date = new Date(dateString);
-  const options = { year: 'numeric', month: 'short', day: 'numeric' };
-  return date.toLocaleDateString('en-US', options);
+  return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
 function formatRelativeTime(dateString) {
+  if (!dateString) return 'N/A';
   const date = new Date(dateString);
   const now = new Date();
   const diffMs = now - date;
@@ -246,9 +249,16 @@ function formatRelativeTime(dateString) {
   const diffDays = Math.floor(diffMs / 86400000);
 
   if (diffMins < 1) return 'just now';
-  if (diffMins < 60) return `${diffMins} min${diffMins > 1 ? 's' : ''} ago`;
-  if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
-  if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+  if (diffMins < 60) return diffMins + ' min' + (diffMins > 1 ? 's' : '') + ' ago';
+  if (diffHours < 24) return diffHours + ' hour' + (diffHours > 1 ? 's' : '') + ' ago';
+  if (diffDays < 7) return diffDays + ' day' + (diffDays > 1 ? 's' : '') + ' ago';
   
   return formatDate(dateString);
+}
+
+function escapeHtml(text) {
+  if (!text) return '';
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
 }

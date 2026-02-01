@@ -282,7 +282,7 @@ const orderSchema = new mongoose.Schema({
     // Order Type
     type: {
         type: String,
-        enum: ['regular', 'AOG', 'aviation'],
+        enum: ['regular'],
         default: 'regular'
     },
 
@@ -430,7 +430,6 @@ orderSchema.statics.createFromCartItems = async function (buyer, cartItems, paym
             currency: item.currency || 'AED',
             weight: parseFloat(item.weight) || 0,
             stock: item.stock || 'N/A',
-            origin: item.origin || '',
             terms: item.terms || 'N/A',
             aircraftType: item.aircraftType || 'N/A',
             reference: item.reference || '',
@@ -448,9 +447,9 @@ orderSchema.statics.createFromCartItems = async function (buyer, cartItems, paym
     const processingFee = parseFloat(paymentInfo.fee) || 0;
     const total = subtotal + processingFee;
 
-    // Determine order type (AOG or regular)
-    const orderType = paymentInfo.isAOG ? 'AOG' : 'regular';
-    const priority = paymentInfo.isAOG ? 'urgent' : 'normal';
+    // Order defaults
+    const orderType = 'regular';
+    const priority = 'normal';
 
     // Build shipping address - use provided address or fallback to buyer info
     const shippingData = paymentInfo.shippingAddress ? {

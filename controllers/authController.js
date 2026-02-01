@@ -152,20 +152,28 @@ const register = async (req, res) => {
       password,
       newsletter: newsletter === 'on' || newsletter === true,
       termsAcceptedAt: new Date(),
+      isActive: true, // Account is active by default
     });
 
     await buyer.save();
 
-    // Generate token
-    const token = generateToken(buyer._id);
+    // Generate JWT token
+    const token = jwt.sign({ id: buyer._id }, process.env.JWT_SECRET, {
+      expiresIn: '7d',
+    });
 
-    // Set cookie
-    setTokenCookie(res, token);
+    // Set JWT in HTTP-only cookie
+    res.cookie('buyerToken', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
 
     // Return success response
     res.status(201).json({
       success: true,
-      message: 'Account created successfully',
+      message: 'Account created successfully!',
       data: {
         user: {
           id: buyer._id,
@@ -174,7 +182,7 @@ const register = async (req, res) => {
           email: buyer.email,
           companyName: buyer.companyName,
         },
-        redirectUrl: '/buyer',
+        redirectUrl: '/buyer/dashboard',
       },
     });
   } catch (error) {
@@ -340,8 +348,8 @@ const handleBuyerLogin = async (buyer, password, res) => {
   if (!buyer.isActive) {
     return res.status(403).json({
       success: false,
-      message: 'Your account has been deactivated. Please contact support.',
-      errors: { account: 'Account is deactivated' },
+      message: 'Your account has been deactivated. Please contact support for assistance.',
+      errors: { account: 'Account is inactive' },
     });
   }
 

@@ -1,9 +1,11 @@
 /**
  * CSV Parser Service
  * Parses CSV files and imports records to MongoDB and Elasticsearch
+ * Memory-optimized for large files
  */
 const csv = require('csv-parser');
 const { Readable } = require('stream');
+const fs = require('fs');
 const Part = require('../models/Part');
 const elasticsearchService = require('./elasticsearchService');
 
@@ -96,10 +98,29 @@ class CSVParserService {
       'Stock', 'stock', 'STOCK', 'Available',
     ].filter(Boolean);
 
-    const originFields = [
-      columnMapping.origin,
-      'Origin', 'origin', 'ORIGIN', 'Country', 'country',
-      'Country of Origin', 'Made In',
+    const weightFields = [
+      columnMapping.weight,
+      'Weight', 'weight', 'WEIGHT', 'Net Weight', 'Gross Weight',
+    ].filter(Boolean);
+
+    const volumeFields = [
+      columnMapping.volume,
+      'Volume', 'volume', 'VOLUME',
+    ].filter(Boolean);
+
+    const deliveryFields = [
+      columnMapping.delivery,
+      'Delivery', 'delivery', 'DELIVERY', 'Delivery Days', 'Lead Time',
+    ].filter(Boolean);
+
+    const stockCodeFields = [
+      columnMapping.stockCode,
+      'Stock', 'stock', 'STOCK', 'Stock Code', 'Warehouse',
+    ].filter(Boolean);
+
+    const minLotFields = [
+      columnMapping.minOrderQty,
+      'MIN_LOT', 'Min Lot', 'Min Order', 'MOQ', 'Minimum Order',
     ].filter(Boolean);
 
     // Find values using field mappings
@@ -115,15 +136,35 @@ class CSVParserService {
     const partNumber = findValue(partNumberFields);
     if (!partNumber) return null;
 
+    // Parse delivery days from format like "0/0" or "1-3"
+    const parseDelivery = (val) => {
+      if (!val) return null;
+      const str = String(val).replace(/[=""]/g, '').trim();
+      const match = str.match(/(\d+)/);
+      return match ? parseInt(match[1], 10) : null;
+    };
+
+    // Parse weight (handle European format with comma)
+    const parseWeight = (val) => {
+      if (!val) return null;
+      const str = String(val).replace(',', '.').trim();
+      const parsed = parseFloat(str);
+      return isNaN(parsed) ? null : parsed;
+    };
+
     return {
       partNumber,
       description: findValue(descriptionFields),
       supplier: findValue(supplierFields),
       brand: findValue(brandFields),
       price: this.parsePrice(findValue(priceFields)),
+      currency: 'AED', // Default currency for your FTP data
       quantity: this.parseQuantity(findValue(quantityFields)),
-      origin: findValue(originFields),
-      rawData: data,
+      weight: parseWeight(findValue(weightFields)),
+      volume: parseWeight(findValue(volumeFields)),
+      deliveryDays: parseDelivery(findValue(deliveryFields)),
+      stockCode: findValue(stockCodeFields),
+      minOrderQty: this.parseQuantity(findValue(minLotFields)) || 1,
     };
   }
 
@@ -160,14 +201,64 @@ class CSVParserService {
 
   /**
    * Parse and import CSV to database and Elasticsearch
+   * Memory-optimized: processes in small chunks, supports both buffer and file path
+   * @param {Buffer|string} source - Buffer or file path to CSV
+   * @param {Object} options - Import options
    */
-  async parseAndImport(buffer, options = {}) {
+  async parseAndImport(source, options = {}) {
     const { integration, integrationName, fileName, columnMapping = {}, onProgress } = options;
 
     return new Promise(async (resolve, reject) => {
       try {
-        if (!buffer || buffer.length === 0) {
-          return reject(new Error('CSV file is empty'));
+        // Determine if source is a file path or buffer
+        const isFilePath = typeof source === 'string';
+        let fileSize = 0;
+        let inputStream;
+        let separator = ';'; // Default separator
+
+        if (isFilePath) {
+          // Streaming from file - memory efficient
+          if (!fs.existsSync(source)) {
+            return reject(new Error('CSV file not found'));
+          }
+          const stats = fs.statSync(source);
+          fileSize = stats.size;
+          
+          // Read just first 1KB to detect separator
+          const fd = fs.openSync(source, 'r');
+          const sampleBuffer = Buffer.alloc(Math.min(1024, fileSize));
+          fs.readSync(fd, sampleBuffer, 0, sampleBuffer.length, 0);
+          fs.closeSync(fd);
+          
+          const sample = sampleBuffer.toString('utf8');
+          const firstLine = sample.split('\n')[0] || '';
+          const semicolonCount = firstLine.split(';').length;
+          const commaCount = firstLine.split(',').length;
+          separator = semicolonCount > commaCount ? ';' : ',';
+          
+          // Create read stream from file
+          inputStream = fs.createReadStream(source, { highWaterMark: 64 * 1024 }); // 64KB chunks
+          
+          console.log(`📊 Streaming ${(fileSize / 1024 / 1024).toFixed(2)} MB file with separator "${separator}"`);
+        } else {
+          // Legacy buffer support
+          if (!source || source.length === 0) {
+            return reject(new Error('CSV file is empty'));
+          }
+          fileSize = source.length;
+          
+          // Detect delimiter from first 1KB only
+          const sampleSize = Math.min(1024, source.length);
+          const sample = source.slice(0, sampleSize).toString('utf8');
+          const firstLine = sample.split('\n')[0] || '';
+          const semicolonCount = firstLine.split(';').length;
+          const commaCount = firstLine.split(',').length;
+          separator = semicolonCount > commaCount ? ';' : ',';
+          
+          inputStream = Readable.from(source);
+          source = null; // Release buffer reference
+          
+          console.log(`📊 Processing ${(fileSize / 1024 / 1024).toFixed(2)} MB buffer with separator "${separator}"`);
         }
 
         let batch = [];
@@ -175,16 +266,11 @@ class CSVParserService {
         let totalUpdated = 0;
         let rawRecordCount = 0;
         let validRecordCount = 0;
-        const BATCH_SIZE = 5000;
+        let esRecordIndex = 0;
+        const BATCH_SIZE = 500;
+        const ES_BATCH_SIZE = 200;
         let lastProgressUpdate = Date.now();
-        const PROGRESS_INTERVAL = 500; // Update progress every 500ms
-
-        // Detect delimiter
-        const bufferStr = buffer.toString('utf8');
-        const firstLine = bufferStr.split('\n')[0] || '';
-        const semicolonCount = firstLine.split(';').length;
-        const commaCount = firstLine.split(',').length;
-        const separator = semicolonCount > commaCount ? ';' : ',';
+        const PROGRESS_INTERVAL = 1000;
 
         const mapHeaders = ({ header }) => header.trim().replace(/^["']|["']$/g, '');
 
@@ -193,21 +279,35 @@ class CSVParserService {
 
           try {
             // Insert to MongoDB
-            const mongoResult = await Part.bulkUpsert(batchToProcess, {
+            const mongoResult = await Part.bulkInsert(batchToProcess, {
               integration,
+              integrationName,
               fileName,
             });
 
-            // Index in Elasticsearch
+            // Index in Elasticsearch in smaller sub-batches
             if (elasticsearchService.isAvailable) {
-              const docsWithIds = batchToProcess.map((doc, idx) => ({
-                ...doc,
-                integration: integration?.toString(),
-                integrationName,
-                fileName,
-                _id: `${integration}-${fileName}-${rawRecordCount - batchToProcess.length + idx}`,
-              }));
-              await elasticsearchService.bulkIndex(docsWithIds);
+              for (let i = 0; i < batchToProcess.length; i += ES_BATCH_SIZE) {
+                const esBatch = batchToProcess.slice(i, i + ES_BATCH_SIZE).map((doc, idx) => ({
+                  ...doc,
+                  integration: integration?.toString(),
+                  integrationName,
+                  fileName,
+                  _id: `${integration}-${fileName}-${esRecordIndex + i + idx}`,
+                }));
+                
+                try {
+                  await elasticsearchService.bulkIndex(esBatch);
+                } catch (esError) {
+                  console.error(`ES batch error (non-fatal): ${esError.message}`);
+                }
+                
+                // Small delay between ES batches
+                if (i + ES_BATCH_SIZE < batchToProcess.length) {
+                  await new Promise(resolve => setTimeout(resolve, 50));
+                }
+              }
+              esRecordIndex += batchToProcess.length;
             }
 
             return mongoResult;
@@ -217,23 +317,12 @@ class CSVParserService {
           }
         };
 
-        // Emit progress update if callback provided
-        const emitProgress = () => {
-          if (onProgress && Date.now() - lastProgressUpdate >= PROGRESS_INTERVAL) {
-            onProgress({
-              processed: validRecordCount,
-              inserted: totalInserted,
-              updated: totalUpdated,
-              raw: rawRecordCount,
-            });
-            lastProgressUpdate = Date.now();
-          }
-        };
+        let processingPromise = Promise.resolve();
+        let tempFilePath = isFilePath ? source : null;
 
-        const stream = Readable.from(buffer);
-        stream
+        inputStream
           .pipe(csv({ separator, skipEmptyLines: true, mapHeaders }))
-          .on('data', async (data) => {
+          .on('data', (data) => {
             rawRecordCount++;
 
             const normalized = this.normalizeRecord(data, columnMapping);
@@ -252,42 +341,75 @@ class CSVParserService {
               batch.push(record);
 
               // Emit progress periodically
-              emitProgress();
+              if (onProgress && Date.now() - lastProgressUpdate >= PROGRESS_INTERVAL) {
+                onProgress({
+                  processed: validRecordCount,
+                  inserted: totalInserted,
+                  updated: totalUpdated,
+                  raw: rawRecordCount,
+                });
+                lastProgressUpdate = Date.now();
+              }
 
               if (batch.length >= BATCH_SIZE) {
-                stream.pause();
-                const batchToProcess = [...batch];
-                batch = [];
+                inputStream.pause();
+                const batchToProcess = batch;
+                batch = []; // Clear batch immediately
 
-                const result = await processBatch(batchToProcess);
-                totalInserted += result.inserted;
-                totalUpdated += result.updated;
+                processingPromise = processingPromise.then(async () => {
+                  try {
+                    const result = await processBatch(batchToProcess);
+                    totalInserted += result.inserted;
+                    totalUpdated += result.updated;
 
-                // Emit progress after batch
-                if (onProgress) {
-                  onProgress({
-                    processed: validRecordCount,
-                    inserted: totalInserted,
-                    updated: totalUpdated,
-                    raw: rawRecordCount,
-                  });
-                  lastProgressUpdate = Date.now();
-                }
+                    // Force garbage collection hint by clearing array
+                    batchToProcess.length = 0;
 
-                stream.resume();
+                    if (onProgress) {
+                      onProgress({
+                        processed: validRecordCount,
+                        inserted: totalInserted,
+                        updated: totalUpdated,
+                        raw: rawRecordCount,
+                      });
+                      lastProgressUpdate = Date.now();
+                    }
+
+                    inputStream.resume();
+                  } catch (err) {
+                    inputStream.destroy(err);
+                  }
+                });
               }
             }
+            
+            // Clear data reference
+            data = null;
           })
           .on('end', async () => {
             try {
+              // Wait for any pending batch processing
+              await processingPromise;
+
               // Process remaining batch
               if (batch.length > 0) {
                 const result = await processBatch(batch);
                 totalInserted += result.inserted;
                 totalUpdated += result.updated;
+                batch = [];
               }
 
-              // Refresh Elasticsearch index and invalidate cache
+              // Clean up temp file if used
+              if (tempFilePath && fs.existsSync(tempFilePath)) {
+                try {
+                  fs.unlinkSync(tempFilePath);
+                  console.log('🗑️  Cleaned up temp file');
+                } catch (cleanupErr) {
+                  console.warn('Warning: Could not delete temp file:', cleanupErr.message);
+                }
+              }
+
+              // Refresh Elasticsearch index
               if (elasticsearchService.isAvailable) {
                 await elasticsearchService.refreshIndex();
                 elasticsearchService.invalidateDocCountCache();
@@ -304,7 +426,7 @@ class CSVParserService {
                 });
               }
 
-              console.log(`✅ Import complete: ${totalInserted} inserted, ${totalUpdated} updated`);
+              console.log(`✅ Import complete: ${totalInserted} inserted, ${totalUpdated} updated from ${rawRecordCount} raw records`);
 
               resolve({
                 success: true,

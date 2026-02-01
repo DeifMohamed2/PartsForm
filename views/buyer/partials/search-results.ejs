@@ -84,43 +84,23 @@
           </div>
         </div>
 
-        <!-- Stock Availability with Count Badges -->
+        <!-- Stock Code Filter - Dynamic from Data -->
         <div class="filter-section filter-section-enhanced">
-          <h4 class="filter-section-title">
-            <i data-lucide="package-check"></i>
-            Availability
-          </h4>
-          <div class="filter-options filter-options-cards">
-            <label class="filter-checkbox filter-card">
-              <input type="checkbox" name="stock" value="in-stock" data-filter="stock" data-value="in-stock">
-              <span class="filter-card-content">
-                <span class="filter-card-icon green">
-                  <i data-lucide="check-circle"></i>
-                </span>
-                <span class="filter-card-label">In Stock</span>
-                <span class="filter-card-count" id="stock-in-count">0</span>
-              </span>
+          <div class="filter-section-header">
+            <h4 class="filter-section-title">
+              <i data-lucide="tag"></i>
+              Stock Code
+            </h4>
+            <span class="filter-count-badge" id="stockcode-total-count">0</span>
+          </div>
+          <div class="filter-options scrollable filter-options-dynamic" id="stockcode-filter-tags">
+            <label class="filter-checkbox">
+              <input type="checkbox" name="stockCode" value="All" data-filter="stockCode" data-value="All" checked>
+              <span class="filter-checkbox-box"></span>
+              <span class="filter-checkbox-label">All Stock Codes</span>
+              <span class="filter-item-count" id="stockcode-all-count"></span>
             </label>
-            <label class="filter-checkbox filter-card">
-              <input type="checkbox" name="stock" value="low-stock" data-filter="stock" data-value="low-stock">
-              <span class="filter-card-content">
-                <span class="filter-card-icon yellow">
-                  <i data-lucide="alert-triangle"></i>
-                </span>
-                <span class="filter-card-label">Low Stock</span>
-                <span class="filter-card-count" id="stock-low-count">0</span>
-              </span>
-            </label>
-            <label class="filter-checkbox filter-card">
-              <input type="checkbox" name="stock" value="out-of-stock" data-filter="stock" data-value="out-of-stock">
-              <span class="filter-card-content">
-                <span class="filter-card-icon red">
-                  <i data-lucide="x-circle"></i>
-                </span>
-                <span class="filter-card-label">Out of Stock</span>
-                <span class="filter-card-count" id="stock-out-count">0</span>
-              </span>
-            </label>
+            <!-- Dynamic stock code options will be inserted here -->
           </div>
         </div>
 
@@ -154,58 +134,6 @@
               <span>Show more</span>
               <i data-lucide="chevron-down"></i>
             </button>
-          </div>
-        </div>
-
-        <!-- Supplier with Dynamic Count -->
-        <div class="filter-section filter-section-enhanced">
-          <div class="filter-section-header">
-            <h4 class="filter-section-title">
-              <i data-lucide="building-2"></i>
-              Supplier
-            </h4>
-            <span class="filter-count-badge" id="supplier-total-count">0</span>
-          </div>
-          <div class="filter-search-box">
-            <i data-lucide="search"></i>
-            <input type="text" id="supplier-filter-search" placeholder="Search suppliers...">
-            <button class="filter-search-clear" id="supplier-search-clear" style="display: none;">
-              <i data-lucide="x"></i>
-            </button>
-          </div>
-          <div class="filter-options scrollable filter-options-dynamic" id="supplier-filter-tags">
-            <label class="filter-checkbox">
-              <input type="checkbox" name="supplier" value="All" data-filter="supplier" data-value="All" checked>
-              <span class="filter-checkbox-box"></span>
-              <span class="filter-checkbox-label">All Suppliers</span>
-              <span class="filter-item-count" id="supplier-all-count"></span>
-            </label>
-            <!-- Dynamic supplier options will be inserted here -->
-          </div>
-          <div class="filter-show-more" id="supplier-show-more" style="display: none;">
-            <button class="show-more-btn" data-target="supplier">
-              <span>Show more</span>
-              <i data-lucide="chevron-down"></i>
-            </button>
-          </div>
-        </div>
-
-        <!-- Origin/Country Filter -->
-        <div class="filter-section filter-section-enhanced">
-          <div class="filter-section-header">
-            <h4 class="filter-section-title">
-              <i data-lucide="globe"></i>
-              Origin Country
-            </h4>
-            <span class="filter-count-badge" id="origin-total-count">0</span>
-          </div>
-          <div class="filter-options scrollable filter-options-dynamic" id="origin-filter-tags">
-            <label class="filter-checkbox">
-              <input type="checkbox" name="origin" value="All" data-filter="origin" data-value="All" checked>
-              <span class="filter-checkbox-box"></span>
-              <span class="filter-checkbox-label">All Countries</span>
-            </label>
-            <!-- Dynamic origin options will be inserted here -->
           </div>
         </div>
 
@@ -430,10 +358,9 @@
                 <th>BRAND</th>
                 <th>VENDOR CODE</th>
                 <th>DESCRIPTION</th>
-                <th>SUPPLIER</th>
-                <th>ORIGIN</th>
                 <th>QTY</th>
-                <th>STOCK</th>
+                <th>STOCK CODE</th>
+                <th>VOLUME</th>
                 <th>WEIGHT</th>
                 <th>DELIVERY</th>
                 <th>ORDER QTY</th>
@@ -454,10 +381,6 @@
               <i data-lucide="shopping-cart"></i>
             Add Selected to Cart (<span id="selected-count">0</span>)
           </button>
-            <button class="btn-create-aog-case" id="create-aog-btn" disabled style="display: none;">
-              <i data-lucide="alert-triangle"></i>
-              Create AOG Case
-            </button>
           </div>
           <div class="selected-total-footer">
             <span class="selected-total-label-footer">SELECTED TOTAL:</span>
@@ -1273,8 +1196,7 @@
     width: 100%;
   }
   
-  .btn-add-to-cart,
-  .btn-create-aog-case {
+  .btn-add-to-cart {
     width: 100%;
     justify-content: center;
   }

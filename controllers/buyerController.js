@@ -3,7 +3,9 @@
 
 const Buyer = require('../models/Buyer');
 const Order = require('../models/Order');
+const Ticket = require('../models/Ticket');
 const { processProfileImage, deleteOldProfileImage } = require('../utils/fileUploader');
+const socketService = require('../services/socketService');
 
 /**
  * Get buyer dashboard/main page
@@ -207,7 +209,6 @@ const getProfilePage = async (req, res) => {
         city: buyer.city,
         shippingAddress: buyer.shippingAddress,
         isActive: buyer.isActive,
-        isVerified: buyer.isVerified,
         newsletter: buyer.newsletter,
         avatar: buyer.avatar,
         memberSince: memberSince,
@@ -264,8 +265,16 @@ const getTicketsPage = async (req, res) => {
  */
 const getCreateTicketPage = async (req, res) => {
   try {
+    // Get buyer's orders for the dropdown
+    const orders = await Order.find({ buyer: req.user._id })
+      .select('orderNumber status createdAt')
+      .sort({ createdAt: -1 })
+      .limit(50)
+      .lean();
+
     res.render('buyer/create-ticket', {
       title: 'Create Support Ticket | PARTSFORM',
+      orders: orders
     });
   } catch (error) {
     console.error('Error in getCreateTicketPage:', error);
@@ -282,9 +291,24 @@ const getCreateTicketPage = async (req, res) => {
 const getTicketDetailsPage = async (req, res) => {
   try {
     const ticketId = req.params.ticketId;
+    
+    // Find the ticket and verify ownership
+    const ticket = await Ticket.findOne({
+      ticketNumber: ticketId,
+      buyer: req.user._id
+    }).lean();
+
+    if (!ticket) {
+      return res.status(404).render('error', {
+        title: 'Ticket Not Found | PARTSFORM',
+        error: 'Ticket not found or you do not have access to it',
+      });
+    }
+
     res.render('buyer/ticket-details', {
       title: `Ticket #${ticketId} | PARTSFORM`,
       ticketId: ticketId,
+      ticket: ticket
     });
   } catch (error) {
     console.error('Error in getTicketDetailsPage:', error);
@@ -292,6 +316,424 @@ const getTicketDetailsPage = async (req, res) => {
       title: 'Error | PARTSFORM',
       error: 'Failed to load ticket details page',
     });
+  }
+};
+
+/**
+ * Get tickets list API
+ * GET /buyer/api/tickets
+ */
+const getTicketsApi = async (req, res) => {
+  try {
+    const { status, search, page = 1, limit = 20 } = req.query;
+    const buyerId = req.user._id;
+
+    // Build query
+    const query = { buyer: buyerId };
+    
+    if (status && status !== '') {
+      query.status = status;
+    }
+
+    if (search && search.trim() !== '') {
+      const searchRegex = new RegExp(search.trim(), 'i');
+      query.$or = [
+        { ticketNumber: searchRegex },
+        { subject: searchRegex },
+        { orderNumber: searchRegex },
+        { category: searchRegex }
+      ];
+    }
+
+    // Get tickets with pagination
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    
+    const [tickets, total] = await Promise.all([
+      Ticket.find(query)
+        .select('ticketNumber subject category status priority orderNumber createdAt updatedAt messages unreadByBuyer lastMessageAt lastMessageBy')
+        .sort({ lastMessageAt: -1, createdAt: -1 })
+        .skip(skip)
+        .limit(parseInt(limit))
+        .lean(),
+      Ticket.countDocuments(query)
+    ]);
+
+    // Format tickets for frontend
+    const formattedTickets = tickets.map(ticket => ({
+      id: ticket.ticketNumber,
+      subject: ticket.subject,
+      category: ticket.category,
+      status: ticket.status,
+      priority: ticket.priority,
+      orderNumber: ticket.orderNumber || 'N/A',
+      createdAt: ticket.createdAt,
+      updatedAt: ticket.updatedAt || ticket.lastMessageAt,
+      messageCount: ticket.messages ? ticket.messages.length : 0,
+      unreadCount: ticket.unreadByBuyer || 0,
+      lastMessageBy: ticket.lastMessageBy
+    }));
+
+    // Get status counts for statistics
+    const [openCount, inProgressCount, resolvedCount] = await Promise.all([
+      Ticket.countDocuments({ buyer: buyerId, status: 'open' }),
+      Ticket.countDocuments({ buyer: buyerId, status: 'in-progress' }),
+      Ticket.countDocuments({ buyer: buyerId, status: 'resolved' })
+    ]);
+
+    res.json({
+      success: true,
+      tickets: formattedTickets,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / parseInt(limit))
+      },
+      stats: {
+        open: openCount,
+        'in-progress': inProgressCount,
+        resolved: resolvedCount
+      }
+    });
+  } catch (error) {
+    console.error('Error in getTicketsApi:', error);
+    res.status(500).json({ success: false, error: 'Failed to load tickets' });
+  }
+};
+
+/**
+ * Get ticket details API
+ * GET /buyer/api/tickets/:ticketId
+ */
+const getTicketDetailsApi = async (req, res) => {
+  try {
+    const ticketId = req.params.ticketId;
+    const buyerId = req.user._id;
+    
+    const ticket = await Ticket.findOne({
+      ticketNumber: ticketId,
+      buyer: buyerId
+    }).lean();
+
+    if (!ticket) {
+      return res.status(404).json({ success: false, error: 'Ticket not found' });
+    }
+
+    // Mark messages as read by buyer
+    await Ticket.updateOne(
+      { _id: ticket._id },
+      { 
+        $set: { 
+          unreadByBuyer: 0,
+          'messages.$[elem].readByBuyer': true 
+        } 
+      },
+      { 
+        arrayFilters: [{ 'elem.sender': 'admin' }] 
+      }
+    );
+
+    // Format response
+    const formattedTicket = {
+      id: ticket.ticketNumber,
+      subject: ticket.subject,
+      description: ticket.description,
+      category: ticket.category,
+      status: ticket.status,
+      priority: ticket.priority,
+      orderNumber: ticket.orderNumber || 'N/A',
+      createdAt: ticket.createdAt,
+      updatedAt: ticket.updatedAt,
+      lastMessageAt: ticket.lastMessageAt,
+      attachments: ticket.attachments || [],
+      messages: ticket.messages.map(msg => ({
+        id: msg._id,
+        sender: msg.sender,
+        senderName: msg.senderName,
+        content: msg.content,
+        attachments: msg.attachments || [],
+        timestamp: msg.createdAt,
+        read: msg.readByBuyer
+      }))
+    };
+
+    res.json({ success: true, ticket: formattedTicket });
+  } catch (error) {
+    console.error('Error in getTicketDetailsApi:', error);
+    res.status(500).json({ success: false, error: 'Failed to load ticket' });
+  }
+};
+
+/**
+ * Create a new ticket
+ * POST /buyer/api/tickets
+ */
+const createTicket = async (req, res) => {
+  try {
+    const buyer = req.user;
+    const { subject, category, description, orderNumber, priority } = req.body;
+
+    // Validate required fields
+    if (!subject || !category || !description) {
+      return res.status(400).json({
+        success: false,
+        error: 'Subject, category, and description are required'
+      });
+    }
+
+    // Generate ticket number
+    const ticketNumber = await Ticket.generateTicketNumber();
+
+    // Handle file attachments if any
+    const attachments = [];
+    if (req.files && req.files.length > 0) {
+      for (const file of req.files) {
+        attachments.push({
+          filename: file.filename,
+          originalName: file.originalname,
+          mimetype: file.mimetype,
+          size: file.size,
+          path: `/uploads/tickets/${file.filename}`
+        });
+      }
+    }
+
+    // Create the ticket
+    const ticket = new Ticket({
+      ticketNumber,
+      subject: subject.trim(),
+      category,
+      priority: priority || 'medium',
+      description: description.trim(),
+      buyer: buyer._id,
+      buyerName: `${buyer.firstName} ${buyer.lastName}`.trim() || buyer.email,
+      buyerEmail: buyer.email,
+      orderNumber: orderNumber || null,
+      attachments,
+      messages: [{
+        sender: 'buyer',
+        senderName: `${buyer.firstName} ${buyer.lastName}`.trim() || 'Customer',
+        senderId: buyer._id,
+        senderModel: 'Buyer',
+        content: description.trim(),
+        attachments,
+        readByAdmin: false,
+        readByBuyer: true,
+        createdAt: new Date()
+      }],
+      lastMessageAt: new Date(),
+      lastMessageBy: 'buyer'
+    });
+
+    await ticket.save();
+
+    // Notify admins about new ticket via socket
+    socketService.notifyNewTicket(ticket);
+
+    res.status(201).json({
+      success: true,
+      message: 'Ticket created successfully',
+      ticket: {
+        id: ticket.ticketNumber,
+        subject: ticket.subject,
+        status: ticket.status,
+        createdAt: ticket.createdAt
+      }
+    });
+  } catch (error) {
+    console.error('Error in createTicket:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to create ticket'
+    });
+  }
+};
+
+/**
+ * Send a message in a ticket
+ * POST /buyer/api/tickets/:ticketId/messages
+ */
+const sendTicketMessage = async (req, res) => {
+  try {
+    const ticketId = req.params.ticketId;
+    const buyer = req.user;
+    const { message } = req.body;
+
+    if (!message || message.trim() === '') {
+      return res.status(400).json({
+        success: false,
+        error: 'Message content is required'
+      });
+    }
+
+    // Find the ticket
+    const ticket = await Ticket.findOne({
+      ticketNumber: ticketId,
+      buyer: buyer._id
+    });
+
+    if (!ticket) {
+      return res.status(404).json({
+        success: false,
+        error: 'Ticket not found'
+      });
+    }
+
+    // Handle file attachments if any
+    const attachments = [];
+    if (req.files && req.files.length > 0) {
+      for (const file of req.files) {
+        attachments.push({
+          filename: file.filename,
+          originalName: file.originalname,
+          mimetype: file.mimetype,
+          size: file.size,
+          path: `/uploads/tickets/${file.filename}`
+        });
+      }
+    }
+
+    // Add the message
+    const newMessage = await ticket.addMessage({
+      sender: 'buyer',
+      senderName: `${buyer.firstName} ${buyer.lastName}`.trim() || 'Customer',
+      senderId: buyer._id,
+      content: message.trim(),
+      attachments
+    });
+
+    // Emit socket event for real-time update
+    socketService.emitToTicket(ticketId, 'message-received', {
+      ticketId,
+      message: {
+        id: newMessage._id,
+        sender: 'buyer',
+        senderName: `${buyer.firstName} ${buyer.lastName}`.trim() || 'Customer',
+        content: message.trim(),
+        attachments,
+        timestamp: newMessage.createdAt
+      }
+    });
+
+    // Notify admins
+    socketService.emitToAdmins('ticket-new-message', {
+      ticketId,
+      ticketNumber: ticket.ticketNumber,
+      subject: ticket.subject,
+      message: {
+        sender: 'buyer',
+        senderName: `${buyer.firstName} ${buyer.lastName}`.trim() || 'Customer',
+        content: message.trim().substring(0, 100),
+        timestamp: newMessage.createdAt
+      }
+    });
+
+    res.json({
+      success: true,
+      message: {
+        id: newMessage._id,
+        sender: 'buyer',
+        senderName: `${buyer.firstName} ${buyer.lastName}`.trim() || 'Customer',
+        content: message.trim(),
+        attachments,
+        timestamp: newMessage.createdAt
+      }
+    });
+  } catch (error) {
+    console.error('Error in sendTicketMessage:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to send message'
+    });
+  }
+};
+
+/**
+ * Mark ticket messages as read
+ * PUT /buyer/api/tickets/:ticketId/read
+ */
+const markTicketAsRead = async (req, res) => {
+  try {
+    const ticketId = req.params.ticketId;
+    const buyerId = req.user._id;
+
+    const ticket = await Ticket.findOne({
+      ticketNumber: ticketId,
+      buyer: buyerId
+    });
+
+    if (!ticket) {
+      return res.status(404).json({
+        success: false,
+        error: 'Ticket not found'
+      });
+    }
+
+    await ticket.markAsRead('buyer');
+
+    // Notify via socket
+    socketService.emitToTicket(ticketId, 'messages-marked-read', {
+      ticketId,
+      readBy: 'buyer'
+    });
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error in markTicketAsRead:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to mark as read'
+    });
+  }
+};
+
+/**
+ * Get user's preferred currency
+ * GET /buyer/api/settings/currency
+ */
+const getPreferredCurrency = async (req, res) => {
+  try {
+    const buyer = req.user;
+    res.json({
+      success: true,
+      currency: buyer.preferredCurrency || 'USD',
+    });
+  } catch (error) {
+    console.error('Error in getPreferredCurrency:', error);
+    res.status(500).json({ success: false, error: 'Failed to get currency preference' });
+  }
+};
+
+/**
+ * Update user's preferred currency
+ * PUT /buyer/api/settings/currency
+ */
+const updatePreferredCurrency = async (req, res) => {
+  try {
+    const buyer = req.user;
+    const { currency } = req.body;
+
+    // Validate currency code (ORIGINAL shows prices in their original database currency)
+    const validCurrencies = ['ORIGINAL', 'USD', 'EUR', 'GBP', 'AED', 'JPY', 'CNY', 'RUB', 'CAD', 'AUD', 'CHF', 'INR', 'KRW', 'SGD', 'HKD', 'NOK', 'SEK', 'DKK', 'PLN', 'THB', 'MYR', 'MXN', 'BRL', 'ZAR', 'TRY', 'SAR', 'QAR', 'KWD', 'OMR', 'BHD', 'EGP', 'PKR', 'PHP', 'IDR', 'VND', 'NZD', 'CZK', 'HUF', 'RON', 'BGN', 'HRK', 'UAH'];
+    
+    if (!currency || !validCurrencies.includes(currency.toUpperCase())) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid currency code',
+      });
+    }
+
+    buyer.preferredCurrency = currency.toUpperCase();
+    await buyer.save();
+
+    res.json({
+      success: true,
+      message: 'Currency preference updated successfully',
+      currency: buyer.preferredCurrency,
+    });
+  } catch (error) {
+    console.error('Error in updatePreferredCurrency:', error);
+    res.status(500).json({ success: false, message: 'Failed to update currency preference' });
   }
 };
 
@@ -551,7 +993,7 @@ const validateCheckout = async (req, res) => {
 const createOrder = async (req, res) => {
   try {
     const buyerId = req.user._id;
-    const { items, paymentType, paymentMethod, fee, isAOG, notes, shippingAddress } = req.body;
+    const { items, paymentType, paymentMethod, fee, notes, shippingAddress } = req.body;
 
     // Validate input
     if (!paymentType || !paymentMethod) {
@@ -591,7 +1033,6 @@ const createOrder = async (req, res) => {
       type: paymentType,
       method: paymentMethod,
       fee: parseFloat(fee) || 0,
-      isAOG: isAOG || false,
       notes: notes || '',
       shippingAddress: {
         addressId: shippingAddress.addressId,
@@ -1231,5 +1672,16 @@ module.exports = {
   updateAddress,
   deleteAddress,
   setDefaultAddress,
+
+  // Tickets API
+  getTicketsApi,
+  getTicketDetailsApi,
+  createTicket,
+  sendTicketMessage,
+  markTicketAsRead,
+
+  // Currency Preference API
+  getPreferredCurrency,
+  updatePreferredCurrency,
 };
 

@@ -191,7 +191,6 @@ const VEHICLE_COMPATIBILITY = {
   'Kia': ['Forte', 'K5', 'Sportage', 'Sorento', 'Telluride', 'Stinger', 'EV6']
 };
 
-const ORIGINS = ['USA', 'Germany', 'Japan', 'South Korea', 'China', 'Mexico', 'Canada', 'Italy', 'UK', 'France', 'Taiwan', 'Poland', 'Spain', 'Czech Republic', 'Hungary', 'Brazil', 'Turkey'];
 const CONDITIONS = ['New', 'OEM', 'Aftermarket', 'Remanufactured', 'OE Replacement'];
 
 // -----------------------------------------------------------------------------
@@ -308,7 +307,6 @@ function buildBasePartDefinitions() {
       partTypeName: partType.name,
       basePrice,
       weight: weightForCategory(categoryName),
-      origin: randomElement(ORIGINS),
       tags: [...new Set(tags)],
       rawData: { generated: true, generatedAt: new Date().toISOString(), version: '2.0.0', partType: partType.name }
     });
@@ -333,7 +331,7 @@ function createListingsForBasePart(base, targetCount) {
     const deliveryDays = deliveryDaysForQty(qty, tierConfig.deliveryBonus);
     const stock = stockStatus(qty, useOnOrder);
 
-    const searchText = [base.partNumber, base.description, base.brand, sup.name, base.origin].filter(Boolean).join(' ').toLowerCase();
+    const searchText = [base.partNumber, base.description, base.brand, sup.name].filter(Boolean).join(' ').toLowerCase();
     listings.push({
       partNumber: base.partNumber,
       description: base.description,
@@ -343,7 +341,6 @@ function createListingsForBasePart(base, targetCount) {
       currency: 'USD',
       quantity: qty,
       stock,
-      origin: base.origin,
       weight: base.weight,
       weightUnit: 'kg',
       deliveryDays,

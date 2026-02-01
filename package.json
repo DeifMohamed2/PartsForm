@@ -4,8 +4,9 @@
   "description": "PARTSFORM - Global Industrial Parts Sourcing Platform with Express.js",
   "main": "app.js",
   "scripts": {
-    "start": "node app.js",
-    "dev": "nodemon app.js",
+    "start": "node --max-old-space-size=4096 app.js",
+    "dev": "nodemon --max-old-space-size=4096 app.js",
+    "dev:highmem": "nodemon --max-old-space-size=8192 app.js",
     "create-admin": "node scripts/createAdmin.js"
   },
   "keywords": [
@@ -19,6 +20,7 @@
   "license": "ISC",
   "dependencies": {
     "@elastic/elasticsearch": "^8.16.4",
+    "@google/genai": "^1.39.0",
     "basic-ftp": "^5.0.5",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
@@ -34,6 +36,7 @@
     "mongoose": "^9.1.4",
     "multer": "^2.0.2",
     "node-cron": "^4.0.7",
+    "socket.io": "^4.8.3",
     "validator": "^13.15.26"
   },
   "devDependencies": {

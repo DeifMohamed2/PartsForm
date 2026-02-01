@@ -5,6 +5,7 @@
  */
 const Part = require('../models/Part');
 const elasticsearchService = require('../services/elasticsearchService');
+const geminiService = require('../services/geminiService');
 
 /**
  * Search parts by EXACT part number
@@ -446,4 +447,418 @@ module.exports = {
   getPartsByNumber,
   getSearchStats,
   searchMultipleParts,
+  aiSearch,
+  aiSuggestions,
+  aiAnalyze,
 };
+
+/**
+ * Exchange rates for currency conversion in AI search
+ * Database stores prices in AED by default, but users search in USD
+ * Rates are approximate - for accurate pricing, frontend uses live API
+ */
+const EXCHANGE_RATES = {
+  USD: 1,
+  AED: 3.67,  // 1 USD = 3.67 AED
+  EUR: 0.92,
+  GBP: 0.79,
+  JPY: 149.50,
+  CNY: 7.24,
+};
+
+/**
+ * Convert price from one currency to another
+ * @param {number} amount - The amount to convert
+ * @param {string} fromCurrency - Source currency (e.g., 'USD')
+ * @param {string} toCurrency - Target currency (e.g., 'AED')
+ * @returns {number} - Converted amount
+ */
+function convertCurrency(amount, fromCurrency = 'USD', toCurrency = 'AED') {
+  if (!amount || isNaN(amount)) return amount;
+  if (fromCurrency === toCurrency) return amount;
+  
+  // Get rates (relative to USD as base)
+  const fromRate = EXCHANGE_RATES[fromCurrency.toUpperCase()] || 1;
+  const toRate = EXCHANGE_RATES[toCurrency.toUpperCase()] || 1;
+  
+  // Convert: amount in fromCurrency -> USD -> toCurrency
+  const amountInUSD = amount / fromRate;
+  const converted = amountInUSD * toRate;
+  
+  return Math.round(converted * 100) / 100; // Round to 2 decimals
+}
+
+/**
+ * AI-powered search - Parse natural language and search
+ * POST /api/ai-search
+ * Body: { query: "Find Bosch brake pads under $500" }
+ */
+async function aiSearch(req, res) {
+  try {
+    const { query } = req.body;
+    
+    if (!query || !query.trim()) {
+      return res.json({
+        success: false,
+        error: 'Query is required',
+        results: [],
+        total: 0,
+      });
+    }
+
+    console.log(`🤖 AI Search: "${query}"`);
+    const startTime = Date.now();
+
+    // Step 1: Parse the natural language query using Gemini
+    const parsed = await geminiService.parseSearchQuery(query);
+    console.log('AI parsed query:', JSON.stringify(parsed, null, 2));
+
+    // Step 2: Build search parameters from AI output
+    // Filter out generic/useless search terms that would match too many results
+    const genericWords = ['parts', 'part', 'find', 'get', 'show', 'search', 'looking', 'need', 'want', 'items', 'products', 'all', 'any', 'some', 'oem', 'original', 'genuine', 'new', 'used'];
+    
+    // Split compound terms and filter out generic words
+    let searchTerms = [];
+    for (const term of (parsed.searchTerms || [])) {
+      // Split compound terms like "brake parts" into individual words
+      const words = term.toLowerCase().trim().split(/\s+/);
+      for (const word of words) {
+        if (word.length > 2 && !genericWords.includes(word) && !searchTerms.includes(word)) {
+          searchTerms.push(word);
+        }
+      }
+    }
+    
+    const filters = parsed.filters || {};
+    
+    let allResults = [];
+    let source = 'mongodb';
+    let isGenericSearch = searchTerms.length === 0; // Flag for broad searches
+    
+    console.log(`🔍 Filtered search terms: [${searchTerms.join(', ')}], isGenericSearch: ${isGenericSearch}`);
+
+    // Step 3: Search for parts
+    const useElasticsearch = await elasticsearchService.hasDocuments();
+
+    // If we have specific search terms (part numbers/keywords), search for them
+    if (searchTerms.length > 0) {
+      if (useElasticsearch) {
+        try {
+          // Search for multiple part numbers/terms
+          const esResult = await elasticsearchService.searchMultiplePartNumbers(searchTerms, {
+            limitPerPart: 100,
+          });
+          allResults = esResult.results;
+          source = 'elasticsearch';
+        } catch (esError) {
+          console.error('ES AI search failed:', esError.message);
+        }
+      }
+      
+      // MongoDB fallback
+      if (allResults.length === 0) {
+        for (const term of searchTerms.slice(0, 5)) {
+          const escapedTerm = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          const mongoResults = await Part.find({
+            $or: [
+              { partNumber: { $regex: escapedTerm, $options: 'i' } },
+              { description: { $regex: escapedTerm, $options: 'i' } },
+              { brand: { $regex: escapedTerm, $options: 'i' } },
+            ],
+          })
+            .limit(100)
+            .lean();
+          allResults.push(...mongoResults);
+        }
+      }
+    }
+    
+    // If no results from search terms OR no search terms provided, fetch parts to filter
+    if (allResults.length === 0) {
+      const searchQuery = {};
+      
+      // Build query based on filters
+      if (filters.category) {
+        searchQuery.$or = [
+          { category: { $regex: filters.category, $options: 'i' } },
+          { description: { $regex: filters.category, $options: 'i' } },
+        ];
+      }
+      
+      // If we still have search terms that didn't match, try searching in description
+      if (searchTerms.length > 0 && !filters.category) {
+        const termPatterns = searchTerms.map(t => new RegExp(t, 'i'));
+        searchQuery.$or = [
+          { description: { $in: termPatterns } },
+          { brand: { $in: termPatterns } },
+          { category: { $in: termPatterns } },
+        ];
+      }
+      
+      if (filters.brand && filters.brand.length > 0) {
+        const brandRegex = filters.brand.map(b => new RegExp(b, 'i'));
+        searchQuery.brand = { $in: brandRegex };
+      }
+      
+      // If we have price filters, convert from USD to AED for database query
+      // User searches in USD (e.g., "under 100 USD") but DB stores prices in AED
+      const userCurrency = filters.priceCurrency || 'USD';
+      const dbCurrency = 'AED'; // Database default currency
+      
+      if (filters.maxPrice !== undefined) {
+        const convertedMaxPrice = convertCurrency(filters.maxPrice, userCurrency, dbCurrency);
+        searchQuery.price = { ...searchQuery.price, $lte: convertedMaxPrice };
+        console.log(`💱 Price filter: max ${filters.maxPrice} ${userCurrency} → ${convertedMaxPrice} ${dbCurrency}`);
+      }
+      if (filters.minPrice !== undefined) {
+        const convertedMinPrice = convertCurrency(filters.minPrice, userCurrency, dbCurrency);
+        searchQuery.price = { ...searchQuery.price, $gte: convertedMinPrice };
+        console.log(`💱 Price filter: min ${filters.minPrice} ${userCurrency} → ${convertedMinPrice} ${dbCurrency}`);
+      }
+      
+      // If we have stock filter, only get in-stock items
+      if (filters.inStock || filters.stockStatus === 'in-stock') {
+        searchQuery.quantity = { $gt: 0 };
+      }
+      
+      console.log('Fetching parts with query:', JSON.stringify(searchQuery));
+      
+      // Use a timeout to prevent long-running queries
+      const queryPromise = Part.find(searchQuery).limit(500).lean();
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Query timeout')), 10000)
+      );
+      
+      try {
+        allResults = await Promise.race([queryPromise, timeoutPromise]);
+      } catch (queryError) {
+        console.warn('Query timed out or failed, fetching with price filter only');
+        // Fallback: just use price filter
+        const fallbackQuery = {};
+        if (searchQuery.price) fallbackQuery.price = searchQuery.price;
+        allResults = await Part.find(fallbackQuery).limit(200).lean();
+      }
+      
+      source = 'mongodb-filtered';
+    }
+
+    // Step 4: Apply AI-extracted filters to results
+    let filteredResults = [...allResults];
+
+    // Apply brand filter
+    if (filters.brand && filters.brand.length > 0) {
+      filteredResults = filteredResults.filter(p => {
+        if (!p.brand) return false;
+        return filters.brand.some(b => 
+          p.brand.toLowerCase().includes(b.toLowerCase())
+        );
+      });
+    }
+
+    // Apply supplier filter
+    if (filters.supplier) {
+      filteredResults = filteredResults.filter(p => 
+        p.supplier && p.supplier.toLowerCase().includes(filters.supplier.toLowerCase())
+      );
+    }
+
+    // Apply price filters with currency conversion
+    // Convert user's price filter (default USD) to each part's currency for accurate comparison
+    const userCurrency = filters.priceCurrency || 'USD';
+    
+    if (filters.minPrice !== undefined) {
+      filteredResults = filteredResults.filter(p => {
+        if (p.price === null || p.price === undefined) return false;
+        // Convert user's minPrice to the part's currency for comparison
+        const partCurrency = p.currency || 'AED';
+        const convertedMinPrice = convertCurrency(filters.minPrice, userCurrency, partCurrency);
+        return p.price >= convertedMinPrice;
+      });
+    }
+    if (filters.maxPrice !== undefined) {
+      filteredResults = filteredResults.filter(p => {
+        if (p.price === null || p.price === undefined) return false;
+        // Convert user's maxPrice to the part's currency for comparison
+        const partCurrency = p.currency || 'AED';
+        const convertedMaxPrice = convertCurrency(filters.maxPrice, userCurrency, partCurrency);
+        return p.price <= convertedMaxPrice;
+      });
+    }
+
+    // Apply stock filter
+    if (filters.inStock) {
+      filteredResults = filteredResults.filter(p => (p.quantity || 0) > 0);
+    }
+    if (filters.stockStatus === 'in-stock') {
+      filteredResults = filteredResults.filter(p => (p.quantity || 0) > 10);
+    } else if (filters.stockStatus === 'low-stock') {
+      filteredResults = filteredResults.filter(p => (p.quantity || 0) > 0 && (p.quantity || 0) <= 10);
+    }
+
+    // Apply delivery days filter
+    if (filters.deliveryDays !== undefined) {
+      filteredResults = filteredResults.filter(p => 
+        p.deliveryDays !== null && p.deliveryDays <= filters.deliveryDays
+      );
+    }
+
+    // Apply category filter (search in category or description)
+    if (filters.category) {
+      filteredResults = filteredResults.filter(p => {
+        const cat = (p.category || '').toLowerCase();
+        const desc = (p.description || '').toLowerCase();
+        return cat.includes(filters.category.toLowerCase()) || 
+               desc.includes(filters.category.toLowerCase());
+      });
+    }
+
+    // Step 5: Sort results
+    const sortBy = filters.sortBy || 'price';
+    const sortOrder = filters.sortOrder || 'asc';
+    
+    filteredResults.sort((a, b) => {
+      let aVal = a[sortBy] || 0;
+      let bVal = b[sortBy] || 0;
+      if (typeof aVal === 'string') aVal = aVal.toLowerCase();
+      if (typeof bVal === 'string') bVal = bVal.toLowerCase();
+      
+      if (sortOrder === 'asc') {
+        return aVal > bVal ? 1 : -1;
+      } else {
+        return aVal < bVal ? 1 : -1;
+      }
+    });
+
+    // Remove duplicates by part number + supplier
+    const seen = new Set();
+    filteredResults = filteredResults.filter(p => {
+      const key = `${p.partNumber}-${p.supplier}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+
+    // Diversify results - ensure we show variety of brands, not just one type
+    // Group by brand and interleave results for better variety
+    if (filteredResults.length > 20) {
+      const brandGroups = {};
+      filteredResults.forEach(p => {
+        const brand = p.brand || 'Unknown';
+        if (!brandGroups[brand]) brandGroups[brand] = [];
+        brandGroups[brand].push(p);
+      });
+      
+      // Interleave brands for diversity
+      const diversifiedResults = [];
+      const brands = Object.keys(brandGroups);
+      let maxItems = Math.max(...brands.map(b => brandGroups[b].length));
+      
+      for (let i = 0; i < maxItems && diversifiedResults.length < 500; i++) {
+        for (const brand of brands) {
+          if (brandGroups[brand][i]) {
+            diversifiedResults.push(brandGroups[brand][i]);
+            if (diversifiedResults.length >= 500) break;
+          }
+        }
+      }
+      filteredResults = diversifiedResults;
+    }
+
+    const searchTime = Date.now() - startTime;
+    console.log(`🤖 AI Search completed in ${searchTime}ms: ${filteredResults.length} results`);
+
+    // Build response with messaging for broad searches
+    const response = {
+      success: true,
+      query,
+      parsed: {
+        searchTerms: searchTerms, // Use filtered terms, not original
+        filters: parsed.filters,
+        intent: parsed.intent,
+        suggestions: parsed.suggestions,
+      },
+      results: filteredResults.slice(0, 500),
+      total: filteredResults.length,
+      source,
+      searchTime,
+    };
+
+    // Add helpful messaging for very broad searches
+    if (isGenericSearch && filteredResults.length > 100) {
+      response.message = 'Your search is quite broad. For better results, try specifying a brand, part number, or category.';
+      response.isBroadSearch = true;
+      
+      // Add unique part numbers for reference (first 50)
+      const uniquePartNumbers = [...new Set(filteredResults.map(p => p.partNumber))].slice(0, 50);
+      response.samplePartNumbers = uniquePartNumbers;
+      
+      // Add available brands in results
+      const uniqueBrands = [...new Set(filteredResults.map(p => p.brand).filter(Boolean))].slice(0, 20);
+      response.availableBrands = uniqueBrands;
+    }
+
+    res.json(response);
+  } catch (error) {
+    console.error('AI Search error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'AI Search failed',
+      message: error.message,
+    });
+  }
+}
+
+/**
+ * AI-powered suggestions
+ * GET /api/ai-suggestions?q=brake
+ */
+async function aiSuggestions(req, res) {
+  try {
+    const { q: query } = req.query;
+    
+    if (!query || query.length < 2) {
+      return res.json({ success: true, suggestions: [] });
+    }
+
+    const suggestions = await geminiService.generateSuggestions(query);
+    
+    res.json({
+      success: true,
+      suggestions,
+    });
+  } catch (error) {
+    console.error('AI Suggestions error:', error);
+    res.json({ success: true, suggestions: [] });
+  }
+}
+
+/**
+ * AI-powered result analysis
+ * POST /api/ai-analyze
+ * Body: { results: [...], query: "..." }
+ */
+async function aiAnalyze(req, res) {
+  try {
+    const { results, query } = req.body;
+    
+    if (!results || !Array.isArray(results)) {
+      return res.json({
+        success: false,
+        error: 'Results array is required',
+      });
+    }
+
+    const analysis = await geminiService.analyzeResults(results, query || '');
+    
+    res.json({
+      success: true,
+      ...analysis,
+    });
+  } catch (error) {
+    console.error('AI Analysis error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Analysis failed',
+    });
+  }
+}

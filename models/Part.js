@@ -35,7 +35,7 @@ const partSchema = new mongoose.Schema({
   },
   currency: {
     type: String,
-    default: 'USD',
+    default: 'AED',
     uppercase: true,
     trim: true
   },
@@ -44,18 +44,23 @@ const partSchema = new mongoose.Schema({
     min: 0,
     default: 0
   },
+  minOrderQty: {
+    type: Number,
+    min: 1,
+    default: 1
+  },
   stock: {
     type: String,
     enum: ['in-stock', 'low-stock', 'out-of-stock', 'on-order', 'unknown'],
     default: 'unknown'
   },
-
-  // Additional Details
-  origin: {
+  stockCode: {
     type: String,
     trim: true,
     default: ''
   },
+
+  // Additional Details
   weight: {
     type: Number,
     min: 0,
@@ -65,6 +70,11 @@ const partSchema = new mongoose.Schema({
     type: String,
     enum: ['kg', 'lbs', 'g', 'oz'],
     default: 'kg'
+  },
+  volume: {
+    type: Number,
+    min: 0,
+    default: null
   },
   deliveryDays: {
     type: Number,
@@ -101,11 +111,6 @@ const partSchema = new mongoose.Schema({
   fileName: {
     type: String,
     trim: true
-  },
-
-  // Raw Data (for reference)
-  rawData: {
-    type: mongoose.Schema.Types.Mixed
   },
 
   // Import Information
@@ -162,8 +167,7 @@ partSchema.pre('save', function (next) {
     this.partNumber,
     this.description,
     this.brand,
-    this.supplier,
-    this.origin
+    this.supplier
   ].filter(Boolean).join(' ').toLowerCase();
 
   // Update stock status based on quantity (preserve explicit 'on-order' when qty is 0)
@@ -199,7 +203,6 @@ partSchema.post('save', async function (doc) {
         currency: doc.currency,
         quantity: doc.quantity,
         stock: doc.stock,
-        origin: doc.origin,
         weight: doc.weight,
         deliveryDays: doc.deliveryDays,
         category: doc.category,
@@ -320,7 +323,43 @@ partSchema.statics.getFilterOptions = async function (query = {}) {
   };
 };
 
-// Static method for bulk upsert
+// Static method for bulk insert (allows duplicate part numbers)
+partSchema.statics.bulkInsert = async function (records, options = {}) {
+  const { integration, fileName, integrationName } = options;
+
+  const batchSize = 1000;
+  let inserted = 0;
+
+  // Prepare documents for insertion
+  const documents = records.map(record => ({
+    ...record,
+    integration,
+    integrationName,
+    fileName,
+    importedAt: new Date(),
+    lastUpdated: new Date(),
+    createdAt: new Date()
+  }));
+
+  for (let i = 0; i < documents.length; i += batchSize) {
+    const batch = documents.slice(i, i + batchSize);
+    try {
+      const result = await this.insertMany(batch, { ordered: false });
+      inserted += result.length;
+    } catch (error) {
+      // Handle duplicate key errors gracefully - count successful inserts
+      if (error.insertedDocs) {
+        inserted += error.insertedDocs.length;
+      } else if (error.result && error.result.nInserted) {
+        inserted += error.result.nInserted;
+      }
+    }
+  }
+
+  return { inserted, updated: 0, total: records.length };
+};
+
+// Static method for bulk upsert (legacy - updates existing records)
 partSchema.statics.bulkUpsert = async function (records, options = {}) {
   const { integration, fileName } = options;
 
@@ -359,6 +398,24 @@ partSchema.statics.bulkUpsert = async function (records, options = {}) {
   }
 
   return { inserted, updated, total: records.length };
+};
+
+/**
+ * Delete all parts for an integration (used before fresh sync)
+ */
+partSchema.statics.deleteByIntegration = async function (integrationId) {
+  const result = await this.deleteMany({ integration: integrationId });
+  console.log(`🗑️  Deleted ${result.deletedCount} old parts for integration ${integrationId}`);
+  return result.deletedCount;
+};
+
+/**
+ * Delete all parts for an integration + file (used for file-level refresh)
+ */
+partSchema.statics.deleteByIntegrationFile = async function (integrationId, fileName) {
+  const result = await this.deleteMany({ integration: integrationId, fileName: fileName });
+  console.log(`🗑️  Deleted ${result.deletedCount} old parts for file ${fileName}`);
+  return result.deletedCount;
 };
 
 const Part = mongoose.model('Part', partSchema);

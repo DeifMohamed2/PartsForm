@@ -91,6 +91,21 @@ class SchedulerService {
    */
   async initialize() {
     try {
+      // First, cleanup any stuck "syncing" status from previous server instance
+      const stuckSyncing = await Integration.updateMany(
+        { status: 'syncing' },
+        { 
+          $set: { 
+            status: 'error',
+            'lastSync.status': 'failed',
+            'lastSync.error': 'Sync interrupted by server restart'
+          }
+        }
+      );
+      if (stuckSyncing.modifiedCount > 0) {
+        console.log(`🔧 Cleaned up ${stuckSyncing.modifiedCount} stuck syncing integrations`);
+      }
+      
       const integrations = await Integration.find({
         'syncSchedule.enabled': true,
         status: { $in: ['active', 'inactive'] },

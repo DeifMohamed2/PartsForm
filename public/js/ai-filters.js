@@ -1,6 +1,6 @@
 // ====================================
 // AI SMART FILTER - PROFESSIONAL AIUX FUNCTIONALITY
-// Premium Filter Experience with AI Integration
+// Premium Filter Experience with Gemini AI Integration
 // ====================================
 
 (function() {
@@ -12,6 +12,8 @@
   const AIFilterState = {
     isOpen: false,
     activeTab: 'pricing',
+    isLoading: false,
+    lastSearchResults: [],
     filters: {
       // Pricing
       priceMin: 0,
@@ -50,6 +52,7 @@
     },
     aiQuery: '',
     aiParsedFilters: [],
+    aiParsedResponse: null,
     activeFilterCount: 0
   };
 
@@ -280,13 +283,25 @@
   }
 
   // ====================================
-  // AI PROCESSING
+  // AI PROCESSING - GEMINI INTEGRATION
   // ====================================
-  function handleAISubmit() {
+  let currentAbortController = null;
+  
+  async function handleAISubmit() {
     const query = elements.aiInput?.value.trim();
     if (!query) return;
+    
+    // Cancel any pending request
+    if (currentAbortController) {
+      currentAbortController.abort();
+    }
+    
+    // Create new abort controller for this request
+    currentAbortController = new AbortController();
+    const timeoutId = setTimeout(() => currentAbortController.abort(), 30000); // 30s timeout
 
     AIFilterState.aiQuery = query;
+    AIFilterState.isLoading = true;
 
     // Show response section with thinking state
     if (elements.aiResponseSection) {
@@ -294,6 +309,8 @@
     }
     if (elements.aiThinking) {
       elements.aiThinking.style.display = 'flex';
+      const thinkingText = elements.aiThinking.querySelector('.thinking-text');
+      if (thinkingText) thinkingText.textContent = 'AI is analyzing your request...';
     }
     if (elements.aiResponseTitle) {
       elements.aiResponseTitle.style.display = 'none';
@@ -302,11 +319,214 @@
       elements.aiFiltersPreview.style.display = 'none';
     }
 
-    // Simulate AI processing
-    setTimeout(() => {
-      const parsedFilters = parseAIQuery(query);
-      displayAIResults(parsedFilters);
-    }, 1500);
+    try {
+      // Call the Gemini-powered AI search endpoint with timeout
+      const response = await fetch('/buyer/api/ai-search', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ query }),
+        signal: currentAbortController.signal,
+      });
+      
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      if (!data.success) {
+        throw new Error(data.error || 'AI search failed');
+      }
+
+      console.log('AI Search Response:', data);
+      
+      // Store the results and parsed data
+      AIFilterState.lastSearchResults = data.results || [];
+      AIFilterState.aiParsedResponse = data.parsed || {};
+      
+      // Store broad search info if available
+      AIFilterState.isBroadSearch = data.isBroadSearch || false;
+      AIFilterState.broadSearchMessage = data.message || '';
+      AIFilterState.availableBrands = data.availableBrands || [];
+      AIFilterState.samplePartNumbers = data.samplePartNumbers || [];
+      
+      // Convert parsed filters to display format
+      const displayFilters = convertParsedToDisplayFilters(data.parsed);
+      
+      // Display the results (even if empty, to show filters applied)
+      displayAIResults(displayFilters, data.results || [], data.parsed);
+
+    } catch (error) {
+      // Check if this was an abort (user cancelled or timeout)
+      if (error.name === 'AbortError') {
+        console.log('AI Search cancelled or timed out');
+      } else {
+        console.error('AI Search error:', error);
+      }
+      
+      // Hide thinking indicator
+      if (elements.aiThinking) {
+        elements.aiThinking.style.display = 'none';
+      }
+      
+      // Show error message in the response title
+      if (elements.aiResponseTitle) {
+        elements.aiResponseTitle.style.display = 'flex';
+        const titleSpan = elements.aiResponseTitle.querySelector('span');
+        if (titleSpan) {
+          if (error.name === 'AbortError') {
+            titleSpan.textContent = 'Search timed out. Try a more specific query.';
+          } else if (error.message && error.message.includes('429')) {
+            titleSpan.textContent = 'AI service busy. Using basic search...';
+          } else {
+            titleSpan.textContent = 'Using basic search mode...';
+          }
+        }
+        // Change icon to info
+        const icon = elements.aiResponseTitle.querySelector('i');
+        if (icon) {
+          icon.setAttribute('data-lucide', 'info');
+        }
+      }
+      
+      // Fallback to local parsing and still show results section
+      const fallbackFilters = parseAIQuery(query);
+      AIFilterState.aiParsedResponse = {
+        intent: `Searching for: "${query}"`,
+        filters: {},
+        suggestions: ['Try being more specific', 'Include brand names or part numbers'],
+      };
+      
+      // Display with empty results - user can still apply filters
+      displayAIResults(fallbackFilters, [], AIFilterState.aiParsedResponse);
+      
+    } finally {
+      AIFilterState.isLoading = false;
+      currentAbortController = null;
+      
+      // Reinitialize icons
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+    }
+  }
+
+  /**
+   * Convert parsed AI response to display filter cards
+   */
+  function convertParsedToDisplayFilters(parsed) {
+    const filters = [];
+    
+    if (!parsed || !parsed.filters) return filters;
+    
+    const f = parsed.filters;
+    
+    // Brand filters
+    if (f.brand && f.brand.length > 0) {
+      f.brand.forEach(brand => {
+        filters.push({
+          type: 'brand',
+          icon: 'award',
+          label: 'Brand',
+          value: brand.toUpperCase(),
+          filterKey: 'brands',
+          filterValue: brand.toLowerCase(),
+        });
+      });
+    }
+    
+    // Price filters
+    if (f.minPrice !== undefined) {
+      filters.push({
+        type: 'price',
+        icon: 'dollar-sign',
+        label: 'Min Price',
+        value: `$${f.minPrice}`,
+        filterKey: 'priceMin',
+        filterValue: f.minPrice,
+      });
+    }
+    if (f.maxPrice !== undefined) {
+      filters.push({
+        type: 'price',
+        icon: 'dollar-sign',
+        label: 'Max Price',
+        value: `$${f.maxPrice}`,
+        filterKey: 'priceMax',
+        filterValue: f.maxPrice,
+      });
+    }
+    
+    // Stock filter
+    if (f.inStock) {
+      filters.push({
+        type: 'stock',
+        icon: 'package',
+        label: 'Stock',
+        value: 'In Stock Only',
+        filterKey: 'stockStatus',
+        filterValue: 'in-stock',
+      });
+    }
+    
+    // Category filter
+    if (f.category) {
+      filters.push({
+        type: 'category',
+        icon: 'component',
+        label: 'Category',
+        value: f.category.charAt(0).toUpperCase() + f.category.slice(1),
+        filterKey: 'partCategories',
+        filterValue: f.category,
+      });
+    }
+    
+    // Delivery filter
+    if (f.deliveryDays !== undefined) {
+      filters.push({
+        type: 'delivery',
+        icon: 'truck',
+        label: 'Delivery',
+        value: `Within ${f.deliveryDays} days`,
+        filterKey: 'deliveryTime',
+        filterValue: f.deliveryDays <= 3 ? 'express' : f.deliveryDays <= 7 ? 'fast' : 'standard',
+      });
+    }
+    
+    // Supplier filter
+    if (f.supplier) {
+      filters.push({
+        type: 'supplier',
+        icon: 'building',
+        label: 'Supplier',
+        value: f.supplier,
+        filterKey: 'supplier',
+        filterValue: f.supplier,
+      });
+    }
+    
+    // Sort filter
+    if (f.sortBy && f.sortBy !== 'price') {
+      const sortLabels = {
+        quantity: 'Highest Stock',
+        deliveryDays: 'Fastest Delivery',
+        brand: 'Brand Name',
+      };
+      filters.push({
+        type: 'sort',
+        icon: 'arrow-up-down',
+        label: 'Sort By',
+        value: sortLabels[f.sortBy] || f.sortBy,
+        filterKey: 'sortBy',
+        filterValue: f.sortBy,
+      });
+    }
+    
+    return filters;
   }
 
   function extractKeywords(query) {
@@ -445,31 +665,6 @@
       }
     });
 
-    // Origin detection
-    const origins = {
-      'german': 'Germany',
-      'germany': 'Germany',
-      'usa': 'USA',
-      'american': 'USA',
-      'japan': 'Japan',
-      'japanese': 'Japan',
-      'chinese': 'China',
-      'china': 'China'
-    };
-
-    Object.keys(origins).forEach(key => {
-      if (queryLower.includes(key)) {
-        filters.push({
-          type: 'origin',
-          icon: 'globe',
-          label: 'Origin',
-          value: origins[key],
-          filterKey: 'origins',
-          filterValue: key
-        });
-      }
-    });
-
     // Stock detection
     if (queryLower.includes('in stock') || queryLower.includes('available')) {
       filters.push({
@@ -571,18 +766,30 @@
     return filters;
   }
 
-  function displayAIResults(parsedFilters) {
+  function displayAIResults(parsedFilters, results = [], parsedResponse = null) {
     // Hide thinking, show results
     if (elements.aiThinking) {
       elements.aiThinking.style.display = 'none';
     }
+    
+    const hasResults = results && results.length > 0;
+    const hasFilters = parsedFilters && parsedFilters.length > 0;
+    
     if (elements.aiResponseTitle) {
       elements.aiResponseTitle.style.display = 'flex';
-      // Update title based on results
-      const titleText = parsedFilters.length > 0 
-        ? `Found ${parsedFilters.length} filter${parsedFilters.length > 1 ? 's' : ''} from your request!`
-        : 'Understanding your request...';
-      elements.aiResponseTitle.querySelector('span').textContent = titleText;
+      const titleSpan = elements.aiResponseTitle.querySelector('span');
+      const icon = elements.aiResponseTitle.querySelector('i');
+      
+      if (hasResults) {
+        titleSpan.textContent = `Found ${results.length} parts matching your search!`;
+        icon?.setAttribute('data-lucide', 'check-circle');
+      } else if (hasFilters) {
+        titleSpan.textContent = `Applied ${parsedFilters.length} filter${parsedFilters.length > 1 ? 's' : ''} from your request!`;
+        icon?.setAttribute('data-lucide', 'filter');
+      } else {
+        titleSpan.textContent = parsedResponse?.intent || 'Understanding your request...';
+        icon?.setAttribute('data-lucide', 'search');
+      }
     }
     if (elements.aiFiltersPreview) {
       elements.aiFiltersPreview.style.display = 'block';
@@ -597,127 +804,317 @@
     // Store parsed filters
     AIFilterState.aiParsedFilters = parsedFilters;
 
-    // Render enhanced filter cards for light mode
+    // Render the redesigned results layout
     if (elements.aiFiltersGrid) {
-      if (parsedFilters.length === 0) {
-        // Generate sample products based on query
-        const sampleProducts = generateSampleProducts(AIFilterState.aiQuery);
-        
-        elements.aiFiltersGrid.innerHTML = `
-          <div class="ai-no-filters-message" style="grid-column: 1 / -1;">
-            <div class="ai-suggestion-header">
-              <div class="suggestion-icon">
-                <i data-lucide="lightbulb"></i>
+      // Check if this is a broad search
+      const isBroad = AIFilterState.isBroadSearch;
+      const availableBrands = AIFilterState.availableBrands || [];
+      const broadMessage = AIFilterState.broadSearchMessage || '';
+      
+      // Build the new 3-column layout
+      let contentHTML = `<div class="ai-results-container">`;
+      
+      // LEFT COLUMN - AI Understanding & Filters
+      contentHTML += `
+        <div class="ai-results-left-col">
+          <!-- AI Understanding Section -->
+          <div class="ai-section ai-understanding-section">
+            <div class="ai-section-header">
+              <div class="ai-section-icon understanding-icon">
+                <i data-lucide="brain"></i>
               </div>
-              <div class="suggestion-content">
-                <h4>I found some relevant products for you!</h4>
-                <p>Here are the top matches based on your search. Click "Apply Filters" to see full results.</p>
-              </div>
+              <h3 class="ai-section-title">AI Understanding</h3>
             </div>
-            
-            <div class="ai-products-preview-table">
-              <table class="products-table">
-                <thead>
-                  <tr>
-                    <th>Part Number</th>
-                    <th>Description</th>
-                    <th>Brand</th>
-                    <th>Price</th>
-                    <th>Stock</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${sampleProducts.map(product => `
-                    <tr>
-                      <td><strong>${product.partNumber}</strong></td>
-                      <td>${product.description}</td>
-                      <td><span class="brand-badge">${product.brand}</span></td>
-                      <td><span class="price-tag">$${product.price}</span></td>
-                      <td><span class="stock-badge stock-${product.stock}">${product.stockText}</span></td>
-                    </tr>
+            <div class="ai-section-content">
+              <div class="ai-intent-display">
+                <i data-lucide="sparkles"></i>
+                <span>${escapeHtml(parsedResponse?.intent || 'Searching for parts matching your query')}</span>
+              </div>
+              ${isBroad ? `
+                <div class="ai-broad-search-warning">
+                  <i data-lucide="alert-triangle"></i>
+                  <div class="broad-warning-content">
+                    <span class="broad-warning-title">Broad Search Detected</span>
+                    <span class="broad-warning-text">${escapeHtml(broadMessage)}</span>
+                  </div>
+                </div>
+                ${availableBrands.length > 0 ? `
+                  <div class="ai-brand-suggestions">
+                    <span class="brand-suggestions-label">Try filtering by brand:</span>
+                    <div class="brand-chips">
+                      ${availableBrands.slice(0, 8).map(brand => `
+                        <button class="brand-chip" data-brand="${escapeHtml(brand)}">
+                          ${escapeHtml(brand)}
+                        </button>
+                      `).join('')}
+                    </div>
+                  </div>
+                ` : ''}
+              ` : ''}
+            </div>
+          </div>
+          
+          <!-- Active Filters Section -->
+          <div class="ai-section ai-active-filters-section">
+            <div class="ai-section-header">
+              <div class="ai-section-icon filters-icon">
+                <i data-lucide="sliders-horizontal"></i>
+              </div>
+              <h3 class="ai-section-title">Applied Filters</h3>
+              <span class="ai-filter-count">${hasFilters ? parsedFilters.length : 0}</span>
+            </div>
+            <div class="ai-section-content">
+              ${hasFilters ? `
+                <div class="ai-active-filters-grid">
+                  ${parsedFilters.map((filter, index) => `
+                    <div class="ai-active-filter-chip ${filter.type}" data-index="${index}">
+                      <i data-lucide="${filter.icon}"></i>
+                      <div class="filter-chip-content">
+                        <span class="filter-chip-label">${filter.label}</span>
+                        <span class="filter-chip-value">${filter.value}</span>
+                      </div>
+                      <button class="filter-chip-remove" data-index="${index}">
+                        <i data-lucide="x"></i>
+                      </button>
+                    </div>
                   `).join('')}
-                </tbody>
-              </table>
+                </div>
+              ` : `
+                <div class="ai-no-filters">
+                  <i data-lucide="filter-x"></i>
+                  <span>No specific filters detected</span>
+                </div>
+              `}
             </div>
-            
-            <div class="ai-filter-suggestions">
-              <p class="suggestions-title"><i data-lucide="filter"></i> Try these specific filters:</p>
-              <div class="suggestion-chips">
-                <button class="suggestion-chip" data-hint="Find ${extractKeywords(AIFilterState.aiQuery)} under $500">
-                  <i data-lucide="dollar-sign"></i> Set price range
-                </button>
-                <button class="suggestion-chip" data-hint="${extractKeywords(AIFilterState.aiQuery)} from OEM suppliers in stock">
-                  <i data-lucide="package"></i> Filter by availability
-                </button>
-                <button class="suggestion-chip" data-hint="German ${extractKeywords(AIFilterState.aiQuery)} with express delivery">
-                  <i data-lucide="zap"></i> Add delivery options
-                </button>
+          </div>
+          
+          <!-- Suggestions Section -->
+          ${parsedResponse?.suggestions && parsedResponse.suggestions.length > 0 ? `
+            <div class="ai-section ai-suggestions-section">
+              <div class="ai-section-header">
+                <div class="ai-section-icon suggestions-icon">
+                  <i data-lucide="lightbulb"></i>
+                </div>
+                <h3 class="ai-section-title">Try Also</h3>
+              </div>
+              <div class="ai-section-content">
+                <div class="ai-suggestion-buttons">
+                  ${parsedResponse.suggestions.slice(0, 3).map(suggestion => `
+                    <button class="ai-suggestion-btn" data-suggestion="${escapeHtml(suggestion)}">
+                      <i data-lucide="search"></i>
+                      <span>${escapeHtml(truncateText(suggestion, 40))}</span>
+                    </button>
+                  `).join('')}
+                </div>
               </div>
             </div>
-          </div>
-        `;
-        
-        // Add click handlers for suggestion chips
-        elements.aiFiltersGrid.querySelectorAll('.suggestion-chip').forEach(chip => {
-          chip.addEventListener('click', () => {
-            const hint = chip.dataset.hint;
-            if (elements.aiInput) {
-              elements.aiInput.value = hint;
-              elements.aiInput.focus();
-              // Auto-submit after a short delay
-              setTimeout(() => handleAISubmit(), 300);
-            }
-          });
-        });
-      } else {
-        elements.aiFiltersGrid.innerHTML = parsedFilters.map((filter, index) => `
-          <div class="ai-filter-card" data-index="${index}" style="animation-delay: ${index * 0.08}s">
-            <div class="filter-card-icon">
-              <i data-lucide="${filter.icon}"></i>
+          ` : ''}
+        </div>
+      `;
+      
+      // RIGHT COLUMN - Results Preview
+      contentHTML += `
+        <div class="ai-results-right-col">
+          <div class="ai-section ai-results-section">
+            <div class="ai-section-header">
+              <div class="ai-section-icon results-icon">
+                <i data-lucide="package-search"></i>
+              </div>
+              <h3 class="ai-section-title">Search Results</h3>
+              <div class="ai-results-badge ${hasResults ? 'has-results' : 'no-results'}">
+                <span class="results-number">${hasResults ? results.length : 0}</span>
+                <span class="results-label">found</span>
+              </div>
             </div>
-            <div class="ai-filter-card-content">
-              <span class="ai-filter-card-label">${filter.label}</span>
-              <span class="ai-filter-card-value">${filter.value}</span>
+            <div class="ai-section-content">
+              ${hasResults ? `
+                <div class="ai-results-table-container">
+                  <table class="ai-results-table">
+                    <thead>
+                      <tr>
+                        <th class="col-brand">Brand</th>
+                        <th class="col-part">Part Number</th>
+                        <th class="col-desc">Description</th>
+                        <th class="col-qty">Qty</th>
+                        <th class="col-price">Price</th>
+                        <th class="col-delivery">Delivery</th>
+                        <th class="col-stock">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${results.slice(0, 10).map((product, idx) => `
+                        <tr class="result-row" style="animation-delay: ${idx * 0.04}s" data-part-id="${product._id || product.id || ''}">
+                          <td class="col-brand">
+                            <span class="brand-tag">${escapeHtml(product.brand || 'N/A')}</span>
+                          </td>
+                          <td class="col-part">
+                            <span class="part-number-cell">${escapeHtml(product.partNumber || product.vendorCode || 'N/A')}</span>
+                          </td>
+                          <td class="col-desc">
+                            <span class="description-text" title="${escapeHtml(product.description || '')}">${escapeHtml(truncateText(product.description || 'No description', 30))}</span>
+                          </td>
+                          <td class="col-qty">
+                            <span class="qty-display">${product.quantity || product.stock || 0}</span>
+                          </td>
+                          <td class="col-price">
+                            <span class="price-display">${product.price ? `$${Number(product.price).toFixed(2)}` : '—'}</span>
+                          </td>
+                          <td class="col-delivery">
+                            <span class="delivery-badge">${product.deliveryDays ? `${product.deliveryDays}d` : '—'}</span>
+                          </td>
+                          <td class="col-stock">
+                            <span class="stock-indicator ${getStockStatus(product)}">
+                              <span class="stock-dot"></span>
+                              <span class="stock-text">${getStockLabel(product)}</span>
+                            </span>
+                          </td>
+                        </tr>
+                      `).join('')}
+                    </tbody>
+                  </table>
+                </div>
+                ${results.length > 10 ? `
+                  <div class="ai-results-more">
+                    <i data-lucide="chevrons-down"></i>
+                    <span>+${results.length - 10} more results — Click Apply to see all</span>
+                  </div>
+                ` : ''}
+              ` : `
+                <div class="ai-no-results">
+                  <div class="no-results-visual">
+                    <div class="no-results-icon-wrapper">
+                      <i data-lucide="package-x"></i>
+                    </div>
+                    <h4>No Parts Found</h4>
+                    <p>We couldn't find parts matching your search criteria.</p>
+                  </div>
+                  <div class="no-results-suggestions">
+                    <p class="suggestions-intro">Try searching for:</p>
+                    <div class="quick-search-chips">
+                      <button class="quick-chip" data-hint="Brake pads BOSCH under $300">
+                        <i data-lucide="disc"></i> Brake pads
+                      </button>
+                      <button class="quick-chip" data-hint="SKF wheel bearings in stock">
+                        <i data-lucide="circle-dot"></i> SKF bearings
+                      </button>
+                      <button class="quick-chip" data-hint="Oil filters MANN MAHLE available">
+                        <i data-lucide="filter"></i> Oil filters
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              `}
             </div>
-            <button class="ai-filter-card-remove" data-index="${index}" title="Remove filter">
-              <i data-lucide="x"></i>
-            </button>
           </div>
-        `).join('');
+        </div>
+      `;
+      
+      contentHTML += `</div>`; // Close ai-results-container
+      
+      elements.aiFiltersGrid.innerHTML = contentHTML;
 
-        // Add remove handlers
-        elements.aiFiltersGrid.querySelectorAll('.ai-filter-card-remove').forEach(btn => {
-          btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const index = parseInt(btn.dataset.index);
-            removeAIParsedFilter(index);
-          });
+      // Add event handlers for filter removal
+      elements.aiFiltersGrid.querySelectorAll('.filter-chip-remove').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const index = parseInt(btn.dataset.index);
+          removeAIParsedFilter(index);
         });
-      }
+      });
+      
+      // Add event handlers for suggestion buttons
+      elements.aiFiltersGrid.querySelectorAll('.ai-suggestion-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const suggestion = btn.dataset.suggestion;
+          if (elements.aiInput) {
+            elements.aiInput.value = suggestion;
+            handleAISubmit();
+          }
+        });
+      });
+      
+      // Add event handlers for quick search chips
+      elements.aiFiltersGrid.querySelectorAll('.quick-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+          const hint = chip.dataset.hint;
+          if (elements.aiInput) {
+            elements.aiInput.value = hint;
+            handleAISubmit();
+          }
+        });
+      });
+      
+      // Add event handlers for brand suggestion chips (broad search)
+      elements.aiFiltersGrid.querySelectorAll('.brand-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+          const brand = chip.dataset.brand;
+          const currentQuery = elements.aiInput?.value || '';
+          // Append brand to current search
+          if (elements.aiInput) {
+            elements.aiInput.value = `${currentQuery} ${brand}`.trim();
+            handleAISubmit();
+          }
+        });
+      });
     }
 
     // Apply the parsed filters to the state
     parsedFilters.forEach(filter => {
       if (filter.filterKey === 'brands' || filter.filterKey === 'origins' || filter.filterKey === 'partCategories') {
         if (!AIFilterState.filters[filter.filterKey].includes(filter.filterValue)) {
-          AIFilterState.filters[filter.filterKey].push(filter.filterValue);
+          if (AIFilterState.filters[filter.filterKey].includes('all')) {
+            AIFilterState.filters[filter.filterKey] = [filter.filterValue];
+          } else {
+            AIFilterState.filters[filter.filterKey].push(filter.filterValue);
+          }
         }
-      } else {
+      } else if (filter.filterKey) {
         AIFilterState.filters[filter.filterKey] = filter.filterValue;
       }
     });
 
     updateFilterCount();
+    
+    // Update results preview count
+    if (elements.resultsPreview) {
+      elements.resultsPreview.textContent = results.length || AIFilterState.activeFilterCount;
+    }
 
     // Reinitialize icons
     if (typeof lucide !== 'undefined') {
       lucide.createIcons();
     }
   }
+  
+  // Utility functions for display
+  function escapeHtml(str) {
+    if (!str) return '';
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+  
+  function truncateText(str, maxLength) {
+    if (!str) return '';
+    if (str.length <= maxLength) return str;
+    return str.substring(0, maxLength) + '...';
+  }
+  
+  function getStockStatus(product) {
+    if (!product.quantity || product.quantity === 0) return 'out';
+    if (product.quantity <= 10) return 'low';
+    return 'in';
+  }
+  
+  function getStockLabel(product) {
+    if (!product.quantity || product.quantity === 0) return 'Out of Stock';
+    if (product.quantity <= 10) return 'Low Stock';
+    return 'In Stock';
+  }
 
   function removeAIParsedFilter(index) {
     AIFilterState.aiParsedFilters.splice(index, 1);
-    displayAIResults(AIFilterState.aiParsedFilters);
+    displayAIResults(AIFilterState.aiParsedFilters, AIFilterState.lastSearchResults, AIFilterState.aiParsedResponse);
   }
 
   // ====================================
@@ -923,10 +1320,6 @@
     const brandTypeCheckboxes = document.querySelectorAll('input[name="brand-type"]:checked');
     if (brandTypeCheckboxes.length > 0) count++;
 
-    // Check country checkboxes
-    const countryCheckboxes = document.querySelectorAll('input[name="origin"]:checked');
-    if (countryCheckboxes.length > 0) count++;
-
     AIFilterState.activeFilterCount = count;
 
     if (elements.activeFilterCount) {
@@ -999,22 +1392,44 @@
     const filters = collectAllFilters();
     
     console.log('Applying filters:', filters);
+    console.log('AI Results count:', AIFilterState.lastSearchResults.length);
 
-    // Dispatch custom event for search2.js to listen to
-    const event = new CustomEvent('aiFiltersApplied', { detail: filters });
-    window.dispatchEvent(event);
-
-    // Close modal
+    // Close modal first
     closeModal();
 
     // Show success feedback
-    showFilterToast(`${AIFilterState.activeFilterCount} filters applied`);
+    const resultCount = AIFilterState.lastSearchResults.length;
+    const message = resultCount > 0 
+      ? `Found ${resultCount} parts matching your search`
+      : `${AIFilterState.activeFilterCount} filters applied`;
+    showFilterToast(message);
 
-    // Trigger search if there's a query
-    const searchInput = document.getElementById('search2-input');
-    const searchBtn = document.getElementById('search2-btn');
-    if (searchInput?.value.trim() && searchBtn) {
-      searchBtn.click();
+    // If we have AI search results, dispatch the event to display them
+    if (AIFilterState.lastSearchResults.length > 0) {
+      // Small delay to ensure modal is closed
+      setTimeout(() => {
+        // Dispatch the AI results event - search.js will handle displaying
+        const resultsEvent = new CustomEvent('aiSearchResults', { 
+          detail: {
+            results: AIFilterState.lastSearchResults,
+            query: AIFilterState.aiQuery,
+            parsed: AIFilterState.aiParsedResponse,
+          }
+        });
+        window.dispatchEvent(resultsEvent);
+      }, 50);
+    } else if (AIFilterState.aiQuery) {
+      // If we have an AI query but no results, put the query in search input and trigger search
+      setTimeout(() => {
+        const searchInput = document.getElementById('search2-input');
+        if (searchInput) {
+          searchInput.value = AIFilterState.aiQuery;
+          const searchBtn = document.getElementById('search2-btn');
+          if (searchBtn) {
+            searchBtn.click();
+          }
+        }
+      }, 50);
     }
   }
 
@@ -1027,7 +1442,6 @@
     filters.brandType = Array.from(document.querySelectorAll('input[name="brand-type"]:checked')).map(cb => cb.value);
     filters.certifications = Array.from(document.querySelectorAll('input[name="cert"]:checked')).map(cb => cb.value);
     filters.returnPolicy = Array.from(document.querySelectorAll('input[name="return"]:checked')).map(cb => cb.value);
-    filters.origins = Array.from(document.querySelectorAll('input[name="origin"]:checked')).map(cb => cb.value);
 
     // Collect radio values
     filters.condition = document.querySelector('input[name="condition"]:checked')?.value || 'all';

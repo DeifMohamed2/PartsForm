@@ -41,22 +41,48 @@
           </div>
 
           <form id="create-ticket-form" class="ticket-form">
-            <!-- Order Number -->
+            <!-- Category (First to determine if order is needed) -->
             <div class="form-group">
-              <label for="order-number" class="form-label">
-                <i data-lucide="package"></i>
-                <span>Order Number</span>
+              <label for="category" class="form-label">
+                <i data-lucide="tag"></i>
+                <span>Category</span>
                 <span class="required">*</span>
               </label>
-              <input 
-                type="text" 
+              <select id="category" name="category" class="form-select" required>
+                <option value="">Select a category</option>
+                <option value="Shipping Issue">Shipping Issue</option>
+                <option value="Order Issue">Order Issue</option>
+                <option value="Product Inquiry">Product Inquiry</option>
+                <option value="Payment">Payment</option>
+                <option value="Documentation">Documentation</option>
+                <option value="Technical Issue">Technical Issue</option>
+                <option value="General">General</option>
+              </select>
+              <span class="form-hint">Choose the category that best describes your issue</span>
+            </div>
+
+            <!-- Order Number (Optional - shown for order-related categories) -->
+            <div class="form-group" id="order-group">
+              <label for="order-number" class="form-label">
+                <i data-lucide="package"></i>
+                <span>Related Order</span>
+                <span class="optional">(Optional)</span>
+              </label>
+              <select 
                 id="order-number" 
                 name="orderNumber" 
-                class="form-input" 
-                placeholder="e.g., ORD-2025-001"
-                required
+                class="form-select"
               >
-              <span class="form-hint">Enter the order number related to this issue</span>
+                <option value="">No specific order</option>
+                <% if (typeof orders !== 'undefined' && orders && orders.length > 0) { %>
+                  <% orders.forEach(function(order) { %>
+                    <option value="<%= order.orderNumber %>">
+                      <%= order.orderNumber %> - <%= order.status ? order.status.charAt(0).toUpperCase() + order.status.slice(1) : 'N/A' %> - <%= new Date(order.createdAt).toLocaleDateString() %>
+                    </option>
+                  <% }); %>
+                <% } %>
+              </select>
+              <span class="form-hint">Select an order if this issue is related to a specific order</span>
             </div>
 
             <!-- Subject -->
@@ -75,26 +101,6 @@
                 required
               >
               <span class="form-hint">Provide a clear, concise summary of your issue</span>
-            </div>
-
-            <!-- Category -->
-            <div class="form-group">
-              <label for="category" class="form-label">
-                <i data-lucide="tag"></i>
-                <span>Category</span>
-                <span class="required">*</span>
-              </label>
-              <select id="category" name="category" class="form-select" required>
-                <option value="">Select a category</option>
-                <option value="Shipping Issue">Shipping Issue</option>
-                <option value="Order Issue">Order Issue</option>
-                <option value="Product Inquiry">Product Inquiry</option>
-                <option value="Payment">Payment</option>
-                <option value="Documentation">Documentation</option>
-                <option value="Technical Issue">Technical Issue</option>
-                <option value="General">General</option>
-              </select>
-              <span class="form-hint">Choose the category that best describes your issue</span>
             </div>
 
             <!-- Description -->
@@ -198,6 +204,25 @@
   lucide.createIcons();
   window.addEventListener('load', () => lucide.createIcons());
   
+  // Categories that typically require an order
+  const orderRelatedCategories = ['Shipping Issue', 'Order Issue', 'Payment', 'Return Request'];
+  
+  // Handle category change to show/hide order field hint
+  const categorySelect = document.getElementById('category');
+  const orderGroup = document.getElementById('order-group');
+  const orderSelect = document.getElementById('order-number');
+  
+  categorySelect.addEventListener('change', () => {
+    const category = categorySelect.value;
+    if (orderRelatedCategories.includes(category)) {
+      orderGroup.classList.add('order-recommended');
+      orderGroup.querySelector('.form-hint').textContent = 'Recommended: Select the related order for faster resolution';
+    } else {
+      orderGroup.classList.remove('order-recommended');
+      orderGroup.querySelector('.form-hint').textContent = 'Select an order if this issue is related to a specific order';
+    }
+  });
+  
   // Force navbar to always stay white
   document.addEventListener('DOMContentLoaded', () => {
     const navbar = document.getElementById('navbar');
@@ -286,27 +311,53 @@
   }
 
   // Form submission
-  document.getElementById('create-ticket-form').addEventListener('submit', (e) => {
+  document.getElementById('create-ticket-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     
-    const formData = new FormData(e.target);
-    const ticketData = {
-      orderNumber: formData.get('orderNumber'),
-      subject: formData.get('subject'),
-      category: formData.get('category'),
-      priority: 'high', // Default priority since field was removed
-      description: formData.get('description'),
-      attachments: selectedFiles.map(f => f.name)
-    };
+    const submitBtn = e.target.querySelector('.btn-submit');
+    const originalBtnText = submitBtn.innerHTML;
+    
+    // Disable button and show loading
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i data-lucide="loader-2" class="spin"></i><span>Creating...</span>';
+    lucide.createIcons();
+    
+    try {
+      const formData = new FormData();
+      formData.append('orderNumber', document.getElementById('order-number').value);
+      formData.append('subject', document.getElementById('subject').value);
+      formData.append('category', document.getElementById('category').value);
+      formData.append('description', document.getElementById('description').value);
+      
+      // Add all selected files
+      selectedFiles.forEach(file => {
+        formData.append('attachments', file);
+      });
 
-    console.log('Ticket Data:', ticketData);
-    
-    // Show success message
-    alert('Ticket created successfully! Redirecting to tickets page...');
-    
-    // Redirect to tickets page
-    setTimeout(() => {
-      window.location.href = '/buyer/tickets';
-    }, 1000);
+      const response = await fetch('/buyer/api/tickets', {
+        method: 'POST',
+        body: formData
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        // Show success message
+        alert('Ticket created successfully!');
+        // Redirect to the new ticket
+        window.location.href = '/buyer/tickets/' + data.ticket.id;
+      } else {
+        alert(data.message || 'Failed to create ticket. Please try again.');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnText;
+        lucide.createIcons();
+      }
+    } catch (error) {
+      console.error('Error creating ticket:', error);
+      alert('An error occurred. Please try again.');
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalBtnText;
+      lucide.createIcons();
+    }
   });
 </script>

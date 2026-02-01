@@ -20,7 +20,11 @@
 
         <!-- User Header - Enhanced -->
         <div class="user-profile-header">
+          <% if (user.avatar) { %>
+          <img src="<%= user.avatar %>" alt="<%= user.name %>" class="user-profile-avatar-img">
+          <% } else { %>
           <div class="user-profile-avatar"><%= user.name.charAt(0) %></div>
+          <% } %>
           <div class="user-profile-main">
             <div class="user-profile-name-row">
               <h1><%= user.name %></h1>
@@ -37,14 +41,15 @@
             <div class="user-profile-tags">
               <span class="user-tag">
                 <i data-lucide="building"></i>
-                <%= user.company %>
+                <%= user.company || user.companyName %>
               </span>
               <span class="user-tag">
-                <i data-lucide="briefcase"></i>
-                <%= user.position || 'Procurement Manager' %>
+                <i data-lucide="map-pin"></i>
+                <%= user.city %>, <%= user.country %>
               </span>
-              <span class="user-tag industry automotive">
-                <i data-lucide="car"></i> Automotive
+              <span class="user-tag">
+                <i data-lucide="phone"></i>
+                <%= user.phone %>
               </span>
               <span class="user-tag">
                 <i data-lucide="calendar"></i>
@@ -92,7 +97,7 @@
               <i data-lucide="ticket"></i>
             </div>
             <div class="quick-stat-content">
-              <div class="quick-stat-value"><%= user.tickets || 2 %></div>
+              <div class="quick-stat-value"><%= user.tickets || 0 %></div>
               <div class="quick-stat-label">Support Tickets</div>
             </div>
           </div>
@@ -110,7 +115,7 @@
               <i data-lucide="trending-up"></i>
             </div>
             <div class="quick-stat-content">
-              <div class="quick-stat-value">$<%= ((user.totalSpent / user.orders) / 1000).toFixed(1) %>K</div>
+              <div class="quick-stat-value">$<%= user.orders > 0 ? ((user.totalSpent / user.orders) / 1000).toFixed(1) : '0' %>K</div>
               <div class="quick-stat-label">Avg Order Value</div>
             </div>
           </div>
@@ -166,17 +171,19 @@
                     <div class="info-icon"><i data-lucide="phone"></i></div>
                     <div class="info-content">
                       <span class="info-label">Phone Number</span>
-                      <span class="info-value"><%= user.phone || '+1 (555) 123-4567' %></span>
+                      <span class="info-value"><%= user.phone || 'Not provided' %></span>
                     </div>
-                    <a href="tel:<%= user.phone || '+15551234567' %>" class="info-action" title="Call">
+                    <% if (user.phone) { %>
+                    <a href="tel:<%= user.phone %>" class="info-action" title="Call">
                       <i data-lucide="phone-call"></i>
                     </a>
+                    <% } %>
                   </div>
                   <div class="info-item">
                     <div class="info-icon"><i data-lucide="globe"></i></div>
                     <div class="info-content">
                       <span class="info-label">Country</span>
-                      <span class="info-value"><%= user.country || 'United States' %></span>
+                      <span class="info-value"><%= user.country || 'Not provided' %></span>
                     </div>
                   </div>
                 </div>
@@ -197,24 +204,31 @@
                     </div>
                   </div>
                   <div class="info-item">
-                    <div class="info-icon"><i data-lucide="user-check"></i></div>
-                    <div class="info-content">
-                      <span class="info-label">Position</span>
-                      <span class="info-value"><%= user.position || 'Procurement Manager' %></span>
-                    </div>
-                  </div>
-                  <div class="info-item">
-                    <div class="info-icon"><i data-lucide="factory"></i></div>
-                    <div class="info-content">
-                      <span class="info-label">Industry</span>
-                      <span class="info-value"><%= user.industry ? user.industry.charAt(0).toUpperCase() + user.industry.slice(1) : 'N/A' %></span>
-                    </div>
-                  </div>
-                  <div class="info-item">
                     <div class="info-icon"><i data-lucide="map-pin"></i></div>
                     <div class="info-content">
-                      <span class="info-label">Address</span>
-                      <span class="info-value"><%= user.address || '123 Business Street, New York, NY 10001' %></span>
+                      <span class="info-label">City</span>
+                      <span class="info-value"><%= user.city || 'Not provided' %></span>
+                    </div>
+                  </div>
+                  <div class="info-item">
+                    <div class="info-icon"><i data-lucide="truck"></i></div>
+                    <div class="info-content">
+                      <span class="info-label">Shipping Address</span>
+                      <span class="info-value"><%= user.shippingAddress || 'Not provided' %></span>
+                    </div>
+                  </div>
+                  <div class="info-item">
+                    <div class="info-icon"><i data-lucide="mail"></i></div>
+                    <div class="info-content">
+                      <span class="info-label">Newsletter</span>
+                      <span class="info-value"><%= user.newsletter ? 'Subscribed' : 'Not subscribed' %></span>
+                    </div>
+                  </div>
+                  <div class="info-item">
+                    <div class="info-icon"><i data-lucide="coins"></i></div>
+                    <div class="info-content">
+                      <span class="info-label">Preferred Currency</span>
+                      <span class="info-value"><%= user.preferredCurrency || 'USD' %></span>
                     </div>
                   </div>
                 </div>
@@ -245,43 +259,51 @@
                     <strong><%= new Date(user.joined).toLocaleDateString() %></strong>
                   </div>
                   <div class="account-row">
-                    <span>Last Active</span>
-                    <strong>2 hours ago</strong>
+                    <span>Last Login</span>
+                    <strong><%= user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'Never' %></strong>
                   </div>
                 </div>
               </div>
 
-              <!-- Recent Activity Quick -->
+              <!-- Saved Addresses -->
               <div class="info-card">
                 <div class="info-card-header">
-                  <i data-lucide="activity"></i>
-                  <h3>Recent Activity</h3>
-                  <a href="#" onclick="document.querySelector('[data-tab=activity]').click(); return false;" class="view-all-link">View All</a>
+                  <i data-lucide="map-pin"></i>
+                  <h3>Saved Addresses (<%= user.addresses ? user.addresses.length : 0 %>)</h3>
                 </div>
                 <div class="info-card-body">
-                  <div class="activity-timeline">
-                    <div class="activity-item">
-                      <div class="activity-dot blue"></div>
-                      <div class="activity-content">
-                        <span>Placed order ORD-2025-1247</span>
-                        <small>2 hours ago</small>
+                  <% if (user.addresses && user.addresses.length > 0) { %>
+                  <div class="addresses-list">
+                    <% user.addresses.forEach(function(addr, index) { %>
+                    <div class="address-card <%= addr.isDefault ? 'default' : '' %>">
+                      <div class="address-header">
+                        <span class="address-label">
+                          <i data-lucide="<%= addr.label.toLowerCase().includes('home') ? 'home' : (addr.label.toLowerCase().includes('office') ? 'building' : 'map-pin') %>"></i>
+                          <%= addr.label %>
+                        </span>
+                        <% if (addr.isDefault) { %>
+                        <span class="default-badge">Default</span>
+                        <% } %>
+                      </div>
+                      <div class="address-body">
+                        <p class="address-name"><%= addr.fullName %></p>
+                        <p class="address-line"><%= addr.street %></p>
+                        <p class="address-line"><%= addr.city %>, <%= addr.state %> <%= addr.postalCode %></p>
+                        <p class="address-line"><%= addr.country %></p>
+                        <p class="address-phone"><i data-lucide="phone"></i> <%= addr.phone %></p>
+                        <% if (addr.notes) { %>
+                        <p class="address-notes"><i data-lucide="info"></i> <%= addr.notes %></p>
+                        <% } %>
                       </div>
                     </div>
-                    <div class="activity-item">
-                      <div class="activity-dot green"></div>
-                      <div class="activity-content">
-                        <span>Payment completed</span>
-                        <small>2 days ago</small>
-                      </div>
-                    </div>
-                    <div class="activity-item">
-                      <div class="activity-dot orange"></div>
-                      <div class="activity-content">
-                        <span>Opened ticket TKT-001</span>
-                        <small>3 days ago</small>
-                      </div>
-                    </div>
+                    <% }); %>
                   </div>
+                  <% } else { %>
+                  <div class="empty-state-small">
+                    <i data-lucide="map-pin-off"></i>
+                    <p>No saved addresses</p>
+                  </div>
+                  <% } %>
                 </div>
               </div>
 
@@ -331,17 +353,11 @@
                 </tr>
               </thead>
               <tbody>
-                <% var mockOrders = [
-                  { id: 'ORD-2025-1247', date: '2025-12-26', items: 3, amount: 45200, status: 'processing' },
-                  { id: 'ORD-2025-1246', date: '2025-12-24', items: 5, amount: 12800, status: 'shipped' },
-                  { id: 'ORD-2025-1245', date: '2025-12-20', items: 2, amount: 89500, status: 'delivered' },
-                  { id: 'ORD-2025-1240', date: '2025-12-15', items: 8, amount: 34200, status: 'delivered' },
-                  { id: 'ORD-2025-1235', date: '2025-12-10', items: 4, amount: 56800, status: 'delivered' }
-                ]; %>
-                <% mockOrders.forEach(function(order) { %>
+                <% if (user.recentOrders && user.recentOrders.length > 0) { %>
+                <% user.recentOrders.forEach(function(order) { %>
                 <tr>
                   <td><span class="id-badge order"><i data-lucide="shopping-bag"></i><%= order.id %></span></td>
-                  <td><%= order.date %></td>
+                  <td><%= new Date(order.date).toLocaleDateString() %></td>
                   <td><%= order.items %> items</td>
                   <td><strong>$<%= order.amount.toLocaleString() %></strong></td>
                   <td>
@@ -354,6 +370,13 @@
                   </td>
                 </tr>
                 <% }); %>
+                <% } else { %>
+                <tr>
+                  <td colspan="6" style="text-align: center; padding: 2rem; color: #64748b;">
+                    No orders found for this user
+                  </td>
+                </tr>
+                <% } %>
               </tbody>
             </table>
           </div>
@@ -374,23 +397,12 @@
                 </tr>
               </thead>
               <tbody>
-                <% var mockPayments = [
-                  { id: 'PAY-2025-001', order: 'ORD-2025-1247', date: '2025-12-26', amount: 45200, method: 'Wire Transfer', status: 'completed' },
-                  { id: 'PAY-2025-002', order: 'ORD-2025-1246', date: '2025-12-24', amount: 12800, method: 'Credit Card', status: 'completed' },
-                  { id: 'PAY-2025-003', order: 'ORD-2025-1245', date: '2025-12-20', amount: 89500, method: 'Wire Transfer', status: 'completed' }
-                ]; %>
-                <% mockPayments.forEach(function(payment) { %>
+                <!-- Payments will be loaded from real data when Payment model is implemented -->
                 <tr>
-                  <td><span class="id-badge payment"><i data-lucide="credit-card"></i><%= payment.id %></span></td>
-                  <td><span class="id-badge order-ref"><%= payment.order %></span></td>
-                  <td><%= payment.date %></td>
-                  <td><strong>$<%= payment.amount.toLocaleString() %></strong></td>
-                  <td><%= payment.method %></td>
-                  <td>
-                    <span class="user-status-badge active"><%= payment.status.charAt(0).toUpperCase() + payment.status.slice(1) %></span>
+                  <td colspan="6" style="text-align: center; padding: 2rem; color: #64748b;">
+                    No payments found for this user
                   </td>
                 </tr>
-                <% }); %>
               </tbody>
             </table>
           </div>
@@ -411,28 +423,12 @@
                 </tr>
               </thead>
               <tbody>
-                <% var mockTickets = [
-                  { id: 'TKT-001', subject: 'Delayed Shipment Inquiry', category: 'Shipping', date: '2025-12-26', status: 'open' },
-                  { id: 'TKT-002', subject: 'Invoice Question', category: 'Billing', date: '2025-12-20', status: 'resolved' }
-                ]; %>
-                <% mockTickets.forEach(function(ticket) { %>
+                <!-- Tickets will be loaded from database when Ticket model is implemented -->
                 <tr>
-                  <td><span class="id-badge ticket"><i data-lucide="ticket"></i><%= ticket.id %></span></td>
-                  <td><%= ticket.subject %></td>
-                  <td><%= ticket.category %></td>
-                  <td><%= ticket.date %></td>
-                  <td>
-                    <span class="ticket-status-badge <%= ticket.status %>">
-                      <%= ticket.status.charAt(0).toUpperCase() + ticket.status.slice(1) %>
-                    </span>
-                  </td>
-                  <td>
-                    <a href="/admin/tickets/<%= ticket.id %>" class="user-action-btn view">
-                      <i data-lucide="eye"></i>
-                    </a>
+                  <td colspan="6" style="text-align: center; padding: 2rem; color: #64748b;">
+                    No tickets found for this user
                   </td>
                 </tr>
-                <% }); %>
               </tbody>
             </table>
           </div>
@@ -442,15 +438,48 @@
         <div class="user-tab-content" id="tab-activity">
           <div class="activity-feed-card">
             <div class="activity-feed">
-              <% var activities = [
-                { icon: 'shopping-bag', text: 'Placed order ORD-2025-1247', detail: '3 items, $45,200', time: '2 hours ago', color: 'blue' },
-                { icon: 'credit-card', text: 'Payment received', detail: 'Wire Transfer - $12,800', time: '2 days ago', color: 'green' },
-                { icon: 'ticket', text: 'Opened support ticket TKT-001', detail: 'Category: Shipping Issue', time: '3 days ago', color: 'orange' },
-                { icon: 'log-in', text: 'Logged in', detail: 'From New York, USA', time: '3 days ago', color: 'gray' },
-                { icon: 'shopping-cart', text: 'Added items to cart', detail: '5 items added', time: '4 days ago', color: 'purple' },
-                { icon: 'check-circle', text: 'Ticket resolved', detail: 'TKT-002 - Invoice Question', time: '5 days ago', color: 'green' },
-                { icon: 'package', text: 'Order delivered', detail: 'ORD-2025-1245', time: '1 week ago', color: 'teal' }
-              ]; %>
+              <% 
+              // Build real activity from orders and account events
+              var activities = [];
+              
+              // Add registration activity
+              activities.push({
+                icon: 'user-plus',
+                text: 'Account created',
+                detail: 'Registered as ' + user.companyName,
+                time: new Date(user.createdAt).toLocaleDateString(),
+                color: 'blue'
+              });
+              
+              // Add orders as activities
+              if (user.recentOrders && user.recentOrders.length > 0) {
+                user.recentOrders.forEach(function(order) {
+                  activities.push({
+                    icon: 'shopping-bag',
+                    text: 'Placed order ' + order.id,
+                    detail: order.items + ' items, $' + order.amount.toLocaleString(),
+                    time: new Date(order.date).toLocaleDateString(),
+                    color: 'purple'
+                  });
+                });
+              }
+              
+              // Add last login
+              if (user.lastLogin) {
+                activities.push({
+                  icon: 'log-in',
+                  text: 'Last login',
+                  detail: 'Accessed account',
+                  time: new Date(user.lastLogin).toLocaleDateString(),
+                  color: 'gray'
+                });
+              }
+              
+              // Sort by date (most recent first) - simple reverse since we added in order
+              activities.reverse();
+              %>
+              
+              <% if (activities.length > 0) { %>
               <% activities.forEach(function(activity) { %>
               <div class="activity-feed-item">
                 <div class="activity-feed-icon <%= activity.color %>">
@@ -463,6 +492,12 @@
                 <div class="activity-feed-time"><%= activity.time %></div>
               </div>
               <% }); %>
+              <% } else { %>
+              <div class="empty-state-small" style="padding: 2rem; text-align: center;">
+                <i data-lucide="activity"></i>
+                <p>No activity recorded yet</p>
+              </div>
+              <% } %>
             </div>
           </div>
         </div>
@@ -542,7 +577,6 @@
       color: var(--admin-text-secondary);
     }
     .user-tag i { width: 14px; height: 14px; }
-    .user-tag.industry.automotive { background: rgba(14, 165, 233, 0.1); color: #0ea5e9; }
     .user-profile-actions {
       display: flex;
       gap: 0.5rem;
@@ -769,10 +803,83 @@
     .activity-feed-icon.gray { background: var(--admin-bg-tertiary); color: var(--admin-text-muted); }
     .activity-feed-icon.purple { background: rgba(139, 92, 246, 0.12); color: #8b5cf6; }
     .activity-feed-icon.teal { background: rgba(20, 184, 166, 0.12); color: #14b8a6; }
+    .activity-feed-icon.red { background: rgba(239, 68, 68, 0.12); color: #ef4444; }
     .activity-feed-content { flex: 1; }
     .activity-feed-text { font-size: 0.9rem; font-weight: 500; color: var(--admin-text-primary); margin-bottom: 0.15rem; }
     .activity-feed-detail { font-size: 0.8rem; color: var(--admin-text-muted); }
     .activity-feed-time { font-size: 0.75rem; color: var(--admin-text-muted); white-space: nowrap; }
+
+    /* Saved Addresses Styles */
+    .addresses-list { display: flex; flex-direction: column; gap: 0.75rem; max-height: 300px; overflow-y: auto; padding-right: 0.5rem; }
+    .addresses-list::-webkit-scrollbar { width: 6px; }
+    .addresses-list::-webkit-scrollbar-track { background: transparent; }
+    .addresses-list::-webkit-scrollbar-thumb { background: var(--admin-border); border-radius: 3px; }
+    .addresses-list::-webkit-scrollbar-thumb:hover { background: var(--admin-text-muted); }
+    .address-card {
+      background: var(--admin-bg-tertiary);
+      border: 1px solid var(--admin-border);
+      border-radius: 12px;
+      padding: 1rem;
+      transition: all 0.15s;
+    }
+    .address-card.default { border-color: var(--module-primary, #3b82f6); }
+    .address-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+    }
+    .address-label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: var(--admin-text-primary);
+    }
+    .address-label i { width: 16px; height: 16px; color: var(--module-primary, #3b82f6); }
+    .default-badge {
+      background: var(--module-primary, #3b82f6);
+      color: white;
+      font-size: 0.65rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .address-body p { margin: 0; line-height: 1.5; }
+    .address-name { font-weight: 600; color: var(--admin-text-primary); font-size: 0.85rem; margin-bottom: 0.25rem !important; }
+    .address-line { color: var(--admin-text-secondary); font-size: 0.8rem; }
+    .address-phone {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      color: var(--admin-text-muted);
+      font-size: 0.75rem;
+      margin-top: 0.5rem !important;
+    }
+    .address-phone i { width: 12px; height: 12px; }
+    .address-notes {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.35rem;
+      color: var(--admin-text-muted);
+      font-size: 0.75rem;
+      font-style: italic;
+      margin-top: 0.35rem !important;
+    }
+    .address-notes i { width: 12px; height: 12px; flex-shrink: 0; margin-top: 2px; }
+    .empty-state-small {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      color: var(--admin-text-muted);
+      text-align: center;
+    }
+    .empty-state-small i { width: 32px; height: 32px; opacity: 0.5; margin-bottom: 0.5rem; }
+    .empty-state-small p { margin: 0; font-size: 0.85rem; }
 
     /* Status Badges */
     .ticket-status-badge { display: inline-flex; padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }
@@ -782,6 +889,14 @@
     .order-status.processing { background: rgba(59, 130, 246, 0.12); color: #2563eb; }
     .order-status.shipped { background: rgba(139, 92, 246, 0.12); color: #7c3aed; }
     .order-status.delivered { background: rgba(16, 185, 129, 0.12); color: #059669; }
+    .order-status.pending { background: rgba(245, 158, 11, 0.12); color: #d97706; }
+    
+    /* Pending/Rejected status badges */
+    .user-status-badge.pending { background: rgba(245, 158, 11, 0.12); color: #d97706; }
+    .user-status-badge.rejected { background: rgba(239, 68, 68, 0.12); color: #dc2626; }
+    
+    /* Avatar image */
+    .user-profile-avatar-img { width: 90px; height: 90px; border-radius: 20px; object-fit: cover; }
 
     /* Responsive */
     @media (max-width: 1200px) {
@@ -809,13 +924,18 @@
     
     function toggleUserStatus(userId, currentStatus) {
       var newStatus = currentStatus === 'active' ? 'inactive' : 'active';
-      fetch('/admin/users/' + userId + '/status', {
+      fetch('/admin/api/users/' + userId + '/status', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus })
       }).then(function(response) {
         if (response.ok) { location.reload(); }
       }).catch(function(err) { console.error('Error:', err); });
+    }
+    
+    function toggleActionsMenu() {
+      // TODO: Implement dropdown menu for more actions
+      console.log('Actions menu toggled');
     }
   </script>
 

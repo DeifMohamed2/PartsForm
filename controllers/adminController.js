@@ -3,10 +3,14 @@
 
 const Integration = require('../models/Integration');
 const Part = require('../models/Part');
+const Buyer = require('../models/Buyer');
+const Order = require('../models/Order');
+const Ticket = require('../models/Ticket');
 const ftpService = require('../services/ftpService');
 const syncService = require('../services/syncService');
 const schedulerService = require('../services/schedulerService');
 const elasticsearchService = require('../services/elasticsearchService');
+const socketService = require('../services/socketService');
 
 /**
  * Get module from query parameter and get module-specific data
@@ -137,28 +141,58 @@ const getAdminDashboard = async (req, res) => {
 };
 
 /**
- * Get Orders Management page
+ * Helper function to format order date
+ */
+const formatOrderDate = (date) => {
+  if (!date) return 'N/A';
+  const d = new Date(date);
+  return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+};
+
+/**
+ * Helper function to format order time
+ */
+const formatOrderTime = (date) => {
+  if (!date) return 'N/A';
+  const d = new Date(date);
+  return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+};
+
+/**
+ * Get Orders Management page - Uses real database
  */
 const getOrdersManagement = async (req, res) => {
   try {
     const { currentModule, moduleConfig } = getModuleData(req);
     
-    // Mock orders data with priority field - automotive only
-    const allOrders = [
-      { id: 'ORD-2025-1247', customer: 'AutoMax Germany', email: 'orders@automax.de', amount: 45200, status: 'processing', industry: 'automotive', date: '2025-12-26', time: '09:30 AM', items: 3, priority: 'critical' },
-      { id: 'ORD-2025-1246', customer: 'Premium Auto Parts', email: 'procurement@premiumauto.com', amount: 12800, status: 'shipped', industry: 'automotive', date: '2025-12-26', time: '11:15 AM', items: 5, priority: 'normal' },
-      { id: 'ORD-2025-1245', customer: 'Euro Auto Systems', email: 'supply@euroauto.eu', amount: 89500, status: 'delivered', industry: 'automotive', date: '2025-12-25', time: '02:45 PM', items: 2, priority: 'urgent' },
-      { id: 'ORD-2025-1244', customer: 'PartsWorld Inc', email: 'parts@partsworld.com', amount: 156000, status: 'processing', industry: 'automotive', date: '2025-12-25', time: '10:00 AM', items: 8, priority: 'critical' },
-      { id: 'ORD-2025-1243', customer: 'Car Components Ltd', email: 'orders@carcomponents.com', amount: 8750, status: 'pending', industry: 'automotive', date: '2025-12-24', time: '03:30 PM', items: 12, priority: 'normal' },
-      { id: 'ORD-2025-1242', customer: 'Drive Parts Co', email: 'purchasing@driveparts.com', amount: 67300, status: 'shipped', industry: 'automotive', date: '2025-12-24', time: '08:45 AM', items: 4, priority: 'urgent' },
-      { id: 'ORD-2025-1241', customer: 'Motor Supply Inc', email: 'supply@motorsupply.com', amount: 234000, status: 'pending', industry: 'automotive', date: '2025-12-23', time: '01:20 PM', items: 6, priority: 'normal' },
-      { id: 'ORD-2025-1240', customer: 'AutoParts Express', email: 'parts@autoexpress.com', amount: 19500, status: 'delivered', industry: 'automotive', date: '2025-12-23', time: '04:00 PM', items: 8, priority: 'normal' },
-    ];
-
-    // Store orders in app locals for other functions to access
-    req.app.locals.ordersDatabase = allOrders;
-
-    const orders = filterByModule(allOrders, currentModule);
+    // Get real orders from database with buyer info
+    const dbOrders = await Order.find({})
+      .populate('buyer', 'firstName lastName email companyName phone')
+      .sort({ createdAt: -1 })
+      .lean();
+    
+    // Transform database orders to view format
+    const orders = dbOrders.map(order => ({
+      id: order.orderNumber,
+      _id: order._id,
+      customer: order.buyer ? 
+        (order.buyer.companyName || `${order.buyer.firstName || ''} ${order.buyer.lastName || ''}`.trim() || 'Unknown') : 
+        'Unknown Customer',
+      email: order.buyer?.email || 'N/A',
+      phone: order.buyer?.phone || 'N/A',
+      amount: order.pricing?.total || 0,
+      currency: order.pricing?.currency || 'AED',
+      status: order.status || 'pending',
+      industry: 'automotive',
+      date: formatOrderDate(order.createdAt),
+      time: formatOrderTime(order.createdAt),
+      items: order.totalItems || order.items?.length || 0,
+      priority: order.priority || 'normal',
+      paymentStatus: order.payment?.status || 'pending',
+      paymentMethod: order.payment?.method || 'N/A',
+      createdAt: order.createdAt,
+      updatedAt: order.updatedAt
+    }));
 
     res.render('admin/orders', {
       title: currentModule ? `${moduleConfig.name} Orders | PARTSFORM Admin` : 'Orders Management | PARTSFORM',
@@ -174,32 +208,128 @@ const getOrdersManagement = async (req, res) => {
 };
 
 /**
- * Get Order Details page
+ * Get Order Details page - Uses real database
  */
 const getOrderDetails = async (req, res) => {
   try {
     const { currentModule, moduleConfig } = getModuleData(req);
     const orderId = req.params.id;
     
-    // Get orders from database or use default
-    const allOrders = req.app.locals.ordersDatabase || [
-      { id: 'ORD-2025-1247', customer: 'AutoMax Germany', email: 'orders@automax.de', amount: 45200, status: 'processing', industry: 'automotive', date: '2025-12-26', time: '09:30 AM', items: 3, priority: 'critical' },
-      { id: 'ORD-2025-1246', customer: 'Premium Auto Parts', email: 'procurement@premiumauto.com', amount: 12800, status: 'shipped', industry: 'automotive', date: '2025-12-26', time: '11:15 AM', items: 5, priority: 'normal' },
-    ];
+    // Try to find by order number first, then by _id
+    let order = await Order.findOne({ orderNumber: orderId })
+      .populate('buyer', 'firstName lastName email companyName phone country city shippingAddress')
+      .lean();
     
-    // Find the order
-    const order = allOrders.find(o => o.id === orderId);
+    if (!order) {
+      // Try finding by MongoDB _id
+      const mongoose = require('mongoose');
+      if (mongoose.Types.ObjectId.isValid(orderId)) {
+        order = await Order.findById(orderId)
+          .populate('buyer', 'firstName lastName email companyName phone country city shippingAddress')
+          .lean();
+      }
+    }
     
     if (!order) {
       return res.status(404).render('error', { title: 'Error', error: 'Order not found' });
     }
 
+    // Transform for view - full order details
+    const orderData = {
+      id: order.orderNumber,
+      _id: order._id,
+      customer: order.buyer ? 
+        (order.buyer.companyName || `${order.buyer.firstName || ''} ${order.buyer.lastName || ''}`.trim() || 'Unknown') : 
+        'Unknown Customer',
+      email: order.buyer?.email || 'N/A',
+      phone: order.buyer?.phone || 'N/A',
+      amount: order.pricing?.total || 0,
+      subtotal: order.pricing?.subtotal || 0,
+      tax: order.pricing?.tax || 0,
+      shipping: order.pricing?.shipping || 0,
+      processingFee: order.pricing?.processingFee || 0,
+      discount: order.pricing?.discount || 0,
+      currency: order.pricing?.currency || 'AED',
+      status: order.status || 'pending',
+      date: formatOrderDate(order.createdAt),
+      time: formatOrderTime(order.createdAt),
+      priority: order.priority || 'normal',
+      totalItems: order.totalItems || order.items?.length || 0,
+      totalWeight: order.totalWeight || 0,
+      notes: order.notes || '',
+      
+      // Items with full details
+      items: order.items?.map(item => ({
+        partNumber: item.partNumber,
+        description: item.description || item.partNumber,
+        brand: item.brand || 'N/A',
+        supplier: item.supplier || 'N/A',
+        price: item.price || 0,
+        currency: item.currency || 'AED',
+        weight: item.weight || 0,
+        stock: item.stock || 'N/A',
+        addedAt: item.addedAt
+      })) || [],
+      
+      // Payment info
+      payment: {
+        type: order.payment?.type || 'full',
+        method: order.payment?.method || 'N/A',
+        status: order.payment?.status || 'pending',
+        amountPaid: order.payment?.amountPaid || 0,
+        amountDue: order.payment?.amountDue || order.pricing?.total || 0,
+        transactions: order.payment?.transactions || []
+      },
+      
+      // Shipping info
+      shipping: {
+        fullName: order.shipping?.fullName || order.shipping?.firstName || 'N/A',
+        phone: order.shipping?.phone || 'N/A',
+        street: order.shipping?.street || order.shipping?.address || 'N/A',
+        city: order.shipping?.city || 'N/A',
+        state: order.shipping?.state || '',
+        country: order.shipping?.country || 'N/A',
+        postalCode: order.shipping?.postalCode || '',
+        trackingNumber: order.shipping?.trackingNumber || '',
+        carrier: order.shipping?.carrier || '',
+        estimatedDelivery: order.shipping?.estimatedDelivery,
+        actualDelivery: order.shipping?.actualDelivery
+      },
+      
+      // Timeline
+      timeline: order.timeline?.map(event => ({
+        status: event.status,
+        message: event.message,
+        timestamp: event.timestamp,
+        updatedBy: event.updatedBy || 'System',
+        formattedDate: formatOrderDate(event.timestamp),
+        formattedTime: formatOrderTime(event.timestamp)
+      })) || [],
+      
+      // Buyer info
+      buyer: order.buyer ? {
+        id: order.buyer._id,
+        name: order.buyer.companyName || `${order.buyer.firstName || ''} ${order.buyer.lastName || ''}`.trim(),
+        email: order.buyer.email,
+        phone: order.buyer.phone,
+        country: order.buyer.country,
+        city: order.buyer.city
+      } : null,
+      
+      // Cancellation info
+      cancellation: order.cancellation || null,
+      
+      // Timestamps
+      createdAt: order.createdAt,
+      updatedAt: order.updatedAt
+    };
+
     res.render('admin/order-details', {
-      title: `Order ${orderId} | PARTSFORM Admin`,
+      title: `Order ${order.orderNumber} | PARTSFORM Admin`,
       activePage: 'orders',
       currentModule,
       moduleConfig,
-      order
+      order: orderData
     });
   } catch (error) {
     console.error('Error in getOrderDetails:', error);
@@ -208,17 +338,26 @@ const getOrderDetails = async (req, res) => {
 };
 
 /**
- * Get Order Create page
+ * Get Order Create page - with buyers list
  */
 const getOrderCreate = async (req, res) => {
   try {
     const { currentModule, moduleConfig } = getModuleData(req);
+    
+    // Get all buyers for the dropdown (include all statuses for admin)
+    const buyers = await Buyer.find({})
+      .select('firstName lastName email companyName phone country city accountStatus')
+      .sort({ companyName: 1, lastName: 1 })
+      .lean();
+    
+    console.log('Found buyers for order create:', buyers.length);
 
     res.render('admin/order-create', {
       title: 'Create Order | PARTSFORM Admin',
       activePage: 'orders',
       currentModule,
-      moduleConfig
+      moduleConfig,
+      buyers
     });
   } catch (error) {
     console.error('Error in getOrderCreate:', error);
@@ -227,31 +366,102 @@ const getOrderCreate = async (req, res) => {
 };
 
 /**
- * Get Order Edit page
+ * Get Order Edit page - Uses real database
  */
 const getOrderEdit = async (req, res) => {
   try {
     const { currentModule, moduleConfig } = getModuleData(req);
     const orderId = req.params.id;
     
-    // Get orders from database or use default
-    const allOrders = req.app.locals.ordersDatabase || [
-      { id: 'ORD-2025-1247', customer: 'AutoMax Germany', email: 'orders@automax.de', amount: 45200, status: 'processing', industry: 'automotive', date: '2025-12-26', time: '09:30 AM', items: 3, priority: 'critical' },
-    ];
+    // Try to find by order number first, then by _id
+    let order = await Order.findOne({ orderNumber: orderId })
+      .populate('buyer', 'firstName lastName email companyName phone')
+      .lean();
     
-    // Find the order
-    const order = allOrders.find(o => o.id === orderId);
+    if (!order) {
+      const mongoose = require('mongoose');
+      if (mongoose.Types.ObjectId.isValid(orderId)) {
+        order = await Order.findById(orderId)
+          .populate('buyer', 'firstName lastName email companyName phone')
+          .lean();
+      }
+    }
     
     if (!order) {
       return res.status(404).render('error', { title: 'Error', error: 'Order not found' });
     }
+    
+    // Get all buyers for the dropdown
+    const buyers = await Buyer.find({ accountStatus: 'active' })
+      .select('firstName lastName email companyName phone')
+      .sort({ companyName: 1, lastName: 1 })
+      .lean();
+
+    // Transform for edit view
+    const orderData = {
+      id: order.orderNumber,
+      _id: order._id,
+      buyerId: order.buyer?._id,
+      customer: order.buyer ? 
+        (order.buyer.companyName || `${order.buyer.firstName || ''} ${order.buyer.lastName || ''}`.trim()) : 
+        'Unknown',
+      email: order.buyer?.email || 'N/A',
+      status: order.status || 'pending',
+      priority: order.priority || 'normal',
+      date: formatOrderDate(order.createdAt),
+      time: formatOrderTime(order.createdAt),
+      amount: order.pricing?.total || 0,
+      subtotal: order.pricing?.subtotal || 0,
+      currency: order.pricing?.currency || 'AED',
+      notes: order.notes || '',
+      
+      // Pricing object for edit view
+      pricing: {
+        subtotal: order.pricing?.subtotal || 0,
+        tax: order.pricing?.tax || 0,
+        shipping: order.pricing?.shipping || 0,
+        processingFee: order.pricing?.processingFee || 0,
+        discount: order.pricing?.discount || 0,
+        total: order.pricing?.total || 0,
+        currency: order.pricing?.currency || 'AED'
+      },
+      
+      // Items
+      items: order.items?.map(item => ({
+        partNumber: item.partNumber,
+        description: item.description || item.partNumber,
+        brand: item.brand || 'N/A',
+        supplier: item.supplier || 'N/A',
+        price: item.price || 0,
+        currency: item.currency || 'AED'
+      })) || [],
+      
+      // Payment
+      payment: {
+        type: order.payment?.type || 'full',
+        method: order.payment?.method || 'bank-dubai',
+        status: order.payment?.status || 'pending'
+      },
+      
+      // Shipping
+      shipping: {
+        fullName: order.shipping?.fullName || '',
+        phone: order.shipping?.phone || '',
+        street: order.shipping?.street || order.shipping?.address || '',
+        city: order.shipping?.city || '',
+        state: order.shipping?.state || '',
+        country: order.shipping?.country || '',
+        postalCode: order.shipping?.postalCode || ''
+      }
+    };
 
     res.render('admin/order-edit', {
-      title: `Edit Order ${orderId} | PARTSFORM Admin`,
+      title: `Edit Order ${order.orderNumber} | PARTSFORM Admin`,
       activePage: 'orders',
       currentModule,
       moduleConfig,
-      order
+      order: orderData,
+      buyers
     });
   } catch (error) {
     console.error('Error in getOrderEdit:', error);
@@ -260,15 +470,31 @@ const getOrderEdit = async (req, res) => {
 };
 
 /**
- * Delete Order (API)
+ * Delete Order (API) - Uses real database
  */
 const deleteOrder = async (req, res) => {
   try {
     const orderId = req.params.id;
     
-    // In production, delete from database
-    // For now, just return success
-    res.json({ success: true, message: `Order ${orderId} deleted successfully` });
+    // Try to find and delete by order number first
+    let deletedOrder = await Order.findOneAndDelete({ orderNumber: orderId });
+    
+    if (!deletedOrder) {
+      // Try by MongoDB _id
+      const mongoose = require('mongoose');
+      if (mongoose.Types.ObjectId.isValid(orderId)) {
+        deletedOrder = await Order.findByIdAndDelete(orderId);
+      }
+    }
+    
+    if (!deletedOrder) {
+      return res.status(404).json({ success: false, error: 'Order not found' });
+    }
+    
+    res.json({ 
+      success: true, 
+      message: `Order ${deletedOrder.orderNumber} deleted successfully` 
+    });
   } catch (error) {
     console.error('Error in deleteOrder:', error);
     res.status(500).json({ success: false, error: 'Failed to delete order' });
@@ -276,130 +502,331 @@ const deleteOrder = async (req, res) => {
 };
 
 /**
- * Get Tickets Management page
+ * Create Order (API) - Uses real database
+ */
+const createOrder = async (req, res) => {
+  try {
+    const { buyerId, items, priority, notes, payment, shipping } = req.body;
+    
+    // Validate buyer
+    const buyer = await Buyer.findById(buyerId);
+    if (!buyer) {
+      return res.status(400).json({ success: false, error: 'Invalid buyer selected' });
+    }
+    
+    // Validate items
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ success: false, error: 'At least one item is required' });
+    }
+    
+    // Generate order number
+    const orderNumber = await Order.generateOrderNumber();
+    
+    // Calculate totals
+    const subtotal = items.reduce((sum, item) => sum + (parseFloat(item.price) || 0), 0);
+    const processingFee = parseFloat(payment?.processingFee) || 0;
+    const tax = parseFloat(payment?.tax) || 0;
+    const shippingCost = parseFloat(payment?.shippingCost) || 0;
+    const total = subtotal + processingFee + tax + shippingCost;
+    
+    // Create order items
+    const orderItems = items.map(item => ({
+      partNumber: item.partNumber,
+      description: item.description || item.partNumber,
+      brand: item.brand || 'N/A',
+      supplier: item.supplier || 'N/A',
+      price: parseFloat(item.price) || 0,
+      currency: item.currency || 'AED',
+      weight: parseFloat(item.weight) || 0,
+      stock: item.stock || 'N/A',
+      addedAt: new Date()
+    }));
+    
+    // Create order
+    const order = await Order.create({
+      orderNumber,
+      buyer: buyerId,
+      items: orderItems,
+      pricing: {
+        subtotal,
+        tax,
+        shipping: shippingCost,
+        processingFee,
+        discount: 0,
+        total,
+        currency: payment?.currency || 'AED'
+      },
+      payment: {
+        type: payment?.type || 'full',
+        method: payment?.method || 'bank-dubai',
+        status: 'pending',
+        amountPaid: 0,
+        amountDue: total,
+        transactions: []
+      },
+      shipping: {
+        fullName: shipping?.fullName || `${buyer.firstName} ${buyer.lastName}`,
+        phone: shipping?.phone || buyer.phone,
+        street: shipping?.street || buyer.shippingAddress,
+        city: shipping?.city || buyer.city,
+        state: shipping?.state || '',
+        country: shipping?.country || buyer.country,
+        postalCode: shipping?.postalCode || ''
+      },
+      status: 'pending',
+      priority: priority || 'normal',
+      notes: notes || '',
+      totalItems: orderItems.length,
+      totalWeight: orderItems.reduce((sum, item) => sum + (item.weight || 0), 0),
+      timeline: [{
+        status: 'pending',
+        message: 'Order created by admin',
+        timestamp: new Date(),
+        updatedBy: req.admin?.username || 'Admin'
+      }]
+    });
+    
+    res.json({
+      success: true,
+      message: 'Order created successfully',
+      order: {
+        id: order.orderNumber,
+        _id: order._id,
+        total: order.pricing.total
+      }
+    });
+  } catch (error) {
+    console.error('Error in createOrder:', error);
+    res.status(500).json({ success: false, error: error.message || 'Failed to create order' });
+  }
+};
+
+/**
+ * Update Order (API) - Uses real database
+ */
+const updateOrder = async (req, res) => {
+  try {
+    const orderId = req.params.id;
+    const { status, priority, notes, shipping, items, payment } = req.body;
+    
+    // Find order
+    let order = await Order.findOne({ orderNumber: orderId });
+    if (!order) {
+      const mongoose = require('mongoose');
+      if (mongoose.Types.ObjectId.isValid(orderId)) {
+        order = await Order.findById(orderId);
+      }
+    }
+    
+    if (!order) {
+      return res.status(404).json({ success: false, error: 'Order not found' });
+    }
+    
+    // Track status change
+    const statusChanged = status && status !== order.status;
+    
+    // Update fields
+    if (status) order.status = status;
+    if (priority) order.priority = priority;
+    if (notes !== undefined) order.notes = notes;
+    
+    // Update shipping
+    if (shipping) {
+      order.shipping = {
+        ...order.shipping,
+        ...shipping
+      };
+    }
+    
+    // Update items if provided
+    if (items && Array.isArray(items)) {
+      order.items = items.map(item => ({
+        partNumber: item.partNumber,
+        description: item.description || item.partNumber,
+        brand: item.brand || 'N/A',
+        supplier: item.supplier || 'N/A',
+        price: parseFloat(item.price) || 0,
+        currency: item.currency || 'AED',
+        weight: parseFloat(item.weight) || 0,
+        stock: item.stock || 'N/A'
+      }));
+      
+      // Recalculate pricing
+      const subtotal = order.items.reduce((sum, item) => sum + item.price, 0);
+      order.pricing.subtotal = subtotal;
+      order.pricing.total = subtotal + (order.pricing.tax || 0) + 
+                           (order.pricing.shipping || 0) + 
+                           (order.pricing.processingFee || 0) - 
+                           (order.pricing.discount || 0);
+      order.totalItems = order.items.length;
+    }
+    
+    // Update payment if provided
+    if (payment) {
+      if (payment.status) order.payment.status = payment.status;
+      if (payment.method) order.payment.method = payment.method;
+    }
+    
+    // Add timeline event if status changed
+    if (statusChanged) {
+      const statusMessages = {
+        pending: 'Order marked as pending',
+        processing: 'Order is now being processed',
+        shipped: 'Order has been shipped',
+        delivered: 'Order has been delivered',
+        completed: 'Order completed',
+        cancelled: 'Order has been cancelled'
+      };
+      
+      order.timeline.push({
+        status,
+        message: statusMessages[status] || `Status changed to ${status}`,
+        timestamp: new Date(),
+        updatedBy: req.admin?.username || 'Admin'
+      });
+    }
+    
+    await order.save();
+    
+    res.json({
+      success: true,
+      message: 'Order updated successfully',
+      order: {
+        id: order.orderNumber,
+        status: order.status,
+        total: order.pricing.total
+      }
+    });
+  } catch (error) {
+    console.error('Error in updateOrder:', error);
+    res.status(500).json({ success: false, error: error.message || 'Failed to update order' });
+  }
+};
+
+/**
+ * Update Order Status (API)
+ */
+const updateOrderStatus = async (req, res) => {
+  try {
+    const orderId = req.params.id;
+    const { status, message } = req.body;
+    
+    if (!status) {
+      return res.status(400).json({ success: false, error: 'Status is required' });
+    }
+    
+    // Find order
+    let order = await Order.findOne({ orderNumber: orderId });
+    if (!order) {
+      const mongoose = require('mongoose');
+      if (mongoose.Types.ObjectId.isValid(orderId)) {
+        order = await Order.findById(orderId);
+      }
+    }
+    
+    if (!order) {
+      return res.status(404).json({ success: false, error: 'Order not found' });
+    }
+    
+    const statusMessages = {
+      pending: 'Order marked as pending',
+      processing: 'Order is now being processed',
+      shipped: 'Order has been shipped',
+      delivered: 'Order has been delivered',
+      completed: 'Order completed',
+      cancelled: 'Order has been cancelled'
+    };
+    
+    await order.updateStatus(
+      status, 
+      message || statusMessages[status] || `Status changed to ${status}`,
+      req.admin?.username || 'Admin'
+    );
+    
+    res.json({
+      success: true,
+      message: 'Order status updated successfully',
+      newStatus: status
+    });
+  } catch (error) {
+    console.error('Error in updateOrderStatus:', error);
+    res.status(500).json({ success: false, error: 'Failed to update order status' });
+  }
+};
+
+/**
+ * Get Order Stats (API) - For dashboard
+ */
+const getOrderStats = async (req, res) => {
+  try {
+    const stats = await Order.aggregate([
+      {
+        $group: {
+          _id: '$status',
+          count: { $sum: 1 },
+          totalAmount: { $sum: '$pricing.total' }
+        }
+      }
+    ]);
+    
+    const totalOrders = await Order.countDocuments();
+    const totalRevenue = await Order.aggregate([
+      { $group: { _id: null, total: { $sum: '$pricing.total' } } }
+    ]);
+    
+    res.json({
+      success: true,
+      stats: {
+        totalOrders,
+        totalRevenue: totalRevenue[0]?.total || 0,
+        byStatus: stats.reduce((acc, s) => {
+          acc[s._id] = { count: s.count, amount: s.totalAmount };
+          return acc;
+        }, {})
+      }
+    });
+  } catch (error) {
+    console.error('Error in getOrderStats:', error);
+    res.status(500).json({ success: false, error: 'Failed to get order stats' });
+  }
+};
+
+/**
+ * Get Tickets Management page - Uses real database
  */
 const getTicketsManagement = async (req, res) => {
   try {
     const { currentModule, moduleConfig } = getModuleData(req);
     
-    // Enhanced mock tickets with messages, unread counts, customer info
-    const defaultTickets = [
-      { 
-        id: 'TKT-001', 
-        subject: 'Delayed Shipment Inquiry', 
-        category: 'Shipping Issue', 
-        status: 'open', 
-        priority: 'high',
-        orderNumber: 'ORD-2025-1247',
-        customerName: 'John Smith',
-        customerEmail: 'john.smith@automax.com',
-        industry: 'automotive',
-        createdAt: '2025-12-26T10:30:00Z',
-        unreadCount: 2,
-        lastMessage: { content: 'Any update on the shipping status?', time: '2 hours ago' },
-        messages: [
-          { sender: 'customer', content: 'Hi, I placed an order 3 days ago but haven\'t received shipping confirmation yet. Can you please check?', time: '2025-12-24T14:00:00Z' },
-          { sender: 'admin', content: 'Hello! I\'m looking into this for you. Could you please confirm your order number?', time: '2025-12-24T15:30:00Z' },
-          { sender: 'customer', content: 'The order number is ORD-2025-1247. Thanks for your help!', time: '2025-12-24T16:00:00Z' },
-          { sender: 'customer', content: 'Any update on the shipping status?', time: '2025-12-26T08:30:00Z' }
-        ]
-      },
-      { 
-        id: 'TKT-002', 
-        subject: 'Wrong Part Received', 
-        category: 'Product Quality', 
-        status: 'in-progress', 
-        priority: 'urgent',
-        orderNumber: 'ORD-2025-1246',
-        customerName: 'Maria Garcia',
-        customerEmail: 'maria@automax.de',
-        industry: 'automotive',
-        createdAt: '2025-12-25T09:15:00Z',
-        unreadCount: 0,
-        lastMessage: { content: 'We are processing your replacement.', time: '1 day ago' },
-        messages: [
-          { sender: 'customer', content: 'I received the wrong part. I ordered a fuel pump but got a water pump instead.', time: '2025-12-25T09:15:00Z' },
-          { sender: 'admin', content: 'We apologize for the mix-up. We are processing your replacement immediately.', time: '2025-12-25T10:00:00Z' }
-        ]
-      },
-      { 
-        id: 'TKT-003', 
-        subject: 'Return Authorization Request', 
-        category: 'Return Request', 
-        status: 'open', 
-        priority: 'medium',
-        orderNumber: 'ORD-2025-1242',
-        customerName: 'Robert Chen',
-        customerEmail: 'r.chen@heavyduty.com',
-        industry: 'machinery',
-        createdAt: '2025-12-24T16:45:00Z',
-        unreadCount: 1,
-        lastMessage: { content: 'I need to return unused parts from my order.', time: '3 days ago' },
-        messages: [
-          { sender: 'customer', content: 'I need to return some unused parts from my recent order. How do I proceed?', time: '2025-12-24T16:45:00Z' }
-        ]
-      },
-      { 
-        id: 'TKT-004', 
-        subject: 'Technical Specifications Query', 
-        category: 'Technical Support', 
-        status: 'resolved', 
-        priority: 'low',
-        orderNumber: 'ORD-2025-1244',
-        customerName: 'Sarah Johnson',
-        customerEmail: 'sarah@partsworld.com',
-        industry: 'automotive',
-        createdAt: '2025-12-23T11:20:00Z',
-        unreadCount: 0,
-        lastMessage: { content: 'Perfect, that answers my question!', time: '4 days ago' },
-        messages: [
-          { sender: 'customer', content: 'Could you provide detailed specifications for the hydraulic assembly unit?', time: '2025-12-23T11:20:00Z' },
-          { sender: 'admin', content: 'Of course! Here are the specifications...', time: '2025-12-23T12:00:00Z' },
-          { sender: 'customer', content: 'Perfect, that answers my question!', time: '2025-12-23T13:00:00Z' }
-        ]
-      },
-      { 
-        id: 'TKT-005', 
-        subject: 'Invoice Discrepancy', 
-        category: 'Billing', 
-        status: 'in-progress', 
-        priority: 'high',
-        orderNumber: 'ORD-2025-1243',
-        customerName: 'Michael Brown',
-        customerEmail: 'mbrown@premiumauto.com',
-        industry: 'automotive',
-        createdAt: '2025-12-22T14:30:00Z',
-        unreadCount: 0,
-        lastMessage: { content: 'Our accounting team is reviewing this.', time: '5 days ago' },
-        messages: [
-          { sender: 'customer', content: 'The invoice amount doesn\'t match the quoted price. Please clarify.', time: '2025-12-22T14:30:00Z' },
-          { sender: 'admin', content: 'Our accounting team is reviewing this. We\'ll get back to you shortly.', time: '2025-12-22T15:00:00Z' }
-        ]
-      },
-      { 
-        id: 'TKT-006', 
-        subject: 'Equipment Compatibility Question', 
-        category: 'Technical Support', 
-        status: 'open', 
-        priority: 'medium',
-        orderNumber: 'ORD-2025-1242',
-        customerName: 'David Wilson',
-        customerEmail: 'd.wilson@constplus.com',
-        industry: 'machinery',
-        createdAt: '2025-12-27T08:00:00Z',
-        unreadCount: 1,
-        lastMessage: { content: 'Will this part work with my CAT 320?', time: '1 hour ago' },
-        messages: [
-          { sender: 'customer', content: 'Will this part work with my CAT 320 excavator? I need to confirm before ordering.', time: '2025-12-27T08:00:00Z' }
-        ]
-      }
-    ];
-    
-    // Always use defaultTickets to ensure data is available
-    // Store in app.locals for other functions to use
-    req.app.locals.ticketsDatabase = defaultTickets;
+    // Get real tickets from database
+    const dbTickets = await Ticket.find({})
+      .sort({ lastMessageAt: -1, createdAt: -1 })
+      .lean();
 
-    const tickets = filterByModule(defaultTickets, currentModule);
+    // Format tickets for the view
+    const tickets = dbTickets.map(ticket => ({
+      id: ticket.ticketNumber,
+      subject: ticket.subject,
+      category: ticket.category,
+      status: ticket.status,
+      priority: ticket.priority || 'medium',
+      orderNumber: ticket.orderNumber || 'N/A',
+      customerName: ticket.buyerName,
+      customerEmail: ticket.buyerEmail,
+      customer: ticket.buyerName,
+      email: ticket.buyerEmail,
+      industry: ticket.industry || 'automotive',
+      createdAt: ticket.createdAt,
+      updatedAt: ticket.updatedAt,
+      unreadCount: ticket.unreadByAdmin || 0,
+      lastMessage: ticket.messages && ticket.messages.length > 0 
+        ? { 
+            content: ticket.messages[ticket.messages.length - 1].content,
+            time: ticket.messages[ticket.messages.length - 1].createdAt
+          }
+        : null,
+      messages: ticket.messages || []
+    }));
     
     res.render('admin/tickets', {
       title: currentModule ? `${moduleConfig.name} Tickets | PARTSFORM Admin` : 'Tickets Management | PARTSFORM',
@@ -415,19 +842,67 @@ const getTicketsManagement = async (req, res) => {
 };
 
 /**
- * Get Ticket Details/Chat page
+ * Get Ticket Details/Chat page - Uses real database
  */
 const getTicketDetails = async (req, res) => {
   try {
     const { currentModule, moduleConfig } = getModuleData(req);
     const ticketId = req.params.id;
     
-    const ticketsDatabase = req.app.locals.ticketsDatabase || [];
-    const ticket = ticketsDatabase.find(t => t.id === ticketId);
+    // Find ticket in database
+    const dbTicket = await Ticket.findOne({ ticketNumber: ticketId })
+      .populate('buyer', 'firstName lastName email companyName phone industry')
+      .lean();
     
-    if (!ticket) {
+    if (!dbTicket) {
       return res.status(404).render('error', { title: 'Error', error: 'Ticket not found' });
     }
+
+    // Mark messages as read by admin
+    await Ticket.updateOne(
+      { _id: dbTicket._id },
+      { 
+        $set: { 
+          unreadByAdmin: 0,
+          'messages.$[elem].readByAdmin': true 
+        } 
+      },
+      { 
+        arrayFilters: [{ 'elem.sender': 'buyer' }] 
+      }
+    );
+
+    // Format ticket for the view
+    const ticket = {
+      id: dbTicket.ticketNumber,
+      _id: dbTicket._id,
+      subject: dbTicket.subject,
+      description: dbTicket.description,
+      category: dbTicket.category,
+      status: dbTicket.status,
+      priority: dbTicket.priority || 'medium',
+      orderNumber: dbTicket.orderNumber || 'N/A',
+      customerName: dbTicket.buyerName,
+      customerEmail: dbTicket.buyerEmail,
+      customer: dbTicket.buyerName,
+      email: dbTicket.buyerEmail,
+      buyerId: dbTicket.buyer?._id || dbTicket.buyer,
+      industry: dbTicket.buyer?.industry || dbTicket.industry || 'N/A',
+      createdAt: dbTicket.createdAt,
+      updatedAt: dbTicket.updatedAt,
+      attachments: dbTicket.attachments || [],
+      messages: dbTicket.messages.map(msg => ({
+        _id: msg._id,
+        sender: msg.sender,
+        senderName: msg.senderName,
+        content: msg.content,
+        text: msg.content,
+        attachments: msg.attachments || [],
+        time: msg.createdAt,
+        createdAt: msg.createdAt,
+        read: msg.readByAdmin
+      }))
+    };
 
     res.render('admin/ticket-details', {
       title: `Ticket ${ticketId} | PARTSFORM Admin`,
@@ -443,32 +918,86 @@ const getTicketDetails = async (req, res) => {
 };
 
 /**
- * Post reply to ticket
+ * Post reply to ticket - Uses real database
  */
 const postTicketReply = async (req, res) => {
   try {
     const ticketId = req.params.id;
     const { message } = req.body;
+    const admin = req.user;
     
-    const ticketsDatabase = req.app.locals.ticketsDatabase || [];
-    const ticket = ticketsDatabase.find(t => t.id === ticketId);
+    if (!message || message.trim() === '') {
+      return res.status(400).json({ success: false, error: 'Message is required' });
+    }
+
+    // Find the ticket
+    const ticket = await Ticket.findOne({ ticketNumber: ticketId });
     
     if (!ticket) {
       return res.status(404).json({ success: false, error: 'Ticket not found' });
     }
     
-    // Add message
-    if (!ticket.messages) ticket.messages = [];
-    ticket.messages.push({
+    // Handle file attachments if any
+    const attachments = [];
+    if (req.files && req.files.length > 0) {
+      for (const file of req.files) {
+        attachments.push({
+          filename: file.filename,
+          originalName: file.originalname,
+          mimetype: file.mimetype,
+          size: file.size,
+          path: `/uploads/tickets/${file.filename}`
+        });
+      }
+    }
+
+    // Add the message
+    const adminName = admin ? `${admin.firstName || ''} ${admin.lastName || ''}`.trim() || 'Support Team' : 'Support Team';
+    
+    const newMessage = await ticket.addMessage({
       sender: 'admin',
-      content: message,
-      time: new Date().toISOString()
+      senderName: adminName,
+      senderId: admin?._id,
+      content: message.trim(),
+      attachments
+    });
+
+    // Emit socket event for real-time update
+    socketService.emitToTicket(ticketId, 'message-received', {
+      ticketId,
+      message: {
+        id: newMessage._id,
+        sender: 'admin',
+        senderName: adminName,
+        content: message.trim(),
+        attachments,
+        timestamp: newMessage.createdAt
+      }
+    });
+
+    // Notify the buyer
+    socketService.emitToBuyer(ticket.buyer.toString(), 'ticket-new-message', {
+      ticketId: ticket.ticketNumber,
+      subject: ticket.subject,
+      message: {
+        sender: 'admin',
+        senderName: adminName,
+        content: message.trim().substring(0, 100),
+        timestamp: newMessage.createdAt
+      }
     });
     
-    // Update last message
-    ticket.lastMessage = { content: message, time: 'Just now' };
-    
-    res.json({ success: true, message: 'Reply sent' });
+    res.json({ 
+      success: true, 
+      message: {
+        id: newMessage._id,
+        sender: 'admin',
+        senderName: adminName,
+        content: message.trim(),
+        attachments,
+        timestamp: newMessage.createdAt
+      }
+    });
   } catch (error) {
     console.error('Error in postTicketReply:', error);
     res.status(500).json({ success: false, error: 'Failed to send reply' });
@@ -476,21 +1005,34 @@ const postTicketReply = async (req, res) => {
 };
 
 /**
- * Update ticket status
+ * Update ticket status - Uses real database
  */
 const updateTicketStatus = async (req, res) => {
   try {
     const ticketId = req.params.id;
     const { status } = req.body;
     
-    const ticketsDatabase = req.app.locals.ticketsDatabase || [];
-    const ticket = ticketsDatabase.find(t => t.id === ticketId);
+    const ticket = await Ticket.findOne({ ticketNumber: ticketId });
     
     if (!ticket) {
       return res.status(404).json({ success: false, error: 'Ticket not found' });
     }
     
-    ticket.status = status;
+    await ticket.updateStatus(status, 'admin');
+
+    // Emit socket event for real-time update
+    socketService.emitToTicket(ticketId, 'ticket-status-changed', {
+      ticketId,
+      status,
+      updatedBy: 'admin'
+    });
+
+    // Notify the buyer
+    socketService.emitToBuyer(ticket.buyer.toString(), 'ticket-status-changed', {
+      ticketId: ticket.ticketNumber,
+      subject: ticket.subject,
+      status
+    });
     
     res.json({ success: true, message: `Ticket status updated to ${status}` });
   } catch (error) {
@@ -500,33 +1042,174 @@ const updateTicketStatus = async (req, res) => {
 };
 
 /**
+ * Get tickets API for admin
+ * GET /admin/api/tickets
+ */
+const getTicketsApi = async (req, res) => {
+  try {
+    const { status, priority, category, search, page = 1, limit = 20 } = req.query;
+
+    // Build query
+    const query = {};
+    
+    if (status && status !== '') {
+      query.status = status;
+    }
+    
+    if (priority && priority !== '') {
+      query.priority = priority;
+    }
+    
+    if (category && category !== '') {
+      query.category = category;
+    }
+
+    if (search && search.trim() !== '') {
+      const searchRegex = new RegExp(search.trim(), 'i');
+      query.$or = [
+        { ticketNumber: searchRegex },
+        { subject: searchRegex },
+        { orderNumber: searchRegex },
+        { buyerName: searchRegex },
+        { buyerEmail: searchRegex }
+      ];
+    }
+
+    // Get tickets with pagination
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    
+    const [tickets, total] = await Promise.all([
+      Ticket.find(query)
+        .sort({ lastMessageAt: -1, createdAt: -1 })
+        .skip(skip)
+        .limit(parseInt(limit))
+        .lean(),
+      Ticket.countDocuments(query)
+    ]);
+
+    // Get status counts
+    const [openCount, inProgressCount, resolvedCount, closedCount] = await Promise.all([
+      Ticket.countDocuments({ status: 'open' }),
+      Ticket.countDocuments({ status: 'in-progress' }),
+      Ticket.countDocuments({ status: 'resolved' }),
+      Ticket.countDocuments({ status: 'closed' })
+    ]);
+
+    res.json({
+      success: true,
+      tickets: tickets.map(t => ({
+        id: t.ticketNumber,
+        subject: t.subject,
+        category: t.category,
+        status: t.status,
+        priority: t.priority,
+        orderNumber: t.orderNumber || 'N/A',
+        customerName: t.buyerName,
+        customerEmail: t.buyerEmail,
+        createdAt: t.createdAt,
+        unreadCount: t.unreadByAdmin || 0,
+        messageCount: t.messages?.length || 0,
+        lastMessageAt: t.lastMessageAt
+      })),
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / parseInt(limit))
+      },
+      stats: {
+        open: openCount,
+        'in-progress': inProgressCount,
+        resolved: resolvedCount,
+        closed: closedCount,
+        total: openCount + inProgressCount + resolvedCount + closedCount
+      }
+    });
+  } catch (error) {
+    console.error('Error in getTicketsApi:', error);
+    res.status(500).json({ success: false, error: 'Failed to load tickets' });
+  }
+};
+
+/**
+ * Mark ticket as read by admin
+ * PUT /admin/api/tickets/:id/read
+ */
+const markTicketAsReadAdmin = async (req, res) => {
+  try {
+    const ticketId = req.params.id;
+
+    const ticket = await Ticket.findOne({ ticketNumber: ticketId });
+
+    if (!ticket) {
+      return res.status(404).json({ success: false, error: 'Ticket not found' });
+    }
+
+    await ticket.markAsRead('admin');
+
+    // Notify via socket
+    socketService.emitToTicket(ticketId, 'messages-marked-read', {
+      ticketId,
+      readBy: 'admin'
+    });
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error in markTicketAsReadAdmin:', error);
+    res.status(500).json({ success: false, error: 'Failed to mark as read' });
+  }
+};
+
+/**
  * Get Users Management page (users are global, not filtered by module)
+ * Uses real database data from Buyer model
  */
 const getUsersManagement = async (req, res) => {
   try {
     const { currentModule, moduleConfig } = getModuleData(req);
     
-    // Mock users data - global, all automotive
-    const allUsers = [
-      { id: 1, name: 'John Smith', email: 'john.smith@automax.com', company: 'AutoMax Germany', orders: 23, totalSpent: 245000, status: 'active', joined: '2024-03-15', industry: 'automotive', phone: '+1 (555) 123-4567' },
-      { id: 2, name: 'Maria Garcia', email: 'maria@premiumauto.com', company: 'Premium Auto Parts', orders: 45, totalSpent: 89000, status: 'active', joined: '2024-01-22', industry: 'automotive', phone: '+49 30 123456' },
-      { id: 3, name: 'Robert Chen', email: 'r.chen@euroauto.eu', company: 'Euro Auto Systems', orders: 12, totalSpent: 456000, status: 'active', joined: '2024-06-10', industry: 'automotive', phone: '+1 (555) 987-6543' },
-      { id: 4, name: 'Sarah Johnson', email: 'sarah@partsworld.com', company: 'PartsWorld Inc', orders: 67, totalSpent: 1250000, status: 'active', joined: '2023-11-05', industry: 'automotive', phone: '+1 (555) 456-7890' },
-      { id: 5, name: 'Michael Brown', email: 'mbrown@carcomponents.com', company: 'Car Components Ltd', orders: 34, totalSpent: 67500, status: 'inactive', joined: '2024-02-28', industry: 'automotive', phone: '+1 (555) 321-0987' },
-      { id: 6, name: 'Emma Wilson', email: 'emma@driveparts.com', company: 'Drive Parts Co', orders: 18, totalSpent: 234000, status: 'active', joined: '2024-04-19', industry: 'automotive', phone: '+1 (555) 654-3210' },
-      { id: 7, name: 'David Lee', email: 'd.lee@motorsupply.com', company: 'Motor Supply Inc', orders: 56, totalSpent: 345000, status: 'active', joined: '2024-05-12', industry: 'automotive', phone: '+1 (555) 789-0123' },
-      { id: 8, name: 'Lisa Anderson', email: 'lisa@autoexpress.com', company: 'AutoParts Express', orders: 29, totalSpent: 567000, status: 'active', joined: '2024-02-08', industry: 'automotive', phone: '+1 (555) 234-5678' },
-    ];
+    // Get all buyers from database
+    const buyers = await Buyer.find({}).sort({ createdAt: -1 }).lean();
     
-    // Store in app.locals for other functions
-    req.app.locals.usersDatabase = allUsers;
+    // Get order counts and total spent for each buyer
+    const usersWithStats = await Promise.all(buyers.map(async (buyer) => {
+      // Get orders for this buyer
+      const orders = await Order.find({ buyer: buyer._id }).lean();
+      const orderCount = orders.length;
+      const totalSpent = orders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
+      
+      // Map isActive to status for view compatibility
+      const status = buyer.isActive ? 'active' : 'inactive';
+      
+      return {
+        id: buyer._id,
+        name: `${buyer.firstName} ${buyer.lastName}`,
+        firstName: buyer.firstName,
+        lastName: buyer.lastName,
+        email: buyer.email,
+        company: buyer.companyName,
+        companyName: buyer.companyName,
+        phone: buyer.phone,
+        country: buyer.country,
+        city: buyer.city,
+        shippingAddress: buyer.shippingAddress,
+        orders: orderCount,
+        totalSpent: totalSpent,
+        status: status,
+        isActive: buyer.isActive,
+        joined: buyer.createdAt,
+        createdAt: buyer.createdAt,
+        lastLogin: buyer.lastLogin,
+        avatar: buyer.avatar,
+      };
+    }));
 
     res.render('admin/users', {
       title: 'Users Management | PARTSFORM',
       activePage: 'users',
       currentModule,
       moduleConfig,
-      users: allUsers  // No filtering - all users
+      users: usersWithStats
     });
   } catch (error) {
     console.error('Error in getUsersManagement:', error);
@@ -535,26 +1218,70 @@ const getUsersManagement = async (req, res) => {
 };
 
 /**
- * Get User Details page
+ * Get User Details page - uses real database
  */
 const getUserDetails = async (req, res) => {
   try {
     const { currentModule, moduleConfig } = getModuleData(req);
-    const userId = parseInt(req.params.id);
+    const userId = req.params.id;
     
-    const usersDatabase = req.app.locals.usersDatabase || [];
-    const user = usersDatabase.find(u => u.id === userId);
+    // Find buyer in database
+    const buyer = await Buyer.findById(userId).lean();
     
-    if (!user) {
+    if (!buyer) {
       return res.status(404).render('error', { title: 'Error', error: 'User not found' });
     }
+
+    // Get orders for this buyer
+    const orders = await Order.find({ buyer: userId }).sort({ createdAt: -1 }).lean();
+    const orderCount = orders.length;
+    const totalSpent = orders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
+    
+    // Map isActive to status for view compatibility
+    const status = buyer.isActive ? 'active' : 'inactive';
+    
+    // Build user object for view
+    const user = {
+      id: buyer._id,
+      name: `${buyer.firstName} ${buyer.lastName}`,
+      firstName: buyer.firstName,
+      lastName: buyer.lastName,
+      email: buyer.email,
+      company: buyer.companyName,
+      companyName: buyer.companyName,
+      phone: buyer.phone,
+      country: buyer.country,
+      city: buyer.city,
+      shippingAddress: buyer.shippingAddress,
+      addresses: buyer.addresses || [],
+      orders: orderCount,
+      totalSpent: totalSpent,
+      status: status,
+      isActive: buyer.isActive,
+      joined: buyer.createdAt,
+      createdAt: buyer.createdAt,
+      updatedAt: buyer.updatedAt,
+      lastLogin: buyer.lastLogin,
+      avatar: buyer.avatar,
+      newsletter: buyer.newsletter,
+      preferredCurrency: buyer.preferredCurrency,
+      // Include recent orders for display
+      recentOrders: orders.slice(0, 5).map(order => ({
+        id: order.orderNumber || order._id,
+        date: order.createdAt,
+        items: order.items ? order.items.length : 0,
+        amount: order.totalAmount || 0,
+        status: order.status || 'pending'
+      }))
+    };
 
     res.render('admin/user-details', {
       title: `${user.name} | PARTSFORM Admin`,
       activePage: 'users',
       currentModule,
       moduleConfig,
-      user
+      user,
+      orders: orders
     });
   } catch (error) {
     console.error('Error in getUserDetails:', error);
@@ -582,19 +1309,41 @@ const getUserCreate = async (req, res) => {
 };
 
 /**
- * Get User Edit page
+ * Get User Edit page - uses real database
  */
 const getUserEdit = async (req, res) => {
   try {
     const { currentModule, moduleConfig } = getModuleData(req);
-    const userId = parseInt(req.params.id);
+    const userId = req.params.id;
     
-    const usersDatabase = req.app.locals.usersDatabase || [];
-    const user = usersDatabase.find(u => u.id === userId);
+    // Find buyer in database
+    const buyer = await Buyer.findById(userId).lean();
     
-    if (!user) {
+    if (!buyer) {
       return res.status(404).render('error', { title: 'Error', error: 'User not found' });
     }
+
+    // Map isActive to status for view compatibility
+    const status = buyer.isActive ? 'active' : 'inactive';
+
+    const user = {
+      id: buyer._id,
+      name: `${buyer.firstName} ${buyer.lastName}`,
+      firstName: buyer.firstName,
+      lastName: buyer.lastName,
+      email: buyer.email,
+      company: buyer.companyName,
+      companyName: buyer.companyName,
+      phone: buyer.phone,
+      country: buyer.country,
+      city: buyer.city,
+      shippingAddress: buyer.shippingAddress,
+      status: status,
+      isActive: buyer.isActive,
+      joined: buyer.createdAt,
+      newsletter: buyer.newsletter,
+      preferredCurrency: buyer.preferredCurrency,
+    };
 
     res.render('admin/user-edit', {
       title: `Edit ${user.name} | PARTSFORM Admin`,
@@ -610,21 +1359,24 @@ const getUserEdit = async (req, res) => {
 };
 
 /**
- * Update user status
+ * Update user status - uses real database
  */
 const updateUserStatus = async (req, res) => {
   try {
-    const userId = parseInt(req.params.id);
+    const userId = req.params.id;
     const { status } = req.body;
     
-    const usersDatabase = req.app.locals.usersDatabase || [];
-    const user = usersDatabase.find(u => u.id === userId);
+    // Find and update buyer in database
+    const buyer = await Buyer.findById(userId);
     
-    if (!user) {
+    if (!buyer) {
       return res.status(404).json({ success: false, error: 'User not found' });
     }
     
-    user.status = status;
+    // Update isActive based on status
+    buyer.isActive = (status === 'active');
+    
+    await buyer.save();
     
     res.json({ success: true, message: `User status updated to ${status}` });
   } catch (error) {
@@ -634,20 +1386,20 @@ const updateUserStatus = async (req, res) => {
 };
 
 /**
- * Bulk update users
+ * Bulk update users - uses real database
  */
 const bulkUpdateUsers = async (req, res) => {
   try {
     const { userIds, status } = req.body;
     
-    const usersDatabase = req.app.locals.usersDatabase || [];
+    // Map status to isActive
+    const isActive = (status === 'active');
     
-    userIds.forEach(userId => {
-      const user = usersDatabase.find(u => u.id === userId);
-      if (user) {
-        user.status = status;
-      }
-    });
+    // Update all users in database
+    await Buyer.updateMany(
+      { _id: { $in: userIds } },
+      { isActive: isActive }
+    );
     
     res.json({ success: true, message: `${userIds.length} users updated to ${status}` });
   } catch (error) {
@@ -657,26 +1409,235 @@ const bulkUpdateUsers = async (req, res) => {
 };
 
 /**
- * Delete user
+ * Delete user - uses real database
  */
 const deleteUser = async (req, res) => {
   try {
-    const userId = parseInt(req.params.id);
+    const userId = req.params.id;
     
-    let usersDatabase = req.app.locals.usersDatabase || [];
-    const userIndex = usersDatabase.findIndex(u => u.id === userId);
+    // Find and delete buyer from database
+    const buyer = await Buyer.findByIdAndDelete(userId);
     
-    if (userIndex === -1) {
+    if (!buyer) {
       return res.status(404).json({ success: false, error: 'User not found' });
     }
     
-    usersDatabase.splice(userIndex, 1);
-    req.app.locals.usersDatabase = usersDatabase;
+    // Optionally: Delete related orders (or keep them for records)
+    // await Order.deleteMany({ buyer: userId });
     
-    res.json({ success: true, message: 'User deleted' });
+    res.json({ success: true, message: 'User deleted successfully' });
   } catch (error) {
     console.error('Error in deleteUser:', error);
     res.status(500).json({ success: false, error: 'Failed to delete user' });
+  }
+};
+
+/**
+ * Create user from admin panel - uses real database
+ */
+const createUser = async (req, res) => {
+  try {
+    const {
+      firstName,
+      lastName,
+      email,
+      phone,
+      companyName,
+      country,
+      city,
+      shippingAddress,
+      status,
+      industry,
+      position
+    } = req.body;
+
+    // Check if email already exists
+    const existingBuyer = await Buyer.findOne({ email: email.toLowerCase() });
+    if (existingBuyer) {
+      return res.status(409).json({
+        success: false,
+        error: 'A user with this email already exists'
+      });
+    }
+
+    // Generate a temporary password (user will need to reset)
+    const tempPassword = Math.random().toString(36).slice(-8) + 'A1!';
+
+    // Create new buyer
+    const buyer = new Buyer({
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      email: email.toLowerCase().trim(),
+      phone: phone ? phone.trim() : '',
+      companyName: companyName ? companyName.trim() : 'N/A',
+      country: country ? country.trim() : 'US',
+      city: city ? city.trim() : 'N/A',
+      shippingAddress: shippingAddress ? shippingAddress.trim() : 'N/A',
+      password: tempPassword,
+      isActive: status === 'active',
+      termsAcceptedAt: new Date(),
+    });
+
+    await buyer.save();
+
+    res.status(201).json({
+      success: true,
+      message: 'User created successfully',
+      data: {
+        id: buyer._id,
+        email: buyer.email,
+        name: `${buyer.firstName} ${buyer.lastName}`
+      }
+    });
+  } catch (error) {
+    console.error('Error in createUser:', error);
+    res.status(500).json({ success: false, error: 'Failed to create user' });
+  }
+};
+
+/**
+ * Update user from admin panel - uses real database
+ */
+const updateUser = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const {
+      firstName,
+      lastName,
+      email,
+      phone,
+      companyName,
+      country,
+      city,
+      shippingAddress,
+      status,
+      industry,
+      position
+    } = req.body;
+
+    const buyer = await Buyer.findById(userId);
+    
+    if (!buyer) {
+      return res.status(404).json({ success: false, error: 'User not found' });
+    }
+
+    // Update fields if provided
+    if (firstName) buyer.firstName = firstName.trim();
+    if (lastName) buyer.lastName = lastName.trim();
+    if (email && email !== buyer.email) {
+      // Check if new email exists
+      const existingBuyer = await Buyer.findOne({ email: email.toLowerCase(), _id: { $ne: userId } });
+      if (existingBuyer) {
+        return res.status(409).json({ success: false, error: 'Email already in use' });
+      }
+      buyer.email = email.toLowerCase().trim();
+    }
+    if (phone) buyer.phone = phone.trim();
+    if (companyName) buyer.companyName = companyName.trim();
+    if (country) buyer.country = country.trim();
+    if (city) buyer.city = city.trim();
+    if (shippingAddress) buyer.shippingAddress = shippingAddress.trim();
+    
+    // Update status - simple active/inactive
+    if (status) {
+      buyer.isActive = (status === 'active');
+    }
+
+    await buyer.save();
+
+    res.json({
+      success: true,
+      message: 'User updated successfully',
+      data: {
+        id: buyer._id,
+        email: buyer.email,
+        name: `${buyer.firstName} ${buyer.lastName}`
+      }
+    });
+  } catch (error) {
+    console.error('Error in updateUser:', error);
+    res.status(500).json({ success: false, error: 'Failed to update user' });
+  }
+};
+
+/**
+ * Activate user account
+ */
+const approveUser = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    
+    const buyer = await Buyer.findById(userId);
+    
+    if (!buyer) {
+      return res.status(404).json({ success: false, error: 'User not found' });
+    }
+    
+    buyer.isActive = true;
+    
+    await buyer.save();
+    
+    res.json({
+      success: true,
+      message: 'User account activated successfully'
+    });
+  } catch (error) {
+    console.error('Error in approveUser:', error);
+    res.status(500).json({ success: false, error: 'Failed to activate user' });
+  }
+};
+
+/**
+ * Deactivate user account
+ */
+const rejectUser = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    
+    const buyer = await Buyer.findById(userId);
+    
+    if (!buyer) {
+      return res.status(404).json({ success: false, error: 'User not found' });
+    }
+    
+    buyer.isActive = false;
+    
+    await buyer.save();
+    
+    res.json({
+      success: true,
+      message: 'User account deactivated'
+    });
+  } catch (error) {
+    console.error('Error in rejectUser:', error);
+    res.status(500).json({ success: false, error: 'Failed to deactivate user' });
+  }
+};
+
+/**
+ * Suspend user account (same as deactivate)
+ */
+const suspendUser = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    
+    const buyer = await Buyer.findById(userId);
+    
+    if (!buyer) {
+      return res.status(404).json({ success: false, error: 'User not found' });
+    }
+    
+    buyer.isActive = false;
+    
+    await buyer.save();
+    
+    res.json({
+      success: true,
+      message: 'User account suspended'
+    });
+  } catch (error) {
+    console.error('Error in suspendUser:', error);
+    res.status(500).json({ success: false, error: 'Failed to suspend user' });
   }
 };
 
@@ -766,34 +1727,6 @@ const getPaymentCreate = async (req, res) => {
   } catch (error) {
     console.error('Error in getPaymentCreate:', error);
     res.status(500).render('error', { title: 'Error', error: 'Failed to load create page' });
-  }
-};
-
-/**
- * Get AOG Cases Management page (Aviation specific)
- */
-const getAOGManagement = async (req, res) => {
-  try {
-    const { currentModule, moduleConfig } = getModuleData(req);
-    
-    // Mock AOG cases data
-    const aogCases = [
-      { id: 'AOG-2025-001', aircraft: 'Boeing 737-800', registration: 'N12345', partNumber: 'PN-789456', description: 'Main Landing Gear Actuator', priority: 'critical', status: 'in_progress', customer: 'Delta Airlines', eta: '4 hours', created: '2025-12-26 14:30' },
-      { id: 'AOG-2025-002', aircraft: 'Airbus A320', registration: 'D-ABCD', partNumber: 'PN-123789', description: 'APU Starter Motor', priority: 'high', status: 'sourcing', customer: 'Lufthansa', eta: '8 hours', created: '2025-12-26 10:15' },
-      { id: 'AOG-2025-003', aircraft: 'Embraer E190', registration: 'PP-PJE', partNumber: 'PN-456123', description: 'Hydraulic Pump Assembly', priority: 'critical', status: 'shipped', customer: 'LATAM Airlines', eta: '2 hours', created: '2025-12-25 22:00' },
-      { id: 'AOG-2025-004', aircraft: 'Boeing 777-300', registration: 'HL7782', partNumber: 'PN-987654', description: 'Engine Bleed Air Valve', priority: 'medium', status: 'delivered', customer: 'Korean Air', eta: 'Delivered', created: '2025-12-25 08:45' },
-    ];
-
-    res.render('admin/aog', {
-      title: 'AOG Cases Management | PARTSFORM Admin',
-      activePage: 'aog',
-      currentModule: 'aviation',
-      moduleConfig: { name: 'Aviation', icon: 'plane', color: '#0ea5e9' },
-      aogCases
-    });
-  } catch (error) {
-    console.error('Error in getAOGManagement:', error);
-    res.status(500).render('error', { title: 'Error', error: 'Failed to load AOG cases' });
   }
 };
 
@@ -1571,99 +2504,116 @@ const getPartsAnalytics = async (req, res) => {
 };
 
 /**
- * Get AOG Case Details page
+ * Upload parts from Excel/CSV file
+ * POST /admin/api/orders/upload-parts
  */
-const getAOGCaseDetails = async (req, res) => {
+const uploadPartsFromFile = async (req, res) => {
   try {
-    const { id } = req.params;
+    if (!req.file) {
+      return res.status(400).json({ success: false, error: 'No file uploaded' });
+    }
+
+    const fileBuffer = req.file.buffer;
+    const fileName = req.file.originalname.toLowerCase();
     
-    // Mock AOG case data (in production, fetch from database)
-    const aogCases = {
-      'AOG-2025-001': { id: 'AOG-2025-001', aircraft: 'Boeing 737-800', registration: 'N12345', partNumber: 'PN-789456', description: 'Main Landing Gear Actuator', priority: 'critical', status: 'in_progress', customer: 'Delta Airlines', eta: '4 hours', created: '2025-12-26 14:30' },
-      'AOG-2025-002': { id: 'AOG-2025-002', aircraft: 'Airbus A320', registration: 'D-ABCD', partNumber: 'PN-123789', description: 'APU Starter Motor', priority: 'high', status: 'sourcing', customer: 'Lufthansa', eta: '8 hours', created: '2025-12-26 10:15' },
-      'AOG-2025-003': { id: 'AOG-2025-003', aircraft: 'Embraer E190', registration: 'PP-PJE', partNumber: 'PN-456123', description: 'Hydraulic Pump Assembly', priority: 'critical', status: 'shipped', customer: 'LATAM Airlines', eta: '2 hours', created: '2025-12-25 22:00' },
-      'AOG-2025-004': { id: 'AOG-2025-004', aircraft: 'Boeing 777-300', registration: 'HL7782', partNumber: 'PN-987654', description: 'Engine Bleed Air Valve', priority: 'medium', status: 'delivered', customer: 'Korean Air', eta: 'Delivered', created: '2025-12-25 08:45' },
-    };
-
-    const aogCase = aogCases[id] || {
-      id: id,
-      aircraft: 'Unknown Aircraft',
-      registration: 'N/A',
-      partNumber: 'N/A',
-      description: 'Case not found',
-      priority: 'medium',
-      status: 'sourcing',
-      customer: 'Unknown',
-      eta: 'N/A',
-      created: new Date().toISOString()
-    };
-
-    res.render('admin/aog-case-details', {
-      title: `AOG Case ${id} | PARTSFORM Admin`,
-      activePage: 'aog',
-      currentModule: 'aviation',
-      moduleConfig: { name: 'Aviation', icon: 'plane', color: '#0ea5e9' },
-      aogCase
-    });
-  } catch (error) {
-    console.error('Error in getAOGCaseDetails:', error);
-    res.status(500).render('error', { title: 'Error', error: 'Failed to load AOG case details' });
-  }
-};
-/**
- * Get AOG Case Create page
- */
-const getAOGCaseCreate = async (req, res) => {
-  try {
-    res.render('admin/aog-case-create', {
-      title: 'Create AOG Case | PARTSFORM Admin',
-      activePage: 'aog',
-      currentModule: 'aviation',
-      moduleConfig: { name: 'Aviation', icon: 'plane', color: '#0ea5e9' }
-    });
-  } catch (error) {
-    console.error('Error in getAOGCaseCreate:', error);
-    res.status(500).render('error', { title: 'Error', error: 'Failed to load create page' });
-  }
-};
-
-/**
- * Get AOG Case Edit page
- */
-const getAOGCaseEdit = async (req, res) => {
-  try {
-    const { id } = req.params;
+    let parts = [];
     
-    const aogCases = {
-      'AOG-2025-001': { id: 'AOG-2025-001', aircraft: 'Boeing 737-800', registration: 'N12345', partNumber: 'PN-789456', description: 'Main Landing Gear Actuator', priority: 'critical', status: 'in_progress', customer: 'Delta Airlines', eta: '4 hours', created: '2025-12-26 14:30' },
-      'AOG-2025-002': { id: 'AOG-2025-002', aircraft: 'Airbus A320', registration: 'D-ABCD', partNumber: 'PN-123789', description: 'APU Starter Motor', priority: 'high', status: 'sourcing', customer: 'Lufthansa', eta: '8 hours', created: '2025-12-26 10:15' },
-      'AOG-2025-003': { id: 'AOG-2025-003', aircraft: 'Embraer E190', registration: 'PP-PJE', partNumber: 'PN-456123', description: 'Hydraulic Pump Assembly', priority: 'critical', status: 'shipped', customer: 'LATAM Airlines', eta: '2 hours', created: '2025-12-25 22:00' },
-      'AOG-2025-004': { id: 'AOG-2025-004', aircraft: 'Boeing 777-300', registration: 'HL7782', partNumber: 'PN-987654', description: 'Engine Bleed Air Valve', priority: 'medium', status: 'delivered', customer: 'Korean Air', eta: 'Delivered', created: '2025-12-25 08:45' },
-    };
-
-    const aogCase = aogCases[id] || {
-      id: id,
-      aircraft: 'Unknown Aircraft',
-      registration: 'N/A',
-      partNumber: 'N/A',
-      description: 'Case not found',
-      priority: 'medium',
-      status: 'sourcing',
-      customer: 'Unknown',
-      eta: 'N/A',
-      created: new Date().toISOString()
-    };
-
-    res.render('admin/aog-case-edit', {
-      title: `Edit AOG Case ${id} | PARTSFORM Admin`,
-      activePage: 'aog',
-      currentModule: 'aviation',
-      moduleConfig: { name: 'Aviation', icon: 'plane', color: '#0ea5e9' },
-      aogCase
+    // Check file type and parse accordingly
+    if (fileName.endsWith('.csv')) {
+      // Parse CSV file
+      const csvParserService = require('../services/csvParserService');
+      const parser = new csvParserService();
+      parts = await parser.parseCSV(fileBuffer, {});
+    } else if (fileName.endsWith('.xlsx') || fileName.endsWith('.xls')) {
+      // For Excel files, use exceljs library
+      try {
+        const ExcelJS = require('exceljs');
+        const workbook = new ExcelJS.Workbook();
+        await workbook.xlsx.load(fileBuffer);
+        
+        const worksheet = workbook.worksheets[0];
+        if (!worksheet || worksheet.rowCount < 2) {
+          return res.status(400).json({ success: false, error: 'Excel file is empty or has no data rows' });
+        }
+        
+        // Get headers from first row
+        const headerRow = worksheet.getRow(1);
+        const headers = [];
+        headerRow.eachCell({ includeEmpty: true }, (cell, colNumber) => {
+          headers[colNumber] = String(cell.value || '').toLowerCase().trim();
+        });
+        
+        // Find column indices
+        const partNumberIdx = headers.findIndex(h => 
+          h && (h.includes('part') || h.includes('number') || h.includes('sku') || h.includes('code'))
+        );
+        const quantityIdx = headers.findIndex(h => 
+          h && (h.includes('qty') || h.includes('quantity'))
+        );
+        
+        // Parse data rows
+        for (let rowNumber = 2; rowNumber <= worksheet.rowCount; rowNumber++) {
+          const row = worksheet.getRow(rowNumber);
+          const partNumber = row.getCell(partNumberIdx !== -1 ? partNumberIdx : 1).value;
+          const quantity = row.getCell(quantityIdx !== -1 ? quantityIdx : 2).value;
+          
+          if (partNumber) {
+            // Search for part in database to get full details
+            const Part = require('../models/Part');
+            const existingPart = await Part.findOne({ 
+              partNumber: { $regex: new RegExp('^' + String(partNumber).toString().trim() + '$', 'i') }
+            });
+            
+            if (existingPart) {
+              parts.push({
+                partNumber: existingPart.partNumber,
+                description: existingPart.description || existingPart.partNumber,
+                brand: existingPart.brand || 'N/A',
+                supplier: existingPart.supplier || 'N/A',
+                price: parseFloat(existingPart.price) || 0,
+                currency: existingPart.currency || 'AED',
+                weight: parseFloat(existingPart.weight) || 0,
+                quantity: parseInt(quantity) || 1,
+                stock: existingPart.quantity || existingPart.stock || 'N/A'
+              });
+            } else {
+              // Add as unknown part
+              parts.push({
+                partNumber: String(partNumber).toString().trim(),
+                description: String(partNumber).toString().trim(),
+                brand: 'Unknown',
+                supplier: 'Unknown',
+                price: 0,
+                currency: 'AED',
+                weight: 0,
+                quantity: parseInt(quantity) || 1,
+                stock: 'N/A'
+              });
+            }
+          }
+        }
+      } catch (xlsxError) {
+        console.error('Excel parsing error:', xlsxError);
+        return res.status(400).json({ 
+          success: false, 
+          error: 'Failed to parse Excel file. Please ensure it is a valid .xlsx or .xls file.'
+        });
+      }
+    } else {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Unsupported file format. Please upload a .csv, .xlsx, or .xls file.'
+      });
+    }
+    
+    res.json({
+      success: true,
+      parts: parts,
+      count: parts.length
     });
   } catch (error) {
-    console.error('Error in getAOGCaseEdit:', error);
-    res.status(500).render('error', { title: 'Error', error: 'Failed to load edit page' });
+    console.error('Error uploading parts file:', error);
+    res.status(500).json({ success: false, error: 'Failed to process file' });
   }
 };
 
@@ -1675,10 +2625,16 @@ module.exports = {
   getOrderCreate,
   getOrderEdit,
   deleteOrder,
+  createOrder,
+  updateOrder,
+  updateOrderStatus,
+  getOrderStats,
   getTicketsManagement,
   getTicketDetails,
   postTicketReply,
   updateTicketStatus,
+  getTicketsApi,
+  markTicketAsReadAdmin,
   getUsersManagement,
   getUserDetails,
   getUserCreate,
@@ -1686,6 +2642,11 @@ module.exports = {
   updateUserStatus,
   bulkUpdateUsers,
   deleteUser,
+  createUser,
+  updateUser,
+  approveUser,
+  rejectUser,
+  suspendUser,
   getPaymentsManagement,
   getPaymentDetails,
   getPaymentCreate,
@@ -1705,5 +2666,7 @@ module.exports = {
   getSyncDetails,
   getIntegrations,
   getIntegration,
+  // File upload
+  uploadPartsFromFile,
 };
 

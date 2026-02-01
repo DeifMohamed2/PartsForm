@@ -700,7 +700,6 @@ class APIService extends EventEmitter {
           quantity: this._parseNumber(this._extractMappedValue(record, mapping, 'quantity', ['quantity', 'Quantity', 'QUANTITY', 'qty', 'Qty', 'QTY', 'stock', 'Stock', 'inventory'])),
           condition: this._extractMappedValue(record, mapping, 'condition', ['condition', 'Condition', 'CONDITION', 'cond', 'status']) || 'New',
           brand: this._extractMappedValue(record, mapping, 'brand', ['brand', 'Brand', 'BRAND', 'manufacturer', 'Manufacturer', 'make', 'Make']) || '',
-          origin: this._extractMappedValue(record, mapping, 'origin', ['origin', 'Origin', 'ORIGIN', 'country', 'Country', 'location', 'Location']) || '',
           leadTime: this._extractMappedValue(record, mapping, 'leadTime', ['leadTime', 'lead_time', 'LeadTime', 'LEAD_TIME', 'delivery', 'Delivery']) || '',
           uom: this._extractMappedValue(record, mapping, 'uom', ['uom', 'UOM', 'unit', 'Unit', 'UNIT', 'unitOfMeasure']) || 'EA',
           category: this._extractMappedValue(record, mapping, 'category', ['category', 'Category', 'CATEGORY', 'type', 'Type', 'class', 'Class']) || '',

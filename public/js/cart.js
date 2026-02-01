@@ -140,7 +140,6 @@
         terms: item.terms || 'N/A',
         weight: parseFloat(item.weight) || 0,
         stock: item.stock || 'N/A',
-        origin: item.origin || 'N/A',
         aircraftType: item.aircraftType || 'N/A',
         price: parseFloat(item.price) || 0,
         currency: item.currency || 'AED',

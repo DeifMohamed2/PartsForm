@@ -233,7 +233,7 @@
     const partNumber = urlParams.get('partnumber');
     
     if (partNumber) {
-      // Get the search input on the page (from search2.js)
+      // Get the search input on the page (from search.js)
       const mainSearchInput = document.getElementById('search2-input');
       const mainSearchBtn = document.getElementById('search2-btn');
       

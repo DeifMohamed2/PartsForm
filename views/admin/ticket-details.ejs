@@ -2,7 +2,7 @@
 <link rel="stylesheet" href="/css/adminCSS/admin-dashboard.css">
 <link rel="stylesheet" href="/css/adminCSS/admin-tickets.css">
 </head>
-<body class="<%= typeof currentModule !== 'undefined' && currentModule ? 'module-' + currentModule : '' %>">
+<body class="<%= typeof currentModule !== 'undefined' && currentModule ? 'module-' + currentModule : '' %>" data-ticket-id="<%= ticket.id %>" data-ticket-oid="<%= ticket._id %>">
   <div class="admin-wrapper">
     <%- include('partials/sidebar', { activePage: 'tickets', currentModule: currentModule }) %>
     
@@ -145,6 +145,24 @@
                 </div>
                 <div class="message-bubble">
                   <div class="message-text"><%= msg.content || msg.text %></div>
+                  <% if (msg.attachments && msg.attachments.length > 0) { %>
+                  <div class="message-attachments">
+                    <% msg.attachments.forEach(function(file) { 
+                      var isImage = file.mimetype && file.mimetype.startsWith('image/');
+                      var isPdf = file.mimetype && file.mimetype.includes('pdf');
+                      var iconName = isImage ? 'image' : (isPdf ? 'file-text' : 'file');
+                    %>
+                    <a href="<%= file.path %>" download="<%= file.originalName %>" class="attachment-link attachment-file">
+                      <div class="attachment-icon"><i data-lucide="<%= iconName %>"></i></div>
+                      <div class="attachment-info">
+                        <span class="attachment-name"><%= file.originalName %></span>
+                        <span class="attachment-meta"><%= Math.round((file.size || 0) / 1024) %> KB<%= isImage ? ' • Image' : '' %></span>
+                      </div>
+                      <div class="attachment-download"><i data-lucide="download"></i></div>
+                    </a>
+                    <% }); %>
+                  </div>
+                  <% } %>
                   <div class="message-time">
                     <%= msg.sender === 'admin' ? 'Admin' : (ticket.customerName || 'Customer') %> • 
                     <%= typeof msg.time === 'string' ? msg.time : new Date(msg.time || msg.createdAt).toLocaleString() %>
@@ -186,130 +204,13 @@
   </div>
 
   <script>
-    var ticketId = '<%= ticket.id %>';
-    var moduleParam = '<%= currentModule ? "?module=" + currentModule : "" %>';
-    
-    // Auto-resize textarea
-    var textarea = document.getElementById('messageInput');
-    textarea.addEventListener('input', function() {
-      this.style.height = 'auto';
-      this.style.height = Math.min(this.scrollHeight, 120) + 'px';
-    });
-    
-    // Scroll to bottom of chat
-    function scrollToBottom() {
-      var chatMessages = document.getElementById('chatMessages');
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-    }
-    scrollToBottom();
-    
-    // Send message
-    function sendMessage(e) {
-      e.preventDefault();
-      var input = document.getElementById('messageInput');
-      var message = input.value.trim();
-      
-      if (!message) return;
-      
-      // Add message to UI immediately
-      var chatMessages = document.getElementById('chatMessages');
-      var messageHtml = '<div class="message admin">' +
-        '<div class="message-avatar">A</div>' +
-        '<div class="message-bubble">' +
-          '<div class="message-text">' + escapeHtml(message) + '</div>' +
-          '<div class="message-time">Admin • Just now</div>' +
-        '</div>' +
-      '</div>';
-      chatMessages.insertAdjacentHTML('beforeend', messageHtml);
-      
-      // Clear input and scroll
-      input.value = '';
-      input.style.height = 'auto';
-      scrollToBottom();
-      
-      // Reinitialize icons
-      if (typeof lucide !== 'undefined') {
-        lucide.createIcons();
-      }
-      
-      // Send to server
-      fetch('/admin/tickets/' + ticketId + '/reply', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: message })
-      }).catch(function(err) {
-        console.error('Error sending message:', err);
-      });
-    }
-    
-    // Insert quick reply
-    function insertQuickReply(text) {
-      var input = document.getElementById('messageInput');
-      input.value = text;
-      input.focus();
-    }
-    
-    // Update status
-    function updateStatus() {
-      var select = document.getElementById('statusSelect');
-      var newStatus = select.value;
-      
-      fetch('/admin/tickets/' + ticketId + '/status', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus })
-      }).then(function(response) {
-        if (response.ok) {
-          // Update UI
-          var badge = document.querySelector('.chat-header .ticket-status-badge');
-          if (badge) {
-            badge.className = 'ticket-status-badge ' + newStatus;
-            var iconMap = {
-              'open': 'inbox',
-              'in-progress': 'loader',
-              'resolved': 'check-circle',
-              'closed': 'x-circle'
-            };
-            var label = newStatus.split('-').map(function(w) { return w.charAt(0).toUpperCase() + w.slice(1); }).join(' ');
-            badge.innerHTML = '<i data-lucide="' + iconMap[newStatus] + '"></i> ' + label;
-            if (typeof lucide !== 'undefined') {
-              lucide.createIcons();
-            }
-          }
-        }
-      }).catch(function(err) {
-        console.error('Error updating status:', err);
-      });
-    }
-    
-    // Quick actions
-    function markResolved() {
-      document.getElementById('statusSelect').value = 'resolved';
-      updateStatus();
-    }
-    
-    function closeTicket() {
-      if (confirm('Are you sure you want to close this ticket?')) {
-        document.getElementById('statusSelect').value = 'closed';
-        updateStatus();
-        window.location.href = '/admin/tickets' + moduleParam;
-      }
-    }
-    
-    // Escape HTML
-    function escapeHtml(text) {
-      var div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
-    }
-    
-    // Enter to send (Shift+Enter for new line)
-    textarea.addEventListener('keydown', function(e) {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        document.getElementById('chatForm').dispatchEvent(new Event('submit'));
-      }
-    });
+    window.adminTicketId = '<%= ticket.id %>';
+    window.adminTicketOid = '<%= ticket._id %>';
+    window.adminModuleParam = '<%= currentModule ? "?module=" + currentModule : "" %>';
+    window.customerName = '<%= ticket.customerName || ticket.customer || "Customer" %>';
+    window.ticketStatus = '<%= ticket.status %>';
   </script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/adminJS/admin-ticket-details.js"></script>
 
 <%- include('partials/footer') %>

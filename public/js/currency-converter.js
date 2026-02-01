@@ -16,6 +16,7 @@
 
   // Currency data with flags
   const CURRENCIES = {
+    ORIGINAL: { name: 'Original Price', flag: '💰', symbol: '' },
     USD: { name: 'US Dollar', flag: '🇺🇸', symbol: '$' },
     EUR: { name: 'Euro', flag: '🇪🇺', symbol: '€' },
     GBP: { name: 'British Pound', flag: '🇬🇧', symbol: '£' },
@@ -66,7 +67,8 @@
     targetCurrency: CONFIG.DEFAULT_TARGET_CURRENCY,
     lastUpdate: null,
     isLoading: false,
-    currentSelector: null // 'from' or 'to'
+    currentSelector: null, // 'from' or 'to'
+    preferredCurrency: 'USD' // User's preferred display currency
   };
 
   // DOM Elements
@@ -87,7 +89,9 @@
     }
 
     loadSavedPreferences();
+    loadPreferredCurrencyFromServer();
     initEventListeners();
+    initPreferredCurrencyDropdown();
     fetchExchangeRates();
     
     // Auto-update rates
@@ -139,7 +143,15 @@
       // All currencies dropdown
       allCurrenciesDropdown: document.getElementById('allCurrenciesDropdown'),
       currencySearchInput: document.getElementById('currencySearchInput'),
-      currencyList: document.getElementById('currencyList')
+      currencyList: document.getElementById('currencyList'),
+      
+      // Preferred Currency Dropdown
+      preferredCurrencyDropdown: document.getElementById('preferredCurrencyDropdown'),
+      preferredCurrencyBtn: document.getElementById('preferredCurrencyBtn'),
+      preferredCurrencyCode: document.getElementById('preferredCurrencyCode'),
+      preferredCurrencyMenu: document.getElementById('preferredCurrencyMenu'),
+      preferredCurrencySearch: document.getElementById('preferredCurrencySearch'),
+      preferredCurrencyList: document.getElementById('preferredCurrencyList')
     };
   }
 
@@ -528,6 +540,248 @@
   }
 
   // ====================================
+  // PREFERRED CURRENCY FUNCTIONALITY
+  // ====================================
+  async function loadPreferredCurrencyFromServer() {
+    // First check if user data is available from server-side render
+    if (window.__USER_DATA__ && window.__USER_DATA__.preferredCurrency) {
+      state.preferredCurrency = window.__USER_DATA__.preferredCurrency;
+      updatePreferredCurrencyDisplay();
+      return;
+    }
+    
+    // Otherwise fetch from API
+    try {
+      const response = await fetch('/buyer/api/settings/currency');
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.currency) {
+          state.preferredCurrency = data.currency;
+          updatePreferredCurrencyDisplay();
+        }
+      }
+    } catch (error) {
+      console.warn('Could not load preferred currency from server:', error);
+    }
+  }
+
+  async function savePreferredCurrencyToServer(currency) {
+    try {
+      const response = await fetch('/buyer/api/settings/currency', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ currency: currency })
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to save currency preference');
+      }
+      
+      const data = await response.json();
+      if (data.success) {
+        state.preferredCurrency = data.currency;
+        // Dispatch event for other components to update
+        window.dispatchEvent(new CustomEvent('preferredCurrencyChanged', { 
+          detail: { currency: data.currency } 
+        }));
+        return true;
+      }
+    } catch (error) {
+      console.error('Error saving preferred currency:', error);
+      return false;
+    }
+    return false;
+  }
+
+  function initPreferredCurrencyDropdown() {
+    if (!elements.preferredCurrencyBtn) return;
+    
+    // Toggle dropdown on button click
+    elements.preferredCurrencyBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      togglePreferredCurrencyDropdown();
+    });
+    
+    // Search functionality
+    if (elements.preferredCurrencySearch) {
+      elements.preferredCurrencySearch.addEventListener('input', debounce(() => {
+        populatePreferredCurrencyList(elements.preferredCurrencySearch.value);
+      }, 200));
+    }
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+      if (elements.preferredCurrencyDropdown && 
+          !elements.preferredCurrencyDropdown.contains(e.target)) {
+        closePreferredCurrencyDropdown();
+      }
+    });
+    
+    // Populate the currency list
+    populatePreferredCurrencyList();
+  }
+
+  function togglePreferredCurrencyDropdown() {
+    if (!elements.preferredCurrencyMenu) return;
+    
+    const isOpen = elements.preferredCurrencyMenu.classList.contains('active');
+    
+    if (isOpen) {
+      closePreferredCurrencyDropdown();
+    } else {
+      openPreferredCurrencyDropdown();
+    }
+  }
+
+  function openPreferredCurrencyDropdown() {
+    if (!elements.preferredCurrencyMenu) return;
+    
+    elements.preferredCurrencyMenu.classList.add('active');
+    elements.preferredCurrencyBtn.classList.add('active');
+    
+    // Focus search input
+    if (elements.preferredCurrencySearch) {
+      elements.preferredCurrencySearch.value = '';
+      elements.preferredCurrencySearch.focus();
+      populatePreferredCurrencyList();
+    }
+  }
+
+  function closePreferredCurrencyDropdown() {
+    if (!elements.preferredCurrencyMenu) return;
+    
+    elements.preferredCurrencyMenu.classList.remove('active');
+    elements.preferredCurrencyBtn.classList.remove('active');
+  }
+
+  function populatePreferredCurrencyList(filterText = '') {
+    if (!elements.preferredCurrencyList) return;
+    
+    const list = elements.preferredCurrencyList;
+    list.innerHTML = '';
+    
+    // Filter currencies
+    const filteredCurrencies = Object.entries(CURRENCIES)
+      .filter(([code, data]) => {
+        if (code === 'ORIGINAL') return false; // Handle ORIGINAL separately
+        if (!filterText) return true;
+        const search = filterText.toLowerCase();
+        return (
+          code.toLowerCase().includes(search) ||
+          data.name.toLowerCase().includes(search)
+        );
+      })
+      .sort((a, b) => a[1].name.localeCompare(b[1].name));
+    
+    // Always show ORIGINAL at the top if it matches filter or no filter
+    const originalData = CURRENCIES['ORIGINAL'];
+    if (originalData && (!filterText || 'original'.includes(filterText.toLowerCase()) || 'show original price'.includes(filterText.toLowerCase()))) {
+      const originalBtn = document.createElement('button');
+      originalBtn.className = 'preferred-currency-item original-price';
+      if ('ORIGINAL' === state.preferredCurrency) {
+        originalBtn.classList.add('active');
+      }
+      originalBtn.setAttribute('data-currency', 'ORIGINAL');
+      originalBtn.innerHTML = `
+        <span class="currency-flag">${originalData.flag}</span>
+        <span class="currency-info">
+          <span class="currency-name">Show Original Price</span>
+          <span class="currency-full">Display prices in database currency</span>
+        </span>
+        ${'ORIGINAL' === state.preferredCurrency ? '<i data-lucide="check" class="check-icon"></i>' : ''}
+      `;
+      
+      originalBtn.addEventListener('click', async () => {
+        const saved = await savePreferredCurrencyToServer('ORIGINAL');
+        if (saved) {
+          updatePreferredCurrencyDisplay();
+          populatePreferredCurrencyList(filterText);
+          closePreferredCurrencyDropdown();
+          showCurrencyChangeNotification('ORIGINAL');
+        }
+      });
+      
+      list.appendChild(originalBtn);
+    }
+    
+    // Add other currencies
+    filteredCurrencies.forEach(([code, data]) => {
+      const btn = document.createElement('button');
+      btn.className = 'preferred-currency-item';
+      if (code === state.preferredCurrency) {
+        btn.classList.add('active');
+      }
+      btn.setAttribute('data-currency', code);
+      btn.innerHTML = `
+        <span class="currency-flag">${data.flag}</span>
+        <span class="currency-info">
+          <span class="currency-name">${code}</span>
+          <span class="currency-full">${data.name}</span>
+        </span>
+        ${code === state.preferredCurrency ? '<i data-lucide="check" class="check-icon"></i>' : ''}
+      `;
+      
+      btn.addEventListener('click', async () => {
+        const saved = await savePreferredCurrencyToServer(code);
+        if (saved) {
+          updatePreferredCurrencyDisplay();
+          populatePreferredCurrencyList(filterText);
+          closePreferredCurrencyDropdown();
+          showCurrencyChangeNotification(code);
+        }
+      });
+      
+      list.appendChild(btn);
+    });
+    
+    // Reinitialize Lucide icons for check marks
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+    }
+    
+    // Show "no results" if empty
+    if (filteredCurrencies.length === 0 && !('original'.includes((filterText || '').toLowerCase()))) {
+      list.innerHTML = '<div class="no-currency-results">No currencies found</div>';
+    }
+  }
+
+  function updatePreferredCurrencyDisplay() {
+    if (elements.preferredCurrencyCode) {
+      // Show a nicer display for ORIGINAL
+      const displayText = state.preferredCurrency === 'ORIGINAL' ? 'ORIGINAL' : state.preferredCurrency;
+      elements.preferredCurrencyCode.textContent = displayText;
+    }
+    
+    // Also update settings page if it exists
+    const settingsSelect = document.getElementById('preferredCurrencySelect');
+    if (settingsSelect) {
+      settingsSelect.value = state.preferredCurrency;
+    }
+  }
+
+  function showCurrencyChangeNotification(currency) {
+    const currencyData = CURRENCIES[currency];
+    const message = `Preferred currency changed to ${currency} (${currencyData.name})`;
+    
+    // Use existing notification system if available, otherwise console
+    if (window.showNotification) {
+      window.showNotification(message, 'success');
+    } else if (window.Toastify) {
+      Toastify({
+        text: message,
+        duration: 3000,
+        gravity: 'top',
+        position: 'right',
+        style: { background: 'linear-gradient(to right, #00b09b, #96c93d)' }
+      }).showToast();
+    } else {
+      console.log(message);
+    }
+  }
+
+  // ====================================
   // GLOBAL CURRENCY CONVERSION HELPER
   // Expose this function for use in other parts of the application
   // ====================================
@@ -550,6 +804,65 @@
 
   window.getCurrentCurrency = function() {
     return state.baseCurrency;
+  };
+
+  // Get user's preferred display currency
+  window.getPreferredCurrency = function() {
+    return state.preferredCurrency;
+  };
+
+  // Convert price to user's preferred currency
+  window.convertToPreferredCurrency = function(amount, fromCurrency) {
+    // If preferred currency is ORIGINAL, return the original amount
+    if (state.preferredCurrency === 'ORIGINAL') {
+      return amount;
+    }
+    return window.convertPrice(amount, fromCurrency, state.preferredCurrency);
+  };
+
+  // Check if showing original prices
+  window.isShowingOriginalPrice = function() {
+    return state.preferredCurrency === 'ORIGINAL';
+  };
+
+  // Format price in preferred currency with symbol
+  window.formatPriceInPreferredCurrency = function(amount, fromCurrency) {
+    const converted = window.convertToPreferredCurrency(amount, fromCurrency);
+    const currencyData = CURRENCIES[state.preferredCurrency] || { symbol: '$' };
+    return `${currencyData.symbol}${formatCurrency(converted)}`;
+  };
+
+  // Get currency data (flag, name, symbol)
+  window.getCurrencyData = function(currency) {
+    return CURRENCIES[currency] || CURRENCIES['USD'];
+  };
+
+  // Check if exchange rates are loaded
+  window.areExchangeRatesReady = function() {
+    return state.exchangeRates !== null;
+  };
+
+  // Get exchange rates promise - waits for rates to be loaded
+  window.waitForExchangeRates = function() {
+    return new Promise((resolve) => {
+      if (state.exchangeRates) {
+        resolve(state.exchangeRates);
+        return;
+      }
+      
+      const checkInterval = setInterval(() => {
+        if (state.exchangeRates) {
+          clearInterval(checkInterval);
+          resolve(state.exchangeRates);
+        }
+      }, 100);
+      
+      // Timeout after 10 seconds
+      setTimeout(() => {
+        clearInterval(checkInterval);
+        resolve(null);
+      }, 10000);
+    });
   };
 
 })();

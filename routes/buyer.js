@@ -1,5 +1,8 @@
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 const { requireAuth } = require('../middleware/auth');
 const {
   getBuyerMain,
@@ -32,6 +35,15 @@ const {
   updateAddress,
   deleteAddress,
   setDefaultAddress,
+  // Tickets API
+  getTicketsApi,
+  getTicketDetailsApi,
+  createTicket,
+  sendTicketMessage,
+  markTicketAsRead,
+  // Currency Preference API
+  getPreferredCurrency,
+  updatePreferredCurrency,
 } = require('../controllers/buyerController');
 const {
   searchParts,
@@ -41,8 +53,46 @@ const {
   getPartsByNumber,
   getSearchStats,
   searchMultipleParts,
+  aiSearch,
+  aiSuggestions,
+  aiAnalyze,
 } = require('../controllers/searchController');
 const { handleProfileImageUpload } = require('../utils/fileUploader');
+
+// Configure multer for ticket file uploads
+const ticketUploadDir = path.join(__dirname, '../public/uploads/tickets');
+if (!fs.existsSync(ticketUploadDir)) {
+  fs.mkdirSync(ticketUploadDir, { recursive: true });
+}
+
+const ticketStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, ticketUploadDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, 'ticket-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const ticketUpload = multer({
+  storage: ticketStorage,
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = [
+      'image/jpeg', 'image/png', 'image/gif', 'image/webp',
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'text/plain'
+    ];
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('File type not allowed. Only images, PDFs, and documents are accepted.'), false);
+    }
+  }
+});
 
 // Apply authentication middleware to all buyer routes
 router.use(requireAuth);
@@ -82,6 +132,11 @@ router.get('/api/search/stats', getSearchStats);
 router.get('/api/parts/:id', getPartById);
 router.get('/api/parts/by-number/:partNumber', getPartsByNumber);
 
+// AI Search API endpoints
+router.post('/api/ai-search', aiSearch);
+router.get('/api/ai-suggestions', aiSuggestions);
+router.post('/api/ai-analyze', aiAnalyze);
+
 // Order API endpoints (cart is managed in localStorage on client-side)
 router.post('/api/checkout/validate', validateCheckout);
 router.post('/api/orders/create', createOrder);
@@ -95,12 +150,23 @@ router.get('/tickets', getTicketsPage);
 router.get('/tickets/create', getCreateTicketPage);
 router.get('/tickets/:ticketId', getTicketDetailsPage);
 
+// Tickets API
+router.get('/api/tickets', getTicketsApi);
+router.post('/api/tickets', ticketUpload.array('attachments', 5), createTicket);
+router.get('/api/tickets/:ticketId', getTicketDetailsApi);
+router.post('/api/tickets/:ticketId/messages', ticketUpload.array('attachments', 5), sendTicketMessage);
+router.put('/api/tickets/:ticketId/read', markTicketAsRead);
+
 // Address Management API
 router.get('/api/addresses', getAddresses);
 router.post('/api/addresses', addAddress);
 router.put('/api/addresses/:addressId', updateAddress);
 router.delete('/api/addresses/:addressId', deleteAddress);
 router.put('/api/addresses/:addressId/default', setDefaultAddress);
+
+// Currency Preference API
+router.get('/api/settings/currency', getPreferredCurrency);
+router.put('/api/settings/currency', updatePreferredCurrency);
 
 module.exports = router;
 

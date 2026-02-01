@@ -154,7 +154,13 @@ const buyerSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-
+    preferredCurrency: {
+      type: String,
+      default: 'USD',
+      uppercase: true,
+      enum: ['ORIGINAL', 'USD', 'EUR', 'GBP', 'AED', 'JPY', 'CNY', 'RUB', 'CAD', 'AUD', 'CHF', 'INR', 'KRW', 'SGD', 'HKD', 'NOK', 'SEK', 'DKK', 'PLN', 'THB', 'MYR', 'MXN', 'BRL', 'ZAR', 'TRY', 'SAR', 'QAR', 'KWD', 'OMR', 'BHD', 'EGP', 'PKR', 'PHP', 'IDR', 'VND', 'NZD', 'CZK', 'HUF', 'RON', 'BGN', 'HRK', 'UAH'],
+    },
+    
     // Profile Image
     avatar: {
       type: String,
@@ -165,18 +171,6 @@ const buyerSchema = new mongoose.Schema(
     isActive: {
       type: Boolean,
       default: true,
-    },
-    isVerified: {
-      type: Boolean,
-      default: false,
-    },
-    verificationToken: {
-      type: String,
-      select: false,
-    },
-    verificationExpires: {
-      type: Date,
-      select: false,
     },
 
     // Password Reset

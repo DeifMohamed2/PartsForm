@@ -163,9 +163,11 @@ class ElasticsearchService {
                 price: { type: 'float' },
                 currency: { type: 'keyword' },
                 quantity: { type: 'integer' },
+                minOrderQty: { type: 'integer' },
                 stock: { type: 'keyword' },
-                origin: { type: 'keyword' },
+                stockCode: { type: 'keyword' },
                 weight: { type: 'float' },
+                volume: { type: 'float' },
                 deliveryDays: { type: 'integer' },
                 category: { type: 'keyword' },
                 integration: { type: 'keyword' },
@@ -314,6 +316,7 @@ class ElasticsearchService {
    * Autocomplete suggestions - Part Number Only (Prefix Match)
    * Returns unique part numbers that START WITH the query
    * NO description matching, NO fuzzy matching
+   * Optimized to avoid fielddata and reduce memory usage
    */
   async autocomplete(query, limit = 10) {
     if (!this.isAvailable || !query || !query.trim()) {
@@ -323,14 +326,15 @@ class ElasticsearchService {
     try {
       const searchTerm = query.trim();
       
-      // Use prefix query on the keyword field - only matches part numbers that START with the query
+      // Use field collapsing instead of terms aggregation to avoid fielddata memory issues
+      // This is much more memory-efficient for large datasets
       const response = await this.client.search({
         index: this.indexName,
         body: {
           query: {
             bool: {
               should: [
-                // Prefix match - as typed
+                // Prefix match - case insensitive
                 { prefix: { partNumber: { value: searchTerm, case_insensitive: true } } },
                 // Prefix match - uppercase
                 { prefix: { partNumber: { value: searchTerm.toUpperCase() } } },
@@ -338,36 +342,37 @@ class ElasticsearchService {
               minimum_should_match: 1,
             },
           },
-          size: 0, // We don't need hits, just aggregations
-          aggs: {
-            unique_part_numbers: {
-              terms: {
-                field: 'partNumber',
-                size: limit,
-                order: { _key: 'asc' },
-              },
-              aggs: {
-                sample: {
-                  top_hits: {
-                    size: 1,
-                    _source: ['partNumber', 'brand'],
-                  },
-                },
-              },
+          // Use field collapsing to get unique part numbers - avoids fielddata
+          collapse: {
+            field: 'partNumber',
+            inner_hits: {
+              name: 'count_hits',
+              size: 0, // We just need the count
             },
           },
+          sort: [{ partNumber: { order: 'asc' } }],
+          size: limit,
+          _source: ['partNumber', 'brand'],
+          // Limit track_total_hits to reduce memory
+          track_total_hits: false,
         },
+        // Reduce request timeout and add circuit breaker friendly settings
+        request_cache: true,
       });
 
-      // Extract unique part numbers from aggregations
-      const buckets = response.aggregations?.unique_part_numbers?.buckets || [];
-      return buckets.map((bucket) => ({
-        partNumber: bucket.key,
-        brand: bucket.sample.hits.hits[0]?._source?.brand || '',
-        count: bucket.doc_count, // Number of suppliers for this part
+      // Extract unique part numbers from collapsed hits
+      return response.hits.hits.map((hit) => ({
+        partNumber: hit._source.partNumber,
+        brand: hit._source.brand || '',
+        count: hit.inner_hits?.count_hits?.hits?.total?.value || 1,
       }));
     } catch (error) {
       console.error('Autocomplete error:', error.message);
+      // If circuit breaker trips, return empty gracefully
+      if (error.message?.includes('circuit_breaking_exception') || error.message?.includes('Data too large')) {
+        console.warn('Elasticsearch memory limit reached - returning empty autocomplete');
+        return [];
+      }
       return [];
     }
   }
@@ -560,9 +565,12 @@ class ElasticsearchService {
   }
 
   /**
-   * Bulk index documents
+   * Bulk index documents with retry logic for 429 errors
    */
-  async bulkIndex(documents) {
+  async bulkIndex(documents, retryCount = 0) {
+    const MAX_RETRIES = 5;
+    const BASE_DELAY = 1000; // 1 second base delay
+
     if (!this.isAvailable || documents.length === 0) {
       return { indexed: 0, errors: 0 };
     }
@@ -578,9 +586,11 @@ class ElasticsearchService {
           price: doc.price,
           currency: doc.currency,
           quantity: doc.quantity,
+          minOrderQty: doc.minOrderQty,
           stock: doc.stock,
-          origin: doc.origin,
+          stockCode: doc.stockCode,
           weight: doc.weight,
+          volume: doc.volume,
           deliveryDays: doc.deliveryDays,
           category: doc.category,
           integration: doc.integration?.toString(),
@@ -606,8 +616,17 @@ class ElasticsearchService {
 
       return { indexed, errors: errors.length };
     } catch (error) {
+      // Handle 429 Too Many Requests with exponential backoff
+      if (error.meta?.statusCode === 429 && retryCount < MAX_RETRIES) {
+        const delay = BASE_DELAY * Math.pow(2, retryCount); // Exponential backoff
+        console.warn(`⚠️  ES rate limited (429). Retrying in ${delay}ms... (attempt ${retryCount + 1}/${MAX_RETRIES})`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        return this.bulkIndex(documents, retryCount + 1);
+      }
+      
       console.error('Bulk index error:', error.message);
-      throw error;
+      // Return error count instead of throwing to allow sync to continue
+      return { indexed: 0, errors: documents.length, error: error.message };
     }
   }
 
@@ -716,6 +735,54 @@ class ElasticsearchService {
     const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
+  }
+
+  /**
+   * Clear fielddata cache to free memory
+   * Call this when circuit breaker errors occur
+   */
+  async clearFielddataCache() {
+    if (!this.isAvailable) return { success: false, message: 'Elasticsearch not available' };
+
+    try {
+      await this.client.indices.clearCache({
+        index: this.indexName,
+        fielddata: true,
+      });
+      console.log('✅ Elasticsearch fielddata cache cleared');
+      return { success: true, message: 'Fielddata cache cleared' };
+    } catch (error) {
+      console.error('Error clearing fielddata cache:', error.message);
+      return { success: false, message: error.message };
+    }
+  }
+
+  /**
+   * Get memory usage stats for monitoring
+   */
+  async getMemoryStats() {
+    if (!this.isAvailable) return null;
+
+    try {
+      const stats = await this.client.nodes.stats({ metric: ['breaker', 'jvm'] });
+      const nodes = stats.nodes;
+      const nodeStats = Object.values(nodes)[0];
+      
+      return {
+        heapUsed: this._formatBytes(nodeStats.jvm?.mem?.heap_used_in_bytes || 0),
+        heapMax: this._formatBytes(nodeStats.jvm?.mem?.heap_max_in_bytes || 0),
+        heapPercent: nodeStats.jvm?.mem?.heap_used_percent || 0,
+        fielddata: this._formatBytes(nodeStats.breaker?.fielddata?.estimated_size_in_bytes || 0),
+        request: this._formatBytes(nodeStats.breaker?.request?.estimated_size_in_bytes || 0),
+        parent: {
+          limit: this._formatBytes(nodeStats.breaker?.parent?.limit_size_in_bytes || 0),
+          estimated: this._formatBytes(nodeStats.breaker?.parent?.estimated_size_in_bytes || 0),
+        },
+      };
+    } catch (error) {
+      console.error('Error getting memory stats:', error.message);
+      return null;
+    }
   }
 
   /**

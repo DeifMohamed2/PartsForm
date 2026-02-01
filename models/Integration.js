@@ -155,7 +155,7 @@ const integrationSchema = new mongoose.Schema({
   // Last Sync Information
   lastSync: {
     date: { type: Date },
-    status: { type: String, enum: ['success', 'failed', 'partial'] },
+    status: { type: String, enum: ['success', 'failed', 'partial', 'interrupted'] },
     duration: { type: Number }, // in milliseconds
     recordsProcessed: { type: Number },
     recordsInserted: { type: Number },
@@ -178,7 +178,6 @@ const integrationSchema = new mongoose.Schema({
     price: { type: String, default: 'Price' },
     quantity: { type: String, default: 'Quantity' },
     brand: { type: String, default: 'Brand' },
-    origin: { type: String, default: 'Origin' },
     custom: [{ 
       sourceColumn: String, 
       targetField: String 

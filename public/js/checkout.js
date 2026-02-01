@@ -87,8 +87,6 @@
     let orderTotal = 0;
     let selectedPaymentType = 'full';
     let selectedPaymentMethod = 'card';
-    let isAOGCase = false;
-    let aogCaseId = null;
     let isSubmitting = false;
     
     // Shipping Address State
@@ -121,17 +119,6 @@
       renderOrderSummary();
       updatePaymentAmounts();
       attachEventListeners();
-      
-      // Show AOG badge if this is an AOG case
-      if (isAOGCase) {
-        const aogBadge = document.getElementById('aog-badge');
-        const secureBadge = document.getElementById('secure-badge');
-        const subtitle = document.getElementById('checkout-subtitle');
-        
-        if (aogBadge) aogBadge.style.display = 'flex';
-        if (secureBadge) secureBadge.style.display = 'none';
-        if (subtitle) subtitle.textContent = 'Priority AOG case - Complete payment to activate sourcing';
-      }
     }
 
     // ====================================
@@ -296,49 +283,22 @@
     // ====================================
     function loadCartData() {
       try {
-        // Check if this is an AOG case
-        isAOGCase = sessionStorage.getItem('is-aog-case') === 'true';
+        // Load cart from localStorage
+        const cartData = localStorage.getItem('partsform_shopping_cart');
+        if (cartData) {
+          const parsed = JSON.parse(cartData);
+          cartItems = parsed.items || [];
 
-        if (isAOGCase) {
-          // Load AOG parts from sessionStorage
-          const aogPartsData = sessionStorage.getItem('aog-parts');
-          if (aogPartsData) {
-            const aogParts = JSON.parse(aogPartsData);
-            
-            // Convert AOG parts to cart format
-            cartItems = aogParts.map(part => ({
-              partNumber: part.vendorCode,
-              description: part.description,
-              quantity: part.quantity,
-              price: part.total / part.quantity,
-              weight: parseFloat(part.weight) || 0,
-              supplier: part.supplier,
-              brand: part.brand,
-              origin: part.origin,
-              delivery: part.delivery,
-            }));
-
-            // Get total from sessionStorage
-            orderTotal = parseFloat(sessionStorage.getItem('aog-total')) || 0;
-          }
-        } else {
-          // Load regular cart
-          const cartData = localStorage.getItem('partsform_shopping_cart');
-          if (cartData) {
-            const parsed = JSON.parse(cartData);
-            cartItems = parsed.items || [];
-
-            // Calculate total - each item is individual (no quantity grouping)
-            orderTotal = cartItems.reduce((sum, item) => {
-              const price = parseFloat(item.price) || 0;
-              return sum + price;
-            }, 0);
-          }
+          // Calculate total - each item is individual (no quantity grouping)
+          orderTotal = cartItems.reduce((sum, item) => {
+            const price = parseFloat(item.price) || 0;
+            return sum + price;
+          }, 0);
         }
 
         // Redirect if no items
         if (cartItems.length === 0) {
-          window.location.href = isAOGCase ? '/buyer/search-aviation' : '/buyer/cart';
+          window.location.href = '/buyer/cart';
         }
       } catch (error) {
         console.error('Error loading cart:', error);
@@ -539,7 +499,6 @@
           paymentType: selectedPaymentType,
           paymentMethod: selectedPaymentMethod,
           fee: fee,
-          isAOG: isAOGCase,
           notes: '',
           shippingAddress: {
             addressId: selectedAddress._id,
@@ -573,20 +532,8 @@
         // Order created successfully - get order number from backend
         const orderNum = result.order.orderNumber;
 
-        // Clear local cart after successful order
-        if (isAOGCase) {
-          // Clear AOG session data
-          sessionStorage.removeItem('aog-parts');
-          sessionStorage.removeItem('is-aog-case');
-          sessionStorage.removeItem('aog-total');
-          sessionStorage.removeItem('aog-case-info');
-          sessionStorage.removeItem('aog-selected-parts');
-          sessionStorage.removeItem('aog-parts-total');
-          aogCaseId = orderNum;
-        } else {
-          // Clear regular cart from localStorage
-          localStorage.removeItem('partsform_shopping_cart');
-        }
+        // Clear cart from localStorage after successful order
+        localStorage.removeItem('partsform_shopping_cart');
 
         // Update cart badge
         if (window.PartsFormCart && window.PartsFormCart.updateBadge) {
@@ -667,15 +614,6 @@
       DOM.paymentMethodText.textContent = method;
       DOM.amountPaid.textContent = `${amount.toFixed(2)} د.إ`;
 
-      // Update title and message for AOG cases
-      const successTitle = document.getElementById('success-title');
-      const successMessage = document.getElementById('success-message');
-      
-      if (isAOGCase) {
-        if (successTitle) successTitle.textContent = 'AOG Case Activated!';
-        if (successMessage) successMessage.textContent = 'Payment confirmed. Redirecting to Command Center...';
-      }
-
       DOM.successModal.style.display = 'flex';
       document.body.style.overflow = 'hidden';
 
@@ -684,15 +622,9 @@
         lucide.createIcons();
       }
 
-      // Redirect after 3 seconds
+      // Redirect to orders page after 3 seconds
       setTimeout(() => {
-        if (isAOGCase && aogCaseId) {
-          // Redirect to AOG Command Center
-          window.location.href = `/buyer/aog/command-center/${aogCaseId}`;
-        } else {
-          // Redirect to orders page
-          window.location.href = '/buyer/orders';
-        }
+        window.location.href = '/buyer/orders';
       }, 3000);
     }
 

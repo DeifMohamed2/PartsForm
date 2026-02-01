@@ -5,6 +5,9 @@
  */
 const ftp = require('basic-ftp');
 const { PassThrough } = require('stream');
+const fs = require('fs');
+const path = require('path');
+const os = require('os');
 
 class FTPService {
   constructor() {
@@ -41,9 +44,9 @@ class FTPService {
       this.currentCredentials = creds;
       
       const accessConfig = {
-        host: creds.host,
+        host: (creds.host || '').trim(),
         port: creds.port || 21,
-        user: creds.username || creds.user,
+        user: (creds.username || creds.user || '').trim(),
         password: creds.password,
         secure: creds.secure !== undefined ? creds.secure : false,
       };
@@ -155,7 +158,55 @@ class FTPService {
   }
 
   /**
-   * Download file from FTP server
+   * Download file from FTP server to a temporary file (memory-efficient for large files)
+   * Returns the path to the temp file
+   */
+  async downloadToTempFile(remotePath, credentials = null) {
+    try {
+      if (credentials || this.client.closed) {
+        await this.connect(credentials);
+      }
+      
+      // Change to remote directory if specified
+      const remoteDir = credentials?.remotePath || '/';
+      if (remoteDir && remoteDir !== '/') {
+        try {
+          this._debug(`Changing to remote directory: ${remoteDir}`);
+          await this.client.cd(remoteDir);
+        } catch (cdError) {
+          this._debug(`Warning: Could not change to directory ${remoteDir}: ${cdError.message}`);
+        }
+      }
+      
+      const fileName = remotePath.split('/').pop();
+      this._debug(`Downloading file to temp: ${remotePath}`);
+      
+      // Create temp file path
+      const tempDir = path.join(os.tmpdir(), 'partsform-ftp');
+      if (!fs.existsSync(tempDir)) {
+        fs.mkdirSync(tempDir, { recursive: true });
+      }
+      const tempFilePath = path.join(tempDir, `${Date.now()}-${fileName}`);
+      
+      // Download directly to file (memory efficient)
+      await this.client.downloadTo(tempFilePath, remotePath);
+      
+      const stats = fs.statSync(tempFilePath);
+      console.log(`📥 Downloaded ${fileName} (${this._formatBytes(stats.size)}) to temp file`);
+      this._debug(`Download complete: ${fileName} - ${this._formatBytes(stats.size)}`);
+      
+      return tempFilePath;
+    } catch (error) {
+      this._debug(`Error downloading file ${remotePath}: ${error.message}`);
+      console.error(`Error downloading file ${remotePath}:`, error);
+      await this.close();
+      throw error;
+    }
+  }
+
+  /**
+   * Download file from FTP server (returns buffer - for backward compatibility)
+   * For large files (>10MB), consider using downloadToTempFile instead
    */
   async downloadFile(remotePath, credentials = null) {
     try {

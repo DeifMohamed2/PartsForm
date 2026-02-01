@@ -51,6 +51,93 @@ function initSettingsPage() {
 
     // Load saved settings from localStorage
     loadSettings();
+    
+    // Initialize preferred currency selector
+    initPreferredCurrencySettings();
+}
+
+/**
+ * Initialize Preferred Currency Settings
+ */
+function initPreferredCurrencySettings() {
+    const currencySelect = document.getElementById('preferredCurrencySelect');
+    if (!currencySelect) return;
+    
+    // Load current preferred currency from user data or API
+    loadPreferredCurrency();
+    
+    // Add change listener to save currency preference
+    currencySelect.addEventListener('change', async function() {
+        const newCurrency = this.value;
+        await savePreferredCurrency(newCurrency);
+    });
+}
+
+/**
+ * Load user's preferred currency
+ */
+async function loadPreferredCurrency() {
+    const currencySelect = document.getElementById('preferredCurrencySelect');
+    if (!currencySelect) return;
+    
+    // First check if user data is available from server
+    if (window.__USER_DATA__ && window.__USER_DATA__.preferredCurrency) {
+        currencySelect.value = window.__USER_DATA__.preferredCurrency;
+        return;
+    }
+    
+    // Otherwise fetch from API
+    try {
+        const response = await fetch('/buyer/api/settings/currency');
+        if (response.ok) {
+            const data = await response.json();
+            if (data.success && data.currency) {
+                currencySelect.value = data.currency;
+            }
+        }
+    } catch (error) {
+        console.warn('Could not load preferred currency:', error);
+    }
+}
+
+/**
+ * Save preferred currency to server
+ */
+async function savePreferredCurrency(currency) {
+    try {
+        const response = await fetch('/buyer/api/settings/currency', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ currency: currency })
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to save currency preference');
+        }
+        
+        const data = await response.json();
+        if (data.success) {
+            showNotification('Preferred currency updated successfully!', 'success');
+            
+            // Dispatch event for other components to update
+            window.dispatchEvent(new CustomEvent('preferredCurrencyChanged', { 
+                detail: { currency: data.currency } 
+            }));
+            
+            // Update navbar currency display if function exists
+            const navbarCurrencyCode = document.getElementById('preferredCurrencyCode');
+            if (navbarCurrencyCode) {
+                navbarCurrencyCode.textContent = data.currency;
+            }
+        } else {
+            throw new Error(data.message || 'Failed to save currency preference');
+        }
+    } catch (error) {
+        console.error('Error saving preferred currency:', error);
+        showNotification('Failed to save currency preference. Please try again.', 'error');
+    }
 }
 
 /**

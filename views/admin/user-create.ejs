@@ -175,11 +175,26 @@
         userData[key] = value;
       });
       
-      // In production, send to server
-      console.log('Creating user:', userData);
-      
-      // Redirect to users list
-      window.location.href = '/admin/users';
+      // Send to API
+      fetch('/admin/api/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userData)
+      }).then(function(response) {
+        if (response.ok) {
+          return response.json();
+        } else {
+          return response.json().then(function(data) {
+            throw new Error(data.error || 'Failed to create user');
+          });
+        }
+      }).then(function(data) {
+        alert('User created successfully!');
+        window.location.href = '/admin/users/' + data.data.id;
+      }).catch(function(err) {
+        console.error('Error creating user:', err);
+        alert(err.message || 'Failed to create user');
+      });
     });
   </script>
 

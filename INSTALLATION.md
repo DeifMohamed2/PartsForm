@@ -1,5 +1,13 @@
 # PartsForm Installation Guide
 
+
+
+
+# RUN THIS 
+cd ~/elasticsearch-8.16.0 && ES_JAVA_OPTS="-Xms512m -Xmx512m" ./bin/elasticsearch -d -E xpack.security.enabled=false -E discovery.type=single-node
+
+
+
 Complete installation guide for setting up PartsForm with FTP integrations and Elasticsearch search on a new device.
 
 ## Prerequisites

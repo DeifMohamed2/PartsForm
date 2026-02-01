@@ -113,6 +113,27 @@
         <span id="current-currency-code" class="currency-code-display">USD</span>
       </button>
 
+      <!-- Preferred Currency Dropdown -->
+      <div class="preferred-currency-dropdown" id="preferredCurrencyDropdown">
+        <button class="btn-preferred-currency" id="preferredCurrencyBtn" title="<%= t('nav.preferredCurrency') || 'Preferred Currency' %>">
+          <i data-lucide="wallet"></i>
+          <span class="preferred-currency-code" id="preferredCurrencyCode"><%= user && user.preferredCurrency ? user.preferredCurrency : 'USD' %></span>
+          <i data-lucide="chevron-down" class="currency-dropdown-chevron"></i>
+        </button>
+        <div class="preferred-currency-menu" id="preferredCurrencyMenu">
+          <div class="preferred-currency-header">
+            <span><%= t('nav.preferredCurrencyTitle') || 'Preferred Currency' %></span>
+          </div>
+          <div class="preferred-currency-search">
+            <i data-lucide="search" class="search-icon"></i>
+            <input type="text" id="preferredCurrencySearch" placeholder="<%= t('nav.searchCurrency') || 'Search currency...' %>">
+          </div>
+          <div class="preferred-currency-list" id="preferredCurrencyList">
+            <!-- Currency options populated by JavaScript -->
+          </div>
+        </div>
+      </div>
+
       <!-- Language Selector -->
       <div class="language-selector">
         <button class="language-btn" id="language-btn">
@@ -376,7 +397,8 @@
     email: '<%= user.email %>',
     fullName: '<%= user.firstName %> <%= user.lastName %>',
     companyName: '<%= user.companyName || "" %>',
-    avatar: '<%= user.avatar || "" %>'
+    avatar: '<%= user.avatar || "" %>',
+    preferredCurrency: '<%= user.preferredCurrency || "USD" %>'
   };
 </script>
 <% } %>

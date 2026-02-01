@@ -213,21 +213,13 @@
     const itemsCount = order.totalItems || (order.items ? order.items.length : 0);
     const itemsPreview = order.itemsPreview || (order.items ? order.items.slice(0, 3).map(item => item.partNumber || item.code || 'Part') : []);
 
-    // Check if this is an AOG/Aviation order
-    const isAOGOrder = order.type === 'AOG' || order.type === 'Aviation' || 
-                       order.orderNumber.startsWith('AOG-') ||
-                       (order.category && (order.category.toLowerCase() === 'aog' || order.category.toLowerCase() === 'aviation'));
-    
-    // Determine the correct link based on order type
-    const orderLink = isAOGOrder 
-      ? `/buyer/aog/command-center/${encodeURIComponent(order.orderNumber)}`
-      : `/buyer/orders/${encodeURIComponent(order.orderNumber)}`;
+    // Link to order details
+    const orderLink = `/buyer/orders/${encodeURIComponent(order.orderNumber)}`;
 
     row.innerHTML = `
       <td data-label="Order Number">
         <a href="${orderLink}" class="order-number-link" data-order="${order.orderNumber}">
           <span class="order-number">${order.orderNumber}</span>
-          ${isAOGOrder ? '<span class="aog-badge">AOG</span>' : ''}
         </a>
       </td>
       <td data-label="Date">
@@ -267,7 +259,7 @@
                 <span>Track</span>
               </button>
             ` : ''}
-            ${!isAOGOrder && order.status === 'pending' ? `
+            ${order.status === 'pending' ? `
               <button class="btn-action cancel" data-order="${order.orderNumber}" onclick="cancelOrder('${order.orderNumber}')">
                 <i data-lucide="x"></i>
                 <span>Cancel</span>

@@ -72,7 +72,7 @@ const requireAuth = async (req, res, next) => {
       if (req.xhr || req.headers.accept?.includes('application/json')) {
         return res.status(403).json({
           success: false,
-          message: 'Your account has been deactivated. Please contact support.',
+          message: 'Your account has been deactivated. Please contact support for assistance.',
         });
       }
       return res.redirect('/?login=true');

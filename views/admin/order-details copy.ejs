@@ -1,0 +1,701 @@
+<%- include('partials/header') %>
+<link rel="stylesheet" href="/css/adminCSS/admin-dashboard.css">
+<link rel="stylesheet" href="/css/adminCSS/admin-orders.css">
+<style>
+  /* Order Details Specific Styles */
+  .order-details-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+  }
+  
+  .order-header-info {
+    flex: 1;
+  }
+  
+  .order-header-id {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--admin-text-primary);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  
+  .order-header-meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: var(--admin-text-muted);
+    font-size: 0.9rem;
+  }
+  
+  .order-header-meta span {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  
+  .order-header-meta i {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .order-header-actions {
+    display: flex;
+    gap: 0.75rem;
+  }
+  
+  /* Status Timeline */
+  .order-timeline {
+    display: flex;
+    justify-content: space-between;
+    padding: 1.5rem 2rem;
+    background: var(--admin-bg-secondary);
+    border: 1px solid var(--admin-border);
+    border-radius: 16px;
+    margin-bottom: 2rem;
+    position: relative;
+  }
+  
+  .order-timeline::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 2.5rem;
+    right: 2.5rem;
+    height: 3px;
+    background: var(--admin-border);
+    transform: translateY(-50%);
+    z-index: 0;
+  }
+  
+  .timeline-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+  }
+  
+  .timeline-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--admin-bg-primary);
+    border: 3px solid var(--admin-border);
+    margin-bottom: 0.75rem;
+    transition: all 0.3s ease;
+  }
+  
+  .timeline-icon i {
+    width: 20px;
+    height: 20px;
+    color: var(--admin-text-muted);
+  }
+  
+  .timeline-step.completed .timeline-icon {
+    background: #10b981;
+    border-color: #10b981;
+  }
+  
+  .timeline-step.completed .timeline-icon i {
+    color: white;
+  }
+  
+  .timeline-step.active .timeline-icon {
+    background: var(--module-primary, #3b82f6);
+    border-color: var(--module-primary, #3b82f6);
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
+  }
+  
+  .timeline-step.active .timeline-icon i {
+    color: white;
+  }
+  
+  .timeline-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--admin-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .timeline-step.completed .timeline-label,
+  .timeline-step.active .timeline-label {
+    color: var(--admin-text-primary);
+  }
+  
+  .timeline-date {
+    font-size: 0.75rem;
+    color: var(--admin-text-muted);
+    margin-top: 0.25rem;
+  }
+  
+  /* Grid Layout */
+  .order-details-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1.5rem;
+  }
+  
+  /* Cards */
+  .details-card {
+    background: var(--admin-bg-secondary);
+    border: 1px solid var(--admin-border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  
+  .details-card-header {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--admin-border);
+    background: var(--admin-bg-tertiary);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .details-card-header h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--admin-text-primary);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .details-card-header h3 i {
+    width: 18px;
+    height: 18px;
+    color: var(--module-primary, var(--admin-primary));
+  }
+  
+  .details-card-body {
+    padding: 1.5rem;
+  }
+  
+  /* Order Items Table */
+  .order-items-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .order-items-table th {
+    text-align: left;
+    padding: 0.75rem 1rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--admin-text-muted);
+    border-bottom: 1px solid var(--admin-border);
+  }
+  
+  .order-items-table td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--admin-border);
+    vertical-align: middle;
+  }
+  
+  .order-items-table tbody tr:last-child td {
+    border-bottom: none;
+  }
+  
+  .item-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .item-image {
+    width: 50px;
+    height: 50px;
+    background: var(--admin-bg-tertiary);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .item-image i {
+    width: 24px;
+    height: 24px;
+    color: var(--admin-text-muted);
+  }
+  
+  .item-name {
+    font-weight: 600;
+    color: var(--admin-text-primary);
+    margin-bottom: 0.2rem;
+  }
+  
+  .item-sku {
+    font-size: 0.8rem;
+    color: var(--admin-text-muted);
+  }
+  
+  .item-price {
+    font-weight: 600;
+    color: var(--admin-text-primary);
+  }
+  
+  .item-qty {
+    text-align: center;
+    font-weight: 500;
+  }
+  
+  .item-total {
+    font-weight: 700;
+    color: var(--admin-text-primary);
+  }
+  
+  /* Order Summary */
+  .order-summary {
+    padding: 1rem 1.5rem;
+    background: var(--admin-bg-tertiary);
+    border-top: 1px solid var(--admin-border);
+  }
+  
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    font-size: 0.9rem;
+  }
+  
+  .summary-label {
+    color: var(--admin-text-muted);
+  }
+  
+  .summary-value {
+    font-weight: 600;
+    color: var(--admin-text-primary);
+  }
+  
+  .summary-row.total {
+    border-top: 1px solid var(--admin-border);
+    margin-top: 0.5rem;
+    padding-top: 1rem;
+  }
+  
+  .summary-row.total .summary-label,
+  .summary-row.total .summary-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--admin-text-primary);
+  }
+  
+  /* Info Grid */
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+  
+  .info-item {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--admin-border);
+  }
+  
+  .info-item:last-child {
+    border-bottom: none;
+  }
+  
+  .info-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--admin-text-muted);
+    margin-bottom: 0.25rem;
+  }
+  
+  .info-value {
+    font-weight: 600;
+    color: var(--admin-text-primary);
+  }
+  
+  /* Activity Log */
+  .activity-log {
+    max-height: 300px;
+    overflow-y: auto;
+  }
+  
+  .activity-item {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--admin-border);
+  }
+  
+  .activity-item:last-child {
+    border-bottom: none;
+  }
+  
+  .activity-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--admin-bg-tertiary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  
+  .activity-icon i {
+    width: 16px;
+    height: 16px;
+    color: var(--admin-text-muted);
+  }
+  
+  .activity-content {
+    flex: 1;
+  }
+  
+  .activity-text {
+    color: var(--admin-text-primary);
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+  
+  .activity-time {
+    font-size: 0.75rem;
+    color: var(--admin-text-muted);
+    margin-top: 0.25rem;
+  }
+  
+  @media (max-width: 992px) {
+    .order-details-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+</head>
+<body class="<%= typeof currentModule !== 'undefined' && currentModule ? 'module-' + currentModule : '' %>">
+  <div class="admin-wrapper">
+    <%- include('partials/sidebar', { activePage: 'orders', currentModule: currentModule }) %>
+    
+    <main class="admin-main">
+      <%- include('partials/topbar', { pageTitle: 'Order Details', currentModule: currentModule }) %>
+      
+      <div class="admin-content">
+        <!-- Breadcrumb -->
+        <div style="margin-bottom: 1.5rem;">
+          <a href="/admin/orders<%= currentModule ? '?module=' + currentModule : '' %>" style="color: var(--admin-text-muted); text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.9rem;">
+            <i data-lucide="arrow-left" style="width: 16px; height: 16px;"></i>
+            Back to Orders
+          </a>
+        </div>
+
+        <!-- Order Header -->
+        <div class="order-details-header">
+          <div class="order-header-info">
+            <div class="order-header-id">
+              <%= order.id %>
+              <span class="status-badge <%= order.status %>">
+                <% if (order.status === 'pending') { %>
+                  <i data-lucide="clock"></i>
+                <% } else if (order.status === 'processing') { %>
+                  <i data-lucide="loader"></i>
+                <% } else if (order.status === 'shipped') { %>
+                  <i data-lucide="truck"></i>
+                <% } else { %>
+                  <i data-lucide="check-circle"></i>
+                <% } %>
+                <%= order.status %>
+              </span>
+              <% var priority = order.priority || 'normal'; %>
+              <% if (priority !== 'normal') { %>
+              <span class="priority-badge <%= priority %>">
+                <% if (priority === 'urgent' || priority === 'critical') { %><i data-lucide="alert-triangle"></i><% } %>
+                <%= priority.toUpperCase() %>
+              </span>
+              <% } %>
+            </div>
+            <div class="order-header-meta">
+              <span><i data-lucide="calendar"></i> <%= order.date %></span>
+              <span><i data-lucide="user"></i> <%= order.customer %></span>
+              <span>
+                <i data-lucide="car"></i>
+                Automotive
+              </span>
+            </div>
+          </div>
+          <div class="order-header-actions">
+            <button class="admin-btn admin-btn-secondary" onclick="window.print()">
+              <i data-lucide="printer"></i>
+              Print
+            </button>
+            <a href="/admin/orders/<%= order.id %>/edit<%= currentModule ? '?module=' + currentModule : '' %>" class="admin-btn admin-btn-secondary">
+              <i data-lucide="edit-2"></i>
+              Edit Order
+            </a>
+            <button class="admin-btn admin-btn-primary" onclick="updateStatus()">
+              <i data-lucide="refresh-cw"></i>
+              Update Status
+            </button>
+          </div>
+        </div>
+
+        <!-- Status Timeline -->
+        <div class="order-timeline">
+          <div class="timeline-step <%= ['pending', 'processing', 'shipped', 'delivered'].indexOf(order.status) >= 0 ? 'completed' : '' %>">
+            <div class="timeline-icon">
+              <i data-lucide="clock"></i>
+            </div>
+            <div class="timeline-label">Pending</div>
+            <div class="timeline-date"><%= order.date %></div>
+          </div>
+          <div class="timeline-step <%= ['processing', 'shipped', 'delivered'].indexOf(order.status) >= 0 ? 'completed' : '' %> <%= order.status === 'processing' ? 'active' : '' %>">
+            <div class="timeline-icon">
+              <i data-lucide="settings"></i>
+            </div>
+            <div class="timeline-label">Processing</div>
+            <div class="timeline-date"><%= order.status === 'pending' ? '-' : order.date %></div>
+          </div>
+          <div class="timeline-step <%= ['shipped', 'delivered'].indexOf(order.status) >= 0 ? 'completed' : '' %> <%= order.status === 'shipped' ? 'active' : '' %>">
+            <div class="timeline-icon">
+              <i data-lucide="truck"></i>
+            </div>
+            <div class="timeline-label">Shipped</div>
+            <div class="timeline-date"><%= ['shipped', 'delivered'].indexOf(order.status) >= 0 ? order.date : '-' %></div>
+          </div>
+          <div class="timeline-step <%= order.status === 'delivered' ? 'completed' : '' %>">
+            <div class="timeline-icon">
+              <i data-lucide="check-circle"></i>
+            </div>
+            <div class="timeline-label">Delivered</div>
+            <div class="timeline-date"><%= order.status === 'delivered' ? order.date : '-' %></div>
+          </div>
+        </div>
+
+        <!-- Content Grid -->
+        <div class="order-details-grid">
+          <!-- Left Column -->
+          <div>
+            <!-- Order Items -->
+            <div class="details-card">
+              <div class="details-card-header">
+                <h3><i data-lucide="package"></i> Order Items (<%= order.items %>)</h3>
+              </div>
+              <table class="order-items-table">
+                <thead>
+                  <tr>
+                    <th>Product</th>
+                    <th>Unit Price</th>
+                    <th>Qty</th>
+                    <th>Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% 
+                    // Mock items based on order
+                    var orderItems = [
+                      { name: 'Engine Gasket Set', sku: 'EGS-' + Math.floor(Math.random() * 10000), price: Math.floor(order.amount * 0.3), qty: 2 },
+                      { name: 'Hydraulic Pump Assembly', sku: 'HPA-' + Math.floor(Math.random() * 10000), price: Math.floor(order.amount * 0.45), qty: 1 },
+                      { name: 'Fuel Injector Kit', sku: 'FIK-' + Math.floor(Math.random() * 10000), price: Math.floor(order.amount * 0.25), qty: 3 }
+                    ];
+                  %>
+                  <% orderItems.forEach(function(item) { %>
+                  <tr>
+                    <td>
+                      <div class="item-info">
+                        <div class="item-image">
+                          <i data-lucide="box"></i>
+                        </div>
+                        <div>
+                          <div class="item-name"><%= item.name %></div>
+                          <div class="item-sku">SKU: <%= item.sku %></div>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="item-price">$<%= item.price.toLocaleString() %></td>
+                    <td class="item-qty"><%= item.qty %></td>
+                    <td class="item-total">$<%= (item.price * item.qty).toLocaleString() %></td>
+                  </tr>
+                  <% }); %>
+                </tbody>
+              </table>
+              <div class="order-summary">
+                <div class="summary-row">
+                  <span class="summary-label">Subtotal</span>
+                  <span class="summary-value">$<%= Math.floor(order.amount * 0.9).toLocaleString() %></span>
+                </div>
+                <div class="summary-row">
+                  <span class="summary-label">Shipping</span>
+                  <span class="summary-value">$<%= Math.floor(order.amount * 0.05).toLocaleString() %></span>
+                </div>
+                <div class="summary-row">
+                  <span class="summary-label">Tax</span>
+                  <span class="summary-value">$<%= Math.floor(order.amount * 0.05).toLocaleString() %></span>
+                </div>
+                <div class="summary-row total">
+                  <span class="summary-label">Total</span>
+                  <span class="summary-value">$<%= order.amount.toLocaleString() %></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Activity Log -->
+            <div class="details-card" style="margin-top: 1.5rem;">
+              <div class="details-card-header">
+                <h3><i data-lucide="activity"></i> Activity Log</h3>
+              </div>
+              <div class="details-card-body">
+                <div class="activity-log">
+                  <div class="activity-item">
+                    <div class="activity-icon" style="background: rgba(16, 185, 129, 0.12);">
+                      <i data-lucide="check" style="color: #10b981;"></i>
+                    </div>
+                    <div class="activity-content">
+                      <div class="activity-text">Order created by <strong>Admin</strong></div>
+                      <div class="activity-time"><%= order.date %> at 09:30 AM</div>
+                    </div>
+                  </div>
+                  <div class="activity-item">
+                    <div class="activity-icon" style="background: rgba(59, 130, 246, 0.12);">
+                      <i data-lucide="mail" style="color: #3b82f6;"></i>
+                    </div>
+                    <div class="activity-content">
+                      <div class="activity-text">Confirmation email sent to <strong><%= order.email %></strong></div>
+                      <div class="activity-time"><%= order.date %> at 09:31 AM</div>
+                    </div>
+                  </div>
+                  <% if (order.status !== 'pending') { %>
+                  <div class="activity-item">
+                    <div class="activity-icon" style="background: rgba(139, 92, 246, 0.12);">
+                      <i data-lucide="settings" style="color: #8b5cf6;"></i>
+                    </div>
+                    <div class="activity-content">
+                      <div class="activity-text">Order moved to <strong>Processing</strong></div>
+                      <div class="activity-time"><%= order.date %> at 02:15 PM</div>
+                    </div>
+                  </div>
+                  <% } %>
+                  <% if (['shipped', 'delivered'].indexOf(order.status) >= 0) { %>
+                  <div class="activity-item">
+                    <div class="activity-icon" style="background: rgba(245, 158, 11, 0.12);">
+                      <i data-lucide="truck" style="color: #f59e0b;"></i>
+                    </div>
+                    <div class="activity-content">
+                      <div class="activity-text">Order shipped via <strong>DHL Express</strong></div>
+                      <div class="activity-time"><%= order.date %> at 04:45 PM</div>
+                    </div>
+                  </div>
+                  <% } %>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column -->
+          <div>
+            <!-- Customer Info -->
+            <div class="details-card">
+              <div class="details-card-header">
+                <h3><i data-lucide="user"></i> Customer</h3>
+              </div>
+              <div class="details-card-body">
+                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                  <div style="width: 48px; height: 48px; border-radius: 50%; background: var(--module-primary, var(--admin-primary)); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 1.1rem;">
+                    <%= order.customer.charAt(0) %>
+                  </div>
+                  <div>
+                    <div style="font-weight: 600; color: var(--admin-text-primary);"><%= order.customer %></div>
+                    <div style="font-size: 0.85rem; color: var(--admin-text-muted);"><%= order.email %></div>
+                  </div>
+                </div>
+                <div class="info-grid">
+                  <div class="info-item">
+                    <div class="info-label">Phone</div>
+                    <div class="info-value">+1 (555) 123-4567</div>
+                  </div>
+                  <div class="info-item">
+                    <div class="info-label">Total Orders</div>
+                    <div class="info-value">12</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Shipping Info -->
+            <div class="details-card" style="margin-top: 1.5rem;">
+              <div class="details-card-header">
+                <h3><i data-lucide="map-pin"></i> Shipping Address</h3>
+              </div>
+              <div class="details-card-body">
+                <div style="color: var(--admin-text-primary); line-height: 1.6;">
+                  <strong><%= order.customer %></strong><br>
+                  123 Industrial Park Drive<br>
+                  Building A, Suite 400<br>
+                  Los Angeles, CA 90001<br>
+                  United States
+                </div>
+              </div>
+            </div>
+
+            <!-- Payment Info -->
+            <div class="details-card" style="margin-top: 1.5rem;">
+              <div class="details-card-header">
+                <h3><i data-lucide="credit-card"></i> Payment</h3>
+              </div>
+              <div class="details-card-body">
+                <div class="info-grid">
+                  <div class="info-item">
+                    <div class="info-label">Method</div>
+                    <div class="info-value">Wire Transfer</div>
+                  </div>
+                  <div class="info-item">
+                    <div class="info-label">Status</div>
+                    <div class="info-value" style="color: #10b981;">Paid</div>
+                  </div>
+                  <div class="info-item">
+                    <div class="info-label">Transaction ID</div>
+                    <div class="info-value">TXN-<%= Math.floor(Math.random() * 1000000) %></div>
+                  </div>
+                  <div class="info-item">
+                    <div class="info-label">Date</div>
+                    <div class="info-value"><%= order.date %></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Notes -->
+            <div class="details-card" style="margin-top: 1.5rem;">
+              <div class="details-card-header">
+                <h3><i data-lucide="file-text"></i> Notes</h3>
+              </div>
+              <div class="details-card-body">
+                <p style="color: var(--admin-text-muted); font-size: 0.9rem; line-height: 1.6; margin: 0;">
+                  <% if (order.priority === 'critical') { %>
+                  <strong style="color: #dc2626;">CRITICAL PRIORITY:</strong> Expedite immediately.<br><br>
+                  <% } %>
+                  Standard delivery terms apply. Contact customer for any questions regarding specifications.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    function updateStatus() {
+      // In production, show a modal to select new status
+      alert('Status update functionality - would show modal to select: Processing, Shipped, or Delivered');
+    }
+  </script>
+
+<%- include('partials/footer') %>

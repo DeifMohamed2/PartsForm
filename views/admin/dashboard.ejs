@@ -37,20 +37,6 @@
   .module-aviation .chart-card {
     border-top: 3px solid #0ea5e9;
   }
-  .module-aviation .aog-alert-banner {
-    display: flex;
-    background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.05));
-    border: 2px solid rgba(239, 68, 68, 0.3);
-    border-radius: var(--admin-radius-xl);
-    padding: 1.25rem;
-    margin-bottom: 1.5rem;
-    align-items: center;
-    gap: 1rem;
-  }
-  .module-aviation .aog-alert-banner i { color: #ef4444; width: 28px; height: 28px; }
-  .module-aviation .aog-alert-banner .aog-alert-text { flex: 1; }
-  .module-aviation .aog-alert-banner h4 { color: #dc2626; font-size: 1rem; margin-bottom: 0.25rem; }
-  .module-aviation .aog-alert-banner p { color: #991b1b; font-size: 0.85rem; margin: 0; }
 
   /* Machinery Module - Industrial/Solid Theme */
   .module-machinery .module-info-banner {
@@ -271,21 +257,6 @@
             </div>
           </div>
         </div>
-
-        <% if (currentModule === 'aviation') { %>
-        <!-- Aviation-Specific: AOG Alert Banner -->
-        <div class="aog-alert-banner">
-          <i data-lucide="alert-triangle"></i>
-          <div class="aog-alert-text">
-            <h4>3 Active AOG Cases Require Attention</h4>
-            <p>Critical aircraft parts needed - 2 cases are marked as urgent priority</p>
-          </div>
-          <a href="/admin/aog?module=aviation" class="admin-btn admin-btn-primary" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
-            <i data-lucide="external-link"></i>
-            View AOG Cases
-          </a>
-        </div>
-        <% } %>
         <% } %>
 
         <% if (!currentModule) { %>
@@ -1533,19 +1504,6 @@
             </div>
           </div>
           <% } %>
-          <% if (currentModule === 'aviation') { %>
-          <div class="chart-card">
-            <div class="chart-header">
-              <div>
-                <div class="chart-title">AOG Cases</div>
-                <div class="chart-subtitle">Priority breakdown</div>
-              </div>
-            </div>
-            <div class="chart-container" style="height: 180px;">
-              <canvas id="aogChart"></canvas>
-            </div>
-          </div>
-          <% } %>
           <% if (currentModule === 'machinery') { %>
           <div class="chart-card">
             <div class="chart-header">
@@ -2018,28 +1976,6 @@
           y: { display: false },
           x: { grid: { display: false }, ticks: { color: '#64748b', font: { size: 10 } } }
         }
-      }
-    });
-    <% } %>
-
-    // AOG Cases Chart (Aviation only)
-    <% if (currentModule === 'aviation') { %>
-    const aogCtx = document.getElementById('aogChart').getContext('2d');
-    new Chart(aogCtx, {
-      type: 'doughnut',
-      data: {
-        labels: ['Critical', 'High', 'Medium', 'Resolved'],
-        datasets: [{
-          data: [2, 3, 4, 12],
-          backgroundColor: ['#ef4444', '#f59e0b', '#3b82f6', '#10b981'],
-          borderWidth: 0
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: true, position: 'right', labels: { usePointStyle: true, font: { size: 10 } } } },
-        cutout: '50%'
       }
     });
     <% } %>

@@ -50,23 +50,33 @@
       pointer-events: none;
     }
     
-    /* Loader Background - Automotive Blue Theme */
+    /* Loader Background - Semi-transparent with blur */
     .module-loader-overlay.loader-default,
     .module-loader-overlay.loader-automotive {
-      background: linear-gradient(135deg, #0c4a6e 0%, #0ea5e9 50%, #0c4a6e 100%);
+      background: rgba(12, 74, 110, 0.45);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
     }
     
-    /* Loader Content */
+    /* Loader Content - Only icon visible */
     .module-loader-content {
       text-align: center;
       color: white;
+    }
+    
+    /* Hide text and progress bar - only show icon */
+    .loader-title,
+    .loader-subtitle,
+    .loader-progress,
+    .loader-particles {
+      display: none !important;
     }
     
     /* Animated Icon Container */
     .loader-icon-container {
       width: 120px;
       height: 120px;
-      margin: 0 auto 1.5rem;
+      margin: 0 auto;
       position: relative;
     }
     
@@ -106,37 +116,6 @@
       animation: loaderBuild 1.5s ease-in-out infinite;
     }
     
-    /* Loader Text */
-    .loader-title {
-      font-size: 1.5rem;
-      font-weight: 700;
-      margin-bottom: 0.5rem;
-      letter-spacing: 0.5px;
-    }
-    
-    .loader-subtitle {
-      font-size: 0.9rem;
-      opacity: 0.8;
-      font-weight: 500;
-    }
-    
-    /* Progress Bar */
-    .loader-progress {
-      width: 200px;
-      height: 4px;
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: 4px;
-      margin: 1.5rem auto 0;
-      overflow: hidden;
-    }
-    
-    .loader-progress-bar {
-      height: 100%;
-      background: white;
-      border-radius: 4px;
-      animation: loaderProgress 1.2s ease-in-out infinite;
-    }
-    
     /* Keyframes */
     @keyframes loaderSpin {
       0% { transform: rotate(0deg); }
@@ -167,50 +146,13 @@
       75% { transform: translate(-50%, -50%) rotate(10deg); }
     }
     
-    @keyframes loaderProgress {
-      0% { width: 0%; margin-left: 0; }
-      50% { width: 70%; margin-left: 15%; }
-      100% { width: 0%; margin-left: 100%; }
-    }
-    
-    /* Particles Effect */
+    /* Particles Effect - Hidden */
     .loader-particles {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      pointer-events: none;
+      display: none;
     }
     
     .loader-particle {
-      position: absolute;
-      width: 8px;
-      height: 8px;
-      background: rgba(255, 255, 255, 0.3);
-      border-radius: 50%;
-      animation: particleFloat 3s ease-in-out infinite;
-    }
-    
-    .loader-particle:nth-child(1) { left: 10%; animation-delay: 0s; }
-    .loader-particle:nth-child(2) { left: 25%; animation-delay: 0.5s; }
-    .loader-particle:nth-child(3) { left: 40%; animation-delay: 1s; }
-    .loader-particle:nth-child(4) { left: 55%; animation-delay: 1.5s; }
-    .loader-particle:nth-child(5) { left: 70%; animation-delay: 2s; }
-    .loader-particle:nth-child(6) { left: 85%; animation-delay: 2.5s; }
-    
-    @keyframes particleFloat {
-      0%, 100% { 
-        transform: translateY(100vh) scale(0);
-        opacity: 0;
-      }
-      10% { opacity: 1; }
-      90% { opacity: 1; }
-      100% { 
-        transform: translateY(-20px) scale(1);
-        opacity: 0;
-      }
+      display: none;
     }
   </style>
 </head>

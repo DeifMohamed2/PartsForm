@@ -54,6 +54,15 @@
               <div class="stat-label">Active Users</div>
             </div>
           </div>
+          <div class="stat-card orange">
+            <div class="stat-icon">
+              <i data-lucide="user-x"></i>
+            </div>
+            <div class="stat-content">
+              <div class="stat-value"><%= inactiveCount %></div>
+              <div class="stat-label">Inactive Users</div>
+            </div>
+          </div>
           <div class="stat-card purple">
             <div class="stat-icon">
               <i data-lucide="shopping-bag"></i>
@@ -61,15 +70,6 @@
             <div class="stat-content">
               <div class="stat-value"><%= totalOrders %></div>
               <div class="stat-label">Total Orders</div>
-            </div>
-          </div>
-          <div class="stat-card orange">
-            <div class="stat-icon">
-              <i data-lucide="dollar-sign"></i>
-            </div>
-            <div class="stat-content">
-              <div class="stat-value">$<%= (totalSpent / 1000000).toFixed(1) %>M</div>
-              <div class="stat-label">Total Revenue</div>
             </div>
           </div>
         </div>
@@ -150,9 +150,9 @@
             </thead>
             <tbody id="usersTableBody">
               <% users.forEach(function(user) { %>
-              <tr data-user-id="<%= user.id %>" data-status="<%= user.status %>" onclick="handleRowClick(event, <%= user.id %>)">
+              <tr data-user-id="<%= user.id %>" data-status="<%= user.status %>" onclick="handleRowClick(event, '<%= user.id %>')">
                 <td onclick="event.stopPropagation()">
-                  <div class="user-checkbox" data-id="<%= user.id %>" onclick="toggleUserSelection(<%= user.id %>)"></div>
+                  <div class="user-checkbox" data-id="<%= user.id %>" onclick="toggleUserSelection('<%= user.id %>')"></div>
                 </td>
                 <td>
                   <div class="user-cell">
@@ -189,9 +189,15 @@
                     <a href="/admin/users/<%= user.id %>/edit" class="user-action-btn edit" title="Edit User">
                       <i data-lucide="edit-2"></i>
                     </a>
-                    <button class="user-action-btn" title="Toggle Status" onclick="toggleUserStatus(<%= user.id %>, '<%= user.status %>')">
-                      <i data-lucide="<%= user.status === 'active' ? 'user-x' : 'user-check' %>"></i>
+                    <% if (user.status === 'active') { %>
+                    <button class="user-action-btn deactivate" title="Deactivate User" onclick="toggleUserStatus('<%= user.id %>', '<%= user.status %>')">
+                      <i data-lucide="user-x"></i>
                     </button>
+                    <% } else { %>
+                    <button class="user-action-btn activate" title="Activate User" onclick="toggleUserStatus('<%= user.id %>', '<%= user.status %>')">
+                      <i data-lucide="user-check"></i>
+                    </button>
+                    <% } %>
                   </div>
                 </td>
               </tr>
@@ -249,7 +255,7 @@
         selectedUsers = [];
         allRows.forEach(function(row) {
           if (row.style.display !== 'none') {
-            var userId = parseInt(row.dataset.userId);
+            var userId = row.dataset.userId;
             selectedUsers.push(userId);
             row.classList.add('selected');
             document.querySelector('.user-checkbox[data-id="' + userId + '"]').classList.add('checked');
@@ -295,7 +301,7 @@
     function bulkUpdateStatus(newStatus) {
       if (selectedUsers.length === 0) return;
       
-      fetch('/admin/users/bulk', {
+      fetch('/admin/api/users/bulk', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userIds: selectedUsers, status: newStatus })
@@ -312,7 +318,7 @@
     function toggleUserStatus(userId, currentStatus) {
       var newStatus = currentStatus === 'active' ? 'inactive' : 'active';
       
-      fetch('/admin/users/' + userId + '/status', {
+      fetch('/admin/api/users/' + userId + '/status', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus })
@@ -322,6 +328,49 @@
         }
       }).catch(function(err) {
         console.error('Error updating user:', err);
+      });
+    }
+    
+    // Approve user
+    function approveUser(userId) {
+      if (!confirm('Are you sure you want to approve this user? They will be able to access their buyer dashboard.')) {
+        return;
+      }
+      
+      fetch('/admin/api/users/' + userId + '/approve', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ notes: 'Approved by admin' })
+      }).then(function(response) {
+        if (response.ok) {
+          location.reload();
+        } else {
+          alert('Failed to approve user');
+        }
+      }).catch(function(err) {
+        console.error('Error approving user:', err);
+        alert('Failed to approve user');
+      });
+    }
+    
+    // Reject user
+    function rejectUser(userId) {
+      var reason = prompt('Please provide a reason for rejection (optional):');
+      if (reason === null) return; // User cancelled
+      
+      fetch('/admin/api/users/' + userId + '/reject', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason: reason || 'Application rejected by admin' })
+      }).then(function(response) {
+        if (response.ok) {
+          location.reload();
+        } else {
+          alert('Failed to reject user');
+        }
+      }).catch(function(err) {
+        console.error('Error rejecting user:', err);
+        alert('Failed to reject user');
       });
     }
     
@@ -359,5 +408,38 @@
       rows.forEach(function(row) { row.style.display = ''; });
     }
   </script>
+
+  <style>
+    /* Pending status badge */
+    .user-status-badge.pending {
+      background: rgba(245, 158, 11, 0.12);
+      color: #d97706;
+    }
+    .user-status-badge.rejected {
+      background: rgba(239, 68, 68, 0.12);
+      color: #dc2626;
+    }
+    /* Approve/Reject/Activate/Deactivate buttons */
+    .user-action-btn.approve,
+    .user-action-btn.activate {
+      background: rgba(16, 185, 129, 0.1);
+      color: #10b981;
+    }
+    .user-action-btn.approve:hover,
+    .user-action-btn.activate:hover {
+      background: #10b981;
+      color: white;
+    }
+    .user-action-btn.reject,
+    .user-action-btn.deactivate {
+      background: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+    }
+    .user-action-btn.reject:hover,
+    .user-action-btn.deactivate:hover {
+      background: #ef4444;
+      color: white;
+    }
+  </style>
 
 <%- include('partials/footer') %>

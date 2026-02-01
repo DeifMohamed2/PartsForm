@@ -7,7 +7,7 @@
 <!-- ====================================
      TICKET DETAILS PAGE - CHAT INTERFACE
      ==================================== -->
-<div class="ticket-details-page">
+<div class="ticket-details-page" data-ticket-id="<%= ticket ? ticket._id : '' %>">
   <!-- Ticket Header -->
   <div class="ticket-header-bar">
     <div class="buyer-container">
@@ -115,6 +115,7 @@
 <%- include('partials/quick-search') %>
 <%- include('partials/footer') %>
 
+<script src="/socket.io/socket.io.js"></script>
 <script src="/js/main.js"></script>
 <script src="/js/quick-search.js"></script>
 <script src="/js/cart.js"></script>

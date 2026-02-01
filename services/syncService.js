@@ -37,7 +37,19 @@ class SyncService extends EventEmitter {
    */
   _updateProgress(integrationId, progress) {
     const current = this.syncProgress.get(integrationId) || {};
-    const updated = { ...current, ...progress, updatedAt: new Date() };
+    
+    // Calculate elapsed time if startTime exists
+    let elapsedMs = progress.duration;
+    if (!elapsedMs && current.startTime) {
+      elapsedMs = Date.now() - current.startTime;
+    }
+    
+    const updated = { 
+      ...current, 
+      ...progress, 
+      elapsedMs,
+      updatedAt: new Date() 
+    };
     this.syncProgress.set(integrationId, updated);
     this.emit('progress', { integrationId, ...updated });
     return updated;
@@ -259,6 +271,26 @@ class SyncService extends EventEmitter {
       message: `Found ${files.length} files to process`,
     });
 
+    // Delete old data for this integration before importing fresh data
+    // This ensures clean sync - no orphaned records from removed files
+    this._updateProgress(integrationId, {
+      phase: 'cleaning',
+      message: 'Removing old data before fresh sync...',
+    });
+
+    try {
+      const deletedCount = await Part.deleteByIntegration(integration._id);
+      console.log(`🗑️  Cleaned up ${deletedCount} old parts before sync`);
+
+      // Also delete from Elasticsearch
+      if (elasticsearchService.isAvailable) {
+        await elasticsearchService.deleteByIntegration(integration._id.toString());
+      }
+    } catch (cleanupError) {
+      console.error('Warning: Failed to cleanup old data:', cleanupError.message);
+      // Continue with sync even if cleanup fails
+    }
+
     let totalInserted = 0;
     let totalUpdated = 0;
     let totalProcessed = 0;
@@ -303,20 +335,20 @@ class SyncService extends EventEmitter {
           remotePath: remoteDir
         };
 
-        // Download file - ftpService handles connection/disconnection internally
-        // Close connection after each download (like working implementation)
-        const buffer = await ftpService.downloadFile(remotePath, downloadCredentials);
+        // Download file to temp (memory-efficient for large files)
+        // This streams directly to disk instead of holding in memory
+        const tempFilePath = await ftpService.downloadToTempFile(remotePath, downloadCredentials);
         await ftpService.close();
 
-        console.log(`[SYNC DEBUG] Downloaded ${file.name}, size: ${buffer.length} bytes`);
+        console.log(`[SYNC DEBUG] Downloaded ${file.name} to temp file`);
 
         this._updateProgress(integrationId, {
           phase: 'parsing',
           message: `Parsing ${file.name}...`,
         });
 
-        // Parse and import
-        const result = await csvParserService.parseAndImport(buffer, {
+        // Parse and import from temp file (streaming, memory-efficient)
+        const result = await csvParserService.parseAndImport(tempFilePath, {
           integration: integration._id,
           integrationName: integration.name,
           fileName: file.name,
@@ -337,7 +369,6 @@ class SyncService extends EventEmitter {
 
         fileResults.push({
           name: file.name,
-          size: buffer.length,
           records: result.validRecords,
           inserted: result.inserted,
           updated: result.updated,
@@ -507,7 +538,6 @@ class SyncService extends EventEmitter {
               quantity: record.quantity,
               condition: record.condition,
               brand: record.brand,
-              origin: record.origin,
               leadTime: record.leadTime,
               uom: record.uom,
               category: record.category,

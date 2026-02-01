@@ -2,75 +2,173 @@
 <link rel="stylesheet" href="/css/adminCSS/admin-dashboard.css">
 <link rel="stylesheet" href="/css/adminCSS/admin-orders.css">
 <style>
-  /* Order Details Specific Styles */
-  .order-details-header {
+  /* Professional Order Details Styles */
+  .order-details-page {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  
+  /* Order Hero Header */
+  .order-hero {
+    background: linear-gradient(135deg, var(--admin-bg-secondary) 0%, var(--admin-bg-tertiary) 100%);
+    border: 1px solid var(--admin-border);
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .order-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, var(--module-primary, #3b82f6) 0%, transparent 70%);
+    opacity: 0.05;
+    pointer-events: none;
+  }
+  
+  .order-hero-content {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 2rem;
     flex-wrap: wrap;
     gap: 1.5rem;
+    position: relative;
+    z-index: 1;
   }
   
-  .order-header-info {
+  .order-hero-main {
     flex: 1;
+    min-width: 300px;
   }
   
-  .order-header-id {
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: var(--admin-text-primary);
-    margin-bottom: 0.5rem;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-  }
-  
-  .order-header-meta {
+  .order-number {
     display: flex;
     align-items: center;
     gap: 1rem;
-    color: var(--admin-text-muted);
-    font-size: 0.9rem;
+    margin-bottom: 1rem;
   }
   
-  .order-header-meta span {
+  .order-number h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--admin-text-primary);
+    margin: 0;
+    font-family: 'SF Mono', 'Monaco', monospace;
+  }
+  
+  .order-badges {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  
+  .order-meta-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+  }
+  
+  .meta-item {
     display: flex;
     align-items: center;
-    gap: 0.4rem;
-  }
-  
-  .order-header-meta i {
-    width: 16px;
-    height: 16px;
-  }
-  
-  .order-header-actions {
-    display: flex;
     gap: 0.75rem;
   }
   
-  /* Status Timeline */
-  .order-timeline {
+  .meta-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: var(--admin-bg-primary);
     display: flex;
-    justify-content: space-between;
-    padding: 1.5rem 2rem;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  
+  .meta-icon i {
+    width: 18px;
+    height: 18px;
+    color: var(--module-primary, var(--admin-primary));
+  }
+  
+  .meta-content {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .meta-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--admin-text-muted);
+    margin-bottom: 0.15rem;
+  }
+  
+  .meta-value {
+    font-weight: 600;
+    color: var(--admin-text-primary);
+    font-size: 0.95rem;
+  }
+  
+  .order-hero-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+  
+  /* Status Timeline */
+  .timeline-card {
     background: var(--admin-bg-secondary);
     border: 1px solid var(--admin-border);
     border-radius: 16px;
+    padding: 1.5rem 2rem;
     margin-bottom: 2rem;
+  }
+  
+  .timeline-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+  
+  .timeline-card-header h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--admin-text-primary);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .timeline-card-header h3 i {
+    width: 18px;
+    height: 18px;
+    color: var(--module-primary, var(--admin-primary));
+  }
+  
+  .order-timeline {
+    display: flex;
+    justify-content: space-between;
     position: relative;
+    padding: 0 1rem;
   }
   
   .order-timeline::before {
     content: '';
     position: absolute;
-    top: 50%;
-    left: 2.5rem;
-    right: 2.5rem;
+    top: 22px;
+    left: 3rem;
+    right: 3rem;
     height: 3px;
     background: var(--admin-border);
-    transform: translateY(-50%);
     z-index: 0;
   }
   
@@ -81,6 +179,7 @@
     text-align: center;
     position: relative;
     z-index: 1;
+    flex: 1;
   }
   
   .timeline-icon {
@@ -115,10 +214,25 @@
     background: var(--module-primary, #3b82f6);
     border-color: var(--module-primary, #3b82f6);
     box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
+    animation: pulse 2s infinite;
   }
   
   .timeline-step.active .timeline-icon i {
     color: white;
+  }
+  
+  .timeline-step.cancelled .timeline-icon {
+    background: #ef4444;
+    border-color: #ef4444;
+  }
+  
+  .timeline-step.cancelled .timeline-icon i {
+    color: white;
+  }
+  
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2); }
+    50% { box-shadow: 0 0 0 8px rgba(59, 130, 246, 0.1); }
   }
   
   .timeline-label {
@@ -140,10 +254,10 @@
     margin-top: 0.25rem;
   }
   
-  /* Grid Layout */
-  .order-details-grid {
+  /* Main Content Grid */
+  .order-content-grid {
     display: grid;
-    grid-template-columns: 2fr 1fr;
+    grid-template-columns: 1fr 380px;
     gap: 1.5rem;
   }
   
@@ -153,6 +267,11 @@
     border: 1px solid var(--admin-border);
     border-radius: 16px;
     overflow: hidden;
+    margin-bottom: 1.5rem;
+  }
+  
+  .details-card:last-child {
+    margin-bottom: 0;
   }
   
   .details-card-header {
@@ -165,7 +284,7 @@
   }
   
   .details-card-header h3 {
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: 600;
     color: var(--admin-text-primary);
     margin: 0;
@@ -185,30 +304,58 @@
   }
   
   /* Order Items Table */
+  .items-table-wrapper {
+    overflow-x: auto;
+  }
+  
   .order-items-table {
     width: 100%;
     border-collapse: collapse;
+    min-width: 600px;
   }
   
   .order-items-table th {
     text-align: left;
-    padding: 0.75rem 1rem;
+    padding: 0.875rem 1rem;
     font-size: 0.7rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     color: var(--admin-text-muted);
+    background: var(--admin-bg-tertiary);
     border-bottom: 1px solid var(--admin-border);
   }
   
+  .order-items-table th:first-child {
+    padding-left: 1.5rem;
+  }
+  
+  .order-items-table th:last-child {
+    padding-right: 1.5rem;
+    text-align: right;
+  }
+  
   .order-items-table td {
-    padding: 1rem;
+    padding: 1.25rem 1rem;
     border-bottom: 1px solid var(--admin-border);
     vertical-align: middle;
   }
   
+  .order-items-table td:first-child {
+    padding-left: 1.5rem;
+  }
+  
+  .order-items-table td:last-child {
+    padding-right: 1.5rem;
+    text-align: right;
+  }
+  
   .order-items-table tbody tr:last-child td {
     border-bottom: none;
+  }
+  
+  .order-items-table tbody tr:hover {
+    background: var(--admin-bg-tertiary);
   }
   
   .item-info {
@@ -220,48 +367,55 @@
   .item-image {
     width: 50px;
     height: 50px;
-    background: var(--admin-bg-tertiary);
-    border-radius: 8px;
+    background: linear-gradient(135deg, var(--admin-bg-tertiary) 0%, var(--admin-bg-primary) 100%);
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
+    border: 1px solid var(--admin-border);
   }
   
   .item-image i {
-    width: 24px;
-    height: 24px;
-    color: var(--admin-text-muted);
+    width: 22px;
+    height: 22px;
+    color: var(--module-primary, var(--admin-primary));
+  }
+  
+  .item-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
   }
   
   .item-name {
     font-weight: 600;
     color: var(--admin-text-primary);
-    margin-bottom: 0.2rem;
+    font-size: 0.9rem;
   }
   
-  .item-sku {
+  .item-meta {
+    display: flex;
+    gap: 0.75rem;
     font-size: 0.8rem;
     color: var(--admin-text-muted);
+  }
+  
+  .item-meta span {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
   }
   
   .item-price {
     font-weight: 600;
     color: var(--admin-text-primary);
-  }
-  
-  .item-qty {
-    text-align: center;
-    font-weight: 500;
-  }
-  
-  .item-total {
-    font-weight: 700;
-    color: var(--admin-text-primary);
+    font-size: 0.95rem;
   }
   
   /* Order Summary */
   .order-summary {
-    padding: 1rem 1.5rem;
+    padding: 1.25rem 1.5rem;
     background: var(--admin-bg-tertiary);
     border-top: 1px solid var(--admin-border);
   }
@@ -283,50 +437,148 @@
   }
   
   .summary-row.total {
-    border-top: 1px solid var(--admin-border);
-    margin-top: 0.5rem;
+    border-top: 2px solid var(--admin-border);
+    margin-top: 0.75rem;
     padding-top: 1rem;
   }
   
   .summary-row.total .summary-label,
   .summary-row.total .summary-value {
-    font-size: 1.1rem;
+    font-size: 1.15rem;
     font-weight: 700;
     color: var(--admin-text-primary);
   }
   
-  /* Info Grid */
-  .info-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
+  /* Customer Card */
+  .customer-header {
+    display: flex;
+    align-items: center;
     gap: 1rem;
-  }
-  
-  .info-item {
-    padding: 0.75rem 0;
+    margin-bottom: 1.25rem;
+    padding-bottom: 1.25rem;
     border-bottom: 1px solid var(--admin-border);
   }
   
-  .info-item:last-child {
-    border-bottom: none;
+  .customer-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--module-primary, #3b82f6) 0%, #8b5cf6 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 1.25rem;
+    flex-shrink: 0;
   }
   
-  .info-label {
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: var(--admin-text-muted);
-    margin-bottom: 0.25rem;
-  }
-  
-  .info-value {
+  .customer-info h4 {
+    font-size: 1rem;
     font-weight: 600;
     color: var(--admin-text-primary);
+    margin: 0 0 0.25rem;
+  }
+  
+  .customer-info p {
+    font-size: 0.85rem;
+    color: var(--admin-text-muted);
+    margin: 0;
+  }
+  
+  /* Info List */
+  .info-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .info-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--admin-border);
+  }
+  
+  .info-list-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+  
+  .info-list-label {
+    font-size: 0.8rem;
+    color: var(--admin-text-muted);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .info-list-label i {
+    width: 14px;
+    height: 14px;
+  }
+  
+  .info-list-value {
+    font-weight: 600;
+    color: var(--admin-text-primary);
+    text-align: right;
+    font-size: 0.9rem;
+  }
+  
+  /* Payment Status Badge */
+  .payment-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  
+  .payment-status.paid {
+    background: rgba(16, 185, 129, 0.12);
+    color: #10b981;
+  }
+  
+  .payment-status.pending {
+    background: rgba(245, 158, 11, 0.12);
+    color: #f59e0b;
+  }
+  
+  .payment-status.partial {
+    background: rgba(59, 130, 246, 0.12);
+    color: #3b82f6;
+  }
+  
+  .payment-status.failed {
+    background: rgba(239, 68, 68, 0.12);
+    color: #ef4444;
+  }
+  
+  .payment-status i {
+    width: 12px;
+    height: 12px;
+  }
+  
+  /* Shipping Address */
+  .shipping-address {
+    color: var(--admin-text-primary);
+    line-height: 1.7;
+    font-size: 0.9rem;
+  }
+  
+  .shipping-address strong {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
   }
   
   /* Activity Log */
   .activity-log {
-    max-height: 300px;
+    max-height: 400px;
     overflow-y: auto;
   }
   
@@ -335,48 +587,240 @@
     gap: 1rem;
     padding: 1rem 0;
     border-bottom: 1px solid var(--admin-border);
+    position: relative;
   }
   
   .activity-item:last-child {
     border-bottom: none;
   }
   
+  .activity-icon-wrapper {
+    position: relative;
+  }
+  
+  .activity-icon-wrapper::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 40px;
+    bottom: -1rem;
+    width: 2px;
+    background: var(--admin-border);
+    transform: translateX(-50%);
+  }
+  
+  .activity-item:last-child .activity-icon-wrapper::after {
+    display: none;
+  }
+  
   .activity-icon {
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    background: var(--admin-bg-tertiary);
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    position: relative;
+    z-index: 1;
   }
   
   .activity-icon i {
     width: 16px;
     height: 16px;
-    color: var(--admin-text-muted);
   }
   
   .activity-content {
     flex: 1;
+    padding-top: 0.25rem;
   }
   
   .activity-text {
     color: var(--admin-text-primary);
     font-size: 0.9rem;
-    line-height: 1.4;
+    line-height: 1.5;
+    margin-bottom: 0.35rem;
   }
   
-  .activity-time {
+  .activity-meta {
+    display: flex;
+    gap: 1rem;
     font-size: 0.75rem;
     color: var(--admin-text-muted);
-    margin-top: 0.25rem;
   }
   
-  @media (max-width: 992px) {
-    .order-details-grid {
+  .activity-meta span {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+  
+  .activity-meta i {
+    width: 12px;
+    height: 12px;
+  }
+  
+  /* Notes Card */
+  .notes-content {
+    color: var(--admin-text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.7;
+  }
+  
+  /* Status Modal */
+  .status-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+  }
+  
+  .status-modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+  }
+  
+  .status-modal {
+    background: var(--admin-bg-secondary);
+    border: 1px solid var(--admin-border);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 420px;
+    padding: 1.5rem;
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+  }
+  
+  .status-modal-overlay.active .status-modal {
+    transform: scale(1);
+  }
+  
+  .status-modal h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--admin-text-primary);
+    margin: 0 0 1rem;
+  }
+  
+  .status-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .status-option {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1rem;
+    background: var(--admin-bg-primary);
+    border: 2px solid var(--admin-border);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .status-option:hover {
+    border-color: var(--module-primary, var(--admin-primary));
+    background: var(--admin-bg-tertiary);
+  }
+  
+  .status-option.selected {
+    border-color: var(--module-primary, var(--admin-primary));
+    background: rgba(59, 130, 246, 0.05);
+  }
+  
+  .status-option input {
+    display: none;
+  }
+  
+  .status-option-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .status-option-icon i {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .status-option-content {
+    flex: 1;
+  }
+  
+  .status-option-label {
+    font-weight: 600;
+    color: var(--admin-text-primary);
+    font-size: 0.9rem;
+  }
+  
+  .status-option-desc {
+    font-size: 0.75rem;
+    color: var(--admin-text-muted);
+    margin-top: 0.15rem;
+  }
+  
+  .status-modal-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+  }
+  
+  /* Empty Items */
+  .empty-items {
+    text-align: center;
+    padding: 3rem 1.5rem;
+    color: var(--admin-text-muted);
+  }
+  
+  .empty-items i {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+  }
+  
+  @media (max-width: 1024px) {
+    .order-content-grid {
       grid-template-columns: 1fr;
+    }
+    
+    .order-timeline::before {
+      display: none;
+    }
+    
+    .timeline-step {
+      flex: 0 0 calc(50% - 0.5rem);
+    }
+  }
+  
+  @media (max-width: 640px) {
+    .order-hero {
+      padding: 1.5rem;
+    }
+    
+    .order-hero-content {
+      flex-direction: column;
+    }
+    
+    .order-hero-actions {
+      width: 100%;
+    }
+    
+    .order-hero-actions .admin-btn {
+      flex: 1;
     }
   }
 </style>
@@ -388,7 +832,7 @@
     <main class="admin-main">
       <%- include('partials/topbar', { pageTitle: 'Order Details', currentModule: currentModule }) %>
       
-      <div class="admin-content">
+      <div class="admin-content order-details-page">
         <!-- Breadcrumb -->
         <div style="margin-bottom: 1.5rem;">
           <a href="/admin/orders<%= currentModule ? '?module=' + currentModule : '' %>" style="color: var(--admin-text-muted); text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.9rem;">
@@ -397,205 +841,316 @@
           </a>
         </div>
 
-        <!-- Order Header -->
-        <div class="order-details-header">
-          <div class="order-header-info">
-            <div class="order-header-id">
-              <%= order.id %>
-              <span class="status-badge <%= order.status %>">
-                <% if (order.status === 'pending') { %>
-                  <i data-lucide="clock"></i>
-                <% } else if (order.status === 'processing') { %>
-                  <i data-lucide="loader"></i>
-                <% } else if (order.status === 'shipped') { %>
-                  <i data-lucide="truck"></i>
-                <% } else { %>
-                  <i data-lucide="check-circle"></i>
-                <% } %>
-                <%= order.status %>
-              </span>
-              <% var priority = order.priority || 'normal'; %>
-              <% if (priority !== 'normal') { %>
-              <span class="priority-badge <%= priority %>">
-                <% if (priority === 'urgent' || priority === 'critical' || priority === 'aog') { %><i data-lucide="alert-triangle"></i><% } %>
-                <%= priority === 'aog' ? 'CRITICAL' : priority.toUpperCase() %>
-              </span>
-              <% } %>
+        <!-- Order Hero Header -->
+        <div class="order-hero">
+          <div class="order-hero-content">
+            <div class="order-hero-main">
+              <div class="order-number">
+                <h1><%= order.id %></h1>
+                <div class="order-badges">
+                  <span class="status-badge <%= order.status %>">
+                    <% if (order.status === 'pending') { %>
+                      <i data-lucide="clock"></i>
+                    <% } else if (order.status === 'processing') { %>
+                      <i data-lucide="loader"></i>
+                    <% } else if (order.status === 'shipped') { %>
+                      <i data-lucide="truck"></i>
+                    <% } else if (order.status === 'delivered' || order.status === 'completed') { %>
+                      <i data-lucide="check-circle"></i>
+                    <% } else if (order.status === 'cancelled') { %>
+                      <i data-lucide="x-circle"></i>
+                    <% } %>
+                    <%= order.status.charAt(0).toUpperCase() + order.status.slice(1) %>
+                  </span>
+                  <% if (order.priority !== 'normal') { %>
+                  <span class="priority-badge <%= order.priority %>">
+                    <i data-lucide="<%= order.priority === 'urgent' ? 'alert-triangle' : 'zap' %>"></i>
+                    <%= order.priority.toUpperCase() %>
+                  </span>
+                  <% } %>
+                </div>
+              </div>
+              
+              <div class="order-meta-grid">
+                <div class="meta-item">
+                  <div class="meta-icon">
+                    <i data-lucide="calendar"></i>
+                  </div>
+                  <div class="meta-content">
+                    <span class="meta-label">Order Date</span>
+                    <span class="meta-value"><%= order.date %></span>
+                  </div>
+                </div>
+                <div class="meta-item">
+                  <div class="meta-icon">
+                    <i data-lucide="clock"></i>
+                  </div>
+                  <div class="meta-content">
+                    <span class="meta-label">Time</span>
+                    <span class="meta-value"><%= order.time %></span>
+                  </div>
+                </div>
+                <div class="meta-item">
+                  <div class="meta-icon">
+                    <i data-lucide="package"></i>
+                  </div>
+                  <div class="meta-content">
+                    <span class="meta-label">Items</span>
+                    <span class="meta-value"><%= order.totalItems %> item<%= order.totalItems !== 1 ? 's' : '' %></span>
+                  </div>
+                </div>
+                <div class="meta-item">
+                  <div class="meta-icon">
+                    <i data-lucide="banknote"></i>
+                  </div>
+                  <div class="meta-content">
+                    <span class="meta-label">Total</span>
+                    <span class="meta-value"><%= order.currency %> <%= order.amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div class="order-header-meta">
-              <span><i data-lucide="calendar"></i> <%= order.date %></span>
-              <span><i data-lucide="user"></i> <%= order.customer %></span>
-              <span>
-                <i data-lucide="car"></i>
-                Automotive
-              </span>
+            
+            <div class="order-hero-actions">
+              <button class="admin-btn admin-btn-secondary" onclick="window.print()">
+                <i data-lucide="printer"></i>
+                Print
+              </button>
+              <a href="/admin/orders/<%= order.id %>/edit<%= currentModule ? '?module=' + currentModule : '' %>" class="admin-btn admin-btn-secondary">
+                <i data-lucide="edit-2"></i>
+                Edit
+              </a>
+              <button class="admin-btn admin-btn-primary" onclick="showStatusModal()">
+                <i data-lucide="refresh-cw"></i>
+                Update Status
+              </button>
             </div>
-          </div>
-          <div class="order-header-actions">
-            <button class="admin-btn admin-btn-secondary" onclick="window.print()">
-              <i data-lucide="printer"></i>
-              Print
-            </button>
-            <a href="/admin/orders/<%= order.id %>/edit<%= currentModule ? '?module=' + currentModule : '' %>" class="admin-btn admin-btn-secondary">
-              <i data-lucide="edit-2"></i>
-              Edit Order
-            </a>
-            <button class="admin-btn admin-btn-primary" onclick="updateStatus()">
-              <i data-lucide="refresh-cw"></i>
-              Update Status
-            </button>
           </div>
         </div>
 
         <!-- Status Timeline -->
-        <div class="order-timeline">
-          <div class="timeline-step <%= ['pending', 'processing', 'shipped', 'delivered'].indexOf(order.status) >= 0 ? 'completed' : '' %>">
-            <div class="timeline-icon">
-              <i data-lucide="clock"></i>
-            </div>
-            <div class="timeline-label">Pending</div>
-            <div class="timeline-date"><%= order.date %></div>
+        <div class="timeline-card">
+          <div class="timeline-card-header">
+            <h3><i data-lucide="git-branch"></i> Order Progress</h3>
+            <% if (order.shipping && order.shipping.trackingNumber) { %>
+            <span style="font-size: 0.85rem; color: var(--admin-text-muted);">
+              Tracking: <strong style="color: var(--admin-text-primary);"><%= order.shipping.trackingNumber %></strong>
+            </span>
+            <% } %>
           </div>
-          <div class="timeline-step <%= ['processing', 'shipped', 'delivered'].indexOf(order.status) >= 0 ? 'completed' : '' %> <%= order.status === 'processing' ? 'active' : '' %>">
-            <div class="timeline-icon">
-              <i data-lucide="settings"></i>
+          <div class="order-timeline">
+            <% 
+              const statuses = ['pending', 'processing', 'shipped', 'delivered'];
+              const statusIndex = statuses.indexOf(order.status);
+              const isCancelled = order.status === 'cancelled';
+            %>
+            <% statuses.forEach((status, index) => { %>
+            <div class="timeline-step <%= isCancelled ? (index === 0 ? 'completed' : '') : (index < statusIndex ? 'completed' : (index === statusIndex ? 'active' : '')) %> <%= isCancelled && index === statusIndex ? 'cancelled' : '' %>">
+              <div class="timeline-icon">
+                <% if (status === 'pending') { %>
+                  <i data-lucide="clock"></i>
+                <% } else if (status === 'processing') { %>
+                  <i data-lucide="settings"></i>
+                <% } else if (status === 'shipped') { %>
+                  <i data-lucide="truck"></i>
+                <% } else { %>
+                  <i data-lucide="check-circle"></i>
+                <% } %>
+              </div>
+              <div class="timeline-label"><%= status.charAt(0).toUpperCase() + status.slice(1) %></div>
+              <div class="timeline-date">
+                <% 
+                  const timelineEvent = order.timeline ? order.timeline.find(t => t.status === status) : null;
+                  if (timelineEvent) { 
+                %>
+                  <%= timelineEvent.formattedDate %>
+                <% } else { %>
+                  -
+                <% } %>
+              </div>
             </div>
-            <div class="timeline-label">Processing</div>
-            <div class="timeline-date"><%= order.status === 'pending' ? '-' : order.date %></div>
-          </div>
-          <div class="timeline-step <%= ['shipped', 'delivered'].indexOf(order.status) >= 0 ? 'completed' : '' %> <%= order.status === 'shipped' ? 'active' : '' %>">
-            <div class="timeline-icon">
-              <i data-lucide="truck"></i>
-            </div>
-            <div class="timeline-label">Shipped</div>
-            <div class="timeline-date"><%= ['shipped', 'delivered'].indexOf(order.status) >= 0 ? order.date : '-' %></div>
-          </div>
-          <div class="timeline-step <%= order.status === 'delivered' ? 'completed' : '' %>">
-            <div class="timeline-icon">
-              <i data-lucide="check-circle"></i>
-            </div>
-            <div class="timeline-label">Delivered</div>
-            <div class="timeline-date"><%= order.status === 'delivered' ? order.date : '-' %></div>
+            <% }); %>
           </div>
         </div>
 
-        <!-- Content Grid -->
-        <div class="order-details-grid">
+        <!-- Main Content Grid -->
+        <div class="order-content-grid">
           <!-- Left Column -->
           <div>
             <!-- Order Items -->
             <div class="details-card">
               <div class="details-card-header">
-                <h3><i data-lucide="package"></i> Order Items (<%= order.items %>)</h3>
+                <h3><i data-lucide="shopping-bag"></i> Order Items (<%= order.items.length %>)</h3>
               </div>
-              <table class="order-items-table">
-                <thead>
-                  <tr>
-                    <th>Product</th>
-                    <th>Unit Price</th>
-                    <th>Qty</th>
-                    <th>Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <% 
-                    // Mock items based on order
-                    var orderItems = [
-                      { name: 'Engine Gasket Set', sku: 'EGS-' + Math.floor(Math.random() * 10000), price: Math.floor(order.amount * 0.3), qty: 2 },
-                      { name: 'Hydraulic Pump Assembly', sku: 'HPA-' + Math.floor(Math.random() * 10000), price: Math.floor(order.amount * 0.45), qty: 1 },
-                      { name: 'Fuel Injector Kit', sku: 'FIK-' + Math.floor(Math.random() * 10000), price: Math.floor(order.amount * 0.25), qty: 3 }
-                    ];
-                  %>
-                  <% orderItems.forEach(function(item) { %>
-                  <tr>
-                    <td>
-                      <div class="item-info">
-                        <div class="item-image">
-                          <i data-lucide="box"></i>
+              <% if (order.items.length > 0) { %>
+              <div class="items-table-wrapper">
+                <table class="order-items-table">
+                  <thead>
+                    <tr>
+                      <th>Product</th>
+                      <th>Supplier</th>
+                      <th>Stock</th>
+                      <th>Price</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% order.items.forEach((item, index) => { %>
+                    <tr>
+                      <td>
+                        <div class="item-info">
+                          <div class="item-image">
+                            <i data-lucide="box"></i>
+                          </div>
+                          <div class="item-details">
+                            <div class="item-name"><%= item.description || item.partNumber %></div>
+                            <div class="item-meta">
+                              <span><i data-lucide="hash"></i> <%= item.partNumber %></span>
+                              <% if (item.brand && item.brand !== 'N/A') { %>
+                              <span><i data-lucide="tag"></i> <%= item.brand %></span>
+                              <% } %>
+                            </div>
+                          </div>
                         </div>
-                        <div>
-                          <div class="item-name"><%= item.name %></div>
-                          <div class="item-sku">SKU: <%= item.sku %></div>
-                        </div>
-                      </div>
-                    </td>
-                    <td class="item-price">$<%= item.price.toLocaleString() %></td>
-                    <td class="item-qty"><%= item.qty %></td>
-                    <td class="item-total">$<%= (item.price * item.qty).toLocaleString() %></td>
-                  </tr>
-                  <% }); %>
-                </tbody>
-              </table>
+                      </td>
+                      <td>
+                        <span style="color: var(--admin-text-secondary);"><%= item.supplier || 'N/A' %></span>
+                      </td>
+                      <td>
+                        <span class="status-badge <%= item.stock === 'In Stock' ? 'delivered' : (item.stock === 'Low Stock' ? 'pending' : 'processing') %>" style="font-size: 0.7rem; padding: 0.25rem 0.5rem;">
+                          <%= item.stock || 'N/A' %>
+                        </span>
+                      </td>
+                      <td class="item-price">
+                        <%= item.currency || order.currency %> <%= (item.price || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
+                      </td>
+                    </tr>
+                    <% }); %>
+                  </tbody>
+                </table>
+              </div>
+              <% } else { %>
+              <div class="empty-items">
+                <i data-lucide="package-x"></i>
+                <p>No items in this order</p>
+              </div>
+              <% } %>
+              
+              <!-- Order Summary -->
               <div class="order-summary">
                 <div class="summary-row">
-                  <span class="summary-label">Subtotal</span>
-                  <span class="summary-value">$<%= Math.floor(order.amount * 0.9).toLocaleString() %></span>
+                  <span class="summary-label">Subtotal (<%= order.items.length %> items)</span>
+                  <span class="summary-value"><%= order.currency %> <%= (order.subtotal || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
                 </div>
+                <% if (order.shipping > 0) { %>
                 <div class="summary-row">
                   <span class="summary-label">Shipping</span>
-                  <span class="summary-value">$<%= Math.floor(order.amount * 0.05).toLocaleString() %></span>
+                  <span class="summary-value"><%= order.currency %> <%= order.shipping.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
                 </div>
+                <% } %>
+                <% if (order.tax > 0) { %>
                 <div class="summary-row">
                   <span class="summary-label">Tax</span>
-                  <span class="summary-value">$<%= Math.floor(order.amount * 0.05).toLocaleString() %></span>
+                  <span class="summary-value"><%= order.currency %> <%= order.tax.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
                 </div>
+                <% } %>
+                <% if (order.processingFee > 0) { %>
+                <div class="summary-row">
+                  <span class="summary-label">Processing Fee</span>
+                  <span class="summary-value"><%= order.currency %> <%= order.processingFee.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
+                </div>
+                <% } %>
+                <% if (order.discount > 0) { %>
+                <div class="summary-row">
+                  <span class="summary-label">Discount</span>
+                  <span class="summary-value" style="color: #10b981;">-<%= order.currency %> <%= order.discount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
+                </div>
+                <% } %>
                 <div class="summary-row total">
                   <span class="summary-label">Total</span>
-                  <span class="summary-value">$<%= order.amount.toLocaleString() %></span>
+                  <span class="summary-value"><%= order.currency %> <%= (order.amount || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
                 </div>
               </div>
             </div>
 
             <!-- Activity Log -->
-            <div class="details-card" style="margin-top: 1.5rem;">
+            <div class="details-card">
               <div class="details-card-header">
-                <h3><i data-lucide="activity"></i> Activity Log</h3>
+                <h3><i data-lucide="activity"></i> Activity Timeline</h3>
               </div>
               <div class="details-card-body">
                 <div class="activity-log">
-                  <div class="activity-item">
-                    <div class="activity-icon" style="background: rgba(16, 185, 129, 0.12);">
-                      <i data-lucide="check" style="color: #10b981;"></i>
+                  <% if (order.timeline && order.timeline.length > 0) { %>
+                    <% order.timeline.slice().reverse().forEach((event, index) => { %>
+                    <div class="activity-item">
+                      <div class="activity-icon-wrapper">
+                        <div class="activity-icon" style="background: <%= 
+                          event.status === 'pending' ? 'rgba(245, 158, 11, 0.12)' :
+                          event.status === 'processing' ? 'rgba(139, 92, 246, 0.12)' :
+                          event.status === 'shipped' ? 'rgba(59, 130, 246, 0.12)' :
+                          event.status === 'delivered' ? 'rgba(16, 185, 129, 0.12)' :
+                          event.status === 'cancelled' ? 'rgba(239, 68, 68, 0.12)' :
+                          'rgba(100, 116, 139, 0.12)'
+                        %>;">
+                          <i data-lucide="<%= 
+                            event.status === 'pending' ? 'clock' :
+                            event.status === 'processing' ? 'settings' :
+                            event.status === 'shipped' ? 'truck' :
+                            event.status === 'delivered' ? 'check-circle' :
+                            event.status === 'cancelled' ? 'x-circle' :
+                            'info'
+                          %>" style="color: <%= 
+                            event.status === 'pending' ? '#f59e0b' :
+                            event.status === 'processing' ? '#8b5cf6' :
+                            event.status === 'shipped' ? '#3b82f6' :
+                            event.status === 'delivered' ? '#10b981' :
+                            event.status === 'cancelled' ? '#ef4444' :
+                            '#64748b'
+                          %>;"></i>
+                        </div>
+                      </div>
+                      <div class="activity-content">
+                        <div class="activity-text"><%= event.message %></div>
+                        <div class="activity-meta">
+                          <span><i data-lucide="calendar"></i> <%= event.formattedDate || 'N/A' %></span>
+                          <span><i data-lucide="clock"></i> <%= event.formattedTime || 'N/A' %></span>
+                          <span><i data-lucide="user"></i> <%= event.updatedBy || 'System' %></span>
+                        </div>
+                      </div>
                     </div>
-                    <div class="activity-content">
-                      <div class="activity-text">Order created by <strong>Admin</strong></div>
-                      <div class="activity-time"><%= order.date %> at 09:30 AM</div>
+                    <% }); %>
+                  <% } else { %>
+                    <div class="activity-item">
+                      <div class="activity-icon-wrapper">
+                        <div class="activity-icon" style="background: rgba(16, 185, 129, 0.12);">
+                          <i data-lucide="plus" style="color: #10b981;"></i>
+                        </div>
+                      </div>
+                      <div class="activity-content">
+                        <div class="activity-text">Order created</div>
+                        <div class="activity-meta">
+                          <span><i data-lucide="calendar"></i> <%= order.date %></span>
+                          <span><i data-lucide="clock"></i> <%= order.time %></span>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                  <div class="activity-item">
-                    <div class="activity-icon" style="background: rgba(59, 130, 246, 0.12);">
-                      <i data-lucide="mail" style="color: #3b82f6;"></i>
-                    </div>
-                    <div class="activity-content">
-                      <div class="activity-text">Confirmation email sent to <strong><%= order.email %></strong></div>
-                      <div class="activity-time"><%= order.date %> at 09:31 AM</div>
-                    </div>
-                  </div>
-                  <% if (order.status !== 'pending') { %>
-                  <div class="activity-item">
-                    <div class="activity-icon" style="background: rgba(139, 92, 246, 0.12);">
-                      <i data-lucide="settings" style="color: #8b5cf6;"></i>
-                    </div>
-                    <div class="activity-content">
-                      <div class="activity-text">Order moved to <strong>Processing</strong></div>
-                      <div class="activity-time"><%= order.date %> at 02:15 PM</div>
-                    </div>
-                  </div>
-                  <% } %>
-                  <% if (['shipped', 'delivered'].indexOf(order.status) >= 0) { %>
-                  <div class="activity-item">
-                    <div class="activity-icon" style="background: rgba(245, 158, 11, 0.12);">
-                      <i data-lucide="truck" style="color: #f59e0b;"></i>
-                    </div>
-                    <div class="activity-content">
-                      <div class="activity-text">Order shipped via <strong>DHL Express</strong></div>
-                      <div class="activity-time"><%= order.date %> at 04:45 PM</div>
-                    </div>
-                  </div>
                   <% } %>
                 </div>
               </div>
             </div>
+
+            <!-- Notes -->
+            <% if (order.notes) { %>
+            <div class="details-card">
+              <div class="details-card-header">
+                <h3><i data-lucide="file-text"></i> Order Notes</h3>
+              </div>
+              <div class="details-card-body">
+                <div class="notes-content">
+                  <%= order.notes %>
+                </div>
+              </div>
+            </div>
+            <% } %>
           </div>
 
           <!-- Right Column -->
@@ -604,85 +1159,139 @@
             <div class="details-card">
               <div class="details-card-header">
                 <h3><i data-lucide="user"></i> Customer</h3>
+                <% if (order.buyer) { %>
+                <a href="/admin/users/<%= order.buyer.id %>" class="admin-btn admin-btn-sm admin-btn-ghost" style="padding: 0.35rem 0.75rem; font-size: 0.75rem;">
+                  View Profile
+                </a>
+                <% } %>
               </div>
               <div class="details-card-body">
-                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
-                  <div style="width: 48px; height: 48px; border-radius: 50%; background: var(--module-primary, var(--admin-primary)); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 1.1rem;">
-                    <%= order.customer.charAt(0) %>
+                <div class="customer-header">
+                  <div class="customer-avatar">
+                    <%= order.customer ? order.customer.charAt(0).toUpperCase() : '?' %>
                   </div>
-                  <div>
-                    <div style="font-weight: 600; color: var(--admin-text-primary);"><%= order.customer %></div>
-                    <div style="font-size: 0.85rem; color: var(--admin-text-muted);"><%= order.email %></div>
+                  <div class="customer-info">
+                    <h4><%= order.customer || 'Unknown' %></h4>
+                    <p><%= order.email || 'N/A' %></p>
                   </div>
                 </div>
-                <div class="info-grid">
-                  <div class="info-item">
-                    <div class="info-label">Phone</div>
-                    <div class="info-value">+1 (555) 123-4567</div>
+                <div class="info-list">
+                  <div class="info-list-item">
+                    <span class="info-list-label"><i data-lucide="phone"></i> Phone</span>
+                    <span class="info-list-value"><%= order.phone || 'N/A' %></span>
                   </div>
-                  <div class="info-item">
-                    <div class="info-label">Total Orders</div>
-                    <div class="info-value">12</div>
+                  <% if (order.buyer && order.buyer.country) { %>
+                  <div class="info-list-item">
+                    <span class="info-list-label"><i data-lucide="globe"></i> Location</span>
+                    <span class="info-list-value"><%= order.buyer.city ? order.buyer.city + ', ' : '' %><%= order.buyer.country %></span>
                   </div>
+                  <% } %>
                 </div>
               </div>
             </div>
 
             <!-- Shipping Info -->
-            <div class="details-card" style="margin-top: 1.5rem;">
+            <div class="details-card">
               <div class="details-card-header">
                 <h3><i data-lucide="map-pin"></i> Shipping Address</h3>
               </div>
               <div class="details-card-body">
-                <div style="color: var(--admin-text-primary); line-height: 1.6;">
-                  <strong><%= order.customer %></strong><br>
-                  123 Industrial Park Drive<br>
-                  Building A, Suite 400<br>
-                  Los Angeles, CA 90001<br>
-                  United States
+                <div class="shipping-address">
+                  <strong><%= order.shipping ? order.shipping.fullName : 'N/A' %></strong>
+                  <% if (order.shipping && order.shipping.street && order.shipping.street !== 'N/A') { %>
+                    <%= order.shipping.street %><br>
+                  <% } %>
+                  <% if (order.shipping && order.shipping.city && order.shipping.city !== 'N/A') { %>
+                    <%= order.shipping.city %><%= order.shipping.state ? ', ' + order.shipping.state : '' %> <%= order.shipping.postalCode || '' %><br>
+                  <% } %>
+                  <% if (order.shipping && order.shipping.country && order.shipping.country !== 'N/A') { %>
+                    <%= order.shipping.country %>
+                  <% } %>
                 </div>
+                <% if (order.shipping && order.shipping.phone && order.shipping.phone !== 'N/A') { %>
+                <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--admin-border);">
+                  <div class="info-list-item" style="border: none; padding: 0;">
+                    <span class="info-list-label"><i data-lucide="phone"></i> Contact</span>
+                    <span class="info-list-value"><%= order.shipping.phone %></span>
+                  </div>
+                </div>
+                <% } %>
               </div>
             </div>
 
             <!-- Payment Info -->
-            <div class="details-card" style="margin-top: 1.5rem;">
+            <div class="details-card">
               <div class="details-card-header">
                 <h3><i data-lucide="credit-card"></i> Payment</h3>
               </div>
               <div class="details-card-body">
-                <div class="info-grid">
-                  <div class="info-item">
-                    <div class="info-label">Method</div>
-                    <div class="info-value">Wire Transfer</div>
+                <div class="info-list">
+                  <div class="info-list-item">
+                    <span class="info-list-label"><i data-lucide="wallet"></i> Method</span>
+                    <span class="info-list-value">
+                      <% 
+                        const methodLabels = {
+                          'card': 'Credit/Debit Card',
+                          'bank-dubai': 'Bank Transfer (Dubai)',
+                          'bank-international': 'International Wire',
+                          'paypal': 'PayPal',
+                          'cod': 'Cash on Delivery'
+                        };
+                      %>
+                      <%= order.payment ? (methodLabels[order.payment.method] || order.payment.method) : 'N/A' %>
+                    </span>
                   </div>
-                  <div class="info-item">
-                    <div class="info-label">Status</div>
-                    <div class="info-value" style="color: #10b981;">Paid</div>
+                  <div class="info-list-item">
+                    <span class="info-list-label"><i data-lucide="check-circle"></i> Status</span>
+                    <span class="info-list-value">
+                      <span class="payment-status <%= order.payment ? order.payment.status : 'pending' %>">
+                        <% if (order.payment && order.payment.status === 'paid') { %>
+                          <i data-lucide="check"></i>
+                        <% } else if (!order.payment || order.payment.status === 'pending') { %>
+                          <i data-lucide="clock"></i>
+                        <% } else if (order.payment && order.payment.status === 'partial') { %>
+                          <i data-lucide="percent"></i>
+                        <% } else { %>
+                          <i data-lucide="x"></i>
+                        <% } %>
+                        <%= order.payment ? (order.payment.status.charAt(0).toUpperCase() + order.payment.status.slice(1)) : 'Pending' %>
+                      </span>
+                    </span>
                   </div>
-                  <div class="info-item">
-                    <div class="info-label">Transaction ID</div>
-                    <div class="info-value">TXN-<%= Math.floor(Math.random() * 1000000) %></div>
+                  <div class="info-list-item">
+                    <span class="info-list-label"><i data-lucide="receipt"></i> Amount Paid</span>
+                    <span class="info-list-value" style="color: #10b981;"><%= order.currency %> <%= order.payment ? order.payment.amountPaid.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00' %></span>
                   </div>
-                  <div class="info-item">
-                    <div class="info-label">Date</div>
-                    <div class="info-value"><%= order.date %></div>
+                  <% if (order.payment && order.payment.amountDue > 0) { %>
+                  <div class="info-list-item">
+                    <span class="info-list-label"><i data-lucide="alert-circle"></i> Amount Due</span>
+                    <span class="info-list-value" style="color: #f59e0b;"><%= order.currency %> <%= order.payment.amountDue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
                   </div>
+                  <% } %>
                 </div>
               </div>
             </div>
 
-            <!-- Notes -->
-            <div class="details-card" style="margin-top: 1.5rem;">
+            <!-- Quick Actions -->
+            <div class="details-card">
               <div class="details-card-header">
-                <h3><i data-lucide="file-text"></i> Notes</h3>
+                <h3><i data-lucide="zap"></i> Quick Actions</h3>
               </div>
-              <div class="details-card-body">
-                <p style="color: var(--admin-text-muted); font-size: 0.9rem; line-height: 1.6; margin: 0;">
-                  <% if (order.priority === 'critical' || order.priority === 'aog') { %>
-                  <strong style="color: #dc2626;">CRITICAL PRIORITY:</strong> Expedite immediately.<br><br>
-                  <% } %>
-                  Standard delivery terms apply. Contact customer for any questions regarding specifications.
-                </p>
+              <div class="details-card-body" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <button class="admin-btn admin-btn-secondary" style="width: 100%; justify-content: flex-start;" onclick="window.print()">
+                  <i data-lucide="printer"></i>
+                  Print Invoice
+                </button>
+                <button class="admin-btn admin-btn-secondary" style="width: 100%; justify-content: flex-start;">
+                  <i data-lucide="mail"></i>
+                  Send Update Email
+                </button>
+                <% if (order.status !== 'cancelled' && order.status !== 'delivered') { %>
+                <button class="admin-btn admin-btn-secondary" style="width: 100%; justify-content: flex-start; color: #ef4444;" onclick="cancelOrder()">
+                  <i data-lucide="x-circle"></i>
+                  Cancel Order
+                </button>
+                <% } %>
               </div>
             </div>
           </div>
@@ -691,11 +1300,144 @@
     </main>
   </div>
 
+  <!-- Status Update Modal -->
+  <div class="status-modal-overlay" id="statusModal">
+    <div class="status-modal">
+      <h3>Update Order Status</h3>
+      <div class="status-options">
+        <label class="status-option" data-status="pending">
+          <input type="radio" name="newStatus" value="pending" <%= order.status === 'pending' ? 'checked' : '' %>>
+          <div class="status-option-icon" style="background: rgba(245, 158, 11, 0.12);">
+            <i data-lucide="clock" style="color: #f59e0b;"></i>
+          </div>
+          <div class="status-option-content">
+            <div class="status-option-label">Pending</div>
+            <div class="status-option-desc">Order awaiting processing</div>
+          </div>
+        </label>
+        <label class="status-option" data-status="processing">
+          <input type="radio" name="newStatus" value="processing" <%= order.status === 'processing' ? 'checked' : '' %>>
+          <div class="status-option-icon" style="background: rgba(139, 92, 246, 0.12);">
+            <i data-lucide="settings" style="color: #8b5cf6;"></i>
+          </div>
+          <div class="status-option-content">
+            <div class="status-option-label">Processing</div>
+            <div class="status-option-desc">Order is being prepared</div>
+          </div>
+        </label>
+        <label class="status-option" data-status="shipped">
+          <input type="radio" name="newStatus" value="shipped" <%= order.status === 'shipped' ? 'checked' : '' %>>
+          <div class="status-option-icon" style="background: rgba(59, 130, 246, 0.12);">
+            <i data-lucide="truck" style="color: #3b82f6;"></i>
+          </div>
+          <div class="status-option-content">
+            <div class="status-option-label">Shipped</div>
+            <div class="status-option-desc">Order has been dispatched</div>
+          </div>
+        </label>
+        <label class="status-option" data-status="delivered">
+          <input type="radio" name="newStatus" value="delivered" <%= order.status === 'delivered' ? 'checked' : '' %>>
+          <div class="status-option-icon" style="background: rgba(16, 185, 129, 0.12);">
+            <i data-lucide="check-circle" style="color: #10b981;"></i>
+          </div>
+          <div class="status-option-content">
+            <div class="status-option-label">Delivered</div>
+            <div class="status-option-desc">Order completed successfully</div>
+          </div>
+        </label>
+      </div>
+      <div class="status-modal-actions">
+        <button class="admin-btn admin-btn-secondary" onclick="hideStatusModal()">Cancel</button>
+        <button class="admin-btn admin-btn-primary" onclick="updateOrderStatus()">Update Status</button>
+      </div>
+    </div>
+  </div>
+
   <script>
-    function updateStatus() {
-      // In production, show a modal to select new status
-      alert('Status update functionality - would show modal to select: Processing, Shipped, or Delivered');
+    const statusModal = document.getElementById('statusModal');
+    
+    function showStatusModal() {
+      statusModal.classList.add('active');
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
     }
+    
+    function hideStatusModal() {
+      statusModal.classList.remove('active');
+    }
+    
+    document.querySelectorAll('.status-option').forEach(option => {
+      option.addEventListener('click', function() {
+        document.querySelectorAll('.status-option').forEach(o => o.classList.remove('selected'));
+        this.classList.add('selected');
+        this.querySelector('input').checked = true;
+      });
+      
+      if (option.querySelector('input').checked) {
+        option.classList.add('selected');
+      }
+    });
+    
+    async function updateOrderStatus() {
+      const selectedStatus = document.querySelector('input[name="newStatus"]:checked');
+      if (!selectedStatus) {
+        alert('Please select a status');
+        return;
+      }
+      
+      try {
+        const response = await fetch('/admin/api/orders/<%= order.id %>/status', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: selectedStatus.value })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          window.location.reload();
+        } else {
+          alert(data.error || 'Failed to update status');
+        }
+      } catch (error) {
+        console.error('Error updating status:', error);
+        alert('Failed to update order status');
+      }
+    }
+    
+    async function cancelOrder() {
+      if (!confirm('Are you sure you want to cancel this order? This action cannot be undone.')) {
+        return;
+      }
+      
+      try {
+        const response = await fetch('/admin/api/orders/<%= order.id %>/status', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: 'cancelled', message: 'Order cancelled by admin' })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          window.location.reload();
+        } else {
+          alert(data.error || 'Failed to cancel order');
+        }
+      } catch (error) {
+        console.error('Error cancelling order:', error);
+        alert('Failed to cancel order');
+      }
+    }
+    
+    statusModal.addEventListener('click', function(e) {
+      if (e.target === this) hideStatusModal();
+    });
+    
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') hideStatusModal();
+    });
   </script>
 
 <%- include('partials/footer') %>
