@@ -579,6 +579,14 @@ const sendTicketMessage = async (req, res) => {
       });
     }
 
+    // Do not allow sending messages to resolved or closed tickets
+    if (['resolved', 'closed'].includes(ticket.status)) {
+      return res.status(403).json({
+        success: false,
+        error: 'Cannot send messages to a resolved or closed ticket'
+      });
+    }
+
     // Handle file attachments if any
     const attachments = [];
     if (req.files && req.files.length > 0) {

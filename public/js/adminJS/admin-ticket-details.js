@@ -171,30 +171,21 @@ function sendMessage(e) {
     formData.append('attachments', files[i]);
   }
 
-  // Add message to UI immediately for responsiveness
-  addMessageToChat({
-    sender: 'admin',
-    senderName: 'Admin',
-    content: message,
-    attachments: [],
-    timestamp: new Date().toISOString()
-  });
-  
-  // Clear input and scroll
+  // Clear input immediately for responsiveness
+  var originalMessage = message;
   input.value = '';
   input.style.height = 'auto';
   if (fileInput) {
     fileInput.value = '';
     clearFilePreview();
   }
-  scrollToBottom();
 
   // Stop typing
   if (socket) {
     socket.emit('typing', { ticketId: ticketId, isTyping: false });
   }
 
-  // Send to server
+  // Send to server and wait for response before adding to UI
   fetch('/admin/tickets/' + ticketId + '/reply', {
     method: 'POST',
     body: formData
@@ -207,6 +198,15 @@ function sendMessage(e) {
       showNotification('Failed to send message: ' + (data.error || 'Unknown error'), 'error');
     } else {
       hideUploadProgress();
+      // Add message to UI with actual attachments from server response
+      addMessageToChat({
+        sender: 'admin',
+        senderName: 'Admin',
+        content: data.message?.content || originalMessage,
+        attachments: data.message?.attachments || [],
+        timestamp: data.message?.timestamp || new Date().toISOString()
+      });
+      scrollToBottom();
     }
   })
   .catch(function(err) {

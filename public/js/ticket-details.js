@@ -91,11 +91,68 @@ async function loadTicketData() {
     updateTicketHeader();
     updateTicketInfo();
     renderMessages();
-    scrollToBottom();
+      scrollToBottom();
+      // Disable chat UI if ticket is resolved/closed
+      setChatEnabled(!['resolved', 'closed'].includes(currentTicket.status));
   } catch (error) {
     console.error('Error loading ticket:', error);
     showError('Failed to load ticket');
   }
+/**
+ * Enable or disable the chat input UI for buyer
+ */
+function setChatEnabled(enabled) {
+  const chatForm = document.getElementById('chat-form');
+  const messageInput = document.getElementById('message-input');
+  const fileInput = document.getElementById('file-input');
+  const attachBtn = document.getElementById('btn-attach');
+  const sendBtn = document.querySelector('.btn-send');
+  const chatInputContainer = document.querySelector('.chat-input-container');
+
+  if (!chatInputContainer) return;
+
+  // Remove existing notice
+  const existingNotice = chatInputContainer.querySelector('.ticket-closed-notice');
+  if (existingNotice) existingNotice.remove();
+
+  if (!enabled) {
+    if (chatForm) chatForm.classList.add('disabled');
+    if (messageInput) {
+      messageInput.disabled = true;
+      messageInput.placeholder = 'This ticket is resolved — you cannot send messages.';
+    }
+    if (fileInput) fileInput.disabled = true;
+    if (attachBtn) attachBtn.disabled = true;
+    if (sendBtn) {
+      sendBtn.disabled = true;
+      sendBtn.classList.add('disabled');
+    }
+
+    const notice = document.createElement('div');
+    notice.className = 'ticket-closed-notice';
+    notice.style.padding = '0.75rem 1rem';
+    notice.style.background = 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)';
+    notice.style.border = '1px solid #bfdbfe';
+    notice.style.borderRadius = '8px';
+    notice.style.color = '#1e3a8a';
+    notice.style.fontWeight = '600';
+    notice.style.marginBottom = '0.75rem';
+    notice.textContent = 'This ticket has been resolved/closed. You cannot send new messages.';
+    chatInputContainer.insertBefore(notice, chatInputContainer.firstChild);
+  } else {
+    if (chatForm) chatForm.classList.remove('disabled');
+    if (messageInput) {
+      messageInput.disabled = false;
+      messageInput.placeholder = 'Type your message...';
+    }
+    if (fileInput) fileInput.disabled = false;
+    if (attachBtn) attachBtn.disabled = false;
+    if (sendBtn) {
+      sendBtn.disabled = false;
+      sendBtn.classList.remove('disabled');
+    }
+  }
+}
 }
 
 /**
@@ -524,6 +581,8 @@ function updateStatusUI(status) {
   }
 
   showNotification('Ticket status changed to ' + formattedStatus);
+  // Enable/disable chat depending on new status
+  setChatEnabled(!['resolved', 'closed'].includes(status));
 }
 
 /**

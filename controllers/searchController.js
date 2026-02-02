@@ -439,6 +439,192 @@ const searchMultipleParts = async (req, res) => {
   }
 };
 
+/**
+ * AI-powered Excel analysis
+ * POST /api/excel/analyze
+ * Body: { data: [[...], [...]], filename: "parts.xlsx" }
+ */
+const aiExcelAnalyze = async (req, res) => {
+  try {
+    const { data, filename, sheetName } = req.body;
+    
+    if (!data || !Array.isArray(data)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Excel data array is required',
+      });
+    }
+
+    if (data.length === 0) {
+      return res.json({
+        success: true,
+        summary: 'Empty spreadsheet',
+        totalPartsFound: 0,
+        parts: [],
+        dataQuality: {
+          hasHeaders: false,
+          formatting: 'empty',
+          issues: ['The spreadsheet appears to be empty'],
+        },
+        suggestions: ['Please upload a spreadsheet with part numbers'],
+      });
+    }
+
+    console.log(`📊 AI Excel Analysis: ${data.length} rows from ${filename || 'unknown file'}`);
+    const startTime = Date.now();
+
+    // Use Gemini to analyze the Excel data
+    const analysis = await geminiService.analyzeExcelData(data, {
+      filename,
+      sheetName: sheetName || 'Sheet1',
+    });
+
+    const analysisTime = Date.now() - startTime;
+    console.log(`✅ Excel analysis completed in ${analysisTime}ms: ${analysis.totalPartsFound} parts found`);
+
+    res.json({
+      success: true,
+      ...analysis,
+      analysisTime,
+    });
+  } catch (error) {
+    console.error('AI Excel Analysis error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Excel analysis failed',
+      message: error.message,
+    });
+  }
+};
+
+/**
+ * AI-powered Excel search with recommendations
+ * POST /api/excel/search
+ * Body: { parts: [{ partNumber, quantity }, ...] }
+ */
+const aiExcelSearch = async (req, res) => {
+  try {
+    const { parts } = req.body;
+    
+    if (!parts || !Array.isArray(parts) || parts.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'Parts array is required',
+      });
+    }
+
+    console.log(`🔍 AI Excel Search: ${parts.length} parts`);
+    const startTime = Date.now();
+
+    // Extract part numbers for search
+    const partNumbers = parts.map(p => p.partNumber).filter(Boolean);
+    
+    if (partNumbers.length === 0) {
+      return res.json({
+        success: true,
+        results: [],
+        recommendations: [],
+        found: [],
+        notFound: parts.map(p => p.partNumber),
+      });
+    }
+
+    // Limit to 100 parts
+    const searchPartNumbers = partNumbers.slice(0, 100);
+
+    let allResults = [];
+    let found = [];
+    let notFound = [];
+    let source = 'mongodb';
+
+    // Try Elasticsearch first (same approach as searchMultipleParts)
+    const useElasticsearch = await elasticsearchService.hasDocuments();
+    
+    if (useElasticsearch) {
+      try {
+        const esResult = await elasticsearchService.searchMultiplePartNumbers(searchPartNumbers, {
+          limitPerPart: 50,
+        });
+        allResults = esResult.results;
+        found = esResult.found;
+        notFound = esResult.notFound;
+        source = 'elasticsearch';
+        
+        console.log(`ES Excel search completed in ${Date.now() - startTime}ms`);
+      } catch (esError) {
+        console.error('Elasticsearch Excel search failed:', esError.message);
+        // Reset source to try MongoDB
+        source = 'mongodb';
+      }
+    }
+
+    // Fallback to MongoDB if ES not available or failed
+    if (source === 'mongodb') {
+      console.log('Using MongoDB for Excel search');
+      
+      // Use $in with exact matches instead of regex for speed (same as searchMultipleParts)
+      const upperCaseParts = searchPartNumbers.map(pn => pn.trim().toUpperCase());
+      const lowerCaseParts = searchPartNumbers.map(pn => pn.trim().toLowerCase());
+      const originalParts = searchPartNumbers.map(pn => pn.trim());
+      
+      // Combine all case variations
+      const allVariations = [...new Set([...upperCaseParts, ...lowerCaseParts, ...originalParts])];
+      
+      // Single MongoDB query with $in (faster than $or with regex)
+      const mongoQuery = {
+        partNumber: { $in: allVariations }
+      };
+      
+      allResults = await Part.find(mongoQuery).limit(1000).lean();
+      
+      // Determine which parts were found
+      const foundSet = new Set();
+      allResults.forEach(r => {
+        if (r.partNumber) {
+          foundSet.add(r.partNumber.toUpperCase());
+        }
+      });
+      
+      // Update found/notFound
+      found = [];
+      notFound = [];
+      searchPartNumbers.forEach(pn => {
+        if (foundSet.has(pn.trim().toUpperCase())) {
+          found.push(pn);
+        } else {
+          notFound.push(pn);
+        }
+      });
+      
+      console.log(`MongoDB Excel search completed in ${Date.now() - startTime}ms`);
+    }
+
+    // Get AI recommendations for best parts
+    const recommendations = await geminiService.recommendBestParts(allResults, parts);
+
+    const searchTime = Date.now() - startTime;
+    console.log(`✅ Excel search completed in ${searchTime}ms: ${allResults.length} results for ${found.length} parts`);
+
+    res.json({
+      success: true,
+      results: allResults,
+      recommendations: recommendations.recommendations,
+      stats: recommendations.stats,
+      found,
+      notFound,
+      source,
+      searchTime,
+    });
+  } catch (error) {
+    console.error('AI Excel Search error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Excel search failed',
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   searchParts,
   autocomplete,
@@ -450,6 +636,8 @@ module.exports = {
   aiSearch,
   aiSuggestions,
   aiAnalyze,
+  aiExcelAnalyze,
+  aiExcelSearch,
 };
 
 /**

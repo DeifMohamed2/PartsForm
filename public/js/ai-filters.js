@@ -1559,7 +1559,14 @@
     close: closeModal,
     getFilters: () => AIFilterState.filters,
     clearAll: clearAllFilters,
-    apply: applyFilters
+    apply: applyFilters,
+    clearResults: () => {
+      // Clear AI search results to prevent interference with regular search
+      AIFilterState.lastSearchResults = [];
+      AIFilterState.aiQuery = '';
+      AIFilterState.aiParsedFilters = [];
+      AIFilterState.aiParsedResponse = null;
+    }
   };
 
 })();

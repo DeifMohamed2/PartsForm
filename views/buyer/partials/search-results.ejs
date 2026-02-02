@@ -484,64 +484,318 @@
   </div>
 </div>
 
-<!-- Excel Upload Modal -->
-<div class="modal" id="excel-modal">
+<!-- AI-Powered Excel Upload Modal -->
+<div class="modal ai-excel-modal" id="excel-modal">
   <div class="modal-overlay" id="excel-modal-overlay"></div>
-  <div class="modal-container">
-    <div class="modal-header">
-      <h3 class="modal-title">
-        <i data-lucide="file-spreadsheet"></i>
-        <span>Upload Excel File</span>
-      </h3>
+  <div class="modal-container ai-excel-container">
+    <!-- Modal Header -->
+    <div class="modal-header ai-excel-header">
+      <div class="ai-excel-title-wrapper">
+        <div class="ai-excel-icon">
+          <i data-lucide="file-spreadsheet"></i>
+        </div>
+        <div class="ai-excel-title-content">
+          <h3 class="modal-title">
+            Excel Import
+            <span class="ai-badge">AI</span>
+          </h3>
+          <p class="ai-excel-subtitle">AI analyzes your spreadsheet to extract parts automatically</p>
+        </div>
+      </div>
       <button class="modal-close" id="excel-modal-close">
         <i data-lucide="x"></i>
       </button>
     </div>
 
-    <div class="modal-body">
-      <div class="upload-area" id="upload-area">
-        <input type="file" id="excel-file-input" accept=".xlsx,.xls,.csv" hidden>
-        <div class="upload-icon">
-          <i data-lucide="upload-cloud"></i>
+    <div class="modal-body ai-excel-body">
+      <!-- Step 1: Upload Area -->
+      <div class="ai-excel-step" id="excel-step-upload">
+        <div class="upload-area ai-upload-area" id="upload-area">
+          <input type="file" id="excel-file-input" accept=".xlsx,.xls,.csv" hidden>
+          <div class="ai-upload-visual">
+            <div class="ai-upload-icon-wrapper">
+              <div class="ai-upload-glow"></div>
+              <i data-lucide="upload-cloud"></i>
+            </div>
+            <div class="ai-upload-sparkles">
+              <i data-lucide="sparkles" class="sparkle s1"></i>
+              <i data-lucide="sparkles" class="sparkle s2"></i>
+              <i data-lucide="sparkles" class="sparkle s3"></i>
+            </div>
+          </div>
+          
+          <h4 class="upload-title">Drag & drop your Excel file</h4>
+          <p class="upload-subtitle">AI will intelligently extract parts from any format</p>
+          
+          <button class="btn-primary ai-browse-btn" id="browse-file-btn">
+            <i data-lucide="folder-open"></i>
+            <span>Browse Files</span>
+          </button>
+          
+          <p class="upload-hint">
+            <i data-lucide="check-circle"></i>
+            Supports .xlsx, .xls, .csv • Max 10MB
+          </p>
         </div>
-        <h4 class="upload-title">Drag & drop your Excel file here</h4>
-        <p class="upload-subtitle">or click to browse</p>
-        <button class="btn-secondary" id="browse-file-btn">
-          <i data-lucide="folder-open"></i>
-          <span>Browse Files</span>
-        </button>
-        <p class="upload-hint">Supports .xlsx, .xls, .csv (Max 10MB)</p>
+
+        <div class="sample-format ai-sample-format">
+          <div class="sample-header">
+            <i data-lucide="info"></i>
+            <span>Works with any format, but structured data gives better results</span>
+          </div>
+          <a href="/api/download-sample-excel" class="download-sample" download>
+            <i data-lucide="download"></i>
+            <span>Download Sample Template</span>
+          </a>
+        </div>
       </div>
 
-      <div class="sample-format">
-        <h4 class="sample-title">Expected Format:</h4>
-        <div class="sample-table-wrapper">
-          <table class="sample-table">
-            <thead>
-              <tr>
-                <th>Part Number</th>
-                <th>Quantity</th>
-                <th>Brand</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>8471474</td>
-                <td>5</td>
-                <td>OEM</td>
-              </tr>
-              <tr>
-                <td>1234567</td>
-                <td>10</td>
-                <td>Bosch</td>
-              </tr>
-            </tbody>
-          </table>
+      <!-- Step 2: AI Analyzing -->
+      <div class="ai-excel-step" id="excel-step-analyzing" style="display: none;">
+        <div class="ai-analyzing-container">
+          <div class="ai-analyzing-visual">
+            <div class="ai-brain-pulse">
+              <i data-lucide="brain"></i>
+            </div>
+            <div class="ai-analyzing-rings">
+              <div class="ring r1"></div>
+              <div class="ring r2"></div>
+              <div class="ring r3"></div>
+            </div>
+          </div>
+          
+          <div class="ai-analyzing-content">
+            <h4 class="ai-analyzing-title">AI is analyzing your spreadsheet...</h4>
+            <p class="ai-analyzing-file" id="analyzing-file-name">processing file.xlsx</p>
+            
+            <div class="ai-analyzing-steps">
+              <div class="ai-step" id="ai-step-reading">
+                <div class="ai-step-icon"><i data-lucide="file-search"></i></div>
+                <span>Reading spreadsheet data</span>
+                <div class="ai-step-status"><i data-lucide="loader-2" class="spin"></i></div>
+              </div>
+              <div class="ai-step" id="ai-step-detecting">
+                <div class="ai-step-icon"><i data-lucide="scan-search"></i></div>
+                <span>Detecting part numbers</span>
+                <div class="ai-step-status"></div>
+              </div>
+              <div class="ai-step" id="ai-step-extracting">
+                <div class="ai-step-icon"><i data-lucide="wand-2"></i></div>
+                <span>Extracting quantities & brands</span>
+                <div class="ai-step-status"></div>
+              </div>
+              <div class="ai-step" id="ai-step-validating">
+                <div class="ai-step-icon"><i data-lucide="check-circle"></i></div>
+                <span>Validating & organizing</span>
+                <div class="ai-step-status"></div>
+              </div>
+            </div>
+          </div>
         </div>
-        <a href="/api/download-sample-excel" class="download-sample" download>
-          <i data-lucide="download"></i>
-          <span>Download Sample Template</span>
-        </a>
+      </div>
+
+      <!-- Step 3: AI Results Preview -->
+      <div class="ai-excel-step" id="excel-step-results" style="display: none;">
+        <!-- AI Summary Banner -->
+        <div class="ai-results-summary">
+          <div class="ai-summary-icon">
+            <i data-lucide="sparkles"></i>
+          </div>
+          <div class="ai-summary-content">
+            <h4 class="ai-summary-title" id="ai-summary-title">Analysis Complete!</h4>
+            <p class="ai-summary-text" id="ai-summary-text">Found 25 parts ready for search</p>
+          </div>
+          <div class="ai-summary-badge" id="ai-summary-badge">
+            <i data-lucide="zap"></i>
+            <span>AI Powered</span>
+          </div>
+        </div>
+
+        <!-- Data Quality Indicator -->
+        <div class="ai-data-quality" id="ai-data-quality">
+          <div class="quality-meter">
+            <div class="quality-label">Data Quality:</div>
+            <div class="quality-bar">
+              <div class="quality-fill" id="quality-fill"></div>
+            </div>
+            <div class="quality-text" id="quality-text">Good</div>
+          </div>
+          <div class="quality-issues" id="quality-issues" style="display: none;">
+            <i data-lucide="alert-circle"></i>
+            <span id="quality-issues-text"></span>
+          </div>
+        </div>
+
+        <!-- Parts List Header -->
+        <div class="ai-parts-header">
+          <div class="parts-header-left">
+            <label class="select-all-checkbox">
+              <input type="checkbox" id="select-all-parts" checked>
+              <span class="checkbox-custom"></span>
+              <span class="checkbox-label">Select All</span>
+            </label>
+            <span class="parts-count" id="parts-count">0 parts selected</span>
+          </div>
+          <div class="parts-header-right">
+            <div class="parts-filter">
+              <button class="filter-btn active" data-filter="all">All</button>
+              <button class="filter-btn" data-filter="high">High Confidence</button>
+              <button class="filter-btn" data-filter="medium">Medium</button>
+              <button class="filter-btn" data-filter="low">Low</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Parts List -->
+        <div class="ai-parts-list" id="ai-parts-list">
+          <!-- Parts will be dynamically inserted here -->
+        </div>
+
+        <!-- AI Suggestions -->
+        <div class="ai-suggestions" id="ai-suggestions" style="display: none;">
+          <div class="suggestions-header">
+            <i data-lucide="lightbulb"></i>
+            <span>AI Suggestions</span>
+          </div>
+          <ul class="suggestions-list" id="suggestions-list">
+          </ul>
+        </div>
+      </div>
+
+      <!-- Step 4: Search Results with Recommendations -->
+      <div class="ai-excel-step" id="excel-step-search-results" style="display: none;">
+        <!-- Analytics Summary -->
+        <div class="excel-analytics" id="excel-analytics">
+          <div class="analytics-header">
+            <h4>Import Analytics</h4>
+            <span class="analytics-filename" id="analytics-filename">file.xlsx</span>
+          </div>
+          
+          <!-- Stats Cards -->
+          <div class="analytics-stats">
+            <div class="stat-card stat-total">
+              <div class="stat-icon">
+                <i data-lucide="file-spreadsheet"></i>
+              </div>
+              <div class="stat-content">
+                <div class="stat-value" id="stat-total">0</div>
+                <div class="stat-label">Total Parts</div>
+              </div>
+            </div>
+            <div class="stat-card stat-found">
+              <div class="stat-icon">
+                <i data-lucide="check-circle"></i>
+              </div>
+              <div class="stat-content">
+                <div class="stat-value" id="stat-found">0</div>
+                <div class="stat-label">Found</div>
+              </div>
+              <div class="stat-percent stat-percent-found" id="stat-percent-found">0%</div>
+            </div>
+            <div class="stat-card stat-not-found">
+              <div class="stat-icon">
+                <i data-lucide="x-circle"></i>
+              </div>
+              <div class="stat-content">
+                <div class="stat-value" id="stat-not-found">0</div>
+                <div class="stat-label">Not Found</div>
+              </div>
+              <div class="stat-percent stat-percent-not-found" id="stat-percent-not-found">0%</div>
+            </div>
+            <div class="stat-card stat-duplicates" id="stat-duplicates-card" style="display: none;">
+              <div class="stat-icon">
+                <i data-lucide="copy"></i>
+              </div>
+              <div class="stat-content">
+                <div class="stat-value" id="stat-duplicates">0</div>
+                <div class="stat-label">Duplicates</div>
+              </div>
+              <div class="stat-note">Not counted</div>
+            </div>
+          </div>
+          
+          <!-- Success Rate Bar -->
+          <div class="success-rate-container">
+            <div class="success-rate-header">
+              <span class="success-rate-label">Success Rate</span>
+              <span class="success-rate-value" id="success-rate-value">0%</span>
+            </div>
+            <div class="success-rate-bar">
+              <div class="success-rate-fill" id="success-rate-fill" style="width: 0%;"></div>
+            </div>
+          </div>
+          
+          <!-- Not Found Parts List -->
+          <div class="not-found-section" id="not-found-section" style="display: none;">
+            <div class="not-found-header">
+              <i data-lucide="alert-triangle"></i>
+              <span>Parts Not Found</span>
+              <button class="not-found-toggle" id="not-found-toggle">
+                <i data-lucide="chevron-down"></i>
+              </button>
+            </div>
+            <div class="not-found-list" id="not-found-list">
+              <!-- Not found parts will be listed here -->
+            </div>
+          </div>
+          
+          <!-- Duplicates Warning -->
+          <div class="duplicates-section" id="duplicates-section" style="display: none;">
+            <div class="duplicates-header">
+              <i data-lucide="info"></i>
+              <span>Duplicate parts detected and merged</span>
+              <button class="duplicates-toggle" id="duplicates-toggle">
+                <i data-lucide="chevron-down"></i>
+              </button>
+            </div>
+            <div class="duplicates-list" id="duplicates-list">
+              <!-- Duplicates will be listed here -->
+            </div>
+          </div>
+        </div>
+
+        <div class="ai-search-header">
+          <div class="search-header-left">
+            <h4>Search Results & AI Recommendations</h4>
+            <p class="search-summary" id="search-summary">Found options for 25 parts</p>
+          </div>
+          <div class="search-header-right">
+            <button class="btn-secondary" id="back-to-parts-btn">
+              <i data-lucide="arrow-left"></i>
+              <span>Back to Parts</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Recommendations List -->
+        <div class="ai-recommendations-list" id="ai-recommendations-list">
+          <!-- Recommendations will be dynamically inserted here -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="modal-footer ai-excel-footer">
+      <div class="footer-left">
+        <button class="btn-secondary" id="excel-reset-btn" style="display: none;">
+          <i data-lucide="rotate-ccw"></i>
+          <span>Upload New File</span>
+        </button>
+      </div>
+      <div class="footer-right">
+        <button class="btn-secondary" id="excel-cancel-btn">
+          Cancel
+        </button>
+        <button class="btn-primary ai-search-btn" id="excel-search-btn" style="display: none;">
+          <i data-lucide="search"></i>
+          <span>Search Parts</span>
+          <span class="search-count" id="excel-search-count">0</span>
+        </button>
+        <button class="btn-primary ai-cart-btn" id="excel-add-cart-btn" style="display: none;">
+          <i data-lucide="shopping-cart"></i>
+          <span>Add to Cart</span>
+          <span class="cart-count" id="excel-cart-count">0</span>
+        </button>
       </div>
     </div>
   </div>

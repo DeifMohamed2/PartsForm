@@ -3,6 +3,7 @@
 <link rel="stylesheet" href="/css/buyerCSS/search2.css">
 <link rel="stylesheet" href="/css/buyerCSS/search-automotive.css">
 <link rel="stylesheet" href="/css/buyerCSS/ai-filters.css">
+<link rel="stylesheet" href="/css/buyerCSS/ai-excel.css">
 
 <%- include('partials/navbar') %>
 
@@ -65,9 +66,10 @@
 
         <!-- Quick Actions - Enhanced with AI -->
         <div class="search2-quick-actions">
-          <button class="quick-action-btn" id="excel-upload-trigger">
+          <button class="quick-action-btn ai-excel-action" id="excel-upload-trigger">
             <i data-lucide="file-spreadsheet"></i>
-            <span>Upload Excel</span>
+            <span>Excel Import</span>
+            <span class="ai-chip">AI</span>
           </button>
           <button class="quick-action-btn ai-filter-btn" id="ai-filter-trigger">
             <div class="ai-glow"></div>
@@ -312,6 +314,8 @@
 <script src="/js/quick-search.js"></script>
 <script src="/js/cart-badge-updater.js"></script>
 <script src="/js/ai-filters.js"></script>
+<script src="/js/ai-excel.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
   lucide.createIcons();
   window.addEventListener('load', () => lucide.createIcons());

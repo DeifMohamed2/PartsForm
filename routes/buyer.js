@@ -56,6 +56,8 @@ const {
   aiSearch,
   aiSuggestions,
   aiAnalyze,
+  aiExcelAnalyze,
+  aiExcelSearch,
 } = require('../controllers/searchController');
 const { handleProfileImageUpload } = require('../utils/fileUploader');
 
@@ -80,16 +82,29 @@ const ticketUpload = multer({
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
   fileFilter: (req, file, cb) => {
     const allowedTypes = [
-      'image/jpeg', 'image/png', 'image/gif', 'image/webp',
+      // Images
+      'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/bmp', 'image/tiff', 'image/svg+xml', 'image/heic', 'image/heif',
+      // PDF
       'application/pdf',
+      // Documents
       'application/msword',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      'text/plain'
+      'text/plain',
+      // CSV and Excel
+      'text/csv',
+      'application/csv',
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      // Other common formats
+      'application/zip',
+      'application/x-zip-compressed',
+      'application/rtf',
+      'text/rtf'
     ];
     if (allowedTypes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error('File type not allowed. Only images, PDFs, and documents are accepted.'), false);
+      cb(new Error('File type not allowed. Allowed: images, PDF, CSV, Excel, Word documents.'), false);
     }
   }
 });
@@ -136,6 +151,10 @@ router.get('/api/parts/by-number/:partNumber', getPartsByNumber);
 router.post('/api/ai-search', aiSearch);
 router.get('/api/ai-suggestions', aiSuggestions);
 router.post('/api/ai-analyze', aiAnalyze);
+
+// AI Excel Analysis API endpoints
+router.post('/api/excel/analyze', aiExcelAnalyze);
+router.post('/api/excel/search', aiExcelSearch);
 
 // Order API endpoints (cart is managed in localStorage on client-side)
 router.post('/api/checkout/validate', validateCheckout);

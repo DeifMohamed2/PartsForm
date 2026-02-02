@@ -99,16 +99,29 @@ const ticketUpload = multer({
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
   fileFilter: (req, file, cb) => {
     const allowedTypes = [
-      'image/jpeg', 'image/png', 'image/gif', 'image/webp',
+      // Images
+      'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/bmp', 'image/tiff', 'image/svg+xml', 'image/heic', 'image/heif',
+      // PDF
       'application/pdf',
+      // Documents
       'application/msword',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      'text/plain'
+      'text/plain',
+      // CSV and Excel
+      'text/csv',
+      'application/csv',
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      // Other common formats
+      'application/zip',
+      'application/x-zip-compressed',
+      'application/rtf',
+      'text/rtf'
     ];
     if (allowedTypes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error('File type not allowed'), false);
+      cb(new Error('File type not allowed. Allowed: images, PDF, CSV, Excel, Word documents.'), false);
     }
   }
 });

@@ -376,7 +376,10 @@
       chip.addEventListener('click', handleFilterChipClick);
     });
 
-    // Excel modal
+    // Excel modal - Handled by ai-excel.js
+    // Note: The new AI-powered Excel modal is now controlled by ai-excel.js
+    // We keep the old event listeners commented out in case we need to fallback
+    /*
     elements.excelUploadTrigger?.addEventListener('click', () => {
       // Check if user is logged in
       if (
@@ -398,9 +401,10 @@
     elements.uploadArea?.addEventListener('click', () =>
       elements.excelFileInput?.click()
     );
+    */
 
-    // Drag and drop
-    setupDragAndDrop();
+    // Drag and drop - DISABLED: AI Excel handler in ai-excel.js handles this now
+    // setupDragAndDrop();
 
     // Add to Cart button (footer)
     const addToCartBtn = document.getElementById('add-to-cart-btn');
@@ -504,6 +508,10 @@
       }
       return;
     }
+
+    // Reset all filters before performing new search
+    // This ensures AI filters or previous search filters don't interfere
+    resetFiltersForNewSearch();
 
     state.searchQuery = query;
     hideAutocomplete();
@@ -686,16 +694,34 @@
           // Save to recent searches
           saveRecentSearch(query);
 
-          // Show not-found banner if any parts weren't found
+          // Check if this is from Excel import (has stored stats)
+          const excelStats = window.__excelImportStats;
+          const isFromExcel = excelStats && excelStats.source === 'Excel';
+          
+          // Show analytics banner with stats
+          const searchStats = {
+            found: data.found || [],
+            totalSearched: data.partNumbers?.length || 0,
+            duplicates: isFromExcel ? (excelStats.duplicates || []) : (data.duplicates || [])
+          };
+          
+          // Clear Excel stats after use
+          if (isFromExcel) {
+            window.__excelImportStats = null;
+          }
+          
+          const source = isFromExcel ? 'Excel' : 'Search';
+          
           if (data.notFound && data.notFound.length > 0) {
-            showNotFoundBanner(data.notFound, 'Search');
-            showCartAlert('info', 'Some parts not found', 
-              `Found ${data.found.length} parts. ${data.notFound.length} not found.`);
+            showNotFoundBanner(data.notFound, source, searchStats);
+          } else if (data.found && data.found.length > 0) {
+            // Show success banner even when all found
+            showNotFoundBanner([], source, searchStats);
           } else {
             hideNotFoundBanner();
-            showCartAlert('success', 'Search Complete', 
-              `Found ${data.results.length} results for ${data.partNumbers.length} part numbers`);
           }
+          showCartAlert('success', 'Search Complete', 
+            `Found ${data.results.length} results for ${data.partNumbers?.length || 0} part numbers`);
         } else {
           state.currentResults = [];
           state.filteredResults = [];
@@ -703,7 +729,12 @@
           hideQuickSortBar();
           
           if (data.notFound && data.notFound.length > 0) {
-            showNotFoundBanner(data.notFound, 'Search');
+            const searchStats = {
+              found: [],
+              totalSearched: data.partNumbers?.length || data.notFound.length,
+              duplicates: []
+            };
+            showNotFoundBanner(data.notFound, 'Search', searchStats);
           }
           showCartAlert('warning', 'No Results', 'No parts found for the searched part numbers');
         }
@@ -790,9 +821,17 @@
           // Save each part number to recent searches
           saveRecentSearchFromExcel(partNumbers);
 
-          // Show not-found banner if any parts weren't found
+          // Show analytics banner with stats
+          const excelStats = {
+            found: data.found || [],
+            totalSearched: partNumbers.length,
+            duplicates: data.duplicates || []
+          };
+          
           if (data.notFound && data.notFound.length > 0) {
-            showNotFoundBanner(data.notFound, 'Excel');
+            showNotFoundBanner(data.notFound, 'Excel', excelStats);
+          } else if (data.found && data.found.length > 0) {
+            showNotFoundBanner([], 'Excel', excelStats);
           } else {
             hideNotFoundBanner();
           }
@@ -809,7 +848,12 @@
           hideQuickSortBar();
           
           if (data.notFound && data.notFound.length > 0) {
-            showNotFoundBanner(data.notFound, 'Excel');
+            const excelStats = {
+              found: [],
+              totalSearched: partNumbers.length,
+              duplicates: []
+            };
+            showNotFoundBanner(data.notFound, 'Excel', excelStats);
           }
           showCartAlert('warning', 'No Results', 'No parts found for the uploaded Excel file');
         }
@@ -829,6 +873,60 @@
     elements.clearBtn.style.display = 'none';
     hideAutocomplete();
     elements.searchInput.focus();
+  }
+
+  /**
+   * Reset filters silently for a new search
+   * This is called before each search to ensure clean state
+   */
+  function resetFiltersForNewSearch() {
+    // Reset selected filters to defaults
+    state.selectedFilters = {
+      brand: 'all',
+      stockCode: 'all',
+      delivery: 'all',
+      minPrice: 0,
+      maxPrice: 500000,
+      minWeight: 0,
+      maxWeight: 100,
+      minQuantity: 0,
+      minDeliveryDays: 0,
+      maxDeliveryDays: 30,
+    };
+
+    // Reset quick filters
+    state.quickFilters = {
+      inStockOnly: false,
+      lowStockOnly: false
+    };
+
+    // Reset current sort
+    state.currentSort = {
+      field: 'relevance',
+      order: 'desc'
+    };
+
+    // Clear previous results
+    state.currentResults = [];
+    state.filteredResults = [];
+
+    // Notify AI filters to clear their state (if exposed)
+    if (window.AIFilters && typeof window.AIFilters.clearResults === 'function') {
+      window.AIFilters.clearResults();
+    }
+
+    // Reset quick sort buttons UI silently
+    document.querySelectorAll('.quick-sort-btn').forEach(btn => {
+      btn.classList.remove('active');
+      if (btn.dataset.sort === 'relevance') {
+        btn.classList.add('active');
+      }
+    });
+
+    // Reset quick filter buttons UI silently
+    document.querySelectorAll('.quick-filter-btn, .filter-quick-btn').forEach(btn => {
+      btn.classList.remove('active');
+    });
   }
 
   function resetSearch() {
@@ -2854,6 +2952,8 @@
     document.body.style.overflow = '';
   }
 
+  // DISABLED: AI Excel handler in ai-excel.js handles all file uploads now
+  /*
   function setupDragAndDrop() {
     if (!elements.uploadArea) return;
 
@@ -2951,6 +3051,7 @@
       reader.readAsArrayBuffer(file);
     }
   }
+  */
 
   /**
    * Load SheetJS library dynamically
@@ -3447,109 +3548,177 @@
   }
 
   /**
-   * Show a persistent banner for parts not found from Excel/multi-search
+   * Show a persistent banner with search analytics from Excel/multi-search
    */
-  function showNotFoundBanner(notFoundParts, source = 'Excel') {
+  function showNotFoundBanner(notFoundParts, source = 'Excel', stats = {}) {
     // Remove existing banner if any
     hideNotFoundBanner();
     
-    if (!notFoundParts || notFoundParts.length === 0) return;
+    // Calculate analytics
+    const found = stats.found || [];
+    const duplicates = stats.duplicates || [];
+    const totalSearched = stats.totalSearched || (found.length + (notFoundParts?.length || 0));
+    const foundCount = found.length;
+    const notFoundCount = notFoundParts?.length || 0;
+    const duplicateCount = duplicates.length;
+    
+    // Calculate success rate
+    const successRate = totalSearched > 0 ? Math.round((foundCount / totalSearched) * 100) : 0;
+    const failRate = 100 - successRate;
+    
+    // If nothing to show, don't show banner
+    if (notFoundCount === 0 && duplicateCount === 0) return;
 
     const banner = document.createElement('div');
     banner.id = 'not-found-banner';
-    banner.className = 'not-found-banner';
+    banner.className = 'search-analytics-banner';
     
-    // Limit display to first 10 parts
-    const displayParts = notFoundParts.slice(0, 10);
-    const remainingCount = notFoundParts.length - displayParts.length;
+    // Limit display to first 8 parts
+    const displayParts = notFoundParts?.slice(0, 8) || [];
+    const remainingCount = (notFoundParts?.length || 0) - displayParts.length;
     
-    banner.innerHTML = `
-      <div class="not-found-banner-content">
-        <div class="not-found-icon">
-          <i data-lucide="alert-triangle"></i>
+    // Build duplicates info
+    let duplicatesHtml = '';
+    if (duplicateCount > 0) {
+      const dupDisplay = duplicates.slice(0, 5);
+      const dupRemaining = duplicates.length - dupDisplay.length;
+      duplicatesHtml = `
+        <div class="analytics-duplicates">
+          <i data-lucide="copy"></i>
+          <span><strong>${duplicateCount}</strong> duplicate${duplicateCount > 1 ? 's' : ''} merged</span>
+          <span class="duplicate-parts">${dupDisplay.map(d => d.partNumber || d).join(', ')}${dupRemaining > 0 ? ` +${dupRemaining} more` : ''}</span>
         </div>
-        <div class="not-found-text">
-          <strong>${notFoundParts.length} part${notFoundParts.length > 1 ? 's' : ''} not found from ${source}:</strong>
+      `;
+    }
+    
+    // Build not found info
+    let notFoundHtml = '';
+    if (notFoundCount > 0) {
+      notFoundHtml = `
+        <div class="analytics-not-found">
+          <i data-lucide="alert-circle"></i>
+          <span><strong>${notFoundCount}</strong> part${notFoundCount > 1 ? 's' : ''} not found</span>
           <span class="not-found-parts">${displayParts.join(', ')}${remainingCount > 0 ? ` +${remainingCount} more` : ''}</span>
         </div>
-        <button class="not-found-close" onclick="window.hideNotFoundBanner()">
-          <i data-lucide="x"></i>
-        </button>
+      `;
+    }
+    
+    banner.innerHTML = `
+      <div class="analytics-banner-content">
+        <div class="analytics-row">
+          <div class="analytics-left">
+            <span class="analytics-label">${source} Import</span>
+            <span class="analytics-sep">•</span>
+            <span class="stat-inline found"><i data-lucide="check"></i> ${foundCount} found</span>
+            <span class="analytics-sep">•</span>
+            <span class="stat-inline not-found"><i data-lucide="x"></i> ${notFoundCount} not found</span>
+            ${duplicateCount > 0 ? `<span class="analytics-sep">•</span><span class="stat-inline duplicates"><i data-lucide="copy"></i> ${duplicateCount} duplicates</span>` : ''}
+          </div>
+          <div class="analytics-right">
+            <span class="success-rate ${successRate >= 80 ? 'good' : successRate >= 50 ? 'warning' : 'low'}">${successRate}% success</span>
+            <button class="analytics-close" onclick="window.hideNotFoundBanner()">
+              <i data-lucide="x"></i>
+            </button>
+          </div>
+        </div>
+        ${notFoundCount > 0 ? `<div class="analytics-parts"><span class="parts-label">Not found:</span> <span class="parts-list">${displayParts.join(', ')}${remainingCount > 0 ? ` +${remainingCount} more` : ''}</span></div>` : ''}
       </div>
     `;
     
     // Add styles if not already present
-    if (!document.getElementById('not-found-banner-styles')) {
+    if (!document.getElementById('analytics-banner-styles')) {
       const style = document.createElement('style');
-      style.id = 'not-found-banner-styles';
+      style.id = 'analytics-banner-styles';
       style.textContent = `
-        .not-found-banner {
+        .search-analytics-banner {
           position: sticky;
           top: 0;
           z-index: 100;
-          background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
-          border-bottom: 2px solid #f39c12;
-          padding: 12px 20px;
-          margin-bottom: 0;
+          background: #f8fafc;
+          border-bottom: 1px solid #e2e8f0;
+          padding: 10px 20px;
         }
-        .not-found-banner-content {
-          display: flex;
-          align-items: center;
-          gap: 12px;
+        .analytics-banner-content {
           max-width: 1400px;
           margin: 0 auto;
         }
-        .not-found-icon {
-          flex-shrink: 0;
-          width: 32px;
-          height: 32px;
-          background: #f39c12;
-          border-radius: 50%;
+        .analytics-row {
           display: flex;
           align-items: center;
-          justify-content: center;
-          color: white;
+          justify-content: space-between;
+          gap: 16px;
         }
-        .not-found-icon svg {
-          width: 18px;
-          height: 18px;
+        .analytics-left {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex-wrap: wrap;
         }
-        .not-found-text {
-          flex: 1;
-          font-size: 14px;
-          color: #856404;
-        }
-        .not-found-text strong {
-          display: block;
-          margin-bottom: 2px;
-          color: #664d03;
-        }
-        .not-found-parts {
-          font-family: monospace;
-          background: rgba(0,0,0,0.05);
-          padding: 2px 6px;
-          border-radius: 4px;
+        .analytics-label {
+          font-weight: 600;
+          color: #1e293b;
           font-size: 13px;
         }
-        .not-found-close {
-          flex-shrink: 0;
-          width: 28px;
-          height: 28px;
+        .analytics-sep {
+          color: #cbd5e1;
+          font-size: 10px;
+        }
+        .stat-inline {
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          font-size: 13px;
+          padding: 3px 8px;
+          border-radius: 4px;
+          font-weight: 500;
+        }
+        .stat-inline svg { width: 14px; height: 14px; }
+        .stat-inline.found { background: #dcfce7; color: #16a34a; }
+        .stat-inline.not-found { background: #fee2e2; color: #dc2626; }
+        .stat-inline.duplicates { background: #e0e7ff; color: #4f46e5; }
+        .analytics-right {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+        .success-rate {
+          font-size: 12px;
+          font-weight: 600;
+          padding: 4px 10px;
+          border-radius: 12px;
+        }
+        .success-rate.good { background: #dcfce7; color: #16a34a; }
+        .success-rate.warning { background: #fef3c7; color: #d97706; }
+        .success-rate.low { background: #fee2e2; color: #dc2626; }
+        .analytics-close {
+          width: 24px;
+          height: 24px;
           border: none;
-          background: rgba(0,0,0,0.1);
-          border-radius: 50%;
+          background: transparent;
+          border-radius: 4px;
           cursor: pointer;
           display: flex;
           align-items: center;
           justify-content: center;
           transition: background 0.2s;
         }
-        .not-found-close:hover {
-          background: rgba(0,0,0,0.2);
+        .analytics-close:hover { background: rgba(0,0,0,0.08); }
+        .analytics-close svg { width: 16px; height: 16px; color: #94a3b8; }
+        .analytics-parts {
+          margin-top: 6px;
+          padding-top: 6px;
+          border-top: 1px solid #e2e8f0;
+          font-size: 12px;
+          color: #64748b;
         }
-        .not-found-close svg {
-          width: 16px;
-          height: 16px;
+        .parts-label { color: #94a3b8; }
+        .parts-list {
+          font-family: 'SF Mono', Monaco, monospace;
+          color: #475569;
+        }
+        @media (max-width: 640px) {
+          .analytics-row { flex-direction: column; align-items: flex-start; gap: 8px; }
+          .analytics-right { width: 100%; justify-content: space-between; }
         }
       `;
       document.head.appendChild(style);
