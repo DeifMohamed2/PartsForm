@@ -237,9 +237,9 @@ class CSVParserService {
           separator = semicolonCount > commaCount ? ';' : ',';
           
           // Create read stream from file
-          inputStream = fs.createReadStream(source, { highWaterMark: 64 * 1024 }); // 64KB chunks
+          inputStream = fs.createReadStream(source, { highWaterMark: productionMode ? 256 * 1024 : 64 * 1024 }); // Larger chunks in production
           
-          console.log(`📊 Streaming ${(fileSize / 1024 / 1024).toFixed(2)} MB file with separator "${separator}"`);
+          if (!productionMode) console.log(`📊 Streaming ${(fileSize / 1024 / 1024).toFixed(2)} MB file with separator "${separator}"`);
         } else {
           // Legacy buffer support
           if (!source || source.length === 0) {
@@ -258,7 +258,7 @@ class CSVParserService {
           inputStream = Readable.from(source);
           source = null; // Release buffer reference
           
-          console.log(`📊 Processing ${(fileSize / 1024 / 1024).toFixed(2)} MB buffer with separator "${separator}"`);
+          if (!productionMode) console.log(`📊 Processing ${(fileSize / 1024 / 1024).toFixed(2)} MB buffer with separator "${separator}"`);
         }
 
         let batch = [];
@@ -267,10 +267,13 @@ class CSVParserService {
         let rawRecordCount = 0;
         let validRecordCount = 0;
         let esRecordIndex = 0;
-        const BATCH_SIZE = 500;
-        const ES_BATCH_SIZE = 200;
+        
+        // Production optimizations - larger batches, less frequent updates
+        const productionMode = process.env.NODE_ENV === 'production' || process.env.SYNC_PRODUCTION_MODE === 'true';
+        const BATCH_SIZE = productionMode ? 2000 : 500;
+        const ES_BATCH_SIZE = productionMode ? 500 : 200;
         let lastProgressUpdate = Date.now();
-        const PROGRESS_INTERVAL = 1000;
+        const PROGRESS_INTERVAL = productionMode ? 5000 : 1000;
 
         const mapHeaders = ({ header }) => header.trim().replace(/^["']|["']$/g, '');
 
@@ -302,9 +305,9 @@ class CSVParserService {
                   console.error(`ES batch error (non-fatal): ${esError.message}`);
                 }
                 
-                // Small delay between ES batches
+                // Small delay between ES batches (shorter in production)
                 if (i + ES_BATCH_SIZE < batchToProcess.length) {
-                  await new Promise(resolve => setTimeout(resolve, 50));
+                  await new Promise(resolve => setTimeout(resolve, productionMode ? 10 : 50));
                 }
               }
               esRecordIndex += batchToProcess.length;
@@ -403,7 +406,7 @@ class CSVParserService {
               if (tempFilePath && fs.existsSync(tempFilePath)) {
                 try {
                   fs.unlinkSync(tempFilePath);
-                  console.log('🗑️  Cleaned up temp file');
+                  if (!productionMode) console.log('🗑️  Cleaned up temp file');
                 } catch (cleanupErr) {
                   console.warn('Warning: Could not delete temp file:', cleanupErr.message);
                 }
@@ -426,7 +429,7 @@ class CSVParserService {
                 });
               }
 
-              console.log(`✅ Import complete: ${totalInserted} inserted, ${totalUpdated} updated from ${rawRecordCount} raw records`);
+              if (!productionMode) console.log(`✅ Import complete: ${totalInserted} inserted, ${totalUpdated} updated from ${rawRecordCount} raw records`);
 
               resolve({
                 success: true,

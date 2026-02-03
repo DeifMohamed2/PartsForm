@@ -14,6 +14,7 @@ class FTPService {
     this.client = new ftp.Client();
     this.currentCredentials = null;
     this.debug = false; // Set to true for detailed FTP logging
+    this.productionMode = process.env.NODE_ENV === 'production' || process.env.SYNC_PRODUCTION_MODE === 'true';
   }
 
   /**
@@ -67,7 +68,7 @@ class FTPService {
       await this.client.access(accessConfig);
       
       this._debug(`✅ FTP connected successfully to ${creds.host}`);
-      console.log(`✅ FTP connected to ${creds.host}`);
+      if (!this.productionMode) console.log(`✅ FTP connected to ${creds.host}`);
       return true;
     } catch (error) {
       this._debug(`❌ FTP connection error: ${error.message}`, { 
@@ -192,7 +193,7 @@ class FTPService {
       await this.client.downloadTo(tempFilePath, remotePath);
       
       const stats = fs.statSync(tempFilePath);
-      console.log(`📥 Downloaded ${fileName} (${this._formatBytes(stats.size)}) to temp file`);
+      if (!this.productionMode) console.log(`📥 Downloaded ${fileName} (${this._formatBytes(stats.size)}) to temp file`);
       this._debug(`Download complete: ${fileName} - ${this._formatBytes(stats.size)}`);
       
       return tempFilePath;

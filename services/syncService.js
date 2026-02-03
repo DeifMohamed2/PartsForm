@@ -16,6 +16,13 @@ class SyncService extends EventEmitter {
     super();
     this.syncingIntegrations = new Map();
     this.syncProgress = new Map();
+    // Production mode - less logging, faster processing
+    this.productionMode = process.env.NODE_ENV === 'production' || process.env.SYNC_PRODUCTION_MODE === 'true';
+    this.debug = !this.productionMode;
+  }
+
+  log(...args) {
+    if (this.debug) console.log(...args);
   }
 
   /**
@@ -214,7 +221,7 @@ class SyncService extends EventEmitter {
    * Based on working implementation from THings of FTP Connection
    */
   async syncFTP(integration, integrationId) {
-    console.log(`[SYNC DEBUG] Starting FTP sync for: ${integration.name}`);
+    this.log(`[SYNC] Starting FTP sync for: ${integration.name}`);
 
     const credentials = {
       host: integration.ftp.host,
@@ -225,14 +232,7 @@ class SyncService extends EventEmitter {
       filePattern: integration.ftp.filePattern,
     };
 
-    console.log(`[SYNC DEBUG] FTP credentials:`, {
-      host: credentials.host,
-      port: credentials.port,
-      username: credentials.username,
-      secure: credentials.secure,
-      filePattern: credentials.filePattern,
-      remotePath: integration.ftp.remotePath
-    });
+    this.log(`[SYNC] FTP host: ${credentials.host}, pattern: ${credentials.filePattern}`);
 
     this._updateProgress(integrationId, {
       phase: 'listing',
@@ -245,9 +245,9 @@ class SyncService extends EventEmitter {
       // List files - ftpService now handles connection internally
       files = await ftpService.listFiles(credentials, integration.ftp.remotePath);
       // Connection is already closed by listFiles
-      console.log(`[SYNC DEBUG] Listed ${files.length} files from FTP`);
+      console.log(`📂 Found ${files.length} files to sync`);
     } catch (listError) {
-      console.error(`[SYNC DEBUG] Error listing files:`, listError);
+      console.error(`❌ Error listing files:`, listError.message);
       throw listError;
     }
 
@@ -298,23 +298,22 @@ class SyncService extends EventEmitter {
     const errors = [];
 
     // Process each file - ftpService creates fresh connection for each download and closes after
-    // Process in batches with delays to avoid overwhelming the FTP server
-    const batchSize = 5; // Process 5 files per batch (reduced to avoid rate limiting)
-    const batchDelay = 5000; // 5 second delay between batches (increased to avoid rate limiting)
+    // Process in batches - optimized for production servers
+    const batchSize = this.productionMode ? 10 : 5; // More files per batch in production
+    const batchDelay = this.productionMode ? 1000 : 5000; // Shorter delay in production
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-      console.log(`[SYNC DEBUG] Processing file ${i + 1}/${files.length}: ${file.name}`);
+      this.log(`[SYNC] Processing file ${i + 1}/${files.length}: ${file.name}`);
 
       // Wait between batches to avoid rate limiting
-      // Note: Connection is already closed after each download by ftpService
       if (i > 0 && i % batchSize === 0) {
-        console.log(`[SYNC DEBUG] Batch complete, waiting ${batchDelay}ms before next batch...`);
+        this.log(`[SYNC] Batch complete, waiting ${batchDelay}ms...`);
         await new Promise(resolve => setTimeout(resolve, batchDelay));
       }
 
       try {
-        console.log(`📥 Processing: ${file.name}`);
+        if (!this.productionMode) console.log(`📥 Processing: ${file.name}`);
 
         this._updateProgress(integrationId, {
           phase: 'downloading',
@@ -327,7 +326,7 @@ class SyncService extends EventEmitter {
         const remotePath = file.name;
         const remoteDir = integration.ftp.remotePath || '/';
 
-        console.log(`[SYNC DEBUG] Remote directory: ${remoteDir}, File: ${remotePath}`);
+        this.log(`[SYNC] Remote: ${remoteDir}/${remotePath}`);
 
         // Pass remotePath in credentials so downloadFile can change directory if needed
         const downloadCredentials = {
@@ -340,7 +339,7 @@ class SyncService extends EventEmitter {
         const tempFilePath = await ftpService.downloadToTempFile(remotePath, downloadCredentials);
         await ftpService.close();
 
-        console.log(`[SYNC DEBUG] Downloaded ${file.name} to temp file`);
+        this.log(`[SYNC] Downloaded ${file.name}`);
 
         this._updateProgress(integrationId, {
           phase: 'parsing',
@@ -384,10 +383,10 @@ class SyncService extends EventEmitter {
           message: `Completed ${file.name}: ${result.validRecords} records`,
         });
 
-        console.log(`✅ Processed ${file.name}: ${result.inserted} inserted, ${result.updated} updated`);
+        if (!this.productionMode) console.log(`✅ Processed ${file.name}: ${result.inserted} inserted, ${result.updated} updated`);
       } catch (error) {
         console.error(`❌ Error processing ${file.name}:`, error.message);
-        console.error(`[SYNC DEBUG] Full error:`, error);
+        if (this.debug) console.error(`Full error:`, error);
 
         errors.push({ file: file.name, error: error.message });
 
@@ -406,10 +405,10 @@ class SyncService extends EventEmitter {
         // Force reset connection on error and wait longer
         await ftpService.forceReset();
 
-        // Add a longer delay before next file if we hit an error
+        // Add delay before next file after error
         if (i < files.length - 1) {
-          const errorDelay = 5000; // Increased to 5 seconds to avoid rate limiting
-          console.log(`[SYNC DEBUG] Waiting ${errorDelay}ms before next file after error...`);
+          const errorDelay = this.productionMode ? 2000 : 5000;
+          this.log(`[SYNC] Waiting ${errorDelay}ms after error...`);
           await new Promise(resolve => setTimeout(resolve, errorDelay));
         }
       }
@@ -417,7 +416,7 @@ class SyncService extends EventEmitter {
 
     // Final cleanup - ensure connection is closed
     await ftpService.close();
-    console.log(`[SYNC DEBUG] Sync completed. Files: ${fileResults.length}, Errors: ${errors.length}`);
+    console.log(`✅ Sync completed: ${fileResults.length} files, ${totalInserted} records, ${errors.length} errors`);
 
     return {
       success: errors.length === 0 || fileResults.some(f => f.status === 'success'),

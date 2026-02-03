@@ -17,6 +17,10 @@ class ElasticsearchService {
     this._cachedDocCount = null;
     this._docCountCacheTime = null;
     this._docCountCacheTTL = 60000; // 60 seconds cache
+    // Production mode - less logging
+    this.productionMode = process.env.NODE_ENV === 'production' || process.env.SYNC_PRODUCTION_MODE === 'true';
+    this._indexedCount = 0;
+    this._lastLogTime = 0;
   }
 
   /**
@@ -609,10 +613,21 @@ class ElasticsearchService {
       const indexed = documents.length - errors.length;
 
       if (errors.length > 0) {
-        console.error(`⚠️  ${errors.length} errors during bulk indexing`);
+        console.error(`⚠️  ${errors.length} ES index errors`);
       }
 
-      console.log(`✅ ES Indexed ${indexed} documents in ${indexTime}ms`);
+      // In production, only log periodically (every 10k docs or 5 seconds)
+      this._indexedCount += indexed;
+      const now = Date.now();
+      if (!this.productionMode || (now - this._lastLogTime > 5000) || this._indexedCount >= 10000) {
+        if (this.productionMode) {
+          console.log(`✅ ES Indexed ${this._indexedCount} documents`);
+        } else {
+          console.log(`✅ ES Indexed ${indexed} documents in ${indexTime}ms`);
+        }
+        this._indexedCount = 0;
+        this._lastLogTime = now;
+      }
 
       return { indexed, errors: errors.length };
     } catch (error) {
@@ -698,7 +713,7 @@ class ElasticsearchService {
 
     try {
       await this.client.indices.refresh({ index: this.indexName });
-      console.log('✅ Elasticsearch index refreshed');
+      if (!this.productionMode) console.log('✅ Elasticsearch index refreshed');
     } catch (error) {
       console.error('Error refreshing index:', error.message);
     }
