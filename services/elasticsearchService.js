@@ -5,9 +5,6 @@
  */
 const { Client } = require('@elastic/elasticsearch');
 
-// Load environment variables
-require('dotenv').config();
-
 class ElasticsearchService {
   constructor() {
     this.client = null;

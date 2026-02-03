@@ -4,9 +4,6 @@
  */
 const { GoogleGenAI } = require('@google/genai');
 
-// Load environment variables
-require('dotenv').config();
-
 // Validate GEMINI_API_KEY is set
 if (!process.env.GEMINI_API_KEY) {
   console.warn('⚠️  WARNING: GEMINI_API_KEY environment variable is not set!');

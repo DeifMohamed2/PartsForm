@@ -4,9 +4,6 @@ const Admin = require('../models/Admin');
 const Order = require('../models/Order');
 const Ticket = require('../models/Ticket');
 
-// Load environment variables
-require('dotenv').config();
-
 // JWT Secret - Must match authController (loaded from environment)
 const JWT_SECRET = process.env.JWT_SECRET;
 

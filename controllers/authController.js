@@ -2,9 +2,6 @@ const jwt = require('jsonwebtoken');
 const Buyer = require('../models/Buyer');
 const Admin = require('../models/Admin');
 
-// Load environment variables
-require('dotenv').config();
-
 // JWT Configuration - MUST be set via environment variables
 const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
