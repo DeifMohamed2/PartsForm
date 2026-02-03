@@ -207,6 +207,9 @@ class CSVParserService {
    */
   async parseAndImport(source, options = {}) {
     const { integration, integrationName, fileName, columnMapping = {}, onProgress } = options;
+    
+    // Production optimizations - larger batches, less frequent updates
+    const productionMode = process.env.NODE_ENV === 'production' || process.env.SYNC_PRODUCTION_MODE === 'true';
 
     return new Promise(async (resolve, reject) => {
       try {
@@ -268,8 +271,7 @@ class CSVParserService {
         let validRecordCount = 0;
         let esRecordIndex = 0;
         
-        // Production optimizations - larger batches, less frequent updates
-        const productionMode = process.env.NODE_ENV === 'production' || process.env.SYNC_PRODUCTION_MODE === 'true';
+        // Production batch sizes
         const BATCH_SIZE = productionMode ? 2000 : 500;
         const ES_BATCH_SIZE = productionMode ? 500 : 200;
         let lastProgressUpdate = Date.now();
