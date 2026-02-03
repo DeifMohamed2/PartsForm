@@ -1,3 +1,6 @@
+// Load environment variables FIRST - before anything else
+require('dotenv').config();
+
 const express = require('express');
 const http = require('http');
 const path = require('path');
@@ -6,6 +9,25 @@ const i18next = require('./config/i18n');
 const middleware = require('i18next-http-middleware');
 const connectDB = require('./config/database');
 const { initializeUploadDirectories } = require('./utils/fileUploader');
+
+// Validate required environment variables
+const requiredEnvVars = ['JWT_SECRET'];
+const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
+
+if (missingEnvVars.length > 0) {
+  console.error('❌ FATAL: Missing required environment variables:');
+  missingEnvVars.forEach(envVar => console.error(`   - ${envVar}`));
+  console.error('   Please check your .env file');
+  process.exit(1);
+}
+
+// Warn about optional but recommended environment variables
+const recommendedEnvVars = ['GEMINI_API_KEY', 'MONGODB_URI'];
+const missingRecommended = recommendedEnvVars.filter(envVar => !process.env[envVar]);
+if (missingRecommended.length > 0) {
+  console.warn('⚠️  Warning: Some recommended environment variables are not set:');
+  missingRecommended.forEach(envVar => console.warn(`   - ${envVar} (using default)`));
+}
 
 // Services
 const elasticsearchService = require('./services/elasticsearchService');

@@ -4,8 +4,17 @@
  */
 const { GoogleGenAI } = require('@google/genai');
 
+// Load environment variables
+require('dotenv').config();
+
+// Validate GEMINI_API_KEY is set
+if (!process.env.GEMINI_API_KEY) {
+  console.warn('⚠️  WARNING: GEMINI_API_KEY environment variable is not set!');
+  console.warn('   AI-powered search features will not work without it.');
+}
+
 // Initialize the Gemini API
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || 'AIzaSyDMT9YWw1l9-AWeI8Dm3te5Lz-3xke1K6k' });
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 // System instruction for the AI model - optimized for parts search
 const SYSTEM_INSTRUCTION = `You are an intelligent automotive parts search assistant for PartsForm, a B2B industrial parts marketplace. Your role is to understand natural language search queries and convert them into structured search filters and search terms.

@@ -4,8 +4,18 @@ const Admin = require('../models/Admin');
 const Order = require('../models/Order');
 const Ticket = require('../models/Ticket');
 
-// JWT Secret - Should match authController
-const JWT_SECRET = process.env.JWT_SECRET || 'partsform-secret-key-change-in-production';
+// Load environment variables
+require('dotenv').config();
+
+// JWT Secret - Must match authController (loaded from environment)
+const JWT_SECRET = process.env.JWT_SECRET;
+
+// Validate JWT_SECRET is set
+if (!JWT_SECRET) {
+  console.error('❌ FATAL: JWT_SECRET environment variable is not set!');
+  console.error('   Please set JWT_SECRET in your .env file');
+  process.exit(1);
+}
 
 /**
  * Middleware to protect buyer routes - requires buyer authentication

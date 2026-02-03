@@ -1,9 +1,16 @@
 const mongoose = require('mongoose');
 
+// Load environment variables
+require('dotenv').config();
+
 // MongoDB connection configuration
 const connectDB = async () => {
   try {
     const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/partsform';
+    
+    // Log which database we're connecting to (hide credentials)
+    const sanitizedUri = mongoURI.replace(/:\/\/[^:]+:[^@]+@/, '://****:****@');
+    console.log(`📦 Connecting to MongoDB: ${sanitizedUri}`);
     
     const conn = await mongoose.connect(mongoURI);
 

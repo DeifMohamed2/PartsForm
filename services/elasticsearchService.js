@@ -5,13 +5,16 @@
  */
 const { Client } = require('@elastic/elasticsearch');
 
+// Load environment variables
+require('dotenv').config();
+
 class ElasticsearchService {
   constructor() {
     this.client = null;
-    this.indexName = 'automotive_parts';
+    this.indexName = process.env.ELASTICSEARCH_INDEX || 'automotive_parts';
     this.isAvailable = false;
     this.bulkQueue = [];
-    this.bulkSize = 5000;
+    this.bulkSize = parseInt(process.env.ELASTICSEARCH_BULK_SIZE, 10) || 5000;
     this.bulkTimeout = null;
     // Cache for document count to avoid checking on every request
     this._cachedDocCount = null;

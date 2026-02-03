@@ -40,7 +40,7 @@ const initialize = (server) => {
         return next();
       }
 
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production');
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
       socket.userData = {
         authenticated: true,
         userId: decoded.id,

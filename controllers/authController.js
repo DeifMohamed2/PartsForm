@@ -2,9 +2,19 @@ const jwt = require('jsonwebtoken');
 const Buyer = require('../models/Buyer');
 const Admin = require('../models/Admin');
 
-// JWT Secret - In production, use environment variable
-const JWT_SECRET = process.env.JWT_SECRET || 'partsform-secret-key-change-in-production';
+// Load environment variables
+require('dotenv').config();
+
+// JWT Configuration - MUST be set via environment variables
+const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
+
+// Validate JWT_SECRET is set
+if (!JWT_SECRET) {
+  console.error('❌ FATAL: JWT_SECRET environment variable is not set!');
+  console.error('   Please set JWT_SECRET in your .env file');
+  process.exit(1);
+}
 
 /**
  * Generate JWT token with role
