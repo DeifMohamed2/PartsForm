@@ -36,7 +36,6 @@ const {
   getPaymentsManagement,
   getPaymentDetails,
   getPaymentCreate,
-  getAdminSettings,
   getIntegrationsManagement,
   getIntegrationCreate,
   getIntegrationEdit,
@@ -54,6 +53,14 @@ const {
   getIntegration,
   // File upload
   uploadPartsFromFile,
+  // Sidebar counts
+  getSidebarCounts,
+  // Administrators management
+  getAdminsManagement,
+  createAdmin,
+  updateAdmin,
+  updateAdminStatus,
+  deleteAdmin,
 } = require('../controllers/adminController');
 
 // Import search controller for parts search API
@@ -132,6 +139,9 @@ router.use(requireAdminAuth);
 // Admin dashboard
 router.get('/', getAdminDashboard);
 
+// Sidebar counts API (for real-time updates)
+router.get('/api/sidebar-counts', getSidebarCounts);
+
 // Orders management - Pages
 router.get('/orders', getOrdersManagement);
 router.get('/orders/create', getOrderCreate);
@@ -206,8 +216,12 @@ router.get('/api/integrations/:id/status', getSyncStatus);
 router.get('/api/integrations/:id/progress', getSyncProgress);
 router.get('/api/integrations/:id/sync-details', getSyncDetails);
 
-// Other admin pages
-router.get('/settings', getAdminSettings);
+// Administrators management
+router.get('/admins', getAdminsManagement);
+router.post('/api/admins', createAdmin);
+router.put('/api/admins/:id', updateAdmin);
+router.put('/api/admins/:id/status', updateAdminStatus);
+router.delete('/api/admins/:id', deleteAdmin);
 
 // Parts Analytics
 router.get('/parts-analytics', getPartsAnalytics);

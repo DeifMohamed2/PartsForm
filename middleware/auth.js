@@ -1,6 +1,8 @@
 const jwt = require('jsonwebtoken');
 const Buyer = require('../models/Buyer');
 const Admin = require('../models/Admin');
+const Order = require('../models/Order');
+const Ticket = require('../models/Ticket');
 
 // JWT Secret - Should match authController
 const JWT_SECRET = process.env.JWT_SECRET || 'partsform-secret-key-change-in-production';
@@ -196,6 +198,33 @@ const requireAdminAuth = async (req, res, next) => {
     res.locals.user = admin;
     res.locals.userRole = 'admin';
     res.locals.adminRole = admin.role;
+
+    // Fetch sidebar notification counts for orders and tickets
+    // Only fetch for non-API requests to avoid slowing down API calls
+    if (!req.xhr && !req.headers.accept?.includes('application/json')) {
+      try {
+        // Count new/pending orders (orders that need attention)
+        const newOrdersCount = await Order.countDocuments({ 
+          status: { $in: ['pending', 'processing'] } 
+        });
+        
+        // Count open/in-progress tickets (tickets that need attention)
+        const openTicketsCount = await Ticket.countDocuments({ 
+          status: { $in: ['open', 'in-progress'] } 
+        });
+        
+        res.locals.sidebarCounts = {
+          newOrders: newOrdersCount,
+          openTickets: openTicketsCount
+        };
+      } catch (countError) {
+        console.error('Error fetching sidebar counts:', countError);
+        res.locals.sidebarCounts = {
+          newOrders: 0,
+          openTickets: 0
+        };
+      }
+    }
 
     next();
   } catch (error) {

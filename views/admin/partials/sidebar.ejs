@@ -38,12 +38,16 @@
       <a href="/admin/orders<%= typeof currentModule !== 'undefined' && currentModule ? '?module=' + currentModule : '' %>" class="sidebar-nav-item <%= typeof activePage !== 'undefined' && activePage === 'orders' ? 'active' : '' %>">
         <i data-lucide="shopping-cart"></i>
         <span>Orders</span>
-        <span class="sidebar-nav-badge">12</span>
+        <% if (typeof sidebarCounts !== 'undefined' && sidebarCounts.newOrders > 0) { %>
+        <span class="sidebar-nav-badge" id="sidebarOrdersBadge"><%= sidebarCounts.newOrders %></span>
+        <% } %>
       </a>
       <a href="/admin/tickets<%= typeof currentModule !== 'undefined' && currentModule ? '?module=' + currentModule : '' %>" class="sidebar-nav-item <%= typeof activePage !== 'undefined' && activePage === 'tickets' ? 'active' : '' %>">
         <i data-lucide="ticket"></i>
         <span>Tickets</span>
-        <span class="sidebar-nav-badge">5</span>
+        <% if (typeof sidebarCounts !== 'undefined' && sidebarCounts.openTickets > 0) { %>
+        <span class="sidebar-nav-badge" id="sidebarTicketsBadge"><%= sidebarCounts.openTickets %></span>
+        <% } %>
       </a>
       <a href="/admin/users<%= typeof currentModule !== 'undefined' && currentModule ? '?module=' + currentModule : '' %>" class="sidebar-nav-item <%= typeof activePage !== 'undefined' && activePage === 'users' ? 'active' : '' %>">
         <i data-lucide="users"></i>
@@ -55,16 +59,16 @@
       </a>
     </div>
 
-    <!-- Settings Section -->
+    <!-- System Section -->
     <div class="sidebar-nav-section">
       <div class="sidebar-nav-title">System</div>
       <a href="/admin/integrations<%= typeof currentModule !== 'undefined' && currentModule ? '?module=' + currentModule : '' %>" class="sidebar-nav-item <%= typeof activePage !== 'undefined' && activePage === 'integrations' ? 'active' : '' %>">
         <i data-lucide="plug"></i>
         <span>Integrations</span>
       </a>
-      <a href="/admin/settings" class="sidebar-nav-item <%= typeof activePage !== 'undefined' && activePage === 'settings' ? 'active' : '' %>">
-        <i data-lucide="settings"></i>
-        <span>Settings</span>
+      <a href="/admin/admins" class="sidebar-nav-item <%= typeof activePage !== 'undefined' && activePage === 'admins' ? 'active' : '' %>">
+        <i data-lucide="shield"></i>
+        <span>Administrators</span>
       </a>
     </div>
   </nav>
@@ -89,9 +93,9 @@
           <i data-lucide="user"></i>
           <span>My Profile</span>
         </a>
-        <a href="/admin/settings" class="sidebar-user-menu-item">
-          <i data-lucide="settings"></i>
-          <span>Account Settings</span>
+        <a href="/admin/admins" class="sidebar-user-menu-item">
+          <i data-lucide="shield"></i>
+          <span>Administrators</span>
         </a>
         <a href="/admin/activity" class="sidebar-user-menu-item">
           <i data-lucide="activity"></i>
@@ -288,6 +292,73 @@ document.addEventListener('DOMContentLoaded', function() {
   window.addEventListener('resize', function() {
     if (window.innerWidth >= 1200) {
       closeSidebar();
+    }
+  });
+
+  // ===== Sidebar Notification Counts - Real-time Updates =====
+  
+  /**
+   * Update sidebar badge counts from API
+   */
+  async function updateSidebarCounts() {
+    try {
+      const response = await fetch('/admin/api/sidebar-counts');
+      if (!response.ok) return;
+      
+      const data = await response.json();
+      if (!data.success) return;
+      
+      const { newOrders, openTickets } = data.counts;
+      
+      // Update Orders badge
+      const ordersBadge = document.getElementById('sidebarOrdersBadge');
+      const ordersNavItem = document.querySelector('a[href*="/admin/orders"]');
+      
+      if (newOrders > 0) {
+        if (ordersBadge) {
+          ordersBadge.textContent = newOrders;
+        } else if (ordersNavItem) {
+          // Create badge if it doesn't exist
+          const badge = document.createElement('span');
+          badge.className = 'sidebar-nav-badge';
+          badge.id = 'sidebarOrdersBadge';
+          badge.textContent = newOrders;
+          ordersNavItem.appendChild(badge);
+        }
+      } else if (ordersBadge) {
+        ordersBadge.remove();
+      }
+      
+      // Update Tickets badge
+      const ticketsBadge = document.getElementById('sidebarTicketsBadge');
+      const ticketsNavItem = document.querySelector('a[href*="/admin/tickets"]');
+      
+      if (openTickets > 0) {
+        if (ticketsBadge) {
+          ticketsBadge.textContent = openTickets;
+        } else if (ticketsNavItem) {
+          // Create badge if it doesn't exist
+          const badge = document.createElement('span');
+          badge.className = 'sidebar-nav-badge';
+          badge.id = 'sidebarTicketsBadge';
+          badge.textContent = openTickets;
+          ticketsNavItem.appendChild(badge);
+        }
+      } else if (ticketsBadge) {
+        ticketsBadge.remove();
+      }
+    } catch (error) {
+      console.error('Failed to update sidebar counts:', error);
+    }
+  }
+  
+  // Update counts every 30 seconds for real-time updates
+  setInterval(updateSidebarCounts, 30000);
+  
+  // Also update when page becomes visible again (user returns to tab)
+  document.addEventListener('visibilitychange', function() {
+    if (document.visibilityState === 'visible') {
+      updateSidebarCounts();
     }
   });
 });

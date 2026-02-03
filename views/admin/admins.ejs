@@ -1,0 +1,1182 @@
+<%- include('partials/header') %>
+<link rel="stylesheet" href="/css/adminCSS/admin-dashboard.css">
+<style>
+  /* Admins Page Styles */
+  .admins-page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .admins-page-header h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--admin-text-primary);
+    margin: 0;
+  }
+  .admins-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .admins-search-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .admins-search-container .search-icon {
+    position: absolute;
+    left: 1rem;
+    width: 18px;
+    height: 18px;
+    color: var(--admin-text-muted);
+    pointer-events: none;
+  }
+  .admins-search-container input {
+    width: 280px;
+    padding: 0.75rem 1rem 0.75rem 2.75rem;
+    background: var(--admin-bg-primary);
+    border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius-lg);
+    color: var(--admin-text-primary);
+    font-size: 0.9rem;
+    transition: var(--admin-transition-fast);
+  }
+  .admins-search-container input:focus {
+    outline: none;
+    border-color: var(--module-primary, #3b82f6);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+
+  /* Stats Cards */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .stat-card {
+    background: var(--admin-bg-primary);
+    border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius-xl);
+    padding: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: var(--admin-shadow-sm);
+    transition: var(--admin-transition-fast);
+  }
+  .stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--admin-shadow-md);
+  }
+  .stat-card .stat-icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--admin-radius-lg);
+    background: rgba(59, 130, 246, 0.1);
+  }
+  .stat-card .stat-icon i {
+    width: 24px;
+    height: 24px;
+    color: #3b82f6;
+  }
+  .stat-card.purple .stat-icon {
+    background: rgba(139, 92, 246, 0.1);
+  }
+  .stat-card.purple .stat-icon i {
+    color: #8b5cf6;
+  }
+  .stat-card.green .stat-icon {
+    background: rgba(16, 185, 129, 0.1);
+  }
+  .stat-card.green .stat-icon i {
+    color: #10b981;
+  }
+  .stat-card.orange .stat-icon {
+    background: rgba(249, 115, 22, 0.1);
+  }
+  .stat-card.orange .stat-icon i {
+    color: #f97316;
+  }
+  .stat-content .stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--admin-text-primary);
+  }
+  .stat-content .stat-label {
+    font-size: 0.85rem;
+    color: var(--admin-text-muted);
+    margin-top: 0.25rem;
+  }
+
+  /* Admins Table Card */
+  .admins-table-card {
+    background: var(--admin-bg-primary);
+    border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius-xl);
+    overflow: hidden;
+    box-shadow: var(--admin-shadow-sm);
+  }
+  .admins-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .admins-table thead tr {
+    background: var(--admin-bg-secondary);
+    border-bottom: 1px solid var(--admin-border);
+  }
+  .admins-table th {
+    padding: 1rem 1.25rem;
+    text-align: left;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--admin-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .admins-table td {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--admin-border);
+    vertical-align: middle;
+  }
+  .admins-table tbody tr {
+    transition: var(--admin-transition-fast);
+    cursor: pointer;
+  }
+  .admins-table tbody tr:hover {
+    background: var(--admin-bg-tertiary);
+  }
+  .admins-table tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  /* Admin Cell */
+  .admin-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .admin-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 1rem;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+    flex-shrink: 0;
+  }
+  .admin-avatar.super {
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+  }
+  .admin-avatar.moderator {
+    background: linear-gradient(135deg, #10b981, #059669);
+  }
+  .admin-info h4 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--admin-text-primary);
+    margin: 0;
+  }
+  .admin-info p {
+    font-size: 0.8rem;
+    color: var(--admin-text-muted);
+    margin: 0.2rem 0 0;
+  }
+
+  /* Role Badge */
+  .role-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: capitalize;
+  }
+  .role-badge i {
+    width: 14px;
+    height: 14px;
+  }
+  .role-badge.super_admin {
+    background: rgba(139, 92, 246, 0.15);
+    color: #8b5cf6;
+  }
+  .role-badge.admin {
+    background: rgba(59, 130, 246, 0.15);
+    color: #3b82f6;
+  }
+  .role-badge.moderator {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+  }
+
+  /* Status Badge */
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+  .status-badge i {
+    width: 14px;
+    height: 14px;
+  }
+  .status-badge.active {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+  }
+  .status-badge.inactive {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+  }
+
+  /* Action Buttons */
+  .admin-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+  .admin-action-btn {
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius-md);
+    background: var(--admin-bg-primary);
+    color: var(--admin-text-secondary);
+    cursor: pointer;
+    transition: var(--admin-transition-fast);
+  }
+  .admin-action-btn:hover {
+    background: var(--admin-bg-tertiary);
+    border-color: var(--module-primary, #3b82f6);
+    color: var(--module-primary, #3b82f6);
+  }
+  .admin-action-btn.delete:hover {
+    border-color: #ef4444;
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+  }
+  .admin-action-btn i {
+    width: 16px;
+    height: 16px;
+  }
+
+  /* Empty State */
+  .admins-empty {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: var(--admin-bg-primary);
+    border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius-xl);
+  }
+  .admins-empty-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--admin-bg-tertiary);
+    border-radius: 50%;
+  }
+  .admins-empty-icon i {
+    width: 40px;
+    height: 40px;
+    color: var(--admin-text-muted);
+  }
+  .admins-empty h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--admin-text-primary);
+    margin: 0 0 0.5rem;
+  }
+  .admins-empty p {
+    color: var(--admin-text-muted);
+    margin: 0 0 1.5rem;
+  }
+
+  /* Modal Styles */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s;
+  }
+  .modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+  }
+  .modal-container {
+    background: var(--admin-bg-primary);
+    border-radius: var(--admin-radius-xl);
+    width: 100%;
+    max-width: 520px;
+    max-height: 90vh;
+    overflow-y: auto;
+    transform: scale(0.95) translateY(20px);
+    transition: all 0.3s;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  }
+  .modal-overlay.active .modal-container {
+    transform: scale(1) translateY(0);
+  }
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--admin-border);
+  }
+  .modal-header h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--admin-text-primary);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .modal-header h3 i {
+    width: 24px;
+    height: 24px;
+    color: var(--module-primary, #3b82f6);
+  }
+  .modal-close {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: var(--admin-bg-tertiary);
+    border-radius: var(--admin-radius-md);
+    color: var(--admin-text-secondary);
+    cursor: pointer;
+    transition: var(--admin-transition-fast);
+  }
+  .modal-close:hover {
+    background: var(--admin-bg-secondary);
+    color: var(--admin-text-primary);
+  }
+  .modal-close i {
+    width: 20px;
+    height: 20px;
+  }
+  .modal-body {
+    padding: 1.5rem;
+  }
+  .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--admin-border);
+    background: var(--admin-bg-secondary);
+  }
+
+  /* Form Styles */
+  .form-group {
+    margin-bottom: 1.25rem;
+  }
+  .form-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--admin-text-secondary);
+    margin-bottom: 0.5rem;
+  }
+  .form-label .required {
+    color: #ef4444;
+  }
+  .form-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: var(--admin-bg-tertiary);
+    border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius-md);
+    color: var(--admin-text-primary);
+    font-size: 0.9rem;
+    transition: var(--admin-transition-fast);
+  }
+  .form-input:focus {
+    outline: none;
+    border-color: var(--module-primary, #3b82f6);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+  .form-select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: var(--admin-bg-tertiary);
+    border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius-md);
+    color: var(--admin-text-primary);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: var(--admin-transition-fast);
+  }
+  .form-select:focus {
+    outline: none;
+    border-color: var(--module-primary, #3b82f6);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  .form-hint {
+    font-size: 0.8rem;
+    color: var(--admin-text-muted);
+    margin-top: 0.35rem;
+  }
+  .form-error {
+    font-size: 0.8rem;
+    color: #ef4444;
+    margin-top: 0.35rem;
+    display: none;
+  }
+
+  /* Permissions Grid */
+  .permissions-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+  }
+  .permission-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    background: var(--admin-bg-secondary);
+    border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius-md);
+    cursor: pointer;
+    transition: var(--admin-transition-fast);
+  }
+  .permission-item:hover {
+    border-color: var(--module-primary, #3b82f6);
+  }
+  .permission-item.selected {
+    border-color: var(--module-primary, #3b82f6);
+    background: rgba(59, 130, 246, 0.1);
+  }
+  .permission-item input {
+    display: none;
+  }
+  .permission-checkbox {
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--admin-border);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: var(--admin-transition-fast);
+  }
+  .permission-item.selected .permission-checkbox {
+    background: var(--module-primary, #3b82f6);
+    border-color: var(--module-primary, #3b82f6);
+  }
+  .permission-checkbox i {
+    width: 12px;
+    height: 12px;
+    color: white;
+    opacity: 0;
+    transition: var(--admin-transition-fast);
+  }
+  .permission-item.selected .permission-checkbox i {
+    opacity: 1;
+  }
+  .permission-label {
+    font-size: 0.85rem;
+    color: var(--admin-text-primary);
+    font-weight: 500;
+  }
+
+  /* Button Styles */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: var(--admin-radius-md);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--admin-transition-fast);
+  }
+  .btn i {
+    width: 18px;
+    height: 18px;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+  }
+  .btn-primary:hover {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    transform: translateY(-1px);
+  }
+  .btn-secondary {
+    background: var(--admin-bg-tertiary);
+    color: var(--admin-text-secondary);
+    border: 1px solid var(--admin-border);
+  }
+  .btn-secondary:hover {
+    background: var(--admin-bg-secondary);
+    color: var(--admin-text-primary);
+  }
+  .btn-danger {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+  }
+  .btn-danger:hover {
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+  }
+  .btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+  }
+
+  /* Toast Notification */
+  .toast {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    padding: 1rem 1.5rem;
+    background: var(--admin-bg-primary);
+    border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius-lg);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 1001;
+  }
+  .toast.show {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  .toast.success {
+    border-left: 4px solid #10b981;
+  }
+  .toast.error {
+    border-left: 4px solid #ef4444;
+  }
+  .toast-icon {
+    width: 24px;
+    height: 24px;
+  }
+  .toast.success .toast-icon {
+    color: #10b981;
+  }
+  .toast.error .toast-icon {
+    color: #ef4444;
+  }
+  .toast-message {
+    font-size: 0.9rem;
+    color: var(--admin-text-primary);
+    font-weight: 500;
+  }
+
+  /* Last Login */
+  .last-login {
+    font-size: 0.85rem;
+    color: var(--admin-text-muted);
+  }
+  .last-login.never {
+    font-style: italic;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .admins-page-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .admins-header-actions {
+      width: 100%;
+    }
+    .admins-search-container input {
+      width: 100%;
+    }
+    .stats-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .form-row {
+      grid-template-columns: 1fr;
+    }
+    .permissions-grid {
+      grid-template-columns: 1fr;
+    }
+    .admins-table-card {
+      overflow-x: auto;
+    }
+    .admins-table {
+      min-width: 700px;
+    }
+  }
+</style>
+</head>
+<body class="<%= typeof currentModule !== 'undefined' && currentModule ? 'module-' + currentModule : '' %>">
+  <div class="admin-wrapper">
+    <%- include('partials/sidebar', { activePage: 'admins', currentModule: typeof currentModule !== 'undefined' ? currentModule : null }) %>
+    
+    <main class="admin-main">
+      <%- include('partials/topbar', { pageTitle: 'Administrators', currentModule: typeof currentModule !== 'undefined' ? currentModule : null }) %>
+      
+      <div class="admin-content">
+        <!-- Page Header -->
+        <div class="admins-page-header">
+          <h2>Administrators Management</h2>
+          <div class="admins-header-actions">
+            <div class="admins-search-container">
+              <i data-lucide="search" class="search-icon"></i>
+              <input type="text" id="adminsSearch" placeholder="Search administrators..." autocomplete="off">
+            </div>
+            <button class="btn btn-primary" onclick="openCreateModal()">
+              <i data-lucide="user-plus"></i>
+              Add Admin
+            </button>
+          </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i data-lucide="shield"></i>
+            </div>
+            <div class="stat-content">
+              <div class="stat-value" id="totalAdmins"><%= admins.length %></div>
+              <div class="stat-label">Total Admins</div>
+            </div>
+          </div>
+          <div class="stat-card purple">
+            <div class="stat-icon">
+              <i data-lucide="crown"></i>
+            </div>
+            <div class="stat-content">
+              <div class="stat-value" id="superAdmins"><%= admins.filter(a => a.role === 'super_admin').length %></div>
+              <div class="stat-label">Super Admins</div>
+            </div>
+          </div>
+          <div class="stat-card green">
+            <div class="stat-icon">
+              <i data-lucide="user-check"></i>
+            </div>
+            <div class="stat-content">
+              <div class="stat-value" id="activeAdmins"><%= admins.filter(a => a.isActive).length %></div>
+              <div class="stat-label">Active Admins</div>
+            </div>
+          </div>
+          <div class="stat-card orange">
+            <div class="stat-icon">
+              <i data-lucide="user-x"></i>
+            </div>
+            <div class="stat-content">
+              <div class="stat-value" id="inactiveAdmins"><%= admins.filter(a => !a.isActive).length %></div>
+              <div class="stat-label">Inactive Admins</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Admins Table -->
+        <% if (admins.length === 0) { %>
+        <div class="admins-empty">
+          <div class="admins-empty-icon">
+            <i data-lucide="shield"></i>
+          </div>
+          <h3>No Administrators Found</h3>
+          <p>Create your first administrator to get started.</p>
+          <button class="btn btn-primary" onclick="openCreateModal()">
+            <i data-lucide="user-plus"></i>
+            Create Administrator
+          </button>
+        </div>
+        <% } else { %>
+        <div class="admins-table-card">
+          <table class="admins-table">
+            <thead>
+              <tr>
+                <th>Administrator</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Last Login</th>
+                <th>Created</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="adminsTableBody">
+              <% admins.forEach(function(admin) { %>
+              <tr data-admin-id="<%= admin._id %>">
+                <td>
+                  <div class="admin-cell">
+                    <div class="admin-avatar <%= admin.role === 'super_admin' ? 'super' : admin.role === 'moderator' ? 'moderator' : '' %>">
+                      <%= admin.firstName.charAt(0).toUpperCase() %><%= admin.lastName.charAt(0).toUpperCase() %>
+                    </div>
+                    <div class="admin-info">
+                      <h4><%= admin.firstName %> <%= admin.lastName %></h4>
+                      <p><%= admin.email %></p>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <span class="role-badge <%= admin.role %>">
+                    <% if (admin.role === 'super_admin') { %>
+                      <i data-lucide="crown"></i>
+                    <% } else if (admin.role === 'admin') { %>
+                      <i data-lucide="shield"></i>
+                    <% } else { %>
+                      <i data-lucide="user"></i>
+                    <% } %>
+                    <%= admin.role.replace('_', ' ') %>
+                  </span>
+                </td>
+                <td>
+                  <span class="status-badge <%= admin.isActive ? 'active' : 'inactive' %>">
+                    <% if (admin.isActive) { %>
+                      <i data-lucide="check-circle"></i>
+                      Active
+                    <% } else { %>
+                      <i data-lucide="x-circle"></i>
+                      Inactive
+                    <% } %>
+                  </span>
+                </td>
+                <td>
+                  <% if (admin.lastLogin) { %>
+                    <span class="last-login"><%= new Date(admin.lastLogin).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></span>
+                  <% } else { %>
+                    <span class="last-login never">Never</span>
+                  <% } %>
+                </td>
+                <td><%= new Date(admin.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></td>
+                <td>
+                  <div class="admin-actions">
+                    <button class="admin-action-btn" title="Edit Admin" onclick="openEditModal('<%= admin._id %>')">
+                      <i data-lucide="edit-2"></i>
+                    </button>
+                    <button class="admin-action-btn" title="<%= admin.isActive ? 'Deactivate' : 'Activate' %>" onclick="toggleAdminStatus('<%= admin._id %>', <%= admin.isActive %>)">
+                      <% if (admin.isActive) { %>
+                        <i data-lucide="user-x"></i>
+                      <% } else { %>
+                        <i data-lucide="user-check"></i>
+                      <% } %>
+                    </button>
+                    <% if (admin.role !== 'super_admin' || admins.filter(a => a.role === 'super_admin').length > 1) { %>
+                    <button class="admin-action-btn delete" title="Delete Admin" onclick="confirmDelete('<%= admin._id %>', '<%= admin.firstName %> <%= admin.lastName %>')">
+                      <i data-lucide="trash-2"></i>
+                    </button>
+                    <% } %>
+                  </div>
+                </td>
+              </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+        <% } %>
+      </div>
+    </main>
+  </div>
+
+  <!-- Create/Edit Admin Modal -->
+  <div class="modal-overlay" id="adminModal">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3>
+          <i data-lucide="user-plus"></i>
+          <span id="modalTitle">Create Administrator</span>
+        </h3>
+        <button class="modal-close" onclick="closeModal()">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <form id="adminForm" onsubmit="handleSubmit(event)">
+        <div class="modal-body">
+          <input type="hidden" id="adminId" name="adminId">
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">First Name <span class="required">*</span></label>
+              <input type="text" class="form-input" id="firstName" name="firstName" required placeholder="Enter first name">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Last Name <span class="required">*</span></label>
+              <input type="text" class="form-input" id="lastName" name="lastName" required placeholder="Enter last name">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Email Address <span class="required">*</span></label>
+            <input type="email" class="form-input" id="email" name="email" required placeholder="Enter email address">
+            <div class="form-error" id="emailError">This email is already in use</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Phone Number</label>
+            <input type="tel" class="form-input" id="phone" name="phone" placeholder="Enter phone number">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Password <span class="required" id="passwordRequired">*</span></label>
+              <input type="password" class="form-input" id="password" name="password" placeholder="Enter password" minlength="8">
+              <div class="form-hint">Minimum 8 characters</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Confirm Password <span class="required" id="confirmRequired">*</span></label>
+              <input type="password" class="form-input" id="confirmPassword" name="confirmPassword" placeholder="Confirm password">
+              <div class="form-error" id="passwordError">Passwords do not match</div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Role <span class="required">*</span></label>
+            <select class="form-select" id="role" name="role" required>
+              <option value="admin">Admin</option>
+              <option value="moderator">Moderator</option>
+              <option value="super_admin">Super Admin</option>
+            </select>
+            <div class="form-hint">Super Admins have full access to all features</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Permissions</label>
+            <div class="permissions-grid">
+              <label class="permission-item" onclick="togglePermission(this)">
+                <input type="checkbox" name="permissions" value="read" checked>
+                <div class="permission-checkbox"><i data-lucide="check"></i></div>
+                <span class="permission-label">Read</span>
+              </label>
+              <label class="permission-item selected" onclick="togglePermission(this)">
+                <input type="checkbox" name="permissions" value="write" checked>
+                <div class="permission-checkbox"><i data-lucide="check"></i></div>
+                <span class="permission-label">Write</span>
+              </label>
+              <label class="permission-item" onclick="togglePermission(this)">
+                <input type="checkbox" name="permissions" value="delete">
+                <div class="permission-checkbox"><i data-lucide="check"></i></div>
+                <span class="permission-label">Delete</span>
+              </label>
+              <label class="permission-item" onclick="togglePermission(this)">
+                <input type="checkbox" name="permissions" value="manage_users">
+                <div class="permission-checkbox"><i data-lucide="check"></i></div>
+                <span class="permission-label">Manage Users</span>
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="submitBtn">
+            <i data-lucide="check"></i>
+            <span id="submitBtnText">Create Admin</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal-overlay" id="deleteModal">
+    <div class="modal-container" style="max-width: 420px;">
+      <div class="modal-header">
+        <h3>
+          <i data-lucide="alert-triangle" style="color: #ef4444;"></i>
+          Confirm Deletion
+        </h3>
+        <button class="modal-close" onclick="closeDeleteModal()">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p style="color: var(--admin-text-secondary); margin: 0;">Are you sure you want to delete <strong id="deleteAdminName"></strong>? This action cannot be undone.</p>
+        <input type="hidden" id="deleteAdminId">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
+        <button type="button" class="btn btn-danger" onclick="deleteAdmin()">
+          <i data-lucide="trash-2"></i>
+          Delete Admin
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast">
+    <i data-lucide="check-circle" class="toast-icon"></i>
+    <span class="toast-message" id="toastMessage">Success!</span>
+  </div>
+
+  <%- include('partials/footer') %>
+
+  <script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Store admins data for client-side operations
+    const adminsData = <%- JSON.stringify(admins) %>;
+    let isEditMode = false;
+
+    // Search functionality
+    document.getElementById('adminsSearch').addEventListener('input', function(e) {
+      const query = e.target.value.toLowerCase();
+      const rows = document.querySelectorAll('#adminsTableBody tr');
+      
+      rows.forEach(row => {
+        const name = row.querySelector('.admin-info h4')?.textContent.toLowerCase() || '';
+        const email = row.querySelector('.admin-info p')?.textContent.toLowerCase() || '';
+        const visible = name.includes(query) || email.includes(query);
+        row.style.display = visible ? '' : 'none';
+      });
+    });
+
+    // Modal functions
+    function openCreateModal() {
+      isEditMode = false;
+      document.getElementById('modalTitle').textContent = 'Create Administrator';
+      document.getElementById('submitBtnText').textContent = 'Create Admin';
+      document.getElementById('adminForm').reset();
+      document.getElementById('adminId').value = '';
+      document.getElementById('password').required = true;
+      document.getElementById('confirmPassword').required = true;
+      document.getElementById('passwordRequired').style.display = '';
+      document.getElementById('confirmRequired').style.display = '';
+      
+      // Reset permissions
+      document.querySelectorAll('.permission-item').forEach(item => {
+        const input = item.querySelector('input');
+        if (input.value === 'read' || input.value === 'write') {
+          input.checked = true;
+          item.classList.add('selected');
+        } else {
+          input.checked = false;
+          item.classList.remove('selected');
+        }
+      });
+      
+      document.getElementById('adminModal').classList.add('active');
+      lucide.createIcons();
+    }
+
+    function openEditModal(adminId) {
+      isEditMode = true;
+      const admin = adminsData.find(a => a._id === adminId);
+      if (!admin) return;
+
+      document.getElementById('modalTitle').textContent = 'Edit Administrator';
+      document.getElementById('submitBtnText').textContent = 'Update Admin';
+      document.getElementById('adminId').value = adminId;
+      document.getElementById('firstName').value = admin.firstName;
+      document.getElementById('lastName').value = admin.lastName;
+      document.getElementById('email').value = admin.email;
+      document.getElementById('phone').value = admin.phone || '';
+      document.getElementById('role').value = admin.role;
+      document.getElementById('password').value = '';
+      document.getElementById('confirmPassword').value = '';
+      document.getElementById('password').required = false;
+      document.getElementById('confirmPassword').required = false;
+      document.getElementById('passwordRequired').style.display = 'none';
+      document.getElementById('confirmRequired').style.display = 'none';
+
+      // Set permissions
+      document.querySelectorAll('.permission-item').forEach(item => {
+        const input = item.querySelector('input');
+        if (admin.permissions && admin.permissions.includes(input.value)) {
+          input.checked = true;
+          item.classList.add('selected');
+        } else {
+          input.checked = false;
+          item.classList.remove('selected');
+        }
+      });
+
+      document.getElementById('adminModal').classList.add('active');
+      lucide.createIcons();
+    }
+
+    function closeModal() {
+      document.getElementById('adminModal').classList.remove('active');
+      document.getElementById('emailError').style.display = 'none';
+      document.getElementById('passwordError').style.display = 'none';
+    }
+
+    function togglePermission(element) {
+      const input = element.querySelector('input');
+      input.checked = !input.checked;
+      element.classList.toggle('selected', input.checked);
+    }
+
+    // Form submission
+    async function handleSubmit(event) {
+      event.preventDefault();
+      
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      
+      // Validate passwords match
+      if (password && password !== confirmPassword) {
+        document.getElementById('passwordError').style.display = 'block';
+        return;
+      }
+      document.getElementById('passwordError').style.display = 'none';
+
+      // Collect permissions
+      const permissions = [];
+      document.querySelectorAll('.permission-item input:checked').forEach(input => {
+        permissions.push(input.value);
+      });
+
+      const formData = {
+        firstName: document.getElementById('firstName').value,
+        lastName: document.getElementById('lastName').value,
+        email: document.getElementById('email').value,
+        phone: document.getElementById('phone').value,
+        role: document.getElementById('role').value,
+        permissions: permissions
+      };
+
+      if (password) {
+        formData.password = password;
+      }
+
+      const adminId = document.getElementById('adminId').value;
+      const url = adminId ? `/admin/api/admins/${adminId}` : '/admin/api/admins';
+      const method = adminId ? 'PUT' : 'POST';
+
+      try {
+        document.getElementById('submitBtn').disabled = true;
+        
+        const response = await fetch(url, {
+          method: method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData)
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          showToast(adminId ? 'Administrator updated successfully!' : 'Administrator created successfully!', 'success');
+          closeModal();
+          setTimeout(() => location.reload(), 1000);
+        } else {
+          if (data.message && data.message.includes('email')) {
+            document.getElementById('emailError').style.display = 'block';
+          } else {
+            showToast(data.message || 'An error occurred', 'error');
+          }
+        }
+      } catch (error) {
+        showToast('Failed to save administrator', 'error');
+      } finally {
+        document.getElementById('submitBtn').disabled = false;
+      }
+    }
+
+    // Toggle admin status
+    async function toggleAdminStatus(adminId, currentStatus) {
+      try {
+        const response = await fetch(`/admin/api/admins/${adminId}/status`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ isActive: !currentStatus })
+        });
+
+        if (response.ok) {
+          showToast(`Administrator ${currentStatus ? 'deactivated' : 'activated'} successfully!`, 'success');
+          setTimeout(() => location.reload(), 1000);
+        } else {
+          const data = await response.json();
+          showToast(data.message || 'Failed to update status', 'error');
+        }
+      } catch (error) {
+        showToast('Failed to update administrator status', 'error');
+      }
+    }
+
+    // Delete confirmation
+    function confirmDelete(adminId, adminName) {
+      document.getElementById('deleteAdminId').value = adminId;
+      document.getElementById('deleteAdminName').textContent = adminName;
+      document.getElementById('deleteModal').classList.add('active');
+      lucide.createIcons();
+    }
+
+    function closeDeleteModal() {
+      document.getElementById('deleteModal').classList.remove('active');
+    }
+
+    async function deleteAdmin() {
+      const adminId = document.getElementById('deleteAdminId').value;
+      
+      try {
+        const response = await fetch(`/admin/api/admins/${adminId}`, {
+          method: 'DELETE'
+        });
+
+        if (response.ok) {
+          showToast('Administrator deleted successfully!', 'success');
+          closeDeleteModal();
+          setTimeout(() => location.reload(), 1000);
+        } else {
+          const data = await response.json();
+          showToast(data.message || 'Failed to delete administrator', 'error');
+        }
+      } catch (error) {
+        showToast('Failed to delete administrator', 'error');
+      }
+    }
+
+    // Toast notification
+    function showToast(message, type = 'success') {
+      const toast = document.getElementById('toast');
+      const toastMessage = document.getElementById('toastMessage');
+      const toastIcon = toast.querySelector('.toast-icon');
+      
+      toastMessage.textContent = message;
+      toast.className = `toast ${type}`;
+      toastIcon.setAttribute('data-lucide', type === 'success' ? 'check-circle' : 'alert-circle');
+      lucide.createIcons();
+      
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+  </script>
+</body>
+</html>

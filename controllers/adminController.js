@@ -6,6 +6,7 @@ const Part = require('../models/Part');
 const Buyer = require('../models/Buyer');
 const Order = require('../models/Order');
 const Ticket = require('../models/Ticket');
+const Admin = require('../models/Admin');
 const ftpService = require('../services/ftpService');
 const syncService = require('../services/syncService');
 const schedulerService = require('../services/schedulerService');
@@ -43,101 +44,309 @@ const filterByModule = (data, module, industryField = 'industry') => {
 };
 
 /**
- * Get Admin Dashboard page
+ * Simple in-memory cache for dashboard data
+ */
+const dashboardCache = {
+  data: null,
+  timestamp: 0,
+  TTL: 30000 // 30 seconds cache
+};
+
+/**
+ * Get Admin Dashboard page - ULTRA OPTIMIZED with caching
  */
 const getAdminDashboard = async (req, res) => {
   try {
     const { currentModule, moduleConfig } = getModuleData(req);
+    const now = Date.now();
     
-    // Get mock data from app locals
-    const partsDatabase = req.app.locals.partsDatabase || {};
-    const ticketsDatabase = req.app.locals.ticketsDatabase || [];
-
-    // Calculate statistics
-    const allParts = Object.values(partsDatabase).flat();
-    const totalProducts = allParts.length;
-    const totalTickets = ticketsDatabase.length;
-    const openTickets = ticketsDatabase.filter(t => t.status === 'open').length;
+    // Use cached data if fresh (within 30 seconds)
+    if (dashboardCache.data && (now - dashboardCache.timestamp) < dashboardCache.TTL) {
+      return res.render('admin/dashboard', {
+        ...dashboardCache.data,
+        currentModule,
+        moduleConfig,
+        title: currentModule ? `${moduleConfig.name} Dashboard | PARTSFORM Admin` : 'Admin Dashboard | PARTSFORM',
+      });
+    }
     
-    // Mock orders data - automotive only
-    const allOrders = [
-      { id: 'ORD-2025-1247', customer: 'AutoMax Germany', amount: 45200, status: 'processing', industry: 'automotive', date: '2025-12-26' },
-      { id: 'ORD-2025-1246', customer: 'Premium Auto Parts', amount: 12800, status: 'shipped', industry: 'automotive', date: '2025-12-26' },
-      { id: 'ORD-2025-1245', customer: 'Euro Auto Systems', amount: 89500, status: 'delivered', industry: 'automotive', date: '2025-12-25' },
-      { id: 'ORD-2025-1244', customer: 'PartsWorld Inc', amount: 156000, status: 'processing', industry: 'automotive', date: '2025-12-25' },
-      { id: 'ORD-2025-1243', customer: 'AutoParts Express', amount: 8750, status: 'pending', industry: 'automotive', date: '2025-12-24' },
-      { id: 'ORD-2025-1242', customer: 'Car Components Ltd', amount: 67300, status: 'shipped', industry: 'automotive', date: '2025-12-24' },
-      { id: 'ORD-2025-1241', customer: 'Drive Parts Co', amount: 234000, status: 'pending', industry: 'automotive', date: '2025-12-23' },
-      { id: 'ORD-2025-1240', customer: 'Motor Supply Inc', amount: 19500, status: 'delivered', industry: 'automotive', date: '2025-12-23' },
-    ];
-
-    // Filter orders by module if selected
-    const recentOrders = filterByModule(allOrders, currentModule);
-
-    // Calculate module-specific or overall stats
-    const calculateModuleStats = (industry) => {
-      const orders = industry ? allOrders.filter(o => o.industry === industry) : allOrders;
-      return {
-        orders: orders.length,
-        revenue: orders.reduce((sum, o) => sum + o.amount, 0),
-        growth: 24
-      };
-    };
-
-    const moduleStats = currentModule ? calculateModuleStats(currentModule) : null;
+    // Get current date info
+    const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+    const startOfYear = new Date(new Date().getFullYear(), 0, 1);
+    const startOfLastMonth = new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1);
+    const endOfLastMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 0);
     
-    // Mock statistics for dashboard
-    const stats = {
-      totalOrders: currentModule ? moduleStats.orders : 1247,
-      totalRevenue: currentModule ? moduleStats.revenue : 2847562,
-      activeUsers: currentModule ? Math.floor(892 / 3) : 892,
-      pendingTickets: openTickets,
-      totalProducts: totalProducts,
-      growth: currentModule ? moduleStats.growth : 22,
+    // ===== ULTRA-FAST QUERIES =====
+    const [
+      // Use estimatedDocumentCount for speed (doesn't scan collection)
+      totalOrdersCount,
+      totalBuyers,
+      totalParts,
       
-      // Automotive-specific stats
-      automotive: { orders: 1247, revenue: 2847562, growth: 24, topParts: ['Brake Systems', 'Engine Components', 'Suspension'] }
-    };
-
-    // Mock chart data - automotive focused
-    const getChartData = () => {
+      // Minimal data fetch
+      recentOrders,
+      recentTickets,
+      
+      // Combined aggregation for all order stats
+      orderStats
+    ] = await Promise.all([
+      Order.estimatedDocumentCount(),
+      Buyer.estimatedDocumentCount(),
+      Part.estimatedDocumentCount(),
+      
+      // Only fetch 10 orders with minimal fields
+      Order.find({})
+        .select('orderNumber pricing.total status createdAt updatedAt buyer')
+        .populate('buyer', 'firstName lastName companyName')
+        .sort({ createdAt: -1 })
+        .limit(10)
+        .lean(),
+      
+      // Only fetch 5 tickets
+      Ticket.find({})
+        .select('ticketNumber subject category status priority createdAt updatedAt buyerName')
+        .sort({ createdAt: -1 })
+        .limit(5)
+        .lean(),
+      
+      // Single aggregation for ALL order statistics
+      Order.aggregate([
+        {
+          $facet: {
+            // Status counts
+            statusCounts: [
+              { $group: { _id: '$status', count: { $sum: 1 } } }
+            ],
+            // Revenue stats
+            revenue: [
+              { $match: { status: { $ne: 'cancelled' } } },
+              {
+                $group: {
+                  _id: null,
+                  total: { $sum: '$pricing.total' },
+                  thisMonth: {
+                    $sum: { $cond: [{ $gte: ['$createdAt', startOfMonth] }, '$pricing.total', 0] }
+                  },
+                  lastMonth: {
+                    $sum: {
+                      $cond: [
+                        { $and: [{ $gte: ['$createdAt', startOfLastMonth] }, { $lte: ['$createdAt', endOfLastMonth] }] },
+                        '$pricing.total', 0
+                      ]
+                    }
+                  }
+                }
+              }
+            ],
+            // Monthly data for chart (simplified)
+            monthly: [
+              { $match: { createdAt: { $gte: startOfYear }, status: { $ne: 'cancelled' } } },
+              { $group: { _id: { $month: '$createdAt' }, revenue: { $sum: '$pricing.total' }, count: { $sum: 1 } } },
+              { $sort: { _id: 1 } }
+            ],
+            // Top buyers
+            topBuyers: [
+              { $match: { status: { $ne: 'cancelled' } } },
+              { $group: { _id: '$buyer', totalSpent: { $sum: '$pricing.total' }, orderCount: { $sum: 1 } } },
+              { $sort: { totalSpent: -1 } },
+              { $limit: 5 },
+              { $lookup: { from: 'buyers', localField: '_id', foreignField: '_id', as: 'buyerInfo' } },
+              { $unwind: { path: '$buyerInfo', preserveNullAndEmptyArrays: true } }
+            ],
+            // Orders by country (for Global Reach)
+            ordersByCountry: [
+              { $match: { status: { $ne: 'cancelled' } } },
+              { $lookup: { from: 'buyers', localField: 'buyer', foreignField: '_id', as: 'buyerInfo' } },
+              { $unwind: { path: '$buyerInfo', preserveNullAndEmptyArrays: true } },
+              { $group: { _id: '$buyerInfo.country', orderCount: { $sum: 1 }, revenue: { $sum: '$pricing.total' } } },
+              { $match: { _id: { $ne: null } } },
+              { $sort: { orderCount: -1 } },
+              { $limit: 8 }
+            ]
+          }
+        }
+      ])
+    ]);
+    
+    // Process order stats from facet
+    const stats_data = orderStats[0] || {};
+    const statusCounts = {};
+    (stats_data.statusCounts || []).forEach(s => { statusCounts[s._id] = s.count; });
+    
+    const revData = stats_data.revenue?.[0] || { total: 0, thisMonth: 0, lastMonth: 0 };
+    const totalRevenue = revData.total || 0;
+    const thisMonthRevenue = revData.thisMonth || 0;
+    const prevMonthRevenue = revData.lastMonth || 1;
+    const growthPercent = prevMonthRevenue > 0 ? Math.round(((thisMonthRevenue - prevMonthRevenue) / prevMonthRevenue) * 100) : 0;
+    
+    // Chart data
+    const monthLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const revenueData = new Array(12).fill(0);
+    const orderCountData = new Array(12).fill(0);
+    (stats_data.monthly || []).forEach(item => {
+      revenueData[item._id - 1] = item.revenue || 0;
+      orderCountData[item._id - 1] = item.count || 0;
+    });
+    
+    // Format orders
+    const formattedOrders = recentOrders.map(order => ({
+      id: order.orderNumber,
+      _id: order._id,
+      customer: order.buyer?.companyName || `${order.buyer?.firstName || ''} ${order.buyer?.lastName || ''}`.trim() || 'Unknown',
+      amount: order.pricing?.total || 0,
+      status: order.status || 'pending',
+      date: formatOrderDate(order.createdAt),
+      createdAt: order.createdAt
+    }));
+    
+    // Format tickets
+    const formattedTickets = recentTickets.map(ticket => ({
+      id: ticket.ticketNumber,
+      _id: ticket._id,
+      subject: ticket.subject,
+      category: ticket.category,
+      status: ticket.status,
+      priority: ticket.priority,
+      buyerName: ticket.buyerName || 'Unknown',
+      createdAt: ticket.createdAt
+    }));
+    
+    // Format top buyers with real buyer details
+    const topBuyersData = (stats_data.topBuyers || []).map((buyer, index) => {
+      const info = buyer.buyerInfo || {};
       return {
-        revenueLabels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-        revenueData: [180000, 220000, 195000, 280000, 310000, 275000, 320000, 350000, 295000, 380000, 420000, 285000],
-        orderLabels: ['Engine Parts', 'Brakes', 'Suspension', 'Electrical', 'Body Parts'],
-        orderData: [320, 280, 195, 165, 135]
+        rank: index + 1,
+        _id: buyer._id,
+        firstName: info.firstName || '',
+        lastName: info.lastName || '',
+        fullName: info.firstName && info.lastName ? `${info.firstName} ${info.lastName}` : 'Unknown',
+        companyName: info.companyName || 'Unknown Company',
+        avatar: info.avatar || null,
+        country: info.country || 'N/A',
+        email: info.email || '',
+        totalSpent: buyer.totalSpent || 0,
+        orderCount: buyer.orderCount || 0,
+        fulfillmentRate: 95 + (index % 5)
       };
+    });
+    
+    // Format country data for Global Reach
+    const countryNames = {
+      'US': 'United States', 'GB': 'United Kingdom', 'DE': 'Germany', 'FR': 'France',
+      'CA': 'Canada', 'AU': 'Australia', 'JP': 'Japan', 'CN': 'China', 'IN': 'India',
+      'BR': 'Brazil', 'MX': 'Mexico', 'RU': 'Russia', 'AE': 'United Arab Emirates',
+      'SA': 'Saudi Arabia', 'KR': 'South Korea', 'IT': 'Italy', 'ES': 'Spain',
+      'NL': 'Netherlands', 'SE': 'Sweden', 'CH': 'Switzerland', 'PL': 'Poland',
+      'TR': 'Turkey', 'EG': 'Egypt', 'ZA': 'South Africa', 'NG': 'Nigeria',
+      'UA': 'Ukraine', 'PK': 'Pakistan', 'ID': 'Indonesia', 'TH': 'Thailand',
+      'MY': 'Malaysia', 'SG': 'Singapore', 'PH': 'Philippines', 'VN': 'Vietnam'
     };
-
-    // Mock tickets data - automotive only
-    const allTickets = [
-      { id: 'TKT-001', subject: 'Brake pad compatibility issue', category: 'Product', status: 'open', priority: 'high', orderNumber: 'ORD-2025-1246', industry: 'automotive', createdAt: '2025-12-26', messages: [{}, {}] },
-      { id: 'TKT-002', subject: 'Urgent engine part needed', category: 'Shipping', status: 'open', priority: 'urgent', orderNumber: 'ORD-2025-1247', industry: 'automotive', createdAt: '2025-12-26', messages: [{}, {}, {}] },
-      { id: 'TKT-003', subject: 'Transmission part delivery delay', category: 'Shipping', status: 'in-progress', priority: 'medium', orderNumber: 'ORD-2025-1245', industry: 'automotive', createdAt: '2025-12-25', messages: [{}] },
-      { id: 'TKT-004', subject: 'Engine component return request', category: 'Returns', status: 'open', priority: 'medium', orderNumber: 'ORD-2025-1243', industry: 'automotive', createdAt: '2025-12-25', messages: [{}, {}] },
-      { id: 'TKT-005', subject: 'Brake system certification docs', category: 'Documentation', status: 'resolved', priority: 'low', orderNumber: 'ORD-2025-1244', industry: 'automotive', createdAt: '2025-12-24', messages: [{}, {}, {}, {}] },
-      { id: 'TKT-006', subject: 'Suspension part warranty claim', category: 'Warranty', status: 'in-progress', priority: 'high', orderNumber: 'ORD-2025-1242', industry: 'automotive', createdAt: '2025-12-24', messages: [{}, {}] },
-      { id: 'TKT-007', subject: 'Suspension kit wrong size', category: 'Product', status: 'resolved', priority: 'medium', orderNumber: 'ORD-2025-1240', industry: 'automotive', createdAt: '2025-12-23', messages: [{}] },
-      { id: 'TKT-008', subject: 'Alternator not working', category: 'Technical', status: 'open', priority: 'high', orderNumber: 'ORD-2025-1241', industry: 'automotive', createdAt: '2025-12-23', messages: [{}, {}, {}] },
-      { id: 'TKT-009', subject: 'Body panel missing parts', category: 'Shipping', status: 'resolved', priority: 'medium', orderNumber: 'ORD-2025-1242', industry: 'automotive', createdAt: '2025-12-22', messages: [{}, {}] },
-    ];
-
-    const tickets = filterByModule(allTickets, currentModule);
+    
+    const ordersByCountry = (stats_data.ordersByCountry || []).map(item => ({
+      code: item._id || 'N/A',
+      name: countryNames[item._id] || item._id || 'Unknown',
+      orderCount: item.orderCount || 0,
+      revenue: item.revenue || 0
+    }));
+    
+    // Pending tickets
+    const pendingTicketsCount = formattedTickets.filter(t => t.status === 'open' || t.status === 'in-progress').length;
+    
+    // Build stats object
+    const stats = {
+      totalOrders: totalOrdersCount,
+      totalRevenue,
+      activeUsers: totalBuyers,
+      totalBuyers,
+      pendingTickets: pendingTicketsCount,
+      totalProducts: totalParts,
+      growth: growthPercent,
+      thisMonthRevenue,
+      ordersPending: statusCounts['pending'] || 0,
+      ordersProcessing: statusCounts['processing'] || 0,
+      ordersShipped: statusCounts['shipped'] || 0,
+      ordersDelivered: statusCounts['delivered'] || 0,
+      ordersCompleted: statusCounts['completed'] || 0,
+      ordersCancelled: statusCounts['cancelled'] || 0,
+      inStock: 0,
+      lowStock: 0,
+      outOfStock: 0,
+      automotive: { orders: totalOrdersCount, revenue: totalRevenue, growth: growthPercent, topParts: [] }
+    };
+    
+    const chartData = {
+      revenueLabels: monthLabels,
+      revenueData,
+      orderLabels: ['Parts', 'Accessories', 'Tools', 'Other', 'Misc'],
+      orderData: [40, 25, 20, 10, 5],
+      orderCountByMonth: orderCountData,
+      statusLabels: ['Pending', 'Processing', 'Shipped', 'Delivered'],
+      statusData: [statusCounts['pending'] || 0, statusCounts['processing'] || 0, statusCounts['shipped'] || 0, statusCounts['delivered'] || 0]
+    };
+    
+    const performanceMetrics = {
+      fulfillmentRate: 94.2, fulfillmentTarget: 95, fulfillmentChange: 2.1,
+      satisfactionScore: 4.8, satisfactionReviews: formattedTickets.length, satisfactionChange: 0.3,
+      avgDeliveryDays: 3.2, deliveryTarget: 3, deliveryChange: -0.5,
+      avgResponseHours: 1.8, responseTarget: 2, resolvedPercent: 98
+    };
+    
+    // Recent activity from orders
+    const recentActivity = formattedOrders.slice(0, 4).map(order => ({
+      icon: order.status === 'shipped' ? 'truck' : order.status === 'delivered' ? 'check-circle' : 'shopping-cart',
+      iconClass: order.status === 'delivered' ? 'success' : '',
+      title: `Order #${order.id}`,
+      description: order.status === 'shipped' ? 'was shipped' : order.status === 'delivered' ? 'was delivered' : 'was placed',
+      timeAgo: getTimeAgo(order.createdAt)
+    }));
+    
+    // Cache the result
+    const cacheData = {
+      activePage: 'dashboard',
+      stats,
+      recentOrders: formattedOrders,
+      chartData,
+      tickets: formattedTickets,
+      topBuyers: topBuyersData,
+      ordersByCountry,
+      mostWantedParts: [],
+      performanceMetrics,
+      topSellingParts: [],
+      recentActivity
+    };
+    
+    dashboardCache.data = cacheData;
+    dashboardCache.timestamp = now;
 
     res.render('admin/dashboard', {
       title: currentModule ? `${moduleConfig.name} Dashboard | PARTSFORM Admin` : 'Admin Dashboard | PARTSFORM',
-      activePage: 'dashboard',
       currentModule,
       moduleConfig,
-      stats,
-      recentOrders,
-      chartData: getChartData(),
-      tickets
+      ...cacheData
     });
   } catch (error) {
     console.error('Error in getAdminDashboard:', error);
     res.status(500).render('error', { title: 'Error', error: 'Failed to load admin dashboard' });
   }
+};
+
+/**
+ * Helper function to get relative time ago string
+ */
+const getTimeAgo = (date) => {
+  if (!date) return 'Unknown';
+  const now = new Date();
+  const past = new Date(date);
+  const diffMs = now - past;
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+  
+  if (diffMins < 1) return 'Just now';
+  if (diffMins < 60) return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
+  if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+  if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+  return past.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 };
 
 /**
@@ -2617,6 +2826,225 @@ const uploadPartsFromFile = async (req, res) => {
   }
 };
 
+/**
+ * Get Administrators Management page
+ */
+const getAdminsManagement = async (req, res) => {
+  try {
+    const { currentModule, moduleConfig } = getModuleData(req);
+    
+    const admins = await Admin.find()
+      .select('-password -passwordResetToken -passwordResetExpires')
+      .sort({ createdAt: -1 })
+      .lean();
+    
+    res.render('admin/admins', {
+      title: 'Administrators | PARTSFORM',
+      activePage: 'admins',
+      currentModule,
+      moduleConfig,
+      admins,
+      sidebarCounts: { newOrders: 0, openTickets: 0 }
+    });
+  } catch (error) {
+    console.error('Error fetching admins:', error);
+    res.status(500).render('error', { message: 'Error loading administrators page' });
+  }
+};
+
+/**
+ * Create new administrator (API)
+ */
+const createAdmin = async (req, res) => {
+  try {
+    const { firstName, lastName, email, phone, password, role, permissions } = req.body;
+    
+    // Check if email already exists
+    const existingAdmin = await Admin.findOne({ email: email.toLowerCase() });
+    if (existingAdmin) {
+      return res.status(400).json({ success: false, message: 'An admin with this email already exists' });
+    }
+    
+    const newAdmin = new Admin({
+      firstName,
+      lastName,
+      email: email.toLowerCase(),
+      phone,
+      password,
+      role: role || 'admin',
+      permissions: permissions || ['read', 'write'],
+      isActive: true
+    });
+    
+    await newAdmin.save();
+    
+    res.status(201).json({
+      success: true,
+      message: 'Administrator created successfully',
+      admin: {
+        _id: newAdmin._id,
+        firstName: newAdmin.firstName,
+        lastName: newAdmin.lastName,
+        email: newAdmin.email,
+        role: newAdmin.role
+      }
+    });
+  } catch (error) {
+    console.error('Error creating admin:', error);
+    res.status(500).json({ success: false, message: error.message || 'Failed to create administrator' });
+  }
+};
+
+/**
+ * Update administrator (API)
+ */
+const updateAdmin = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { firstName, lastName, email, phone, password, role, permissions } = req.body;
+    
+    const admin = await Admin.findById(id);
+    if (!admin) {
+      return res.status(404).json({ success: false, message: 'Administrator not found' });
+    }
+    
+    // Check if email is being changed and if it's already in use
+    if (email && email.toLowerCase() !== admin.email) {
+      const existingAdmin = await Admin.findOne({ email: email.toLowerCase() });
+      if (existingAdmin) {
+        return res.status(400).json({ success: false, message: 'An admin with this email already exists' });
+      }
+      admin.email = email.toLowerCase();
+    }
+    
+    if (firstName) admin.firstName = firstName;
+    if (lastName) admin.lastName = lastName;
+    if (phone !== undefined) admin.phone = phone;
+    if (role) admin.role = role;
+    if (permissions) admin.permissions = permissions;
+    if (password) admin.password = password; // Will be hashed by pre-save hook
+    
+    await admin.save();
+    
+    res.json({
+      success: true,
+      message: 'Administrator updated successfully',
+      admin: {
+        _id: admin._id,
+        firstName: admin.firstName,
+        lastName: admin.lastName,
+        email: admin.email,
+        role: admin.role
+      }
+    });
+  } catch (error) {
+    console.error('Error updating admin:', error);
+    res.status(500).json({ success: false, message: error.message || 'Failed to update administrator' });
+  }
+};
+
+/**
+ * Update administrator status (API)
+ */
+const updateAdminStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { isActive } = req.body;
+    
+    const admin = await Admin.findById(id);
+    if (!admin) {
+      return res.status(404).json({ success: false, message: 'Administrator not found' });
+    }
+    
+    // Prevent deactivating the last super admin
+    if (!isActive && admin.role === 'super_admin') {
+      const superAdminCount = await Admin.countDocuments({ role: 'super_admin', isActive: true });
+      if (superAdminCount <= 1) {
+        return res.status(400).json({ success: false, message: 'Cannot deactivate the last super admin' });
+      }
+    }
+    
+    admin.isActive = isActive;
+    await admin.save();
+    
+    res.json({
+      success: true,
+      message: `Administrator ${isActive ? 'activated' : 'deactivated'} successfully`
+    });
+  } catch (error) {
+    console.error('Error updating admin status:', error);
+    res.status(500).json({ success: false, message: 'Failed to update administrator status' });
+  }
+};
+
+/**
+ * Delete administrator (API)
+ */
+const deleteAdmin = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const admin = await Admin.findById(id);
+    if (!admin) {
+      return res.status(404).json({ success: false, message: 'Administrator not found' });
+    }
+    
+    // Prevent deleting the last super admin
+    if (admin.role === 'super_admin') {
+      const superAdminCount = await Admin.countDocuments({ role: 'super_admin' });
+      if (superAdminCount <= 1) {
+        return res.status(400).json({ success: false, message: 'Cannot delete the last super admin' });
+      }
+    }
+    
+    await Admin.findByIdAndDelete(id);
+    
+    res.json({
+      success: true,
+      message: 'Administrator deleted successfully'
+    });
+  } catch (error) {
+    console.error('Error deleting admin:', error);
+    res.status(500).json({ success: false, message: 'Failed to delete administrator' });
+  }
+};
+
+/**
+ * Get Sidebar Notification Counts API
+ * Returns counts for new orders and open tickets for real-time updates
+ */
+const getSidebarCounts = async (req, res) => {
+  try {
+    // Count new/pending orders (orders that need attention)
+    const newOrdersCount = await Order.countDocuments({ 
+      status: { $in: ['pending', 'processing'] } 
+    });
+    
+    // Count open/in-progress tickets (tickets that need attention)
+    const openTicketsCount = await Ticket.countDocuments({ 
+      status: { $in: ['open', 'in-progress'] } 
+    });
+    
+    res.json({
+      success: true,
+      counts: {
+        newOrders: newOrdersCount,
+        openTickets: openTicketsCount
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching sidebar counts:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Failed to fetch counts',
+      counts: {
+        newOrders: 0,
+        openTickets: 0
+      }
+    });
+  }
+};
+
 // Export controller functions
 module.exports = {
   getAdminDashboard,
@@ -2650,7 +3078,6 @@ module.exports = {
   getPaymentsManagement,
   getPaymentDetails,
   getPaymentCreate,
-  getAdminSettings,
   getIntegrationsManagement,
   getIntegrationCreate,
   getIntegrationEdit,
@@ -2668,5 +3095,13 @@ module.exports = {
   getIntegration,
   // File upload
   uploadPartsFromFile,
+  // Sidebar counts API
+  getSidebarCounts,
+  // Administrators management
+  getAdminsManagement,
+  createAdmin,
+  updateAdmin,
+  updateAdminStatus,
+  deleteAdmin,
 };
 
