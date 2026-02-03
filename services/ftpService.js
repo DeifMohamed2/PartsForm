@@ -13,7 +13,7 @@ class FTPService {
   constructor() {
     this.client = new ftp.Client();
     this.currentCredentials = null;
-    this.debug = true;
+    this.debug = false; // Set to true for detailed FTP logging
   }
 
   /**
