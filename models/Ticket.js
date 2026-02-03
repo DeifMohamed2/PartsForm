@@ -181,9 +181,9 @@ const ticketSchema = new mongoose.Schema({
 });
 
 // Indexes for efficient queries
+// Note: ticketNumber index is already created by unique: true
 ticketSchema.index({ buyer: 1, status: 1 });
 ticketSchema.index({ status: 1, createdAt: -1 });
-ticketSchema.index({ ticketNumber: 1 });
 ticketSchema.index({ orderNumber: 1 });
 ticketSchema.index({ lastMessageAt: -1 });
 ticketSchema.index({ assignedTo: 1, status: 1 });

@@ -152,7 +152,6 @@ const orderSchema = new mongoose.Schema({
         type: String,
         required: true,
         unique: true,
-        index: true,
         trim: true
     },
     buyer: {
@@ -316,9 +315,9 @@ const orderSchema = new mongoose.Schema({
 });
 
 // Indexes for efficient queries
+// Note: orderNumber index is already created by unique: true
 orderSchema.index({ 'buyer': 1, 'createdAt': -1 });
 orderSchema.index({ 'status': 1, 'createdAt': -1 });
-orderSchema.index({ 'orderNumber': 1 });
 
 // Virtual for order items preview (first 3 items)
 orderSchema.virtual('itemsPreview').get(function () {

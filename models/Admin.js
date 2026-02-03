@@ -105,7 +105,7 @@ const adminSchema = new mongoose.Schema(
 );
 
 // Indexes
-adminSchema.index({ email: 1 });
+// Note: email index is already created by unique: true
 adminSchema.index({ role: 1 });
 
 // Virtual for full name
