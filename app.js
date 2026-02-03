@@ -1,5 +1,5 @@
 // Load environment variables FIRST - before anything else
-require('dotenv').config();
+require('dotenv').config({ quiet: true });
 
 const express = require('express');
 const http = require('http');
