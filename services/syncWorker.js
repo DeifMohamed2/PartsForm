@@ -24,17 +24,27 @@ const Integration = require('../models/Integration');
 const Part = require('../models/Part');
 
 // Increase event listener limit for high-performance sync
-EventEmitter.defaultMaxListeners = 50;
+EventEmitter.defaultMaxListeners = 100;
 
-// Configuration - balanced for FTP server limits + speed
+// ============================================
+// MAXIMUM SPEED CONFIGURATION
+// Server: 96GB RAM, 18 cores, NVMe SSD
+// ============================================
 const CONFIG = {
-  PARALLEL_DOWNLOADS: 8,        // FTP servers typically limit to 5-10 connections
-  BATCH_SIZE: 100000,           // 100k records per batch
-  ES_BULK_SIZE: 25000,          // ES bulk size
-  ES_PARALLEL_BULKS: 10,        // Concurrent ES operations
-  POLL_INTERVAL: 2000,          // Check for new requests every 2s
-  FTP_RETRY_ATTEMPTS: 3,        // Retry failed downloads
-  FTP_RETRY_DELAY: 2000,        // Wait 2s between retries
+  // FTP Downloads - push to FTP server limits
+  PARALLEL_DOWNLOADS: 12,       // 12 concurrent FTP connections (max most servers allow)
+  FTP_RETRY_ATTEMPTS: 2,        // Quick retries
+  FTP_RETRY_DELAY: 1000,        // 1s between retries
+  
+  // MongoDB - maximum throughput with w:0
+  BATCH_SIZE: 100000,           // 100k records per MongoDB batch
+  
+  // Elasticsearch - aggressive bulk indexing  
+  ES_BULK_SIZE: 30000,          // 30k docs per bulk request
+  ES_PARALLEL_BULKS: 12,        // 12 concurrent bulk operations
+  
+  // Worker polling
+  POLL_INTERVAL: 1000,          // Check for requests every 1s
 };
 
 class SyncWorker {

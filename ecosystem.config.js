@@ -21,22 +21,25 @@ module.exports = {
     },
     
     // ============================================
-    // SYNC WORKER - Dedicated heavy-duty process
+    // SYNC WORKER - MAXIMUM SPEED dedicated process
     // ============================================
+    // Server: 96GB RAM, 18 cores, NVMe SSD
     // Has its own 20GB memory space
-    // Runs sync at MAXIMUM SPEED
-    // Does NOT affect website performance AT ALL
+    // Runs at FULL POWER - no throttling!
     {
       name: 'sync-worker',
       script: 'services/syncWorker.js',
       instances: 1,
       exec_mode: 'fork',
-      max_memory_restart: '16G',
+      max_memory_restart: '18G',
       node_args: '--max-old-space-size=20480 --expose-gc',
-      autorestart: true,  // Keep running, watching for sync requests
+      autorestart: true,
       watch: false,
       env: {
         NODE_ENV: 'production',
+        SYNC_PRIORITY: 'high',      // Maximum speed - no yielding
+        SYNC_DEFER_ES: 'true',      // MongoDB first, ES after
+        SYNC_PRODUCTION_MODE: 'true',
       },
     }
   ]
