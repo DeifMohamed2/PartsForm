@@ -239,8 +239,8 @@ class CSVParserService {
           const commaCount = firstLine.split(',').length;
           separator = semicolonCount > commaCount ? ';' : ',';
           
-          // Create read stream from file - 1MB chunks for fast processing
-          inputStream = fs.createReadStream(source, { highWaterMark: productionMode ? 1024 * 1024 : 64 * 1024 }); // 1MB chunks in production
+          // Create read stream from file - 4MB chunks for maximum speed
+          inputStream = fs.createReadStream(source, { highWaterMark: productionMode ? 4 * 1024 * 1024 : 64 * 1024 }); // 4MB chunks in production
           
           if (!productionMode) console.log(`📊 Streaming ${(fileSize / 1024 / 1024).toFixed(2)} MB file with separator "${separator}"`);
         } else {
@@ -271,11 +271,11 @@ class CSVParserService {
         let validRecordCount = 0;
         let esRecordIndex = 0;
         
-        // Production batch sizes - optimized for 16GB RAM server
-        const BATCH_SIZE = productionMode ? 5000 : 500; // 5k MongoDB batch
-        const ES_BATCH_SIZE = productionMode ? 2000 : 200; // 2k ES batch
+        // Production batch sizes - MAXIMUM SPEED for 16GB RAM server
+        const BATCH_SIZE = productionMode ? 10000 : 500; // 10k MongoDB batch
+        const ES_BATCH_SIZE = productionMode ? 5000 : 200; // 5k ES batch
         let lastProgressUpdate = Date.now();
-        const PROGRESS_INTERVAL = productionMode ? 10000 : 1000; // Less frequent updates
+        const PROGRESS_INTERVAL = productionMode ? 15000 : 1000; // 15s updates in prod
 
         const mapHeaders = ({ header }) => header.trim().replace(/^["']|["']$/g, '');
 
@@ -283,15 +283,17 @@ class CSVParserService {
           if (batchToProcess.length === 0) return { inserted: 0, updated: 0 };
 
           try {
-            // Insert to MongoDB
-            const mongoResult = await Part.bulkInsert(batchToProcess, {
+            // PARALLEL: Run MongoDB insert and ES indexing simultaneously
+            const mongoPromise = Part.bulkInsert(batchToProcess, {
               integration,
               integrationName,
               fileName,
             });
 
-            // Index in Elasticsearch in smaller sub-batches
+            // Prepare ES batches for parallel indexing
+            let esPromise = Promise.resolve();
             if (elasticsearchService.isAvailable) {
+              const esBatches = [];
               for (let i = 0; i < batchToProcess.length; i += ES_BATCH_SIZE) {
                 const esBatch = batchToProcess.slice(i, i + ES_BATCH_SIZE).map((doc, idx) => ({
                   ...doc,
@@ -300,21 +302,25 @@ class CSVParserService {
                   fileName,
                   _id: `${integration}-${fileName}-${esRecordIndex + i + idx}`,
                 }));
-                
-                try {
-                  await elasticsearchService.bulkIndex(esBatch);
-                } catch (esError) {
-                  console.error(`ES batch error (non-fatal): ${esError.message}`);
-                }
-                
-                // Small delay between ES batches (shorter in production)
-                if (i + ES_BATCH_SIZE < batchToProcess.length) {
-                  await new Promise(resolve => setTimeout(resolve, productionMode ? 10 : 50));
-                }
+                esBatches.push(esBatch);
               }
+              
+              // Run all ES batches in parallel (max 3 concurrent)
+              const PARALLEL_ES = productionMode ? 3 : 1;
+              esPromise = (async () => {
+                for (let i = 0; i < esBatches.length; i += PARALLEL_ES) {
+                  const chunk = esBatches.slice(i, i + PARALLEL_ES);
+                  await Promise.all(chunk.map(batch => 
+                    elasticsearchService.bulkIndex(batch).catch(() => {})
+                  ));
+                }
+              })();
+              
               esRecordIndex += batchToProcess.length;
             }
 
+            // Wait for both MongoDB and ES to complete
+            const [mongoResult] = await Promise.all([mongoPromise, esPromise]);
             return mongoResult;
           } catch (error) {
             console.error('Batch processing error:', error.message);

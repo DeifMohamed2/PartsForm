@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-// MongoDB connection configuration
+// MongoDB connection configuration - optimized for bulk operations
 const connectDB = async () => {
   try {
     const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/partsform';
@@ -9,7 +9,17 @@ const connectDB = async () => {
     const sanitizedUri = mongoURI.replace(/:\/\/[^:]+:[^@]+@/, '://****:****@');
     console.log(`📦 Connecting to MongoDB: ${sanitizedUri}`);
     
-    const conn = await mongoose.connect(mongoURI);
+    const conn = await mongoose.connect(mongoURI, {
+      // Performance optimizations for bulk operations
+      maxPoolSize: 100, // More connections for parallel operations
+      minPoolSize: 10,
+      socketTimeoutMS: 120000, // 2 min timeout for large bulk ops
+      serverSelectionTimeoutMS: 30000,
+      writeConcern: {
+        w: 1, // Fast writes (acknowledge from primary only)
+        j: false // Don't wait for journal
+      }
+    });
 
     console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
     

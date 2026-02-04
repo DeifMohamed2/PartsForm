@@ -327,7 +327,7 @@ partSchema.statics.getFilterOptions = async function (query = {}) {
 partSchema.statics.bulkInsert = async function (records, options = {}) {
   const { integration, fileName, integrationName } = options;
 
-  const batchSize = 1000;
+  const batchSize = 10000; // 10k for fast servers
   let inserted = 0;
 
   // Prepare documents for insertion
@@ -344,7 +344,7 @@ partSchema.statics.bulkInsert = async function (records, options = {}) {
   for (let i = 0; i < documents.length; i += batchSize) {
     const batch = documents.slice(i, i + batchSize);
     try {
-      const result = await this.insertMany(batch, { ordered: false });
+      const result = await this.insertMany(batch, { ordered: false, lean: true });
       inserted += result.length;
     } catch (error) {
       // Handle duplicate key errors gracefully - count successful inserts

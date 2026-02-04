@@ -303,126 +303,100 @@ class SyncService extends EventEmitter {
     const fileResults = [];
     const errors = [];
 
-    // Process each file - ftpService creates fresh connection for each download and closes after
-    // Process in batches - optimized for production servers
-    const batchSize = this.productionMode ? 20 : 5; // 20 files per batch in production
-    const batchDelay = this.productionMode ? 500 : 5000; // 500ms delay in production
+    // PARALLEL PROCESSING - Process multiple files simultaneously
+    const PARALLEL_DOWNLOADS = this.productionMode ? 5 : 2; // 5 parallel downloads in production
+    const PARALLEL_PARSING = this.productionMode ? 3 : 1; // 3 parallel CSV parsing in production
 
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      if (!this.productionMode) this.log(`[SYNC] Processing file ${i + 1}/${files.length}: ${file.name}`);
+    console.log(`⚡ Starting PARALLEL sync: ${PARALLEL_DOWNLOADS} downloads, ${PARALLEL_PARSING} parsing threads`);
 
-      // Wait between batches to avoid rate limiting
-      if (i > 0 && i % batchSize === 0) {
-        if (!this.productionMode) this.log(`[SYNC] Batch complete, waiting ${batchDelay}ms...`);
-        await new Promise(resolve => setTimeout(resolve, batchDelay));
-      }
-
+    // Helper function to process a single file
+    const processFile = async (file, index) => {
+      const startTime = Date.now();
       try {
-        if (!this.productionMode) console.log(`📥 Processing: ${file.name}`);
-
-        this._updateProgress(integrationId, {
-          phase: 'downloading',
-          currentFile: file.name,
-          filesProcessed: i,
-          message: `Downloading ${file.name}...`,
-        });
-
-        // Build remote path - use just the filename (working implementation pattern)
+        // Build remote path
         const remotePath = file.name;
         const remoteDir = integration.ftp.remotePath || '/';
 
-        this.log(`[SYNC] Remote: ${remoteDir}/${remotePath}`);
-
-        // Pass remotePath in credentials so downloadFile can change directory if needed
-        const downloadCredentials = {
-          ...credentials,
-          remotePath: remoteDir
-        };
-
-        // Download file to temp (memory-efficient for large files)
-        // This streams directly to disk instead of holding in memory
+        // Download file to temp
+        const downloadCredentials = { ...credentials, remotePath: remoteDir };
         const tempFilePath = await ftpService.downloadToTempFile(remotePath, downloadCredentials);
         await ftpService.close();
 
-        this.log(`[SYNC] Downloaded ${file.name}`);
-
-        this._updateProgress(integrationId, {
-          phase: 'parsing',
-          message: `Parsing ${file.name}...`,
-        });
-
-        // Parse and import from temp file (streaming, memory-efficient)
+        // Parse and import from temp file
         const result = await csvParserService.parseAndImport(tempFilePath, {
           integration: integration._id,
           integrationName: integration.name,
           fileName: file.name,
           columnMapping: integration.columnMapping,
-          onProgress: (parseProgress) => {
-            this._updateProgress(integrationId, {
-              recordsProcessed: totalProcessed + parseProgress.processed,
-              recordsInserted: totalInserted + parseProgress.inserted,
-              recordsUpdated: totalUpdated + parseProgress.updated,
-              message: `Processing ${file.name}: ${parseProgress.processed} records...`,
-            });
-          }
         });
 
-        totalInserted += result.inserted;
-        totalUpdated += result.updated;
-        totalProcessed += result.validRecords;
+        const duration = ((Date.now() - startTime) / 1000).toFixed(1);
+        if (this.productionMode && index % 20 === 0) {
+          console.log(`✅ [${index + 1}/${files.length}] ${file.name}: ${result.inserted.toLocaleString()} records (${duration}s)`);
+        }
 
-        fileResults.push({
+        return {
           name: file.name,
           records: result.validRecords,
           inserted: result.inserted,
           updated: result.updated,
           status: 'success',
-        });
-
-        this._updateProgress(integrationId, {
-          filesProcessed: i + 1,
-          recordsTotal: totalProcessed,
-          recordsProcessed: totalProcessed,
-          recordsInserted: totalInserted,
-          recordsUpdated: totalUpdated,
-          message: `Completed ${file.name}: ${result.validRecords} records`,
-        });
-
-        if (!this.productionMode) console.log(`✅ Processed ${file.name}: ${result.inserted} inserted, ${result.updated} updated`);
+        };
       } catch (error) {
-        console.error(`❌ Error processing ${file.name}:`, error.message);
-        if (this.debug) console.error(`Full error:`, error);
-
-        errors.push({ file: file.name, error: error.message });
-
-        fileResults.push({
+        console.error(`❌ [${index + 1}/${files.length}] ${file.name}: ${error.message}`);
+        await ftpService.forceReset();
+        return {
           name: file.name,
           status: 'failed',
           error: error.message,
-        });
+        };
+      }
+    };
 
-        this._updateProgress(integrationId, {
-          filesProcessed: i + 1,
-          errors: errors,
-          message: `Error processing ${file.name}: ${error.message}`,
-        });
+    // Process files in parallel batches
+    const processBatch = async (batch, startIndex) => {
+      const promises = batch.map((file, i) => processFile(file, startIndex + i));
+      return Promise.all(promises);
+    };
 
-        // Force reset connection on error and wait longer
-        await ftpService.forceReset();
+    // Split files into batches and process in parallel
+    for (let i = 0; i < files.length; i += PARALLEL_DOWNLOADS) {
+      const batch = files.slice(i, i + PARALLEL_DOWNLOADS);
+      
+      this._updateProgress(integrationId, {
+        phase: 'processing',
+        filesProcessed: i,
+        message: `Processing files ${i + 1}-${Math.min(i + PARALLEL_DOWNLOADS, files.length)} of ${files.length} (parallel)...`,
+      });
 
-        // Add delay before next file after error
-        if (i < files.length - 1) {
-          const errorDelay = this.productionMode ? 2000 : 5000;
-          this.log(`[SYNC] Waiting ${errorDelay}ms after error...`);
-          await new Promise(resolve => setTimeout(resolve, errorDelay));
+      const batchResults = await processBatch(batch, i);
+      
+      // Aggregate results
+      for (const result of batchResults) {
+        fileResults.push(result);
+        if (result.status === 'success') {
+          totalInserted += result.inserted;
+          totalUpdated += result.updated;
+          totalProcessed += result.records;
+        } else {
+          errors.push({ file: result.name, error: result.error });
         }
       }
+
+      // Update progress after each batch
+      this._updateProgress(integrationId, {
+        filesProcessed: Math.min(i + PARALLEL_DOWNLOADS, files.length),
+        recordsTotal: totalProcessed,
+        recordsProcessed: totalProcessed,
+        recordsInserted: totalInserted,
+        recordsUpdated: totalUpdated,
+        errors: errors,
+      });
     }
 
-    // Final cleanup - ensure connection is closed
+    // Final cleanup
     await ftpService.close();
-    console.log(`✅ Sync completed: ${fileResults.length} files, ${totalInserted} records, ${errors.length} errors`);
+    console.log(`✅ PARALLEL sync completed: ${fileResults.length} files, ${totalInserted.toLocaleString()} records, ${errors.length} errors`);
 
     return {
       success: errors.length === 0 || fileResults.some(f => f.status === 'success'),
