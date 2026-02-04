@@ -443,11 +443,13 @@ IMPORTANT: You MUST respond ONLY with valid JSON. No explanations, no markdown, 
 
 When analyzing spreadsheet data:
 
-1. **Identify Part Numbers**: Look for alphanumeric patterns that could be part numbers (e.g., "CAF-000267", "8471474", "SKF-12345", "BRK-001", "ENG-2024-001")
-   - Part numbers typically contain letters and numbers
-   - May have dashes, underscores, or other separators
-   - Usually 5-20 characters long
+1. **Identify Part Numbers**: Look for patterns that could be part numbers:
+   - PURELY NUMERIC part numbers (e.g., "8471474", "1234567", "3123124", "7700109906") - these are VERY COMMON
+   - ALPHANUMERIC part numbers with letters AND numbers in ANY position (e.g., "213ds1", "CAF-000267", "SKF-12345", "A1B2C3")
+   - Part numbers with dashes, underscores, or other separators (e.g., "BRK-001", "ENG-2024-001")
+   - Usually 4-20 characters long
    - May appear in any column or row
+   - IMPORTANT: Do NOT skip numbers just because they lack letters - many OEM part numbers are purely numeric
 
 2. **Identify Quantities**: Look for numeric values that could represent quantities
    - Often near part numbers
@@ -598,7 +600,12 @@ Remember: Respond with ONLY valid JSON, no markdown formatting, no code blocks.`
  */
 function fallbackExcelExtraction(rawData, options = {}) {
   const parts = [];
+  // Pattern to match:
+  // 1. Purely numeric part numbers (4+ digits)
+  // 2. Alphanumeric part numbers (letters + numbers in any combination)
   const partNumberPattern = /[A-Z0-9][-A-Z0-9_]{3,20}/gi;
+  // Additional pattern for purely numeric part numbers
+  const numericPartPattern = /\b\d{4,15}\b/g;
   
   for (const row of rawData) {
     const rowStr = Array.isArray(row) 
@@ -607,23 +614,37 @@ function fallbackExcelExtraction(rawData, options = {}) {
         ? Object.values(row).join(' ')
         : String(row);
     
-    const matches = rowStr.match(partNumberPattern) || [];
+    // First, extract alphanumeric matches
+    const alphanumericMatches = rowStr.match(partNumberPattern) || [];
+    // Then, extract purely numeric matches
+    const numericMatches = rowStr.match(numericPartPattern) || [];
     
-    for (const match of matches) {
+    // Combine all matches
+    const allMatches = [...new Set([...alphanumericMatches, ...numericMatches])];
+    
+    for (const match of allMatches) {
       // Skip common non-part-number patterns
       if (/^(ROW|COL|SHEET|TABLE|TOTAL|SUM|COUNT|QTY|QUANTITY|PRICE|BRAND|NAME|DESC)/i.test(match)) {
         continue;
       }
       
-      // Check if this looks like a part number (has both letters and numbers typically)
-      if (/[A-Z]/i.test(match) && /[0-9]/.test(match)) {
+      // Skip very small numbers that are likely quantities (1-999)
+      if (/^\d+$/.test(match) && parseInt(match, 10) < 1000) {
+        continue;
+      }
+      
+      // Accept if: purely numeric (4+ digits) OR has both letters and numbers
+      const isPurelyNumeric = /^\d{4,}$/.test(match);
+      const isAlphanumeric = /[A-Z]/i.test(match) && /[0-9]/.test(match);
+      
+      if (isPurelyNumeric || isAlphanumeric) {
         parts.push({
           partNumber: match.toUpperCase(),
           quantity: 1,
           brand: null,
           description: null,
           originalText: rowStr.substring(0, 100),
-          confidence: 'low',
+          confidence: isPurelyNumeric ? 'medium' : 'low',
           selected: true,
         });
       }

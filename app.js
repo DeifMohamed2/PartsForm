@@ -140,4 +140,12 @@ server.listen(PORT, () => {
   console.log(`   ➜ Local:    http://localhost:${PORT}`);
   console.log(`   ➜ Views:    ${path.join(__dirname, 'views')}`);
   console.log(`   ➜ Socket:   Real-time chat enabled`);
+  
+  // AI Status
+  if (process.env.GEMINI_API_KEY) {
+    console.log(`   ➜ AI:       ✅ Gemini AI is RUNNING`);
+  } else {
+    console.log(`   ➜ AI:       ❌ Gemini AI is NOT running (GEMINI_API_KEY not set)`);
+  }
+  console.log('');
 });
