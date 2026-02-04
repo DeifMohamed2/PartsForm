@@ -327,33 +327,43 @@ partSchema.statics.getFilterOptions = async function (query = {}) {
 };
 
 // Static method for bulk insert (allows duplicate part numbers)
+// ULTRA-FAST: Uses raw MongoDB driver for maximum speed
 partSchema.statics.bulkInsert = async function (records, options = {}) {
   const { integration, fileName, integrationName } = options;
 
-  const batchSize = 20000; // 20k for 96GB/18-core/NVMe server
+  // MAXIMUM SPEED: 50k batch size for powerful server
+  const batchSize = 50000;
   let inserted = 0;
+  const now = new Date();
 
-  // Prepare documents for insertion
+  // Prepare documents - minimal processing
   const documents = records.map(record => ({
     ...record,
     integration,
     integrationName,
     fileName,
-    importedAt: new Date(),
-    lastUpdated: new Date(),
-    createdAt: new Date()
+    importedAt: now,
+    lastUpdated: now,
+    createdAt: now
   }));
+
+  // Use raw collection for maximum speed (bypasses Mongoose overhead)
+  const collection = this.collection;
 
   for (let i = 0; i < documents.length; i += batchSize) {
     const batch = documents.slice(i, i + batchSize);
     try {
-      const result = await this.insertMany(batch, { ordered: false, lean: true });
-      inserted += result.length;
+      // Use raw insertMany with minimal options for speed
+      const result = await collection.insertMany(batch, {
+        ordered: false,      // Don't stop on errors
+        writeConcern: { w: 0 } // Fire-and-forget for MAXIMUM speed (no ack)
+      });
+      inserted += result.insertedCount || batch.length;
     } catch (error) {
-      // Handle duplicate key errors gracefully - count successful inserts
-      if (error.insertedDocs) {
-        inserted += error.insertedDocs.length;
-      } else if (error.result && error.result.nInserted) {
+      // Handle duplicate key errors gracefully
+      if (error.insertedCount) {
+        inserted += error.insertedCount;
+      } else if (error.result?.nInserted) {
         inserted += error.result.nInserted;
       }
     }

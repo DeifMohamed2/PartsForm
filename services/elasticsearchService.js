@@ -11,7 +11,7 @@ class ElasticsearchService {
     this.indexName = process.env.ELASTICSEARCH_INDEX || 'automotive_parts';
     this.isAvailable = false;
     this.bulkQueue = [];
-    this.bulkSize = parseInt(process.env.ELASTICSEARCH_BULK_SIZE, 10) || 15000; // 15k for 16GB ES RAM
+    this.bulkSize = parseInt(process.env.ELASTICSEARCH_BULK_SIZE, 10) || 25000; // 25k for 16GB ES - ULTRA-FAST
     this.bulkTimeout = null;
     // Cache for document count to avoid checking on every request
     this._cachedDocCount = null;
@@ -888,11 +888,12 @@ class ElasticsearchService {
     let totalErrors = 0;
     let batchNum = 0;
     
-    // Use large batch for speed - 16GB ES can handle this
-    const REINDEX_BATCH_SIZE = 10000;
-    const PARALLEL_BULK = 3; // 3 concurrent bulk operations
+    // ULTRA-FAST: Large batches with high parallelism
+    // 16GB ES with 96GB server RAM can handle this
+    const REINDEX_BATCH_SIZE = 25000;  // 25k per batch
+    const PARALLEL_BULK = 5;            // 5 concurrent bulk operations
     
-    console.log(`🔄 Starting ES reindex for integration ${integrationId}...`);
+    console.log(`🔄 Starting ULTRA-FAST ES reindex for integration ${integrationId}...`);
     
     try {
       // Prepare ES for bulk indexing

@@ -4,16 +4,22 @@ module.exports = {
     script: 'app.js',
     instances: 1,
     exec_mode: 'fork',
-    max_memory_restart: '12G', // Restart if memory exceeds 12GB
-    node_args: '--max-old-space-size=16384 --expose-gc', // 16GB heap + expose GC for manual cleanup
+    max_memory_restart: '14G', // More headroom for ultra-fast sync
+    node_args: '--max-old-space-size=20480 --expose-gc', // 20GB heap for massive parallel sync
     env: {
       NODE_ENV: 'production',
-      SYNC_PRIORITY: 'low',      // Keep website responsive during sync
-      SYNC_DEFER_ES: 'true'      // Defer ES indexing for 10x faster sync
+      SYNC_PRIORITY: 'low',      // 20 parallel files, yields for website
+      SYNC_DEFER_ES: 'true'      // Phase 1: MongoDB only, Phase 2: ES reindex
     },
     env_production: {
       NODE_ENV: 'production',
       SYNC_PRIORITY: 'low',
+      SYNC_DEFER_ES: 'true'
+    },
+    // For maximum speed during off-peak hours:
+    env_turbo: {
+      NODE_ENV: 'production',
+      SYNC_PRIORITY: 'high',     // 30 parallel files, no yields
       SYNC_DEFER_ES: 'true'
     }
   }]

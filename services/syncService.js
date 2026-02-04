@@ -339,25 +339,26 @@ class SyncService extends EventEmitter {
     const fileResults = [];
     const errors = [];
 
-    // PARALLEL PROCESSING - Process multiple files simultaneously
+    // MAXIMUM SPEED PARALLEL PROCESSING
     // Each file uses its own isolated FTP connection for true parallelism
     // 
-    // WITH DEFERRED ES (default): MongoDB-only import is fast, can use more parallel
-    //   'low' = 8 parallel - fast MongoDB import, website stays responsive
-    //   'high' = 15 parallel - maximum speed MongoDB import
+    // ULTRA-FAST MODE (SYNC_DEFER_ES=true, default):
+    //   - MongoDB-only import with w:0 write concern (fire-and-forget)
+    //   - 25 parallel downloads for maximum throughput
+    //   - Target: 75M records in 10-15 minutes
     //
-    // WITHOUT DEFERRED ES: ES indexing during import is slow, use fewer parallel
-    //   'low' = 4 parallel, 'high' = 8 parallel
+    // SYNC_PRIORITY=low (default): 20 parallel - fast but yields for website
+    // SYNC_PRIORITY=high: 30 parallel - maximum speed, website may lag
     //
     const deferES = process.env.SYNC_DEFER_ES !== 'false';
     const PARALLEL_DOWNLOADS = this.syncPriority === 'high' 
-      ? (this.productionMode ? (deferES ? 15 : 8) : 2)
-      : (this.productionMode ? (deferES ? 8 : 4) : 2);
+      ? (this.productionMode ? (deferES ? 30 : 10) : 2)
+      : (this.productionMode ? (deferES ? 20 : 6) : 2);
     
     const YIELD_BETWEEN_BATCHES = this.syncPriority !== 'high';
-    const YIELD_DELAY_MS = 20; // 20ms pause between batches
+    const YIELD_DELAY_MS = 5; // Minimal pause
 
-    console.log(`⚡ Starting PARALLEL sync: ${PARALLEL_DOWNLOADS} concurrent downloads (priority: ${this.syncPriority}, deferES: ${deferES})`);
+    console.log(`🚀 ULTRA-FAST sync: ${PARALLEL_DOWNLOADS} parallel downloads (priority: ${this.syncPriority}, deferES: ${deferES})`);
 
     // Helper function to process a single file with isolated FTP connection
     const processFile = async (file, index) => {

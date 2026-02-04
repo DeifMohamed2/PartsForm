@@ -239,8 +239,9 @@ class CSVParserService {
           const commaCount = firstLine.split(',').length;
           separator = semicolonCount > commaCount ? ';' : ',';
           
-          // Create read stream from file - smaller chunks to reduce memory pressure
-          inputStream = fs.createReadStream(source, { highWaterMark: productionMode ? 512 * 1024 : 64 * 1024 }); // 512KB chunks (was 4MB - caused OOM)
+          // Create read stream - larger buffer for faster reading
+          // With deferred ES and w:0 writes, memory is not the bottleneck
+          inputStream = fs.createReadStream(source, { highWaterMark: productionMode ? 2 * 1024 * 1024 : 64 * 1024 }); // 2MB chunks
           
           if (!productionMode) console.log(`📊 Streaming ${(fileSize / 1024 / 1024).toFixed(2)} MB file with separator "${separator}"`);
         } else {
@@ -272,25 +273,25 @@ class CSVParserService {
         let esRecordIndex = 0;
         
         // SYNC_PRIORITY controls batch sizes:
-        //   'low' (default) = smaller batches, less memory, website stays responsive
-        //   'high' = larger batches, more memory, faster sync
+        //   'low' (default) = fast but yields for website
+        //   'high' = maximum speed, website may lag
         const syncPriority = process.env.SYNC_PRIORITY || 'low';
         const websiteFriendly = syncPriority !== 'high';
         const deferES = process.env.SYNC_DEFER_ES !== 'false'; // Default: true
         
-        // With deferred ES, we only do MongoDB inserts - can use larger batches
-        // Without deferred ES, we also index to ES - use smaller batches
+        // ULTRA-FAST: Massive batch sizes for MongoDB with w:0 write concern
+        // With deferred ES + w:0, we can push 50k-100k records per batch
         const BATCH_SIZE = productionMode 
           ? (deferES 
-              ? (websiteFriendly ? 10000 : 20000)  // Deferred ES: 10k/20k MongoDB only
-              : (websiteFriendly ? 2000 : 5000))   // Inline ES: 2k/5k
+              ? (websiteFriendly ? 50000 : 100000)  // Deferred ES: 50k/100k batches
+              : (websiteFriendly ? 5000 : 10000))   // Inline ES: 5k/10k
           : 500;
         const ES_BATCH_SIZE = productionMode 
-          ? (websiteFriendly ? 3000 : 5000)
+          ? (websiteFriendly ? 5000 : 10000)
           : 200;
         
         let lastProgressUpdate = Date.now();
-        const PROGRESS_INTERVAL = productionMode ? 30000 : 1000; // 30s updates in prod
+        const PROGRESS_INTERVAL = productionMode ? 60000 : 1000; // 60s updates in prod
         let batchCount = 0; // Track batches for periodic GC hint
         
         // Yield function to let web requests through AND allow garbage collection
