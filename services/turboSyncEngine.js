@@ -43,7 +43,8 @@ const CONFIG = {
   FTP_TIMEOUT: 30000,            // 30s timeout per file
   
   // MongoDB - mongoimport settings
-  MONGO_WORKERS: 18,             // Use all 18 cores
+  MONGO_WORKERS: 18,             // Use all 18 cores per process
+  MONGO_PARALLEL: 6,             // Run 6 mongoimport processes in parallel
   MONGO_BATCH_SIZE: 10000,       // mongoimport batch size
   SKIP_INDEXES: true,            // Skip index creation (do in background later)
   
@@ -406,7 +407,8 @@ async function importToMongoDB(ndjsonFiles, totalRecords, integration) {
   
   if (useMongoimport) {
     // Use mongoimport (FASTEST - 10-50x faster than Node.js)
-    log('Using mongoimport for maximum speed...');
+    // Run MONGO_PARALLEL imports simultaneously!
+    log(`Using PARALLEL mongoimport (${CONFIG.MONGO_PARALLEL} concurrent) for maximum speed...`);
     
     // Parse MongoDB URI
     const uri = new URL(mongoUri);
@@ -417,29 +419,74 @@ async function importToMongoDB(ndjsonFiles, totalRecords, integration) {
     const password = uri.password;
     const authSource = uri.searchParams.get('authSource') || 'admin';
     
-    for (const ndjsonPath of ndjsonFiles) {
-      let cmd = `mongoimport`;
-      cmd += ` --host ${host}`;
-      cmd += ` --port ${port}`;
+    // Build base command args
+    const buildArgs = (ndjsonPath) => {
+      const args = [
+        '--host', host,
+        '--port', String(port),
+        '--db', database,
+        '--collection', 'parts',
+        '--type', 'json',
+        '--file', ndjsonPath,
+        '--numInsertionWorkers', String(CONFIG.MONGO_WORKERS),
+      ];
       if (username && password) {
-        cmd += ` --username "${username}"`;
-        cmd += ` --password "${decodeURIComponent(password)}"`;
-        cmd += ` --authenticationDatabase ${authSource}`;
+        args.push('--username', username);
+        args.push('--password', decodeURIComponent(password));
+        args.push('--authenticationDatabase', authSource);
       }
-      cmd += ` --db ${database}`;
-      cmd += ` --collection parts`;
-      cmd += ` --type json`;
-      cmd += ` --file "${ndjsonPath}"`;
-      cmd += ` --numInsertionWorkers ${CONFIG.MONGO_WORKERS}`;
+      return args;
+    };
+    
+    // Run mongoimport as promise
+    const runMongoimport = (ndjsonPath) => {
+      return new Promise((resolve, reject) => {
+        const child = spawn('mongoimport', buildArgs(ndjsonPath), {
+          stdio: ['ignore', 'pipe', 'pipe']
+        });
+        
+        let stderr = '';
+        child.stderr.on('data', (data) => { stderr += data.toString(); });
+        
+        child.on('close', (code) => {
+          // Delete file after import
+          try { fs.unlinkSync(ndjsonPath); } catch (e) {}
+          
+          if (code === 0) {
+            resolve({ success: true, file: path.basename(ndjsonPath) });
+          } else {
+            resolve({ success: false, file: path.basename(ndjsonPath), error: stderr });
+          }
+        });
+        
+        child.on('error', (err) => {
+          resolve({ success: false, file: path.basename(ndjsonPath), error: err.message });
+        });
+      });
+    };
+    
+    // Process in parallel batches of MONGO_PARALLEL
+    let completedFiles = 0;
+    let successCount = 0;
+    let failCount = 0;
+    
+    for (let i = 0; i < ndjsonFiles.length; i += CONFIG.MONGO_PARALLEL) {
+      const batch = ndjsonFiles.slice(i, i + CONFIG.MONGO_PARALLEL);
+      const results = await Promise.all(batch.map(f => runMongoimport(f)));
       
-      try {
-        execCommand(cmd);
-      } catch (e) {
-        log(`mongoimport error: ${e.message}`, 'ERROR');
+      for (const result of results) {
+        completedFiles++;
+        if (result.success) successCount++;
+        else {
+          failCount++;
+          log(`mongoimport failed for ${result.file}: ${result.error}`, 'ERROR');
+        }
       }
       
-      // Delete NDJSON file after import to free disk space
-      try { fs.unlinkSync(ndjsonPath); } catch (e) {}
+      // Progress update
+      const percent = Math.round((completedFiles / ndjsonFiles.length) * 100);
+      const elapsed = (Date.now() - startTime) / 1000;
+      log(`MongoDB import: ${completedFiles}/${ndjsonFiles.length} files (${percent}%) - ${formatDuration(elapsed * 1000)} elapsed`, 'PROGRESS');
     }
     
     // Count imported (fast query since we just dropped and recreated)
@@ -577,6 +624,10 @@ async function indexToElasticsearch(integration, totalRecords) {
   let batch = [];
   let totalIndexed = 0;
   let pendingBulks = [];
+  let lastProgressTime = Date.now();
+  const PROGRESS_INTERVAL = 10000; // Show progress every 10 seconds
+  
+  log(`Starting ES bulk indexing (${CONFIG.ES_PARALLEL} parallel x ${CONFIG.ES_BULK_SIZE/1000}k batch)...`);
   
   const flushBatch = async (docs) => {
     if (docs.length === 0) return 0;
@@ -630,11 +681,15 @@ async function indexToElasticsearch(integration, totalRecords) {
         totalIndexed += results.reduce((a, b) => a + b, 0);
         pendingBulks = [];
         
-        // Progress update every 2M records
-        if (totalIndexed % 2000000 < CONFIG.ES_BULK_SIZE) {
-          const elapsed = (Date.now() - startTime) / 1000;
+        // Progress update every 10 seconds (much more visible!)
+        const now = Date.now();
+        if (now - lastProgressTime >= PROGRESS_INTERVAL) {
+          lastProgressTime = now;
+          const elapsed = (now - startTime) / 1000;
           const rate = Math.round(totalIndexed / elapsed);
-          log(`ES indexed ${formatNumber(totalIndexed)} docs (${formatNumber(rate)}/sec)`, 'PROGRESS');
+          const percent = Math.round((totalIndexed / totalRecords) * 100);
+          const eta = totalRecords > 0 ? Math.round((totalRecords - totalIndexed) / rate) : 0;
+          log(`ES indexed ${formatNumber(totalIndexed)}/${formatNumber(totalRecords)} (${percent}%) - ${formatNumber(rate)}/sec - ETA: ${formatDuration(eta * 1000)}`, 'PROGRESS');
         }
       }
     }
