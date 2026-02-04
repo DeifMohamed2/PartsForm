@@ -1,21 +1,22 @@
 #!/usr/bin/env node
 /**
- * TURBO SYNC ENGINE v2.0
- * ======================
+ * TURBO SYNC ENGINE v2.1 - MAXIMUM SPEED
+ * ======================================
  * Professional-grade high-performance sync system
- * Target: 75M records in 30 minutes (~42k records/sec)
+ * Target: 75M records in 25 minutes (~50k records/sec)
  * 
  * Architecture:
  * ┌─────────────┐     ┌──────────────┐     ┌─────────────┐     ┌─────────────┐
  * │  FTP Server │ ──▶ │ Local Files  │ ──▶ │ mongoimport │ ──▶ │  ES Bulk    │
- * │  (parallel) │     │ (NVMe disk)  │     │ (16 workers)│     │  (parallel) │
+ * │  (parallel) │     │ (NVMe disk)  │     │ (18 workers)│     │  (parallel) │
  * └─────────────┘     └──────────────┘     └─────────────┘     └─────────────┘
  * 
  * Key optimizations:
  * 1. Download ALL files first (parallel FTP)
  * 2. Use mongoimport (Go binary, 10-50x faster than Node.js)
- * 3. Drop indexes before import, recreate after
- * 4. ES bulk with refresh disabled
+ * 3. Drop collection (instant) instead of deleteMany
+ * 4. ES bulk with refresh disabled, async translog
+ * 5. Parallel NDJSON transformation
  */
 
 require('dotenv').config();
@@ -29,16 +30,16 @@ const { Client: FTPClient } = require('basic-ftp');
 const { Client: ESClient } = require('@elastic/elasticsearch');
 
 // ============================================
-// CONFIGURATION - MAXIMUM SPEED
+// CONFIGURATION - ABSOLUTE MAXIMUM SPEED
 // 96GB RAM, 18 cores, NVMe SSD
-// Target: 75M records in ~30 minutes
+// Target: 75M records in ~25 minutes
 // ============================================
 const CONFIG = {
   // Directories
   WORK_DIR: '/tmp/partsform-turbo-sync',
   
-  // FTP
-  FTP_PARALLEL: 20,              // 20 parallel FTP downloads
+  // FTP - aggressive parallel downloads
+  FTP_PARALLEL: 30,              // 30 parallel FTP downloads (was 20)
   FTP_TIMEOUT: 30000,            // 30s timeout per file
   
   // MongoDB - mongoimport settings
@@ -46,13 +47,13 @@ const CONFIG = {
   MONGO_BATCH_SIZE: 10000,       // mongoimport batch size
   SKIP_INDEXES: true,            // Skip index creation (do in background later)
   
-  // Elasticsearch - MAXIMUM SPEED
-  ES_BULK_SIZE: 100000,          // 100k docs per bulk (was 50k)
-  ES_PARALLEL: 16,               // 16 parallel bulk operations (was 8)
+  // Elasticsearch - ABSOLUTE MAXIMUM SPEED
+  ES_BULK_SIZE: 150000,          // 150k docs per bulk (was 100k)
+  ES_PARALLEL: 24,               // 24 parallel bulk operations (was 16)
   ES_REFRESH_INTERVAL: '-1',     // Disable during import
   
-  // Processing
-  TRANSFORM_WORKERS: 8,          // Parallel file transformation
+  // Processing - PARALLEL EVERYTHING
+  TRANSFORM_PARALLEL: 16,        // Process 16 files simultaneously (was 8)
 };
 
 // ============================================
@@ -197,11 +198,11 @@ async function downloadAllFiles(integration) {
 }
 
 // ============================================
-// PHASE 2: TRANSFORM CSVs TO NDJSON (STREAMING)
-// Uses streaming to avoid loading entire files into memory
+// PHASE 2: TRANSFORM CSVs TO NDJSON (PARALLEL STREAMING)
+// Process multiple files simultaneously for 3-4x speedup
 // ============================================
 async function transformToNDJSON(downloadDir, files, integration) {
-  log('PHASE 2: Transforming CSVs to NDJSON format (streaming)...', 'PROGRESS');
+  log('PHASE 2: Transforming CSVs to NDJSON format (PARALLEL)...', 'PROGRESS');
   const startTime = Date.now();
   
   const ndjsonDir = path.join(CONFIG.WORK_DIR, 'ndjson');
@@ -213,10 +214,10 @@ async function transformToNDJSON(downloadDir, files, integration) {
   
   let totalRecords = 0;
   const ndjsonFiles = [];
+  let completedFiles = 0;
   
-  // Process files one at a time with streaming
-  for (let i = 0; i < files.length; i++) {
-    const fileName = files[i];
+  // Function to transform a single file
+  const transformFile = async (fileName) => {
     const csvPath = path.join(downloadDir, fileName);
     const ndjsonPath = path.join(ndjsonDir, `${path.basename(fileName, '.csv')}.ndjson`);
     
@@ -336,25 +337,35 @@ async function transformToNDJSON(downloadDir, files, integration) {
         readStream.on('error', reject);
       });
       
-      totalRecords += fileRecords;
-      ndjsonFiles.push(ndjsonPath);
-      
       // Delete CSV immediately to free disk space
       try { fs.unlinkSync(csvPath); } catch (e) {}
       
-      // Force GC every 10 files to prevent memory buildup
-      if ((i + 1) % 10 === 0 && global.gc) {
-        global.gc();
-      }
+      return { ndjsonPath, records: fileRecords };
       
     } catch (error) {
       log(`Error transforming ${fileName}: ${error.message}`, 'ERROR');
+      return { ndjsonPath: null, records: 0 };
+    }
+  };
+  
+  // Process files in parallel batches of TRANSFORM_PARALLEL
+  for (let i = 0; i < files.length; i += CONFIG.TRANSFORM_PARALLEL) {
+    const batch = files.slice(i, i + CONFIG.TRANSFORM_PARALLEL);
+    const results = await Promise.all(batch.map(f => transformFile(f)));
+    
+    for (const result of results) {
+      if (result.ndjsonPath) {
+        ndjsonFiles.push(result.ndjsonPath);
+        totalRecords += result.records;
+      }
+      completedFiles++;
     }
     
-    // Progress update every 20 files
-    if ((i + 1) % 20 === 0) {
-      log(`Transformed ${i + 1}/${files.length} files (${formatNumber(totalRecords)} records)`, 'PROGRESS');
-    }
+    // Progress update
+    log(`Transformed ${completedFiles}/${files.length} files (${formatNumber(totalRecords)} records)`, 'PROGRESS');
+    
+    // Force GC after each batch to prevent memory buildup
+    if (global.gc) global.gc();
   }
   
   const duration = Date.now() - startTime;
@@ -426,10 +437,13 @@ async function importToMongoDB(ndjsonFiles, totalRecords, integration) {
       } catch (e) {
         log(`mongoimport error: ${e.message}`, 'ERROR');
       }
+      
+      // Delete NDJSON file after import to free disk space
+      try { fs.unlinkSync(ndjsonPath); } catch (e) {}
     }
     
-    // Count imported
-    importedCount = await collection.countDocuments({ integration: integration._id.toString() });
+    // Count imported (fast query since we just dropped and recreated)
+    importedCount = await collection.estimatedDocumentCount();
     
   } else {
     // Fallback: Node.js bulk insert (still fast with w:0)
@@ -481,7 +495,7 @@ async function importToMongoDB(ndjsonFiles, totalRecords, integration) {
   }
   
   // Step 3: Skip index recreation during import (saves 15-20 minutes!)
-  // Indexes will be created in background by MongoDB after sync completes
+  // Indexes will be created after ES indexing completes
   if (!CONFIG.SKIP_INDEXES) {
     log('Recreating indexes...');
     await collection.createIndex({ partNumber: 1 }, { background: true });
@@ -489,20 +503,7 @@ async function importToMongoDB(ndjsonFiles, totalRecords, integration) {
     await collection.createIndex({ brand: 1 }, { background: true });
     await collection.createIndex({ partNumber: 1, integration: 1 }, { background: true });
   } else {
-    log('Skipping index recreation (will create in background later)');
-    // Schedule background index creation (non-blocking)
-    setImmediate(async () => {
-      try {
-        log('Starting background index creation...');
-        await collection.createIndex({ partNumber: 1 }, { background: true });
-        await collection.createIndex({ integration: 1 }, { background: true });
-        await collection.createIndex({ brand: 1 }, { background: true });
-        await collection.createIndex({ partNumber: 1, integration: 1 }, { background: true });
-        log('Background index creation complete', 'SUCCESS');
-      } catch (e) {
-        log(`Background index error: ${e.message}`, 'ERROR');
-      }
-    });
+    log('Skipping indexes (will create after ES indexing)');
   }
   
   const duration = Date.now() - startTime;
@@ -689,13 +690,25 @@ async function updateIntegrationStatus(integration, results) {
 // ============================================
 async function runTurboSync(integrationId) {
   console.log('\n' + '═'.repeat(60));
-  console.log('🚀 TURBO SYNC ENGINE v2.0');
+  console.log('🚀 TURBO SYNC ENGINE v2.1 - MAXIMUM SPEED');
   console.log('═'.repeat(60));
-  console.log(`   Target: 75M records in 30 minutes (~42k/sec)`);
+  console.log(`   Target: 75M records in 25 minutes (~50k/sec)`);
   console.log(`   Server: 96GB RAM, 18 cores, NVMe SSD`);
+  console.log(`   Config: FTP=${CONFIG.FTP_PARALLEL} | Transform=${CONFIG.TRANSFORM_PARALLEL} | ES=${CONFIG.ES_PARALLEL}x${CONFIG.ES_BULK_SIZE/1000}k`);
   console.log('═'.repeat(60) + '\n');
   
   const overallStart = Date.now();
+  
+  // STEP 0: Clean up any previous downloads immediately
+  log('Cleaning up previous sync files...');
+  try {
+    if (fs.existsSync(CONFIG.WORK_DIR)) {
+      fs.rmSync(CONFIG.WORK_DIR, { recursive: true, force: true });
+      log('Previous download files removed', 'SUCCESS');
+    }
+  } catch (e) {
+    log(`Cleanup warning: ${e.message}`, 'ERROR');
+  }
   
   try {
     // Connect to MongoDB
@@ -726,6 +739,24 @@ async function runTurboSync(integrationId) {
     const transformResult = await transformToNDJSON(downloadResult.downloadDir, downloadResult.files, integration);
     const mongoResult = await importToMongoDB(transformResult.ndjsonFiles, transformResult.totalRecords, integration);
     const esResult = await indexToElasticsearch(integration, mongoResult.importedCount);
+    
+    // PHASE 5: Create MongoDB indexes in background (after ES completes)
+    if (CONFIG.SKIP_INDEXES) {
+      log('PHASE 5: Creating MongoDB indexes in background...', 'PROGRESS');
+      const indexStart = Date.now();
+      const db = mongoose.connection.db;
+      const collection = db.collection('parts');
+      
+      // Create indexes with background: true (non-blocking)
+      await Promise.all([
+        collection.createIndex({ partNumber: 1 }, { background: true }),
+        collection.createIndex({ integration: 1 }, { background: true }),
+        collection.createIndex({ brand: 1 }, { background: true }),
+        collection.createIndex({ partNumber: 1, integration: 1 }, { background: true }),
+      ]);
+      
+      log(`Indexes created in ${formatDuration(Date.now() - indexStart)}`, 'SUCCESS');
+    }
     
     // Update integration
     await updateIntegrationStatus(integration, {
