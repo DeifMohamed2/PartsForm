@@ -195,10 +195,11 @@ async function downloadAllFiles(integration) {
 }
 
 // ============================================
-// PHASE 2: TRANSFORM CSVs TO NDJSON
+// PHASE 2: TRANSFORM CSVs TO NDJSON (STREAMING)
+// Uses streaming to avoid loading entire files into memory
 // ============================================
 async function transformToNDJSON(downloadDir, files, integration) {
-  log('PHASE 2: Transforming CSVs to NDJSON format...', 'PROGRESS');
+  log('PHASE 2: Transforming CSVs to NDJSON format (streaming)...', 'PROGRESS');
   const startTime = Date.now();
   
   const ndjsonDir = path.join(CONFIG.WORK_DIR, 'ndjson');
@@ -211,71 +212,92 @@ async function transformToNDJSON(downloadDir, files, integration) {
   let totalRecords = 0;
   const ndjsonFiles = [];
   
-  // Process files
+  // Process files one at a time with streaming
   for (let i = 0; i < files.length; i++) {
     const fileName = files[i];
     const csvPath = path.join(downloadDir, fileName);
     const ndjsonPath = path.join(ndjsonDir, `${path.basename(fileName, '.csv')}.ndjson`);
     
     try {
-      const content = fs.readFileSync(csvPath, 'utf8');
-      const lines = content.split('\n');
-      
-      if (lines.length < 2) continue;
-      
-      // Parse header
-      const headerLine = lines[0];
-      const separator = headerLine.includes(';') ? ';' : ',';
-      const headers = headerLine.split(separator).map(h => h.trim().toLowerCase().replace(/['"]/g, ''));
-      
-      // Find column indices
-      const colMap = {
-        partNumber: headers.findIndex(h => h.includes('part') || h.includes('vendor') || h.includes('sku') || h === 'code'),
-        description: headers.findIndex(h => h.includes('desc') || h.includes('title') || h.includes('name')),
-        brand: headers.findIndex(h => h.includes('brand') || h.includes('manufacturer') || h.includes('make')),
-        supplier: headers.findIndex(h => h.includes('supplier') || h.includes('vendor')),
-        price: headers.findIndex(h => h.includes('price') || h.includes('cost')),
-        currency: headers.findIndex(h => h.includes('currency') || h.includes('curr')),
-        quantity: headers.findIndex(h => h.includes('quantity') || h.includes('qty') || h.includes('stock')),
-        weight: headers.findIndex(h => h.includes('weight')),
-        category: headers.findIndex(h => h.includes('category') || h.includes('cat')),
-      };
-      
-      // Transform to NDJSON
-      const writeStream = fs.createWriteStream(ndjsonPath);
-      let fileRecords = 0;
-      
-      for (let j = 1; j < lines.length; j++) {
-        const line = lines[j].trim();
-        if (!line) continue;
+      // Use streaming to avoid memory issues
+      const fileRecords = await new Promise((resolve, reject) => {
+        const readStream = fs.createReadStream(csvPath, { encoding: 'utf8', highWaterMark: 64 * 1024 });
+        const writeStream = fs.createWriteStream(ndjsonPath);
+        const rl = readline.createInterface({ input: readStream, crlfDelay: Infinity });
         
-        const cols = line.split(separator);
-        const partNumber = (cols[colMap.partNumber] || '').replace(/['"]/g, '').trim();
-        if (!partNumber) continue;
+        let isFirstLine = true;
+        let headers = [];
+        let colMap = {};
+        let separator = ',';
+        let recordCount = 0;
         
-        const doc = {
-          partNumber,
-          description: (cols[colMap.description] || '').replace(/['"]/g, ''),
-          brand: (cols[colMap.brand] || '').replace(/['"]/g, ''),
-          supplier: (cols[colMap.supplier] || '').replace(/['"]/g, ''),
-          price: parseFloat(cols[colMap.price]) || 0,
-          currency: (cols[colMap.currency] || 'USD').replace(/['"]/g, ''),
-          quantity: parseInt(cols[colMap.quantity]) || 0,
-          weight: parseFloat(cols[colMap.weight]) || 0,
-          category: (cols[colMap.category] || '').replace(/['"]/g, ''),
-          integration: integrationId,
-          integrationName,
-          fileName,
-          importedAt,
-        };
+        rl.on('line', (line) => {
+          if (isFirstLine) {
+            // Parse header
+            isFirstLine = false;
+            separator = line.includes(';') ? ';' : ',';
+            headers = line.split(separator).map(h => h.trim().toLowerCase().replace(/['"]/g, ''));
+            
+            // Find column indices
+            colMap = {
+              partNumber: headers.findIndex(h => h.includes('part') || h.includes('vendor') || h.includes('sku') || h === 'code'),
+              description: headers.findIndex(h => h.includes('desc') || h.includes('title') || h.includes('name')),
+              brand: headers.findIndex(h => h.includes('brand') || h.includes('manufacturer') || h.includes('make')),
+              supplier: headers.findIndex(h => h.includes('supplier') || h.includes('vendor')),
+              price: headers.findIndex(h => h.includes('price') || h.includes('cost')),
+              currency: headers.findIndex(h => h.includes('currency') || h.includes('curr')),
+              quantity: headers.findIndex(h => h.includes('quantity') || h.includes('qty') || h.includes('stock')),
+              weight: headers.findIndex(h => h.includes('weight')),
+              category: headers.findIndex(h => h.includes('category') || h.includes('cat')),
+            };
+            return;
+          }
+          
+          const trimmedLine = line.trim();
+          if (!trimmedLine) return;
+          
+          const cols = trimmedLine.split(separator);
+          const partNumber = (cols[colMap.partNumber] || '').replace(/['"]/g, '').trim();
+          if (!partNumber) return;
+          
+          const doc = {
+            partNumber,
+            description: (cols[colMap.description] || '').replace(/['"]/g, ''),
+            brand: (cols[colMap.brand] || '').replace(/['"]/g, ''),
+            supplier: (cols[colMap.supplier] || '').replace(/['"]/g, ''),
+            price: parseFloat(cols[colMap.price]) || 0,
+            currency: (cols[colMap.currency] || 'USD').replace(/['"]/g, ''),
+            quantity: parseInt(cols[colMap.quantity]) || 0,
+            weight: parseFloat(cols[colMap.weight]) || 0,
+            category: (cols[colMap.category] || '').replace(/['"]/g, ''),
+            integration: integrationId,
+            integrationName,
+            fileName,
+            importedAt,
+          };
+          
+          writeStream.write(JSON.stringify(doc) + '\n');
+          recordCount++;
+        });
         
-        writeStream.write(JSON.stringify(doc) + '\n');
-        fileRecords++;
-      }
+        rl.on('close', () => {
+          writeStream.end(() => resolve(recordCount));
+        });
+        
+        rl.on('error', reject);
+        readStream.on('error', reject);
+      });
       
-      writeStream.end();
       totalRecords += fileRecords;
       ndjsonFiles.push(ndjsonPath);
+      
+      // Delete CSV immediately to free disk space
+      try { fs.unlinkSync(csvPath); } catch (e) {}
+      
+      // Force GC every 10 files to prevent memory buildup
+      if ((i + 1) % 10 === 0 && global.gc) {
+        global.gc();
+      }
       
     } catch (error) {
       log(`Error transforming ${fileName}: ${error.message}`, 'ERROR');
@@ -393,12 +415,19 @@ async function importToMongoDB(ndjsonFiles, totalRecords, integration) {
           // Skip invalid JSON
         }
       }
+      
+      // Delete NDJSON file after import to free disk space
+      try { fs.unlinkSync(ndjsonPath); } catch (e) {}
+      
+      // Force GC after each file
+      if (global.gc) global.gc();
     }
     
     // Insert remaining
     if (batch.length > 0) {
       await collection.insertMany(batch, { ordered: false, writeConcern: { w: 0 } });
       importedCount += batch.length;
+      batch = []; // Clear batch to free memory
     }
   }
   

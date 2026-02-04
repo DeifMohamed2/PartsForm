@@ -21,25 +21,26 @@ module.exports = {
     },
     
     // ============================================
-    // TURBO SYNC WORKER - MAXIMUM SPEED
+    // TURBO SYNC WORKER - STREAMING MODE
     // ============================================
     // Target: 75M records in 30 minutes
     // Server: 96GB RAM, 18 cores, NVMe SSD
-    // Uses mongoimport (Go) for 10-50x faster imports
+    // Uses streaming to minimize memory usage
     {
       name: 'sync-worker',
       script: 'services/syncWorker.js',
       instances: 1,
       exec_mode: 'fork',
-      max_memory_restart: '24G',
-      node_args: '--max-old-space-size=24576 --expose-gc',
+      max_memory_restart: '40G',  // 40GB limit (you have 96GB)
+      node_args: '--max-old-space-size=40960 --expose-gc --gc-interval=100',
       autorestart: true,
       watch: false,
+      kill_timeout: 60000,        // 60s to gracefully shutdown
       env: {
         NODE_ENV: 'production',
-        SYNC_ENGINE: 'turbo',       // Use TURBO engine (not 'legacy')
+        SYNC_ENGINE: 'turbo',
         SYNC_PRIORITY: 'high',
-        UV_THREADPOOL_SIZE: '32',   // More threads for I/O
+        UV_THREADPOOL_SIZE: '32',
       },
     }
   ]
