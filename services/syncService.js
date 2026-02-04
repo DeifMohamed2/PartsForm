@@ -19,6 +19,18 @@ class SyncService extends EventEmitter {
     // Production mode - less logging, faster processing
     this.productionMode = process.env.NODE_ENV === 'production' || process.env.SYNC_PRODUCTION_MODE === 'true';
     this.debug = !this.productionMode;
+    
+    // Website-friendly mode: slower sync but keeps website responsive
+    // Set SYNC_PRIORITY=low for balanced mode, or SYNC_PRIORITY=high for max speed (website may lag)
+    this.syncPriority = process.env.SYNC_PRIORITY || 'low'; // 'low' = website first, 'high' = sync first
+  }
+  
+  /**
+   * Yield to event loop - allows web requests to be processed
+   * Critical for keeping website responsive during heavy sync
+   */
+  async yieldToEventLoop(ms = 1) {
+    return new Promise(resolve => setImmediate(() => setTimeout(resolve, ms)));
   }
 
   log(...args) {
@@ -305,10 +317,17 @@ class SyncService extends EventEmitter {
 
     // PARALLEL PROCESSING - Process multiple files simultaneously
     // Each file uses its own isolated FTP connection for true parallelism
-    // Optimized for 96GB RAM / 18 CPU cores / NVMe / 16GB ES server
-    const PARALLEL_DOWNLOADS = this.productionMode ? 15 : 2; // 15 parallel for powerful server
+    // SYNC_PRIORITY controls the balance between sync speed and website responsiveness:
+    //   'low' (default) = 5 parallel, yields between batches - website stays fast
+    //   'high' = 15 parallel, no yields - maximum sync speed but website may lag
+    const PARALLEL_DOWNLOADS = this.syncPriority === 'high' 
+      ? (this.productionMode ? 15 : 2)  // High priority: max speed
+      : (this.productionMode ? 5 : 2);  // Low priority: website-friendly
+    
+    const YIELD_BETWEEN_BATCHES = this.syncPriority !== 'high'; // Yield to let web requests through
+    const YIELD_DELAY_MS = 50; // 50ms pause between file batches for web requests
 
-    console.log(`⚡ Starting PARALLEL sync: ${PARALLEL_DOWNLOADS} concurrent downloads with isolated connections`);
+    console.log(`⚡ Starting PARALLEL sync: ${PARALLEL_DOWNLOADS} concurrent downloads (priority: ${this.syncPriority})`);
 
     // Helper function to process a single file with isolated FTP connection
     const processFile = async (file, index) => {
@@ -374,6 +393,11 @@ class SyncService extends EventEmitter {
         filesProcessed: i,
         message: `Processing files ${i + 1}-${Math.min(i + PARALLEL_DOWNLOADS, files.length)} of ${files.length} (${PARALLEL_DOWNLOADS} parallel)...`,
       });
+
+      // Yield to event loop before each batch to keep website responsive
+      if (YIELD_BETWEEN_BATCHES) {
+        await this.yieldToEventLoop(YIELD_DELAY_MS);
+      }
 
       const batchResults = await processBatch(batch, i);
       

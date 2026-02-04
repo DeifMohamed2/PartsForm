@@ -271,11 +271,29 @@ class CSVParserService {
         let validRecordCount = 0;
         let esRecordIndex = 0;
         
-        // Production batch sizes - MAXIMUM SPEED for 96GB RAM / 18 cores / 16GB ES
-        const BATCH_SIZE = productionMode ? 20000 : 500; // 20k MongoDB batch
-        const ES_BATCH_SIZE = productionMode ? 10000 : 200; // 10k ES batch
+        // SYNC_PRIORITY controls batch sizes:
+        //   'low' (default) = smaller batches, yields to event loop - website stays responsive
+        //   'high' = maximum batch sizes - fastest sync but website may lag
+        const syncPriority = process.env.SYNC_PRIORITY || 'low';
+        const websiteFriendly = syncPriority !== 'high';
+        
+        // Batch sizes based on priority
+        const BATCH_SIZE = productionMode 
+          ? (websiteFriendly ? 5000 : 20000)   // 5k for balanced, 20k for max speed
+          : 500;
+        const ES_BATCH_SIZE = productionMode 
+          ? (websiteFriendly ? 3000 : 10000)   // 3k for balanced, 10k for max speed
+          : 200;
+        
         let lastProgressUpdate = Date.now();
         const PROGRESS_INTERVAL = productionMode ? 30000 : 1000; // 30s updates in prod
+        
+        // Yield function to let web requests through
+        const yieldToEventLoop = async () => {
+          if (websiteFriendly) {
+            await new Promise(resolve => setImmediate(resolve));
+          }
+        };
 
         const mapHeaders = ({ header }) => header.trim().replace(/^["']|["']$/g, '');
 
@@ -305,14 +323,16 @@ class CSVParserService {
                 esBatches.push(esBatch);
               }
               
-              // Run all ES batches in parallel (max 3 concurrent)
-              const PARALLEL_ES = productionMode ? 3 : 1;
+              // Parallel ES batches: fewer when website-friendly to reduce resource contention
+              const PARALLEL_ES = productionMode ? (websiteFriendly ? 2 : 3) : 1;
               esPromise = (async () => {
                 for (let i = 0; i < esBatches.length; i += PARALLEL_ES) {
                   const chunk = esBatches.slice(i, i + PARALLEL_ES);
                   await Promise.all(chunk.map(batch => 
                     elasticsearchService.bulkIndex(batch).catch(() => {})
                   ));
+                  // Yield between ES batches for website responsiveness
+                  await yieldToEventLoop();
                 }
               })();
               
@@ -321,6 +341,10 @@ class CSVParserService {
 
             // Wait for both MongoDB and ES to complete
             const [mongoResult] = await Promise.all([mongoPromise, esPromise]);
+            
+            // Yield after each batch to let web requests through
+            await yieldToEventLoop();
+            
             return mongoResult;
           } catch (error) {
             console.error('Batch processing error:', error.message);
