@@ -11,7 +11,7 @@ class ElasticsearchService {
     this.indexName = process.env.ELASTICSEARCH_INDEX || 'automotive_parts';
     this.isAvailable = false;
     this.bulkQueue = [];
-    this.bulkSize = parseInt(process.env.ELASTICSEARCH_BULK_SIZE, 10) || 10000; // 10k for 16GB RAM
+    this.bulkSize = parseInt(process.env.ELASTICSEARCH_BULK_SIZE, 10) || 15000; // 15k for 16GB ES RAM
     this.bulkTimeout = null;
     // Cache for document count to avoid checking on every request
     this._cachedDocCount = null;

@@ -327,7 +327,7 @@ partSchema.statics.getFilterOptions = async function (query = {}) {
 partSchema.statics.bulkInsert = async function (records, options = {}) {
   const { integration, fileName, integrationName } = options;
 
-  const batchSize = 10000; // 10k for fast servers
+  const batchSize = 20000; // 20k for 96GB/18-core/NVMe server
   let inserted = 0;
 
   // Prepare documents for insertion

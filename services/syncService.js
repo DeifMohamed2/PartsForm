@@ -305,7 +305,8 @@ class SyncService extends EventEmitter {
 
     // PARALLEL PROCESSING - Process multiple files simultaneously
     // Each file uses its own isolated FTP connection for true parallelism
-    const PARALLEL_DOWNLOADS = this.productionMode ? 5 : 2; // 5 parallel downloads in production
+    // Optimized for 96GB RAM / 18 CPU cores / NVMe / 16GB ES server
+    const PARALLEL_DOWNLOADS = this.productionMode ? 15 : 2; // 15 parallel for powerful server
 
     console.log(`⚡ Starting PARALLEL sync: ${PARALLEL_DOWNLOADS} concurrent downloads with isolated connections`);
 

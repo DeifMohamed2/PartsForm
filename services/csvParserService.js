@@ -271,11 +271,11 @@ class CSVParserService {
         let validRecordCount = 0;
         let esRecordIndex = 0;
         
-        // Production batch sizes - MAXIMUM SPEED for 16GB RAM server
-        const BATCH_SIZE = productionMode ? 10000 : 500; // 10k MongoDB batch
-        const ES_BATCH_SIZE = productionMode ? 5000 : 200; // 5k ES batch
+        // Production batch sizes - MAXIMUM SPEED for 96GB RAM / 18 cores / 16GB ES
+        const BATCH_SIZE = productionMode ? 20000 : 500; // 20k MongoDB batch
+        const ES_BATCH_SIZE = productionMode ? 10000 : 200; // 10k ES batch
         let lastProgressUpdate = Date.now();
-        const PROGRESS_INTERVAL = productionMode ? 15000 : 1000; // 15s updates in prod
+        const PROGRESS_INTERVAL = productionMode ? 30000 : 1000; // 30s updates in prod
 
         const mapHeaders = ({ header }) => header.trim().replace(/^["']|["']$/g, '');
 

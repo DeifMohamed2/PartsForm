@@ -10,10 +10,10 @@ const connectDB = async () => {
     console.log(`📦 Connecting to MongoDB: ${sanitizedUri}`);
     
     const conn = await mongoose.connect(mongoURI, {
-      // Performance optimizations for bulk operations
-      maxPoolSize: 100, // More connections for parallel operations
-      minPoolSize: 10,
-      socketTimeoutMS: 120000, // 2 min timeout for large bulk ops
+      // Performance optimizations for 96GB/18-core/NVMe server
+      maxPoolSize: 200, // 200 connections for 18 cores
+      minPoolSize: 20,
+      socketTimeoutMS: 180000, // 3 min timeout for large bulk ops
       serverSelectionTimeoutMS: 30000,
       writeConcern: {
         w: 1, // Fast writes (acknowledge from primary only)
