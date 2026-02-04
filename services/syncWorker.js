@@ -72,11 +72,32 @@ class SyncWorker {
    */
   async updateProgress(requestId, progress) {
     const db = mongoose.connection.db;
+    
+    // Calculate elapsedMs if startTime exists
+    const existingRequest = await db.collection('sync_requests').findOne({
+      _id: new mongoose.Types.ObjectId(requestId)
+    });
+    
+    let elapsedMs = 0;
+    if (existingRequest?.progress?.startTime) {
+      elapsedMs = Date.now() - existingRequest.progress.startTime;
+    } else if (progress.startTime) {
+      elapsedMs = Date.now() - progress.startTime;
+    }
+    
+    // Merge with existing progress and add elapsedMs
+    const updatedProgress = {
+      ...existingRequest?.progress,
+      ...progress,
+      elapsedMs,
+      updatedAt: new Date()
+    };
+    
     await db.collection('sync_requests').updateOne(
       { _id: new mongoose.Types.ObjectId(requestId) },
       { 
         $set: { 
-          progress,
+          progress: updatedProgress,
           updatedAt: new Date()
         } 
       }
@@ -107,6 +128,11 @@ class SyncWorker {
         status: 'syncing',
         phase: 'connecting',
         integrationName: integration.name,
+        startTime,  // Add startTime for duration calculation
+        filesTotal: 0,
+        filesProcessed: 0,
+        recordsProcessed: 0,
+        recordsInserted: 0,
         startTime,
       });
 
@@ -242,11 +268,12 @@ class SyncWorker {
       const totalBatches = Math.ceil(files.length / CONFIG.PARALLEL_DOWNLOADS);
       
       await this.updateProgress(requestId, {
+        status: 'syncing',
         phase: 'processing',
         message: `Processing files ${i + 1}-${Math.min(i + CONFIG.PARALLEL_DOWNLOADS, files.length)} of ${files.length} (${CONFIG.PARALLEL_DOWNLOADS} parallel)...`,
         filesTotal: files.length,
         filesProcessed,
-        recordsTotal: totalRecords,
+        recordsProcessed: totalRecords,    // Frontend expects recordsProcessed
         recordsInserted: totalInserted,
       });
 
@@ -265,11 +292,10 @@ class SyncWorker {
               const result = await csvParserService.parseAndImport(
                 tempPath,
                 {
-                  integrationId: integration._id.toString(),
+                  integration: integration._id.toString(),  // Must be 'integration' not 'integrationId'
                   integrationName: integration.name,
                   fileName: file.name,
-                  mapping: integration.mapping || {},
-                  batchSize: CONFIG.BATCH_SIZE,
+                  columnMapping: integration.mapping || {},
                   skipES: true, // Defer ES indexing
                 },
                 null // No progress callback needed
