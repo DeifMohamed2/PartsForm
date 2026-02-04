@@ -2306,12 +2306,53 @@ const testIntegrationConnection = async (req, res) => {
 
 /**
  * Sync integration (API)
+ * When SYNC_USE_WORKER=true, creates a sync request that the worker picks up
+ * Otherwise, runs sync in the main process
  */
 const syncIntegration = async (req, res) => {
   try {
     const integrationId = req.params.id;
+    const useWorker = process.env.SYNC_USE_WORKER === 'true';
     
-    // Check if already syncing
+    if (useWorker) {
+      // WORKER MODE: Create sync request in MongoDB
+      // The sync-worker process will pick it up and process it
+      const mongoose = require('mongoose');
+      const db = mongoose.connection.db;
+      
+      // Check if already syncing
+      const existing = await db.collection('sync_requests').findOne({
+        integrationId,
+        status: { $in: ['pending', 'processing'] }
+      });
+      
+      if (existing) {
+        return res.status(409).json({
+          success: false,
+          error: 'Sync already in progress',
+          requestId: existing._id,
+        });
+      }
+      
+      // Create sync request for worker
+      const result = await db.collection('sync_requests').insertOne({
+        integrationId,
+        status: 'pending',
+        createdAt: new Date(),
+        progress: { status: 'pending', phase: 'queued' },
+      });
+      
+      console.log(`📤 Sync request created for worker: ${result.insertedId}`);
+      
+      return res.json({
+        success: true,
+        message: 'Sync request sent to worker',
+        requestId: result.insertedId,
+        integrationId,
+      });
+    }
+    
+    // MAIN PROCESS MODE: Run sync directly
     if (syncService.isSyncing(integrationId)) {
       return res.status(409).json({
         success: false,
@@ -2319,7 +2360,6 @@ const syncIntegration = async (req, res) => {
       });
     }
     
-    // Start sync in background (uses optimized sync service)
     syncService.syncIntegration(integrationId).then(result => {
       console.log('Sync completed:', result);
     }).catch(error => {
@@ -2339,6 +2379,7 @@ const syncIntegration = async (req, res) => {
 
 /**
  * Get sync status (API) - includes real-time progress
+ * Checks both main process sync and worker sync
  */
 const getSyncStatus = async (req, res) => {
   try {
@@ -2349,8 +2390,29 @@ const getSyncStatus = async (req, res) => {
     }
     
     const integrationId = integration._id.toString();
-    const isSyncing = syncService.isSyncing(integrationId);
-    const progress = syncService.getSyncProgress ? syncService.getSyncProgress(integrationId) : null;
+    const useWorker = process.env.SYNC_USE_WORKER === 'true';
+    
+    let isSyncing = false;
+    let progress = null;
+    
+    if (useWorker) {
+      // Check worker's sync request
+      const mongoose = require('mongoose');
+      const db = mongoose.connection.db;
+      const request = await db.collection('sync_requests').findOne({
+        integrationId,
+        status: { $in: ['pending', 'processing'] }
+      });
+      
+      if (request) {
+        isSyncing = true;
+        progress = request.progress || { status: request.status };
+      }
+    } else {
+      // Check main process sync
+      isSyncing = syncService.isSyncing(integrationId);
+      progress = syncService.getSyncProgress ? syncService.getSyncProgress(integrationId) : null;
+    }
     
     res.json({
       success: true,
@@ -2368,12 +2430,33 @@ const getSyncStatus = async (req, res) => {
 
 /**
  * Get real-time sync progress (API) - for polling
+ * Checks both main process sync and worker sync
  */
 const getSyncProgress = async (req, res) => {
   try {
     const integrationId = req.params.id;
-    const isSyncing = syncService.isSyncing(integrationId);
-    const progress = syncService.getSyncProgress ? syncService.getSyncProgress(integrationId) : null;
+    const useWorker = process.env.SYNC_USE_WORKER === 'true';
+    
+    let isSyncing = false;
+    let progress = null;
+    
+    if (useWorker) {
+      // Check worker's sync request
+      const mongoose = require('mongoose');
+      const db = mongoose.connection.db;
+      const request = await db.collection('sync_requests').findOne({
+        integrationId,
+        status: { $in: ['pending', 'processing'] }
+      });
+      
+      if (request) {
+        isSyncing = true;
+        progress = request.progress || { status: request.status };
+      }
+    } else {
+      isSyncing = syncService.isSyncing(integrationId);
+      progress = syncService.getSyncProgress ? syncService.getSyncProgress(integrationId) : null;
+    }
     
     if (!isSyncing && !progress) {
       // If not syncing and no progress, check the integration for last sync info

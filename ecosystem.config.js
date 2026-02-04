@@ -1,31 +1,42 @@
 module.exports = {
   apps: [
-    // Main Application - runs the website AND handles sync requests
+    // ============================================
+    // MAIN WEBSITE - Lightweight, always fast
+    // ============================================
     {
       name: 'partsform',
       script: 'app.js',
       instances: 1,
       exec_mode: 'fork',
-      max_memory_restart: '14G',
-      node_args: '--max-old-space-size=20480 --expose-gc',
+      max_memory_restart: '4G',  // Website only - doesn't need much
+      node_args: '--max-old-space-size=4096',
       env: {
         NODE_ENV: 'production',
-        SYNC_PRODUCTION_MODE: 'true',
-        SYNC_PRIORITY: 'low',      // Website-friendly sync
-        SYNC_DEFER_ES: 'true',     // Phase 1: MongoDB, Phase 2: ES reindex
+        SYNC_USE_WORKER: 'true',  // Delegate sync to worker process
       },
       env_production: {
         NODE_ENV: 'production',
-        SYNC_PRODUCTION_MODE: 'true',
-        SYNC_PRIORITY: 'low',
-        SYNC_DEFER_ES: 'true',
+        SYNC_USE_WORKER: 'true',
       },
-      // For maximum speed during off-peak hours:
-      env_turbo: {
+    },
+    
+    // ============================================
+    // SYNC WORKER - Dedicated heavy-duty process
+    // ============================================
+    // Has its own 20GB memory space
+    // Runs sync at MAXIMUM SPEED
+    // Does NOT affect website performance AT ALL
+    {
+      name: 'sync-worker',
+      script: 'services/syncWorker.js',
+      instances: 1,
+      exec_mode: 'fork',
+      max_memory_restart: '16G',
+      node_args: '--max-old-space-size=20480 --expose-gc',
+      autorestart: true,  // Keep running, watching for sync requests
+      watch: false,
+      env: {
         NODE_ENV: 'production',
-        SYNC_PRODUCTION_MODE: 'true',
-        SYNC_PRIORITY: 'high',     // Max speed sync
-        SYNC_DEFER_ES: 'true',
       },
     }
   ]

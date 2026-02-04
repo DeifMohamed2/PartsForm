@@ -1,8 +1,10 @@
 /**
  * Scheduler Service
  * Manages cron-based scheduled syncing for integrations
+ * Supports both main process sync and worker process sync
  */
 const cron = require('node-cron');
+const mongoose = require('mongoose');
 const Integration = require('../models/Integration');
 const syncService = require('./syncService');
 
@@ -10,6 +12,41 @@ class SchedulerService {
   constructor() {
     this.tasks = new Map();
     this.isInitialized = false;
+    this.useWorker = process.env.SYNC_USE_WORKER === 'true';
+  }
+
+  /**
+   * Trigger sync - either via worker or main process
+   */
+  async triggerSync(integrationId) {
+    if (this.useWorker) {
+      // Create sync request for worker to pick up
+      const db = mongoose.connection.db;
+      
+      // Check if already syncing
+      const existing = await db.collection('sync_requests').findOne({
+        integrationId,
+        status: { $in: ['pending', 'processing'] }
+      });
+      
+      if (existing) {
+        console.log(`⏭️  Sync already in progress for ${integrationId}`);
+        return;
+      }
+      
+      await db.collection('sync_requests').insertOne({
+        integrationId,
+        status: 'pending',
+        createdAt: new Date(),
+        source: 'scheduler',
+        progress: { status: 'pending', phase: 'queued' },
+      });
+      
+      console.log(`📤 Scheduled sync request sent to worker: ${integrationId}`);
+    } else {
+      // Direct sync in main process
+      await syncService.syncIntegration(integrationId);
+    }
   }
 
   /**
@@ -71,7 +108,7 @@ class SchedulerService {
       async () => {
         console.log(`⏰ Scheduled sync triggered: ${integration.name}`);
         try {
-          await syncService.syncIntegration(integrationId);
+          await this.triggerSync(integrationId);
         } catch (error) {
           console.error(`❌ Scheduled sync failed for ${integration.name}:`, error.message);
         }
@@ -83,7 +120,7 @@ class SchedulerService {
     );
 
     this.tasks.set(integrationId, task);
-    console.log(`📅 Scheduled: ${integration.name} (${cronExpression})`);
+    console.log(`📅 Scheduled: ${integration.name} (${cronExpression})${this.useWorker ? ' [worker mode]' : ''}`);
   }
 
   /**
