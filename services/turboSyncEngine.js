@@ -38,23 +38,24 @@ const CONFIG = {
   // Directories
   WORK_DIR: '/tmp/partsform-turbo-sync',
   
-  // FTP - aggressive parallel downloads
-  FTP_PARALLEL: 30,              // 30 parallel FTP downloads (was 20)
-  FTP_TIMEOUT: 30000,            // 30s timeout per file
+  // FTP - MAXIMUM parallel downloads
+  FTP_PARALLEL: 50,              // 50 parallel FTP downloads (was 30)
+  FTP_TIMEOUT: 60000,            // 60s timeout per file
   
-  // MongoDB - mongoimport settings
+  // MongoDB - mongoimport settings (fewer parallel to reduce disk contention)
   MONGO_WORKERS: 18,             // Use all 18 cores per process
-  MONGO_PARALLEL: 6,             // Run 6 mongoimport processes in parallel
+  MONGO_PARALLEL: 4,             // 4 parallel (less disk contention)
   MONGO_BATCH_SIZE: 10000,       // mongoimport batch size
   SKIP_INDEXES: true,            // Skip index creation (do in background later)
   
-  // Elasticsearch - ABSOLUTE MAXIMUM SPEED
-  ES_BULK_SIZE: 150000,          // 150k docs per bulk (was 100k)
-  ES_PARALLEL: 24,               // 24 parallel bulk operations (was 16)
+  // Elasticsearch - MAXIMUM SPEED (smaller batches = faster individual requests)
+  ES_BULK_SIZE: 50000,           // 50k docs per bulk (smaller = faster response)
+  ES_PARALLEL: 32,               // 32 parallel bulk operations
+  ES_FILE_PARALLEL: 16,          // Process 16 files simultaneously
   ES_REFRESH_INTERVAL: '-1',     // Disable during import
   
-  // Processing - PARALLEL EVERYTHING
-  TRANSFORM_PARALLEL: 16,        // Process 16 files simultaneously (was 8)
+  // Processing - MAXIMUM PARALLEL
+  TRANSFORM_PARALLEL: 24,        // Process 24 files simultaneously (was 16)
 };
 
 // ============================================
@@ -683,7 +684,7 @@ async function indexToElasticsearch(integration, totalRecords, ndjsonFiles) {
           batch = [];
           
           // Limit concurrent bulks per file
-          if (pendingBulks.length >= 4) {
+          if (pendingBulks.length >= 8) {
             const results = await Promise.all(pendingBulks);
             fileIndexed += results.reduce((a, b) => a + b, 0);
             pendingBulks = [];
@@ -707,12 +708,11 @@ async function indexToElasticsearch(integration, totalRecords, ndjsonFiles) {
     return fileIndexed;
   };
   
-  // Process files in parallel batches
-  const ES_FILE_PARALLEL = 8; // Process 8 files simultaneously
+  // Process files in parallel batches - use CONFIG value
   let completedFiles = 0;
   
-  for (let i = 0; i < ndjsonFiles.length; i += ES_FILE_PARALLEL) {
-    const batch = ndjsonFiles.slice(i, i + ES_FILE_PARALLEL);
+  for (let i = 0; i < ndjsonFiles.length; i += CONFIG.ES_FILE_PARALLEL) {
+    const batch = ndjsonFiles.slice(i, i + CONFIG.ES_FILE_PARALLEL);
     const results = await Promise.all(batch.map(f => processFile(f)));
     
     totalIndexed += results.reduce((a, b) => a + b, 0);
@@ -770,12 +770,12 @@ async function updateIntegrationStatus(integration, results) {
 // ============================================
 async function runTurboSync(integrationId) {
   console.log('\n' + '═'.repeat(60));
-  console.log('🚀 TURBO SYNC ENGINE v2.2 - ULTRA SPEED');
+  console.log('🚀 TURBO SYNC ENGINE v2.3 - MAXIMUM OVERDRIVE');
   console.log('═'.repeat(60));
-  console.log(`   Target: 75M records in 35 minutes (~35k/sec)`);
+  console.log(`   Target: 75M records in 25 minutes`);
   console.log(`   Server: 96GB RAM, 18 cores, NVMe SSD`);
-  console.log(`   NEW: ES indexes from NDJSON files (10x faster!)`);
-  console.log(`   Config: FTP=${CONFIG.FTP_PARALLEL} | Transform=${CONFIG.TRANSFORM_PARALLEL} | Mongo=${CONFIG.MONGO_PARALLEL}x | ES=8 files`);
+  console.log(`   FTP: ${CONFIG.FTP_PARALLEL} parallel | Transform: ${CONFIG.TRANSFORM_PARALLEL} parallel`);
+  console.log(`   MongoDB: ${CONFIG.MONGO_PARALLEL}x parallel | ES: ${CONFIG.ES_FILE_PARALLEL} files x ${CONFIG.ES_BULK_SIZE/1000}k`);
   console.log('═'.repeat(60) + '\n');
   
   const overallStart = Date.now();
