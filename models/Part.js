@@ -144,6 +144,9 @@ partSchema.index({ partNumber: 1, integration: 1 });
 partSchema.index({ brand: 1, supplier: 1 });
 partSchema.index({ price: 1, quantity: 1 });
 
+// Standalone integration index for FAST deletion (critical for sync cleanup)
+partSchema.index({ integration: 1 });
+
 // Text index for full-text search (fallback when Elasticsearch is unavailable)
 partSchema.index({
   partNumber: 'text',
