@@ -2306,11 +2306,40 @@ const testIntegrationConnection = async (req, res) => {
 
 /**
  * Sync integration (API)
+ * Supports two modes:
+ * - Normal: uses syncService (runs in main process)
+ * - Ultra-Fast: uses isolatedSyncScheduler (runs in separate process - NEVER affects website)
  */
 const syncIntegration = async (req, res) => {
   try {
     const integrationId = req.params.id;
+    const useIsolatedSync = req.query.mode === 'ultrafast' || process.env.SYNC_USE_ISOLATED === 'true';
     
+    if (useIsolatedSync) {
+      // ULTRA-FAST MODE: Run in completely separate process
+      const isolatedSyncScheduler = require('../services/isolatedSyncScheduler');
+      
+      const status = isolatedSyncScheduler.getStatus();
+      if (status.isRunning) {
+        return res.status(409).json({
+          success: false,
+          error: 'Sync already in progress (isolated mode)',
+          pid: status.pid,
+        });
+      }
+      
+      const result = isolatedSyncScheduler.runSync(integrationId);
+      
+      return res.json({
+        success: true,
+        message: 'Ultra-fast sync started in isolated process',
+        mode: 'isolated',
+        pid: result.pid,
+        integrationId,
+      });
+    }
+    
+    // NORMAL MODE: Run in main process
     // Check if already syncing
     if (syncService.isSyncing(integrationId)) {
       return res.status(409).json({
@@ -2329,6 +2358,7 @@ const syncIntegration = async (req, res) => {
     res.json({
       success: true,
       message: 'Sync started',
+      mode: 'normal',
       integrationId,
     });
   } catch (error) {
