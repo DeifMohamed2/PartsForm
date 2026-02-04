@@ -2,6 +2,7 @@
  * FTP Service
  * Simplified version based on working implementation from THings of FTP Connection
  * Handles FTP connections, file listing, and downloading
+ * Supports parallel downloads with isolated client instances
  */
 const ftp = require('basic-ftp');
 const { PassThrough } = require('stream');
@@ -15,6 +16,67 @@ class FTPService {
     this.currentCredentials = null;
     this.debug = false; // Set to true for detailed FTP logging
     this.productionMode = process.env.NODE_ENV === 'production' || process.env.SYNC_PRODUCTION_MODE === 'true';
+  }
+
+  /**
+   * Create a new isolated FTP client for parallel operations
+   * Each client is independent and can be used concurrently
+   */
+  createIsolatedClient() {
+    return new ftp.Client();
+  }
+
+  /**
+   * Download file using an isolated client (for parallel downloads)
+   * Creates its own connection, downloads, and closes - fully independent
+   */
+  async downloadToTempFileParallel(remotePath, credentials) {
+    const client = this.createIsolatedClient();
+    
+    try {
+      const accessConfig = {
+        host: (credentials.host || '').trim(),
+        port: credentials.port || 21,
+        user: (credentials.username || credentials.user || '').trim(),
+        password: credentials.password,
+        secure: credentials.secure !== undefined ? credentials.secure : false,
+      };
+      
+      await client.access(accessConfig);
+      
+      // Change to remote directory if specified
+      const remoteDir = credentials?.remotePath || '/';
+      if (remoteDir && remoteDir !== '/') {
+        try {
+          await client.cd(remoteDir);
+        } catch (cdError) {
+          // Directory may not exist or already in correct dir
+        }
+      }
+      
+      const fileName = remotePath.split('/').pop();
+      
+      // Create temp file path
+      const tempDir = path.join(os.tmpdir(), 'partsform-ftp');
+      if (!fs.existsSync(tempDir)) {
+        fs.mkdirSync(tempDir, { recursive: true });
+      }
+      const tempFilePath = path.join(tempDir, `${Date.now()}-${Math.random().toString(36).substr(2, 9)}-${fileName}`);
+      
+      // Download directly to file
+      await client.downloadTo(tempFilePath, remotePath);
+      
+      return tempFilePath;
+    } catch (error) {
+      throw error;
+    } finally {
+      // Always close the isolated client
+      try {
+        client.close();
+      } catch (e) {
+        // Ignore close errors
+      }
+    }
   }
 
   /**

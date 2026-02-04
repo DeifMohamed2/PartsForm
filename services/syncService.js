@@ -304,12 +304,12 @@ class SyncService extends EventEmitter {
     const errors = [];
 
     // PARALLEL PROCESSING - Process multiple files simultaneously
+    // Each file uses its own isolated FTP connection for true parallelism
     const PARALLEL_DOWNLOADS = this.productionMode ? 5 : 2; // 5 parallel downloads in production
-    const PARALLEL_PARSING = this.productionMode ? 3 : 1; // 3 parallel CSV parsing in production
 
-    console.log(`⚡ Starting PARALLEL sync: ${PARALLEL_DOWNLOADS} downloads, ${PARALLEL_PARSING} parsing threads`);
+    console.log(`⚡ Starting PARALLEL sync: ${PARALLEL_DOWNLOADS} concurrent downloads with isolated connections`);
 
-    // Helper function to process a single file
+    // Helper function to process a single file with isolated FTP connection
     const processFile = async (file, index) => {
       const startTime = Date.now();
       try {
@@ -317,10 +317,10 @@ class SyncService extends EventEmitter {
         const remotePath = file.name;
         const remoteDir = integration.ftp.remotePath || '/';
 
-        // Download file to temp
+        // Download file using ISOLATED parallel-safe connection
         const downloadCredentials = { ...credentials, remotePath: remoteDir };
-        const tempFilePath = await ftpService.downloadToTempFile(remotePath, downloadCredentials);
-        await ftpService.close();
+        const tempFilePath = await ftpService.downloadToTempFileParallel(remotePath, downloadCredentials);
+        // No need to close - isolated client closes itself
 
         // Parse and import from temp file
         const result = await csvParserService.parseAndImport(tempFilePath, {
@@ -330,8 +330,14 @@ class SyncService extends EventEmitter {
           columnMapping: integration.columnMapping,
         });
 
+        // Clean up temp file after processing
+        try {
+          const fs = require('fs');
+          if (fs.existsSync(tempFilePath)) fs.unlinkSync(tempFilePath);
+        } catch (e) { /* ignore cleanup errors */ }
+
         const duration = ((Date.now() - startTime) / 1000).toFixed(1);
-        if (this.productionMode && index % 20 === 0) {
+        if (index % 10 === 0 || !this.productionMode) {
           console.log(`✅ [${index + 1}/${files.length}] ${file.name}: ${result.inserted.toLocaleString()} records (${duration}s)`);
         }
 
@@ -344,7 +350,6 @@ class SyncService extends EventEmitter {
         };
       } catch (error) {
         console.error(`❌ [${index + 1}/${files.length}] ${file.name}: ${error.message}`);
-        await ftpService.forceReset();
         return {
           name: file.name,
           status: 'failed',
@@ -353,7 +358,7 @@ class SyncService extends EventEmitter {
       }
     };
 
-    // Process files in parallel batches
+    // Process files in parallel batches with isolated connections
     const processBatch = async (batch, startIndex) => {
       const promises = batch.map((file, i) => processFile(file, startIndex + i));
       return Promise.all(promises);
@@ -366,7 +371,7 @@ class SyncService extends EventEmitter {
       this._updateProgress(integrationId, {
         phase: 'processing',
         filesProcessed: i,
-        message: `Processing files ${i + 1}-${Math.min(i + PARALLEL_DOWNLOADS, files.length)} of ${files.length} (parallel)...`,
+        message: `Processing files ${i + 1}-${Math.min(i + PARALLEL_DOWNLOADS, files.length)} of ${files.length} (${PARALLEL_DOWNLOADS} parallel)...`,
       });
 
       const batchResults = await processBatch(batch, i);
@@ -394,7 +399,7 @@ class SyncService extends EventEmitter {
       });
     }
 
-    // Final cleanup
+    // Final cleanup of main client
     await ftpService.close();
     console.log(`✅ PARALLEL sync completed: ${fileResults.length} files, ${totalInserted.toLocaleString()} records, ${errors.length} errors`);
 
