@@ -29,24 +29,26 @@ const { Client: FTPClient } = require('basic-ftp');
 const { Client: ESClient } = require('@elastic/elasticsearch');
 
 // ============================================
-// CONFIGURATION - Optimized for your server
+// CONFIGURATION - MAXIMUM SPEED
 // 96GB RAM, 18 cores, NVMe SSD
+// Target: 75M records in ~30 minutes
 // ============================================
 const CONFIG = {
   // Directories
   WORK_DIR: '/tmp/partsform-turbo-sync',
   
   // FTP
-  FTP_PARALLEL: 15,              // Parallel FTP downloads
+  FTP_PARALLEL: 20,              // 20 parallel FTP downloads
   FTP_TIMEOUT: 30000,            // 30s timeout per file
   
   // MongoDB - mongoimport settings
-  MONGO_WORKERS: 16,             // mongoimport parallel workers
+  MONGO_WORKERS: 18,             // Use all 18 cores
   MONGO_BATCH_SIZE: 10000,       // mongoimport batch size
+  SKIP_INDEXES: true,            // Skip index creation (do in background later)
   
-  // Elasticsearch
-  ES_BULK_SIZE: 50000,           // 50k docs per bulk
-  ES_PARALLEL: 8,                // Parallel bulk operations
+  // Elasticsearch - MAXIMUM SPEED
+  ES_BULK_SIZE: 100000,          // 100k docs per bulk (was 50k)
+  ES_PARALLEL: 16,               // 16 parallel bulk operations (was 8)
   ES_REFRESH_INTERVAL: '-1',     // Disable during import
   
   // Processing
@@ -238,17 +240,37 @@ async function transformToNDJSON(downloadDir, files, integration) {
             separator = line.includes(';') ? ';' : ',';
             headers = line.split(separator).map(h => h.trim().toLowerCase().replace(/['"]/g, ''));
             
-            // Find column indices
+            // Find column indices - comprehensive mapping
             colMap = {
-              partNumber: headers.findIndex(h => h.includes('part') || h.includes('vendor') || h.includes('sku') || h === 'code'),
-              description: headers.findIndex(h => h.includes('desc') || h.includes('title') || h.includes('name')),
+              // Part identification
+              partNumber: headers.findIndex(h => h.includes('vendor code') || h.includes('vendor_code') || h.includes('part') || h.includes('sku') || h === 'code'),
+              description: headers.findIndex(h => h.includes('title') || h.includes('desc') || h.includes('name')),
               brand: headers.findIndex(h => h.includes('brand') || h.includes('manufacturer') || h.includes('make')),
-              supplier: headers.findIndex(h => h.includes('supplier') || h.includes('vendor')),
+              
+              // Pricing
               price: headers.findIndex(h => h.includes('price') || h.includes('cost')),
-              currency: headers.findIndex(h => h.includes('currency') || h.includes('curr')),
-              quantity: headers.findIndex(h => h.includes('quantity') || h.includes('qty') || h.includes('stock')),
-              weight: headers.findIndex(h => h.includes('weight')),
-              category: headers.findIndex(h => h.includes('category') || h.includes('cat')),
+              currency: headers.findIndex(h => h.includes('currency') || h.includes('curr') || h === 'aed' || h === 'usd'),
+              
+              // Stock & Quantity
+              quantity: headers.findIndex(h => h === 'quantity' || h === 'qty'),
+              minOrderQty: headers.findIndex(h => h.includes('min_lot') || h.includes('min lot') || h.includes('minorder') || h.includes('min_order') || h.includes('moq')),
+              stock: headers.findIndex(h => h === 'stock' && !h.includes('code')),
+              stockCode: headers.findIndex(h => h.includes('stock code') || h.includes('stock_code') || h.includes('stockcode')),
+              
+              // Physical properties
+              weight: headers.findIndex(h => h === 'weight'),
+              weightUnit: headers.findIndex(h => h.includes('weight_unit') || h.includes('weightunit')),
+              volume: headers.findIndex(h => h.includes('volume') || h.includes('vol')),
+              
+              // Delivery
+              deliveryDays: headers.findIndex(h => h.includes('delivery') || h.includes('lead_time') || h.includes('leadtime')),
+              
+              // Categories
+              category: headers.findIndex(h => h === 'category' || h === 'cat'),
+              subcategory: headers.findIndex(h => h.includes('subcategory') || h.includes('subcat') || h.includes('sub_category')),
+              
+              // Supplier
+              supplier: headers.findIndex(h => h.includes('supplier')),
             };
             return;
           }
@@ -260,16 +282,42 @@ async function transformToNDJSON(downloadDir, files, integration) {
           const partNumber = (cols[colMap.partNumber] || '').replace(/['"]/g, '').trim();
           if (!partNumber) return;
           
+          // Extract stock code from filename if not in columns (e.g., "APMG price 1 day_DS1_part1.csv" -> "DS1")
+          let stockCodeValue = (cols[colMap.stockCode] || '').replace(/['"]/g, '').trim();
+          if (!stockCodeValue) {
+            const match = fileName.match(/_([A-Z0-9]+)_part/i);
+            if (match) stockCodeValue = match[1];
+          }
+          
           const doc = {
             partNumber,
             description: (cols[colMap.description] || '').replace(/['"]/g, ''),
             brand: (cols[colMap.brand] || '').replace(/['"]/g, ''),
             supplier: (cols[colMap.supplier] || '').replace(/['"]/g, ''),
+            
+            // Pricing
             price: parseFloat(cols[colMap.price]) || 0,
-            currency: (cols[colMap.currency] || 'USD').replace(/['"]/g, ''),
+            currency: (cols[colMap.currency] || 'AED').replace(/['"]/g, '').toUpperCase(),
+            
+            // Stock & Quantity
             quantity: parseInt(cols[colMap.quantity]) || 0,
+            minOrderQty: parseInt(cols[colMap.minOrderQty]) || 1,
+            stock: (cols[colMap.stock] || 'unknown').replace(/['"]/g, ''),
+            stockCode: stockCodeValue,
+            
+            // Physical properties
             weight: parseFloat(cols[colMap.weight]) || 0,
+            weightUnit: (cols[colMap.weightUnit] || 'kg').replace(/['"]/g, ''),
+            volume: parseFloat(cols[colMap.volume]) || 0,
+            
+            // Delivery
+            deliveryDays: parseInt(cols[colMap.deliveryDays]) || 0,
+            
+            // Categories
             category: (cols[colMap.category] || '').replace(/['"]/g, ''),
+            subcategory: (cols[colMap.subcategory] || '').replace(/['"]/g, ''),
+            
+            // Metadata
             integration: integrationId,
             integrationName,
             fileName,
@@ -431,12 +479,30 @@ async function importToMongoDB(ndjsonFiles, totalRecords, integration) {
     }
   }
   
-  // Step 3: Recreate indexes
-  log('Recreating indexes...');
-  await collection.createIndex({ partNumber: 1 }, { background: true });
-  await collection.createIndex({ integration: 1 }, { background: true });
-  await collection.createIndex({ brand: 1 }, { background: true });
-  await collection.createIndex({ partNumber: 1, integration: 1 }, { background: true });
+  // Step 3: Skip index recreation during import (saves 15-20 minutes!)
+  // Indexes will be created in background by MongoDB after sync completes
+  if (!CONFIG.SKIP_INDEXES) {
+    log('Recreating indexes...');
+    await collection.createIndex({ partNumber: 1 }, { background: true });
+    await collection.createIndex({ integration: 1 }, { background: true });
+    await collection.createIndex({ brand: 1 }, { background: true });
+    await collection.createIndex({ partNumber: 1, integration: 1 }, { background: true });
+  } else {
+    log('Skipping index recreation (will create in background later)');
+    // Schedule background index creation (non-blocking)
+    setImmediate(async () => {
+      try {
+        log('Starting background index creation...');
+        await collection.createIndex({ partNumber: 1 }, { background: true });
+        await collection.createIndex({ integration: 1 }, { background: true });
+        await collection.createIndex({ brand: 1 }, { background: true });
+        await collection.createIndex({ partNumber: 1, integration: 1 }, { background: true });
+        log('Background index creation complete', 'SUCCESS');
+      } catch (e) {
+        log(`Background index error: ${e.message}`, 'ERROR');
+      }
+    });
+  }
   
   const duration = Date.now() - startTime;
   const rate = Math.round(importedCount / (duration / 1000));
@@ -457,7 +523,9 @@ async function indexToElasticsearch(integration, totalRecords) {
   
   const esClient = new ESClient({
     node: esNode,
-    requestTimeout: 120000,
+    requestTimeout: 180000,     // 3 min timeout for big bulks
+    maxRetries: 3,
+    compression: true,          // Compress requests
   });
   
   // Check ES availability
@@ -468,36 +536,41 @@ async function indexToElasticsearch(integration, totalRecords) {
     return { indexed: 0, duration: 0 };
   }
   
-  // Put index into ingest mode
+  // Put index into MAXIMUM SPEED ingest mode
   try {
     await esClient.indices.putSettings({
       index: esIndex,
       body: {
         'index.refresh_interval': '-1',
         'index.number_of_replicas': 0,
+        'index.translog.durability': 'async',       // Async translog for speed
+        'index.translog.sync_interval': '60s',      // Sync less often
+        'index.translog.flush_threshold_size': '1gb', // Larger translog buffer
       }
     });
   } catch (e) {
     // Index might not exist
   }
   
-  // Delete old ES data
+  // Delete old ES data (non-blocking)
   try {
     await esClient.deleteByQuery({
       index: esIndex,
       body: { query: { term: { integration: integration._id.toString() } } },
       conflicts: 'proceed',
       refresh: false,
-      wait_for_completion: true,
+      wait_for_completion: false,  // Don't wait
     });
   } catch (e) {
     // Ignore
   }
   
-  // Stream from MongoDB and bulk index
-  await mongoose.connect(process.env.MONGODB_URI);
+  // Reconnect to MongoDB to ensure connection is fresh
+  if (!mongoose.connection.readyState) {
+    await mongoose.connect(process.env.MONGODB_URI);
+  }
   const db = mongoose.connection.db;
-  const cursor = db.collection('parts').find({ integration: integration._id.toString() }).batchSize(CONFIG.ES_BULK_SIZE);
+  const cursor = db.collection('parts').find({ integration: integration._id.toString() }).batchSize(CONFIG.ES_BULK_SIZE * 2);
   
   let batch = [];
   let totalIndexed = 0;
@@ -516,6 +589,15 @@ async function indexToElasticsearch(integration, totalRecords) {
         price: doc.price,
         currency: doc.currency,
         quantity: doc.quantity,
+        minOrderQty: doc.minOrderQty,
+        stock: doc.stock,
+        stockCode: doc.stockCode,
+        weight: doc.weight,
+        weightUnit: doc.weightUnit,
+        volume: doc.volume,
+        deliveryDays: doc.deliveryDays,
+        category: doc.category,
+        subcategory: doc.subcategory,
         integration: doc.integration,
         integrationName: doc.integrationName,
         fileName: doc.fileName,
@@ -546,7 +628,8 @@ async function indexToElasticsearch(integration, totalRecords) {
         totalIndexed += results.reduce((a, b) => a + b, 0);
         pendingBulks = [];
         
-        if (totalIndexed % 500000 < CONFIG.ES_BULK_SIZE) {
+        // Progress update every 2M records
+        if (totalIndexed % 2000000 < CONFIG.ES_BULK_SIZE) {
           const elapsed = (Date.now() - startTime) / 1000;
           const rate = Math.round(totalIndexed / elapsed);
           log(`ES indexed ${formatNumber(totalIndexed)} docs (${formatNumber(rate)}/sec)`, 'PROGRESS');
@@ -678,9 +761,8 @@ async function runTurboSync(integrationId) {
     log(`Sync failed: ${error.message}`, 'ERROR');
     console.error(error);
     return { success: false, error: error.message };
-  } finally {
-    await mongoose.disconnect();
   }
+  // Note: Don't disconnect mongoose here - syncWorker manages the connection
 }
 
 // Export for use by sync worker
@@ -689,7 +771,8 @@ module.exports = { runTurboSync, CONFIG };
 // Direct execution
 if (require.main === module) {
   const integrationId = process.argv[2];
-  runTurboSync(integrationId).then(result => {
+  runTurboSync(integrationId).then(async result => {
+    await mongoose.disconnect();
     process.exit(result.success ? 0 : 1);
   });
 }
