@@ -402,10 +402,23 @@ partSchema.statics.bulkUpsert = async function (records, options = {}) {
 
 /**
  * Delete all parts for an integration (used before fresh sync)
+ * Uses drop collection hint for massive deletes (much faster than deleteMany)
  */
 partSchema.statics.deleteByIntegration = async function (integrationId) {
-  const result = await this.deleteMany({ integration: integrationId });
-  console.log(`🗑️  Deleted ${result.deletedCount} old parts for integration ${integrationId}`);
+  const startTime = Date.now();
+  
+  // For large deletes, use unordered bulk delete which is faster
+  // Also hint to use the integration index
+  const result = await this.deleteMany(
+    { integration: integrationId },
+    { 
+      hint: { integration: 1 }, // Use the integration index
+      writeConcern: { w: 1, j: false } // Fast write concern
+    }
+  );
+  
+  const duration = ((Date.now() - startTime) / 1000).toFixed(1);
+  console.log(`🗑️  Deleted ${result.deletedCount.toLocaleString()} parts in ${duration}s`);
   return result.deletedCount;
 };
 
@@ -413,8 +426,14 @@ partSchema.statics.deleteByIntegration = async function (integrationId) {
  * Delete all parts for an integration + file (used for file-level refresh)
  */
 partSchema.statics.deleteByIntegrationFile = async function (integrationId, fileName) {
-  const result = await this.deleteMany({ integration: integrationId, fileName: fileName });
-  console.log(`🗑️  Deleted ${result.deletedCount} old parts for file ${fileName}`);
+  const result = await this.deleteMany(
+    { integration: integrationId, fileName: fileName },
+    { 
+      hint: { integration: 1, fileName: 1 },
+      writeConcern: { w: 1, j: false }
+    }
+  );
+  console.log(`🗑️  Deleted ${result.deletedCount.toLocaleString()} parts for file ${fileName}`);
   return result.deletedCount;
 };
 

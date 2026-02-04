@@ -770,21 +770,29 @@ class ElasticsearchService {
   }
 
   /**
-   * Delete documents by integration
+   * Delete documents by integration - optimized for speed
    */
   async deleteByIntegration(integrationId) {
     if (!this.isAvailable) return { deleted: 0 };
 
     try {
+      const startTime = Date.now();
+      
       const response = await this.client.deleteByQuery({
         index: this.indexName,
         body: {
           query: { term: { integration: integrationId.toString() } },
         },
+        conflicts: 'proceed', // Don't fail on version conflicts
+        refresh: false, // Don't refresh after delete (faster)
+        wait_for_completion: true,
+        slices: 'auto', // Parallel delete across shards
+        scroll_size: 10000, // Process 10k docs per batch
       });
 
-      console.log(`✅ Deleted ${response.deleted} documents for integration ${integrationId}`);
-      return { deleted: response.deleted };
+      const duration = ((Date.now() - startTime) / 1000).toFixed(1);
+      console.log(`🗑️  ES: Deleted ${response.deleted?.toLocaleString() || 0} docs in ${duration}s`);
+      return { deleted: response.deleted || 0 };
     } catch (error) {
       console.error('Error deleting by integration:', error.message);
       return { deleted: 0 };
