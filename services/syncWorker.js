@@ -252,8 +252,8 @@ class SyncWorker {
       const results = await Promise.all(
         batch.map(async (file) => {
           try {
-            // Download file
-            const tempPath = await ftpService.downloadToTempFileParallel(ftpConfig, file.name);
+            // Download file - pass filename first, then FTP credentials
+            const tempPath = await ftpService.downloadToTempFileParallel(file.name, ftpConfig);
             
             // Parse and import with MAXIMUM speed settings
             const result = await csvParserService.parseAndImportCSV(
