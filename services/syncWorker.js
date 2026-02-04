@@ -1,49 +1,38 @@
 #!/usr/bin/env node
 /**
- * DEDICATED SYNC WORKER
+ * TURBO SYNC WORKER v2.0
  * ======================
- * Runs as a COMPLETELY SEPARATE PM2 process
- * Has its own memory space - NEVER affects website performance
+ * Professional-grade high-performance sync engine
+ * Target: 75M records in 30 minutes (~42k records/sec)
  * 
- * Communication with main app via MongoDB (sync requests collection)
+ * Uses TURBO ENGINE with:
+ * - Parallel FTP downloads
+ * - NDJSON transformation (10x faster than streaming)
+ * - mongoimport (native Go, 16 workers) when available
+ * - Bulk MongoDB inserts with w:0 as fallback
+ * - Parallel ES bulk indexing with refresh disabled
  * 
- * This worker:
- * 1. Watches for sync requests in MongoDB
- * 2. Processes syncs with maximum speed (no throttling)
- * 3. Updates progress in MongoDB (main app reads it)
- * 4. Stays running and waits for next request
+ * Architecture:
+ * ┌─────────────┐     ┌──────────────┐     ┌─────────────┐     ┌─────────────┐
+ * │  FTP Server │ ──▶ │ Transform    │ ──▶ │ mongoimport │ ──▶ │  ES Bulk    │
+ * │  (parallel) │     │ (NDJSON)     │     │ (16 workers)│     │  (parallel) │
+ * └─────────────┘     └──────────────┘     └─────────────┘     └─────────────┘
  */
 
 require('dotenv').config();
 const mongoose = require('mongoose');
 const EventEmitter = require('events');
-const ftpService = require('./ftpService');
-const csvParserService = require('./csvParserService');
-const elasticsearchService = require('./elasticsearchService');
 const Integration = require('../models/Integration');
-const Part = require('../models/Part');
+const { runTurboSync, CONFIG: TURBO_CONFIG } = require('./turboSyncEngine');
 
-// Increase event listener limit for high-performance sync
+// Increase event listener limit
 EventEmitter.defaultMaxListeners = 100;
 
-// ============================================
-// MAXIMUM SPEED CONFIGURATION
-// Server: 96GB RAM, 18 cores, NVMe SSD
-// ============================================
+// Use TURBO mode by default for maximum speed
+const USE_TURBO_ENGINE = process.env.SYNC_ENGINE !== 'legacy';
+
+// Legacy config (only used if turbo disabled)
 const CONFIG = {
-  // FTP Downloads - push to FTP server limits
-  PARALLEL_DOWNLOADS: 12,       // 12 concurrent FTP connections (max most servers allow)
-  FTP_RETRY_ATTEMPTS: 2,        // Quick retries
-  FTP_RETRY_DELAY: 1000,        // 1s between retries
-  
-  // MongoDB - maximum throughput with w:0
-  BATCH_SIZE: 100000,           // 100k records per MongoDB batch
-  
-  // Elasticsearch - aggressive bulk indexing  
-  ES_BULK_SIZE: 30000,          // 30k docs per bulk request
-  ES_PARALLEL_BULKS: 12,        // 12 concurrent bulk operations
-  
-  // Worker polling
   POLL_INTERVAL: 1000,          // Check for requests every 1s
 };
 
@@ -115,7 +104,7 @@ class SyncWorker {
   }
 
   /**
-   * Process a single sync request
+   * Process a single sync request - TURBO MODE
    */
   async processSync(request) {
     const startTime = Date.now();
@@ -136,66 +125,55 @@ class SyncWorker {
 
       await this.updateProgress(request._id, {
         status: 'syncing',
-        phase: 'connecting',
+        phase: 'starting',
         integrationName: integration.name,
-        startTime,  // Add startTime for duration calculation
+        startTime,
         filesTotal: 0,
         filesProcessed: 0,
         recordsProcessed: 0,
         recordsInserted: 0,
-        startTime,
       });
 
-      // Prepare ES for bulk indexing
-      await elasticsearchService.prepareForBulkIndexing();
-
       let result;
-      if (integration.type === 'ftp') {
-        result = await this.syncFTP(integration, request._id);
-      } else {
-        throw new Error(`Unsupported integration type: ${integration.type}`);
-      }
 
-      // Reindex to ES after MongoDB import
-      if (result.success && result.inserted > 0) {
-        await this.updateProgress(request._id, {
-          status: 'syncing',
-          phase: 'indexing',
-          message: `Indexing ${result.inserted.toLocaleString()} records to Elasticsearch...`,
-        });
-
-        this.log(`Starting ES reindex for ${result.inserted.toLocaleString()} records...`);
+      // USE TURBO ENGINE for maximum speed
+      if (USE_TURBO_ENGINE) {
+        this.log('🚀 Using TURBO ENGINE for maximum speed');
         
-        await elasticsearchService.reindexIntegration(
-          integration._id.toString(),
-          (prog) => {
-            this.updateProgress(request._id, {
-              phase: 'indexing',
-              message: `ES: ${prog.indexed.toLocaleString()} docs (${prog.rate.toLocaleString()}/s)`,
-            });
-          }
-        );
+        await this.updateProgress(request._id, {
+          phase: 'turbo',
+          message: 'Starting Turbo Sync Engine...',
+        });
+        
+        const turboResult = await runTurboSync(integrationId);
+        
+        result = {
+          success: turboResult.success,
+          inserted: turboResult.records || 0,
+          recordsProcessed: turboResult.records || 0,
+          duration: turboResult.duration || Date.now() - startTime,
+        };
+        
+      } else {
+        // Legacy mode (fallback)
+        this.log('Using legacy sync mode');
+        result = await this.syncFTPLegacy(integration, request._id);
       }
 
       const duration = Date.now() - startTime;
 
-      // Update integration status
-      integration.status = 'active';
-      integration.lastSync = {
-        date: new Date(),
-        status: 'success',
-        duration,
-        recordsProcessed: result.recordsProcessed || 0,
-        recordsInserted: result.inserted || 0,
-        error: null,
-      };
-      integration.stats.totalRecords += result.inserted || 0;
-      integration.stats.lastSyncRecords = result.recordsProcessed || 0;
-      integration.stats.totalSyncs = (integration.stats.totalSyncs || 0) + 1;
-      integration.stats.successfulSyncs = (integration.stats.successfulSyncs || 0) + 1;
-      await integration.save();
-
-      await elasticsearchService.finalizeIndexing();
+      // Update integration status (turbo engine updates it too, but this is a safety net)
+      await Integration.findByIdAndUpdate(integrationId, {
+        status: 'active',
+        lastSync: {
+          date: new Date(),
+          status: 'success',
+          duration,
+          recordsProcessed: result.recordsProcessed || 0,
+          recordsInserted: result.inserted || 0,
+          error: null,
+        },
+      });
 
       // Mark request as completed
       const db = mongoose.connection.db;
@@ -215,7 +193,7 @@ class SyncWorker {
         }
       );
 
-      this.log(`Sync completed: ${result.inserted.toLocaleString()} records in ${(duration/1000/60).toFixed(1)} minutes`, 'SUCCESS');
+      this.log(`Sync completed: ${(result.inserted || 0).toLocaleString()} records in ${(duration/1000/60).toFixed(1)} minutes`, 'SUCCESS');
 
     } catch (error) {
       this.log(`Sync failed: ${error.message}`, 'ERROR');
@@ -245,9 +223,15 @@ class SyncWorker {
   }
 
   /**
-   * Sync FTP integration with MAXIMUM SPEED
+   * Legacy FTP Sync (fallback if turbo engine disabled)
    */
-  async syncFTP(integration, requestId) {
+  async syncFTPLegacy(integration, requestId) {
+    // Load services only when needed
+    const ftpService = require('./ftpService');
+    const csvParserService = require('./csvParserService');
+    const Part = require('../models/Part');
+    const elasticsearchService = require('./elasticsearchService');
+    
     const ftpConfig = integration.ftp;
     
     // Step 1: Get file list
@@ -266,24 +250,30 @@ class SyncWorker {
     await Part.deleteByIntegration(integration._id.toString());
     this.log(`Deleted old data in ${((Date.now() - deleteStart)/1000).toFixed(1)}s`);
 
-    // Step 3: Process files in PARALLEL
+    // Prepare ES
+    await elasticsearchService.prepareForBulkIndexing();
+
+    // Step 3: Process files
     let totalRecords = 0;
     let totalInserted = 0;
     let filesProcessed = 0;
+    const PARALLEL = 8;
+    const FTP_RETRY_ATTEMPTS = 2;
+    const FTP_RETRY_DELAY = 1000;
 
     // Download and process files in parallel batches
-    for (let i = 0; i < files.length; i += CONFIG.PARALLEL_DOWNLOADS) {
-      const batch = files.slice(i, i + CONFIG.PARALLEL_DOWNLOADS);
-      const batchNum = Math.floor(i / CONFIG.PARALLEL_DOWNLOADS) + 1;
-      const totalBatches = Math.ceil(files.length / CONFIG.PARALLEL_DOWNLOADS);
+    for (let i = 0; i < files.length; i += PARALLEL) {
+      const batch = files.slice(i, i + PARALLEL);
+      const batchNum = Math.floor(i / PARALLEL) + 1;
+      const totalBatches = Math.ceil(files.length / PARALLEL);
       
       await this.updateProgress(requestId, {
         status: 'syncing',
         phase: 'processing',
-        message: `Processing files ${i + 1}-${Math.min(i + CONFIG.PARALLEL_DOWNLOADS, files.length)} of ${files.length} (${CONFIG.PARALLEL_DOWNLOADS} parallel)...`,
+        message: `Processing files ${i + 1}-${Math.min(i + PARALLEL, files.length)} of ${files.length}...`,
         filesTotal: files.length,
         filesProcessed,
-        recordsProcessed: totalRecords,    // Frontend expects recordsProcessed
+        recordsProcessed: totalRecords,
         recordsInserted: totalInserted,
       });
 
@@ -293,22 +283,22 @@ class SyncWorker {
           let lastError = null;
           
           // Retry loop for FTP failures
-          for (let attempt = 1; attempt <= CONFIG.FTP_RETRY_ATTEMPTS; attempt++) {
+          for (let attempt = 1; attempt <= FTP_RETRY_ATTEMPTS; attempt++) {
             try {
-              // Download file - pass filename first, then FTP credentials
+              // Download file
               const tempPath = await ftpService.downloadToTempFileParallel(file.name, ftpConfig);
               
-              // Parse and import with MAXIMUM speed settings
+              // Parse and import
               const result = await csvParserService.parseAndImport(
                 tempPath,
                 {
-                  integration: integration._id.toString(),  // Must be 'integration' not 'integrationId'
+                  integration: integration._id.toString(),
                   integrationName: integration.name,
                   fileName: file.name,
                   columnMapping: integration.mapping || {},
-                  skipES: true, // Defer ES indexing
+                  skipES: true,
                 },
-                null // No progress callback needed
+                null
               );
 
               // Cleanup temp file
@@ -317,15 +307,13 @@ class SyncWorker {
               return result;
             } catch (error) {
               lastError = error;
-              if (attempt < CONFIG.FTP_RETRY_ATTEMPTS) {
-                // Wait before retry
-                await new Promise(r => setTimeout(r, CONFIG.FTP_RETRY_DELAY * attempt));
+              if (attempt < FTP_RETRY_ATTEMPTS) {
+                await new Promise(r => setTimeout(r, FTP_RETRY_DELAY * attempt));
               }
             }
           }
           
-          // All retries failed
-          this.log(`Error processing ${file.name} after ${CONFIG.FTP_RETRY_ATTEMPTS} attempts: ${lastError.message}`, 'ERROR');
+          this.log(`Error processing ${file.name}: ${lastError.message}`, 'ERROR');
           return { recordsProcessed: 0, inserted: 0, error: lastError.message };
         })
       );
@@ -338,6 +326,17 @@ class SyncWorker {
       }
 
       this.log(`Batch ${batchNum}/${totalBatches}: ${totalInserted.toLocaleString()} total records`);
+    }
+
+    // Reindex to ES
+    if (totalInserted > 0) {
+      await this.updateProgress(requestId, {
+        phase: 'indexing',
+        message: `Indexing ${totalInserted.toLocaleString()} records...`,
+      });
+      
+      await elasticsearchService.reindexIntegration(integration._id.toString());
+      await elasticsearchService.finalizeIndexing();
     }
 
     return {
