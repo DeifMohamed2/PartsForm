@@ -2,38 +2,16 @@
 <link rel="stylesheet" href="/css/adminCSS/admin-dashboard.css">
 <link rel="stylesheet" href="/css/adminCSS/admin-payments.css">
 </head>
-<body class="<%= typeof currentModule !== 'undefined' && currentModule ? 'module-' + currentModule : '' %>">
+<body>
   <div class="admin-wrapper">
-    <%- include('partials/sidebar', { activePage: 'payments', currentModule: currentModule }) %>
+    <%- include('partials/sidebar', { activePage: 'payments' }) %>
     
     <main class="admin-main">
-      <%- include('partials/topbar', { pageTitle: 'Payments', currentModule: currentModule }) %>
+      <%- include('partials/topbar', { pageTitle: 'Payments' }) %>
       
       <div class="admin-content">
-        <% if (currentModule && moduleConfig) { %>
-        <div class="module-info-banner">
-          <div class="module-info-icon">
-            <i data-lucide="<%= moduleConfig.icon %>"></i>
-          </div>
-          <div class="module-info-content">
-            <div class="module-info-title"><%= moduleConfig.name %> Payments</div>
-            <div class="module-info-desc">Viewing <%= moduleConfig.name.toLowerCase() %> payment transactions</div>
-          </div>
-          <div class="module-info-stats">
-            <div class="module-info-stat">
-              <div class="module-info-stat-value"><%= payments.length %></div>
-              <div class="module-info-stat-label">Payments</div>
-            </div>
-            <div class="module-info-stat">
-              <div class="module-info-stat-value">$<%= (payments.reduce((s, p) => s + p.amount, 0) / 1000).toFixed(0) %>K</div>
-              <div class="module-info-stat-label">Total</div>
-            </div>
-          </div>
-        </div>
-        <% } %>
-
         <div class="page-header">
-          <h2><%= currentModule ? moduleConfig.name + ' Payments' : 'Payments Management' %></h2>
+          <h2>Payments Management</h2>
           <a href="/admin/payments/create" class="admin-btn admin-btn-primary">
             <i data-lucide="plus"></i>
             Record Payment

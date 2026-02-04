@@ -928,12 +928,12 @@
   }
 </style>
 </head>
-<body class="<%= typeof currentModule !== 'undefined' && currentModule ? 'module-' + currentModule : '' %>">
+<body>
   <div class="admin-wrapper">
-    <%- include('partials/sidebar', { activePage: 'integrations', currentModule: currentModule }) %>
+    <%- include('partials/sidebar', { activePage: 'integrations' }) %>
     
     <main class="admin-main">
-      <%- include('partials/topbar', { pageTitle: 'Integrations', currentModule: currentModule }) %>
+      <%- include('partials/topbar', { pageTitle: 'Integrations' }) %>
       
       <div class="admin-content intg-page">
         <!-- Page Header Bar -->
@@ -944,7 +944,7 @@
             </div>
             <div class="intg-header-text">
               <h1>Data Integrations</h1>
-              <p>Manage FTP and API connections for <%= typeof moduleConfig !== 'undefined' ? moduleConfig.name : 'Parts' %></p>
+              <p>Manage FTP and API connections for Parts</p>
             </div>
           </div>
           <div class="intg-header-actions">
@@ -952,7 +952,7 @@
               <i data-lucide="refresh-cw"></i>
               Sync All
             </button>
-            <a href="/admin/integrations/create?module=<%= typeof currentModule !== 'undefined' ? currentModule : 'automotive-parts' %>" class="btn-add-connection">
+            <a href="/admin/integrations/create" class="btn-add-connection">
               <i data-lucide="plus"></i>
               Add Connection
             </a>
@@ -1020,7 +1020,7 @@
               </div>
               <h3>No Connections Yet</h3>
               <p>Add your first FTP or API connection to start importing parts data automatically.</p>
-              <a href="/admin/integrations/create?module=<%= typeof currentModule !== 'undefined' ? currentModule : 'automotive-parts' %>" class="btn-add-connection">
+              <a href="/admin/integrations/create" class="btn-add-connection">
                 <i data-lucide="plus"></i>
                 Add Your First Connection
             </a>
@@ -1271,7 +1271,6 @@
   </div>
 
   <script>
-    const currentModule = '<%= typeof currentModule !== "undefined" ? currentModule : "automotive-parts" %>';
     let pendingDeleteId = null;
     let activeSyncs = new Map();
     
@@ -1321,7 +1320,7 @@
 
     // Edit
     function editConnection(id) {
-      window.location.href = '/admin/integrations/edit/' + id + '?module=' + currentModule;
+      window.location.href = '/admin/integrations/edit/' + id;
     }
 
     // Delete
@@ -1710,7 +1709,7 @@
         }
         
         // Clean URL
-        window.history.replaceState({}, '', window.location.pathname + '?module=' + currentModule);
+        window.history.replaceState({}, '', window.location.pathname);
       }
     })();
 

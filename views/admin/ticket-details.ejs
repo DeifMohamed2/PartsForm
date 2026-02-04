@@ -2,17 +2,17 @@
 <link rel="stylesheet" href="/css/adminCSS/admin-dashboard.css">
 <link rel="stylesheet" href="/css/adminCSS/admin-tickets.css">
 </head>
-<body class="<%= typeof currentModule !== 'undefined' && currentModule ? 'module-' + currentModule : '' %>" data-ticket-id="<%= ticket.id %>" data-ticket-oid="<%= ticket._id %>">
+<body data-ticket-id="<%= ticket.id %>" data-ticket-oid="<%= ticket._id %>">
   <div class="admin-wrapper">
-    <%- include('partials/sidebar', { activePage: 'tickets', currentModule: currentModule }) %>
+    <%- include('partials/sidebar', { activePage: 'tickets' }) %>
     
     <main class="admin-main">
-      <%- include('partials/topbar', { pageTitle: 'Ticket Chat', currentModule: currentModule }) %>
+      <%- include('partials/topbar', { pageTitle: 'Ticket Chat' }) %>
       
       <div class="admin-content">
         <!-- Breadcrumb -->
         <div style="margin-bottom: 1.5rem;">
-          <a href="/admin/tickets<%= currentModule ? '?module=' + currentModule : '' %>" style="color: var(--admin-text-muted); text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.9rem;">
+          <a href="/admin/tickets" style="color: var(--admin-text-muted); text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.9rem;">
             <i data-lucide="arrow-left" style="width: 16px; height: 16px;"></i>
             Back to Tickets
           </a>
@@ -206,7 +206,6 @@
   <script>
     window.adminTicketId = '<%= ticket.id %>';
     window.adminTicketOid = '<%= ticket._id %>';
-    window.adminModuleParam = '<%= currentModule ? "?module=" + currentModule : "" %>';
     window.customerName = '<%= ticket.customerName || ticket.customer || "Customer" %>';
     window.ticketStatus = '<%= ticket.status %>';
   </script>

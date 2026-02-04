@@ -2,12 +2,12 @@
 <link rel="stylesheet" href="/css/adminCSS/admin-dashboard.css">
 <link rel="stylesheet" href="/css/adminCSS/admin-payments.css">
 </head>
-<body class="<%= typeof currentModule !== 'undefined' && currentModule ? 'module-' + currentModule : '' %>">
+<body>
   <div class="admin-wrapper">
-    <%- include('partials/sidebar', { activePage: 'payments', currentModule: currentModule }) %>
+    <%- include('partials/sidebar', { activePage: 'payments' }) %>
     
     <main class="admin-main">
-      <%- include('partials/topbar', { pageTitle: 'Record Payment', currentModule: currentModule }) %>
+      <%- include('partials/topbar', { pageTitle: 'Record Payment' }) %>
       
       <div class="admin-content">
         <!-- Breadcrumb -->

@@ -317,12 +317,13 @@ class SyncService extends EventEmitter {
 
     // PARALLEL PROCESSING - Process multiple files simultaneously
     // Each file uses its own isolated FTP connection for true parallelism
-    // SYNC_PRIORITY controls the balance between sync speed and website responsiveness:
-    //   'low' (default) = 5 parallel, yields between batches - website stays fast
-    //   'high' = 15 parallel, no yields - maximum sync speed but website may lag
+    // SYNC_PRIORITY controls the balance between sync speed, memory usage, and website responsiveness:
+    //   'low' (default) = 3 parallel, smaller batches - memory safe, website stays fast
+    //   'high' = 8 parallel, larger batches - faster sync but more memory usage
+    // NOTE: Reduced from 5/15 to 3/8 to prevent OOM crashes (each file can use 500MB+)
     const PARALLEL_DOWNLOADS = this.syncPriority === 'high' 
-      ? (this.productionMode ? 15 : 2)  // High priority: max speed
-      : (this.productionMode ? 5 : 2);  // Low priority: website-friendly
+      ? (this.productionMode ? 8 : 2)   // High priority: moderate parallelism
+      : (this.productionMode ? 4 : 2);  // Low priority: memory-safe
     
     const YIELD_BETWEEN_BATCHES = this.syncPriority !== 'high'; // Yield to let web requests through
     const YIELD_DELAY_MS = 50; // 50ms pause between file batches for web requests

@@ -21,11 +21,11 @@
     <!-- Main Section -->
     <div class="sidebar-nav-section">
       <div class="sidebar-nav-title">Main</div>
-      <a href="/admin<%= typeof currentModule !== 'undefined' && currentModule ? '?module=' + currentModule : '' %>" class="sidebar-nav-item <%= typeof activePage !== 'undefined' && activePage === 'dashboard' ? 'active' : '' %>">
+      <a href="/admin" class="sidebar-nav-item <%= typeof activePage !== 'undefined' && activePage === 'dashboard' ? 'active' : '' %>">
         <i data-lucide="layout-dashboard"></i>
         <span>Dashboard</span>
       </a>
-      <a href="/admin/parts-analytics<%= typeof currentModule !== 'undefined' && currentModule ? '?module=' + currentModule : '' %>" class="sidebar-nav-item <%= typeof activePage !== 'undefined' && activePage === 'parts-analytics' ? 'active' : '' %>">
+      <a href="/admin/parts-analytics" class="sidebar-nav-item <%= typeof activePage !== 'undefined' && activePage === 'parts-analytics' ? 'active' : '' %>">
         <i data-lucide="bar-chart-3"></i>
         <span>Parts Analytics</span>
         <span class="sidebar-nav-badge" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">AI</span>
@@ -35,21 +35,21 @@
     <!-- Management Section -->
     <div class="sidebar-nav-section">
       <div class="sidebar-nav-title">Management</div>
-      <a href="/admin/orders<%= typeof currentModule !== 'undefined' && currentModule ? '?module=' + currentModule : '' %>" class="sidebar-nav-item <%= typeof activePage !== 'undefined' && activePage === 'orders' ? 'active' : '' %>">
+      <a href="/admin/orders" class="sidebar-nav-item <%= typeof activePage !== 'undefined' && activePage === 'orders' ? 'active' : '' %>">
         <i data-lucide="shopping-cart"></i>
         <span>Orders</span>
         <% if (typeof sidebarCounts !== 'undefined' && sidebarCounts.newOrders > 0) { %>
         <span class="sidebar-nav-badge" id="sidebarOrdersBadge"><%= sidebarCounts.newOrders %></span>
         <% } %>
       </a>
-      <a href="/admin/tickets<%= typeof currentModule !== 'undefined' && currentModule ? '?module=' + currentModule : '' %>" class="sidebar-nav-item <%= typeof activePage !== 'undefined' && activePage === 'tickets' ? 'active' : '' %>">
+      <a href="/admin/tickets" class="sidebar-nav-item <%= typeof activePage !== 'undefined' && activePage === 'tickets' ? 'active' : '' %>">
         <i data-lucide="ticket"></i>
         <span>Tickets</span>
         <% if (typeof sidebarCounts !== 'undefined' && sidebarCounts.openTickets > 0) { %>
         <span class="sidebar-nav-badge" id="sidebarTicketsBadge"><%= sidebarCounts.openTickets %></span>
         <% } %>
       </a>
-      <a href="/admin/users<%= typeof currentModule !== 'undefined' && currentModule ? '?module=' + currentModule : '' %>" class="sidebar-nav-item <%= typeof activePage !== 'undefined' && activePage === 'users' ? 'active' : '' %>">
+      <a href="/admin/users" class="sidebar-nav-item <%= typeof activePage !== 'undefined' && activePage === 'users' ? 'active' : '' %>">
         <i data-lucide="users"></i>
         <span>Users</span>
       </a>
@@ -62,7 +62,7 @@
     <!-- System Section -->
     <div class="sidebar-nav-section">
       <div class="sidebar-nav-title">System</div>
-      <a href="/admin/integrations<%= typeof currentModule !== 'undefined' && currentModule ? '?module=' + currentModule : '' %>" class="sidebar-nav-item <%= typeof activePage !== 'undefined' && activePage === 'integrations' ? 'active' : '' %>">
+      <a href="/admin/integrations" class="sidebar-nav-item <%= typeof activePage !== 'undefined' && activePage === 'integrations' ? 'active' : '' %>">
         <i data-lucide="plug"></i>
         <span>Integrations</span>
       </a>

@@ -14,36 +14,6 @@ const elasticsearchService = require('../services/elasticsearchService');
 const socketService = require('../services/socketService');
 
 /**
- * Get module from query parameter and get module-specific data
- */
-const getModuleData = (req) => {
-  const module = req.query.module || null;
-  
-  // Module configurations - now automotive only
-  const moduleConfigs = {
-    automotive: {
-      name: 'Automotive',
-      icon: 'car',
-      color: '#0ea5e9',
-      filterIndustry: 'automotive'
-    }
-  };
-
-  return {
-    currentModule: module,
-    moduleConfig: module ? moduleConfigs[module] : null
-  };
-};
-
-/**
- * Filter data by module
- */
-const filterByModule = (data, module, industryField = 'industry') => {
-  if (!module) return data;
-  return data.filter(item => item[industryField] === module);
-};
-
-/**
  * Simple in-memory cache for dashboard data
  */
 const dashboardCache = {
@@ -57,16 +27,13 @@ const dashboardCache = {
  */
 const getAdminDashboard = async (req, res) => {
   try {
-    const { currentModule, moduleConfig } = getModuleData(req);
     const now = Date.now();
     
     // Use cached data if fresh (within 30 seconds)
     if (dashboardCache.data && (now - dashboardCache.timestamp) < dashboardCache.TTL) {
       return res.render('admin/dashboard', {
         ...dashboardCache.data,
-        currentModule,
-        moduleConfig,
-        title: currentModule ? `${moduleConfig.name} Dashboard | PARTSFORM Admin` : 'Admin Dashboard | PARTSFORM',
+        title: 'Admin Dashboard | PARTSFORM',
       });
     }
     
@@ -319,9 +286,7 @@ const getAdminDashboard = async (req, res) => {
     dashboardCache.timestamp = now;
 
     res.render('admin/dashboard', {
-      title: currentModule ? `${moduleConfig.name} Dashboard | PARTSFORM Admin` : 'Admin Dashboard | PARTSFORM',
-      currentModule,
-      moduleConfig,
+      title: 'Admin Dashboard | PARTSFORM',
       ...cacheData
     });
   } catch (error) {
@@ -372,8 +337,6 @@ const formatOrderTime = (date) => {
  */
 const getOrdersManagement = async (req, res) => {
   try {
-    const { currentModule, moduleConfig } = getModuleData(req);
-    
     // Get real orders from database with buyer info
     const dbOrders = await Order.find({})
       .populate('buyer', 'firstName lastName email companyName phone')
@@ -404,10 +367,8 @@ const getOrdersManagement = async (req, res) => {
     }));
 
     res.render('admin/orders', {
-      title: currentModule ? `${moduleConfig.name} Orders | PARTSFORM Admin` : 'Orders Management | PARTSFORM',
+      title: 'Orders Management | PARTSFORM',
       activePage: 'orders',
-      currentModule,
-      moduleConfig,
       orders
     });
   } catch (error) {
@@ -421,7 +382,6 @@ const getOrdersManagement = async (req, res) => {
  */
 const getOrderDetails = async (req, res) => {
   try {
-    const { currentModule, moduleConfig } = getModuleData(req);
     const orderId = req.params.id;
     
     // Try to find by order number first, then by _id
@@ -536,8 +496,6 @@ const getOrderDetails = async (req, res) => {
     res.render('admin/order-details', {
       title: `Order ${order.orderNumber} | PARTSFORM Admin`,
       activePage: 'orders',
-      currentModule,
-      moduleConfig,
       order: orderData
     });
   } catch (error) {
@@ -551,8 +509,6 @@ const getOrderDetails = async (req, res) => {
  */
 const getOrderCreate = async (req, res) => {
   try {
-    const { currentModule, moduleConfig } = getModuleData(req);
-    
     // Get all buyers for the dropdown (include all statuses for admin)
     const buyers = await Buyer.find({})
       .select('firstName lastName email companyName phone country city accountStatus')
@@ -564,8 +520,6 @@ const getOrderCreate = async (req, res) => {
     res.render('admin/order-create', {
       title: 'Create Order | PARTSFORM Admin',
       activePage: 'orders',
-      currentModule,
-      moduleConfig,
       buyers
     });
   } catch (error) {
@@ -579,7 +533,6 @@ const getOrderCreate = async (req, res) => {
  */
 const getOrderEdit = async (req, res) => {
   try {
-    const { currentModule, moduleConfig } = getModuleData(req);
     const orderId = req.params.id;
     
     // Try to find by order number first, then by _id
@@ -667,8 +620,6 @@ const getOrderEdit = async (req, res) => {
     res.render('admin/order-edit', {
       title: `Edit Order ${order.orderNumber} | PARTSFORM Admin`,
       activePage: 'orders',
-      currentModule,
-      moduleConfig,
       order: orderData,
       buyers
     });
@@ -1005,8 +956,6 @@ const getOrderStats = async (req, res) => {
  */
 const getTicketsManagement = async (req, res) => {
   try {
-    const { currentModule, moduleConfig } = getModuleData(req);
-    
     // Get real tickets from database
     const dbTickets = await Ticket.find({})
       .sort({ lastMessageAt: -1, createdAt: -1 })
@@ -1038,10 +987,8 @@ const getTicketsManagement = async (req, res) => {
     }));
     
     res.render('admin/tickets', {
-      title: currentModule ? `${moduleConfig.name} Tickets | PARTSFORM Admin` : 'Tickets Management | PARTSFORM',
+      title: 'Tickets Management | PARTSFORM',
       activePage: 'tickets',
-      currentModule,
-      moduleConfig,
       tickets
     });
   } catch (error) {
@@ -1055,7 +1002,6 @@ const getTicketsManagement = async (req, res) => {
  */
 const getTicketDetails = async (req, res) => {
   try {
-    const { currentModule, moduleConfig } = getModuleData(req);
     const ticketId = req.params.id;
     
     // Find ticket in database
@@ -1116,8 +1062,6 @@ const getTicketDetails = async (req, res) => {
     res.render('admin/ticket-details', {
       title: `Ticket ${ticketId} | PARTSFORM Admin`,
       activePage: 'tickets',
-      currentModule,
-      moduleConfig,
       ticket
     });
   } catch (error) {
@@ -1375,8 +1319,6 @@ const markTicketAsReadAdmin = async (req, res) => {
  */
 const getUsersManagement = async (req, res) => {
   try {
-    const { currentModule, moduleConfig } = getModuleData(req);
-    
     // Get all buyers from database
     const buyers = await Buyer.find({}).sort({ createdAt: -1 }).lean();
     
@@ -1416,8 +1358,6 @@ const getUsersManagement = async (req, res) => {
     res.render('admin/users', {
       title: 'Users Management | PARTSFORM',
       activePage: 'users',
-      currentModule,
-      moduleConfig,
       users: usersWithStats
     });
   } catch (error) {
@@ -1431,7 +1371,6 @@ const getUsersManagement = async (req, res) => {
  */
 const getUserDetails = async (req, res) => {
   try {
-    const { currentModule, moduleConfig } = getModuleData(req);
     const userId = req.params.id;
     
     // Find buyer in database
@@ -1487,8 +1426,6 @@ const getUserDetails = async (req, res) => {
     res.render('admin/user-details', {
       title: `${user.name} | PARTSFORM Admin`,
       activePage: 'users',
-      currentModule,
-      moduleConfig,
       user,
       orders: orders
     });
@@ -1503,13 +1440,9 @@ const getUserDetails = async (req, res) => {
  */
 const getUserCreate = async (req, res) => {
   try {
-    const { currentModule, moduleConfig } = getModuleData(req);
-
     res.render('admin/user-create', {
       title: 'Create User | PARTSFORM Admin',
-      activePage: 'users',
-      currentModule,
-      moduleConfig
+      activePage: 'users'
     });
   } catch (error) {
     console.error('Error in getUserCreate:', error);
@@ -1522,7 +1455,6 @@ const getUserCreate = async (req, res) => {
  */
 const getUserEdit = async (req, res) => {
   try {
-    const { currentModule, moduleConfig } = getModuleData(req);
     const userId = req.params.id;
     
     // Find buyer in database
@@ -1557,8 +1489,6 @@ const getUserEdit = async (req, res) => {
     res.render('admin/user-edit', {
       title: `Edit ${user.name} | PARTSFORM Admin`,
       activePage: 'users',
-      currentModule,
-      moduleConfig,
       user
     });
   } catch (error) {
@@ -1855,10 +1785,8 @@ const suspendUser = async (req, res) => {
  */
 const getPaymentsManagement = async (req, res) => {
   try {
-    const { currentModule, moduleConfig } = getModuleData(req);
-    
     // Mock payments data - automotive only
-    const allPayments = [
+    const payments = [
       { id: 'PAY-2025-001', orderId: 'ORD-2025-1247', customer: 'AutoMax Germany', amount: 45200, method: 'wire', status: 'completed', date: '2025-12-26', industry: 'automotive' },
       { id: 'PAY-2025-002', orderId: 'ORD-2025-1246', customer: 'Premium Auto Parts', amount: 12800, method: 'credit_card', status: 'completed', date: '2025-12-26', industry: 'automotive' },
       { id: 'PAY-2025-003', orderId: 'ORD-2025-1245', customer: 'Euro Auto Systems', amount: 89500, method: 'wire', status: 'pending', date: '2025-12-25', industry: 'automotive' },
@@ -1867,13 +1795,9 @@ const getPaymentsManagement = async (req, res) => {
       { id: 'PAY-2025-006', orderId: 'ORD-2025-1242', customer: 'Drive Parts Co', amount: 67300, method: 'wire', status: 'completed', date: '2025-12-24', industry: 'automotive' },
     ];
 
-    const payments = filterByModule(allPayments, currentModule);
-
     res.render('admin/payments', {
-      title: currentModule ? `${moduleConfig.name} Payments | PARTSFORM Admin` : 'Payments Management | PARTSFORM',
+      title: 'Payments Management | PARTSFORM',
       activePage: 'payments',
-      currentModule,
-      moduleConfig,
       payments
     });
   } catch (error) {
@@ -1888,7 +1812,6 @@ const getPaymentsManagement = async (req, res) => {
 const getPaymentDetails = async (req, res) => {
   try {
     const { id } = req.params;
-    const { currentModule, moduleConfig } = getModuleData(req);
     
     const payments = {
       'PAY-2025-001': { id: 'PAY-2025-001', orderId: 'ORD-2025-1247', customer: 'AutoMax Germany', amount: 45200, method: 'wire', status: 'completed', date: 'Dec 26, 2025' },
@@ -1910,8 +1833,6 @@ const getPaymentDetails = async (req, res) => {
     res.render('admin/payment-details', {
       title: `Payment ${id} | PARTSFORM Admin`,
       activePage: 'payments',
-      currentModule,
-      moduleConfig,
       payment
     });
   } catch (error) {
@@ -1925,13 +1846,9 @@ const getPaymentDetails = async (req, res) => {
  */
 const getPaymentCreate = async (req, res) => {
   try {
-    const { currentModule, moduleConfig } = getModuleData(req);
-
     res.render('admin/payment-create', {
       title: 'Record Payment | PARTSFORM Admin',
-      activePage: 'payments',
-      currentModule,
-      moduleConfig
+      activePage: 'payments'
     });
   } catch (error) {
     console.error('Error in getPaymentCreate:', error);
@@ -1946,9 +1863,7 @@ const getAdminSettings = async (req, res) => {
   try {
     res.render('admin/settings', {
       title: 'Admin Settings | PARTSFORM',
-      activePage: 'settings',
-      currentModule: null,
-      moduleConfig: null
+      activePage: 'settings'
     });
   } catch (error) {
     console.error('Error in getAdminSettings:', error);
@@ -1961,11 +1876,6 @@ const getAdminSettings = async (req, res) => {
  */
 const getIntegrationsManagement = async (req, res) => {
   try {
-    const { currentModule: queryModule, moduleConfig: queryConfig } = getModuleData(req);
-    // Default to automotive if no module is specified
-    const currentModule = queryModule || 'automotive';
-    const { moduleConfig } = getModuleData({ query: { module: currentModule } });
-    
     // Get all integrations from database
     const integrations = await Integration.find({}).sort({ createdAt: -1 }).lean();
     
@@ -1991,8 +1901,6 @@ const getIntegrationsManagement = async (req, res) => {
     res.render('admin/integrations', {
       title: 'Integrations - Admin',
       activePage: 'integrations',
-      currentModule,
-      moduleConfig,
       integrations,
       stats,
       esStats,
@@ -2008,16 +1916,9 @@ const getIntegrationsManagement = async (req, res) => {
  */
 const getIntegrationCreate = async (req, res) => {
   try {
-    const { currentModule: queryModule, moduleConfig: queryConfig } = getModuleData(req);
-    // Default to automotive if no module is specified
-    const currentModule = queryModule || 'automotive';
-    const { moduleConfig } = getModuleData({ query: { module: currentModule } });
-    
     res.render('admin/integration-create', {
       title: 'New Connection - Admin',
       activePage: 'integrations',
-      currentModule,
-      moduleConfig,
       integration: null, // For create mode
     });
   } catch (error) {
@@ -2031,10 +1932,6 @@ const getIntegrationCreate = async (req, res) => {
  */
 const getIntegrationEdit = async (req, res) => {
   try {
-    const { currentModule: queryModule } = getModuleData(req);
-    const currentModule = queryModule || 'automotive';
-    const { moduleConfig } = getModuleData({ query: { module: currentModule } });
-    
     const integration = await Integration.findById(req.params.id);
     if (!integration) {
       return res.status(404).render('error', { title: 'Not Found', error: 'Integration not found' });
@@ -2043,8 +1940,6 @@ const getIntegrationEdit = async (req, res) => {
     res.render('admin/integration-create', {
       title: 'Edit Connection - Admin',
       activePage: 'integrations',
-      currentModule,
-      moduleConfig,
       integration: integration.toSafeJSON(),
     });
   } catch (error) {
@@ -2658,8 +2553,6 @@ const formatDuration = (seconds) => {
  */
 const getPartsAnalytics = async (req, res) => {
   try {
-    const { currentModule, moduleConfig } = getModuleData(req);
-    
     // Mock analytics data
     const analyticsData = {
       totalSearches: 47892,
@@ -2699,8 +2592,6 @@ const getPartsAnalytics = async (req, res) => {
     res.render('admin/parts-analytics', {
       title: 'Parts Analytics | PARTSFORM Admin',
       activePage: 'parts-analytics',
-      currentModule,
-      moduleConfig,
       analyticsData,
       mostSearchedParts,
       missedOpportunities,
@@ -2831,8 +2722,6 @@ const uploadPartsFromFile = async (req, res) => {
  */
 const getAdminsManagement = async (req, res) => {
   try {
-    const { currentModule, moduleConfig } = getModuleData(req);
-    
     const admins = await Admin.find()
       .select('-password -passwordResetToken -passwordResetExpires')
       .sort({ createdAt: -1 })
@@ -2841,8 +2730,6 @@ const getAdminsManagement = async (req, res) => {
     res.render('admin/admins', {
       title: 'Administrators | PARTSFORM',
       activePage: 'admins',
-      currentModule,
-      moduleConfig,
       admins,
       sidebarCounts: { newOrders: 0, openTickets: 0 }
     });

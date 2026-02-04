@@ -122,17 +122,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// Sectors data - Automotive only
-const sectors = [
-  {
-    id: 'automotive',
-    name: 'Automotive',
-  },
-];
-
-// Set app locals for global access
-app.locals.sectors = sectors;
-
 // Routes
 const landingRoutes = require('./routes/landing');
 const buyerRoutes = require('./routes/buyer');

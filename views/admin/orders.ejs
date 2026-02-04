@@ -2,47 +2,24 @@
 <link rel="stylesheet" href="/css/adminCSS/admin-dashboard.css">
 <link rel="stylesheet" href="/css/adminCSS/admin-orders.css">
 </head>
-<body class="<%= typeof currentModule !== 'undefined' && currentModule ? 'module-' + currentModule : '' %>">
+<body>
   <div class="admin-wrapper">
-    <%- include('partials/sidebar', { activePage: 'orders', currentModule: currentModule }) %>
+    <%- include('partials/sidebar', { activePage: 'orders' }) %>
     
     <main class="admin-main">
-      <%- include('partials/topbar', { pageTitle: 'Orders', currentModule: currentModule }) %>
+      <%- include('partials/topbar', { pageTitle: 'Orders' }) %>
       
       <div class="admin-content">
-        <% if (currentModule && moduleConfig) { %>
-        <div class="module-info-banner">
-          <div class="module-info-icon">
-            <i data-lucide="<%= moduleConfig.icon %>"></i>
-          </div>
-          <div class="module-info-content">
-            <div class="module-info-title"><%= moduleConfig.name %> Orders</div>
-            <div class="module-info-desc">Viewing <%= moduleConfig.name.toLowerCase() %> orders only</div>
-          </div>
-          <div class="module-info-stats">
-            <div class="module-info-stat">
-              <div class="module-info-stat-value"><%= orders.length %></div>
-              <div class="module-info-stat-label">Orders</div>
-            </div>
-            <div class="module-info-stat">
-              <% var total = 0; orders.forEach(function(o) { total += o.amount; }); %>
-              <div class="module-info-stat-value">$<%= (total / 1000).toFixed(0) %>K</div>
-              <div class="module-info-stat-label">Total</div>
-            </div>
-          </div>
-        </div>
-        <% } %>
-
         <!-- Page Header -->
         <div class="orders-page-header">
-          <h2><%= currentModule ? moduleConfig.name + ' Orders' : 'Orders Management' %></h2>
+          <h2>Orders Management</h2>
           <div class="orders-header-actions">
             <div class="orders-search-container">
               <i data-lucide="search" class="search-icon"></i>
               <input type="text" id="ordersSearch" placeholder="Search orders, customers..." autocomplete="off">
               <span class="search-shortcut">⌘K</span>
             </div>
-            <a href="/admin/orders/create<%= currentModule ? '?module=' + currentModule : '' %>" class="admin-btn admin-btn-primary">
+            <a href="/admin/orders/create" class="admin-btn admin-btn-primary">
               <i data-lucide="plus"></i>
               Create Order
             </a>
@@ -162,7 +139,7 @@
             </div>
             <h3>No Orders Found</h3>
             <p>There are no orders matching your criteria. Create a new order to get started.</p>
-            <a href="/admin/orders/create<%= currentModule ? '?module=' + currentModule : '' %>" class="admin-btn admin-btn-primary">
+            <a href="/admin/orders/create" class="admin-btn admin-btn-primary">
               <i data-lucide="plus"></i>
               Create Order
             </a>
@@ -186,7 +163,7 @@
               <% orders.forEach(function(order) { %>
               <tr data-order-id="<%= order.id %>" data-status="<%= order.status %>" data-industry="<%= order.industry %>" data-priority="<%= order.priority || 'normal' %>">
                 <td class="order-id-cell">
-                  <a href="/admin/orders/<%= order.id %><%= currentModule ? '?module=' + currentModule : '' %>"><%= order.id %></a>
+                  <a href="/admin/orders/<%= order.id %>"><%= order.id %></a>
                 </td>
                 <td class="customer-cell">
                   <div class="customer-name"><%= order.customer %></div>
@@ -229,10 +206,10 @@
                 </td>
                 <td class="actions-cell">
                   <div class="actions-group">
-                    <a href="/admin/orders/<%= order.id %><%= currentModule ? '?module=' + currentModule : '' %>" class="action-btn view" title="View Details">
+                    <a href="/admin/orders/<%= order.id %>" class="action-btn view" title="View Details">
                       <i data-lucide="eye"></i>
                     </a>
-                    <a href="/admin/orders/<%= order.id %>/edit<%= currentModule ? '?module=' + currentModule : '' %>" class="action-btn edit" title="Edit Order">
+                    <a href="/admin/orders/<%= order.id %>/edit" class="action-btn edit" title="Edit Order">
                       <i data-lucide="edit-2"></i>
                     </a>
                     <button class="action-btn delete" title="Delete Order" onclick="showDeleteModal('<%= order.id %>', '<%= order.customer %>')">

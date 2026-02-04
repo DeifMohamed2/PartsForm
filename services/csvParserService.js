@@ -239,8 +239,8 @@ class CSVParserService {
           const commaCount = firstLine.split(',').length;
           separator = semicolonCount > commaCount ? ';' : ',';
           
-          // Create read stream from file - 4MB chunks for maximum speed
-          inputStream = fs.createReadStream(source, { highWaterMark: productionMode ? 4 * 1024 * 1024 : 64 * 1024 }); // 4MB chunks in production
+          // Create read stream from file - smaller chunks to reduce memory pressure
+          inputStream = fs.createReadStream(source, { highWaterMark: productionMode ? 512 * 1024 : 64 * 1024 }); // 512KB chunks (was 4MB - caused OOM)
           
           if (!productionMode) console.log(`📊 Streaming ${(fileSize / 1024 / 1024).toFixed(2)} MB file with separator "${separator}"`);
         } else {
@@ -272,26 +272,36 @@ class CSVParserService {
         let esRecordIndex = 0;
         
         // SYNC_PRIORITY controls batch sizes:
-        //   'low' (default) = smaller batches, yields to event loop - website stays responsive
-        //   'high' = maximum batch sizes - fastest sync but website may lag
+        //   'low' (default) = smaller batches, less memory, website stays responsive
+        //   'high' = larger batches, more memory, faster sync
         const syncPriority = process.env.SYNC_PRIORITY || 'low';
         const websiteFriendly = syncPriority !== 'high';
         
-        // Batch sizes based on priority
+        // MEMORY-SAFE batch sizes - reduced to prevent OOM crashes
+        // With 5 parallel files, each using these batches, memory stays under control
         const BATCH_SIZE = productionMode 
-          ? (websiteFriendly ? 5000 : 20000)   // 5k for balanced, 20k for max speed
+          ? (websiteFriendly ? 2000 : 5000)    // 2k for balanced (safe), 5k for speed
           : 500;
         const ES_BATCH_SIZE = productionMode 
-          ? (websiteFriendly ? 3000 : 10000)   // 3k for balanced, 10k for max speed
+          ? (websiteFriendly ? 1500 : 3000)    // 1.5k for balanced, 3k for speed
           : 200;
         
         let lastProgressUpdate = Date.now();
         const PROGRESS_INTERVAL = productionMode ? 30000 : 1000; // 30s updates in prod
+        let batchCount = 0; // Track batches for periodic GC hint
         
-        // Yield function to let web requests through
+        // Yield function to let web requests through AND allow garbage collection
         const yieldToEventLoop = async () => {
           if (websiteFriendly) {
             await new Promise(resolve => setImmediate(resolve));
+          }
+        };
+        
+        // Periodic garbage collection hint (every 10 batches)
+        const maybeGC = () => {
+          batchCount++;
+          if (batchCount % 10 === 0 && global.gc) {
+            global.gc();
           }
         };
 
@@ -344,6 +354,9 @@ class CSVParserService {
             
             // Yield after each batch to let web requests through
             await yieldToEventLoop();
+            
+            // Hint to garbage collector periodically
+            maybeGC();
             
             return mongoResult;
           } catch (error) {

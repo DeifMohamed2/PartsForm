@@ -224,42 +224,14 @@
   }
 </style>
 </head>
-<body class="<%= typeof currentModule !== 'undefined' && currentModule ? 'module-' + currentModule : '' %>">
+<body>
   <div class="admin-wrapper">
-    <%- include('partials/sidebar', { activePage: 'dashboard', currentModule: currentModule }) %>
+    <%- include('partials/sidebar', { activePage: 'dashboard' }) %>
     
     <main class="admin-main">
-      <%- include('partials/topbar', { pageTitle: 'Dashboard', currentModule: currentModule }) %>
+      <%- include('partials/topbar', { pageTitle: 'Dashboard' }) %>
       
       <div class="admin-content">
-        <% if (currentModule && moduleConfig) { %>
-        <!-- Module Info Banner -->
-        <div class="module-info-banner">
-          <div class="module-info-icon">
-            <i data-lucide="<%= moduleConfig.icon %>"></i>
-          </div>
-          <div class="module-info-content">
-            <div class="module-info-title"><%= moduleConfig.name %> Dashboard</div>
-            <div class="module-info-desc">Viewing <%= moduleConfig.name.toLowerCase() %> module data and analytics</div>
-          </div>
-          <div class="module-info-stats">
-            <div class="module-info-stat">
-              <div class="module-info-stat-value"><%= stats.totalOrders %></div>
-              <div class="module-info-stat-label">Orders</div>
-            </div>
-            <div class="module-info-stat">
-              <div class="module-info-stat-value">$<%= (stats.totalRevenue / 1000).toFixed(0) %>K</div>
-              <div class="module-info-stat-label">Revenue</div>
-            </div>
-            <div class="module-info-stat">
-              <div class="module-info-stat-value">+<%= stats.growth %>%</div>
-              <div class="module-info-stat-label">Growth</div>
-            </div>
-          </div>
-        </div>
-        <% } %>
-
-        <% if (!currentModule) { %>
         <!-- MAIN DASHBOARD - Premium Overview Design -->
         <div class="main-dashboard-hero" style="background: linear-gradient(135deg, #1e3a5f 0%, #2b5278 50%, #3d6a96 100%); border-radius: var(--admin-radius-xl); padding: 2rem; margin-bottom: 2rem; color: white; position: relative; overflow: hidden;">
           <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: rgba(255,255,255,0.05); border-radius: 50%;"></div>
@@ -368,30 +340,7 @@
             <div class="hero-stat-label">Customers</div>
           </div>
         </div>
-        <% } %>
 
-        <% if (currentModule === 'machinery') { %>
-        <!-- Machinery-Specific: Equipment Categories -->
-        <div class="equipment-tracker">
-          <div class="equipment-card">
-            <div class="equipment-icon"><i data-lucide="arrow-up-from-line"></i></div>
-            <div class="equipment-name">Cranes</div>
-            <div class="equipment-count">156 parts</div>
-          </div>
-          <div class="equipment-card">
-            <div class="equipment-icon"><i data-lucide="shovel"></i></div>
-            <div class="equipment-name">Excavators</div>
-            <div class="equipment-count">234 parts</div>
-          </div>
-          <div class="equipment-card">
-            <div class="equipment-icon"><i data-lucide="forklift"></i></div>
-            <div class="equipment-name">Loaders</div>
-            <div class="equipment-count">189 parts</div>
-          </div>
-        </div>
-        <% } %>
-
-        <% if (!currentModule) { %>
         <!-- MAIN DASHBOARD - Unique Charts & Analytics Layout -->
         <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
           <!-- Left: Main Analytics -->
@@ -1436,7 +1385,7 @@
               <div>
                 <div class="chart-title">Revenue & Orders Trend</div>
                 <div class="chart-subtitle">
-                  <%= moduleConfig.name %> performance over 12 months
+                  Platform performance over 12 months
                 </div>
               </div>
               <div style="display: flex; gap: 0.5rem;">
@@ -1472,10 +1421,8 @@
         </div>
         <% } %>
 
-        <% if (currentModule) { %>
-        <!-- Additional Charts Row - Module Specific (only for individual modules) -->
+        <!-- Additional Charts Row -->
         <div class="admin-grid admin-grid-3" style="margin-bottom: 2rem;">
-          <% if (currentModule !== 'machinery') { %>
           <div class="chart-card">
             <div class="chart-header">
               <div>
@@ -1487,8 +1434,6 @@
               <canvas id="statusChart"></canvas>
             </div>
           </div>
-          <% } %>
-          <% if (currentModule !== 'aviation') { %>
           <div class="chart-card">
             <div class="chart-header">
               <div>
@@ -1500,21 +1445,6 @@
               <canvas id="weeklyChart"></canvas>
             </div>
           </div>
-          <% } %>
-          <% if (currentModule === 'machinery') { %>
-          <div class="chart-card">
-            <div class="chart-header">
-              <div>
-                <div class="chart-title">Equipment Types</div>
-                <div class="chart-subtitle">Parts by category</div>
-              </div>
-            </div>
-            <div class="chart-container" style="height: 180px;">
-              <canvas id="equipmentChart"></canvas>
-            </div>
-          </div>
-          <% } %>
-          <% if (currentModule !== 'automotive') { %>
           <div class="chart-card">
             <div class="chart-header">
               <div>
@@ -1526,8 +1456,6 @@
               <canvas id="countriesChart"></canvas>
             </div>
           </div>
-          <% } %>
-          <% if (currentModule === 'automotive') { %>
           <div class="chart-card">
             <div class="chart-header">
               <div>
@@ -1539,18 +1467,15 @@
             <canvas id="brandsChart"></canvas>
             </div>
           </div>
-          <% } %>
         </div>
-        <% } %>
 
-        <% if (currentModule) { %>
-        <!-- Module-Specific: Orders & Tickets Row -->
+        <!-- Orders & Tickets Row -->
         <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
           <!-- Recent Orders -->
           <div class="orders-card" style="margin-bottom: 0;">
           <div class="orders-header">
             <h3 class="orders-title">Recent Orders</h3>
-            <a href="/admin/orders<%= currentModule ? '?module=' + currentModule : '' %>" class="admin-btn admin-btn-secondary">
+            <a href="/admin/orders" class="admin-btn admin-btn-secondary">
               <i data-lucide="external-link"></i>
               View All
             </a>
@@ -1558,7 +1483,7 @@
           <div class="orders-body">
             <% if (recentOrders.length === 0) { %>
               <div style="padding: 2rem; text-align: center; color: var(--admin-text-muted);">
-                No orders found for this module.
+                No orders found.
               </div>
             <% } else { %>
               <!-- Table Header -->
@@ -1604,7 +1529,7 @@
           <div class="activity-card" style="margin-bottom: 0;">
             <div class="activity-header">
               <h3 class="activity-title">Support Tickets</h3>
-              <a href="/admin/tickets<%= currentModule ? '?module=' + currentModule : '' %>" class="admin-btn admin-btn-secondary">Manage</a>
+              <a href="/admin/tickets" class="admin-btn admin-btn-secondary">Manage</a>
             </div>
             <div class="activity-list" style="max-height: 300px; overflow-y: auto;">
               <% if (tickets.length === 0) { %>
@@ -1671,7 +1596,7 @@
           <div class="activity-card">
             <div class="activity-header">
               <h3 class="activity-title">Top Selling Parts</h3>
-              <a href="/admin/products<%= currentModule ? '?module=' + currentModule : '' %>" class="admin-btn admin-btn-secondary">View All</a>
+              <a href="/admin/products" class="admin-btn admin-btn-secondary">View All</a>
             </div>
             <div class="activity-list">
               <% const partColors = ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#ec4899']; %>
@@ -1714,14 +1639,22 @@
   <script>
     // Get module-themed color
     const moduleColor = getComputedStyle(document.documentElement).getPropertyValue('--module-primary').trim() || '#3b82f6';
-    const currentModule = '<%= typeof currentModule !== "undefined" ? currentModule : "" %>';
+    const currentModule = 'automotive'; // Single platform - automotive only
 
-    // Revenue Chart - Module-Specific Styling
+    // Revenue Chart - Automotive Styling
     const revenueCtx = document.getElementById('revenueChart').getContext('2d');
     
-    // Define unique chart configurations per module
+    // Define chart configuration for automotive
     const chartConfigs = {
       automotive: {
+        type: 'bar',
+        primaryColor: '#dc2626',
+        secondaryColor: '#f97316',
+        gradient: ['#dc2626', '#ef4444', '#f87171'],
+        borderRadius: 8,
+        barThickness: 24
+      },
+      default: {
         type: 'bar',
         primaryColor: '#dc2626',
         secondaryColor: '#f97316',
@@ -1770,7 +1703,7 @@
       data: {
         labels: <%- JSON.stringify(chartData.revenueLabels) %>,
         datasets: [{
-          label: currentModule ? (currentModule.charAt(0).toUpperCase() + currentModule.slice(1) + ' Revenue ($K)') : 'Platform Revenue ($K)',
+          label: 'Platform Revenue ($K)',
           data: <%- JSON.stringify(chartData.revenueData.map(function(v) { return v / 1000; })) %>,
           borderColor: config.primaryColor,
           backgroundColor: config.type === 'bar' ? config.primaryColor : revenueGradient,
@@ -1791,8 +1724,8 @@
           type: 'line',
           borderColor: config.secondaryColor,
           backgroundColor: 'transparent',
-          borderDash: currentModule === 'aviation' ? [] : [5, 5],
-          borderWidth: currentModule === 'aviation' ? 3 : 2,
+          borderDash: [5, 5],
+          borderWidth: 2,
           tension: 0.4,
           pointBackgroundColor: config.secondaryColor,
           pointBorderColor: '#fff',
@@ -1880,8 +1813,7 @@
       }
     });
 
-    // Status Chart (main dashboard and all modules except machinery)
-    <% if (!currentModule || currentModule !== 'machinery') { %>
+    // Status Chart
     const statusCtx = document.getElementById('statusChart').getContext('2d');
     new Chart(statusCtx, {
       type: 'bar',
@@ -1903,10 +1835,8 @@
         }
       }
     });
-    <% } %>
 
-    // Weekly Chart (main dashboard and all modules except aviation)
-    <% if (!currentModule || currentModule !== 'aviation') { %>
+    // Weekly Chart
     const weeklyCtx = document.getElementById('weeklyChart').getContext('2d');
     new Chart(weeklyCtx, {
       type: 'line',
@@ -1931,35 +1861,8 @@
         }
       }
     });
-    <% } %>
-
-    // Equipment Types Chart (Machinery only)
-    <% if (currentModule === 'machinery') { %>
-    const equipmentCtx = document.getElementById('equipmentChart').getContext('2d');
-    new Chart(equipmentCtx, {
-      type: 'bar',
-      data: {
-        labels: ['Cranes', 'Excavators', 'Loaders', 'Dozers', 'Rollers'],
-        datasets: [{
-          data: [156, 234, 189, 98, 67],
-          backgroundColor: '#eab308',
-          borderRadius: 4
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: {
-          y: { display: false },
-          x: { grid: { display: false }, ticks: { color: '#64748b', font: { size: 10 } } }
-        }
-      }
-    });
-    <% } %>
 
     // Countries Chart - Real data from buyer countries
-    <% if (!currentModule || currentModule !== 'automotive') { %>
     <%
       const countryChartData = typeof ordersByCountry !== 'undefined' && ordersByCountry.length > 0 
         ? ordersByCountry.slice(0, 5) 
@@ -1989,10 +1892,8 @@
         }
       }
     });
-    <% } %>
 
-    // Vehicle Brands Chart (Automotive only)
-    <% if (currentModule === 'automotive') { %>
+    // Vehicle Brands Chart
     const brandsCtx = document.getElementById('brandsChart').getContext('2d');
     new Chart(brandsCtx, {
       type: 'bar',
@@ -2015,12 +1916,10 @@
         }
       }
     });
-    <% } %>
 
     // ====================================
     // AI INTELLIGENCE HUB CHARTS & FUNCTIONS
     // ====================================
-    <% if (!currentModule) { %>
     
     // Tab Switching Function
     function switchAITab(tabName) {
@@ -2368,7 +2267,6 @@
       }, 500);
     });
     
-    <% } %>
   </script>
 
 <%- include('partials/footer') %>

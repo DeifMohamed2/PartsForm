@@ -2,12 +2,12 @@
 <link rel="stylesheet" href="/css/adminCSS/admin-dashboard.css">
 <link rel="stylesheet" href="/css/adminCSS/admin-users.css">
 </head>
-<body class="<%= typeof currentModule !== 'undefined' && currentModule ? 'module-' + currentModule : '' %>">
+<body>
   <div class="admin-wrapper">
-    <%- include('partials/sidebar', { activePage: 'users', currentModule: currentModule }) %>
+    <%- include('partials/sidebar', { activePage: 'users' }) %>
     
     <main class="admin-main">
-      <%- include('partials/topbar', { pageTitle: 'Edit User', currentModule: currentModule }) %>
+      <%- include('partials/topbar', { pageTitle: 'Edit User' }) %>
       
       <div class="admin-content">
         <!-- Breadcrumb -->

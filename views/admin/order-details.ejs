@@ -825,17 +825,17 @@
   }
 </style>
 </head>
-<body class="<%= typeof currentModule !== 'undefined' && currentModule ? 'module-' + currentModule : '' %>">
+<body>
   <div class="admin-wrapper">
-    <%- include('partials/sidebar', { activePage: 'orders', currentModule: currentModule }) %>
+    <%- include('partials/sidebar', { activePage: 'orders' }) %>
     
     <main class="admin-main">
-      <%- include('partials/topbar', { pageTitle: 'Order Details', currentModule: currentModule }) %>
+      <%- include('partials/topbar', { pageTitle: 'Order Details' }) %>
       
       <div class="admin-content order-details-page">
         <!-- Breadcrumb -->
         <div style="margin-bottom: 1.5rem;">
-          <a href="/admin/orders<%= currentModule ? '?module=' + currentModule : '' %>" style="color: var(--admin-text-muted); text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.9rem;">
+          <a href="/admin/orders" style="color: var(--admin-text-muted); text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.9rem;">
             <i data-lucide="arrow-left" style="width: 16px; height: 16px;"></i>
             Back to Orders
           </a>
@@ -916,7 +916,7 @@
                 <i data-lucide="printer"></i>
                 Print
               </button>
-              <a href="/admin/orders/<%= order.id %>/edit<%= currentModule ? '?module=' + currentModule : '' %>" class="admin-btn admin-btn-secondary">
+              <a href="/admin/orders/<%= order.id %>/edit" class="admin-btn admin-btn-secondary">
                 <i data-lucide="edit-2"></i>
                 Edit
               </a>

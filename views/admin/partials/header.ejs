@@ -181,151 +181,29 @@
   </div>
 
   <script>
-    // Module Loader System - Optimized
-    var ModuleLoader = {
+    // Page Loader System - Simplified
+    var PageLoader = {
       overlay: null,
-      icon: null,
-      title: null,
-      subtitle: null,
       hideTimer: null,
-      navTimer: null,
-      isNavigating: false,
       
       init: function() {
         this.overlay = document.getElementById('moduleLoaderOverlay');
-        this.icon = document.getElementById('loaderIcon');
-        this.title = document.getElementById('loaderTitle');
-        this.subtitle = document.getElementById('loaderSubtitle');
-      },
-      
-      getModuleConfig: function(module) {
-        // Simplified for automotive-only platform
-        return {
-          icon: 'car',
-          title: 'Loading Dashboard',
-          subtitle: 'Preparing your workspace...',
-          className: 'loader-automotive'
-        };
-      },
-      
-      clearTimers: function() {
-        if (this.hideTimer) {
-          clearTimeout(this.hideTimer);
-          this.hideTimer = null;
-        }
-        if (this.navTimer) {
-          clearTimeout(this.navTimer);
-          this.navTimer = null;
-        }
-      },
-      
-      updateIcon: function(iconName) {
-        if (!this.icon) return;
-        // Clear existing SVG content completely
-        this.icon.innerHTML = '';
-        this.icon.setAttribute('data-lucide', iconName);
-        // Re-render lucide icons
-        if (typeof lucide !== 'undefined') {
-          lucide.createIcons({ nodes: [this.icon] });
-        }
-      },
-      
-      show: function(module) {
-        if (!this.overlay) this.init();
-        
-        // Clear any pending timers
-        this.clearTimers();
-        
-        var config = this.getModuleConfig(module);
-        
-        // Update content
-        this.updateIcon(config.icon);
-        if (this.title) this.title.textContent = config.title;
-        if (this.subtitle) this.subtitle.textContent = config.subtitle;
-        
-        // Update classes - remove hidden to show
-        if (this.overlay) {
-          this.overlay.className = 'module-loader-overlay ' + config.className;
-        }
       },
       
       hide: function() {
-        var self = this;
         if (this.overlay) {
           this.overlay.classList.add('hidden');
         }
-        this.isNavigating = false;
-      },
-      
-      showAndHide: function(module, duration) {
-        var self = this;
-        this.show(module);
-        this.hideTimer = setTimeout(function() {
-          self.hide();
-        }, duration || 1500);
       }
     };
     
     // Initialize on DOM ready
     document.addEventListener('DOMContentLoaded', function() {
-      ModuleLoader.init();
-      
-      // Set correct module theme on loader (it's already visible by default CSS)
-      var currentUrl = new URL(window.location.href);
-      var currentModule = currentUrl.searchParams.get('module') || '';
-      
-      // Show loader with correct theme and hide after delay
-      ModuleLoader.showAndHide(currentModule, 1500);
-      
-      // Intercept module navigation clicks
-      document.addEventListener('click', function(e) {
-        var link = e.target.closest('a[href*="module="], .module-option');
-        
-        if (link && !ModuleLoader.isNavigating) {
-          var targetModule = '';
-          
-          if (link.classList.contains('module-option')) {
-            targetModule = link.dataset.module || '';
-          } else if (link.href) {
-            try {
-              var url = new URL(link.href, window.location.origin);
-              targetModule = url.searchParams.get('module') || '';
-            } catch(err) {
-              return;
-            }
-          }
-          
-          // Only show loader for actual navigation (not current page)
-          var pageUrl = new URL(window.location.href);
-          var pageModule = pageUrl.searchParams.get('module') || '';
-          
-          if (targetModule !== pageModule) {
-            e.preventDefault();
-            ModuleLoader.isNavigating = true;
-            ModuleLoader.show(targetModule);
-            
-            // Navigate after delay
-            var href = link.href || (link.dataset.module ? 
-              window.location.pathname + '?module=' + link.dataset.module : 
-              window.location.pathname);
-            
-            ModuleLoader.navTimer = setTimeout(function() {
-              window.location.href = href;
-            }, 1500);
-          }
-        }
-      });
-    });
-    
-    // Handle page show (back/forward navigation)
-    window.addEventListener('pageshow', function(event) {
-      if (event.persisted) {
-        // Page was restored from cache (back/forward)
-        ModuleLoader.init();
-        var currentUrl = new URL(window.location.href);
-        var currentModule = currentUrl.searchParams.get('module') || '';
-        ModuleLoader.showAndHide(currentModule, 1000);
-      }
+      PageLoader.init();
+      // Hide loader after brief delay
+      setTimeout(function() {
+        PageLoader.hide();
+      }, 500);
     });
   </script>
 </body>

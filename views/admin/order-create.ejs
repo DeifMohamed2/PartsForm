@@ -616,17 +616,17 @@
   }
 </style>
 </head>
-<body class="<%= typeof currentModule !== 'undefined' && currentModule ? 'module-' + currentModule : '' %>">
+<body>
   <div class="admin-wrapper">
-    <%- include('partials/sidebar', { activePage: 'orders', currentModule: currentModule }) %>
+    <%- include('partials/sidebar', { activePage: 'orders' }) %>
     
     <main class="admin-main">
-      <%- include('partials/topbar', { pageTitle: 'Create Order', currentModule: currentModule }) %>
+      <%- include('partials/topbar', { pageTitle: 'Create Order' }) %>
       
       <div class="admin-content create-order-page">
         <!-- Breadcrumb -->
         <div style="margin-bottom: 1.5rem;">
-          <a href="/admin/orders<%= currentModule ? '?module=' + currentModule : '' %>" style="color: var(--admin-text-muted); text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.9rem;">
+          <a href="/admin/orders" style="color: var(--admin-text-muted); text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.9rem;">
             <i data-lucide="arrow-left" style="width: 16px; height: 16px;"></i>
             Back to Orders
           </a>
@@ -872,7 +872,7 @@
                       <i data-lucide="check-circle"></i>
                       Create Order
                     </button>
-                    <a href="/admin/orders<%= currentModule ? '?module=' + currentModule : '' %>" class="admin-btn admin-btn-secondary">
+                    <a href="/admin/orders" class="admin-btn admin-btn-secondary">
                       <i data-lucide="x"></i>
                       Cancel
                     </a>
@@ -1258,7 +1258,7 @@
         const data = await response.json();
         
         if (data.success) {
-          window.location.href = '/admin/orders/' + data.order.id + '<%= currentModule ? "?module=" + currentModule : "" %>';
+          window.location.href = '/admin/orders/' + data.order.id;
         } else {
           alert(data.error || 'Failed to create order');
           createOrderBtn.disabled = false;

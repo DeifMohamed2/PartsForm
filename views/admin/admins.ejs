@@ -651,12 +651,12 @@
   }
 </style>
 </head>
-<body class="<%= typeof currentModule !== 'undefined' && currentModule ? 'module-' + currentModule : '' %>">
+<body>
   <div class="admin-wrapper">
-    <%- include('partials/sidebar', { activePage: 'admins', currentModule: typeof currentModule !== 'undefined' ? currentModule : null }) %>
+    <%- include('partials/sidebar', { activePage: 'admins' }) %>
     
     <main class="admin-main">
-      <%- include('partials/topbar', { pageTitle: 'Administrators', currentModule: typeof currentModule !== 'undefined' ? currentModule : null }) %>
+      <%- include('partials/topbar', { pageTitle: 'Administrators' }) %>
       
       <div class="admin-content">
         <!-- Page Header -->

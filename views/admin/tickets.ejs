@@ -2,29 +2,17 @@
 <link rel="stylesheet" href="/css/adminCSS/admin-dashboard.css">
 <link rel="stylesheet" href="/css/adminCSS/admin-tickets.css">
 </head>
-<body class="<%= typeof currentModule !== 'undefined' && currentModule ? 'module-' + currentModule : '' %>">
+<body>
   <div class="admin-wrapper">
-    <%- include('partials/sidebar', { activePage: 'tickets', currentModule: currentModule }) %>
+    <%- include('partials/sidebar', { activePage: 'tickets' }) %>
     
     <main class="admin-main">
-      <%- include('partials/topbar', { pageTitle: 'Tickets', currentModule: currentModule }) %>
+      <%- include('partials/topbar', { pageTitle: 'Tickets' }) %>
       
       <div class="admin-content">
-        <% if (currentModule && moduleConfig) { %>
-        <div class="module-info-banner">
-          <div class="module-info-icon">
-            <i data-lucide="<%= moduleConfig.icon %>"></i>
-          </div>
-          <div class="module-info-content">
-            <div class="module-info-title"><%= moduleConfig.name %> Tickets</div>
-            <div class="module-info-desc">Viewing <%= moduleConfig.name.toLowerCase() %> support tickets</div>
-          </div>
-        </div>
-        <% } %>
-
         <!-- Page Header -->
         <div class="tickets-page-header">
-          <h2><%= currentModule ? moduleConfig.name + ' Tickets' : 'Support Tickets' %></h2>
+          <h2>Support Tickets</h2>
           <div class="tickets-header-actions">
             <div class="tickets-search-container">
               <i data-lucide="search" class="search-icon"></i>
@@ -143,7 +131,7 @@
             var lastMessageText = lastMessage ? (lastMessage.content || lastMessage.text || '') : '';
             var lastMessageTime = lastMessage ? (lastMessage.time || lastMessage.createdAt || '') : '';
           %>
-          <a href="/admin/tickets/<%= ticket.id %><%= currentModule ? '?module=' + currentModule : '' %>" 
+          <a href="/admin/tickets/<%= ticket.id %>" 
              class="ticket-card <%= hasUnread ? 'has-unread' : '' %>"
              data-status="<%= ticket.status %>"
              data-priority="<%= ticket.priority || 'medium' %>"
@@ -202,7 +190,7 @@
                 <%= ticket.status.split('-').map(function(w) { return w.charAt(0).toUpperCase() + w.slice(1); }).join(' ') %>
               </span>
               <div class="ticket-actions" onclick="event.preventDefault(); event.stopPropagation();">
-                <button class="ticket-action-btn chat" title="Open Chat" onclick="window.location.href='/admin/tickets/<%= ticket.id %><%= currentModule ? '?module=' + currentModule : '' %>'">
+                <button class="ticket-action-btn chat" title="Open Chat" onclick="window.location.href='/admin/tickets/<%= ticket.id %>'">
                   <i data-lucide="message-square"></i>
                 </button>
                 <button class="ticket-action-btn" title="Change Status" onclick="openStatusModal('<%= ticket.id %>', '<%= ticket.status %>', '<%= ticket.subject %>')">

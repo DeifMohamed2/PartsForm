@@ -2,12 +2,12 @@
 <link rel="stylesheet" href="/css/adminCSS/admin-dashboard.css">
 <link rel="stylesheet" href="/css/adminCSS/admin-integrations.css">
 </head>
-<body class="<%= typeof currentModule !== 'undefined' && currentModule ? 'module-' + currentModule : '' %>">
+<body>
   <div class="admin-wrapper">
-    <%- include('partials/sidebar', { activePage: 'integrations', currentModule: currentModule }) %>
+    <%- include('partials/sidebar', { activePage: 'integrations' }) %>
     
     <main class="admin-main">
-      <%- include('partials/topbar', { pageTitle: 'New Connection', currentModule: currentModule }) %>
+      <%- include('partials/topbar', { pageTitle: 'New Connection' }) %>
       
       <div class="admin-content">
         <div class="connection-create-page">
@@ -609,7 +609,7 @@
 
           <!-- Actions -->
           <div class="create-actions">
-            <a href="/admin/integrations<%= currentModule ? '?module=' + currentModule : '' %>" class="admin-btn admin-btn-secondary">
+            <a href="/admin/integrations" class="admin-btn admin-btn-secondary">
               <i data-lucide="arrow-left"></i>
               Cancel
             </a>
@@ -869,9 +869,6 @@
       return Object.keys(mapping).length > 0 ? mapping : undefined;
     }
 
-    // Get current module
-    const currentModule = '<%= typeof currentModule !== "undefined" ? currentModule : "automotive-parts" %>';
-
     // Collect form data based on connection type
     function collectFormData() {
       const connectionType = document.querySelector('input[name="connectionType"]:checked').value;
@@ -879,7 +876,6 @@
       
       const formData = {
         type: connectionType,
-        module: currentModule,
         isEnabled: true,
         syncSchedule: {
           enabled: frequency !== 'manual',
@@ -1106,7 +1102,7 @@
           showNotification(message, 'success');
           // Redirect to integrations list after a short delay to show the sync starting
           setTimeout(() => {
-            window.location.href = '/admin/integrations?module=' + currentModule + (result.autoSyncStarted ? '&syncStarted=' + result.integration._id : '');
+            window.location.href = '/admin/integrations' + (result.autoSyncStarted ? '?syncStarted=' + result.integration._id : '');
           }, 2000);
         } else {
           showNotification('Failed to create connection: ' + (result.error || 'Unknown error'), 'error');
