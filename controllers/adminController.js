@@ -2320,10 +2320,22 @@ const syncIntegration = async (req, res) => {
       const mongoose = require('mongoose');
       const db = mongoose.connection.db;
       
-      // Check if already syncing
+      // Clean up stale requests (older than 1 hour or failed)
+      const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+      await db.collection('sync_requests').updateMany(
+        {
+          integrationId,
+          status: { $in: ['pending', 'processing'] },
+          createdAt: { $lt: oneHourAgo }
+        },
+        { $set: { status: 'stale', error: 'Cleaned up stale request' } }
+      );
+      
+      // Check if already syncing (only recent requests)
       const existing = await db.collection('sync_requests').findOne({
         integrationId,
-        status: { $in: ['pending', 'processing'] }
+        status: { $in: ['pending', 'processing'] },
+        createdAt: { $gte: oneHourAgo }
       });
       
       if (existing) {
