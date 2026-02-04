@@ -868,6 +868,133 @@ class ElasticsearchService {
       console.log('✅ Elasticsearch connection closed');
     }
   }
+
+  /**
+   * FAST BULK REINDEX - Index all parts for an integration from MongoDB to ES
+   * Called AFTER MongoDB import is complete for maximum speed
+   * Uses streaming cursor to avoid memory issues with 76M+ records
+   * @param {string} integrationId - The integration to reindex
+   * @param {function} onProgress - Optional progress callback
+   */
+  async reindexIntegration(integrationId, onProgress = null) {
+    if (!this.isAvailable) {
+      console.log('⚠️  ES not available, skipping reindex');
+      return { indexed: 0, errors: 0 };
+    }
+
+    const Part = require('../models/Part');
+    const startTime = Date.now();
+    let totalIndexed = 0;
+    let totalErrors = 0;
+    let batchNum = 0;
+    
+    // Use large batch for speed - 16GB ES can handle this
+    const REINDEX_BATCH_SIZE = 10000;
+    const PARALLEL_BULK = 3; // 3 concurrent bulk operations
+    
+    console.log(`🔄 Starting ES reindex for integration ${integrationId}...`);
+    
+    try {
+      // Prepare ES for bulk indexing
+      await this.prepareForBulkIndexing();
+      
+      // Use cursor to stream from MongoDB (memory efficient)
+      const cursor = Part.find({ integration: integrationId })
+        .select('partNumber description brand supplier price currency quantity minOrderQty stock stockCode weight volume deliveryDays category integration integrationName fileName importedAt createdAt')
+        .lean()
+        .cursor({ batchSize: REINDEX_BATCH_SIZE });
+      
+      let batch = [];
+      let pendingBulks = [];
+      
+      for await (const doc of cursor) {
+        batch.push({
+          partNumber: doc.partNumber,
+          description: doc.description,
+          brand: doc.brand,
+          supplier: doc.supplier,
+          price: doc.price,
+          currency: doc.currency,
+          quantity: doc.quantity,
+          minOrderQty: doc.minOrderQty,
+          stock: doc.stock,
+          stockCode: doc.stockCode,
+          weight: doc.weight,
+          volume: doc.volume,
+          deliveryDays: doc.deliveryDays,
+          category: doc.category,
+          integration: doc.integration?.toString(),
+          integrationName: doc.integrationName,
+          fileName: doc.fileName,
+          importedAt: doc.importedAt,
+          createdAt: doc.createdAt,
+          _id: doc._id?.toString(),
+        });
+        
+        if (batch.length >= REINDEX_BATCH_SIZE) {
+          const batchToIndex = [...batch];
+          batch = [];
+          batchNum++;
+          
+          // Queue bulk operation
+          pendingBulks.push(this.bulkIndex(batchToIndex));
+          
+          // Process in parallel batches of PARALLEL_BULK
+          if (pendingBulks.length >= PARALLEL_BULK) {
+            const results = await Promise.all(pendingBulks);
+            pendingBulks = [];
+            
+            for (const r of results) {
+              totalIndexed += r.indexed || 0;
+              totalErrors += r.errors || 0;
+            }
+            
+            // Progress callback
+            if (onProgress && batchNum % 10 === 0) {
+              const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+              const rate = Math.round(totalIndexed / parseFloat(elapsed));
+              onProgress({
+                indexed: totalIndexed,
+                errors: totalErrors,
+                elapsed: elapsed,
+                rate: rate,
+              });
+            }
+            
+            // Yield to event loop
+            await new Promise(resolve => setImmediate(resolve));
+          }
+        }
+      }
+      
+      // Process remaining batches
+      if (batch.length > 0) {
+        pendingBulks.push(this.bulkIndex(batch));
+      }
+      
+      if (pendingBulks.length > 0) {
+        const results = await Promise.all(pendingBulks);
+        for (const r of results) {
+          totalIndexed += r.indexed || 0;
+          totalErrors += r.errors || 0;
+        }
+      }
+      
+      // Finalize indexing
+      await this.finalizeIndexing();
+      
+      const duration = ((Date.now() - startTime) / 1000).toFixed(1);
+      const rate = Math.round(totalIndexed / parseFloat(duration));
+      console.log(`✅ ES reindex complete: ${totalIndexed.toLocaleString()} docs in ${duration}s (${rate.toLocaleString()}/s)`);
+      
+      return { indexed: totalIndexed, errors: totalErrors, duration: parseFloat(duration) };
+      
+    } catch (error) {
+      console.error('❌ ES reindex error:', error.message);
+      await this.finalizeIndexing(); // Ensure we restore settings
+      return { indexed: totalIndexed, errors: totalErrors, error: error.message };
+    }
+  }
 }
 
 // Export singleton instance

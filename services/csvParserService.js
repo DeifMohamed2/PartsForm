@@ -276,14 +276,17 @@ class CSVParserService {
         //   'high' = larger batches, more memory, faster sync
         const syncPriority = process.env.SYNC_PRIORITY || 'low';
         const websiteFriendly = syncPriority !== 'high';
+        const deferES = process.env.SYNC_DEFER_ES !== 'false'; // Default: true
         
-        // MEMORY-SAFE batch sizes - reduced to prevent OOM crashes
-        // With 5 parallel files, each using these batches, memory stays under control
+        // With deferred ES, we only do MongoDB inserts - can use larger batches
+        // Without deferred ES, we also index to ES - use smaller batches
         const BATCH_SIZE = productionMode 
-          ? (websiteFriendly ? 2000 : 5000)    // 2k for balanced (safe), 5k for speed
+          ? (deferES 
+              ? (websiteFriendly ? 10000 : 20000)  // Deferred ES: 10k/20k MongoDB only
+              : (websiteFriendly ? 2000 : 5000))   // Inline ES: 2k/5k
           : 500;
         const ES_BATCH_SIZE = productionMode 
-          ? (websiteFriendly ? 1500 : 3000)    // 1.5k for balanced, 3k for speed
+          ? (websiteFriendly ? 3000 : 5000)
           : 200;
         
         let lastProgressUpdate = Date.now();
@@ -311,16 +314,19 @@ class CSVParserService {
           if (batchToProcess.length === 0) return { inserted: 0, updated: 0 };
 
           try {
-            // PARALLEL: Run MongoDB insert and ES indexing simultaneously
-            const mongoPromise = Part.bulkInsert(batchToProcess, {
+            // FAST MODE: Only insert to MongoDB during sync
+            // ES indexing happens AFTER all files are processed (much faster)
+            // This is controlled by SYNC_DEFER_ES env variable
+            const deferES = process.env.SYNC_DEFER_ES !== 'false'; // Default: true (defer ES)
+            
+            const mongoResult = await Part.bulkInsert(batchToProcess, {
               integration,
               integrationName,
               fileName,
             });
 
-            // Prepare ES batches for parallel indexing
-            let esPromise = Promise.resolve();
-            if (elasticsearchService.isAvailable) {
+            // Only index to ES during sync if explicitly requested (slower but real-time)
+            if (!deferES && elasticsearchService.isAvailable) {
               const esBatches = [];
               for (let i = 0; i < batchToProcess.length; i += ES_BATCH_SIZE) {
                 const esBatch = batchToProcess.slice(i, i + ES_BATCH_SIZE).map((doc, idx) => ({
@@ -333,30 +339,24 @@ class CSVParserService {
                 esBatches.push(esBatch);
               }
               
-              // Parallel ES batches: fewer when website-friendly to reduce resource contention
-              const PARALLEL_ES = productionMode ? (websiteFriendly ? 2 : 3) : 1;
-              esPromise = (async () => {
-                for (let i = 0; i < esBatches.length; i += PARALLEL_ES) {
-                  const chunk = esBatches.slice(i, i + PARALLEL_ES);
-                  await Promise.all(chunk.map(batch => 
-                    elasticsearchService.bulkIndex(batch).catch(() => {})
-                  ));
-                  // Yield between ES batches for website responsiveness
-                  await yieldToEventLoop();
-                }
-              })();
-              
+              const PARALLEL_ES = productionMode ? 2 : 1;
+              for (let i = 0; i < esBatches.length; i += PARALLEL_ES) {
+                const chunk = esBatches.slice(i, i + PARALLEL_ES);
+                await Promise.all(chunk.map(batch => 
+                  elasticsearchService.bulkIndex(batch).catch(() => {})
+                ));
+                await yieldToEventLoop();
+              }
               esRecordIndex += batchToProcess.length;
             }
-
-            // Wait for both MongoDB and ES to complete
-            const [mongoResult] = await Promise.all([mongoPromise, esPromise]);
             
             // Yield after each batch to let web requests through
             await yieldToEventLoop();
             
             // Hint to garbage collector periodically
             maybeGC();
+            
+            return mongoResult;
             
             return mongoResult;
           } catch (error) {

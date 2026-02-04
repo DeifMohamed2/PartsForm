@@ -138,6 +138,30 @@ class SyncService extends EventEmitter {
           throw new Error(`Unsupported integration type: ${integration.type}`);
       }
 
+      // PHASE 2: Reindex to Elasticsearch AFTER MongoDB import is complete
+      // This is MUCH faster than indexing during file processing
+      const deferES = process.env.SYNC_DEFER_ES !== 'false'; // Default: true
+      if (deferES && elasticsearchService.isAvailable && result.success && result.inserted > 0) {
+        this._updateProgress(integrationId, {
+          phase: 'indexing',
+          message: `Indexing ${result.inserted.toLocaleString()} records to search engine...`,
+        });
+        
+        console.log(`🔍 Starting deferred ES indexing for ${result.inserted.toLocaleString()} records...`);
+        
+        const esResult = await elasticsearchService.reindexIntegration(
+          integration._id.toString(),
+          (progress) => {
+            this._updateProgress(integrationId, {
+              phase: 'indexing',
+              message: `ES indexing: ${progress.indexed.toLocaleString()} docs (${progress.rate.toLocaleString()}/s)`,
+            });
+          }
+        );
+        
+        console.log(`✅ ES indexing complete: ${esResult.indexed.toLocaleString()} docs`);
+      }
+
       const duration = Date.now() - startTime;
 
       // Update integration with sync results
@@ -317,18 +341,23 @@ class SyncService extends EventEmitter {
 
     // PARALLEL PROCESSING - Process multiple files simultaneously
     // Each file uses its own isolated FTP connection for true parallelism
-    // SYNC_PRIORITY controls the balance between sync speed, memory usage, and website responsiveness:
-    //   'low' (default) = 3 parallel, smaller batches - memory safe, website stays fast
-    //   'high' = 8 parallel, larger batches - faster sync but more memory usage
-    // NOTE: Reduced from 5/15 to 3/8 to prevent OOM crashes (each file can use 500MB+)
+    // 
+    // WITH DEFERRED ES (default): MongoDB-only import is fast, can use more parallel
+    //   'low' = 8 parallel - fast MongoDB import, website stays responsive
+    //   'high' = 15 parallel - maximum speed MongoDB import
+    //
+    // WITHOUT DEFERRED ES: ES indexing during import is slow, use fewer parallel
+    //   'low' = 4 parallel, 'high' = 8 parallel
+    //
+    const deferES = process.env.SYNC_DEFER_ES !== 'false';
     const PARALLEL_DOWNLOADS = this.syncPriority === 'high' 
-      ? (this.productionMode ? 8 : 2)   // High priority: moderate parallelism
-      : (this.productionMode ? 4 : 2);  // Low priority: memory-safe
+      ? (this.productionMode ? (deferES ? 15 : 8) : 2)
+      : (this.productionMode ? (deferES ? 8 : 4) : 2);
     
-    const YIELD_BETWEEN_BATCHES = this.syncPriority !== 'high'; // Yield to let web requests through
-    const YIELD_DELAY_MS = 50; // 50ms pause between file batches for web requests
+    const YIELD_BETWEEN_BATCHES = this.syncPriority !== 'high';
+    const YIELD_DELAY_MS = 20; // 20ms pause between batches
 
-    console.log(`⚡ Starting PARALLEL sync: ${PARALLEL_DOWNLOADS} concurrent downloads (priority: ${this.syncPriority})`);
+    console.log(`⚡ Starting PARALLEL sync: ${PARALLEL_DOWNLOADS} concurrent downloads (priority: ${this.syncPriority}, deferES: ${deferES})`);
 
     // Helper function to process a single file with isolated FTP connection
     const processFile = async (file, index) => {
