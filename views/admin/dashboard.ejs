@@ -293,53 +293,6 @@
             <div style="font-size: 0.85rem; color: #64748b;">Monthly Growth</div>
           </div>
         </div>
-        <% } else { %>
-        <!-- Module-Specific Hero Stats (without Active Users) -->
-        <div class="hero-stat-grid" style="grid-template-columns: repeat(5, 1fr);">
-          <div class="hero-stat">
-            <div class="hero-stat-icon">
-              <i data-lucide="shopping-cart"></i>
-            </div>
-            <div class="hero-stat-value"><%= typeof stats.totalOrders === 'number' ? stats.totalOrders.toLocaleString() : stats.totalOrders %></div>
-            <div class="hero-stat-label">Total Orders</div>
-            <div class="hero-stat-change <%= stats.growth >= 0 ? 'positive' : 'negative' %>">
-              <i data-lucide="<%= stats.growth >= 0 ? 'trending-up' : 'trending-down' %>"></i>
-              <%= stats.growth >= 0 ? '+' : '' %><%= stats.growth %>%
-            </div>
-          </div>
-          <div class="hero-stat">
-            <div class="hero-stat-icon" style="background: rgba(16, 185, 129, 0.12); color: #10b981;">
-              <i data-lucide="dollar-sign"></i>
-            </div>
-            <div class="hero-stat-value"><%= stats.totalRevenue >= 1000000 ? '$' + (stats.totalRevenue / 1000000).toFixed(2) + 'M' : '$' + (stats.totalRevenue / 1000).toFixed(0) + 'K' %></div>
-            <div class="hero-stat-label">Total Revenue</div>
-            <div class="hero-stat-change <%= stats.growth >= 0 ? 'positive' : 'negative' %>">
-              <i data-lucide="<%= stats.growth >= 0 ? 'trending-up' : 'trending-down' %>"></i>
-              <%= stats.growth >= 0 ? '+' : '' %><%= stats.growth %>%
-            </div>
-          </div>
-          <div class="hero-stat">
-            <div class="hero-stat-icon" style="background: rgba(245, 158, 11, 0.12); color: #f59e0b;">
-              <i data-lucide="ticket"></i>
-            </div>
-            <div class="hero-stat-value"><%= stats.pendingTickets %></div>
-            <div class="hero-stat-label">Pending Tickets</div>
-          </div>
-          <div class="hero-stat">
-            <div class="hero-stat-icon" style="background: rgba(6, 182, 212, 0.12); color: #06b6d4;">
-              <i data-lucide="package"></i>
-            </div>
-            <div class="hero-stat-value"><%= stats.totalProducts.toLocaleString() %></div>
-            <div class="hero-stat-label">Products</div>
-          </div>
-          <div class="hero-stat">
-            <div class="hero-stat-icon" style="background: rgba(236, 72, 153, 0.12); color: #ec4899;">
-              <i data-lucide="users"></i>
-            </div>
-            <div class="hero-stat-value"><%= stats.totalBuyers || 0 %></div>
-            <div class="hero-stat-label">Customers</div>
-          </div>
-        </div>
 
         <!-- MAIN DASHBOARD - Unique Charts & Analytics Layout -->
         <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
@@ -1319,108 +1272,6 @@
           .ai-tab:hover:not(.active) { background: #f8fafc; color: #1e293b; }
         </style>
 
-        <% } else { %>
-        <!-- MODULE-SPECIFIC: Original Layout for Individual Modules -->
-        
-        <!-- Performance Metrics Row - Simplified -->
-        <div class="performance-row">
-          <div class="performance-card">
-            <div class="performance-header">
-              <div class="performance-icon">
-                <i data-lucide="check-circle"></i>
-              </div>
-              <span class="performance-title">Order Fulfillment</span>
-            </div>
-            <div class="performance-value"><%= performanceMetrics?.fulfillmentRate || 0 %>%</div>
-            <div class="performance-meta">
-              <span>Target: <%= performanceMetrics?.fulfillmentTarget || 95 %>%</span>
-              <span class="<%= (performanceMetrics?.fulfillmentChange || 0) >= 0 ? 'positive' : 'negative' %>"><%= (performanceMetrics?.fulfillmentChange || 0) >= 0 ? '+' : '' %><%= performanceMetrics?.fulfillmentChange || 0 %>%</span>
-            </div>
-          </div>
-          <div class="performance-card">
-            <div class="performance-header">
-              <div class="performance-icon">
-                <i data-lucide="star"></i>
-              </div>
-              <span class="performance-title">Satisfaction</span>
-            </div>
-            <div class="performance-value"><%= performanceMetrics?.satisfactionScore || 4.5 %>/5.0</div>
-            <div class="performance-meta">
-              <span><%= performanceMetrics?.satisfactionReviews || 0 %> reviews</span>
-              <span class="positive">+<%= performanceMetrics?.satisfactionChange || 0 %></span>
-            </div>
-          </div>
-          <div class="performance-card">
-            <div class="performance-header">
-              <div class="performance-icon">
-                <i data-lucide="truck"></i>
-              </div>
-              <span class="performance-title">Delivery Time</span>
-            </div>
-            <div class="performance-value"><%= performanceMetrics?.avgDeliveryDays || 3 %> days</div>
-            <div class="performance-meta">
-              <span>Target: <%= performanceMetrics?.deliveryTarget || 3 %> days</span>
-              <span class="positive"><%= performanceMetrics?.deliveryChange || 0 %> days</span>
-            </div>
-          </div>
-          <div class="performance-card">
-            <div class="performance-header">
-              <div class="performance-icon">
-                <i data-lucide="message-circle"></i>
-              </div>
-              <span class="performance-title">Response Time</span>
-            </div>
-            <div class="performance-value">&lt; <%= performanceMetrics?.avgResponseHours || 2 %> hrs</div>
-            <div class="performance-meta">
-              <span>Target: <%= performanceMetrics?.responseTarget || 2 %> hrs</span>
-              <span class="positive"><%= performanceMetrics?.resolvedPercent || 98 %>% resolved</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Multi Chart Grid -->
-        <div class="multi-chart-grid">
-          <div class="chart-card full-width">
-            <div class="chart-header">
-              <div>
-                <div class="chart-title">Revenue & Orders Trend</div>
-                <div class="chart-subtitle">
-                  Platform performance over 12 months
-                </div>
-              </div>
-              <div style="display: flex; gap: 0.5rem;">
-                <button class="admin-btn admin-btn-secondary" style="padding: 0.4rem 0.75rem; font-size: 0.8rem;">Week</button>
-                <button class="admin-btn admin-btn-primary" style="padding: 0.4rem 0.75rem; font-size: 0.8rem;">Month</button>
-                <button class="admin-btn admin-btn-secondary" style="padding: 0.4rem 0.75rem; font-size: 0.8rem;">Year</button>
-              </div>
-            </div>
-            <div class="chart-container" style="height: 320px;">
-              <canvas id="revenueChart"></canvas>
-            </div>
-          </div>
-
-          <div class="chart-card">
-            <div class="chart-header">
-              <div>
-                <div class="chart-title">Top Categories</div>
-                <div class="chart-subtitle">Distribution breakdown</div>
-              </div>
-            </div>
-            <div class="chart-container" style="height: 220px;">
-              <canvas id="ordersChart"></canvas>
-            </div>
-            <div class="chart-legend">
-              <% chartData.orderLabels.forEach(function(label, index) { %>
-                <div class="legend-item">
-                  <span class="legend-dot" style="background: <%= ['#3b82f6', '#8b5cf6', '#f59e0b', '#10b981', '#ec4899'][index % 5] %>;"></span>
-                  <span><%= label %></span>
-                </div>
-              <% }); %>
-            </div>
-          </div>
-        </div>
-        <% } %>
-
         <!-- Additional Charts Row -->
         <div class="admin-grid admin-grid-3" style="margin-bottom: 2rem;">
           <div class="chart-card">
@@ -1599,13 +1450,13 @@
               <a href="/admin/products" class="admin-btn admin-btn-secondary">View All</a>
             </div>
             <div class="activity-list">
-              <% const partColors = ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#ec4899']; %>
-              <% const partIcons = ['award', 'trending-up', 'star', 'package', 'box']; %>
+              <% const sellPartColors = ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#ec4899']; %>
+              <% const sellPartIcons = ['award', 'trending-up', 'star', 'package', 'box']; %>
               <% if (topSellingParts && topSellingParts.length > 0) { %>
                 <% topSellingParts.forEach(function(part, index) { %>
                 <div class="activity-item" style="padding: 0.875rem;">
-                  <div style="width: 40px; height: 40px; background: <%= partColors[index % 5] %>1f; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: <%= partColors[index % 5] %>;">
-                    <i data-lucide="<%= partIcons[index % 5] %>"></i>
+                  <div style="width: 40px; height: 40px; background: <%= sellPartColors[index % 5] %>1f; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: <%= sellPartColors[index % 5] %>;">
+                    <i data-lucide="<%= sellPartIcons[index % 5] %>"></i>
                   </div>
                   <div class="activity-content" style="flex: 1;">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -1630,7 +1481,6 @@
             </div>
           </div>
         </div>
-        <% } %>
       </div>
     </main>
   </div>
