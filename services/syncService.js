@@ -98,6 +98,9 @@ class SyncService extends EventEmitter {
 
       console.log(`🔄 Starting sync for: ${integration.name}`);
 
+      // Prepare Elasticsearch for bulk indexing (faster)
+      await elasticsearchService.prepareForBulkIndexing();
+
       // Update status to syncing
       integration.status = 'syncing';
       await integration.save();
@@ -150,7 +153,10 @@ class SyncService extends EventEmitter {
 
       await integration.save();
 
-      console.log(`✅ Sync completed for ${integration.name} in ${duration}ms`);
+      // Finalize Elasticsearch indexing (re-enable refresh and replicas)
+      await elasticsearchService.finalizeIndexing();
+
+      this.log(`✅ Sync completed for ${integration.name} in ${duration}ms`);
 
       // Final progress update
       this._updateProgress(integrationId, {
@@ -299,16 +305,16 @@ class SyncService extends EventEmitter {
 
     // Process each file - ftpService creates fresh connection for each download and closes after
     // Process in batches - optimized for production servers
-    const batchSize = this.productionMode ? 10 : 5; // More files per batch in production
-    const batchDelay = this.productionMode ? 1000 : 5000; // Shorter delay in production
+    const batchSize = this.productionMode ? 20 : 5; // 20 files per batch in production
+    const batchDelay = this.productionMode ? 500 : 5000; // 500ms delay in production
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-      this.log(`[SYNC] Processing file ${i + 1}/${files.length}: ${file.name}`);
+      if (!this.productionMode) this.log(`[SYNC] Processing file ${i + 1}/${files.length}: ${file.name}`);
 
       // Wait between batches to avoid rate limiting
       if (i > 0 && i % batchSize === 0) {
-        this.log(`[SYNC] Batch complete, waiting ${batchDelay}ms...`);
+        if (!this.productionMode) this.log(`[SYNC] Batch complete, waiting ${batchDelay}ms...`);
         await new Promise(resolve => setTimeout(resolve, batchDelay));
       }
 

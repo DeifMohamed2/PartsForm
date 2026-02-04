@@ -11,7 +11,7 @@ class ElasticsearchService {
     this.indexName = process.env.ELASTICSEARCH_INDEX || 'automotive_parts';
     this.isAvailable = false;
     this.bulkQueue = [];
-    this.bulkSize = parseInt(process.env.ELASTICSEARCH_BULK_SIZE, 10) || 5000;
+    this.bulkSize = parseInt(process.env.ELASTICSEARCH_BULK_SIZE, 10) || 10000; // 10k for 16GB RAM
     this.bulkTimeout = null;
     // Cache for document count to avoid checking on every request
     this._cachedDocCount = null;
@@ -62,9 +62,10 @@ class ElasticsearchService {
 
       const clientConfig = {
         node: esNode,
-        maxRetries: 3,
-        requestTimeout: 60000,
+        maxRetries: 5,
+        requestTimeout: 120000, // 2 min for large bulk operations
         sniffOnStart: false,
+        compression: 'gzip', // Reduce network overhead
       };
 
       // Add auth if configured
@@ -107,10 +108,12 @@ class ElasticsearchService {
           index: this.indexName,
           body: {
             settings: {
-              number_of_shards: 3,
-              number_of_replicas: 1,
-              refresh_interval: '30s',
-              max_result_window: 10000,
+              number_of_shards: 5, // More shards for 74M+ parts
+              number_of_replicas: 0, // Disable during bulk indexing (enable after)
+              refresh_interval: '-1', // Disable refresh during bulk indexing
+              max_result_window: 50000,
+              'index.translog.durability': 'async', // Faster indexing
+              'index.translog.sync_interval': '30s',
               analysis: {
                 analyzer: {
                   part_number_analyzer: {
@@ -186,11 +189,59 @@ class ElasticsearchService {
 
         console.log('✅ Elasticsearch index created with optimized settings');
       } else {
-        console.log('✅ Elasticsearch index already exists');
+        if (!this.productionMode) console.log('✅ Elasticsearch index already exists');
       }
     } catch (error) {
       console.error('Error creating Elasticsearch index:', error.message);
       throw error;
+    }
+  }
+
+  /**
+   * Finalize indexing - re-enable refresh and replicas after bulk sync
+   * Call this after completing a large sync operation
+   */
+  async finalizeIndexing() {
+    if (!this.isAvailable) return;
+    
+    try {
+      await this.client.indices.putSettings({
+        index: this.indexName,
+        body: {
+          'index.refresh_interval': '5s', // Normal refresh interval
+          'index.number_of_replicas': 1, // Enable replicas
+          'index.translog.durability': 'request' // Normal durability
+        }
+      });
+      
+      // Force refresh to make all docs searchable
+      await this.client.indices.refresh({ index: this.indexName });
+      
+      console.log('✅ Elasticsearch index finalized - refresh and replicas enabled');
+    } catch (error) {
+      console.error('Error finalizing ES index:', error.message);
+    }
+  }
+
+  /**
+   * Prepare index for bulk indexing - disable refresh and replicas
+   */
+  async prepareForBulkIndexing() {
+    if (!this.isAvailable) return;
+    
+    try {
+      await this.client.indices.putSettings({
+        index: this.indexName,
+        body: {
+          'index.refresh_interval': '-1', // Disable refresh
+          'index.number_of_replicas': 0, // No replicas during bulk
+          'index.translog.durability': 'async'
+        }
+      });
+      
+      if (!this.productionMode) console.log('⚡ ES index prepared for bulk indexing');
+    } catch (error) {
+      console.error('Error preparing ES for bulk:', error.message);
     }
   }
 
@@ -612,19 +663,18 @@ class ElasticsearchService {
       const errors = response.items.filter((item) => item.index?.error);
       const indexed = documents.length - errors.length;
 
-      if (errors.length > 0) {
+      if (errors.length > 0 && !this.productionMode) {
         console.error(`⚠️  ${errors.length} ES index errors`);
       }
 
-      // In production, only log periodically (every 10k docs or 5 seconds)
+      // In production, only log periodically (every 50k docs or 30 seconds)
       this._indexedCount += indexed;
       const now = Date.now();
-      if (!this.productionMode || (now - this._lastLogTime > 5000) || this._indexedCount >= 10000) {
-        if (this.productionMode) {
-          console.log(`✅ ES Indexed ${this._indexedCount} documents`);
-        } else {
-          console.log(`✅ ES Indexed ${indexed} documents in ${indexTime}ms`);
-        }
+      const LOG_INTERVAL = this.productionMode ? 30000 : 5000; // 30s in prod, 5s in dev
+      const LOG_THRESHOLD = this.productionMode ? 50000 : 10000; // 50k in prod, 10k in dev
+      
+      if ((now - this._lastLogTime > LOG_INTERVAL) || this._indexedCount >= LOG_THRESHOLD) {
+        console.log(`✅ ES: ${this._indexedCount.toLocaleString()} docs indexed`);
         this._indexedCount = 0;
         this._lastLogTime = now;
       }

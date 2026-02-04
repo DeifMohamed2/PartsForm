@@ -239,8 +239,8 @@ class CSVParserService {
           const commaCount = firstLine.split(',').length;
           separator = semicolonCount > commaCount ? ';' : ',';
           
-          // Create read stream from file
-          inputStream = fs.createReadStream(source, { highWaterMark: productionMode ? 256 * 1024 : 64 * 1024 }); // Larger chunks in production
+          // Create read stream from file - 1MB chunks for fast processing
+          inputStream = fs.createReadStream(source, { highWaterMark: productionMode ? 1024 * 1024 : 64 * 1024 }); // 1MB chunks in production
           
           if (!productionMode) console.log(`📊 Streaming ${(fileSize / 1024 / 1024).toFixed(2)} MB file with separator "${separator}"`);
         } else {
@@ -271,11 +271,11 @@ class CSVParserService {
         let validRecordCount = 0;
         let esRecordIndex = 0;
         
-        // Production batch sizes
-        const BATCH_SIZE = productionMode ? 2000 : 500;
-        const ES_BATCH_SIZE = productionMode ? 500 : 200;
+        // Production batch sizes - optimized for 16GB RAM server
+        const BATCH_SIZE = productionMode ? 5000 : 500; // 5k MongoDB batch
+        const ES_BATCH_SIZE = productionMode ? 2000 : 200; // 2k ES batch
         let lastProgressUpdate = Date.now();
-        const PROGRESS_INTERVAL = productionMode ? 5000 : 1000;
+        const PROGRESS_INTERVAL = productionMode ? 10000 : 1000; // Less frequent updates
 
         const mapHeaders = ({ header }) => header.trim().replace(/^["']|["']$/g, '');
 
