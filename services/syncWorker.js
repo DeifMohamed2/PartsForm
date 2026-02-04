@@ -26,13 +26,15 @@ const Part = require('../models/Part');
 // Increase event listener limit for high-performance sync
 EventEmitter.defaultMaxListeners = 50;
 
-// Configuration for MAXIMUM SPEED (no website to worry about)
+// Configuration - balanced for FTP server limits + speed
 const CONFIG = {
-  PARALLEL_DOWNLOADS: 30,       // Max parallel FTP downloads
+  PARALLEL_DOWNLOADS: 8,        // FTP servers typically limit to 5-10 connections
   BATCH_SIZE: 100000,           // 100k records per batch
   ES_BULK_SIZE: 25000,          // ES bulk size
   ES_PARALLEL_BULKS: 10,        // Concurrent ES operations
   POLL_INTERVAL: 2000,          // Check for new requests every 2s
+  FTP_RETRY_ATTEMPTS: 3,        // Retry failed downloads
+  FTP_RETRY_DELAY: 2000,        // Wait 2s between retries
 };
 
 class SyncWorker {
@@ -248,35 +250,47 @@ class SyncWorker {
         recordsInserted: totalInserted,
       });
 
-      // Process batch in parallel
+      // Process batch in parallel with retry logic
       const results = await Promise.all(
         batch.map(async (file) => {
-          try {
-            // Download file - pass filename first, then FTP credentials
-            const tempPath = await ftpService.downloadToTempFileParallel(file.name, ftpConfig);
-            
-            // Parse and import with MAXIMUM speed settings
-            const result = await csvParserService.parseAndImport(
-              tempPath,
-              {
-                integrationId: integration._id.toString(),
-                integrationName: integration.name,
-                fileName: file.name,
-                mapping: integration.mapping || {},
-                batchSize: CONFIG.BATCH_SIZE,
-                skipES: true, // Defer ES indexing
-              },
-              null // No progress callback needed
-            );
+          let lastError = null;
+          
+          // Retry loop for FTP failures
+          for (let attempt = 1; attempt <= CONFIG.FTP_RETRY_ATTEMPTS; attempt++) {
+            try {
+              // Download file - pass filename first, then FTP credentials
+              const tempPath = await ftpService.downloadToTempFileParallel(file.name, ftpConfig);
+              
+              // Parse and import with MAXIMUM speed settings
+              const result = await csvParserService.parseAndImport(
+                tempPath,
+                {
+                  integrationId: integration._id.toString(),
+                  integrationName: integration.name,
+                  fileName: file.name,
+                  mapping: integration.mapping || {},
+                  batchSize: CONFIG.BATCH_SIZE,
+                  skipES: true, // Defer ES indexing
+                },
+                null // No progress callback needed
+              );
 
-            // Cleanup temp file
-            try { require('fs').unlinkSync(tempPath); } catch (e) {}
+              // Cleanup temp file
+              try { require('fs').unlinkSync(tempPath); } catch (e) {}
 
-            return result;
-          } catch (error) {
-            this.log(`Error processing ${file.name}: ${error.message}`, 'ERROR');
-            return { recordsProcessed: 0, inserted: 0, error: error.message };
+              return result;
+            } catch (error) {
+              lastError = error;
+              if (attempt < CONFIG.FTP_RETRY_ATTEMPTS) {
+                // Wait before retry
+                await new Promise(r => setTimeout(r, CONFIG.FTP_RETRY_DELAY * attempt));
+              }
+            }
           }
+          
+          // All retries failed
+          this.log(`Error processing ${file.name} after ${CONFIG.FTP_RETRY_ATTEMPTS} attempts: ${lastError.message}`, 'ERROR');
+          return { recordsProcessed: 0, inserted: 0, error: lastError.message };
         })
       );
 
