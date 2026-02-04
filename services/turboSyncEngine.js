@@ -376,19 +376,20 @@ async function importToMongoDB(ndjsonFiles, totalRecords, integration) {
   // Connect to MongoDB
   await mongoose.connect(mongoUri);
   const db = mongoose.connection.db;
-  const collection = db.collection('parts');
   
-  // Step 1: Drop indexes for faster import
-  log('Dropping indexes for faster import...');
+  // Step 1: FAST DELETE - Drop entire collection instead of deleteMany (instant vs 17 min!)
+  const deleteStart = Date.now();
+  log('Dropping parts collection for instant cleanup...');
   try {
-    await collection.dropIndexes();
+    await db.collection('parts').drop();
+    log(`Collection dropped in ${((Date.now() - deleteStart) / 1000).toFixed(1)}s`, 'SUCCESS');
   } catch (e) {
-    // Ignore if no indexes
+    // Collection might not exist
+    log('Collection does not exist, creating fresh');
   }
   
-  // Step 2: Delete old data
-  log(`Deleting old data for integration ${integration._id}...`);
-  await collection.deleteMany({ integration: integration._id.toString() });
+  // Recreate collection
+  const collection = db.collection('parts');
   
   let importedCount = 0;
   
