@@ -395,11 +395,11 @@ class SyncWorker {
    */
   async start() {
     console.log('\n' + '='.repeat(60));
-    console.log('🔧 SYNC WORKER - Dedicated Process');
+    console.log('� TURBO SYNC WORKER v2.0');
     console.log('='.repeat(60));
     console.log(`   Memory: ${(process.memoryUsage().heapTotal / 1024 / 1024).toFixed(0)} MB allocated`);
-    console.log(`   Parallel Downloads: ${CONFIG.PARALLEL_DOWNLOADS}`);
-    console.log(`   Batch Size: ${CONFIG.BATCH_SIZE.toLocaleString()}`);
+    console.log(`   Engine: ${USE_TURBO_ENGINE ? 'TURBO (mongoimport)' : 'Legacy (Node.js)'}`);
+    console.log(`   Target: 75M records in ~30 minutes`);
     console.log('='.repeat(60) + '\n');
 
     await this.connect();
