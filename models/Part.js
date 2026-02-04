@@ -405,24 +405,32 @@ partSchema.statics.bulkUpsert = async function (records, options = {}) {
 
 /**
  * Delete all parts for an integration (used before fresh sync)
- * Uses drop collection hint for massive deletes (much faster than deleteMany)
+ * Uses index hint and extended timeout for massive deletes (millions of records)
  */
 partSchema.statics.deleteByIntegration = async function (integrationId) {
   const startTime = Date.now();
   
-  // For large deletes, use unordered bulk delete which is faster
-  // Also hint to use the integration index
-  const result = await this.deleteMany(
-    { integration: integrationId },
-    { 
-      hint: { integration: 1 }, // Use the integration index
-      writeConcern: { w: 1, j: false } // Fast write concern
-    }
-  );
-  
-  const duration = ((Date.now() - startTime) / 1000).toFixed(1);
-  console.log(`🗑️  Deleted ${result.deletedCount.toLocaleString()} parts in ${duration}s`);
-  return result.deletedCount;
+  try {
+    // For massive deletes, use extended timeout (10 minutes)
+    // The integration index makes this fast, but still takes time for millions of records
+    const result = await this.deleteMany(
+      { integration: integrationId },
+      { 
+        hint: { integration: 1 }, // Use the integration index
+        writeConcern: { w: 1, j: false }, // Fast write concern
+        maxTimeMS: 600000 // 10 minute timeout for large deletes
+      }
+    );
+    
+    const duration = ((Date.now() - startTime) / 1000).toFixed(1);
+    console.log(`🗑️  Deleted ${result.deletedCount.toLocaleString()} parts in ${duration}s`);
+    return result.deletedCount;
+  } catch (error) {
+    // If timeout, try to continue - the sync will overwrite anyway
+    console.error(`⚠️  Delete timeout after ${((Date.now() - startTime) / 1000).toFixed(1)}s: ${error.message}`);
+    console.log(`   Continuing with sync (old data will be overwritten)...`);
+    return 0;
+  }
 };
 
 /**

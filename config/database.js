@@ -13,8 +13,9 @@ const connectDB = async () => {
       // Performance optimizations for 96GB/18-core/NVMe server
       maxPoolSize: 200, // 200 connections for 18 cores
       minPoolSize: 20,
-      socketTimeoutMS: 180000, // 3 min timeout for large bulk ops
+      socketTimeoutMS: 600000, // 10 min timeout for massive delete operations
       serverSelectionTimeoutMS: 30000,
+      connectTimeoutMS: 30000,
       writeConcern: {
         w: 1, // Fast writes (acknowledge from primary only)
         j: false // Don't wait for journal
