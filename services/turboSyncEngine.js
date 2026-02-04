@@ -38,9 +38,10 @@ const CONFIG = {
   // Directories
   WORK_DIR: '/tmp/partsform-turbo-sync',
   
-  // FTP - MAXIMUM parallel downloads
-  FTP_PARALLEL: 50,              // 50 parallel FTP downloads (was 30)
+  // FTP - SAFE parallel downloads (50 was too aggressive)
+  FTP_PARALLEL: 30,              // 30 parallel FTP downloads (stable)
   FTP_TIMEOUT: 60000,            // 60s timeout per file
+  FTP_RETRIES: 3,                // Retry failed downloads 3 times
   
   // MongoDB - mongoimport settings (fewer parallel to reduce disk contention)
   MONGO_WORKERS: 18,             // Use all 18 cores per process
@@ -143,8 +144,8 @@ async function downloadAllFiles(integration) {
   
   log(`Found ${csvFiles.length} CSV files to download`);
   
-  // Parallel download function
-  const downloadFile = async (file, index) => {
+  // Parallel download function with retry logic
+  const downloadFile = async (file, retryCount = 0) => {
     const localPath = path.join(downloadDir, file.name);
     const client = new FTPClient();
     client.ftp.verbose = false;
@@ -163,9 +164,14 @@ async function downloadAllFiles(integration) {
       
       return { success: true, file: file.name, size: file.size };
     } catch (error) {
+      // Retry logic
+      if (retryCount < CONFIG.FTP_RETRIES) {
+        await new Promise(r => setTimeout(r, 1000 * (retryCount + 1))); // Wait 1s, 2s, 3s
+        return downloadFile(file, retryCount + 1);
+      }
       return { success: false, file: file.name, error: error.message };
     } finally {
-      client.close();
+      try { client.close(); } catch (e) {}
     }
   };
   
@@ -176,7 +182,7 @@ async function downloadAllFiles(integration) {
   
   for (let i = 0; i < csvFiles.length; i += CONFIG.FTP_PARALLEL) {
     const batch = csvFiles.slice(i, i + CONFIG.FTP_PARALLEL);
-    const batchResults = await Promise.all(batch.map((f, idx) => downloadFile(f, i + idx)));
+    const batchResults = await Promise.all(batch.map(f => downloadFile(f, 0)));
     
     for (const result of batchResults) {
       results.push(result);
@@ -186,6 +192,12 @@ async function downloadAllFiles(integration) {
     
     const percent = Math.round(((i + batch.length) / csvFiles.length) * 100);
     log(`Downloaded ${i + batch.length}/${csvFiles.length} files (${percent}%)`, 'PROGRESS');
+  }
+  
+  // If any failed, throw error to stop sync
+  if (failed > 0) {
+    const failedFiles = results.filter(r => !r.success).map(r => r.file);
+    log(`WARNING: ${failed} files failed to download: ${failedFiles.slice(0, 5).join(', ')}${failed > 5 ? '...' : ''}`, 'ERROR');
   }
   
   const duration = Date.now() - startTime;
