@@ -256,7 +256,7 @@ class SyncWorker {
             const tempPath = await ftpService.downloadToTempFileParallel(file.name, ftpConfig);
             
             // Parse and import with MAXIMUM speed settings
-            const result = await csvParserService.parseAndImportCSV(
+            const result = await csvParserService.parseAndImport(
               tempPath,
               {
                 integrationId: integration._id.toString(),
