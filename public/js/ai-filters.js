@@ -438,10 +438,10 @@
       isSearchInProgress = false;
       currentAbortController = null;
       
-      // Re-enable submit button
+      // Re-enable submit button (icon only for cleaner UI)
       if (elements.aiSubmitBtn) {
         elements.aiSubmitBtn.disabled = false;
-        elements.aiSubmitBtn.innerHTML = '<i data-lucide="sparkles"></i><span>Search</span>';
+        elements.aiSubmitBtn.innerHTML = '<i data-lucide="search"></i>';
       }
       
       // Reinitialize icons

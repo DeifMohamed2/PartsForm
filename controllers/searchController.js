@@ -946,13 +946,42 @@ async function aiSearch(req, res) {
     }
 
     // Apply category filter (search in category or description)
+    // Use flexible matching with root words to avoid over-filtering
     if (filters.category) {
-      filteredResults = filteredResults.filter(p => {
+      // Map category to search terms (singular/plural variations)
+      const categorySearchTerms = {
+        'brakes': ['brake', 'brakes', 'braking', 'rotor', 'caliper', 'pad', 'disc'],
+        'filters': ['filter', 'filters', 'oil filter', 'air filter', 'fuel filter'],
+        'suspension': ['suspension', 'shock', 'strut', 'spring', 'damper', 'absorber'],
+        'electrical': ['electrical', 'electric', 'alternator', 'starter', 'battery', 'ignition'],
+        'engine': ['engine', 'motor', 'piston', 'valve', 'timing', 'gasket', 'camshaft'],
+        'transmission': ['transmission', 'gearbox', 'clutch', 'gear', 'cv joint', 'driveshaft'],
+        'cooling': ['cooling', 'coolant', 'radiator', 'thermostat', 'water pump', 'fan'],
+        'steering': ['steering', 'tie rod', 'rack', 'power steering', 'ball joint'],
+        'exhaust': ['exhaust', 'muffler', 'catalytic', 'manifold', 'pipe'],
+        'wheels': ['wheel', 'wheels', 'tire', 'tires', 'hub', 'rim', 'bearing'],
+      };
+      
+      const searchTerms = categorySearchTerms[filters.category.toLowerCase()] || [filters.category.toLowerCase()];
+      
+      const beforeCount = filteredResults.length;
+      const categoryFiltered = filteredResults.filter(p => {
         const cat = (p.category || '').toLowerCase();
         const desc = (p.description || '').toLowerCase();
-        return cat.includes(filters.category.toLowerCase()) || 
-               desc.includes(filters.category.toLowerCase());
+        const partNum = (p.partNumber || '').toLowerCase();
+        const combined = `${cat} ${desc} ${partNum}`;
+        
+        return searchTerms.some(term => combined.includes(term));
       });
+      
+      // Only apply category filter if it doesn't eliminate all results
+      // This prevents over-filtering when category data is sparse
+      if (categoryFiltered.length > 0) {
+        filteredResults = categoryFiltered;
+        console.log(`📦 Category filter '${filters.category}': ${beforeCount} → ${filteredResults.length} results`);
+      } else {
+        console.log(`📦 Category filter '${filters.category}' skipped (would eliminate all ${beforeCount} results)`);
+      }
     }
 
     // Step 5: Sort results
