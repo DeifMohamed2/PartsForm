@@ -739,7 +739,7 @@ const DB_QUERY_TIMEOUT = 10000; // 10 second timeout for database queries
 /**
  * AI-powered search - Professional grade with true AI understanding
  * POST /api/ai-search
- * 
+ *
  * NEW ARCHITECTURE:
  * 1. AI parses user intent (understands what they want)
  * 2. Fetch data from database
@@ -787,7 +787,10 @@ async function aiSearch(req, res) {
     let parsed;
     try {
       parsed = await geminiService.parseSearchQuery(query);
-      console.log('🧠 AI Intent:', JSON.stringify(parsed.intent || parsed.filters, null, 2));
+      console.log(
+        '🧠 AI Intent:',
+        JSON.stringify(parsed.intent || parsed.filters, null, 2),
+      );
     } catch (parseError) {
       console.warn(`⚠️ AI parsing failed: ${parseError.message}`);
       parsed = {
@@ -802,7 +805,7 @@ async function aiSearch(req, res) {
     const filters = parsed.filters || {};
     const userIntent = parsed.userIntent || null;
     const understood = userIntent?.understood || {};
-    
+
     // Log what AI understood
     console.log('📋 Understood:', {
       stockRequirements: understood.stockConstraints,
@@ -825,7 +828,7 @@ async function aiSearch(req, res) {
         try {
           const esResult = await elasticsearchService.searchMultiplePartNumbers(
             searchTerms,
-            { limitPerPart: 200 }
+            { limitPerPart: 200 },
           );
           allResults = esResult.results;
           source = 'elasticsearch';
@@ -844,7 +847,9 @@ async function aiSearch(req, res) {
               { description: { $regex: escapedTerm, $options: 'i' } },
               { brand: { $regex: escapedTerm, $options: 'i' } },
             ],
-          }).limit(200).lean();
+          })
+            .limit(200)
+            .lean();
           allResults.push(...mongoResults);
         }
       }
@@ -853,16 +858,16 @@ async function aiSearch(req, res) {
     // If no search terms or no results, fetch by filters
     if (allResults.length === 0) {
       const dbQuery = {};
-      
+
       // Brand filter
       if (filters.brand && filters.brand.length > 0) {
-        dbQuery.brand = { $in: filters.brand.map(b => new RegExp(b, 'i')) };
+        dbQuery.brand = { $in: filters.brand.map((b) => new RegExp(b, 'i')) };
       }
 
       // Fetch a broader set of data for AI filtering
       const queryPromise = Part.find(dbQuery).limit(1000).lean();
       const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('DB_TIMEOUT')), DB_QUERY_TIMEOUT)
+        setTimeout(() => reject(new Error('DB_TIMEOUT')), DB_QUERY_TIMEOUT),
       );
 
       try {
@@ -886,9 +891,9 @@ async function aiSearch(req, res) {
     if (userIntent) {
       // Use the new AI-driven filtering
       const filterResult = await geminiService.filterDataWithAI(
-        allResults, 
-        userIntent, 
-        query
+        allResults,
+        userIntent,
+        query,
       );
       filteredResults = filterResult.matchingParts;
       filterAnalysis = filterResult.analysis;
@@ -902,19 +907,19 @@ async function aiSearch(req, res) {
     // ═══════════════════════════════════════════════════════════════
     // STEP 4: SORT AND DEDUPLICATE
     // ═══════════════════════════════════════════════════════════════
-    
+
     // Sort by relevance: in-stock items first, then by quantity (high to low), then price
     filteredResults.sort((a, b) => {
       // First priority: Stock availability
       const aInStock = (a.quantity || 0) > 0 ? 1 : 0;
       const bInStock = (b.quantity || 0) > 0 ? 1 : 0;
       if (bInStock !== aInStock) return bInStock - aInStock;
-      
+
       // Second priority: Quantity (higher is better for "full stock" queries)
       const aQty = a.quantity || 0;
       const bQty = b.quantity || 0;
       if (bQty !== aQty) return bQty - aQty;
-      
+
       // Third priority: Price (lower is better)
       const aPrice = a.price || Infinity;
       const bPrice = b.price || Infinity;
@@ -923,7 +928,7 @@ async function aiSearch(req, res) {
 
     // Deduplicate by partNumber + supplier
     const seen = new Set();
-    filteredResults = filteredResults.filter(p => {
+    filteredResults = filteredResults.filter((p) => {
       const key = `${p.partNumber}-${p.supplier}`;
       if (seen.has(key)) return false;
       seen.add(key);
@@ -934,31 +939,44 @@ async function aiSearch(req, res) {
     filteredResults = filteredResults.slice(0, 500);
 
     const searchTime = Date.now() - startTime;
-    console.log(`✅ AI Search completed in ${searchTime}ms: ${filteredResults.length} results`);
+    console.log(
+      `✅ AI Search completed in ${searchTime}ms: ${filteredResults.length} results`,
+    );
 
     // ═══════════════════════════════════════════════════════════════
     // STEP 5: BUILD RESPONSE WITH CLEAR MESSAGING
     // ═══════════════════════════════════════════════════════════════
     const stockStats = {
-      highStock: filteredResults.filter(p => (p.quantity || 0) >= 10).length,
-      inStock: filteredResults.filter(p => (p.quantity || 0) > 0).length,
-      lowStock: filteredResults.filter(p => (p.quantity || 0) > 0 && (p.quantity || 0) < 10).length,
-      outOfStock: filteredResults.filter(p => (p.quantity || 0) === 0).length,
+      highStock: filteredResults.filter((p) => (p.quantity || 0) >= 10).length,
+      inStock: filteredResults.filter((p) => (p.quantity || 0) > 0).length,
+      lowStock: filteredResults.filter(
+        (p) => (p.quantity || 0) > 0 && (p.quantity || 0) < 10,
+      ).length,
+      outOfStock: filteredResults.filter((p) => (p.quantity || 0) === 0).length,
     };
 
     let message = `Found ${filteredResults.length} parts`;
     if (filterAnalysis?.filtersApplied) {
       const appliedFilters = [];
-      if (filterAnalysis.filtersApplied.stock) appliedFilters.push(filterAnalysis.filtersApplied.stock);
-      if (filterAnalysis.filtersApplied.price) appliedFilters.push(`price ${filterAnalysis.filtersApplied.price}`);
-      if (filterAnalysis.filtersApplied.brands) appliedFilters.push(`brands: ${filterAnalysis.filtersApplied.brands.join(', ')}`);
-      
+      if (filterAnalysis.filtersApplied.stock)
+        appliedFilters.push(filterAnalysis.filtersApplied.stock);
+      if (filterAnalysis.filtersApplied.price)
+        appliedFilters.push(`price ${filterAnalysis.filtersApplied.price}`);
+      if (filterAnalysis.filtersApplied.brands)
+        appliedFilters.push(
+          `brands: ${filterAnalysis.filtersApplied.brands.join(', ')}`,
+        );
+
       if (appliedFilters.length > 0) {
         message += ` (filtered by: ${appliedFilters.join(', ')})`;
       }
     }
 
-    if (stockStats.highStock > 0 && (understood.stockConstraints?.requireHighStock || filters.stockLevel === 'high')) {
+    if (
+      stockStats.highStock > 0 &&
+      (understood.stockConstraints?.requireHighStock ||
+        filters.stockLevel === 'high')
+    ) {
       message += `. ${stockStats.highStock} with high stock (qty ≥ 10).`;
     }
 
@@ -986,13 +1004,13 @@ async function aiSearch(req, res) {
         stockStats,
       },
     });
-
   } catch (error) {
     const normalizedQuery = (req.body?.query || '').trim().toLowerCase();
     activeAISearches.delete(normalizedQuery);
     console.error('AI Search error:', error);
 
-    const isTimeout = error.message?.includes('TIMEOUT') || error.message?.includes('timeout');
+    const isTimeout =
+      error.message?.includes('TIMEOUT') || error.message?.includes('timeout');
     res.status(isTimeout ? 408 : 500).json({
       success: false,
       error: isTimeout ? 'Search timed out' : 'Search failed',
@@ -1013,42 +1031,58 @@ function applyBasicFilters(parts, filters, query) {
 
   // Price filter
   if (filters.maxPrice !== undefined) {
-    const maxPriceAED = convertCurrency(filters.maxPrice, filters.priceCurrency || 'USD', 'AED');
-    filtered = filtered.filter(p => p.price === null || p.price === undefined || p.price <= maxPriceAED);
+    const maxPriceAED = convertCurrency(
+      filters.maxPrice,
+      filters.priceCurrency || 'USD',
+      'AED',
+    );
+    filtered = filtered.filter(
+      (p) =>
+        p.price === null || p.price === undefined || p.price <= maxPriceAED,
+    );
   }
 
   if (filters.minPrice !== undefined) {
-    const minPriceAED = convertCurrency(filters.minPrice, filters.priceCurrency || 'USD', 'AED');
-    filtered = filtered.filter(p => p.price !== null && p.price !== undefined && p.price >= minPriceAED);
+    const minPriceAED = convertCurrency(
+      filters.minPrice,
+      filters.priceCurrency || 'USD',
+      'AED',
+    );
+    filtered = filtered.filter(
+      (p) =>
+        p.price !== null && p.price !== undefined && p.price >= minPriceAED,
+    );
   }
 
   // Stock filter
   if (filters.stockLevel === 'high' || filters.minQuantity >= 10) {
-    filtered = filtered.filter(p => (p.quantity || 0) >= 10);
+    filtered = filtered.filter((p) => (p.quantity || 0) >= 10);
   } else if (filters.inStock) {
-    filtered = filtered.filter(p => (p.quantity || 0) > 0);
+    filtered = filtered.filter((p) => (p.quantity || 0) > 0);
   }
 
   // Exclude low stock if specified
   if (filters.exclude?.stockLevels?.includes('low')) {
-    filtered = filtered.filter(p => (p.quantity || 0) >= 10 || (p.quantity || 0) === 0);
+    filtered = filtered.filter(
+      (p) => (p.quantity || 0) >= 10 || (p.quantity || 0) === 0,
+    );
   }
 
   // Brand filter
   if (filters.brand && filters.brand.length > 0) {
-    const brandLower = filters.brand.map(b => b.toLowerCase());
-    filtered = filtered.filter(p => {
+    const brandLower = filters.brand.map((b) => b.toLowerCase());
+    filtered = filtered.filter((p) => {
       if (!p.brand) return false;
-      return brandLower.some(b => p.brand.toLowerCase().includes(b));
+      return brandLower.some((b) => p.brand.toLowerCase().includes(b));
     });
   }
 
   // Exclude brands
   if (filters.exclude?.brands?.length > 0) {
-    const excludeBrands = filters.exclude.brands.map(b => b.toLowerCase());
-    filtered = filtered.filter(p => {
+    const excludeBrands = filters.exclude.brands.map((b) => b.toLowerCase());
+    filtered = filtered.filter((p) => {
       if (!p.brand) return true;
-      return !excludeBrands.some(b => p.brand.toLowerCase().includes(b));
+      return !excludeBrands.some((b) => p.brand.toLowerCase().includes(b));
     });
   }
 
@@ -1060,15 +1094,39 @@ function applyBasicFilters(parts, filters, query) {
  */
 function extractBasicKeywordsFromQuery(query) {
   const stopWords = new Set([
-    'find', 'me', 'show', 'get', 'looking', 'for', 'need', 'want',
-    'the', 'a', 'an', 'some', 'with', 'from', 'i', 'am', 'please',
-    'can', 'you', 'under', 'below', 'above', 'over', 'and', 'or',
+    'find',
+    'me',
+    'show',
+    'get',
+    'looking',
+    'for',
+    'need',
+    'want',
+    'the',
+    'a',
+    'an',
+    'some',
+    'with',
+    'from',
+    'i',
+    'am',
+    'please',
+    'can',
+    'you',
+    'under',
+    'below',
+    'above',
+    'over',
+    'and',
+    'or',
   ]);
   const words = query
     .toLowerCase()
     .replace(/[^\w\s-]/g, ' ')
     .split(/\s+/)
-    .filter(word => word.length > 2 && !stopWords.has(word) && !/^\d+$/.test(word));
+    .filter(
+      (word) => word.length > 2 && !stopWords.has(word) && !/^\d+$/.test(word),
+    );
 
   return [...new Set(words)].slice(0, 5);
 }
@@ -1081,10 +1139,14 @@ function extractBasicFiltersFromQuery(query) {
   const queryLower = query.toLowerCase();
 
   // Price extraction
-  const priceMatch = queryLower.match(/(?:under|below|less than|max|cheaper than)\s*\$?\s*(\d+)/i);
+  const priceMatch = queryLower.match(
+    /(?:under|below|less than|max|cheaper than)\s*\$?\s*(\d+)/i,
+  );
   if (priceMatch) filters.maxPrice = parseInt(priceMatch[1]);
 
-  const minPriceMatch = queryLower.match(/(?:over|above|more than|min|at least)\s*\$?\s*(\d+)/i);
+  const minPriceMatch = queryLower.match(
+    /(?:over|above|more than|min|at least)\s*\$?\s*(\d+)/i,
+  );
   if (minPriceMatch) filters.minPrice = parseInt(minPriceMatch[1]);
 
   // Currency detection
@@ -1095,9 +1157,11 @@ function extractBasicFiltersFromQuery(query) {
   if (queryLower.includes('in stock') || queryLower.includes('available')) {
     filters.inStock = true;
   }
-  
+
   // Full/high stock
-  if (queryLower.match(/\b(full\s*stock|high\s*stock|plenty|well\s*stocked)\b/)) {
+  if (
+    queryLower.match(/\b(full\s*stock|high\s*stock|plenty|well\s*stocked)\b/)
+  ) {
     filters.stockLevel = 'high';
     filters.minQuantity = 10;
     filters.inStock = true;

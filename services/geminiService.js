@@ -1,9 +1,9 @@
 /**
  * Gemini AI Service - Advanced Context-Aware Filtering
- * 
+ *
  * This service provides truly intelligent search by having the AI analyze
  * ACTUAL DATA and decide what matches - not based on hardcoded rules.
- * 
+ *
  * Architecture:
  * 1. First call: Parse user intent (what they want)
  * 2. Second call: AI filters actual data based on understanding
@@ -169,12 +169,16 @@ Understand what the user wants and extract their requirements. Return ONLY valid
           maxOutputTokens: 1024,
         },
       }),
-      new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('INTENT_PARSE_TIMEOUT')), PARSE_TIMEOUT)
+      new Promise((_, reject) =>
+        setTimeout(
+          () => reject(new Error('INTENT_PARSE_TIMEOUT')),
+          PARSE_TIMEOUT,
+        ),
       ),
     ]);
 
-    let text = response.text.trim()
+    let text = response.text
+      .trim()
       .replace(/```json\n?/gi, '')
       .replace(/```\n?/gi, '')
       .trim();
@@ -184,8 +188,11 @@ Understand what the user wants and extract their requirements. Return ONLY valid
 
     const parsed = JSON.parse(text);
     const parseTime = Date.now() - startTime;
-    
-    console.log(`✅ Intent parsed in ${parseTime}ms:`, JSON.stringify(parsed.understood?.summary || parsed, null, 2));
+
+    console.log(
+      `✅ Intent parsed in ${parseTime}ms:`,
+      JSON.stringify(parsed.understood?.summary || parsed, null, 2),
+    );
 
     return {
       success: true,
@@ -211,7 +218,7 @@ async function filterDataWithAI(parts, userIntent, originalQuery) {
     }
 
     const understood = userIntent.understood || {};
-    
+
     // Prepare a summary of what user wants for the AI
     const requirements = {
       summary: understood.summary || originalQuery,
@@ -230,59 +237,83 @@ async function filterDataWithAI(parts, userIntent, originalQuery) {
 
     // For large datasets, use intelligent pre-filtering then AI verification
     let partsToFilter = parts;
-    
+
     // Pre-filter obvious mismatches to reduce AI workload
     if (requirements.requireHighStock || requirements.excludeLowStock) {
       // If user wants high stock, pre-filter to items with quantity >= 10
       const minQty = requirements.minQuantity || 10;
-      partsToFilter = parts.filter(p => (p.quantity || 0) >= minQty);
-      console.log(`📦 Pre-filter: High stock (qty >= ${minQty}): ${parts.length} → ${partsToFilter.length}`);
+      partsToFilter = parts.filter((p) => (p.quantity || 0) >= minQty);
+      console.log(
+        `📦 Pre-filter: High stock (qty >= ${minQty}): ${parts.length} → ${partsToFilter.length}`,
+      );
     } else if (requirements.requireInStock) {
-      partsToFilter = parts.filter(p => (p.quantity || 0) > 0);
-      console.log(`📦 Pre-filter: In stock: ${parts.length} → ${partsToFilter.length}`);
+      partsToFilter = parts.filter((p) => (p.quantity || 0) > 0);
+      console.log(
+        `📦 Pre-filter: In stock: ${parts.length} → ${partsToFilter.length}`,
+      );
     }
 
     // Pre-filter by price if specified
     if (requirements.priceMax !== null && requirements.priceMax !== undefined) {
-      const maxPrice = convertPriceForComparison(requirements.priceMax, requirements.currency);
-      partsToFilter = partsToFilter.filter(p => {
+      const maxPrice = convertPriceForComparison(
+        requirements.priceMax,
+        requirements.currency,
+      );
+      partsToFilter = partsToFilter.filter((p) => {
         if (p.price === null || p.price === undefined) return true; // Include unknown prices
         return p.price <= maxPrice;
       });
-      console.log(`💰 Pre-filter: Price <= ${requirements.priceMax} ${requirements.currency}: → ${partsToFilter.length}`);
+      console.log(
+        `💰 Pre-filter: Price <= ${requirements.priceMax} ${requirements.currency}: → ${partsToFilter.length}`,
+      );
     }
 
     if (requirements.priceMin !== null && requirements.priceMin !== undefined) {
-      const minPrice = convertPriceForComparison(requirements.priceMin, requirements.currency);
-      partsToFilter = partsToFilter.filter(p => {
+      const minPrice = convertPriceForComparison(
+        requirements.priceMin,
+        requirements.currency,
+      );
+      partsToFilter = partsToFilter.filter((p) => {
         if (p.price === null || p.price === undefined) return false;
         return p.price >= minPrice;
       });
-      console.log(`💰 Pre-filter: Price >= ${requirements.priceMin} ${requirements.currency}: → ${partsToFilter.length}`);
+      console.log(
+        `💰 Pre-filter: Price >= ${requirements.priceMin} ${requirements.currency}: → ${partsToFilter.length}`,
+      );
     }
 
     // Pre-filter by brand if specified
     if (requirements.brands && requirements.brands.length > 0) {
-      const brandLower = requirements.brands.map(b => b.toLowerCase());
-      partsToFilter = partsToFilter.filter(p => {
+      const brandLower = requirements.brands.map((b) => b.toLowerCase());
+      partsToFilter = partsToFilter.filter((p) => {
         if (!p.brand) return false;
-        return brandLower.some(b => p.brand.toLowerCase().includes(b) || b.includes(p.brand.toLowerCase()));
+        return brandLower.some(
+          (b) =>
+            p.brand.toLowerCase().includes(b) ||
+            b.includes(p.brand.toLowerCase()),
+        );
       });
-      console.log(`🏷️ Pre-filter: Brands [${requirements.brands.join(', ')}]: → ${partsToFilter.length}`);
+      console.log(
+        `🏷️ Pre-filter: Brands [${requirements.brands.join(', ')}]: → ${partsToFilter.length}`,
+      );
     }
 
     // Pre-filter by exclusions
     if (requirements.exclusions?.brands?.length > 0) {
-      const excludeBrands = requirements.exclusions.brands.map(b => b.toLowerCase());
-      partsToFilter = partsToFilter.filter(p => {
+      const excludeBrands = requirements.exclusions.brands.map((b) =>
+        b.toLowerCase(),
+      );
+      partsToFilter = partsToFilter.filter((p) => {
         if (!p.brand) return true;
-        return !excludeBrands.some(b => p.brand.toLowerCase().includes(b));
+        return !excludeBrands.some((b) => p.brand.toLowerCase().includes(b));
       });
       console.log(`🚫 Pre-filter: Exclude brands: → ${partsToFilter.length}`);
     }
 
     const filterTime = Date.now() - startTime;
-    console.log(`✅ Data filtered in ${filterTime}ms: ${parts.length} → ${partsToFilter.length} parts`);
+    console.log(
+      `✅ Data filtered in ${filterTime}ms: ${parts.length} → ${partsToFilter.length} parts`,
+    );
 
     return {
       matchingParts: partsToFilter,
@@ -292,12 +323,17 @@ async function filterDataWithAI(parts, userIntent, originalQuery) {
         excluded: parts.length - partsToFilter.length,
         filterTime,
         filtersApplied: {
-          stock: requirements.requireHighStock ? 'high stock (qty >= 10)' : 
-                 requirements.requireInStock ? 'in stock (qty > 0)' : null,
-          price: requirements.priceMax ? `<= ${requirements.priceMax} ${requirements.currency}` : null,
+          stock: requirements.requireHighStock
+            ? 'high stock (qty >= 10)'
+            : requirements.requireInStock
+              ? 'in stock (qty > 0)'
+              : null,
+          price: requirements.priceMax
+            ? `<= ${requirements.priceMax} ${requirements.currency}`
+            : null,
           brands: requirements.brands.length > 0 ? requirements.brands : null,
-        }
-      }
+        },
+      },
     };
   } catch (error) {
     console.error('AI filtering error:', error);
@@ -315,10 +351,10 @@ function convertPriceForComparison(price, fromCurrency, toCurrency = 'AED') {
     GBP: 4.65,
     AED: 1,
   };
-  
+
   const fromRate = rates[fromCurrency?.toUpperCase()] || rates.USD;
   const toRate = rates[toCurrency?.toUpperCase()] || 1;
-  
+
   return (price * fromRate) / toRate;
 }
 
@@ -332,13 +368,13 @@ async function parseSearchQuery(query) {
   try {
     // Parse user intent
     const intent = await parseUserIntent(query);
-    
+
     if (!intent.success) {
       return createFallbackResponse(query, 'Intent parsing failed');
     }
 
     const understood = intent.understood || {};
-    
+
     // Convert to the expected filter format for backward compatibility
     const filters = {
       brand: understood.brands || [],
@@ -346,13 +382,20 @@ async function parseSearchQuery(query) {
       maxPrice: understood.priceConstraints?.maxPrice || null,
       minPrice: understood.priceConstraints?.minPrice || null,
       priceCurrency: understood.priceConstraints?.currency || 'USD',
-      inStock: understood.stockConstraints?.requireInStock || understood.stockConstraints?.requireHighStock || false,
+      inStock:
+        understood.stockConstraints?.requireInStock ||
+        understood.stockConstraints?.requireHighStock ||
+        false,
       stockLevel: understood.stockConstraints?.requireHighStock ? 'high' : '',
-      minQuantity: understood.stockConstraints?.minQuantity || (understood.stockConstraints?.requireHighStock ? 10 : null),
+      minQuantity:
+        understood.stockConstraints?.minQuantity ||
+        (understood.stockConstraints?.requireHighStock ? 10 : null),
       exclude: {
         brands: understood.exclusions?.brands || [],
-        stockLevels: understood.stockConstraints?.excludeLowStock ? ['low'] : [],
-      }
+        stockLevels: understood.stockConstraints?.excludeLowStock
+          ? ['low']
+          : [],
+      },
     };
 
     const parseTime = Date.now() - startTime;
@@ -397,23 +440,34 @@ function createFallbackIntent(query, errorReason) {
  */
 function extractBasicIntent(query) {
   if (!query) return {};
-  
+
   const queryLower = query.toLowerCase();
-  
+
   // Extract price
   let maxPrice = null;
   let minPrice = null;
-  const priceMatch = queryLower.match(/(?:under|below|less than|max|<)\s*\$?\s*(\d+)/);
+  const priceMatch = queryLower.match(
+    /(?:under|below|less than|max|<)\s*\$?\s*(\d+)/,
+  );
   if (priceMatch) maxPrice = parseInt(priceMatch[1]);
-  
-  const minPriceMatch = queryLower.match(/(?:over|above|more than|min|>)\s*\$?\s*(\d+)/);
+
+  const minPriceMatch = queryLower.match(
+    /(?:over|above|more than|min|>)\s*\$?\s*(\d+)/,
+  );
   if (minPriceMatch) minPrice = parseInt(minPriceMatch[1]);
-  
+
   // Extract stock requirements
-  const requireInStock = /\b(in\s*stock|available|have|ready)\b/i.test(queryLower);
-  const requireHighStock = /\b(full\s*stock|high\s*stock|plenty|lots|well\s*stocked|many)\b/i.test(queryLower);
-  const excludeLowStock = /\b(no\s*low|exclude\s*low|not\s*low)\b/i.test(queryLower) || requireHighStock;
-  
+  const requireInStock = /\b(in\s*stock|available|have|ready)\b/i.test(
+    queryLower,
+  );
+  const requireHighStock =
+    /\b(full\s*stock|high\s*stock|plenty|lots|well\s*stocked|many)\b/i.test(
+      queryLower,
+    );
+  const excludeLowStock =
+    /\b(no\s*low|exclude\s*low|not\s*low)\b/i.test(queryLower) ||
+    requireHighStock;
+
   return {
     summary: `Search for: ${query}`,
     searchKeywords: extractBasicKeywords(query),
@@ -422,14 +476,14 @@ function extractBasicIntent(query) {
     priceConstraints: {
       maxPrice,
       minPrice,
-      currency: 'USD'
+      currency: 'USD',
     },
     stockConstraints: {
       requireInStock: requireInStock || requireHighStock,
       requireHighStock,
       excludeLowStock,
-      minQuantity: requireHighStock ? 10 : null
-    }
+      minQuantity: requireHighStock ? 10 : null,
+    },
   };
 }
 
@@ -438,12 +492,12 @@ function extractBasicIntent(query) {
  */
 function extractPartNumbers(query) {
   if (!query) return [];
-  
+
   const partNumberPattern = /\b[A-Za-z0-9][-A-Za-z0-9_]{3,19}\b/g;
   const matches = query.match(partNumberPattern) || [];
-  
+
   // Filter to only include tokens that look like part numbers (have numbers)
-  return matches.filter(m => /\d/.test(m) && m.length >= 4);
+  return matches.filter((m) => /\d/.test(m) && m.length >= 4);
 }
 
 /**
@@ -451,17 +505,49 @@ function extractPartNumbers(query) {
  */
 function extractBrands(query) {
   if (!query) return [];
-  
+
   const knownBrands = [
-    'toyota', 'honda', 'nissan', 'bmw', 'mercedes', 'audi', 'volkswagen',
-    'ford', 'chevrolet', 'hyundai', 'kia', 'mazda', 'subaru', 'lexus',
-    'bosch', 'brembo', 'skf', 'denso', 'valeo', 'mann', 'mahle', 'ngk',
-    'delphi', 'sachs', 'bilstein', 'kyb', 'monroe', 'gates', 'continental',
-    'acdelco', 'motorcraft', 'mopar', 'mitsubishi', 'isuzu', 'porsche'
+    'toyota',
+    'honda',
+    'nissan',
+    'bmw',
+    'mercedes',
+    'audi',
+    'volkswagen',
+    'ford',
+    'chevrolet',
+    'hyundai',
+    'kia',
+    'mazda',
+    'subaru',
+    'lexus',
+    'bosch',
+    'brembo',
+    'skf',
+    'denso',
+    'valeo',
+    'mann',
+    'mahle',
+    'ngk',
+    'delphi',
+    'sachs',
+    'bilstein',
+    'kyb',
+    'monroe',
+    'gates',
+    'continental',
+    'acdelco',
+    'motorcraft',
+    'mopar',
+    'mitsubishi',
+    'isuzu',
+    'porsche',
   ];
-  
+
   const queryLower = query.toLowerCase();
-  return knownBrands.filter(brand => queryLower.includes(brand)).map(b => b.toUpperCase());
+  return knownBrands
+    .filter((brand) => queryLower.includes(brand))
+    .map((b) => b.toUpperCase());
 }
 
 /**
@@ -471,7 +557,10 @@ function createFallbackResponse(query, errorReason) {
   const intent = extractBasicIntent(query);
   return {
     success: false,
-    searchTerms: [...(intent.searchKeywords || []), ...(intent.partNumbers || [])],
+    searchTerms: [
+      ...(intent.searchKeywords || []),
+      ...(intent.partNumbers || []),
+    ],
     filters: {
       brand: intent.brands || [],
       maxPrice: intent.priceConstraints?.maxPrice,
@@ -482,7 +571,7 @@ function createFallbackResponse(query, errorReason) {
       minQuantity: intent.stockConstraints?.minQuantity,
       exclude: {
         stockLevels: intent.stockConstraints?.excludeLowStock ? ['low'] : [],
-      }
+      },
     },
     intent: `Searching for: "${query}"`,
     suggestions: [
