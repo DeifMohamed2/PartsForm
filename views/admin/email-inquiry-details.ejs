@@ -1,0 +1,458 @@
+<%- include('partials/header') %>
+<link rel="stylesheet" href="/css/adminCSS/admin-dashboard.css">
+<link rel="stylesheet" href="/css/adminCSS/admin-tickets.css">
+<link rel="stylesheet" href="/css/adminCSS/admin-email-inquiries.css">
+</head>
+<body>
+  <div class="admin-wrapper">
+    <%- include('partials/sidebar', { activePage: 'email-inquiries' }) %>
+    
+    <main class="admin-main">
+      <%- include('partials/topbar', { pageTitle: 'Inquiry Details' }) %>
+      
+      <div class="admin-content">
+        <!-- Back Button -->
+        <a href="/admin/email-inquiries" class="admin-btn admin-btn-secondary back-link">
+          <i data-lucide="arrow-left"></i>
+          Back to Inquiries
+        </a>
+
+        <%
+          var initials = inquiry.from.name 
+            ? inquiry.from.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
+            : inquiry.from.email.substring(0, 2).toUpperCase();
+        %>
+
+        <!-- Header -->
+        <div class="inquiry-detail-header">
+          <div class="inquiry-avatar-large"><%= initials %></div>
+          <div class="inquiry-detail-info">
+            <h1 class="inquiry-detail-subject"><%= inquiry.subject || '(No Subject)' %></h1>
+            <p class="inquiry-detail-from">
+              From: <strong><%= inquiry.from.name || inquiry.from.email %></strong>
+              <% if (inquiry.from.name) { %>
+                &lt;<%= inquiry.from.email %>&gt;
+              <% } %>
+              <br>
+              Received: <%= new Date(inquiry.receivedAt).toLocaleString() %>
+            </p>
+            <div class="inquiry-detail-badges">
+              <span class="badge badge-<%= inquiry.status %>"><%= inquiry.status.replace(/_/g, ' ') %></span>
+              <% if (inquiry.aiAnalysis && inquiry.aiAnalysis.urgency !== 'normal') { %>
+                <span class="badge badge-<%= inquiry.aiAnalysis.urgency %>"><%= inquiry.aiAnalysis.urgency %></span>
+              <% } %>
+              <% if (inquiry.quotation && inquiry.quotation.quotationNumber) { %>
+                <span class="badge badge-primary"><%= inquiry.quotation.quotationNumber %></span>
+              <% } %>
+            </div>
+          </div>
+          <div class="inquiry-detail-actions">
+            <% if (inquiry.status === 'failed') { %>
+              <button class="admin-btn admin-btn-primary" onclick="retryInquiry()">
+                <i data-lucide="refresh-cw"></i> Retry
+              </button>
+            <% } %>
+            <% if (inquiry.quotation && inquiry.quotation.emailContent) { %>
+              <button class="admin-btn admin-btn-secondary" onclick="resendQuotation()">
+                <i data-lucide="send"></i> Resend Quotation
+              </button>
+            <% } %>
+            <% if (inquiry.extractedParts && inquiry.extractedParts.length > 0) { %>
+              <button class="admin-btn admin-btn-secondary" onclick="regenerateQuotation()">
+                <i data-lucide="file-text"></i> Regenerate
+              </button>
+            <% } %>
+          </div>
+        </div>
+
+        <div class="detail-grid">
+          <div class="detail-main">
+            <!-- Email Body -->
+            <div class="detail-card">
+              <div class="detail-card-header">
+                <h3><i data-lucide="mail"></i> Email Content</h3>
+              </div>
+              <div class="detail-card-body">
+                <div class="email-body">
+                  <% if (inquiry.body.html) { %>
+                    <%- inquiry.body.html %>
+                  <% } else if (inquiry.body.text) { %>
+                    <pre><%= inquiry.body.text %></pre>
+                  <% } else { %>
+                    <p class="email-empty">No email content available</p>
+                  <% } %>
+                </div>
+              </div>
+            </div>
+
+            <!-- Extracted Parts -->
+            <div class="detail-card">
+              <div class="detail-card-header">
+                <h3><i data-lucide="package"></i> Extracted Parts (<%= inquiry.extractedParts ? inquiry.extractedParts.length : 0 %>)</h3>
+                <div class="parts-summary">
+                  <span class="parts-found"><%= inquiry.totalPartsFound || 0 %> found</span>
+                  <% if (inquiry.totalPartsNotFound > 0) { %>
+                    • <span class="parts-not-found"><%= inquiry.totalPartsNotFound %> not found</span>
+                  <% } %>
+                </div>
+              </div>
+              <div class="detail-card-body parts-table-container">
+                <% if (inquiry.extractedParts && inquiry.extractedParts.length > 0) { %>
+                  <table class="parts-table">
+                    <thead>
+                      <tr>
+                        <th>Part Number</th>
+                        <th>Qty</th>
+                        <th>Brand</th>
+                        <th>Status</th>
+                        <th>Best Match</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <% inquiry.extractedParts.forEach(function(part) { %>
+                        <tr>
+                          <td><strong><%= part.partNumber %></strong></td>
+                          <td><%= part.quantity || 1 %></td>
+                          <td><%= part.brand || '-' %></td>
+                          <td>
+                            <% if (part.found) { %>
+                              <span class="part-status in-stock">
+                                <i data-lucide="check"></i> In Stock
+                              </span>
+                            <% } else { %>
+                              <span class="part-status not-found">
+                                <i data-lucide="x"></i> Not Found
+                              </span>
+                            <% } %>
+                          </td>
+                          <td>
+                            <% if (part.bestMatch) { %>
+                              <div>
+                                <strong><%= part.bestMatch.brand || '' %></strong>
+                                - $<%= (part.bestMatch.price || 0).toFixed(2) %>
+                              </div>
+                              <div class="best-match">
+                                <%= part.bestMatch.supplier || '' %> • 
+                                <%= part.bestMatch.quantity || 0 %> in stock
+                              </div>
+                            <% } else { %>
+                              -
+                            <% } %>
+                          </td>
+                        </tr>
+                      <% }); %>
+                    </tbody>
+                  </table>
+                <% } else { %>
+                  <div class="empty-state">
+                    <i data-lucide="package-x"></i>
+                    <p>No parts extracted from this inquiry</p>
+                  </div>
+                <% } %>
+              </div>
+            </div>
+
+            <!-- AI Analysis -->
+            <% if (inquiry.aiAnalysis && (inquiry.aiAnalysis.summary || inquiry.aiAnalysis.customerIntent)) { %>
+            <div class="detail-card">
+              <div class="detail-card-header">
+                <h3><i data-lucide="brain"></i> AI Analysis</h3>
+              </div>
+              <div class="detail-card-body">
+                <% if (inquiry.aiAnalysis.summary) { %>
+                  <p><strong>Summary:</strong> <%= inquiry.aiAnalysis.summary %></p>
+                <% } %>
+                <% if (inquiry.aiAnalysis.customerIntent) { %>
+                  <p><strong>Customer Intent:</strong> <%= inquiry.aiAnalysis.customerIntent %></p>
+                <% } %>
+                <% if (inquiry.aiAnalysis.suggestions && inquiry.aiAnalysis.suggestions.length > 0) { %>
+                  <p><strong>Suggestions:</strong></p>
+                  <ul>
+                    <% inquiry.aiAnalysis.suggestions.forEach(function(s) { %>
+                      <li><%= s %></li>
+                    <% }); %>
+                  </ul>
+                <% } %>
+              </div>
+            </div>
+            <% } %>
+          </div>
+
+          <div class="detail-sidebar">
+            <!-- Quotation Info -->
+            <% if (inquiry.quotation && inquiry.quotation.totalAmount) { %>
+            <div class="detail-card">
+              <div class="detail-card-header">
+                <h3><i data-lucide="file-text"></i> Quotation</h3>
+              </div>
+              <div class="detail-card-body">
+                <div class="quotation-summary">
+                  <div class="quotation-total">
+                    <%= inquiry.quotation.currency || 'AED' %> <%= inquiry.quotation.totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2 }) %>
+                  </div>
+                  <div class="quotation-meta">
+                    <%= inquiry.quotation.itemCount || 0 %> items quoted
+                  </div>
+                </div>
+                <div class="info-grid">
+                  <div class="info-item">
+                    <label>Quotation #</label>
+                    <div class="value"><%= inquiry.quotation.quotationNumber || '-' %></div>
+                  </div>
+                  <div class="info-item">
+                    <label>Valid Until</label>
+                    <div class="value"><%= inquiry.quotation.validUntil ? new Date(inquiry.quotation.validUntil).toLocaleDateString() : '-' %></div>
+                  </div>
+                  <div class="info-item">
+                    <label>Generated</label>
+                    <div class="value"><%= inquiry.quotation.generatedAt ? new Date(inquiry.quotation.generatedAt).toLocaleDateString() : '-' %></div>
+                  </div>
+                  <div class="info-item">
+                    <label>Sent</label>
+                    <div class="value"><%= inquiry.quotation.sentAt ? new Date(inquiry.quotation.sentAt).toLocaleDateString() : 'Not sent' %></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <% } %>
+
+            <!-- Attachments -->
+            <% if (inquiry.attachments && inquiry.attachments.length > 0) { %>
+            <div class="detail-card">
+              <div class="detail-card-header">
+                <h3><i data-lucide="paperclip"></i> Attachments (<%= inquiry.attachments.length %>)</h3>
+              </div>
+              <div class="detail-card-body">
+                <ul class="attachment-list">
+                  <% inquiry.attachments.forEach(function(att) { %>
+                    <li class="attachment-item">
+                      <i data-lucide="file"></i>
+                      <div class="attachment-info">
+                        <div class="attachment-name"><%= att.filename %></div>
+                        <div class="attachment-size"><%= att.size ? (att.size / 1024).toFixed(1) + ' KB' : '' %></div>
+                      </div>
+                      <span class="attachment-badge <%= att.processed ? 'processed' : 'pending' %>">
+                        <%= att.processed ? att.partsExtracted + ' parts' : 'Pending' %>
+                      </span>
+                    </li>
+                  <% }); %>
+                </ul>
+              </div>
+            </div>
+            <% } %>
+
+            <!-- Processing Timeline -->
+            <div class="detail-card">
+              <div class="detail-card-header">
+                <h3><i data-lucide="clock"></i> Processing Timeline</h3>
+              </div>
+              <div class="detail-card-body">
+                <ul class="processing-timeline">
+                  <li class="timeline-item">
+                    <div class="timeline-dot completed"><i data-lucide="mail"></i></div>
+                    <div class="timeline-content">
+                      <h4>Email Received</h4>
+                      <p><%= new Date(inquiry.receivedAt).toLocaleString() %></p>
+                    </div>
+                  </li>
+                  <li class="timeline-item">
+                    <div class="timeline-dot <%= ['acknowledged', 'processing', 'searching', 'quotation_ready', 'quotation_sent'].includes(inquiry.status) ? 'completed' : '' %>">
+                      <i data-lucide="reply"></i>
+                    </div>
+                    <div class="timeline-content">
+                      <h4>Acknowledgment Sent</h4>
+                      <% if (inquiry.processingTime && inquiry.processingTime.acknowledgementSent) { %>
+                        <p><%= inquiry.processingTime.acknowledgementSent %>ms</p>
+                      <% } %>
+                    </div>
+                  </li>
+                  <li class="timeline-item">
+                    <div class="timeline-dot <%= ['searching', 'quotation_ready', 'quotation_sent'].includes(inquiry.status) ? 'completed' : inquiry.status === 'processing' ? 'active' : '' %>">
+                      <i data-lucide="cpu"></i>
+                    </div>
+                    <div class="timeline-content">
+                      <h4>Parts Extracted</h4>
+                      <% if (inquiry.processingTime && inquiry.processingTime.partsExtracted) { %>
+                        <p><%= inquiry.processingTime.partsExtracted %>ms</p>
+                      <% } %>
+                    </div>
+                  </li>
+                  <li class="timeline-item">
+                    <div class="timeline-dot <%= ['quotation_ready', 'quotation_sent'].includes(inquiry.status) ? 'completed' : inquiry.status === 'searching' ? 'active' : '' %>">
+                      <i data-lucide="search"></i>
+                    </div>
+                    <div class="timeline-content">
+                      <h4>Search Completed</h4>
+                      <% if (inquiry.processingTime && inquiry.processingTime.searchCompleted) { %>
+                        <p><%= inquiry.processingTime.searchCompleted %>ms</p>
+                      <% } %>
+                    </div>
+                  </li>
+                  <li class="timeline-item">
+                    <div class="timeline-dot <%= inquiry.status === 'quotation_sent' ? 'completed' : inquiry.status === 'quotation_ready' ? 'active' : '' %>">
+                      <i data-lucide="send"></i>
+                    </div>
+                    <div class="timeline-content">
+                      <h4>Quotation Sent</h4>
+                      <% if (inquiry.quotation && inquiry.quotation.sentAt) { %>
+                        <p><%= new Date(inquiry.quotation.sentAt).toLocaleString() %></p>
+                      <% } %>
+                    </div>
+                  </li>
+                </ul>
+                <% if (inquiry.processingTime && inquiry.processingTime.totalTime) { %>
+                  <div class="timeline-summary">
+                    <strong>Total Processing Time:</strong> <%= (inquiry.processingTime.totalTime / 1000).toFixed(2) %>s
+                  </div>
+                <% } %>
+              </div>
+            </div>
+
+            <!-- Error (if failed) -->
+            <% if (inquiry.status === 'failed' && inquiry.error) { %>
+            <div class="detail-card">
+              <div class="detail-card-body">
+                <div class="error-box">
+                  <h4><i data-lucide="alert-circle"></i> Error</h4>
+                  <p><%= inquiry.error.message %></p>
+                  <% if (inquiry.error.retryCount > 0) { %>
+                    <p class="retry-info">Retry attempts: <%= inquiry.error.retryCount %></p>
+                  <% } %>
+                </div>
+              </div>
+            </div>
+            <% } %>
+
+            <!-- Admin Notes -->
+            <div class="detail-card">
+              <div class="detail-card-header">
+                <h3><i data-lucide="message-square"></i> Admin Notes</h3>
+              </div>
+              <div class="detail-card-body">
+                <% if (inquiry.adminNotes && inquiry.adminNotes.length > 0) { %>
+                  <ul class="notes-list">
+                    <% inquiry.adminNotes.forEach(function(note) { %>
+                      <li class="note-item">
+                        <p class="note-content"><%= note.note %></p>
+                        <div class="note-meta">
+                          <%= note.addedBy ? (note.addedBy.name || note.addedBy.email) : 'Admin' %> • 
+                          <%= new Date(note.addedAt).toLocaleString() %>
+                        </div>
+                      </li>
+                    <% }); %>
+                  </ul>
+                <% } else { %>
+                  <p class="empty-note">No notes yet</p>
+                <% } %>
+                <form class="add-note-form" onsubmit="addNote(event)">
+                  <textarea id="noteInput" rows="2" placeholder="Add a note..."></textarea>
+                  <button type="submit" class="admin-btn admin-btn-primary add-note-btn">
+                    <i data-lucide="plus"></i>
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const inquiryId = '<%= inquiry._id %>';
+
+    async function retryInquiry() {
+      if (!confirm('Retry processing this inquiry?')) return;
+      
+      try {
+        const response = await fetch(`/admin/api/email-inquiries/${inquiryId}/retry`, { method: 'POST' });
+        const data = await response.json();
+        
+        if (data.success) {
+          showToast('Retry started', 'success');
+          setTimeout(() => window.location.reload(), 1000);
+        } else {
+          showToast(data.error || 'Retry failed', 'error');
+        }
+      } catch (error) {
+        showToast('Retry failed', 'error');
+      }
+    }
+
+    async function resendQuotation() {
+      if (!confirm('Resend quotation to customer?')) return;
+      
+      try {
+        const response = await fetch(`/admin/api/email-inquiries/${inquiryId}/resend-quotation`, { method: 'POST' });
+        const data = await response.json();
+        
+        if (data.success) {
+          showToast('Quotation resent!', 'success');
+          setTimeout(() => window.location.reload(), 1000);
+        } else {
+          showToast(data.error || 'Resend failed', 'error');
+        }
+      } catch (error) {
+        showToast('Resend failed', 'error');
+      }
+    }
+
+    async function regenerateQuotation() {
+      if (!confirm('Regenerate quotation with current data?')) return;
+      
+      try {
+        const response = await fetch(`/admin/api/email-inquiries/${inquiryId}/regenerate-quotation`, { method: 'POST' });
+        const data = await response.json();
+        
+        if (data.success) {
+          showToast('Quotation regenerated!', 'success');
+          setTimeout(() => window.location.reload(), 1000);
+        } else {
+          showToast(data.error || 'Regeneration failed', 'error');
+        }
+      } catch (error) {
+        showToast('Regeneration failed', 'error');
+      }
+    }
+
+    async function addNote(e) {
+      e.preventDefault();
+      const noteInput = document.getElementById('noteInput');
+      const note = noteInput.value.trim();
+      
+      if (!note) return;
+      
+      try {
+        const response = await fetch(`/admin/api/email-inquiries/${inquiryId}/notes`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ note })
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+          noteInput.value = '';
+          window.location.reload();
+        } else {
+          showToast(data.error || 'Failed to add note', 'error');
+        }
+      } catch (error) {
+        showToast('Failed to add note', 'error');
+      }
+    }
+
+    function showToast(message, type) {
+      const toast = document.createElement('div');
+      toast.style.cssText = `
+        position: fixed; bottom: 20px; right: 20px; padding: 1rem 1.5rem;
+        background: ${type === 'success' ? '#10b981' : '#ef4444'}; color: white;
+        border-radius: 8px; font-size: 0.9rem; z-index: 9999;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      `;
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 4000);
+    }
+  </script>
+
+<%- include('partials/footer') %>

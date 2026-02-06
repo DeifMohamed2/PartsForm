@@ -1,0 +1,339 @@
+<%- include('partials/header') %>
+<link rel="stylesheet" href="/css/adminCSS/admin-dashboard.css">
+<link rel="stylesheet" href="/css/adminCSS/admin-tickets.css">
+<link rel="stylesheet" href="/css/adminCSS/admin-email-inquiries.css">
+</head>
+<body>
+  <div class="admin-wrapper">
+    <%- include('partials/sidebar', { activePage: 'email-inquiries' }) %>
+    
+    <main class="admin-main">
+      <%- include('partials/topbar', { pageTitle: 'Email Inquiries' }) %>
+      
+      <div class="admin-content">
+        <!-- Page Header -->
+        <div class="tickets-page-header">
+          <h2>Email Inquiries</h2>
+          <div class="tickets-header-actions">
+            <div class="tickets-search-container">
+              <i data-lucide="search" class="search-icon"></i>
+              <input type="text" id="inquirySearch" placeholder="Search inquiries..." value="<%= search || '' %>" autocomplete="off">
+            </div>
+            <button class="admin-btn admin-btn-primary" onclick="checkEmailsNow()">
+              <i data-lucide="refresh-cw"></i>
+              Check Now
+            </button>
+          </div>
+        </div>
+
+        <!-- Scheduler Status -->
+        <div class="scheduler-status">
+          <div class="status-dot <%= schedulerStatus.isRunning ? 'running' : '' %>"></div>
+          <div class="status-text">
+            <h4>Email Processor: <%= schedulerStatus.isRunning ? 'Running' : 'Stopped' %></h4>
+            <p>
+              <% if (schedulerStatus.lastCheckTime) { %>
+                Last check: <%= new Date(schedulerStatus.lastCheckTime).toLocaleString() %> • 
+              <% } %>
+              Checking every <%= schedulerStatus.checkIntervalMinutes %> minutes • 
+              <%= schedulerStatus.stats.totalEmailsProcessed %> emails processed
+            </p>
+          </div>
+          <div class="scheduler-actions">
+            <button class="admin-btn admin-btn-secondary" onclick="testEmailConfig()">
+              <i data-lucide="settings"></i>
+              Test Config
+            </button>
+            <button class="admin-btn <%= schedulerStatus.isRunning ? 'admin-btn-danger' : 'admin-btn-success' %>" onclick="toggleScheduler()">
+              <i data-lucide="<%= schedulerStatus.isRunning ? 'pause' : 'play' %>"></i>
+              <%= schedulerStatus.isRunning ? 'Stop' : 'Start' %>
+            </button>
+          </div>
+        </div>
+
+        <!-- Stats Cards - Dashboard Style -->
+        <div class="inquiry-stats-grid">
+          <div class="inquiry-stat-card">
+            <div class="inquiry-stat-icon orange">
+              <i data-lucide="inbox"></i>
+            </div>
+            <div class="inquiry-stat-value"><%= stats.received + stats.acknowledged %></div>
+            <div class="inquiry-stat-label">New Inquiries</div>
+          </div>
+          <div class="inquiry-stat-card">
+            <div class="inquiry-stat-icon blue">
+              <i data-lucide="loader"></i>
+            </div>
+            <div class="inquiry-stat-value"><%= stats.processing + stats.searching %></div>
+            <div class="inquiry-stat-label">Processing</div>
+          </div>
+          <div class="inquiry-stat-card">
+            <div class="inquiry-stat-icon green">
+              <i data-lucide="check-circle"></i>
+            </div>
+            <div class="inquiry-stat-value"><%= stats.quotation_sent %></div>
+            <div class="inquiry-stat-label">Quotations Sent</div>
+          </div>
+          <div class="inquiry-stat-card">
+            <div class="inquiry-stat-icon purple">
+              <i data-lucide="mail"></i>
+            </div>
+            <div class="inquiry-stat-value"><%= stats.total %></div>
+            <div class="inquiry-stat-label">Total Inquiries</div>
+          </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="tickets-filters">
+          <div class="filter-group">
+            <span class="filter-label">Status:</span>
+            <select class="filter-select" id="filterStatus" onchange="applyFilters()">
+              <option value="all" <%= currentStatus === 'all' ? 'selected' : '' %>>All Status</option>
+              <option value="received" <%= currentStatus === 'received' ? 'selected' : '' %>>Received</option>
+              <option value="acknowledged" <%= currentStatus === 'acknowledged' ? 'selected' : '' %>>Acknowledged</option>
+              <option value="processing" <%= currentStatus === 'processing' ? 'selected' : '' %>>Processing</option>
+              <option value="quotation_ready" <%= currentStatus === 'quotation_ready' ? 'selected' : '' %>>Quotation Ready</option>
+              <option value="quotation_sent" <%= currentStatus === 'quotation_sent' ? 'selected' : '' %>>Quotation Sent</option>
+              <option value="failed" <%= currentStatus === 'failed' ? 'selected' : '' %>>Failed</option>
+            </select>
+          </div>
+          <div class="filters-spacer"></div>
+          <% if (unreadCount > 0) { %>
+          <span class="unread-indicator">
+            <i data-lucide="mail"></i>
+            <%= unreadCount %> unread
+          </span>
+          <% } %>
+        </div>
+
+        <!-- Inquiries List -->
+        <% if (inquiries.length === 0) { %>
+        <div class="inquiry-empty-state">
+          <i data-lucide="mail-open"></i>
+          <h3>No Email Inquiries</h3>
+          <p>No email inquiries have been received yet, or none match your filters.</p>
+        </div>
+        <% } else { %>
+        <div id="inquiriesList">
+          <% inquiries.forEach(function(inquiry) { %>
+          <%
+            var initials = inquiry.from.name 
+              ? inquiry.from.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
+              : inquiry.from.email.substring(0, 2).toUpperCase();
+            var timeAgo = (function(date) {
+              var seconds = Math.floor((new Date() - new Date(date)) / 1000);
+              if (seconds < 60) return 'Just now';
+              var intervals = [
+                { label: 'y', seconds: 31536000 },
+                { label: 'mo', seconds: 2592000 },
+                { label: 'd', seconds: 86400 },
+                { label: 'h', seconds: 3600 },
+                { label: 'm', seconds: 60 }
+              ];
+              for (var i = 0; i < intervals.length; i++) {
+                var count = Math.floor(seconds / intervals[i].seconds);
+                if (count >= 1) return count + intervals[i].label + ' ago';
+              }
+              return 'Just now';
+            })(inquiry.receivedAt);
+          %>
+          <a href="/admin/email-inquiries/<%= inquiry._id %>" class="inquiry-card <%= !inquiry.isRead ? 'unread' : '' %>">
+            <div class="inquiry-header">
+              <div class="inquiry-sender-avatar"><%= initials %></div>
+              <div class="inquiry-main">
+                <h4 class="inquiry-subject"><%= inquiry.subject || '(No Subject)' %></h4>
+                <p class="inquiry-from">
+                  <%= inquiry.from.name || inquiry.from.email %>
+                  <% if (inquiry.from.name) { %>
+                  &lt;<%= inquiry.from.email %>&gt;
+                  <% } %>
+                </p>
+              </div>
+              <div class="inquiry-meta">
+                <div class="inquiry-time"><%= timeAgo %></div>
+                <div class="inquiry-badges">
+                  <span class="inquiry-badge status-<%= inquiry.status %>">
+                    <%= inquiry.status.replace(/_/g, ' ') %>
+                  </span>
+                  <% if (inquiry.aiAnalysis && (inquiry.aiAnalysis.urgency === 'urgent' || inquiry.aiAnalysis.urgency === 'high')) { %>
+                  <span class="inquiry-badge urgency-<%= inquiry.aiAnalysis.urgency %>">
+                    <%= inquiry.aiAnalysis.urgency %>
+                  </span>
+                  <% } %>
+                </div>
+              </div>
+            </div>
+            <div class="inquiry-footer">
+              <div class="inquiry-stats">
+                <div class="inquiry-stat">
+                  <i data-lucide="package"></i>
+                  <%= inquiry.totalPartsRequested || 0 %> parts requested
+                </div>
+                <div class="inquiry-stat">
+                  <i data-lucide="check-circle" class="found"></i>
+                  <%= inquiry.totalPartsFound || 0 %> found
+                </div>
+                <% if (inquiry.totalPartsNotFound > 0) { %>
+                <div class="inquiry-stat">
+                  <i data-lucide="x-circle" class="not-found"></i>
+                  <%= inquiry.totalPartsNotFound %> not found
+                </div>
+                <% } %>
+                <% if (inquiry.attachments && inquiry.attachments.length > 0) { %>
+                <div class="inquiry-stat">
+                  <i data-lucide="paperclip"></i>
+                  <%= inquiry.attachments.length %> attachment(s)
+                </div>
+                <% } %>
+              </div>
+              <% if (inquiry.quotation && inquiry.quotation.totalAmount) { %>
+              <div class="inquiry-amount">
+                <%= inquiry.quotation.currency || 'AED' %> <%= inquiry.quotation.totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2 }) %>
+              </div>
+              <% } %>
+            </div>
+          </a>
+          <% }); %>
+        </div>
+
+        <!-- Pagination -->
+        <% if (pagination.pages > 1) { %>
+        <div class="inquiry-pagination">
+          <button class="pagination-btn" onclick="goToPage(<%= pagination.page - 1 %>)" <%= pagination.page <= 1 ? 'disabled' : '' %>>
+            <i data-lucide="chevron-left"></i>
+          </button>
+          <% for (var p = 1; p <= pagination.pages; p++) { %>
+            <% if (p === 1 || p === pagination.pages || (p >= pagination.page - 2 && p <= pagination.page + 2)) { %>
+              <button class="pagination-btn <%= p === pagination.page ? 'active' : '' %>" onclick="goToPage(<%= p %>)"><%= p %></button>
+            <% } else if (p === pagination.page - 3 || p === pagination.page + 3) { %>
+              <span class="pagination-dots">...</span>
+            <% } %>
+          <% } %>
+          <button class="pagination-btn" onclick="goToPage(<%= pagination.page + 1 %>)" <%= pagination.page >= pagination.pages ? 'disabled' : '' %>>
+            <i data-lucide="chevron-right"></i>
+          </button>
+        </div>
+        <% } %>
+        <% } %>
+
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Search functionality
+    let searchTimeout;
+    document.getElementById('inquirySearch').addEventListener('input', function(e) {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
+        applyFilters();
+      }, 500);
+    });
+
+    function applyFilters() {
+      const status = document.getElementById('filterStatus').value;
+      const search = document.getElementById('inquirySearch').value;
+      let url = '/admin/email-inquiries?status=' + status;
+      if (search) url += '&search=' + encodeURIComponent(search);
+      window.location.href = url;
+    }
+
+    function goToPage(page) {
+      const status = document.getElementById('filterStatus').value;
+      const search = document.getElementById('inquirySearch').value;
+      let url = '/admin/email-inquiries?page=' + page + '&status=' + status;
+      if (search) url += '&search=' + encodeURIComponent(search);
+      window.location.href = url;
+    }
+
+    async function checkEmailsNow() {
+      const btn = event.target.closest('button');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '<i data-lucide="loader" class="spin"></i> Checking...';
+      btn.disabled = true;
+
+      try {
+        const response = await fetch('/admin/api/email-inquiries/check-now', { method: 'POST' });
+        const data = await response.json();
+        
+        if (data.success) {
+          showToast('Email check completed', 'success');
+          setTimeout(() => window.location.reload(), 1000);
+        } else {
+          showToast(data.error || 'Check failed', 'error');
+        }
+      } catch (error) {
+        showToast('Failed to check emails', 'error');
+      } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        lucide.createIcons();
+      }
+    }
+
+    async function testEmailConfig() {
+      const btn = event.target.closest('button');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '<i data-lucide="loader" class="spin"></i> Testing...';
+      btn.disabled = true;
+
+      try {
+        const response = await fetch('/admin/api/email-inquiries/test-config', { method: 'POST' });
+        const data = await response.json();
+        
+        let message = '';
+        if (data.results) {
+          message = 'IMAP: ' + (data.results.imap.success ? '✓' : '✗ ' + data.results.imap.error) + 
+                    '\nSMTP: ' + (data.results.smtp.success ? '✓' : '✗ ' + data.results.smtp.error);
+        }
+        
+        showToast(message || (data.success ? 'Configuration valid!' : 'Configuration error'), 
+                 data.success ? 'success' : 'error');
+      } catch (error) {
+        showToast('Test failed: ' + error.message, 'error');
+      } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        lucide.createIcons();
+      }
+    }
+
+    async function toggleScheduler() {
+      const isRunning = <%= schedulerStatus.isRunning %>;
+      const btn = event.target.closest('button');
+      
+      try {
+        const response = await fetch('/admin/api/email-inquiries/scheduler/toggle', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ enabled: !isRunning })
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+          showToast('Scheduler ' + (isRunning ? 'stopped' : 'started'), 'success');
+          setTimeout(() => window.location.reload(), 500);
+        } else {
+          showToast(data.error || 'Toggle failed', 'error');
+        }
+      } catch (error) {
+        showToast('Failed to toggle scheduler', 'error');
+      }
+    }
+
+    function showToast(message, type) {
+      const toast = document.createElement('div');
+      toast.className = 'toast toast-' + type;
+      toast.style.cssText = `
+        position: fixed; bottom: 20px; right: 20px; padding: 1rem 1.5rem;
+        background: ${type === 'success' ? '#10b981' : '#ef4444'}; color: white;
+        border-radius: 8px; font-size: 0.9rem; z-index: 9999;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15); white-space: pre-line;
+      `;
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 5000);
+    }
+  </script>
+
+<%- include('partials/footer') %>

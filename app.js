@@ -33,6 +33,7 @@ if (missingRecommended.length > 0) {
 const elasticsearchService = require('./services/elasticsearchService');
 const schedulerService = require('./services/schedulerService');
 const socketService = require('./services/socketService');
+const emailInquiryScheduler = require('./services/emailInquiryScheduler');
 
 // Models
 const Integration = require('./models/Integration');
@@ -82,6 +83,17 @@ connectDB().then(async () => {
     await schedulerService.initialize();
   } catch (error) {
     console.error('Scheduler initialization failed:', error.message);
+  }
+  
+  // Initialize email inquiry scheduler for automated email processing
+  try {
+    const emailInitialized = await emailInquiryScheduler.initialize();
+    if (emailInitialized) {
+      emailInquiryScheduler.start();
+    }
+  } catch (error) {
+    console.error('Email inquiry scheduler initialization failed:', error.message);
+    console.log('⚠️  Email inquiries will need to be manually triggered');
   }
 });
 
@@ -142,10 +154,24 @@ server.listen(PORT, () => {
   console.log(`   ➜ Socket:   Real-time chat enabled`);
   
   // AI Status
-  if (process.env.GEMINI_API_KEY) {
+  if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== 'your-gemini-api-key-here') {
     console.log(`   ➜ AI:       ✅ Gemini AI is RUNNING`);
   } else {
     console.log(`   ➜ AI:       ❌ Gemini AI is NOT running (GEMINI_API_KEY not set)`);
+  }
+  
+  // Email Inquiry Status - check config instead of isRunning (which is set async)
+  const emailConfigured = !!(
+    process.env.EMAIL_IMAP_USER &&
+    process.env.EMAIL_IMAP_PASSWORD &&
+    process.env.EMAIL_SMTP_USER &&
+    process.env.EMAIL_PROCESSING_ENABLED !== 'false'
+  );
+  
+  if (emailConfigured) {
+    console.log(`   ➜ Email:    ✅ Email inquiry processor configured (starting...)`);
+  } else {
+    console.log(`   ➜ Email:    ⚠️  Email inquiry processor not configured`);
   }
   console.log('');
 });

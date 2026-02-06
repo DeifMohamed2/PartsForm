@@ -63,6 +63,24 @@ const {
   deleteAdmin,
 } = require('../controllers/adminController');
 
+// Import email inquiry controller
+const {
+  getEmailInquiries,
+  getEmailInquiryDetails,
+  getInquiryStats,
+  triggerEmailCheck,
+  retryInquiry,
+  resendQuotation,
+  regenerateQuotation,
+  updateInquiryStatus,
+  addNote,
+  markAsRead,
+  deleteInquiry,
+  testEmailConfig,
+  toggleScheduler,
+  getInquiriesApi,
+} = require('../controllers/emailInquiryController');
+
 // Import search controller for parts search API
 const { searchParts, autocomplete } = require('../controllers/searchController');
 
@@ -225,6 +243,27 @@ router.delete('/api/admins/:id', deleteAdmin);
 
 // Parts Analytics
 router.get('/parts-analytics', getPartsAnalytics);
+
+// ==========================================
+// Email Inquiries Management
+// ==========================================
+// Pages
+router.get('/email-inquiries', getEmailInquiries);
+router.get('/email-inquiries/:id', getEmailInquiryDetails);
+
+// API endpoints
+router.get('/api/email-inquiries', getInquiriesApi);
+router.get('/api/email-inquiries/stats', getInquiryStats);
+router.post('/api/email-inquiries/check-now', triggerEmailCheck);
+router.post('/api/email-inquiries/test-config', testEmailConfig);
+router.post('/api/email-inquiries/scheduler/toggle', toggleScheduler);
+router.post('/api/email-inquiries/:id/retry', retryInquiry);
+router.post('/api/email-inquiries/:id/resend-quotation', resendQuotation);
+router.post('/api/email-inquiries/:id/regenerate-quotation', regenerateQuotation);
+router.post('/api/email-inquiries/:id/notes', addNote);
+router.patch('/api/email-inquiries/:id/status', updateInquiryStatus);
+router.patch('/api/email-inquiries/:id/read', markAsRead);
+router.delete('/api/email-inquiries/:id', deleteInquiry);
 
 module.exports = router;
 

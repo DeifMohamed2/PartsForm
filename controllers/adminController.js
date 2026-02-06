@@ -7,6 +7,7 @@ const Buyer = require('../models/Buyer');
 const Order = require('../models/Order');
 const Ticket = require('../models/Ticket');
 const Admin = require('../models/Admin');
+const EmailInquiry = require('../models/EmailInquiry');
 const ftpService = require('../services/ftpService');
 const syncService = require('../services/syncService');
 const schedulerService = require('../services/schedulerService');
@@ -3007,11 +3008,15 @@ const getSidebarCounts = async (req, res) => {
       status: { $in: ['open', 'in-progress'] } 
     });
     
+    // Count unread email inquiries
+    const unreadInquiriesCount = await EmailInquiry.getUnreadCount();
+    
     res.json({
       success: true,
       counts: {
         newOrders: newOrdersCount,
-        openTickets: openTicketsCount
+        openTickets: openTicketsCount,
+        unreadInquiries: unreadInquiriesCount
       }
     });
   } catch (error) {
@@ -3021,7 +3026,8 @@ const getSidebarCounts = async (req, res) => {
       error: 'Failed to fetch counts',
       counts: {
         newOrders: 0,
-        openTickets: 0
+        openTickets: 0,
+        unreadInquiries: 0
       }
     });
   }

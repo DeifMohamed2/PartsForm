@@ -42,6 +42,13 @@
         <span class="sidebar-nav-badge" id="sidebarOrdersBadge"><%= sidebarCounts.newOrders %></span>
         <% } %>
       </a>
+      <a href="/admin/email-inquiries" class="sidebar-nav-item <%= typeof activePage !== 'undefined' && activePage === 'email-inquiries' ? 'active' : '' %>">
+        <i data-lucide="mail"></i>
+        <span>Email Inquiries</span>
+        <% if (typeof sidebarCounts !== 'undefined' && sidebarCounts.unreadInquiries > 0) { %>
+        <span class="sidebar-nav-badge" style="background: linear-gradient(135deg, #667eea, #764ba2);" id="sidebarInquiriesBadge"><%= sidebarCounts.unreadInquiries %></span>
+        <% } %>
+      </a>
       <a href="/admin/tickets" class="sidebar-nav-item <%= typeof activePage !== 'undefined' && activePage === 'tickets' ? 'active' : '' %>">
         <i data-lucide="ticket"></i>
         <span>Tickets</span>
@@ -308,7 +315,7 @@ document.addEventListener('DOMContentLoaded', function() {
       const data = await response.json();
       if (!data.success) return;
       
-      const { newOrders, openTickets } = data.counts;
+      const { newOrders, openTickets, unreadInquiries } = data.counts;
       
       // Update Orders badge
       const ordersBadge = document.getElementById('sidebarOrdersBadge');
@@ -346,6 +353,26 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       } else if (ticketsBadge) {
         ticketsBadge.remove();
+      }
+      
+      // Update Email Inquiries badge
+      const inquiriesBadge = document.getElementById('sidebarInquiriesBadge');
+      const inquiriesNavItem = document.querySelector('a[href*="/admin/email-inquiries"]');
+      
+      if (unreadInquiries > 0) {
+        if (inquiriesBadge) {
+          inquiriesBadge.textContent = unreadInquiries;
+        } else if (inquiriesNavItem) {
+          // Create badge if it doesn't exist
+          const badge = document.createElement('span');
+          badge.className = 'sidebar-nav-badge';
+          badge.id = 'sidebarInquiriesBadge';
+          badge.style.background = 'linear-gradient(135deg, #667eea, #764ba2)';
+          badge.textContent = unreadInquiries;
+          inquiriesNavItem.appendChild(badge);
+        }
+      } else if (inquiriesBadge) {
+        inquiriesBadge.remove();
       }
     } catch (error) {
       console.error('Failed to update sidebar counts:', error);
