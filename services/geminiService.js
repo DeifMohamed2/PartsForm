@@ -1,14 +1,17 @@
 /**
- * Gemini AI Service - Advanced Context-Aware Filtering
+ * Gemini AI Service - Advanced Context-Aware Filtering with Learning
  *
  * This service provides truly intelligent search by having the AI analyze
  * ACTUAL DATA and decide what matches - not based on hardcoded rules.
  *
  * Architecture:
- * 1. First call: Parse user intent (what they want)
- * 2. Second call: AI filters actual data based on understanding
+ * 1. Load learned context (what worked before)
+ * 2. Parse user intent (what they want) - enhanced with learnings
+ * 3. AI filters actual data based on understanding
+ * 4. Record outcome for future learning
  */
 const { GoogleGenAI } = require('@google/genai');
+const aiLearningService = require('./aiLearningService');
 
 // Validate GEMINI_API_KEY is set
 if (!process.env.GEMINI_API_KEY) {
@@ -19,17 +22,22 @@ if (!process.env.GEMINI_API_KEY) {
 // Initialize the Gemini API
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
+// Initialize learning service
+aiLearningService.initialize().catch((err) => {
+  console.warn('⚠️ AI Learning Service initialization deferred:', err.message);
+});
+
 /**
  * ═══════════════════════════════════════════════════════════════════════════
  * INTENT PARSER - Understands what user wants
  * ═══════════════════════════════════════════════════════════════════════════
  */
-const INTENT_PARSER_INSTRUCTION = `You are an intelligent search assistant. Your ONLY job is to understand what the user wants.
+const INTENT_PARSER_INSTRUCTION = `You are an intelligent automotive parts search assistant. Your ONLY job is to understand what the user wants.
 
 RESPOND WITH VALID JSON ONLY. No explanations, no markdown.
 
 UNDERSTAND THE USER'S INTENT:
-- What are they looking for? (keywords, part numbers, categories)
+- What are they looking for? (keywords, part numbers, categories, part types)
 - What constraints do they have? (price limits, availability requirements)
 - What should be excluded?
 
@@ -50,21 +58,32 @@ IMPORTANT RULES:
    - "low stock" = parts with quantity 1-5
    - User saying "full stock" means they want HIGH quantity items, NOT low stock
 
-4. EXTRACT EVERYTHING:
-   - Part numbers (alphanumeric codes like "MX930110", "CAF-000267")
-   - Brand names (TOYOTA, BOSCH, SKF, etc.)
-   - Price constraints (under X, above Y, between X-Y)
-   - Stock requirements (in stock, full stock, plenty)
-   - Categories (brakes, filters, engine, etc.)
+4. EXTRACT EVERYTHING - BE THOROUGH:
+   - Part numbers: alphanumeric codes (e.g., "MX930110", "CAF-000267", "04465-12592")
+   - Brand names: TOYOTA, BOSCH, SKF, BREMBO, OEM, GENUINE, etc.
+   - Price constraints: under X, above Y, between X-Y (detect currency)
+   - Stock requirements: in stock, full stock, plenty
+   
+5. CATEGORIES & KEYWORDS - CRITICAL FOR SEARCH:
+   Extract ALL relevant automotive terms that could appear in part descriptions:
+   - Part types: brake, filter, oil, engine, clutch, suspension, bearing, seal, gasket, belt, pump, sensor, etc.
+   - Qualifiers: OEM, genuine, original, aftermarket, premium, performance
+   - Vehicle types: truck, car, sedan, SUV
+   - Systems: braking system, cooling system, fuel system, steering
+   
+   Examples:
+   - "brake parts" → categories: ["brake"], searchKeywords: ["brake", "brakes", "braking"]
+   - "OEM brake pads" → categories: ["brake"], searchKeywords: ["brake", "pad", "pads", "OEM", "original"]
+   - "oil filter for Toyota" → categories: ["filter"], searchKeywords: ["oil", "filter"], brands: ["TOYOTA"]
 
 OUTPUT FORMAT:
 {
   "understood": {
     "summary": "Brief description of what user wants",
-    "searchKeywords": ["list", "of", "keywords"],
-    "partNumbers": ["specific", "part", "numbers"],
+    "searchKeywords": ["list", "of", "search", "keywords", "for", "description", "matching"],
+    "partNumbers": ["specific", "part", "numbers", "only"],
     "brands": ["brand", "names"],
-    "categories": ["categories"],
+    "categories": ["broad", "categories", "like", "brake", "filter"],
     "priceConstraints": {
       "maxPrice": null,
       "minPrice": null,
@@ -97,27 +116,43 @@ const DATA_FILTER_INSTRUCTION = `You are a data filtering expert. Your job is to
 RESPOND WITH VALID JSON ONLY. No explanations, no markdown.
 
 You will receive:
-1. User's requirements (what they want)
+1. User's requirements (what they want - including keywords and categories)
 2. A sample of actual parts data
 
 Your job: Analyze each part and determine if it MATCHES the user's requirements.
 
-STOCK LEVEL DEFINITIONS (CRITICAL):
-- "Out of Stock": quantity = 0
-- "Low Stock": quantity 1-5
-- "In Stock": quantity > 0
-- "High Stock" / "Full Stock": quantity >= 10
+MATCHING RULES:
+1. KEYWORD MATCHING: Check if user's keywords appear in:
+   - Part description (most important)
+   - Part category
+   - Brand name
+   - Part number
+   Example: User wants "brake" → Match parts with "brake", "brakes", "braking" in description
 
-FILTERING RULES:
-1. If user wants "in stock": Only include parts with quantity > 0
-2. If user wants "full stock" or "high stock": Only include parts with quantity >= 10
-3. If user specifies maxPrice: Only include parts where price <= maxPrice (in same currency)
-4. If user specifies brand: Only include parts matching that brand
-5. If user says "exclude low stock": Remove parts with quantity 1-5
+2. STOCK LEVEL DEFINITIONS (CRITICAL):
+   - "Out of Stock": quantity = 0
+   - "Low Stock": quantity 1-5
+   - "In Stock": quantity > 0
+   - "High Stock" / "Full Stock": quantity >= 10
+
+3. PRICE MATCHING: Convert currencies if needed
+   - USD to AED: multiply by 3.67
+   - If user says "under $500", that's under 1835 AED
+   
+4. BRAND MATCHING: Case-insensitive match
+   - "OEM" means original manufacturer parts
+   - Match brand field against user's brand requirements
+
+FILTERING PRIORITY:
+1. First: Match keywords/categories in description
+2. Then: Apply stock filters
+3. Then: Apply price filters
+4. Then: Apply brand filters
 
 BE STRICT WITH FILTERS:
 - If user says "full stock", do NOT include low stock items (qty 1-5)
 - If user says price below X, do NOT include items priced higher
+- If user asks for "brake parts", only include parts related to brakes
 
 OUTPUT FORMAT:
 {
@@ -132,6 +167,7 @@ OUTPUT FORMAT:
     "priceFilter": "description or null",
     "stockFilter": "description or null",
     "brandFilter": "description or null",
+    "keywordFilter": "description or null",
     "otherFilters": []
   }
 }`;
@@ -143,7 +179,7 @@ const MAX_BATCH_SIZE = 50; // Max items to send to AI for filtering at once
 
 /**
  * Parse user intent from natural language query
- * Step 1 of the AI search process
+ * Step 1 of the AI search process - NOW WITH LEARNING!
  */
 async function parseUserIntent(query) {
   const startTime = Date.now();
@@ -153,8 +189,32 @@ async function parseUserIntent(query) {
       return createFallbackIntent(query, 'Query too short');
     }
 
-    const prompt = `${INTENT_PARSER_INSTRUCTION}
+    // ═══════════════════════════════════════════════════════════════
+    // LEARNING: Get context from past searches
+    // ═══════════════════════════════════════════════════════════════
+    let learnedContext = { hasPriorLearning: false };
+    try {
+      learnedContext = await aiLearningService.getLearnedContext(query);
+      if (learnedContext.hasPriorLearning) {
+        console.log('🧠 Learning context found:', {
+          suggestedKeywords: learnedContext.suggestedKeywords?.slice(0, 5),
+          betterAlternative: learnedContext.betterAlternative,
+          hasHints: learnedContext.hints?.length > 0,
+        });
+      }
+    } catch (learningError) {
+      console.warn(
+        'Learning context error (continuing):',
+        learningError.message,
+      );
+    }
 
+    // Generate learning-enhanced prompt
+    const learningPrompt =
+      aiLearningService.generateLearningPrompt(learnedContext);
+
+    const prompt = `${INTENT_PARSER_INSTRUCTION}
+${learningPrompt}
 User query: "${query}"
 
 Understand what the user wants and extract their requirements. Return ONLY valid JSON.`;
@@ -188,6 +248,17 @@ Understand what the user wants and extract their requirements. Return ONLY valid
 
     const parsed = JSON.parse(text);
     const parseTime = Date.now() - startTime;
+
+    // Enhance parsed result with learned suggestions if available
+    if (learnedContext.suggestedKeywords?.length > 0 && parsed.understood) {
+      const existingKeywords = parsed.understood.searchKeywords || [];
+      parsed.understood.searchKeywords = [
+        ...new Set([
+          ...existingKeywords,
+          ...learnedContext.suggestedKeywords.slice(0, 5),
+        ]),
+      ];
+    }
 
     console.log(
       `✅ Intent parsed in ${parseTime}ms:`,

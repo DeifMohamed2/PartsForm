@@ -58,6 +58,11 @@ const {
   aiAnalyze,
   aiExcelAnalyze,
   aiExcelSearch,
+  // AI Learning
+  recordSearchEngagement,
+  recordSearchRefinement,
+  recordSearchFeedback,
+  getLearningStats,
 } = require('../controllers/searchController');
 const { handleProfileImageUpload } = require('../utils/fileUploader');
 
@@ -72,9 +77,9 @@ const ticketStorage = multer.diskStorage({
     cb(null, ticketUploadDir);
   },
   filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
     cb(null, 'ticket-' + uniqueSuffix + path.extname(file.originalname));
-  }
+  },
 });
 
 const ticketUpload = multer({
@@ -83,7 +88,15 @@ const ticketUpload = multer({
   fileFilter: (req, file, cb) => {
     const allowedTypes = [
       // Images
-      'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/bmp', 'image/tiff', 'image/svg+xml', 'image/heic', 'image/heif',
+      'image/jpeg',
+      'image/png',
+      'image/gif',
+      'image/webp',
+      'image/bmp',
+      'image/tiff',
+      'image/svg+xml',
+      'image/heic',
+      'image/heif',
       // PDF
       'application/pdf',
       // Documents
@@ -99,14 +112,19 @@ const ticketUpload = multer({
       'application/zip',
       'application/x-zip-compressed',
       'application/rtf',
-      'text/rtf'
+      'text/rtf',
     ];
     if (allowedTypes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error('File type not allowed. Allowed: images, PDF, CSV, Excel, Word documents.'), false);
+      cb(
+        new Error(
+          'File type not allowed. Allowed: images, PDF, CSV, Excel, Word documents.',
+        ),
+        false,
+      );
     }
-  }
+  },
 });
 
 // Apply authentication middleware to all buyer routes
@@ -152,6 +170,12 @@ router.post('/api/ai-search', aiSearch);
 router.get('/api/ai-suggestions', aiSuggestions);
 router.post('/api/ai-analyze', aiAnalyze);
 
+// AI Learning API endpoints - Help AI get smarter over time
+router.post('/api/ai-learn/engagement', recordSearchEngagement);
+router.post('/api/ai-learn/refinement', recordSearchRefinement);
+router.post('/api/ai-learn/feedback', recordSearchFeedback);
+router.get('/api/ai-learn/stats', getLearningStats);
+
 // AI Excel Analysis API endpoints
 router.post('/api/excel/analyze', aiExcelAnalyze);
 router.post('/api/excel/search', aiExcelSearch);
@@ -173,7 +197,11 @@ router.get('/tickets/:ticketId', getTicketDetailsPage);
 router.get('/api/tickets', getTicketsApi);
 router.post('/api/tickets', ticketUpload.array('attachments', 5), createTicket);
 router.get('/api/tickets/:ticketId', getTicketDetailsApi);
-router.post('/api/tickets/:ticketId/messages', ticketUpload.array('attachments', 5), sendTicketMessage);
+router.post(
+  '/api/tickets/:ticketId/messages',
+  ticketUpload.array('attachments', 5),
+  sendTicketMessage,
+);
 router.put('/api/tickets/:ticketId/read', markTicketAsRead);
 
 // Address Management API
@@ -188,4 +216,3 @@ router.get('/api/settings/currency', getPreferredCurrency);
 router.put('/api/settings/currency', updatePreferredCurrency);
 
 module.exports = router;
-

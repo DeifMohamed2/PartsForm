@@ -74,7 +74,7 @@
           showAlert(
             'info',
             'Cart Expired',
-            'Your cart items have been cleared after 30 days.'
+            'Your cart items have been cleared after 30 days.',
           );
           return;
         }
@@ -128,7 +128,14 @@
     // Each part is added as a separate item - NO grouping by code/brand
     // If adding multiple quantities, add them as individual items
     const quantity = item.quantity || 1;
-    
+
+    // 🧠 Record for AI learning
+    if (window.aiLearning) {
+      window.aiLearning.recordAddedToCart(
+        item._id || item.code || item.partNumber,
+      );
+    }
+
     for (let i = 0; i < quantity; i++) {
       // Add as new individual item - store all fields from search results
       const cartItem = {
@@ -151,11 +158,19 @@
 
       cartState.items.push(cartItem);
     }
-    
+
     if (quantity > 1) {
-      showAlert('success', 'Added to Cart', `${quantity} x ${item.code || item.partNumber} added successfully`);
+      showAlert(
+        'success',
+        'Added to Cart',
+        `${quantity} x ${item.code || item.partNumber} added successfully`,
+      );
     } else {
-      showAlert('success', 'Added to Cart', `${item.code || item.partNumber} added successfully`);
+      showAlert(
+        'success',
+        'Added to Cart',
+        `${item.code || item.partNumber} added successfully`,
+      );
     }
 
     saveCartToStorage();
@@ -169,7 +184,7 @@
         'Are you sure you want to remove this item from your cart?',
         () => {
           performRemove(itemId);
-        }
+        },
       );
     } else {
       performRemove(itemId);
@@ -201,7 +216,7 @@
         cartState.selectedItems.forEach((itemId) => performRemove(itemId));
         cartState.selectedItems.clear();
         updateSelectAllState();
-      }
+      },
     );
   }
 
@@ -212,7 +227,7 @@
         'Are you sure you want to empty your entire cart? This action cannot be undone.',
         () => {
           performClearCart();
-        }
+        },
       );
     } else {
       performClearCart();
@@ -227,7 +242,7 @@
     showAlert(
       'info',
       'Cart Cleared',
-      'All items have been removed from your cart'
+      'All items have been removed from your cart',
     );
   }
 
@@ -512,8 +527,14 @@
   function calculateTotals() {
     // Each item is individual - count each item as 1
     const totalItems = cartState.items.length;
-    const totalAmount = cartState.items.reduce((sum, item) => sum + (parseFloat(item.price) || 0), 0);
-    const totalWeight = cartState.items.reduce((sum, item) => sum + (parseFloat(item.weight) || 0), 0);
+    const totalAmount = cartState.items.reduce(
+      (sum, item) => sum + (parseFloat(item.price) || 0),
+      0,
+    );
+    const totalWeight = cartState.items.reduce(
+      (sum, item) => sum + (parseFloat(item.weight) || 0),
+      0,
+    );
 
     return { totalItems, totalAmount, totalWeight };
   }
@@ -554,14 +575,14 @@
       showAlert(
         'info',
         'Cart Expired',
-        'Your cart items have been cleared after 30 days.'
+        'Your cart items have been cleared after 30 days.',
       );
       return;
     }
 
     const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
     const hours = Math.floor(
-      (diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+      (diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
     );
     const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
 
@@ -624,7 +645,7 @@
       link.setAttribute('href', url);
       link.setAttribute(
         'download',
-        `partsform_cart_${new Date().toISOString().split('T')[0]}.csv`
+        `partsform_cart_${new Date().toISOString().split('T')[0]}.csv`,
       );
       link.style.visibility = 'hidden';
 

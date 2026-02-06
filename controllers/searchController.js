@@ -6,6 +6,7 @@
 const Part = require('../models/Part');
 const elasticsearchService = require('../services/elasticsearchService');
 const geminiService = require('../services/geminiService');
+const aiLearningService = require('../services/aiLearningService');
 
 /**
  * Search parts by EXACT part number
@@ -693,6 +694,11 @@ module.exports = {
   aiAnalyze,
   aiExcelAnalyze,
   aiExcelSearch,
+  // AI Learning endpoints
+  recordSearchEngagement,
+  recordSearchRefinement,
+  recordSearchFeedback,
+  getLearningStats,
 };
 
 /**
@@ -814,54 +820,113 @@ async function aiSearch(req, res) {
     });
 
     // ═══════════════════════════════════════════════════════════════
-    // STEP 2: FETCH DATA FROM DATABASE
+    // STEP 2: INTELLIGENT DATA FETCHING
+    // Use different search strategies based on what AI understood
     // ═══════════════════════════════════════════════════════════════
     let allResults = [];
     let source = 'mongodb';
-    const searchTerms = parsed.searchTerms || [];
+
+    // Extract search components from AI understanding
+    const partNumbers = understood.partNumbers || parsed.searchTerms || [];
+    const keywords = understood.searchKeywords || [];
+    const categories = understood.categories || [];
+    const brands = understood.brands || filters.brand || [];
+
+    // Combine keywords and categories for text search
+    const searchKeywords = [...new Set([...keywords, ...categories])];
+
+    // Check if we have specific part numbers vs general keywords
+    const hasPartNumbers =
+      partNumbers.length > 0 &&
+      partNumbers.some((pn) => /^[A-Z0-9\-]+$/i.test(pn) && pn.length > 3);
+    const hasKeywords = searchKeywords.length > 0;
+
+    console.log(
+      `🔍 Search strategy: partNumbers=${partNumbers.length}, keywords=${searchKeywords.length}, brands=${brands.length}`,
+    );
 
     const useElasticsearch = await elasticsearchService.hasDocuments();
 
-    // Search by terms if provided
-    if (searchTerms.length > 0) {
+    // STRATEGY 1: Search for specific part numbers (exact match)
+    if (hasPartNumbers && useElasticsearch) {
+      try {
+        const esResult = await elasticsearchService.searchMultiplePartNumbers(
+          partNumbers,
+          { limitPerPart: 200 },
+        );
+        allResults = esResult.results;
+        source = 'elasticsearch-parts';
+        console.log(
+          `📦 Part number search: ${esResult.found?.length || 0} found, ${esResult.notFound?.length || 0} not found`,
+        );
+      } catch (esError) {
+        console.error('ES part search failed:', esError.message);
+      }
+    }
+
+    // STRATEGY 2: Text search by keywords/categories/description
+    if (allResults.length === 0 && (hasKeywords || !hasPartNumbers)) {
+      const searchQuery = searchKeywords.join(' ') || query;
+
       if (useElasticsearch) {
         try {
-          const esResult = await elasticsearchService.searchMultiplePartNumbers(
-            searchTerms,
-            { limitPerPart: 200 },
+          // Use the full-text search that searches across descriptions, brands, etc.
+          const esResult = await elasticsearchService.search(searchQuery, {
+            limit: 500,
+            brand: brands.length > 0 ? brands[0] : undefined,
+            inStock: understood.stockConstraints?.requireInStock || false,
+          });
+          allResults = esResult.results || [];
+          source = 'elasticsearch-text';
+          console.log(
+            `📦 Text search for "${searchQuery}": ${allResults.length} results`,
           );
-          allResults = esResult.results;
-          source = 'elasticsearch';
         } catch (esError) {
-          console.error('ES search failed:', esError.message);
+          console.error('ES text search failed:', esError.message);
         }
       }
 
-      // MongoDB fallback
+      // MongoDB fallback for text search
       if (allResults.length === 0) {
-        for (const term of searchTerms.slice(0, 5)) {
+        const searchTermsForMongo =
+          searchKeywords.length > 0 ? searchKeywords : [query];
+
+        for (const term of searchTermsForMongo.slice(0, 5)) {
           const escapedTerm = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-          const mongoResults = await Part.find({
+          const mongoQuery = {
             $or: [
               { partNumber: { $regex: escapedTerm, $options: 'i' } },
               { description: { $regex: escapedTerm, $options: 'i' } },
               { brand: { $regex: escapedTerm, $options: 'i' } },
+              { category: { $regex: escapedTerm, $options: 'i' } },
             ],
-          })
-            .limit(200)
-            .lean();
+          };
+
+          // Add brand filter if specified
+          if (brands.length > 0) {
+            mongoQuery.brand = { $in: brands.map((b) => new RegExp(b, 'i')) };
+          }
+
+          const mongoResults = await Part.find(mongoQuery).limit(300).lean();
           allResults.push(...mongoResults);
         }
+        source = 'mongodb-text';
+        console.log(`📦 MongoDB text search: ${allResults.length} results`);
       }
     }
 
-    // If no search terms or no results, fetch by filters
+    // STRATEGY 3: Fallback - fetch broader dataset for AI filtering
     if (allResults.length === 0) {
       const dbQuery = {};
 
       // Brand filter
-      if (filters.brand && filters.brand.length > 0) {
-        dbQuery.brand = { $in: filters.brand.map((b) => new RegExp(b, 'i')) };
+      if (brands.length > 0) {
+        dbQuery.brand = { $in: brands.map((b) => new RegExp(b, 'i')) };
+      }
+
+      // Stock filter
+      if (understood.stockConstraints?.requireInStock) {
+        dbQuery.quantity = { $gt: 0 };
       }
 
       // Fetch a broader set of data for AI filtering
@@ -876,7 +941,7 @@ async function aiSearch(req, res) {
         console.warn('DB query timeout, using smaller limit');
         allResults = await Part.find(dbQuery).limit(300).lean();
       }
-      source = 'mongodb-filtered';
+      source = 'mongodb-fallback';
     }
 
     console.log(`📦 Fetched ${allResults.length} parts from ${source}`);
@@ -983,11 +1048,52 @@ async function aiSearch(req, res) {
     // Clean up
     activeAISearches.delete(normalizedQuery);
 
-    res.json({
+    // Combine all search terms for the response
+    const allSearchTerms = [...new Set([...partNumbers, ...searchKeywords])];
+
+    // ═══════════════════════════════════════════════════════════════
+    // LEARNING: Record this search for AI improvement
+    // ═══════════════════════════════════════════════════════════════
+    let learningRecordId = null;
+    let learningSuggestions = [];
+
+    try {
+      const learningResult = await aiLearningService.recordSearchAttempt({
+        query,
+        aiUnderstanding: understood,
+        resultsCount: filteredResults.length,
+        searchTime,
+        source,
+        sessionId: req.sessionID || requestId,
+        userId: req.buyer?._id,
+      });
+
+      learningRecordId = learningResult.recordId;
+
+      // If search failed, include suggestions from learning
+      if (
+        !learningResult.wasSuccessful &&
+        learningResult.suggestions?.length > 0
+      ) {
+        learningSuggestions = learningResult.suggestions;
+        console.log(
+          '🧠 Learning suggestions for failed search:',
+          learningSuggestions,
+        );
+      }
+    } catch (learningError) {
+      console.warn(
+        'Learning record error (non-blocking):',
+        learningError.message,
+      );
+    }
+
+    // Build response with learning data
+    const response = {
       success: true,
       query,
       parsed: {
-        searchTerms,
+        searchTerms: allSearchTerms,
         filters: parsed.filters,
         intent: parsed.intent,
         understood: understood,
@@ -1003,7 +1109,15 @@ async function aiSearch(req, res) {
         analysis: filterAnalysis,
         stockStats,
       },
-    });
+      // Include learning data for frontend
+      learning: {
+        recordId: learningRecordId,
+        suggestions:
+          learningSuggestions.length > 0 ? learningSuggestions : undefined,
+      },
+    };
+
+    res.json(response);
   } catch (error) {
     const normalizedQuery = (req.body?.query || '').trim().toLowerCase();
     activeAISearches.delete(normalizedQuery);
@@ -1222,5 +1336,131 @@ async function aiAnalyze(req, res) {
       success: false,
       error: 'Analysis failed',
     });
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// AI LEARNING ENDPOINTS - Help the AI get smarter over time
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Record user engagement with search results (implicit learning)
+ * POST /api/ai-learn/engagement
+ * Body: { recordId: "...", engagement: { viewedDetails: true, addedToCart: false, ... } }
+ */
+async function recordSearchEngagement(req, res) {
+  try {
+    const { recordId, engagement } = req.body;
+
+    if (!recordId) {
+      return res.status(400).json({
+        success: false,
+        error: 'recordId is required',
+      });
+    }
+
+    const result = await aiLearningService.recordEngagement(
+      recordId,
+      engagement || {},
+    );
+
+    res.json({
+      success: result.updated,
+      newScore: result.newScore,
+    });
+  } catch (error) {
+    console.error('Learning engagement error:', error);
+    res
+      .status(500)
+      .json({ success: false, error: 'Failed to record engagement' });
+  }
+}
+
+/**
+ * Record search refinement (user searched again with better query)
+ * POST /api/ai-learn/refinement
+ * Body: { originalQuery: "...", refinedQuery: "...", refinedResultsCount: 10 }
+ */
+async function recordSearchRefinement(req, res) {
+  try {
+    const { originalQuery, refinedQuery, refinedResultsCount } = req.body;
+
+    if (!originalQuery || !refinedQuery) {
+      return res.status(400).json({
+        success: false,
+        error: 'originalQuery and refinedQuery are required',
+      });
+    }
+
+    const result = await aiLearningService.recordSearchRefinement(
+      originalQuery,
+      refinedQuery,
+      { count: refinedResultsCount || 0 },
+    );
+
+    res.json({
+      success: result.learned,
+      message: result.learned
+        ? 'AI learned from refinement'
+        : 'Learning deferred',
+    });
+  } catch (error) {
+    console.error('Learning refinement error:', error);
+    res
+      .status(500)
+      .json({ success: false, error: 'Failed to record refinement' });
+  }
+}
+
+/**
+ * Record explicit user feedback
+ * POST /api/ai-learn/feedback
+ * Body: { recordId: "...", feedback: { rating: 5, helpful: true, comment: "..." } }
+ */
+async function recordSearchFeedback(req, res) {
+  try {
+    const { recordId, feedback } = req.body;
+
+    if (!recordId) {
+      return res.status(400).json({
+        success: false,
+        error: 'recordId is required',
+      });
+    }
+
+    const result = await aiLearningService.recordFeedback(
+      recordId,
+      feedback || {},
+    );
+
+    res.json({
+      success: result.updated,
+      message: result.updated
+        ? 'Thank you for your feedback!'
+        : 'Feedback not recorded',
+    });
+  } catch (error) {
+    console.error('Learning feedback error:', error);
+    res
+      .status(500)
+      .json({ success: false, error: 'Failed to record feedback' });
+  }
+}
+
+/**
+ * Get AI learning statistics
+ * GET /api/ai-learn/stats
+ */
+async function getLearningStats(req, res) {
+  try {
+    const stats = await aiLearningService.getStats();
+
+    res.json({
+      success: true,
+      stats,
+    });
+  } catch (error) {
+    console.error('Learning stats error:', error);
+    res.status(500).json({ success: false, error: 'Failed to get stats' });
   }
 }

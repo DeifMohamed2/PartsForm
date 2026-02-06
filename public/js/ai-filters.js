@@ -3,7 +3,7 @@
 // Premium Filter Experience with Gemini AI Integration
 // ====================================
 
-(function() {
+(function () {
   'use strict';
 
   // ====================================
@@ -20,7 +20,7 @@
       priceMax: 100000,
       discount: [],
       paymentTerms: [],
-      
+
       // Product
       brandType: [],
       brands: ['all'],
@@ -28,32 +28,32 @@
       weightMin: 0,
       weightMax: 1000,
       stockStatus: 'all',
-      
+
       // Supplier
       origins: [],
       supplierRating: 5,
       certifications: [],
       verifiedOnly: true,
-      
+
       // Logistics
       deliveryTime: 'any',
       shippingTo: '',
       minOrderQty: 1,
       freeShipping: false,
       returnPolicy: [],
-      
+
       // Automotive
       vehicleMake: '',
       vehicleModel: '',
       yearMin: null,
       yearMax: null,
       partCategories: [],
-      engineType: 'all'
+      engineType: 'all',
     },
     aiQuery: '',
     aiParsedFilters: [],
     aiParsedResponse: null,
-    activeFilterCount: 0
+    activeFilterCount: 0,
   };
 
   // ====================================
@@ -79,28 +79,139 @@
     applyBtn: null,
     activeFilterCount: null,
     resultsPreview: null,
-    hintChips: null
+    hintChips: null,
   };
 
   // ====================================
   // VEHICLE DATA
   // ====================================
   const vehicleModels = {
-    toyota: ['Camry', 'Corolla', 'RAV4', 'Highlander', 'Land Cruiser', 'Prado', 'Fortuner', 'Hilux', 'Yaris', 'Prius'],
-    honda: ['Civic', 'Accord', 'CR-V', 'HR-V', 'Pilot', 'Odyssey', 'City', 'Jazz'],
-    nissan: ['Altima', 'Maxima', 'Sentra', 'Patrol', 'X-Trail', 'Pathfinder', 'Navara', 'Sunny'],
-    bmw: ['3 Series', '5 Series', '7 Series', 'X1', 'X3', 'X5', 'X7', 'M3', 'M5'],
-    mercedes: ['A-Class', 'C-Class', 'E-Class', 'S-Class', 'GLA', 'GLC', 'GLE', 'GLS', 'G-Class'],
+    toyota: [
+      'Camry',
+      'Corolla',
+      'RAV4',
+      'Highlander',
+      'Land Cruiser',
+      'Prado',
+      'Fortuner',
+      'Hilux',
+      'Yaris',
+      'Prius',
+    ],
+    honda: [
+      'Civic',
+      'Accord',
+      'CR-V',
+      'HR-V',
+      'Pilot',
+      'Odyssey',
+      'City',
+      'Jazz',
+    ],
+    nissan: [
+      'Altima',
+      'Maxima',
+      'Sentra',
+      'Patrol',
+      'X-Trail',
+      'Pathfinder',
+      'Navara',
+      'Sunny',
+    ],
+    bmw: [
+      '3 Series',
+      '5 Series',
+      '7 Series',
+      'X1',
+      'X3',
+      'X5',
+      'X7',
+      'M3',
+      'M5',
+    ],
+    mercedes: [
+      'A-Class',
+      'C-Class',
+      'E-Class',
+      'S-Class',
+      'GLA',
+      'GLC',
+      'GLE',
+      'GLS',
+      'G-Class',
+    ],
     audi: ['A3', 'A4', 'A6', 'A8', 'Q3', 'Q5', 'Q7', 'Q8', 'RS6'],
-    volkswagen: ['Golf', 'Passat', 'Tiguan', 'Touareg', 'Polo', 'Jetta', 'ID.4'],
-    ford: ['Mustang', 'F-150', 'Explorer', 'Escape', 'Bronco', 'Edge', 'Expedition'],
-    chevrolet: ['Camaro', 'Corvette', 'Silverado', 'Tahoe', 'Suburban', 'Traverse', 'Equinox'],
-    hyundai: ['Elantra', 'Sonata', 'Tucson', 'Santa Fe', 'Palisade', 'Kona', 'Accent'],
-    kia: ['Forte', 'K5', 'Sportage', 'Sorento', 'Telluride', 'Seltos', 'Carnival'],
+    volkswagen: [
+      'Golf',
+      'Passat',
+      'Tiguan',
+      'Touareg',
+      'Polo',
+      'Jetta',
+      'ID.4',
+    ],
+    ford: [
+      'Mustang',
+      'F-150',
+      'Explorer',
+      'Escape',
+      'Bronco',
+      'Edge',
+      'Expedition',
+    ],
+    chevrolet: [
+      'Camaro',
+      'Corvette',
+      'Silverado',
+      'Tahoe',
+      'Suburban',
+      'Traverse',
+      'Equinox',
+    ],
+    hyundai: [
+      'Elantra',
+      'Sonata',
+      'Tucson',
+      'Santa Fe',
+      'Palisade',
+      'Kona',
+      'Accent',
+    ],
+    kia: [
+      'Forte',
+      'K5',
+      'Sportage',
+      'Sorento',
+      'Telluride',
+      'Seltos',
+      'Carnival',
+    ],
     lexus: ['ES', 'IS', 'LS', 'RX', 'NX', 'GX', 'LX', 'LC'],
-    porsche: ['911', 'Cayenne', 'Macan', 'Panamera', 'Taycan', 'Boxster', 'Cayman'],
-    'land-rover': ['Range Rover', 'Range Rover Sport', 'Discovery', 'Defender', 'Velar', 'Evoque'],
-    jeep: ['Wrangler', 'Grand Cherokee', 'Cherokee', 'Compass', 'Renegade', 'Gladiator']
+    porsche: [
+      '911',
+      'Cayenne',
+      'Macan',
+      'Panamera',
+      'Taycan',
+      'Boxster',
+      'Cayman',
+    ],
+    'land-rover': [
+      'Range Rover',
+      'Range Rover Sport',
+      'Discovery',
+      'Defender',
+      'Velar',
+      'Evoque',
+    ],
+    jeep: [
+      'Wrangler',
+      'Grand Cherokee',
+      'Cherokee',
+      'Compass',
+      'Renegade',
+      'Gladiator',
+    ],
   };
 
   // ====================================
@@ -127,7 +238,9 @@
     elements.aiFiltersPreview = document.getElementById('ai-filters-preview');
     elements.aiFiltersGrid = document.getElementById('ai-filters-grid');
     elements.collapseBtn = document.getElementById('collapse-manual-filters');
-    elements.manualFiltersContent = document.getElementById('manual-filters-content');
+    elements.manualFiltersContent = document.getElementById(
+      'manual-filters-content',
+    );
     elements.clearAllBtn = document.getElementById('ai-clear-all');
     elements.applyBtn = document.getElementById('ai-apply-filters');
     elements.activeFilterCount = document.getElementById('active-filter-count');
@@ -145,7 +258,7 @@
     elements.triggerBtn?.addEventListener('click', openModal);
     elements.closeBtn?.addEventListener('click', closeModal);
     elements.backdrop?.addEventListener('click', closeModal);
-    
+
     // Escape key to close
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && AIFilterState.isOpen) {
@@ -163,7 +276,7 @@
     });
 
     // AI Hint chips
-    elements.hintChips?.forEach(chip => {
+    elements.hintChips?.forEach((chip) => {
       chip.addEventListener('click', () => {
         const hint = chip.dataset.hint;
         if (elements.aiInput) {
@@ -174,7 +287,7 @@
     });
 
     // Filter tabs
-    elements.filterTabs?.forEach(tab => {
+    elements.filterTabs?.forEach((tab) => {
       tab.addEventListener('click', () => switchTab(tab.dataset.tab));
     });
 
@@ -188,22 +301,22 @@
     elements.applyBtn?.addEventListener('click', applyFilters);
 
     // Brand chips
-    document.querySelectorAll('.brand-chip').forEach(chip => {
+    document.querySelectorAll('.brand-chip').forEach((chip) => {
       chip.addEventListener('click', () => toggleBrandChip(chip));
     });
 
     // Stock toggles
-    document.querySelectorAll('.stock-toggle').forEach(toggle => {
+    document.querySelectorAll('.stock-toggle').forEach((toggle) => {
       toggle.addEventListener('click', () => toggleStockFilter(toggle));
     });
 
     // Rating buttons
-    document.querySelectorAll('.rating-btn').forEach(btn => {
+    document.querySelectorAll('.rating-btn').forEach((btn) => {
       btn.addEventListener('click', () => selectRating(btn));
     });
 
     // Part category buttons
-    document.querySelectorAll('.part-category-btn').forEach(btn => {
+    document.querySelectorAll('.part-category-btn').forEach((btn) => {
       btn.addEventListener('click', () => togglePartCategory(btn));
     });
 
@@ -218,9 +331,11 @@
     priceMaxInput?.addEventListener('input', updatePriceRange);
 
     // All filter inputs - update count on change
-    document.querySelectorAll('#ai-filter-modal input, #ai-filter-modal select').forEach(input => {
-      input.addEventListener('change', updateFilterCount);
-    });
+    document
+      .querySelectorAll('#ai-filter-modal input, #ai-filter-modal select')
+      .forEach((input) => {
+        input.addEventListener('change', updateFilterCount);
+      });
 
     // Brand search
     const brandSearch = document.getElementById('brand-search');
@@ -232,7 +347,10 @@
   // ====================================
   function openModal() {
     // Check if user is logged in
-    if (typeof window.BuyerAuth !== 'undefined' && !window.BuyerAuth.isLoggedIn()) {
+    if (
+      typeof window.BuyerAuth !== 'undefined' &&
+      !window.BuyerAuth.isLoggedIn()
+    ) {
       if (typeof window.showLoginModal === 'function') {
         window.showLoginModal();
       }
@@ -242,7 +360,7 @@
     AIFilterState.isOpen = true;
     elements.modal?.classList.add('show');
     document.body.style.overflow = 'hidden';
-    
+
     // Focus AI input
     setTimeout(() => {
       elements.aiInput?.focus();
@@ -267,12 +385,12 @@
     AIFilterState.activeTab = tabId;
 
     // Update tab buttons
-    elements.filterTabs?.forEach(tab => {
+    elements.filterTabs?.forEach((tab) => {
       tab.classList.toggle('active', tab.dataset.tab === tabId);
     });
 
     // Update panels
-    elements.filterPanels?.forEach(panel => {
+    elements.filterPanels?.forEach((panel) => {
       panel.classList.toggle('active', panel.id === `panel-${tabId}`);
     });
 
@@ -291,30 +409,33 @@
   const SEARCH_TIMEOUT = 20000; // 20 second timeout
   const DEBOUNCE_DELAY = 300; // 300ms debounce
   let searchDebounceTimer = null;
-  
+
   async function handleAISubmit() {
     const query = elements.aiInput?.value.trim();
     if (!query) {
       showAIMessage('Please enter a search query', 'info');
       return;
     }
-    
+
     // Prevent duplicate requests for same query
-    if (isSearchInProgress && query.toLowerCase() === lastSearchQuery.toLowerCase()) {
+    if (
+      isSearchInProgress &&
+      query.toLowerCase() === lastSearchQuery.toLowerCase()
+    ) {
       showAIMessage('Search in progress, please wait...', 'info');
       return;
     }
-    
+
     // Cancel any pending request
     if (currentAbortController) {
       currentAbortController.abort();
     }
-    
+
     // Clear any pending debounce
     if (searchDebounceTimer) {
       clearTimeout(searchDebounceTimer);
     }
-    
+
     // Create new abort controller for this request
     currentAbortController = new AbortController();
     const timeoutId = setTimeout(() => {
@@ -327,11 +448,12 @@
     lastSearchQuery = query;
     AIFilterState.aiQuery = query;
     AIFilterState.isLoading = true;
-    
+
     // Disable submit button during search
     if (elements.aiSubmitBtn) {
       elements.aiSubmitBtn.disabled = true;
-      elements.aiSubmitBtn.innerHTML = '<i data-lucide="loader-2" class="spin"></i>';
+      elements.aiSubmitBtn.innerHTML =
+        '<i data-lucide="loader-2" class="spin"></i>';
     }
 
     // Show response section with thinking state
@@ -378,7 +500,7 @@
         body: JSON.stringify({ query }),
         signal: currentAbortController.signal,
       });
-      
+
       clearTimeout(timeoutId);
 
       if (!response.ok) {
@@ -386,29 +508,44 @@
       }
 
       const data = await response.json();
-      
+
       if (!data.success) {
         throw new Error(data.error || 'AI search failed');
       }
 
       console.log('AI Search Response:', data);
-      
+
+      // 🧠 Record search for AI learning
+      if (window.aiLearning && data.learning?.recordId) {
+        window.aiLearning.recordSearch(
+          query,
+          data.total || 0,
+          data.learning.recordId,
+        );
+
+        // If there are learning suggestions (for failed searches), show them
+        if (data.learning.suggestions && data.learning.suggestions.length > 0) {
+          console.log('🧠 AI suggests trying:', data.learning.suggestions);
+        }
+      }
+
       // Store the results and parsed data
       AIFilterState.lastSearchResults = data.results || [];
       AIFilterState.aiParsedResponse = data.parsed || {};
-      
+      AIFilterState.learningRecordId = data.learning?.recordId;
+      AIFilterState.learningSuggestions = data.learning?.suggestions || [];
+
       // Store broad search info if available
       AIFilterState.isBroadSearch = data.isBroadSearch || false;
       AIFilterState.broadSearchMessage = data.message || '';
       AIFilterState.availableBrands = data.availableBrands || [];
       AIFilterState.samplePartNumbers = data.samplePartNumbers || [];
-      
+
       // Convert parsed filters to display format
       const displayFilters = convertParsedToDisplayFilters(data.parsed);
-      
+
       // Display the results (even if empty, to show filters applied)
       displayAIResults(displayFilters, data.results || [], data.parsed);
-
     } catch (error) {
       // Check if this was an abort (user cancelled or timeout)
       if (error.name === 'AbortError') {
@@ -421,36 +558,38 @@
         console.error('AI Search error:', error);
         showAIError('general');
       }
-      
+
       // Fallback to local parsing and still show results section
       const fallbackFilters = parseAIQuery(query);
       AIFilterState.aiParsedResponse = {
         intent: `Searching for: "${query}"`,
         filters: {},
-        suggestions: ['Try being more specific', 'Include brand names or part numbers'],
+        suggestions: [
+          'Try being more specific',
+          'Include brand names or part numbers',
+        ],
       };
-      
+
       // Display with empty results - user can still apply filters
       displayAIResults(fallbackFilters, [], AIFilterState.aiParsedResponse);
-      
     } finally {
       AIFilterState.isLoading = false;
       isSearchInProgress = false;
       currentAbortController = null;
-      
+
       // Re-enable submit button (icon only for cleaner UI)
       if (elements.aiSubmitBtn) {
         elements.aiSubmitBtn.disabled = false;
         elements.aiSubmitBtn.innerHTML = '<i data-lucide="search"></i>';
       }
-      
+
       // Reinitialize icons
       if (typeof lucide !== 'undefined') {
         lucide.createIcons();
       }
     }
   }
-  
+
   /**
    * Show AI error message with professional styling
    */
@@ -459,27 +598,27 @@
     if (elements.aiThinking) {
       elements.aiThinking.style.display = 'none';
     }
-    
+
     const messages = {
-      'timeout': {
+      timeout: {
         title: 'Search took too long',
         subtitle: 'Try a more specific query or use filters below.',
-        icon: 'clock'
+        icon: 'clock',
       },
       'rate-limited': {
         title: 'High demand right now',
         subtitle: 'Using quick search mode. Results may be less refined.',
-        icon: 'zap'
+        icon: 'zap',
       },
-      'general': {
+      general: {
         title: 'Switching to quick search',
-        subtitle: 'We\'ll find parts using standard search.',
-        icon: 'search'
-      }
+        subtitle: "We'll find parts using standard search.",
+        icon: 'search',
+      },
     };
-    
+
     const msg = messages[type] || messages['general'];
-    
+
     if (elements.aiResponseTitle) {
       elements.aiResponseTitle.style.display = 'flex';
       const titleSpan = elements.aiResponseTitle.querySelector('span');
@@ -488,7 +627,7 @@
       if (icon) icon.setAttribute('data-lucide', msg.icon);
     }
   }
-  
+
   /**
    * Show AI informational message
    */
@@ -504,7 +643,11 @@
       const titleSpan = elements.aiResponseTitle.querySelector('span');
       if (titleSpan) titleSpan.textContent = message;
       const icon = elements.aiResponseTitle.querySelector('i');
-      if (icon) icon.setAttribute('data-lucide', type === 'info' ? 'info' : 'alert-circle');
+      if (icon)
+        icon.setAttribute(
+          'data-lucide',
+          type === 'info' ? 'info' : 'alert-circle',
+        );
     }
     if (typeof lucide !== 'undefined') lucide.createIcons();
   }
@@ -515,11 +658,11 @@
    */
   function convertParsedToDisplayFilters(parsed) {
     const filters = [];
-    
+
     if (!parsed || !parsed.filters) return filters;
-    
+
     const f = parsed.filters;
-    
+
     // ═══════════════════════════════════════════════════════════════
     // VEHICLE BRAND FILTER (compatibility - "Toyota brake pads")
     // ═══════════════════════════════════════════════════════════════
@@ -533,12 +676,12 @@
         filterValue: f.vehicleBrand,
       });
     }
-    
+
     // ═══════════════════════════════════════════════════════════════
     // PARTS BRAND FILTER (manufacturer like BOSCH, SKF)
     // ═══════════════════════════════════════════════════════════════
     if (f.brand && f.brand.length > 0) {
-      f.brand.forEach(brand => {
+      f.brand.forEach((brand) => {
         filters.push({
           type: 'brand',
           icon: 'award',
@@ -549,14 +692,14 @@
         });
       });
     }
-    
+
     // ═══════════════════════════════════════════════════════════════
     // EXCLUSION FILTERS ("not BOSCH", "exclude Chinese")
     // ═══════════════════════════════════════════════════════════════
     if (f.exclude) {
       // Excluded brands
       if (f.exclude.brands && f.exclude.brands.length > 0) {
-        f.exclude.brands.forEach(brand => {
+        f.exclude.brands.forEach((brand) => {
           filters.push({
             type: 'exclude',
             icon: 'ban',
@@ -567,10 +710,10 @@
           });
         });
       }
-      
+
       // Excluded conditions
       if (f.exclude.conditions && f.exclude.conditions.length > 0) {
-        f.exclude.conditions.forEach(condition => {
+        f.exclude.conditions.forEach((condition) => {
           filters.push({
             type: 'exclude',
             icon: 'ban',
@@ -581,11 +724,11 @@
           });
         });
       }
-      
+
       // Excluded origins
       if (f.exclude.origins && f.exclude.origins.length > 0) {
-        const originLabels = { 'CN': 'Chinese', 'IN': 'Indian' };
-        f.exclude.origins.forEach(origin => {
+        const originLabels = { CN: 'Chinese', IN: 'Indian' };
+        f.exclude.origins.forEach((origin) => {
           filters.push({
             type: 'exclude',
             icon: 'ban',
@@ -597,7 +740,7 @@
         });
       }
     }
-    
+
     // ═══════════════════════════════════════════════════════════════
     // QUANTITY FILTER (B2B - "need x10", "qty 50")
     // ═══════════════════════════════════════════════════════════════
@@ -611,12 +754,12 @@
         filterValue: f.requestedQuantity,
       });
     }
-    
+
     // ═══════════════════════════════════════════════════════════════
     // SUPPLIER ORIGIN FILTER ("German supplier", "Japanese parts")
     // ═══════════════════════════════════════════════════════════════
     if (f.supplierOrigin) {
-      const originLabels = { 'DE': 'German', 'JP': 'Japanese', 'US': 'American' };
+      const originLabels = { DE: 'German', JP: 'Japanese', US: 'American' };
       filters.push({
         type: 'origin',
         icon: 'globe',
@@ -626,7 +769,7 @@
         filterValue: f.supplierOrigin,
       });
     }
-    
+
     // ═══════════════════════════════════════════════════════════════
     // PRICE FILTERS (with smart range support)
     // ═══════════════════════════════════════════════════════════════
@@ -662,7 +805,7 @@
         });
       }
     }
-    
+
     // Stock filter
     if (f.inStock) {
       filters.push({
@@ -674,7 +817,7 @@
         filterValue: 'in-stock',
       });
     }
-    
+
     // Category filter
     if (f.category) {
       filters.push({
@@ -686,7 +829,7 @@
         filterValue: f.category,
       });
     }
-    
+
     // Delivery filter
     if (f.deliveryDays !== undefined) {
       filters.push({
@@ -695,10 +838,15 @@
         label: 'Delivery',
         value: `Within ${f.deliveryDays} days`,
         filterKey: 'deliveryTime',
-        filterValue: f.deliveryDays <= 3 ? 'express' : f.deliveryDays <= 7 ? 'fast' : 'standard',
+        filterValue:
+          f.deliveryDays <= 3
+            ? 'express'
+            : f.deliveryDays <= 7
+              ? 'fast'
+              : 'standard',
       });
     }
-    
+
     // Supplier filter
     if (f.supplier) {
       filters.push({
@@ -710,7 +858,7 @@
         filterValue: f.supplier,
       });
     }
-    
+
     // Certified supplier filter
     if (f.certifiedOnly) {
       filters.push({
@@ -722,7 +870,7 @@
         filterValue: true,
       });
     }
-    
+
     // Sort filter
     if (f.sortBy && f.sortBy !== 'price') {
       const sortLabels = {
@@ -739,24 +887,46 @@
         filterValue: f.sortBy,
       });
     }
-    
+
     return filters;
   }
 
   function extractKeywords(query) {
     // Extract meaningful keywords from query
     const queryLower = query.toLowerCase();
-    const stopWords = ['find', 'me', 'show', 'get', 'looking', 'for', 'need', 'want', 'the', 'a', 'an', 'some', 'with', 'from', 'under', 'over', 'i', 'am'];
-    const words = queryLower.split(/\s+/).filter(word => 
-      word.length > 2 && !stopWords.includes(word) && !/^\d+$/.test(word)
-    );
+    const stopWords = [
+      'find',
+      'me',
+      'show',
+      'get',
+      'looking',
+      'for',
+      'need',
+      'want',
+      'the',
+      'a',
+      'an',
+      'some',
+      'with',
+      'from',
+      'under',
+      'over',
+      'i',
+      'am',
+    ];
+    const words = queryLower
+      .split(/\s+/)
+      .filter(
+        (word) =>
+          word.length > 2 && !stopWords.includes(word) && !/^\d+$/.test(word),
+      );
     return words.slice(0, 3).join(' ') || 'parts';
   }
 
   function generateSampleProducts(query) {
     const queryLower = query.toLowerCase();
     const keywords = extractKeywords(query);
-    
+
     // Sample product database
     const productTemplates = [
       {
@@ -765,7 +935,7 @@
         brand: 'BOSCH',
         price: '245.00',
         stock: 'in-stock',
-        stockText: 'In Stock'
+        stockText: 'In Stock',
       },
       {
         partNumber: 'ENG-78234-B',
@@ -773,7 +943,7 @@
         brand: 'OEM',
         price: '89.50',
         stock: 'in-stock',
-        stockText: 'In Stock'
+        stockText: 'In Stock',
       },
       {
         partNumber: 'SUS-23456-C',
@@ -781,7 +951,7 @@
         brand: 'SKF',
         price: '425.00',
         stock: 'low-stock',
-        stockText: 'Low Stock'
+        stockText: 'Low Stock',
       },
       {
         partNumber: 'TRN-67890-D',
@@ -789,7 +959,7 @@
         brand: 'GATES',
         price: '67.99',
         stock: 'in-stock',
-        stockText: 'In Stock'
+        stockText: 'In Stock',
       },
       {
         partNumber: 'ELC-90123-E',
@@ -797,10 +967,10 @@
         brand: 'DENSO',
         price: '128.00',
         stock: 'in-stock',
-        stockText: 'In Stock'
-      }
+        stockText: 'In Stock',
+      },
     ];
-    
+
     // Customize products based on query
     if (queryLower.includes('brake')) {
       productTemplates[0].description = `${keywords.charAt(0).toUpperCase() + keywords.slice(1)} - Premium Brake System`;
@@ -814,7 +984,7 @@
       productTemplates[1].description = 'Cabin Air Filter - Premium';
       productTemplates[2].description = 'Fuel Filter Assembly';
     }
-    
+
     return productTemplates.slice(0, 5);
   }
 
@@ -823,34 +993,49 @@
     const queryLower = query.toLowerCase();
 
     // Price detection - Enhanced patterns
-    const priceUnderMatch = queryLower.match(/under\s*\$?(\d+)|below\s*\$?(\d+)|less\s+than\s*\$?(\d+)|cheaper\s+than\s*\$?(\d+)|max\s*\$?(\d+)/);
+    const priceUnderMatch = queryLower.match(
+      /under\s*\$?(\d+)|below\s*\$?(\d+)|less\s+than\s*\$?(\d+)|cheaper\s+than\s*\$?(\d+)|max\s*\$?(\d+)/,
+    );
     if (priceUnderMatch) {
-      const price = priceUnderMatch[1] || priceUnderMatch[2] || priceUnderMatch[3] || priceUnderMatch[4] || priceUnderMatch[5];
+      const price =
+        priceUnderMatch[1] ||
+        priceUnderMatch[2] ||
+        priceUnderMatch[3] ||
+        priceUnderMatch[4] ||
+        priceUnderMatch[5];
       filters.push({
         type: 'price',
         icon: 'dollar-sign',
         label: 'Max Price',
         value: `$${price}`,
         filterKey: 'priceMax',
-        filterValue: parseInt(price)
+        filterValue: parseInt(price),
       });
     }
 
-    const priceAboveMatch = queryLower.match(/over\s*\$?(\d+)|above\s*\$?(\d+)|more\s+than\s*\$?(\d+)|min\s*\$?(\d+)/);
+    const priceAboveMatch = queryLower.match(
+      /over\s*\$?(\d+)|above\s*\$?(\d+)|more\s+than\s*\$?(\d+)|min\s*\$?(\d+)/,
+    );
     if (priceAboveMatch) {
-      const price = priceAboveMatch[1] || priceAboveMatch[2] || priceAboveMatch[3] || priceAboveMatch[4];
+      const price =
+        priceAboveMatch[1] ||
+        priceAboveMatch[2] ||
+        priceAboveMatch[3] ||
+        priceAboveMatch[4];
       filters.push({
         type: 'price',
         icon: 'dollar-sign',
         label: 'Min Price',
         value: `$${price}`,
         filterKey: 'priceMin',
-        filterValue: parseInt(price)
+        filterValue: parseInt(price),
       });
     }
-    
+
     // Price range detection
-    const priceRangeMatch = queryLower.match(/\$?(\d+)\s*-\s*\$?(\d+)|between\s*\$?(\d+)\s+and\s+\$?(\d+)/);
+    const priceRangeMatch = queryLower.match(
+      /\$?(\d+)\s*-\s*\$?(\d+)|between\s*\$?(\d+)\s+and\s+\$?(\d+)/,
+    );
     if (priceRangeMatch) {
       const min = priceRangeMatch[1] || priceRangeMatch[3];
       const max = priceRangeMatch[2] || priceRangeMatch[4];
@@ -860,13 +1045,24 @@
         label: 'Price Range',
         value: `$${min} - $${max}`,
         filterKey: 'priceRange',
-        filterValue: { min: parseInt(min), max: parseInt(max) }
+        filterValue: { min: parseInt(min), max: parseInt(max) },
       });
     }
 
     // Brand detection
-    const brands = ['oem', 'bosch', 'skf', 'gates', 'parker', 'continental', 'denso', 'valeo', 'delphi', 'brembo'];
-    brands.forEach(brand => {
+    const brands = [
+      'oem',
+      'bosch',
+      'skf',
+      'gates',
+      'parker',
+      'continental',
+      'denso',
+      'valeo',
+      'delphi',
+      'brembo',
+    ];
+    brands.forEach((brand) => {
       if (queryLower.includes(brand)) {
         filters.push({
           type: 'brand',
@@ -874,7 +1070,7 @@
           label: 'Brand',
           value: brand.toUpperCase(),
           filterKey: 'brands',
-          filterValue: brand
+          filterValue: brand,
         });
       }
     });
@@ -887,81 +1083,97 @@
         label: 'Stock',
         value: 'In Stock',
         filterKey: 'stockStatus',
-        filterValue: 'in-stock'
+        filterValue: 'in-stock',
       });
     }
 
     // Delivery detection
-    if (queryLower.includes('fast') || queryLower.includes('express') || queryLower.includes('quick')) {
+    if (
+      queryLower.includes('fast') ||
+      queryLower.includes('express') ||
+      queryLower.includes('quick')
+    ) {
       filters.push({
         type: 'delivery',
         icon: 'zap',
         label: 'Delivery',
         value: 'Express (1-2 days)',
         filterKey: 'deliveryTime',
-        filterValue: 'express'
+        filterValue: 'express',
       });
     }
 
     // Part category detection - Enhanced
     const categories = {
-      'brake': { value: 'brakes', display: 'Brakes' },
-      'brakes': { value: 'brakes', display: 'Brakes' },
+      brake: { value: 'brakes', display: 'Brakes' },
+      brakes: { value: 'brakes', display: 'Brakes' },
       'brake pad': { value: 'brakes', display: 'Brake Pads' },
       'brake disc': { value: 'brakes', display: 'Brake Discs' },
-      'engine': { value: 'engine', display: 'Engine' },
+      engine: { value: 'engine', display: 'Engine' },
       'engine parts': { value: 'engine', display: 'Engine Parts' },
-      'suspension': { value: 'suspension', display: 'Suspension' },
-      'shock': { value: 'suspension', display: 'Shock Absorbers' },
-      'strut': { value: 'suspension', display: 'Struts' },
-      'electrical': { value: 'electrical', display: 'Electrical' },
-      'battery': { value: 'electrical', display: 'Battery' },
-      'alternator': { value: 'electrical', display: 'Alternator' },
-      'transmission': { value: 'transmission', display: 'Transmission' },
-      'gearbox': { value: 'transmission', display: 'Gearbox' },
-      'cooling': { value: 'cooling', display: 'Cooling System' },
-      'radiator': { value: 'cooling', display: 'Radiator' },
-      'steering': { value: 'steering', display: 'Steering' },
-      'exhaust': { value: 'exhaust', display: 'Exhaust System' },
-      'filter': { value: 'filters', display: 'Filters' },
+      suspension: { value: 'suspension', display: 'Suspension' },
+      shock: { value: 'suspension', display: 'Shock Absorbers' },
+      strut: { value: 'suspension', display: 'Struts' },
+      electrical: { value: 'electrical', display: 'Electrical' },
+      battery: { value: 'electrical', display: 'Battery' },
+      alternator: { value: 'electrical', display: 'Alternator' },
+      transmission: { value: 'transmission', display: 'Transmission' },
+      gearbox: { value: 'transmission', display: 'Gearbox' },
+      cooling: { value: 'cooling', display: 'Cooling System' },
+      radiator: { value: 'cooling', display: 'Radiator' },
+      steering: { value: 'steering', display: 'Steering' },
+      exhaust: { value: 'exhaust', display: 'Exhaust System' },
+      filter: { value: 'filters', display: 'Filters' },
       'oil filter': { value: 'filters', display: 'Oil Filter' },
       'air filter': { value: 'filters', display: 'Air Filter' },
-      'bearing': { value: 'engine', display: 'Bearings' },
-      'pump': { value: 'engine', display: 'Pump' },
-      'clutch': { value: 'transmission', display: 'Clutch' },
-      'tire': { value: 'wheels', display: 'Tires' },
-      'wheel': { value: 'wheels', display: 'Wheels' }
+      bearing: { value: 'engine', display: 'Bearings' },
+      pump: { value: 'engine', display: 'Pump' },
+      clutch: { value: 'transmission', display: 'Clutch' },
+      tire: { value: 'wheels', display: 'Tires' },
+      wheel: { value: 'wheels', display: 'Wheels' },
     };
 
     // Sort by length to match longer phrases first
-    const sortedKeys = Object.keys(categories).sort((a, b) => b.length - a.length);
-    
-    sortedKeys.forEach(key => {
+    const sortedKeys = Object.keys(categories).sort(
+      (a, b) => b.length - a.length,
+    );
+
+    sortedKeys.forEach((key) => {
       if (queryLower.includes(key)) {
         const category = categories[key];
         // Only add if not already added
-        if (!filters.some(f => f.filterKey === 'partCategories' && f.filterValue === category.value)) {
+        if (
+          !filters.some(
+            (f) =>
+              f.filterKey === 'partCategories' &&
+              f.filterValue === category.value,
+          )
+        ) {
           filters.push({
             type: 'category',
             icon: 'component',
             label: 'Category',
             value: category.display,
             filterKey: 'partCategories',
-            filterValue: category.value
+            filterValue: category.value,
           });
         }
       }
     });
 
     // Quality detection
-    if (queryLower.includes('high quality') || queryLower.includes('premium') || queryLower.includes('best')) {
+    if (
+      queryLower.includes('high quality') ||
+      queryLower.includes('premium') ||
+      queryLower.includes('best')
+    ) {
       filters.push({
         type: 'quality',
         icon: 'star',
         label: 'Rating',
         value: '5 Stars',
         filterKey: 'supplierRating',
-        filterValue: 5
+        filterValue: 5,
       });
     }
 
@@ -973,28 +1185,32 @@
         label: 'Supplier',
         value: 'Verified Only',
         filterKey: 'verifiedOnly',
-        filterValue: true
+        filterValue: true,
       });
     }
 
     return filters;
   }
 
-  function displayAIResults(parsedFilters, results = [], parsedResponse = null) {
+  function displayAIResults(
+    parsedFilters,
+    results = [],
+    parsedResponse = null,
+  ) {
     // Hide thinking, show results
     if (elements.aiThinking) {
       elements.aiThinking.style.display = 'none';
     }
-    
+
     const hasResults = results && results.length > 0;
     const hasFilters = parsedFilters && parsedFilters.length > 0;
     const isBroadSearch = AIFilterState.isBroadSearch;
-    
+
     if (elements.aiResponseTitle) {
       elements.aiResponseTitle.style.display = 'flex';
       const titleSpan = elements.aiResponseTitle.querySelector('span');
       const icon = elements.aiResponseTitle.querySelector('i');
-      
+
       if (hasResults) {
         // Professional result messaging
         const resultCount = results.length;
@@ -1012,7 +1228,8 @@
         titleSpan.textContent = `Filters applied - No exact matches found`;
         icon?.setAttribute('data-lucide', 'filter-x');
       } else {
-        titleSpan.textContent = parsedResponse?.intent || 'Processing your search...';
+        titleSpan.textContent =
+          parsedResponse?.intent || 'Processing your search...';
         icon?.setAttribute('data-lucide', 'search');
       }
     }
@@ -1035,10 +1252,10 @@
       const isBroad = AIFilterState.isBroadSearch;
       const availableBrands = AIFilterState.availableBrands || [];
       const broadMessage = AIFilterState.broadSearchMessage || '';
-      
+
       // Build the new 3-column layout
       let contentHTML = `<div class="ai-results-container">`;
-      
+
       // LEFT COLUMN - AI Understanding & Filters
       contentHTML += `
         <div class="ai-results-left-col">
@@ -1055,7 +1272,9 @@
                 <i data-lucide="sparkles"></i>
                 <span>${escapeHtml(parsedResponse?.intent || 'Searching for parts matching your query')}</span>
               </div>
-              ${isBroad ? `
+              ${
+                isBroad
+                  ? `
                 <div class="ai-broad-search-warning">
                   <i data-lucide="alert-triangle"></i>
                   <div class="broad-warning-content">
@@ -1063,19 +1282,30 @@
                     <span class="broad-warning-text">${escapeHtml(broadMessage)}</span>
                   </div>
                 </div>
-                ${availableBrands.length > 0 ? `
+                ${
+                  availableBrands.length > 0
+                    ? `
                   <div class="ai-brand-suggestions">
                     <span class="brand-suggestions-label">Try filtering by brand:</span>
                     <div class="brand-chips">
-                      ${availableBrands.slice(0, 8).map(brand => `
+                      ${availableBrands
+                        .slice(0, 8)
+                        .map(
+                          (brand) => `
                         <button class="brand-chip" data-brand="${escapeHtml(brand)}">
                           ${escapeHtml(brand)}
                         </button>
-                      `).join('')}
+                      `,
+                        )
+                        .join('')}
                     </div>
                   </div>
-                ` : ''}
-              ` : ''}
+                `
+                    : ''
+                }
+              `
+                  : ''
+              }
             </div>
           </div>
           
@@ -1089,9 +1319,13 @@
               <span class="ai-filter-count">${hasFilters ? parsedFilters.length : 0}</span>
             </div>
             <div class="ai-section-content">
-              ${hasFilters ? `
+              ${
+                hasFilters
+                  ? `
                 <div class="ai-active-filters-grid">
-                  ${parsedFilters.map((filter, index) => `
+                  ${parsedFilters
+                    .map(
+                      (filter, index) => `
                     <div class="ai-active-filter-chip ${filter.type}" data-index="${index}">
                       <i data-lucide="${filter.icon}"></i>
                       <div class="filter-chip-content">
@@ -1102,19 +1336,25 @@
                         <i data-lucide="x"></i>
                       </button>
                     </div>
-                  `).join('')}
+                  `,
+                    )
+                    .join('')}
                 </div>
-              ` : `
+              `
+                  : `
                 <div class="ai-no-filters">
                   <i data-lucide="filter-x"></i>
                   <span>No specific filters detected</span>
                 </div>
-              `}
+              `
+              }
             </div>
           </div>
           
           <!-- Suggestions Section -->
-          ${parsedResponse?.suggestions && parsedResponse.suggestions.length > 0 ? `
+          ${
+            parsedResponse?.suggestions && parsedResponse.suggestions.length > 0
+              ? `
             <div class="ai-section ai-suggestions-section">
               <div class="ai-section-header">
                 <div class="ai-section-icon suggestions-icon">
@@ -1124,19 +1364,26 @@
               </div>
               <div class="ai-section-content">
                 <div class="ai-suggestion-buttons">
-                  ${parsedResponse.suggestions.slice(0, 3).map(suggestion => `
+                  ${parsedResponse.suggestions
+                    .slice(0, 3)
+                    .map(
+                      (suggestion) => `
                     <button class="ai-suggestion-btn" data-suggestion="${escapeHtml(suggestion)}">
                       <i data-lucide="search"></i>
                       <span>${escapeHtml(truncateText(suggestion, 40))}</span>
                     </button>
-                  `).join('')}
+                  `,
+                    )
+                    .join('')}
                 </div>
               </div>
             </div>
-          ` : ''}
+          `
+              : ''
+          }
         </div>
       `;
-      
+
       // RIGHT COLUMN - Results Preview
       contentHTML += `
         <div class="ai-results-right-col">
@@ -1152,7 +1399,9 @@
               </div>
             </div>
             <div class="ai-section-content">
-              ${hasResults ? `
+              ${
+                hasResults
+                  ? `
                 <div class="ai-results-table-container">
                   <table class="ai-results-table">
                     <thead>
@@ -1167,7 +1416,10 @@
                       </tr>
                     </thead>
                     <tbody>
-                      ${results.slice(0, 10).map((product, idx) => `
+                      ${results
+                        .slice(0, 10)
+                        .map(
+                          (product, idx) => `
                         <tr class="result-row" style="animation-delay: ${idx * 0.04}s" data-part-id="${product._id || product.id || ''}">
                           <td class="col-brand">
                             <span class="brand-tag">${escapeHtml(product.brand || 'N/A')}</span>
@@ -1194,17 +1446,24 @@
                             </span>
                           </td>
                         </tr>
-                      `).join('')}
+                      `,
+                        )
+                        .join('')}
                     </tbody>
                   </table>
                 </div>
-                ${results.length > 10 ? `
+                ${
+                  results.length > 10
+                    ? `
                   <div class="ai-results-more">
                     <i data-lucide="chevrons-down"></i>
                     <span>+${results.length - 10} more results — Click Apply to see all</span>
                   </div>
-                ` : ''}
-              ` : `
+                `
+                    : ''
+                }
+              `
+                  : `
                 <div class="ai-no-results">
                   <div class="no-results-visual">
                     <div class="no-results-icon-wrapper">
@@ -1240,38 +1499,43 @@
                     </div>
                   </div>
                 </div>
-              `}
+              `
+              }
             </div>
           </div>
         </div>
       `;
-      
+
       contentHTML += `</div>`; // Close ai-results-container
-      
+
       elements.aiFiltersGrid.innerHTML = contentHTML;
 
       // Add event handlers for filter removal
-      elements.aiFiltersGrid.querySelectorAll('.filter-chip-remove').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          const index = parseInt(btn.dataset.index);
-          removeAIParsedFilter(index);
+      elements.aiFiltersGrid
+        .querySelectorAll('.filter-chip-remove')
+        .forEach((btn) => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const index = parseInt(btn.dataset.index);
+            removeAIParsedFilter(index);
+          });
         });
-      });
-      
+
       // Add event handlers for suggestion buttons
-      elements.aiFiltersGrid.querySelectorAll('.ai-suggestion-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const suggestion = btn.dataset.suggestion;
-          if (elements.aiInput) {
-            elements.aiInput.value = suggestion;
-            handleAISubmit();
-          }
+      elements.aiFiltersGrid
+        .querySelectorAll('.ai-suggestion-btn')
+        .forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const suggestion = btn.dataset.suggestion;
+            if (elements.aiInput) {
+              elements.aiInput.value = suggestion;
+              handleAISubmit();
+            }
+          });
         });
-      });
-      
+
       // Add event handlers for quick search chips
-      elements.aiFiltersGrid.querySelectorAll('.quick-chip').forEach(chip => {
+      elements.aiFiltersGrid.querySelectorAll('.quick-chip').forEach((chip) => {
         chip.addEventListener('click', () => {
           const hint = chip.dataset.hint;
           if (elements.aiInput) {
@@ -1280,9 +1544,9 @@
           }
         });
       });
-      
+
       // Add event handlers for brand suggestion chips (broad search)
-      elements.aiFiltersGrid.querySelectorAll('.brand-chip').forEach(chip => {
+      elements.aiFiltersGrid.querySelectorAll('.brand-chip').forEach((chip) => {
         chip.addEventListener('click', () => {
           const brand = chip.dataset.brand;
           const currentQuery = elements.aiInput?.value || '';
@@ -1296,9 +1560,15 @@
     }
 
     // Apply the parsed filters to the state
-    parsedFilters.forEach(filter => {
-      if (filter.filterKey === 'brands' || filter.filterKey === 'origins' || filter.filterKey === 'partCategories') {
-        if (!AIFilterState.filters[filter.filterKey].includes(filter.filterValue)) {
+    parsedFilters.forEach((filter) => {
+      if (
+        filter.filterKey === 'brands' ||
+        filter.filterKey === 'origins' ||
+        filter.filterKey === 'partCategories'
+      ) {
+        if (
+          !AIFilterState.filters[filter.filterKey].includes(filter.filterValue)
+        ) {
           if (AIFilterState.filters[filter.filterKey].includes('all')) {
             AIFilterState.filters[filter.filterKey] = [filter.filterValue];
           } else {
@@ -1311,10 +1581,11 @@
     });
 
     updateFilterCount();
-    
+
     // Update results preview count
     if (elements.resultsPreview) {
-      elements.resultsPreview.textContent = results.length || AIFilterState.activeFilterCount;
+      elements.resultsPreview.textContent =
+        results.length || AIFilterState.activeFilterCount;
     }
 
     // Reinitialize icons
@@ -1322,7 +1593,7 @@
       lucide.createIcons();
     }
   }
-  
+
   // Utility functions for display
   function escapeHtml(str) {
     if (!str) return '';
@@ -1330,19 +1601,19 @@
     div.textContent = str;
     return div.innerHTML;
   }
-  
+
   function truncateText(str, maxLength) {
     if (!str) return '';
     if (str.length <= maxLength) return str;
     return str.substring(0, maxLength) + '...';
   }
-  
+
   function getStockStatus(product) {
     if (!product.quantity || product.quantity === 0) return 'out';
     if (product.quantity <= 10) return 'low';
     return 'in';
   }
-  
+
   function getStockLabel(product) {
     if (!product.quantity || product.quantity === 0) return 'Out of Stock';
     if (product.quantity <= 10) return 'Low Stock';
@@ -1351,30 +1622,39 @@
 
   function removeAIParsedFilter(index) {
     AIFilterState.aiParsedFilters.splice(index, 1);
-    displayAIResults(AIFilterState.aiParsedFilters, AIFilterState.lastSearchResults, AIFilterState.aiParsedResponse);
+    displayAIResults(
+      AIFilterState.aiParsedFilters,
+      AIFilterState.lastSearchResults,
+      AIFilterState.aiParsedResponse,
+    );
   }
 
   // ====================================
   // MANUAL FILTER CONTROLS
   // ====================================
   function toggleManualFilters() {
-    const isCollapsed = elements.manualFiltersContent?.classList.toggle('collapsed');
+    const isCollapsed =
+      elements.manualFiltersContent?.classList.toggle('collapsed');
     elements.collapseBtn?.classList.toggle('collapsed', isCollapsed);
   }
 
   function toggleBrandChip(chip) {
     const brand = chip.dataset.brand;
-    
+
     if (brand === 'all') {
       // Deselect all others, select 'all'
-      document.querySelectorAll('.brand-chip').forEach(c => c.classList.remove('active'));
+      document
+        .querySelectorAll('.brand-chip')
+        .forEach((c) => c.classList.remove('active'));
       chip.classList.add('active');
       AIFilterState.filters.brands = ['all'];
     } else {
       // Deselect 'all', toggle this brand
-      document.querySelector('.brand-chip[data-brand="all"]')?.classList.remove('active');
+      document
+        .querySelector('.brand-chip[data-brand="all"]')
+        ?.classList.remove('active');
       chip.classList.toggle('active');
-      
+
       const index = AIFilterState.filters.brands.indexOf(brand);
       if (index > -1) {
         AIFilterState.filters.brands.splice(index, 1);
@@ -1389,7 +1669,9 @@
 
       // If no brands selected, select 'all'
       if (AIFilterState.filters.brands.length === 0) {
-        document.querySelector('.brand-chip[data-brand="all"]')?.classList.add('active');
+        document
+          .querySelector('.brand-chip[data-brand="all"]')
+          ?.classList.add('active');
         AIFilterState.filters.brands = ['all'];
       }
     }
@@ -1398,14 +1680,18 @@
   }
 
   function toggleStockFilter(toggle) {
-    document.querySelectorAll('.stock-toggle').forEach(t => t.classList.remove('active'));
+    document
+      .querySelectorAll('.stock-toggle')
+      .forEach((t) => t.classList.remove('active'));
     toggle.classList.add('active');
     AIFilterState.filters.stockStatus = toggle.dataset.stock;
     updateFilterCount();
   }
 
   function selectRating(btn) {
-    document.querySelectorAll('.rating-btn').forEach(b => b.classList.remove('active'));
+    document
+      .querySelectorAll('.rating-btn')
+      .forEach((b) => b.classList.remove('active'));
     btn.classList.add('active');
     AIFilterState.filters.supplierRating = parseInt(btn.dataset.rating) || 0;
     updateFilterCount();
@@ -1414,7 +1700,7 @@
   function togglePartCategory(btn) {
     btn.classList.toggle('active');
     const category = btn.dataset.category;
-    
+
     const index = AIFilterState.filters.partCategories.indexOf(category);
     if (index > -1) {
       AIFilterState.filters.partCategories.splice(index, 1);
@@ -1428,13 +1714,19 @@
   function handleVehicleMakeChange(e) {
     const make = e.target.value;
     const modelSelect = document.getElementById('vehicle-model');
-    
+
     if (!modelSelect) return;
 
     if (make && vehicleModels[make]) {
       modelSelect.disabled = false;
-      modelSelect.innerHTML = '<option value="">Select model...</option>' +
-        vehicleModels[make].map(model => `<option value="${model.toLowerCase()}">${model}</option>`).join('');
+      modelSelect.innerHTML =
+        '<option value="">Select model...</option>' +
+        vehicleModels[make]
+          .map(
+            (model) =>
+              `<option value="${model.toLowerCase()}">${model}</option>`,
+          )
+          .join('');
     } else {
       modelSelect.disabled = true;
       modelSelect.innerHTML = '<option value="">Select model...</option>';
@@ -1446,7 +1738,7 @@
 
   function handleBrandSearch(e) {
     const query = e.target.value.toLowerCase();
-    document.querySelectorAll('.brand-chip').forEach(chip => {
+    document.querySelectorAll('.brand-chip').forEach((chip) => {
       const brand = chip.dataset.brand;
       if (brand === 'all' || brand.includes(query)) {
         chip.style.display = '';
@@ -1474,7 +1766,7 @@
         const maxPercent = (max / total) * 100;
 
         priceFill.style.left = minPercent + '%';
-        priceFill.style.right = (100 - maxPercent) + '%';
+        priceFill.style.right = 100 - maxPercent + '%';
 
         // Update input fields
         const minInput = document.getElementById('price-min-input');
@@ -1516,7 +1808,7 @@
     if (minInput && maxInput && priceMinSlider && priceMaxSlider) {
       priceMinSlider.value = minInput.value;
       priceMaxSlider.value = maxInput.value;
-      
+
       // Trigger slider update
       priceMinSlider.dispatchEvent(new Event('input'));
     }
@@ -1529,32 +1821,44 @@
     let count = 0;
 
     // Check price range
-    if (AIFilterState.filters.priceMin > 0 || AIFilterState.filters.priceMax < 100000) count++;
-    
+    if (
+      AIFilterState.filters.priceMin > 0 ||
+      AIFilterState.filters.priceMax < 100000
+    )
+      count++;
+
     // Check brands
-    if (AIFilterState.filters.brands.length > 0 && !AIFilterState.filters.brands.includes('all')) count++;
-    
+    if (
+      AIFilterState.filters.brands.length > 0 &&
+      !AIFilterState.filters.brands.includes('all')
+    )
+      count++;
+
     // Check stock
     if (AIFilterState.filters.stockStatus !== 'all') count++;
-    
+
     // Check origins
     if (AIFilterState.filters.origins.length > 0) count++;
-    
+
     // Check delivery
     if (AIFilterState.filters.deliveryTime !== 'any') count++;
-    
+
     // Check part categories
     if (AIFilterState.filters.partCategories.length > 0) count++;
-    
+
     // Check vehicle make
     if (AIFilterState.filters.vehicleMake) count++;
-    
+
     // Check certifications
-    const certCheckboxes = document.querySelectorAll('input[name="cert"]:checked');
+    const certCheckboxes = document.querySelectorAll(
+      'input[name="cert"]:checked',
+    );
     if (certCheckboxes.length > 0) count++;
 
     // Check brand type
-    const brandTypeCheckboxes = document.querySelectorAll('input[name="brand-type"]:checked');
+    const brandTypeCheckboxes = document.querySelectorAll(
+      'input[name="brand-type"]:checked',
+    );
     if (brandTypeCheckboxes.length > 0) count++;
 
     AIFilterState.activeFilterCount = count;
@@ -1596,7 +1900,7 @@
       yearMin: null,
       yearMax: null,
       partCategories: [],
-      engineType: 'all'
+      engineType: 'all',
     };
 
     AIFilterState.aiParsedFilters = [];
@@ -1611,7 +1915,7 @@
     if (elements.aiResponseSection) {
       elements.aiResponseSection.style.display = 'none';
     }
-    
+
     // Show welcome section and features again
     const welcomeSection = document.querySelector('.ai-welcome-section');
     const featuresInfo = document.querySelector('.ai-features-info');
@@ -1627,7 +1931,7 @@
   function applyFilters() {
     // Collect all filter values
     const filters = collectAllFilters();
-    
+
     console.log('Applying filters:', filters);
     console.log('AI Results count:', AIFilterState.lastSearchResults.length);
 
@@ -1636,9 +1940,10 @@
 
     // Show success feedback
     const resultCount = AIFilterState.lastSearchResults.length;
-    const message = resultCount > 0 
-      ? `Found ${resultCount} parts matching your search`
-      : `${AIFilterState.activeFilterCount} filters applied`;
+    const message =
+      resultCount > 0
+        ? `Found ${resultCount} parts matching your search`
+        : `${AIFilterState.activeFilterCount} filters applied`;
     showFilterToast(message);
 
     // If we have AI search results, dispatch the event to display them
@@ -1646,12 +1951,12 @@
       // Small delay to ensure modal is closed
       setTimeout(() => {
         // Dispatch the AI results event - search.js will handle displaying
-        const resultsEvent = new CustomEvent('aiSearchResults', { 
+        const resultsEvent = new CustomEvent('aiSearchResults', {
           detail: {
             results: AIFilterState.lastSearchResults,
             query: AIFilterState.aiQuery,
             parsed: AIFilterState.aiParsedResponse,
-          }
+          },
         });
         window.dispatchEvent(resultsEvent);
       }, 50);
@@ -1674,32 +1979,54 @@
     const filters = { ...AIFilterState.filters };
 
     // Collect checkbox values
-    filters.discount = Array.from(document.querySelectorAll('input[name="discount"]:checked')).map(cb => cb.value);
-    filters.paymentTerms = Array.from(document.querySelectorAll('input[name="payment"]:checked')).map(cb => cb.value);
-    filters.brandType = Array.from(document.querySelectorAll('input[name="brand-type"]:checked')).map(cb => cb.value);
-    filters.certifications = Array.from(document.querySelectorAll('input[name="cert"]:checked')).map(cb => cb.value);
-    filters.returnPolicy = Array.from(document.querySelectorAll('input[name="return"]:checked')).map(cb => cb.value);
+    filters.discount = Array.from(
+      document.querySelectorAll('input[name="discount"]:checked'),
+    ).map((cb) => cb.value);
+    filters.paymentTerms = Array.from(
+      document.querySelectorAll('input[name="payment"]:checked'),
+    ).map((cb) => cb.value);
+    filters.brandType = Array.from(
+      document.querySelectorAll('input[name="brand-type"]:checked'),
+    ).map((cb) => cb.value);
+    filters.certifications = Array.from(
+      document.querySelectorAll('input[name="cert"]:checked'),
+    ).map((cb) => cb.value);
+    filters.returnPolicy = Array.from(
+      document.querySelectorAll('input[name="return"]:checked'),
+    ).map((cb) => cb.value);
 
     // Collect radio values
-    filters.condition = document.querySelector('input[name="condition"]:checked')?.value || 'all';
-    filters.deliveryTime = document.querySelector('input[name="delivery"]:checked')?.value || 'any';
-    filters.engineType = document.querySelector('input[name="engine-type"]:checked')?.value || 'all';
+    filters.condition =
+      document.querySelector('input[name="condition"]:checked')?.value || 'all';
+    filters.deliveryTime =
+      document.querySelector('input[name="delivery"]:checked')?.value || 'any';
+    filters.engineType =
+      document.querySelector('input[name="engine-type"]:checked')?.value ||
+      'all';
 
     // Collect select values
     filters.shippingTo = document.getElementById('shipping-to')?.value || '';
     filters.vehicleMake = document.getElementById('vehicle-make')?.value || '';
-    filters.vehicleModel = document.getElementById('vehicle-model')?.value || '';
+    filters.vehicleModel =
+      document.getElementById('vehicle-model')?.value || '';
 
     // Collect number inputs
-    filters.weightMin = parseFloat(document.getElementById('weight-min')?.value) || 0;
-    filters.weightMax = parseFloat(document.getElementById('weight-max')?.value) || 1000;
-    filters.yearMin = parseInt(document.getElementById('year-min')?.value) || null;
-    filters.yearMax = parseInt(document.getElementById('year-max')?.value) || null;
-    filters.minOrderQty = parseInt(document.getElementById('min-order-qty')?.value) || 1;
+    filters.weightMin =
+      parseFloat(document.getElementById('weight-min')?.value) || 0;
+    filters.weightMax =
+      parseFloat(document.getElementById('weight-max')?.value) || 1000;
+    filters.yearMin =
+      parseInt(document.getElementById('year-min')?.value) || null;
+    filters.yearMax =
+      parseInt(document.getElementById('year-max')?.value) || null;
+    filters.minOrderQty =
+      parseInt(document.getElementById('min-order-qty')?.value) || 1;
 
     // Collect toggles
-    filters.verifiedOnly = document.getElementById('verified-only')?.checked || false;
-    filters.freeShipping = document.getElementById('free-shipping')?.checked || false;
+    filters.verifiedOnly =
+      document.getElementById('verified-only')?.checked || false;
+    filters.freeShipping =
+      document.getElementById('free-shipping')?.checked || false;
 
     return filters;
   }
@@ -1803,7 +2130,6 @@
       AIFilterState.aiQuery = '';
       AIFilterState.aiParsedFilters = [];
       AIFilterState.aiParsedResponse = null;
-    }
+    },
   };
-
 })();
