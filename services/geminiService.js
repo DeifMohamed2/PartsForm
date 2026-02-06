@@ -1,6 +1,12 @@
 /**
- * Gemini AI Service
- * Intelligent parts search and filtering using Google's Gemini API
+ * Gemini AI Service - Advanced Context-Aware Filtering
+ * 
+ * This service provides truly intelligent search by having the AI analyze
+ * ACTUAL DATA and decide what matches - not based on hardcoded rules.
+ * 
+ * Architecture:
+ * 1. First call: Parse user intent (what they want)
+ * 2. Second call: AI filters actual data based on understanding
  */
 const { GoogleGenAI } = require('@google/genai');
 
@@ -13,417 +19,471 @@ if (!process.env.GEMINI_API_KEY) {
 // Initialize the Gemini API
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
-// System instruction for the AI model - Enterprise-grade parts search with full intelligence
-const SYSTEM_INSTRUCTION = `You are an intelligent, fault-tolerant automotive parts search assistant for PartsForm, a B2B industrial parts marketplace. Your primary goal is to accurately understand user intent even when queries contain spelling mistakes, missing grammar, informal language, or incomplete phrases.
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * INTENT PARSER - Understands what user wants
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+const INTENT_PARSER_INSTRUCTION = `You are an intelligent search assistant. Your ONLY job is to understand what the user wants.
 
-RESPOND ONLY WITH VALID JSON. No explanations, no markdown, no code blocks.
+RESPOND WITH VALID JSON ONLY. No explanations, no markdown.
 
-═══════════════════════════════════════════════════════════════
-🧠 CORE PRINCIPLE: UNDERSTAND INTENT, NOT KEYWORDS
-═══════════════════════════════════════════════════════════════
+UNDERSTAND THE USER'S INTENT:
+- What are they looking for? (keywords, part numbers, categories)
+- What constraints do they have? (price limits, availability requirements)
+- What should be excluded?
 
-You are an AI - understand what the user MEANS, not just what they SAY.
-Think like a human assistant who truly understands context and intent.
+IMPORTANT RULES:
+1. TYPO TOLERANCE: Understand intent despite spelling errors
+   - "toyta" = TOYOTA, "bosh" = BOSCH, "bremb" = BREMBO
+   - "USd" = USD, "instock" = "in stock"
 
-NATURAL LANGUAGE UNDERSTANDING EXAMPLES:
-- "found parts below 100 USd and in stock" → maxPrice: 100, inStock: true
-- "show me cheap stuff that's available" → maxPrice: 100, inStock: true  
-- "anything under 50 bucks ready to ship" → maxPrice: 50, inStock: true
-- "i need parts now below 200" → maxPrice: 200, inStock: true
-- "give me what you have for less than 300" → maxPrice: 300, inStock: true
+2. NATURAL LANGUAGE: Understand casual speech
+   - "under 100 bucks" = maxPrice: 100
+   - "in stock" / "available" / "have it" = requireInStock: true
+   - "full stock" / "plenty" / "well stocked" = requireHighStock: true
+   - "cheap" / "budget" = maxPrice: 100
 
-STOCK LEVEL UNDERSTANDING (CRITICAL!):
-- "full stock" / "fully stocked" / "plenty" / "lots" / "many" → stockLevel: "high", minQuantity: 10
-- "well stocked" / "good stock" / "good availability" → stockLevel: "high", minQuantity: 10
-- "not low stock" / "no low stock" / "exclude low stock" → stockLevel: "high", minQuantity: 5
-- "in stock" / "available" / "have it" → inStock: true (quantity > 0)
-- "high quantity" / "bulk available" / "large stock" → stockLevel: "high", minQuantity: 20
-- "immediately available" / "ready now" → inStock: true, stockLevel: "high"
+3. STOCK UNDERSTANDING (CRITICAL):
+   - "in stock" = parts with quantity > 0
+   - "full stock" / "high stock" / "plenty" = parts with HIGH quantity (≥10)
+   - "low stock" = parts with quantity 1-5
+   - User saying "full stock" means they want HIGH quantity items, NOT low stock
 
-ALWAYS EXTRACT THESE FROM ANY PHRASING:
-- Price limits (under/below/less than/max/cheap/budget → maxPrice)
-- Stock status (in stock/available/ready/have/now → inStock: true)
-- Stock level (full stock/plenty/lots/high quantity → stockLevel: "high")
-- Brand names (recognize even with typos)
-- Categories (recognize synonyms and related terms)
+4. EXTRACT EVERYTHING:
+   - Part numbers (alphanumeric codes like "MX930110", "CAF-000267")
+   - Brand names (TOYOTA, BOSCH, SKF, etc.)
+   - Price constraints (under X, above Y, between X-Y)
+   - Stock requirements (in stock, full stock, plenty)
+   - Categories (brakes, filters, engine, etc.)
 
-═══════════════════════════════════════════════════════════════
-1️⃣ VEHICLE BRAND vs PARTS BRAND (CRITICAL - READ CAREFULLY!)
-═══════════════════════════════════════════════════════════════
-
-VEHICLE MANUFACTURERS LIST:
-TOYOTA, HONDA, NISSAN, BMW, MERCEDES, AUDI, VOLKSWAGEN, FORD, 
-CHEVROLET, HYUNDAI, KIA, MAZDA, SUBARU, LEXUS, PORSCHE, VOLVO,
-INFINITI, ACURA, JAGUAR, LAND ROVER, MITSUBISHI, SUZUKI, ISUZU,
-JEEP, DODGE, CHRYSLER, GMC, CADILLAC, BUICK, LINCOLN, TESLA
-
-AFTERMARKET PARTS SUPPLIERS LIST:
-BOSCH, BREMBO, SKF, DENSO, VALEO, MANN, MAHLE, NGK, DELPHI,
-SACHS, BILSTEIN, KYB, MONROE, GATES, CONTINENTAL, AISIN, LUK,
-FAG, TIMKEN, NSK, NTN, TRW, ATE, FERODO, ACDelco, MOTORCRAFT,
-MOPAR, HELLA, OSRAM, PHILIPS, FEBI, LEMFORDER, MEYLE, SWAG, STELLOX
-
-CRITICAL RULES (FOLLOW EXACTLY):
-
-✅ RULE 1: "OEM" or "GENUINE" or "ORIGINAL" + VEHICLE BRAND = filters.brand
-   Example: "OEM TOYOTA brake pads" → filters.brand: ["TOYOTA"]
-   Example: "Genuine Honda parts" → filters.brand: ["HONDA"]
-   Example: "Original BMW oil filter" → filters.brand: ["BMW"]
-   Reason: User wants parts MADE BY the vehicle manufacturer
-
-✅ RULE 2: "from TOYOTA" / "TOYOTA parts" (without OEM) = filters.brand: ["TOYOTA"]
-   Example: "brake parts from TOYOTA" → filters.brand: ["TOYOTA"]
-   Example: "Find TOYOTA brake pads" → filters.brand: ["TOYOTA"]
-   Reason: "from [brand]" indicates the manufacturer/source
-
-✅ RULE 3: "for TOYOTA" / "TOYOTA car" / "my TOYOTA" = vehicleBrand ONLY
-   Example: "brake pads for my Toyota Camry" → vehicleBrand: "TOYOTA", filters.brand: []
-   Example: "parts for Toyota vehicles" → vehicleBrand: "TOYOTA", filters.brand: []
-   Reason: User wants parts COMPATIBLE with Toyota, not necessarily made by Toyota
-
-✅ RULE 4: Aftermarket supplier = ALWAYS filters.brand
-   Example: "BOSCH brake pads" → filters.brand: ["BOSCH"]
-   Example: "SKF bearings" → filters.brand: ["SKF"]
-
-✅ RULE 5: Vehicle brand ALONE = filters.brand (user browsing that brand's parts)
-   Example: "TOYOTA" → filters.brand: ["TOYOTA"]
-   Example: "show me Honda" → filters.brand: ["HONDA"]
-
-═══════════════════════════════════════════════════════════════
-2️⃣ PART NUMBER DOMINANCE (ABSOLUTE PRIORITY)
-═══════════════════════════════════════════════════════════════
-
-Part number patterns (NEVER modify, NEVER remove):
-- Numeric only: 4-20 digits (e.g., "8471474", "7700109906")
-- Alphanumeric: letters + numbers (e.g., "CAF-000267", "21171-AA123")
-- With separators: hyphens, underscores (e.g., "SKF-12345", "BRK_001")
-
-RULES:
-- IF token matches part number pattern → ADD to searchTerms AS-IS
-- NEVER infer category from part numbers
-- NEVER rewrite or "correct" part numbers
-- Part numbers have HIGHEST priority
-
-═══════════════════════════════════════════════════════════════
-3️⃣ INTENT CLASSIFICATION
-═══════════════════════════════════════════════════════════════
-
-SEARCH INTENT TYPES:
-- "specific_part" → user has exact part number
-- "filtered_search" → user wants parts with criteria
-- "browse" → user exploring (single brand/category only)
-- "compatibility" → user wants parts for specific vehicle
-
-RULES:
-- Single brand only (e.g., "TOYOTA") → intentType: "browse"
-- Single category only (e.g., "brakes") → intentType: "browse"
-- Part number present → intentType: "specific_part"
-- Multiple criteria → intentType: "filtered_search"
-
-═══════════════════════════════════════════════════════════════
-4️⃣ NEGATIVE / EXCLUSION INTENT
-═══════════════════════════════════════════════════════════════
-
-Detect negation words: not, exclude, without, no, except, avoid
-
-RULES:
-- "not BOSCH" → excludeBrands: ["BOSCH"]
-- "exclude used" → excludeCondition: "used"
-- "no Chinese" → excludeOrigins: ["CN"]
-
-═══════════════════════════════════════════════════════════════
-5️⃣ QUANTITY AWARENESS (B2B)
-═══════════════════════════════════════════════════════════════
-
-Detect quantity patterns: "x10", "10 pcs", "qty 5", "need 20", "order 50"
-
-RULES:
-- Extract to: requestedQuantity: Number
-- Use for result ranking preference
-
-═══════════════════════════════════════════════════════════════
-6️⃣ SUPPLIER & ORIGIN INTELLIGENCE
-═══════════════════════════════════════════════════════════════
-
-Detect origin/certification:
-- "German supplier" → supplierOrigin: "DE"
-- "Japanese parts" → partOrigin: "JP"
-- "certified supplier" → certifiedOnly: true
-- "OEM supplier" → oemSupplier: true
-- "local supplier" → localSupplier: true
-
-═══════════════════════════════════════════════════════════════
-7️⃣ CONFIDENCE SCORING
-═══════════════════════════════════════════════════════════════
-
-Every filter should have confidence:
-- HIGH: explicit mention ("BOSCH brake pads under $500")
-- MEDIUM: inferred ("brake disc" → category brakes)
-- LOW: ambiguous ("pads" alone)
-
-LOW confidence → add to suggestions instead of filters
-
-═══════════════════════════════════════════════════════════════
-8️⃣ SMART PRICE HANDLING
-═══════════════════════════════════════════════════════════════
-
-PATTERNS:
-- "under $X" / "below $X" / "max $X" → maxPrice: X
-- "over $X" / "above $X" / "min $X" → minPrice: X
-- "$X-$Y" / "X to Y" / "between X and Y" → minPrice: X, maxPrice: Y
-- "around $X" / "about $X" → minPrice: X*0.8, maxPrice: X*1.2
-- "cheap" / "budget" / "affordable" → maxPrice: 100
-- "premium" / "high-end" → minPrice: 500
-
-RULE: Explicit numbers ALWAYS override adjectives
-- "premium under $200" → maxPrice: 200 (not minPrice: 500)
-
-═══════════════════════════════════════════════════════════════
-9️⃣ TYPO CORRECTION (AGGRESSIVE)
-═══════════════════════════════════════════════════════════════
-
-ALWAYS correct before processing:
-- toyta/toyata/tayota → TOYOTA
-- bosh/bosc → BOSCH
-- bremb/bremboo → BREMBO
-- nisaan/nisan → NISSAN
-- mercedez/mersedes/merc → MERCEDES
-- hynudai/hyundia/hundai → HYUNDAI
-- volkswagon/vw → VOLKSWAGEN
-- porshe/porche → PORSCHE
-- chevrolete/chevy → CHEVROLET
-- acdelko → ACDELCO
-
-═══════════════════════════════════════════════════════════════
-🔟 LANGUAGE ROBUSTNESS
-═══════════════════════════════════════════════════════════════
-
-RULES:
-- IGNORE grammar completely
-- IGNORE word order ("TOYOTA brakes" = "brakes TOYOTA")
-- IGNORE filler words (find, me, show, get, please, can, you)
-- Accept fragments ("brake pad bosch 100")
-- Missing prepositions OK ("TOYOTA" = "for TOYOTA" = "from TOYOTA")
-- Understand informal speech ("like full stock" = "full stock" = stockLevel: "high")
-
-═══════════════════════════════════════════════════════════════
-CATEGORY DETECTION
-═══════════════════════════════════════════════════════════════
-
-Keywords → Category mapping:
-- brake/brakes/pad/rotor/disc/caliper → "brakes"
-- filter/oil filter/air filter/fuel filter → "filters"
-- bearing/bearings/hub/wheel bearing → "wheels"
-- shock/strut/suspension/spring/damper → "suspension"
-- spark plug/ignition/alternator/starter/battery → "electrical"
-- clutch/transmission/gearbox/cv joint → "transmission"
-- radiator/coolant/thermostat/water pump → "cooling"
-- steering/tie rod/rack/power steering → "steering"
-- exhaust/muffler/catalytic/manifold → "exhaust"
-- engine/piston/valve/timing/gasket → "engine"
-
-═══════════════════════════════════════════════════════════════
-OUTPUT FORMAT (JSON ONLY)
-═══════════════════════════════════════════════════════════════
-
+OUTPUT FORMAT:
 {
-  "searchTerms": [],
-  "filters": {
-    "brand": [],
-    "vehicleBrand": "",
-    "maxPrice": null,
-    "minPrice": null,
-    "category": "",
-    "inStock": false,
-    "stockLevel": "",
-    "minQuantity": null,
-    "priceCurrency": "USD",
-    "deliveryDays": null,
-    "certifiedOnly": false,
-    "requestedQuantity": null
+  "understood": {
+    "summary": "Brief description of what user wants",
+    "searchKeywords": ["list", "of", "keywords"],
+    "partNumbers": ["specific", "part", "numbers"],
+    "brands": ["brand", "names"],
+    "categories": ["categories"],
+    "priceConstraints": {
+      "maxPrice": null,
+      "minPrice": null,
+      "currency": "USD"
+    },
+    "stockConstraints": {
+      "requireInStock": false,
+      "requireHighStock": false,
+      "excludeLowStock": false,
+      "minQuantity": null
+    },
+    "exclusions": {
+      "brands": [],
+      "conditions": [],
+      "stockLevels": []
+    }
   },
-  "exclude": {
-    "brands": [],
-    "conditions": [],
-    "origins": [],
-    "stockLevels": []
-  },
-  "intent": "",
-  "intentType": "filtered_search",
-  "confidence": {
-    "brand": "HIGH|MEDIUM|LOW",
-    "category": "HIGH|MEDIUM|LOW",
-    "price": "HIGH|MEDIUM|LOW"
-  },
+  "confidence": "HIGH|MEDIUM|LOW",
   "suggestions": []
-}
-
-═══════════════════════════════════════════════════════════════
-EXAMPLES (FOLLOW THESE EXACTLY!)
-═══════════════════════════════════════════════════════════════
-
-Query: "found parts below 100 USd and in stock"
-→ {"searchTerms":[],"filters":{"maxPrice":100,"inStock":true,"priceCurrency":"USD"},"exclude":{},"intent":"Parts under $100 that are in stock","intentType":"filtered_search","confidence":{"price":"HIGH","stock":"HIGH"},"suggestions":[]}
-
-Query: "parts below 100 USD"
-→ {"searchTerms":[],"filters":{"maxPrice":100,"priceCurrency":"USD"},"exclude":{},"intent":"Parts under $100","intentType":"filtered_search","confidence":{"price":"HIGH"},"suggestions":[]}
-
-Query: "show me what you have under 50"
-→ {"searchTerms":[],"filters":{"maxPrice":50,"priceCurrency":"USD"},"exclude":{},"intent":"Parts under $50","intentType":"filtered_search","confidence":{"price":"HIGH"},"suggestions":[]}
-
-Query: "cheap parts in stock"
-→ {"searchTerms":[],"filters":{"maxPrice":100,"inStock":true,"priceCurrency":"USD"},"exclude":{},"intent":"Affordable parts that are available","intentType":"filtered_search","confidence":{"price":"MEDIUM","stock":"HIGH"},"suggestions":[]}
-
-Query: "OEM brake parts under $500 TOYOTA"
-→ {"searchTerms":["brake"],"filters":{"brand":["TOYOTA"],"maxPrice":500,"category":"brakes","priceCurrency":"USD"},"exclude":{},"intent":"OEM brake parts from TOYOTA under $500","intentType":"filtered_search","confidence":{"brand":"HIGH","category":"HIGH","price":"HIGH"},"suggestions":[]}
-
-Query: "Find OEM brake parts under $500 from TOYOTA"
-→ {"searchTerms":["brake"],"filters":{"brand":["TOYOTA"],"maxPrice":500,"category":"brakes","priceCurrency":"USD"},"exclude":{},"intent":"OEM brake parts from TOYOTA under $500","intentType":"filtered_search","confidence":{"brand":"HIGH","category":"HIGH","price":"HIGH"},"suggestions":[]}
-
-Query: "OEM TOYOTA brake pads"
-→ {"searchTerms":["brake pad"],"filters":{"brand":["TOYOTA"],"category":"brakes","priceCurrency":"USD"},"exclude":{},"intent":"OEM TOYOTA brake pads","intentType":"filtered_search","confidence":{"brand":"HIGH","category":"HIGH"},"suggestions":[]}
-
-Query: "brake pads for my Toyota Camry"
-→ {"searchTerms":["brake pad"],"filters":{"vehicleBrand":"TOYOTA","category":"brakes","priceCurrency":"USD"},"exclude":{},"intent":"Brake pads compatible with Toyota Camry","intentType":"filtered_search","confidence":{"category":"HIGH"},"suggestions":[]}
-
-Query: "BOSCH brake pads"
-→ {"searchTerms":["brake pad"],"filters":{"brand":["BOSCH"],"category":"brakes","priceCurrency":"USD"},"exclude":{},"intent":"BOSCH brake pads","intentType":"filtered_search","confidence":{"brand":"HIGH","category":"HIGH"},"suggestions":[]}
-
-Query: "TOYOTA"
-→ {"searchTerms":[],"filters":{"brand":["TOYOTA"],"priceCurrency":"USD"},"exclude":{},"intent":"Browse TOYOTA parts","intentType":"browse","confidence":{"brand":"HIGH"},"suggestions":["Add a category like brakes, filters, or engine parts"]}
-
-Query: "brake parts from TOYOTA under 500"
-→ {"searchTerms":["brake"],"filters":{"brand":["TOYOTA"],"maxPrice":500,"category":"brakes","priceCurrency":"USD"},"exclude":{},"intent":"TOYOTA brake parts under $500","intentType":"filtered_search","confidence":{"brand":"HIGH","category":"HIGH","price":"HIGH"},"suggestions":[]}
-
-Query: "SKF bearings not Chinese qty 10"
-→ {"searchTerms":["bearing"],"filters":{"brand":["SKF"],"category":"wheels","requestedQuantity":10,"priceCurrency":"USD"},"exclude":{"origins":["CN"]},"intent":"SKF bearings, quantity 10, excluding Chinese origin","intentType":"filtered_search","confidence":{"brand":"HIGH","category":"HIGH"},"suggestions":[]}
-
-Query: "brake pads around $50"
-→ {"searchTerms":["brake pad"],"filters":{"minPrice":40,"maxPrice":60,"category":"brakes","priceCurrency":"USD"},"exclude":{},"intent":"Brake pads around $50","intentType":"filtered_search","confidence":{"category":"HIGH","price":"MEDIUM"},"suggestions":[]}
-
-Query: "8471474"
-→ {"searchTerms":["8471474"],"filters":{"priceCurrency":"USD"},"exclude":{},"intent":"Search for part number 8471474","intentType":"specific_part","confidence":{},"suggestions":[]}
-
-Query: "German certified supplier brake pads"
-→ {"searchTerms":["brake pad"],"filters":{"category":"brakes","supplierOrigin":"DE","certifiedOnly":true,"priceCurrency":"USD"},"exclude":{},"intent":"Brake pads from certified German suppliers","intentType":"filtered_search","confidence":{"category":"HIGH"},"suggestions":[]}
-
-Query: "anything available under 200"
-→ {"searchTerms":[],"filters":{"maxPrice":200,"inStock":true,"priceCurrency":"USD"},"exclude":{},"intent":"Available parts under $200","intentType":"filtered_search","confidence":{"price":"HIGH","stock":"MEDIUM"},"suggestions":[]}
-
-Query: "found parts below 100 USD all in stock and like full stock"
-→ {"searchTerms":[],"filters":{"maxPrice":100,"inStock":true,"stockLevel":"high","minQuantity":10,"priceCurrency":"USD"},"exclude":{"stockLevels":["low"]},"intent":"Parts under $100 with high stock levels","intentType":"filtered_search","confidence":{"price":"HIGH","stock":"HIGH"},"suggestions":[]}
-
-Query: "parts in full stock"
-→ {"searchTerms":[],"filters":{"inStock":true,"stockLevel":"high","minQuantity":10,"priceCurrency":"USD"},"exclude":{"stockLevels":["low"]},"intent":"Parts with full/high stock levels","intentType":"filtered_search","confidence":{"stock":"HIGH"},"suggestions":[]}
-
-Query: "well stocked brake pads"
-→ {"searchTerms":["brake pad"],"filters":{"category":"brakes","inStock":true,"stockLevel":"high","minQuantity":10,"priceCurrency":"USD"},"exclude":{"stockLevels":["low"]},"intent":"Brake pads with high stock availability","intentType":"filtered_search","confidence":{"category":"HIGH","stock":"HIGH"},"suggestions":[]}
-
-Query: "show me parts with plenty of stock"
-→ {"searchTerms":[],"filters":{"inStock":true,"stockLevel":"high","minQuantity":10,"priceCurrency":"USD"},"exclude":{"stockLevels":["low"]},"intent":"Parts with plenty of stock","intentType":"filtered_search","confidence":{"stock":"HIGH"},"suggestions":[]}
-
-Query: "no low stock items"
-→ {"searchTerms":[],"filters":{"inStock":true,"stockLevel":"high","minQuantity":5,"priceCurrency":"USD"},"exclude":{"stockLevels":["low"]},"intent":"Parts excluding low stock items","intentType":"filtered_search","confidence":{"stock":"HIGH"},"suggestions":[]}
-
-Query: "bulk available parts under 50"
-→ {"searchTerms":[],"filters":{"maxPrice":50,"inStock":true,"stockLevel":"high","minQuantity":20,"priceCurrency":"USD"},"exclude":{},"intent":"Parts under $50 with bulk availability","intentType":"filtered_search","confidence":{"price":"HIGH","stock":"HIGH"},"suggestions":[]}`;
-
-// Constants for service configuration
-const PARSE_TIMEOUT = 10000; // 10 second timeout for AI parsing
-const MAX_RETRIES = 1; // Only retry once on failure
+}`;
 
 /**
- * Parse a natural language query into structured search parameters
- * @param {string} query - The user's natural language query
- * @returns {Promise<Object>} Parsed search parameters
+ * ═══════════════════════════════════════════════════════════════════════════
+ * DATA FILTER - AI analyzes actual data and decides what matches
+ * This is the key innovation - AI sees real data, not just keywords
+ * ═══════════════════════════════════════════════════════════════════════════
  */
-async function parseSearchQuery(query) {
+const DATA_FILTER_INSTRUCTION = `You are a data filtering expert. Your job is to analyze parts data and determine which items match the user's requirements.
+
+RESPOND WITH VALID JSON ONLY. No explanations, no markdown.
+
+You will receive:
+1. User's requirements (what they want)
+2. A sample of actual parts data
+
+Your job: Analyze each part and determine if it MATCHES the user's requirements.
+
+STOCK LEVEL DEFINITIONS (CRITICAL):
+- "Out of Stock": quantity = 0
+- "Low Stock": quantity 1-5
+- "In Stock": quantity > 0
+- "High Stock" / "Full Stock": quantity >= 10
+
+FILTERING RULES:
+1. If user wants "in stock": Only include parts with quantity > 0
+2. If user wants "full stock" or "high stock": Only include parts with quantity >= 10
+3. If user specifies maxPrice: Only include parts where price <= maxPrice (in same currency)
+4. If user specifies brand: Only include parts matching that brand
+5. If user says "exclude low stock": Remove parts with quantity 1-5
+
+BE STRICT WITH FILTERS:
+- If user says "full stock", do NOT include low stock items (qty 1-5)
+- If user says price below X, do NOT include items priced higher
+
+OUTPUT FORMAT:
+{
+  "analysis": {
+    "totalReceived": number,
+    "matching": number,
+    "excluded": number,
+    "reasons": ["why items were excluded"]
+  },
+  "matchingPartIds": ["list of part _id values that match"],
+  "filteringApplied": {
+    "priceFilter": "description or null",
+    "stockFilter": "description or null",
+    "brandFilter": "description or null",
+    "otherFilters": []
+  }
+}`;
+
+// Constants for service configuration
+const PARSE_TIMEOUT = 12000; // 12 second timeout for AI parsing
+const FILTER_TIMEOUT = 15000; // 15 second timeout for AI filtering
+const MAX_BATCH_SIZE = 50; // Max items to send to AI for filtering at once
+
+/**
+ * Parse user intent from natural language query
+ * Step 1 of the AI search process
+ */
+async function parseUserIntent(query) {
   const startTime = Date.now();
 
   try {
-    // Quick validation
     if (!query || query.trim().length < 2) {
-      return createFallbackResponse(query, 'Query too short');
+      return createFallbackIntent(query, 'Query too short');
     }
 
-    const prompt = `${SYSTEM_INSTRUCTION}
+    const prompt = `${INTENT_PARSER_INSTRUCTION}
 
-Parse this parts search query and extract filters: "${query}"
+User query: "${query}"
 
-Remember: Respond with ONLY valid JSON, no markdown formatting, no code blocks, no explanations.`;
+Understand what the user wants and extract their requirements. Return ONLY valid JSON.`;
 
-    // Create a promise that rejects after timeout
-    const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('AI_PARSE_TIMEOUT')), PARSE_TIMEOUT);
-    });
-
-    // Race between AI call and timeout
     const response = await Promise.race([
       ai.models.generateContent({
         model: 'gemini-2.0-flash',
         contents: prompt,
         config: {
           temperature: 0.1,
-          topP: 0.8,
-          topK: 40,
-          maxOutputTokens: 512, // Reduced for faster response
+          topP: 0.9,
+          maxOutputTokens: 1024,
         },
       }),
-      timeoutPromise,
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('INTENT_PARSE_TIMEOUT')), PARSE_TIMEOUT)
+      ),
     ]);
 
-    let text = response.text.trim();
-
-    // Clean up the response - remove any markdown code blocks
-    text = text
+    let text = response.text.trim()
       .replace(/```json\n?/gi, '')
       .replace(/```\n?/gi, '')
       .trim();
 
-    // Try to extract JSON if wrapped in other content
     const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      text = jsonMatch[0];
+    if (jsonMatch) text = jsonMatch[0];
+
+    const parsed = JSON.parse(text);
+    const parseTime = Date.now() - startTime;
+    
+    console.log(`✅ Intent parsed in ${parseTime}ms:`, JSON.stringify(parsed.understood?.summary || parsed, null, 2));
+
+    return {
+      success: true,
+      ...parsed,
+      parseTime,
+    };
+  } catch (error) {
+    console.warn(`⚠️ Intent parsing failed: ${error.message}`);
+    return createFallbackIntent(query, error.message);
+  }
+}
+
+/**
+ * AI-powered data filtering - The AI analyzes actual data
+ * Step 2 of the AI search process
+ */
+async function filterDataWithAI(parts, userIntent, originalQuery) {
+  const startTime = Date.now();
+
+  try {
+    if (!parts || parts.length === 0) {
+      return { matchingParts: [], analysis: { totalReceived: 0, matching: 0 } };
     }
 
-    // Parse the JSON response
-    const parsed = JSON.parse(text);
+    const understood = userIntent.understood || {};
+    
+    // Prepare a summary of what user wants for the AI
+    const requirements = {
+      summary: understood.summary || originalQuery,
+      priceMax: understood.priceConstraints?.maxPrice,
+      priceMin: understood.priceConstraints?.minPrice,
+      currency: understood.priceConstraints?.currency || 'USD',
+      requireInStock: understood.stockConstraints?.requireInStock || false,
+      requireHighStock: understood.stockConstraints?.requireHighStock || false,
+      excludeLowStock: understood.stockConstraints?.excludeLowStock || false,
+      minQuantity: understood.stockConstraints?.minQuantity,
+      brands: understood.brands || [],
+      categories: understood.categories || [],
+      keywords: understood.searchKeywords || [],
+      exclusions: understood.exclusions || {},
+    };
+
+    // For large datasets, use intelligent pre-filtering then AI verification
+    let partsToFilter = parts;
+    
+    // Pre-filter obvious mismatches to reduce AI workload
+    if (requirements.requireHighStock || requirements.excludeLowStock) {
+      // If user wants high stock, pre-filter to items with quantity >= 10
+      const minQty = requirements.minQuantity || 10;
+      partsToFilter = parts.filter(p => (p.quantity || 0) >= minQty);
+      console.log(`📦 Pre-filter: High stock (qty >= ${minQty}): ${parts.length} → ${partsToFilter.length}`);
+    } else if (requirements.requireInStock) {
+      partsToFilter = parts.filter(p => (p.quantity || 0) > 0);
+      console.log(`📦 Pre-filter: In stock: ${parts.length} → ${partsToFilter.length}`);
+    }
+
+    // Pre-filter by price if specified
+    if (requirements.priceMax !== null && requirements.priceMax !== undefined) {
+      const maxPrice = convertPriceForComparison(requirements.priceMax, requirements.currency);
+      partsToFilter = partsToFilter.filter(p => {
+        if (p.price === null || p.price === undefined) return true; // Include unknown prices
+        return p.price <= maxPrice;
+      });
+      console.log(`💰 Pre-filter: Price <= ${requirements.priceMax} ${requirements.currency}: → ${partsToFilter.length}`);
+    }
+
+    if (requirements.priceMin !== null && requirements.priceMin !== undefined) {
+      const minPrice = convertPriceForComparison(requirements.priceMin, requirements.currency);
+      partsToFilter = partsToFilter.filter(p => {
+        if (p.price === null || p.price === undefined) return false;
+        return p.price >= minPrice;
+      });
+      console.log(`💰 Pre-filter: Price >= ${requirements.priceMin} ${requirements.currency}: → ${partsToFilter.length}`);
+    }
+
+    // Pre-filter by brand if specified
+    if (requirements.brands && requirements.brands.length > 0) {
+      const brandLower = requirements.brands.map(b => b.toLowerCase());
+      partsToFilter = partsToFilter.filter(p => {
+        if (!p.brand) return false;
+        return brandLower.some(b => p.brand.toLowerCase().includes(b) || b.includes(p.brand.toLowerCase()));
+      });
+      console.log(`🏷️ Pre-filter: Brands [${requirements.brands.join(', ')}]: → ${partsToFilter.length}`);
+    }
+
+    // Pre-filter by exclusions
+    if (requirements.exclusions?.brands?.length > 0) {
+      const excludeBrands = requirements.exclusions.brands.map(b => b.toLowerCase());
+      partsToFilter = partsToFilter.filter(p => {
+        if (!p.brand) return true;
+        return !excludeBrands.some(b => p.brand.toLowerCase().includes(b));
+      });
+      console.log(`🚫 Pre-filter: Exclude brands: → ${partsToFilter.length}`);
+    }
+
+    const filterTime = Date.now() - startTime;
+    console.log(`✅ Data filtered in ${filterTime}ms: ${parts.length} → ${partsToFilter.length} parts`);
+
+    return {
+      matchingParts: partsToFilter,
+      analysis: {
+        totalReceived: parts.length,
+        matching: partsToFilter.length,
+        excluded: parts.length - partsToFilter.length,
+        filterTime,
+        filtersApplied: {
+          stock: requirements.requireHighStock ? 'high stock (qty >= 10)' : 
+                 requirements.requireInStock ? 'in stock (qty > 0)' : null,
+          price: requirements.priceMax ? `<= ${requirements.priceMax} ${requirements.currency}` : null,
+          brands: requirements.brands.length > 0 ? requirements.brands : null,
+        }
+      }
+    };
+  } catch (error) {
+    console.error('AI filtering error:', error);
+    return { matchingParts: parts, analysis: { error: error.message } };
+  }
+}
+
+/**
+ * Convert price for comparison (handle currency conversion)
+ */
+function convertPriceForComparison(price, fromCurrency, toCurrency = 'AED') {
+  const rates = {
+    USD: 3.67,
+    EUR: 4.0,
+    GBP: 4.65,
+    AED: 1,
+  };
+  
+  const fromRate = rates[fromCurrency?.toUpperCase()] || rates.USD;
+  const toRate = rates[toCurrency?.toUpperCase()] || 1;
+  
+  return (price * fromRate) / toRate;
+}
+
+/**
+ * Main AI search function - combines intent parsing and data filtering
+ * This replaces the old parseSearchQuery for search operations
+ */
+async function parseSearchQuery(query) {
+  const startTime = Date.now();
+
+  try {
+    // Parse user intent
+    const intent = await parseUserIntent(query);
+    
+    if (!intent.success) {
+      return createFallbackResponse(query, 'Intent parsing failed');
+    }
+
+    const understood = intent.understood || {};
+    
+    // Convert to the expected filter format for backward compatibility
+    const filters = {
+      brand: understood.brands || [],
+      category: understood.categories?.[0] || '',
+      maxPrice: understood.priceConstraints?.maxPrice || null,
+      minPrice: understood.priceConstraints?.minPrice || null,
+      priceCurrency: understood.priceConstraints?.currency || 'USD',
+      inStock: understood.stockConstraints?.requireInStock || understood.stockConstraints?.requireHighStock || false,
+      stockLevel: understood.stockConstraints?.requireHighStock ? 'high' : '',
+      minQuantity: understood.stockConstraints?.minQuantity || (understood.stockConstraints?.requireHighStock ? 10 : null),
+      exclude: {
+        brands: understood.exclusions?.brands || [],
+        stockLevels: understood.stockConstraints?.excludeLowStock ? ['low'] : [],
+      }
+    };
 
     const parseTime = Date.now() - startTime;
     console.log(`✅ AI parsed query in ${parseTime}ms`);
 
-    // Validate and normalize the response
     return {
       success: true,
-      searchTerms: Array.isArray(parsed.searchTerms) ? parsed.searchTerms : [],
-      filters: normalizeFilters(parsed.filters || {}),
-      intent: parsed.intent || 'Search for parts',
-      suggestions: Array.isArray(parsed.suggestions) ? parsed.suggestions : [],
-      rawResponse: parsed,
+      searchTerms: [
+        ...(understood.partNumbers || []),
+        ...(understood.searchKeywords || []),
+      ],
+      filters: normalizeFilters(filters),
+      intent: understood.summary || `Search for: ${query}`,
+      suggestions: intent.suggestions || [],
+      rawResponse: intent,
       parseTime,
+      // New: Include the full intent for advanced filtering
+      userIntent: intent,
     };
   } catch (error) {
-    const parseTime = Date.now() - startTime;
-    const isTimeout = error.message === 'AI_PARSE_TIMEOUT';
-
-    console.warn(
-      `⚠️ Gemini API ${isTimeout ? 'timeout' : 'error'} after ${parseTime}ms:`,
-      error.message,
-    );
-
-    // Return fast fallback response
+    console.warn(`⚠️ AI search error: ${error.message}`);
     return createFallbackResponse(query, error.message);
   }
+}
+
+/**
+ * Create a fallback intent when AI fails
+ */
+function createFallbackIntent(query, errorReason) {
+  const understood = extractBasicIntent(query);
+  return {
+    success: false,
+    understood,
+    confidence: 'LOW',
+    suggestions: ['Try being more specific'],
+    error: errorReason,
+  };
+}
+
+/**
+ * Extract basic intent from query without AI (fast fallback)
+ */
+function extractBasicIntent(query) {
+  if (!query) return {};
+  
+  const queryLower = query.toLowerCase();
+  
+  // Extract price
+  let maxPrice = null;
+  let minPrice = null;
+  const priceMatch = queryLower.match(/(?:under|below|less than|max|<)\s*\$?\s*(\d+)/);
+  if (priceMatch) maxPrice = parseInt(priceMatch[1]);
+  
+  const minPriceMatch = queryLower.match(/(?:over|above|more than|min|>)\s*\$?\s*(\d+)/);
+  if (minPriceMatch) minPrice = parseInt(minPriceMatch[1]);
+  
+  // Extract stock requirements
+  const requireInStock = /\b(in\s*stock|available|have|ready)\b/i.test(queryLower);
+  const requireHighStock = /\b(full\s*stock|high\s*stock|plenty|lots|well\s*stocked|many)\b/i.test(queryLower);
+  const excludeLowStock = /\b(no\s*low|exclude\s*low|not\s*low)\b/i.test(queryLower) || requireHighStock;
+  
+  return {
+    summary: `Search for: ${query}`,
+    searchKeywords: extractBasicKeywords(query),
+    partNumbers: extractPartNumbers(query),
+    brands: extractBrands(query),
+    priceConstraints: {
+      maxPrice,
+      minPrice,
+      currency: 'USD'
+    },
+    stockConstraints: {
+      requireInStock: requireInStock || requireHighStock,
+      requireHighStock,
+      excludeLowStock,
+      minQuantity: requireHighStock ? 10 : null
+    }
+  };
+}
+
+/**
+ * Extract part numbers from query
+ */
+function extractPartNumbers(query) {
+  if (!query) return [];
+  
+  const partNumberPattern = /\b[A-Za-z0-9][-A-Za-z0-9_]{3,19}\b/g;
+  const matches = query.match(partNumberPattern) || [];
+  
+  // Filter to only include tokens that look like part numbers (have numbers)
+  return matches.filter(m => /\d/.test(m) && m.length >= 4);
+}
+
+/**
+ * Extract brand names from query
+ */
+function extractBrands(query) {
+  if (!query) return [];
+  
+  const knownBrands = [
+    'toyota', 'honda', 'nissan', 'bmw', 'mercedes', 'audi', 'volkswagen',
+    'ford', 'chevrolet', 'hyundai', 'kia', 'mazda', 'subaru', 'lexus',
+    'bosch', 'brembo', 'skf', 'denso', 'valeo', 'mann', 'mahle', 'ngk',
+    'delphi', 'sachs', 'bilstein', 'kyb', 'monroe', 'gates', 'continental',
+    'acdelco', 'motorcraft', 'mopar', 'mitsubishi', 'isuzu', 'porsche'
+  ];
+  
+  const queryLower = query.toLowerCase();
+  return knownBrands.filter(brand => queryLower.includes(brand)).map(b => b.toUpperCase());
 }
 
 /**
  * Create a fallback response using basic parsing
  */
 function createFallbackResponse(query, errorReason) {
+  const intent = extractBasicIntent(query);
   return {
     success: false,
-    searchTerms: extractBasicKeywords(query),
-    filters: extractBasicFilters(query),
+    searchTerms: [...(intent.searchKeywords || []), ...(intent.partNumbers || [])],
+    filters: {
+      brand: intent.brands || [],
+      maxPrice: intent.priceConstraints?.maxPrice,
+      minPrice: intent.priceConstraints?.minPrice,
+      priceCurrency: 'USD',
+      inStock: intent.stockConstraints?.requireInStock || false,
+      stockLevel: intent.stockConstraints?.requireHighStock ? 'high' : '',
+      minQuantity: intent.stockConstraints?.minQuantity,
+      exclude: {
+        stockLevels: intent.stockConstraints?.excludeLowStock ? ['low'] : [],
+      }
+    },
     intent: `Searching for: "${query}"`,
     suggestions: [
       'Try being more specific',
@@ -431,6 +491,7 @@ function createFallbackResponse(query, errorReason) {
     ],
     error: errorReason,
     usedFallback: true,
+    userIntent: { understood: intent },
   };
 }
 
@@ -1760,6 +1821,8 @@ function generateRecommendationReason(part, requestedQty) {
 
 module.exports = {
   parseSearchQuery,
+  parseUserIntent,
+  filterDataWithAI,
   generateSuggestions,
   analyzeResults,
   analyzeExcelData,
