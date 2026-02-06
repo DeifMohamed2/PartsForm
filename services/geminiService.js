@@ -682,7 +682,7 @@ function normalizeFilters(filters) {
         ? filters.exclude.origins
         : [],
       stockLevels: Array.isArray(filters.exclude.stockLevels)
-        ? filters.exclude.stockLevels.map(s => s.toLowerCase())
+        ? filters.exclude.stockLevels.map((s) => s.toLowerCase())
         : [],
     };
   }
