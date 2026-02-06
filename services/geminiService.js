@@ -19,8 +19,15 @@ if (!process.env.GEMINI_API_KEY) {
   console.warn('   AI-powered search features will not work without it.');
 }
 
-// Initialize the Gemini API
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+// Initialize the Gemini API (gracefully handle missing key)
+let ai = null;
+try {
+  if (process.env.GEMINI_API_KEY) {
+    ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+  }
+} catch (err) {
+  console.warn('⚠️ Failed to initialize Gemini API:', err.message);
+}
 
 // Initialize learning service
 aiLearningService.initialize().catch((err) => {
@@ -29,443 +36,642 @@ aiLearningService.initialize().catch((err) => {
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════
- * INTENT PARSER - Understands what user wants
+ * INTENT PARSER v2 - Clean, deterministic intent extraction
+ * Uses Gemini ONLY for complex natural language understanding
+ * Falls back to robust local parser for reliability
  * ═══════════════════════════════════════════════════════════════════════════
  */
-const INTENT_PARSER_INSTRUCTION = `You are an intelligent automotive parts search assistant. Your ONLY job is to understand what the user wants.
+const INTENT_PARSER_INSTRUCTION = `You are an automotive parts search query parser. Extract structured filters from natural language.
 
-RESPOND WITH VALID JSON ONLY. No explanations, no markdown.
+RESPOND WITH VALID JSON ONLY. No markdown, no explanation.
 
-UNDERSTAND THE USER'S INTENT:
-- What are they looking for? (keywords, part numbers, categories, part types)
-- What constraints do they have? (price limits, availability requirements)
-- What should be excluded?
-
-IMPORTANT RULES:
-1. TYPO TOLERANCE: Understand intent despite spelling errors
-   - "toyta" = TOYOTA, "bosh" = BOSCH, "bremb" = BREMBO
-   - "USd" = USD, "instock" = "in stock"
-
-2. NATURAL LANGUAGE: Understand casual speech
-   - "under 100 bucks" = maxPrice: 100
-   - "in stock" / "available" / "have it" = requireInStock: true
-   - "full stock" / "plenty" / "well stocked" = requireHighStock: true
-   - "cheap" / "budget" = maxPrice: 100
-
-3. STOCK UNDERSTANDING (CRITICAL):
-   - "in stock" = parts with quantity > 0
-   - "full stock" / "high stock" / "plenty" = parts with HIGH quantity (≥10)
-   - "low stock" = parts with quantity 1-5
-   - User saying "full stock" means they want HIGH quantity items, NOT low stock
-
-4. EXTRACT EVERYTHING - BE THOROUGH:
-   - Part numbers: alphanumeric codes (e.g., "MX930110", "CAF-000267", "04465-12592")
-   - Brand names: TOYOTA, BOSCH, SKF, BREMBO, OEM, GENUINE, etc.
-   - Price constraints: under X, above Y, between X-Y (detect currency)
-   - Stock requirements: in stock, full stock, plenty
-   
-5. CATEGORIES & KEYWORDS - CRITICAL FOR SEARCH:
-   Extract ALL relevant automotive terms that could appear in part descriptions:
-   - Part types: brake, filter, oil, engine, clutch, suspension, bearing, seal, gasket, belt, pump, sensor, etc.
-   - Qualifiers: OEM, genuine, original, aftermarket, premium, performance
-   - Vehicle types: truck, car, sedan, SUV
-   - Systems: braking system, cooling system, fuel system, steering
-   
-   Examples:
-   - "brake parts" → categories: ["brake"], searchKeywords: ["brake", "brakes", "braking"]
-   - "OEM brake pads" → categories: ["brake"], searchKeywords: ["brake", "pad", "pads", "OEM", "original"]
-   - "oil filter for Toyota" → categories: ["filter"], searchKeywords: ["oil", "filter"], brands: ["TOYOTA"]
+CRITICAL RULES:
+1. PRICE: "under $500" → maxPrice:500. "over $100" → minPrice:100. "$50-$200" → minPrice:50, maxPrice:200. "cheap"/"budget" → maxPrice:100. Currency is ALWAYS USD unless explicitly stated otherwise (AED, EUR, etc).
+2. BRANDS: Distinguish VEHICLE brands (Toyota, BMW, Mercedes) from PARTS brands (Bosch, SKF, Denso). "Toyota brake pads" → vehicleBrand:"TOYOTA". "Bosch brake pads" → partsBrands:["BOSCH"].
+3. CATEGORIES: Extract part types: brake, filter, engine, suspension, bearing, clutch, steering, exhaust, electrical, cooling, transmission, wheel, pump, sensor, gasket, belt, hose, etc.
+4. STOCK: "in stock"/"available" → requireInStock:true. "full stock"/"plenty" → requireHighStock:true.
+5. KEYWORDS: Extract ALL words that should match part descriptions. "brake pads" → ["brake","pad","pads","braking"]. Include synonyms.
+6. DELIVERY: "fast delivery"/"express"/"urgent" → fastDelivery:true. "within 3 days" → maxDeliveryDays:3.
+7. QUALITY: "OEM"/"genuine"/"original" → oem:true. "certified"/"verified" → certifiedSupplier:true.
+8. EXCLUSIONS: "not Bosch"/"exclude Chinese" → exclude relevant items.
+9. QUANTITY: "need 50 units"/"qty 100" → requestedQuantity:50/100.
+10. TYPO TOLERANCE: "bosh"=BOSCH, "toyta"=TOYOTA, "bremb"=BREMBO, "mersedes"=MERCEDES.
 
 OUTPUT FORMAT:
 {
-  "understood": {
-    "summary": "Brief description of what user wants",
-    "searchKeywords": ["list", "of", "search", "keywords", "for", "description", "matching"],
-    "partNumbers": ["specific", "part", "numbers", "only"],
-    "brands": ["brand", "names"],
-    "categories": ["broad", "categories", "like", "brake", "filter"],
-    "priceConstraints": {
-      "maxPrice": null,
-      "minPrice": null,
-      "currency": "USD"
-    },
-    "stockConstraints": {
-      "requireInStock": false,
-      "requireHighStock": false,
-      "excludeLowStock": false,
-      "minQuantity": null
-    },
-    "exclusions": {
-      "brands": [],
-      "conditions": [],
-      "stockLevels": []
-    }
-  },
-  "confidence": "HIGH|MEDIUM|LOW",
-  "suggestions": []
+  "summary": "One-line description of what user wants",
+  "searchKeywords": ["keyword1", "keyword2"],
+  "partNumbers": ["ABC-123"],
+  "vehicleBrand": null,
+  "partsBrands": [],
+  "categories": ["brake"],
+  "maxPrice": null,
+  "minPrice": null,
+  "priceCurrency": "USD",
+  "requireInStock": false,
+  "requireHighStock": false,
+  "fastDelivery": false,
+  "maxDeliveryDays": null,
+  "oem": false,
+  "certifiedSupplier": false,
+  "requestedQuantity": null,
+  "sortPreference": null,
+  "excludeBrands": [],
+  "excludeOrigins": [],
+  "confidence": "HIGH",
+  "suggestions": ["suggestion1"]
 }`;
 
-/**
- * ═══════════════════════════════════════════════════════════════════════════
- * DATA FILTER - AI analyzes actual data and decides what matches
- * This is the key innovation - AI sees real data, not just keywords
- * ═══════════════════════════════════════════════════════════════════════════
- */
-const DATA_FILTER_INSTRUCTION = `You are a data filtering expert. Your job is to analyze parts data and determine which items match the user's requirements.
-
-RESPOND WITH VALID JSON ONLY. No explanations, no markdown.
-
-You will receive:
-1. User's requirements (what they want - including keywords and categories)
-2. A sample of actual parts data
-
-Your job: Analyze each part and determine if it MATCHES the user's requirements.
-
-MATCHING RULES:
-1. KEYWORD MATCHING: Check if user's keywords appear in:
-   - Part description (most important)
-   - Part category
-   - Brand name
-   - Part number
-   Example: User wants "brake" → Match parts with "brake", "brakes", "braking" in description
-
-2. STOCK LEVEL DEFINITIONS (CRITICAL):
-   - "Out of Stock": quantity = 0
-   - "Low Stock": quantity 1-5
-   - "In Stock": quantity > 0
-   - "High Stock" / "Full Stock": quantity >= 10
-
-3. PRICE MATCHING: Convert currencies if needed
-   - USD to AED: multiply by 3.67
-   - If user says "under $500", that's under 1835 AED
-   
-4. BRAND MATCHING: Case-insensitive match
-   - "OEM" means original manufacturer parts
-   - Match brand field against user's brand requirements
-
-FILTERING PRIORITY:
-1. First: Match keywords/categories in description
-2. Then: Apply stock filters
-3. Then: Apply price filters
-4. Then: Apply brand filters
-
-BE STRICT WITH FILTERS:
-- If user says "full stock", do NOT include low stock items (qty 1-5)
-- If user says price below X, do NOT include items priced higher
-- If user asks for "brake parts", only include parts related to brakes
-
-OUTPUT FORMAT:
-{
-  "analysis": {
-    "totalReceived": number,
-    "matching": number,
-    "excluded": number,
-    "reasons": ["why items were excluded"]
-  },
-  "matchingPartIds": ["list of part _id values that match"],
-  "filteringApplied": {
-    "priceFilter": "description or null",
-    "stockFilter": "description or null",
-    "brandFilter": "description or null",
-    "keywordFilter": "description or null",
-    "otherFilters": []
-  }
-}`;
+// Remove old DATA_FILTER_INSTRUCTION - filtering is now done deterministically in code
+// No more sending data to AI for filtering - this was the source of errors
 
 // Constants for service configuration
 const PARSE_TIMEOUT = 12000; // 12 second timeout for AI parsing
-const FILTER_TIMEOUT = 15000; // 15 second timeout for AI filtering
 const MAX_BATCH_SIZE = 50; // Max items to send to AI for filtering at once
 
 /**
- * Parse user intent from natural language query
- * Step 1 of the AI search process - NOW WITH LEARNING!
+ * Parse user intent from natural language query - v2
+ * Uses robust local parsing FIRST, then enhances with Gemini if available
  */
 async function parseUserIntent(query) {
   const startTime = Date.now();
 
   try {
     if (!query || query.trim().length < 2) {
-      return createFallbackIntent(query, 'Query too short');
+      return { success: false, ...buildLocalParsedIntent(query), confidence: 'LOW' };
     }
 
-    // ═══════════════════════════════════════════════════════════════
-    // LEARNING: Get context from past searches
-    // ═══════════════════════════════════════════════════════════════
-    let learnedContext = { hasPriorLearning: false };
+    // STEP 1: Always do local parsing first (instant, reliable, never fails)
+    const localParsed = buildLocalParsedIntent(query);
+
+    // STEP 2: Try Gemini for enhanced understanding (optional, may fail)
+    let geminiParsed = null;
     try {
-      learnedContext = await aiLearningService.getLearnedContext(query);
-      if (learnedContext.hasPriorLearning) {
-        console.log('🧠 Learning context found:', {
-          suggestedKeywords: learnedContext.suggestedKeywords?.slice(0, 5),
-          betterAlternative: learnedContext.betterAlternative,
-          hasHints: learnedContext.hints?.length > 0,
-        });
-      }
-    } catch (learningError) {
-      console.warn(
-        'Learning context error (continuing):',
-        learningError.message,
-      );
+      // Get learning context
+      let learnedContext = { hasPriorLearning: false };
+      try {
+        learnedContext = await aiLearningService.getLearnedContext(query);
+      } catch (e) { /* ignore */ }
+
+      const learningPrompt = aiLearningService.generateLearningPrompt(learnedContext);
+
+      const prompt = `${INTENT_PARSER_INSTRUCTION}\n${learningPrompt}\nUser query: "${query}"\n\nReturn ONLY valid JSON.`;
+
+      const response = await Promise.race([
+        ai.models.generateContent({
+          model: 'gemini-2.0-flash',
+          contents: prompt,
+          config: { temperature: 0.05, topP: 0.9, maxOutputTokens: 1024 },
+        }),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('TIMEOUT')), PARSE_TIMEOUT)),
+      ]);
+
+      let text = response.text.trim().replace(/```json\n?/gi, '').replace(/```\n?/gi, '').trim();
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      if (jsonMatch) text = jsonMatch[0];
+      geminiParsed = JSON.parse(text);
+    } catch (aiError) {
+      console.warn(`⚠️ Gemini parsing skipped: ${aiError.message}`);
     }
 
-    // Generate learning-enhanced prompt
-    const learningPrompt =
-      aiLearningService.generateLearningPrompt(learnedContext);
-
-    const prompt = `${INTENT_PARSER_INSTRUCTION}
-${learningPrompt}
-User query: "${query}"
-
-Understand what the user wants and extract their requirements. Return ONLY valid JSON.`;
-
-    const response = await Promise.race([
-      ai.models.generateContent({
-        model: 'gemini-2.0-flash',
-        contents: prompt,
-        config: {
-          temperature: 0.1,
-          topP: 0.9,
-          maxOutputTokens: 1024,
-        },
-      }),
-      new Promise((_, reject) =>
-        setTimeout(
-          () => reject(new Error('INTENT_PARSE_TIMEOUT')),
-          PARSE_TIMEOUT,
-        ),
-      ),
-    ]);
-
-    let text = response.text
-      .trim()
-      .replace(/```json\n?/gi, '')
-      .replace(/```\n?/gi, '')
-      .trim();
-
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (jsonMatch) text = jsonMatch[0];
-
-    const parsed = JSON.parse(text);
+    // STEP 3: Merge - local parsed is the FOUNDATION, Gemini enhances it
+    const merged = mergeIntents(localParsed, geminiParsed);
     const parseTime = Date.now() - startTime;
 
-    // Enhance parsed result with learned suggestions if available
-    if (learnedContext.suggestedKeywords?.length > 0 && parsed.understood) {
-      const existingKeywords = parsed.understood.searchKeywords || [];
-      parsed.understood.searchKeywords = [
-        ...new Set([
-          ...existingKeywords,
-          ...learnedContext.suggestedKeywords.slice(0, 5),
-        ]),
-      ];
-    }
+    console.log(`✅ Intent parsed in ${parseTime}ms:`, JSON.stringify(merged.summary));
 
-    console.log(
-      `✅ Intent parsed in ${parseTime}ms:`,
-      JSON.stringify(parsed.understood?.summary || parsed, null, 2),
-    );
-
-    return {
-      success: true,
-      ...parsed,
-      parseTime,
-    };
+    return { success: true, ...merged, parseTime };
   } catch (error) {
     console.warn(`⚠️ Intent parsing failed: ${error.message}`);
-    return createFallbackIntent(query, error.message);
+    return { success: false, ...buildLocalParsedIntent(query), confidence: 'LOW' };
   }
 }
 
 /**
- * AI-powered data filtering - The AI analyzes actual data
- * Step 2 of the AI search process
+ * Build a complete parsed intent using LOCAL rules (no AI needed)
+ * This is the reliable backbone - it NEVER fails
  */
-async function filterDataWithAI(parts, userIntent, originalQuery) {
-  const startTime = Date.now();
+function buildLocalParsedIntent(query) {
+  if (!query) return { summary: '', searchKeywords: [], partNumbers: [], categories: [], confidence: 'LOW' };
 
-  try {
-    if (!parts || parts.length === 0) {
-      return { matchingParts: [], analysis: { totalReceived: 0, matching: 0 } };
-    }
+  let q = query.toLowerCase().trim();
 
-    const understood = userIntent.understood || {};
-
-    // Prepare a summary of what user wants for the AI
-    const requirements = {
-      summary: understood.summary || originalQuery,
-      priceMax: understood.priceConstraints?.maxPrice,
-      priceMin: understood.priceConstraints?.minPrice,
-      currency: understood.priceConstraints?.currency || 'USD',
-      requireInStock: understood.stockConstraints?.requireInStock || false,
-      requireHighStock: understood.stockConstraints?.requireHighStock || false,
-      excludeLowStock: understood.stockConstraints?.excludeLowStock || false,
-      minQuantity: understood.stockConstraints?.minQuantity,
-      brands: understood.brands || [],
-      categories: understood.categories || [],
-      keywords: understood.searchKeywords || [],
-      exclusions: understood.exclusions || {},
-    };
-
-    // For large datasets, use intelligent pre-filtering then AI verification
-    let partsToFilter = parts;
-
-    // Pre-filter obvious mismatches to reduce AI workload
-    if (requirements.requireHighStock || requirements.excludeLowStock) {
-      // If user wants high stock, pre-filter to items with quantity >= 10
-      const minQty = requirements.minQuantity || 10;
-      partsToFilter = parts.filter((p) => (p.quantity || 0) >= minQty);
-      console.log(
-        `📦 Pre-filter: High stock (qty >= ${minQty}): ${parts.length} → ${partsToFilter.length}`,
-      );
-    } else if (requirements.requireInStock) {
-      partsToFilter = parts.filter((p) => (p.quantity || 0) > 0);
-      console.log(
-        `📦 Pre-filter: In stock: ${parts.length} → ${partsToFilter.length}`,
-      );
-    }
-
-    // Pre-filter by price if specified
-    if (requirements.priceMax !== null && requirements.priceMax !== undefined) {
-      const maxPrice = convertPriceForComparison(
-        requirements.priceMax,
-        requirements.currency,
-      );
-      partsToFilter = partsToFilter.filter((p) => {
-        if (p.price === null || p.price === undefined) return true; // Include unknown prices
-        return p.price <= maxPrice;
-      });
-      console.log(
-        `💰 Pre-filter: Price <= ${requirements.priceMax} ${requirements.currency}: → ${partsToFilter.length}`,
-      );
-    }
-
-    if (requirements.priceMin !== null && requirements.priceMin !== undefined) {
-      const minPrice = convertPriceForComparison(
-        requirements.priceMin,
-        requirements.currency,
-      );
-      partsToFilter = partsToFilter.filter((p) => {
-        if (p.price === null || p.price === undefined) return false;
-        return p.price >= minPrice;
-      });
-      console.log(
-        `💰 Pre-filter: Price >= ${requirements.priceMin} ${requirements.currency}: → ${partsToFilter.length}`,
-      );
-    }
-
-    // Pre-filter by brand if specified
-    if (requirements.brands && requirements.brands.length > 0) {
-      const brandLower = requirements.brands.map((b) => b.toLowerCase());
-      partsToFilter = partsToFilter.filter((p) => {
-        if (!p.brand) return false;
-        return brandLower.some(
-          (b) =>
-            p.brand.toLowerCase().includes(b) ||
-            b.includes(p.brand.toLowerCase()),
-        );
-      });
-      console.log(
-        `🏷️ Pre-filter: Brands [${requirements.brands.join(', ')}]: → ${partsToFilter.length}`,
-      );
-    }
-
-    // Pre-filter by exclusions
-    if (requirements.exclusions?.brands?.length > 0) {
-      const excludeBrands = requirements.exclusions.brands.map((b) =>
-        b.toLowerCase(),
-      );
-      partsToFilter = partsToFilter.filter((p) => {
-        if (!p.brand) return true;
-        return !excludeBrands.some((b) => p.brand.toLowerCase().includes(b));
-      });
-      console.log(`🚫 Pre-filter: Exclude brands: → ${partsToFilter.length}`);
-    }
-
-    const filterTime = Date.now() - startTime;
-    console.log(
-      `✅ Data filtered in ${filterTime}ms: ${parts.length} → ${partsToFilter.length} parts`,
-    );
-
-    return {
-      matchingParts: partsToFilter,
-      analysis: {
-        totalReceived: parts.length,
-        matching: partsToFilter.length,
-        excluded: parts.length - partsToFilter.length,
-        filterTime,
-        filtersApplied: {
-          stock: requirements.requireHighStock
-            ? 'high stock (qty >= 10)'
-            : requirements.requireInStock
-              ? 'in stock (qty > 0)'
-              : null,
-          price: requirements.priceMax
-            ? `<= ${requirements.priceMax} ${requirements.currency}`
-            : null,
-          brands: requirements.brands.length > 0 ? requirements.brands : null,
-        },
-      },
-    };
-  } catch (error) {
-    console.error('AI filtering error:', error);
-    return { matchingParts: parts, analysis: { error: error.message } };
+  // ── Typo corrections ──
+  const typoMap = {
+    'toyta': 'toyota', 'toyata': 'toyota', 'tayota': 'toyota',
+    'bosh': 'bosch', 'bosc': 'bosch',
+    'bremb': 'brembo', 'bremboo': 'brembo',
+    'nisaan': 'nissan', 'nisan': 'nissan',
+    'mercedez': 'mercedes', 'mersedes': 'mercedes', 'merc': 'mercedes',
+    'hynudai': 'hyundai', 'hyundia': 'hyundai', 'hundai': 'hyundai',
+    'volkswagon': 'volkswagen', 'vw': 'volkswagen',
+    'porshe': 'porsche', 'porche': 'porsche',
+    'chevrolete': 'chevrolet', 'chevy': 'chevrolet',
+    'acdelko': 'acdelco',
+    'germn': 'german', 'japnese': 'japanese', 'chines': 'chinese',
+  };
+  for (const [typo, fix] of Object.entries(typoMap)) {
+    q = q.replace(new RegExp(`\\b${typo}\\b`, 'g'), fix);
   }
-}
 
-/**
- * Convert price for comparison (handle currency conversion)
- */
-function convertPriceForComparison(price, fromCurrency, toCurrency = 'AED') {
-  const rates = {
-    USD: 3.67,
-    EUR: 4.0,
-    GBP: 4.65,
-    AED: 1,
+  const result = {
+    summary: '',
+    searchKeywords: [],
+    partNumbers: [],
+    vehicleBrand: null,
+    partsBrands: [],
+    categories: [],
+    maxPrice: null,
+    minPrice: null,
+    priceCurrency: 'USD',
+    requireInStock: false,
+    requireHighStock: false,
+    fastDelivery: false,
+    maxDeliveryDays: null,
+    oem: false,
+    certifiedSupplier: false,
+    requestedQuantity: null,
+    sortPreference: null,
+    excludeBrands: [],
+    excludeOrigins: [],
+    confidence: 'MEDIUM',
+    suggestions: [],
   };
 
-  const fromRate = rates[fromCurrency?.toUpperCase()] || rates.USD;
-  const toRate = rates[toCurrency?.toUpperCase()] || 1;
+  // ── Price extraction (CRITICAL - must be exact) ──
+  // "under $500" / "below 500" / "less than $500" / "max $500" / "cheaper than 500"
+  const maxPriceMatch = q.match(/(?:under|below|less\s+than|max|cheaper\s+than|up\s+to|no\s+more\s+than|budget|within)\s*\$?\s*(\d+(?:,\d{3})*(?:\.\d{1,2})?)/);
+  if (maxPriceMatch) result.maxPrice = parseFloat(maxPriceMatch[1].replace(/,/g, ''));
 
-  return (price * fromRate) / toRate;
+  // "over $100" / "above 100" / "more than $100" / "min $100" / "at least $100"  
+  const minPriceMatch = q.match(/(?:over|above|more\s+than|min|at\s+least|starting\s+from|from)\s*\$?\s*(\d+(?:,\d{3})*(?:\.\d{1,2})?)/);
+  if (minPriceMatch) result.minPrice = parseFloat(minPriceMatch[1].replace(/,/g, ''));
+
+  // "$100-$500" / "between $100 and $500"
+  const rangeMatch = q.match(/\$?\s*(\d+(?:,\d{3})*)\s*[-–to]+\s*\$?\s*(\d+(?:,\d{3})*)/);
+  if (rangeMatch && !maxPriceMatch && !minPriceMatch) {
+    result.minPrice = parseFloat(rangeMatch[1].replace(/,/g, ''));
+    result.maxPrice = parseFloat(rangeMatch[2].replace(/,/g, ''));
+  }
+
+  // "cheap" / "budget" / "affordable"
+  if (/\b(cheap|budget|affordable|economical|inexpensive)\b/.test(q) && !result.maxPrice) {
+    result.maxPrice = 100;
+  }
+  // "expensive" / "premium" / "high-end"
+  if (/\b(expensive|premium|high[\s-]?end|luxury)\b/.test(q) && !result.minPrice) {
+    result.minPrice = 500;
+  }
+
+  // Currency detection
+  if (/\b(aed|dirham|dhs)\b/.test(q)) result.priceCurrency = 'AED';
+  else if (/\b(eur|euro|€)\b/.test(q)) result.priceCurrency = 'EUR';
+  else if (/\b(gbp|pound|£)\b/.test(q)) result.priceCurrency = 'GBP';
+
+  // ── Vehicle brands vs parts brands ──
+  const vehicleBrandMap = {
+    'toyota': 'TOYOTA', 'honda': 'HONDA', 'nissan': 'NISSAN', 'bmw': 'BMW',
+    'mercedes': 'MERCEDES-BENZ', 'audi': 'AUDI', 'volkswagen': 'VOLKSWAGEN',
+    'ford': 'FORD', 'chevrolet': 'CHEVROLET', 'hyundai': 'HYUNDAI',
+    'kia': 'KIA', 'mazda': 'MAZDA', 'subaru': 'SUBARU', 'lexus': 'LEXUS',
+    'porsche': 'PORSCHE', 'volvo': 'VOLVO', 'jeep': 'JEEP', 'dodge': 'DODGE',
+    'mitsubishi': 'MITSUBISHI', 'suzuki': 'SUZUKI', 'isuzu': 'ISUZU',
+    'infiniti': 'INFINITI', 'acura': 'ACURA', 'jaguar': 'JAGUAR',
+    'land rover': 'LAND ROVER', 'tesla': 'TESLA', 'peugeot': 'PEUGEOT',
+    'renault': 'RENAULT', 'fiat': 'FIAT', 'alfa romeo': 'ALFA ROMEO',
+  };
+
+  const partsBrandMap = {
+    'bosch': 'BOSCH', 'skf': 'SKF', 'denso': 'DENSO', 'valeo': 'VALEO',
+    'brembo': 'BREMBO', 'gates': 'GATES', 'continental': 'CONTINENTAL',
+    'mann': 'MANN', 'mahle': 'MAHLE', 'sachs': 'SACHS', 'bilstein': 'BILSTEIN',
+    'kyb': 'KYB', 'monroe': 'MONROE', 'acdelco': 'ACDELCO', 'mopar': 'MOPAR',
+    'ngk': 'NGK', 'delphi': 'DELPHI', 'aisin': 'AISIN', 'luk': 'LUK',
+    'trw': 'TRW', 'ate': 'ATE', 'ferodo': 'FERODO', 'hella': 'HELLA',
+    'febi': 'FEBI', 'lemforder': 'LEMFORDER', 'meyle': 'MEYLE', 'swag': 'SWAG',
+    'timken': 'TIMKEN', 'nsk': 'NSK', 'ntn': 'NTN', 'fag': 'FAG',
+    'motorcraft': 'MOTORCRAFT', 'osram': 'OSRAM', 'philips': 'PHILIPS',
+    'moog': 'MOOG', 'dayco': 'DAYCO', 'walker': 'WALKER', 'wix': 'WIX',
+    'champion': 'CHAMPION', 'exedy': 'EXEDY', 'ina': 'INA',
+  };
+
+  // Check vehicle brands
+  for (const [key, val] of Object.entries(vehicleBrandMap)) {
+    if (q.includes(key)) {
+      result.vehicleBrand = val;
+      break;
+    }
+  }
+
+  // Check parts brands
+  for (const [key, val] of Object.entries(partsBrandMap)) {
+    if (new RegExp(`\\b${key}\\b`).test(q)) {
+      result.partsBrands.push(val);
+    }
+  }
+
+  // ── Categories ──
+  const categoryMap = {
+    'brake pad': 'brake', 'brake disc': 'brake', 'brake rotor': 'brake',
+    'brake caliper': 'brake', 'brake fluid': 'brake', 'brake hose': 'brake',
+    'brake drum': 'brake', 'brake shoe': 'brake', 'brake line': 'brake',
+    'brake light': 'brake', 'brake': 'brake', 'braking': 'brake',
+    'oil filter': 'filter', 'air filter': 'filter', 'fuel filter': 'filter',
+    'cabin filter': 'filter', 'filter': 'filter',
+    'engine mount': 'engine', 'engine oil': 'engine', 'engine': 'engine',
+    'suspension': 'suspension', 'shock absorber': 'suspension', 'strut': 'suspension',
+    'spring': 'suspension', 'control arm': 'suspension',
+    'bearing': 'bearing', 'wheel bearing': 'bearing', 'hub bearing': 'bearing',
+    'clutch': 'clutch', 'clutch kit': 'clutch', 'clutch plate': 'clutch',
+    'steering': 'steering', 'power steering': 'steering', 'steering rack': 'steering',
+    'exhaust': 'exhaust', 'muffler': 'exhaust', 'catalytic': 'exhaust',
+    'alternator': 'electrical', 'starter': 'electrical', 'battery': 'electrical',
+    'spark plug': 'electrical', 'ignition': 'electrical', 'coil': 'electrical',
+    'radiator': 'cooling', 'thermostat': 'cooling', 'water pump': 'cooling',
+    'coolant': 'cooling', 'fan': 'cooling',
+    'transmission': 'transmission', 'gearbox': 'transmission',
+    'timing belt': 'belt', 'serpentine belt': 'belt', 'belt': 'belt',
+    'gasket': 'gasket', 'head gasket': 'gasket', 'seal': 'seal',
+    'sensor': 'sensor', 'oxygen sensor': 'sensor', 'abs sensor': 'sensor',
+    'injector': 'fuel', 'fuel pump': 'fuel', 'fuel': 'fuel',
+    'wiper': 'wiper', 'mirror': 'body', 'bumper': 'body', 'fender': 'body',
+    'headlight': 'lighting', 'tail light': 'lighting', 'lamp': 'lighting',
+    'hub': 'hub', 'axle': 'axle', 'cv joint': 'axle', 'driveshaft': 'axle',
+    'pump': 'pump', 'valve': 'valve', 'piston': 'engine',
+    'turbo': 'turbo', 'turbocharger': 'turbo', 'supercharger': 'turbo',
+  };
+
+  const sortedCategoryKeys = Object.keys(categoryMap).sort((a, b) => b.length - a.length);
+  const addedCategories = new Set();
+  for (const key of sortedCategoryKeys) {
+    if (q.includes(key) && !addedCategories.has(categoryMap[key])) {
+      result.categories.push(categoryMap[key]);
+      addedCategories.add(categoryMap[key]);
+    }
+  }
+
+  // ── Search keywords (for description matching) ──
+  const stopWords = new Set([
+    'find', 'me', 'show', 'get', 'looking', 'for', 'need', 'want', 'the', 'a', 'an',
+    'some', 'with', 'from', 'i', 'am', 'please', 'can', 'you', 'under', 'below',
+    'above', 'over', 'price', 'priced', 'less', 'more', 'than', 'and', 'or', 'not',
+    'no', 'up', 'to', 'at', 'least', 'most', 'around', 'about', 'in', 'of',
+    'search', 'parts', 'part', 'suppliers', 'supplier', 'verified', 'certified',
+    'available', 'stock', 'delivery', 'fast', 'quick', 'express', 'cheap', 'budget',
+    'best', 'good', 'high', 'quality', 'premium', 'professional', 'all', 'any',
+  ]);
+
+  const words = q.replace(/[^\w\s-]/g, ' ').split(/\s+/).filter(w => {
+    if (w.length < 2) return false;
+    if (stopWords.has(w)) return false;
+    if (/^\d+$/.test(w)) return false;
+    // Don't include brand names as search keywords (they're already in brands)
+    if (vehicleBrandMap[w] || partsBrandMap[w]) return false;
+    return true;
+  });
+
+  // Also expand categories to related keywords
+  const categoryKeywordMap = {
+    'brake': ['brake', 'brakes', 'braking', 'brake pad', 'brake disc', 'brake fluid', 'brake drum', 'brake shoe'],
+    'filter': ['filter', 'filters', 'filtration'],
+    'engine': ['engine', 'motor'],
+    'bearing': ['bearing', 'bearings'],
+    'suspension': ['suspension', 'shock', 'strut', 'spring'],
+    'steering': ['steering', 'steer'],
+    'cooling': ['cooling', 'coolant', 'radiator', 'thermostat'],
+    'electrical': ['electrical', 'electric', 'alternator', 'starter', 'battery'],
+    'clutch': ['clutch'],
+    'exhaust': ['exhaust', 'muffler', 'catalytic'],
+    'transmission': ['transmission', 'gearbox'],
+    'belt': ['belt', 'timing', 'serpentine'],
+    'fuel': ['fuel', 'injector'],
+    'sensor': ['sensor', 'sensors'],
+    'seal': ['seal', 'sealing', 'o-ring'],
+    'gasket': ['gasket', 'gaskets'],
+  };
+
+  const expandedKeywords = new Set(words);
+  for (const cat of result.categories) {
+    const related = categoryKeywordMap[cat] || [cat];
+    related.forEach(k => expandedKeywords.add(k));
+  }
+
+  result.searchKeywords = [...expandedKeywords].slice(0, 15);
+
+  // ── Part numbers ──
+  const tokens = query.replace(/[^\w\s-]/g, ' ').split(/\s+/);
+  result.partNumbers = tokens.filter(t => /\d/.test(t) && /^[A-Za-z0-9][-A-Za-z0-9_]{3,}$/.test(t) && t.length >= 4);
+
+  // ── Stock requirements ──
+  if (/\b(in\s*stock|available|have\s+it|ready)\b/.test(q)) result.requireInStock = true;
+  if (/\b(full\s*stock|high\s*stock|plenty|lots|well\s*stocked|large\s*qty|bulk)\b/.test(q)) {
+    result.requireHighStock = true;
+    result.requireInStock = true;
+  }
+
+  // ── Delivery ──
+  if (/\b(fast|express|quick|urgent|rush|asap|immediate)\b/.test(q)) result.fastDelivery = true;
+  const deliveryMatch = q.match(/within\s+(\d+)\s*days?/);
+  if (deliveryMatch) result.maxDeliveryDays = parseInt(deliveryMatch[1]);
+
+  // ── OEM / Certified ──
+  if (/\b(oem|genuine|original)\b/.test(q)) result.oem = true;
+  if (/\b(certified|verified|trusted|authorized)\b/.test(q)) result.certifiedSupplier = true;
+
+  // ── Quantity ──
+  const qtyMatch = q.match(/(?:qty|quantity|need|order)\s*:?\s*(\d+)|x\s*(\d+)\b|(\d+)\s*(?:units?|pcs?|pieces?)/);
+  if (qtyMatch) result.requestedQuantity = parseInt(qtyMatch[1] || qtyMatch[2] || qtyMatch[3]);
+
+  // ── Exclusions ──
+  const excludeBrandMatch = q.match(/(?:not|no|exclude|without|except)\s+(\w+)/g);
+  if (excludeBrandMatch) {
+    excludeBrandMatch.forEach(match => {
+      const brand = match.replace(/^(not|no|exclude|without|except)\s+/i, '').trim();
+      if (partsBrandMap[brand]) result.excludeBrands.push(partsBrandMap[brand]);
+      if (vehicleBrandMap[brand]) result.excludeBrands.push(vehicleBrandMap[brand]);
+    });
+  }
+  if (/\b(no|not|exclude|without)\s*(chinese|china)\b/.test(q)) result.excludeOrigins.push('CN');
+  if (/\b(no|not|exclude|without)\s*(indian|india)\b/.test(q)) result.excludeOrigins.push('IN');
+
+  // ── Origin preference ──
+  if (/\bgerman\b/.test(q)) result.certifiedSupplier = true; // German = quality
+  if (/\bjapanese\b/.test(q)) result.certifiedSupplier = true;
+
+  // ── Sort preference ──
+  if (/\bcheapest|lowest\s+price|best\s+price\b/.test(q)) result.sortPreference = 'price_asc';
+  if (/\bmost\s+expensive|highest\s+price\b/.test(q)) result.sortPreference = 'price_desc';
+  if (/\bmost\s+stock|highest\s+quantity\b/.test(q)) result.sortPreference = 'quantity_desc';
+  if (/\bfastest\s+delivery|quickest\b/.test(q)) result.sortPreference = 'delivery_asc';
+
+  // ── Build summary ──
+  const summaryParts = [];
+  if (result.categories.length > 0) summaryParts.push(result.categories.join(', ') + ' parts');
+  if (result.vehicleBrand) summaryParts.push(`for ${result.vehicleBrand}`);
+  if (result.partsBrands.length > 0) summaryParts.push(`by ${result.partsBrands.join(', ')}`);
+  if (result.maxPrice) summaryParts.push(`under $${result.maxPrice}`);
+  if (result.minPrice) summaryParts.push(`over $${result.minPrice}`);
+  if (result.requireInStock) summaryParts.push('in stock');
+  if (result.requireHighStock) summaryParts.push('with high availability');
+  if (result.fastDelivery) summaryParts.push('with fast delivery');
+  if (result.oem) summaryParts.push('OEM/genuine');
+  if (result.certifiedSupplier) summaryParts.push('from certified suppliers');
+  result.summary = summaryParts.length > 0 ? `Find ${summaryParts.join(' ')}` : `Search for: ${query}`;
+
+  return result;
 }
 
 /**
- * Main AI search function - combines intent parsing and data filtering
- * This replaces the old parseSearchQuery for search operations
+ * Merge local parsing with Gemini results
+ * Local parsing is ALWAYS the foundation - Gemini only enhances/overrides with higher confidence
+ */
+function mergeIntents(local, gemini) {
+  if (!gemini) return local;
+
+  const merged = { ...local };
+
+  // Gemini can add search keywords we missed
+  if (gemini.searchKeywords?.length > 0) {
+    merged.searchKeywords = [...new Set([...local.searchKeywords, ...gemini.searchKeywords])].slice(0, 20);
+  }
+
+  // Gemini can find part numbers we missed
+  if (gemini.partNumbers?.length > 0) {
+    merged.partNumbers = [...new Set([...local.partNumbers, ...gemini.partNumbers])];
+  }
+
+  // Gemini overrides vehicle brand only if local didn't find one
+  if (!local.vehicleBrand && gemini.vehicleBrand) {
+    merged.vehicleBrand = gemini.vehicleBrand.toUpperCase();
+  }
+
+  // Gemini can add parts brands
+  if (gemini.partsBrands?.length > 0) {
+    merged.partsBrands = [...new Set([...local.partsBrands, ...gemini.partsBrands.map(b => b.toUpperCase())])];
+  }
+
+  // Gemini can add categories
+  if (gemini.categories?.length > 0) {
+    merged.categories = [...new Set([...local.categories, ...gemini.categories.map(c => c.toLowerCase())])];
+  }
+
+  // CRITICAL: Price - use local parsing if found (it's reliable), only use Gemini if local missed it
+  if (local.maxPrice === null && gemini.maxPrice != null) merged.maxPrice = Number(gemini.maxPrice);
+  if (local.minPrice === null && gemini.minPrice != null) merged.minPrice = Number(gemini.minPrice);
+
+  // Stock - OR them together (if either thinks user wants stock filter, apply it)
+  if (gemini.requireInStock) merged.requireInStock = true;
+  if (gemini.requireHighStock) merged.requireHighStock = true;
+
+  // Delivery
+  if (gemini.fastDelivery) merged.fastDelivery = true;
+  if (gemini.maxDeliveryDays && !local.maxDeliveryDays) merged.maxDeliveryDays = gemini.maxDeliveryDays;
+
+  // OEM / Certified
+  if (gemini.oem) merged.oem = true;
+  if (gemini.certifiedSupplier) merged.certifiedSupplier = true;
+
+  // Quantity
+  if (!local.requestedQuantity && gemini.requestedQuantity) merged.requestedQuantity = gemini.requestedQuantity;
+
+  // Exclusions
+  if (gemini.excludeBrands?.length > 0) {
+    merged.excludeBrands = [...new Set([...local.excludeBrands, ...gemini.excludeBrands])];
+  }
+  if (gemini.excludeOrigins?.length > 0) {
+    merged.excludeOrigins = [...new Set([...local.excludeOrigins, ...gemini.excludeOrigins])];
+  }
+
+  // Summary - prefer Gemini's if it has one
+  if (gemini.summary && gemini.summary.length > 10) merged.summary = gemini.summary;
+
+  // Suggestions
+  if (gemini.suggestions?.length > 0) merged.suggestions = gemini.suggestions;
+
+  // Confidence
+  merged.confidence = gemini.confidence || local.confidence;
+
+  return merged;
+}
+
+/**
+ * Deterministic data filtering v2 - NO AI needed, pure code logic
+ * This replaces the old AI-based filtering that was unreliable
+ * EVERY filter is applied deterministically with clear rules
+ */
+function filterDataWithAI(parts, parsedIntent, originalQuery) {
+  const startTime = Date.now();
+
+  if (!parts || parts.length === 0) {
+    return { matchingParts: [], analysis: { totalReceived: 0, matching: 0, filtersApplied: {} } };
+  }
+
+  let filtered = [...parts];
+  const totalBefore = filtered.length;
+  const filtersApplied = {};
+
+  // ── 1. KEYWORD / CATEGORY FILTERING (search descriptions) ──
+  const keywords = parsedIntent.searchKeywords || [];
+  const categories = parsedIntent.categories || [];
+  const allSearchTerms = [...new Set([...keywords, ...categories])];
+
+  if (allSearchTerms.length > 0) {
+    filtered = filtered.filter(p => {
+      const searchText = [
+        p.description || '',
+        p.category || '',
+        p.subcategory || '',
+        p.partNumber || '',
+        ...(p.tags || []),
+      ].join(' ').toLowerCase();
+
+      // At least ONE search term must appear in the part's searchable text
+      return allSearchTerms.some(term => searchText.includes(term.toLowerCase()));
+    });
+    filtersApplied.keywords = `Matched: ${allSearchTerms.join(', ')} (${totalBefore} → ${filtered.length})`;
+  }
+
+  // ── 2. VEHICLE BRAND FILTERING ──
+  if (parsedIntent.vehicleBrand) {
+    const vBrand = parsedIntent.vehicleBrand.toLowerCase();
+    const beforeCount = filtered.length;
+    filtered = filtered.filter(p => {
+      const brandText = (p.brand || '').toLowerCase();
+      const descText = (p.description || '').toLowerCase();
+      const supplierText = (p.supplier || '').toLowerCase();
+      return brandText.includes(vBrand) || descText.includes(vBrand) || supplierText.includes(vBrand);
+    });
+    filtersApplied.vehicleBrand = `${parsedIntent.vehicleBrand} (${beforeCount} → ${filtered.length})`;
+  }
+
+  // ── 3. PARTS BRAND FILTERING ──
+  if (parsedIntent.partsBrands && parsedIntent.partsBrands.length > 0) {
+    const brandsLower = parsedIntent.partsBrands.map(b => b.toLowerCase());
+    const beforeCount = filtered.length;
+    filtered = filtered.filter(p => {
+      if (!p.brand) return false;
+      const partBrand = p.brand.toLowerCase();
+      return brandsLower.some(b => partBrand.includes(b) || b.includes(partBrand));
+    });
+    filtersApplied.partsBrands = `${parsedIntent.partsBrands.join(', ')} (${beforeCount} → ${filtered.length})`;
+  }
+
+  // ── 4. PRICE FILTERING (CRITICAL - with proper currency conversion) ──
+  // Database stores prices in AED. User typically specifies in USD.
+  const CURRENCY_TO_AED = {
+    'USD': 3.67, 'EUR': 4.00, 'GBP': 4.65, 'AED': 1, 'SAR': 0.98, 'JPY': 0.025, 'CNY': 0.51,
+  };
+
+  const priceCurrency = (parsedIntent.priceCurrency || 'USD').toUpperCase();
+  const conversionRate = CURRENCY_TO_AED[priceCurrency] || 3.67; // Default to USD→AED
+
+  if (parsedIntent.maxPrice != null) {
+    const maxPriceAED = parsedIntent.maxPrice * conversionRate;
+    const beforeCount = filtered.length;
+    filtered = filtered.filter(p => {
+      if (p.price == null || p.price === undefined) return true; // Include parts with no price listed
+      return p.price <= maxPriceAED;
+    });
+    filtersApplied.maxPrice = `≤ $${parsedIntent.maxPrice} ${priceCurrency} (${maxPriceAED.toFixed(0)} AED) (${beforeCount} → ${filtered.length})`;
+  }
+
+  if (parsedIntent.minPrice != null) {
+    const minPriceAED = parsedIntent.minPrice * conversionRate;
+    const beforeCount = filtered.length;
+    filtered = filtered.filter(p => {
+      if (p.price == null || p.price === undefined) return false; // Exclude parts with no price
+      return p.price >= minPriceAED;
+    });
+    filtersApplied.minPrice = `≥ $${parsedIntent.minPrice} ${priceCurrency} (${minPriceAED.toFixed(0)} AED) (${beforeCount} → ${filtered.length})`;
+  }
+
+  // ── 5. STOCK FILTERING ──
+  if (parsedIntent.requireHighStock) {
+    const beforeCount = filtered.length;
+    filtered = filtered.filter(p => (p.quantity || 0) >= 10);
+    filtersApplied.stock = `High stock qty≥10 (${beforeCount} → ${filtered.length})`;
+  } else if (parsedIntent.requireInStock) {
+    const beforeCount = filtered.length;
+    filtered = filtered.filter(p => (p.quantity || 0) > 0);
+    filtersApplied.stock = `In stock qty>0 (${beforeCount} → ${filtered.length})`;
+  }
+
+  // ── 6. DELIVERY FILTERING ──
+  if (parsedIntent.fastDelivery || parsedIntent.maxDeliveryDays) {
+    const maxDays = parsedIntent.maxDeliveryDays || 5;
+    const beforeCount = filtered.length;
+    filtered = filtered.filter(p => {
+      if (!p.deliveryDays) return true; // Include if delivery not specified
+      return p.deliveryDays <= maxDays;
+    });
+    filtersApplied.delivery = `≤ ${maxDays} days (${beforeCount} → ${filtered.length})`;
+  }
+
+  // ── 7. EXCLUSION FILTERING ──
+  if (parsedIntent.excludeBrands && parsedIntent.excludeBrands.length > 0) {
+    const excludeLower = parsedIntent.excludeBrands.map(b => b.toLowerCase());
+    const beforeCount = filtered.length;
+    filtered = filtered.filter(p => {
+      if (!p.brand) return true;
+      return !excludeLower.some(b => p.brand.toLowerCase().includes(b));
+    });
+    filtersApplied.excludeBrands = `Excluded: ${parsedIntent.excludeBrands.join(', ')} (${beforeCount} → ${filtered.length})`;
+  }
+
+  // ── 8. QUANTITY REQUIREMENT ──
+  if (parsedIntent.requestedQuantity && parsedIntent.requestedQuantity > 1) {
+    const beforeCount = filtered.length;
+    filtered = filtered.filter(p => (p.quantity || 0) >= parsedIntent.requestedQuantity);
+    filtersApplied.quantity = `≥ ${parsedIntent.requestedQuantity} units (${beforeCount} → ${filtered.length})`;
+  }
+
+  const filterTime = Date.now() - startTime;
+
+  return {
+    matchingParts: filtered,
+    analysis: {
+      totalReceived: totalBefore,
+      matching: filtered.length,
+      excluded: totalBefore - filtered.length,
+      filterTime,
+      filtersApplied,
+    },
+  };
+}
+
+/**
+ * Main AI search function v2 - combines intent parsing with clean filter format
+ * Returns a standardized format for the search controller
  */
 async function parseSearchQuery(query) {
   const startTime = Date.now();
 
   try {
-    // Parse user intent
+    // Parse user intent (local + optional Gemini enhancement)
     const intent = await parseUserIntent(query);
 
-    if (!intent.success) {
-      return createFallbackResponse(query, 'Intent parsing failed');
-    }
-
-    const understood = intent.understood || {};
-
-    // Convert to the expected filter format for backward compatibility
+    // Convert to the backward-compatible filter format
     const filters = {
-      brand: understood.brands || [],
-      category: understood.categories?.[0] || '',
-      maxPrice: understood.priceConstraints?.maxPrice || null,
-      minPrice: understood.priceConstraints?.minPrice || null,
-      priceCurrency: understood.priceConstraints?.currency || 'USD',
-      inStock:
-        understood.stockConstraints?.requireInStock ||
-        understood.stockConstraints?.requireHighStock ||
-        false,
-      stockLevel: understood.stockConstraints?.requireHighStock ? 'high' : '',
-      minQuantity:
-        understood.stockConstraints?.minQuantity ||
-        (understood.stockConstraints?.requireHighStock ? 10 : null),
+      brand: intent.partsBrands || [],
+      vehicleBrand: intent.vehicleBrand || null,
+      category: intent.categories?.[0] || '',
+      categories: intent.categories || [],
+      maxPrice: intent.maxPrice,
+      minPrice: intent.minPrice,
+      priceCurrency: intent.priceCurrency || 'USD',
+      inStock: intent.requireInStock || intent.requireHighStock || false,
+      stockLevel: intent.requireHighStock ? 'high' : '',
+      minQuantity: intent.requireHighStock ? 10 : null,
+      fastDelivery: intent.fastDelivery || false,
+      maxDeliveryDays: intent.maxDeliveryDays || null,
+      oem: intent.oem || false,
+      certifiedSupplier: intent.certifiedSupplier || false,
+      requestedQuantity: intent.requestedQuantity || null,
+      sortPreference: intent.sortPreference || null,
       exclude: {
-        brands: understood.exclusions?.brands || [],
-        stockLevels: understood.stockConstraints?.excludeLowStock
-          ? ['low']
-          : [],
+        brands: intent.excludeBrands || [],
+        origins: intent.excludeOrigins || [],
+        stockLevels: intent.requireHighStock ? ['low'] : [],
       },
     };
 
@@ -474,185 +680,33 @@ async function parseSearchQuery(query) {
 
     return {
       success: true,
-      searchTerms: [
-        ...(understood.partNumbers || []),
-        ...(understood.searchKeywords || []),
-      ],
-      filters: normalizeFilters(filters),
-      intent: understood.summary || `Search for: ${query}`,
+      searchTerms: [...(intent.partNumbers || []), ...(intent.searchKeywords || [])],
+      filters,
+      intent: intent.summary || `Search for: ${query}`,
       suggestions: intent.suggestions || [],
-      rawResponse: intent,
       parseTime,
-      // New: Include the full intent for advanced filtering
-      userIntent: intent,
+      // Pass full parsed intent for the deterministic filter engine
+      parsedIntent: intent,
     };
   } catch (error) {
     console.warn(`⚠️ AI search error: ${error.message}`);
-    return createFallbackResponse(query, error.message);
-  }
-}
-
-/**
- * Create a fallback intent when AI fails
- */
-function createFallbackIntent(query, errorReason) {
-  const understood = extractBasicIntent(query);
-  return {
-    success: false,
-    understood,
-    confidence: 'LOW',
-    suggestions: ['Try being more specific'],
-    error: errorReason,
-  };
-}
-
-/**
- * Extract basic intent from query without AI (fast fallback)
- */
-function extractBasicIntent(query) {
-  if (!query) return {};
-
-  const queryLower = query.toLowerCase();
-
-  // Extract price
-  let maxPrice = null;
-  let minPrice = null;
-  const priceMatch = queryLower.match(
-    /(?:under|below|less than|max|<)\s*\$?\s*(\d+)/,
-  );
-  if (priceMatch) maxPrice = parseInt(priceMatch[1]);
-
-  const minPriceMatch = queryLower.match(
-    /(?:over|above|more than|min|>)\s*\$?\s*(\d+)/,
-  );
-  if (minPriceMatch) minPrice = parseInt(minPriceMatch[1]);
-
-  // Extract stock requirements
-  const requireInStock = /\b(in\s*stock|available|have|ready)\b/i.test(
-    queryLower,
-  );
-  const requireHighStock =
-    /\b(full\s*stock|high\s*stock|plenty|lots|well\s*stocked|many)\b/i.test(
-      queryLower,
-    );
-  const excludeLowStock =
-    /\b(no\s*low|exclude\s*low|not\s*low)\b/i.test(queryLower) ||
-    requireHighStock;
-
-  return {
-    summary: `Search for: ${query}`,
-    searchKeywords: extractBasicKeywords(query),
-    partNumbers: extractPartNumbers(query),
-    brands: extractBrands(query),
-    priceConstraints: {
-      maxPrice,
-      minPrice,
-      currency: 'USD',
-    },
-    stockConstraints: {
-      requireInStock: requireInStock || requireHighStock,
-      requireHighStock,
-      excludeLowStock,
-      minQuantity: requireHighStock ? 10 : null,
-    },
-  };
-}
-
-/**
- * Extract part numbers from query
- */
-function extractPartNumbers(query) {
-  if (!query) return [];
-
-  const partNumberPattern = /\b[A-Za-z0-9][-A-Za-z0-9_]{3,19}\b/g;
-  const matches = query.match(partNumberPattern) || [];
-
-  // Filter to only include tokens that look like part numbers (have numbers)
-  return matches.filter((m) => /\d/.test(m) && m.length >= 4);
-}
-
-/**
- * Extract brand names from query
- */
-function extractBrands(query) {
-  if (!query) return [];
-
-  const knownBrands = [
-    'toyota',
-    'honda',
-    'nissan',
-    'bmw',
-    'mercedes',
-    'audi',
-    'volkswagen',
-    'ford',
-    'chevrolet',
-    'hyundai',
-    'kia',
-    'mazda',
-    'subaru',
-    'lexus',
-    'bosch',
-    'brembo',
-    'skf',
-    'denso',
-    'valeo',
-    'mann',
-    'mahle',
-    'ngk',
-    'delphi',
-    'sachs',
-    'bilstein',
-    'kyb',
-    'monroe',
-    'gates',
-    'continental',
-    'acdelco',
-    'motorcraft',
-    'mopar',
-    'mitsubishi',
-    'isuzu',
-    'porsche',
-  ];
-
-  const queryLower = query.toLowerCase();
-  return knownBrands
-    .filter((brand) => queryLower.includes(brand))
-    .map((b) => b.toUpperCase());
-}
-
-/**
- * Create a fallback response using basic parsing
- */
-function createFallbackResponse(query, errorReason) {
-  const intent = extractBasicIntent(query);
-  return {
-    success: false,
-    searchTerms: [
-      ...(intent.searchKeywords || []),
-      ...(intent.partNumbers || []),
-    ],
-    filters: {
-      brand: intent.brands || [],
-      maxPrice: intent.priceConstraints?.maxPrice,
-      minPrice: intent.priceConstraints?.minPrice,
-      priceCurrency: 'USD',
-      inStock: intent.stockConstraints?.requireInStock || false,
-      stockLevel: intent.stockConstraints?.requireHighStock ? 'high' : '',
-      minQuantity: intent.stockConstraints?.minQuantity,
-      exclude: {
-        stockLevels: intent.stockConstraints?.excludeLowStock ? ['low'] : [],
+    const localParsed = buildLocalParsedIntent(query);
+    return {
+      success: false,
+      searchTerms: [...(localParsed.partNumbers || []), ...(localParsed.searchKeywords || [])],
+      filters: {
+        brand: localParsed.partsBrands || [],
+        maxPrice: localParsed.maxPrice,
+        minPrice: localParsed.minPrice,
+        priceCurrency: 'USD',
+        inStock: localParsed.requireInStock || false,
       },
-    },
-    intent: `Searching for: "${query}"`,
-    suggestions: [
-      'Try being more specific',
-      'Include brand names or part numbers',
-    ],
-    error: errorReason,
-    usedFallback: true,
-    userIntent: { understood: intent },
-  };
+      intent: `Searching for: "${query}"`,
+      suggestions: ['Try being more specific', 'Include brand names or part numbers'],
+      error: error.message,
+      parsedIntent: localParsed,
+    };
+  }
 }
 
 /**
@@ -800,759 +854,9 @@ Provide a brief, helpful summary and 2-3 recommendations. Respond with ONLY vali
   }
 }
 
-/**
- * Normalize filters to ensure consistent format
- * CRITICAL: Preserve ALL filter fields from AI parsing
- */
-function normalizeFilters(filters) {
-  const normalized = {};
+// Old normalizeFilters, extractBasicKeywords, extractBasicFilters removed
+// All functionality is now in buildLocalParsedIntent and filterDataWithAI above
 
-  // ═══════════════════════════════════════════════════════════════
-  // BRAND FILTERS (CRITICAL)
-  // ═══════════════════════════════════════════════════════════════
-  if (filters.brand) {
-    normalized.brand = Array.isArray(filters.brand)
-      ? filters.brand
-      : [filters.brand];
-  }
-
-  // CRITICAL: Preserve vehicleBrand for vehicle compatibility filtering
-  if (filters.vehicleBrand) {
-    normalized.vehicleBrand = filters.vehicleBrand.toUpperCase();
-  }
-
-  if (filters.supplier) {
-    normalized.supplier = filters.supplier;
-  }
-
-  // ═══════════════════════════════════════════════════════════════
-  // PRICE FILTERS
-  // ═══════════════════════════════════════════════════════════════
-  if (
-    filters.minPrice !== undefined &&
-    filters.minPrice !== null &&
-    !isNaN(filters.minPrice)
-  ) {
-    normalized.minPrice = Number(filters.minPrice);
-  }
-  if (
-    filters.maxPrice !== undefined &&
-    filters.maxPrice !== null &&
-    !isNaN(filters.maxPrice)
-  ) {
-    normalized.maxPrice = Number(filters.maxPrice);
-  }
-  // Preserve the price currency for accurate filtering
-  if (filters.priceCurrency) {
-    normalized.priceCurrency = filters.priceCurrency.toUpperCase();
-  } else {
-    normalized.priceCurrency = 'USD'; // Default to USD
-  }
-
-  // ═══════════════════════════════════════════════════════════════
-  // STOCK & DELIVERY FILTERS
-  // ═══════════════════════════════════════════════════════════════
-  if (filters.inStock !== undefined) {
-    normalized.inStock = Boolean(filters.inStock);
-  }
-  if (filters.stockStatus) {
-    normalized.stockStatus = filters.stockStatus;
-  }
-  // CRITICAL: Stock level for "full stock" / "plenty" / "well stocked" queries
-  if (filters.stockLevel) {
-    normalized.stockLevel = filters.stockLevel.toLowerCase();
-  }
-  // Minimum quantity filter for high stock requirements
-  if (
-    filters.minQuantity !== undefined &&
-    filters.minQuantity !== null &&
-    !isNaN(filters.minQuantity)
-  ) {
-    normalized.minQuantity = Number(filters.minQuantity);
-  }
-  if (
-    filters.deliveryDays !== undefined &&
-    filters.deliveryDays !== null &&
-    !isNaN(filters.deliveryDays)
-  ) {
-    normalized.deliveryDays = Number(filters.deliveryDays);
-  }
-
-  // ═══════════════════════════════════════════════════════════════
-  // CATEGORY & CONDITION FILTERS
-  // ═══════════════════════════════════════════════════════════════
-  if (filters.category) {
-    normalized.category = filters.category.toLowerCase();
-  }
-  if (filters.condition && filters.condition !== 'all') {
-    normalized.condition = filters.condition;
-  }
-
-  // ═══════════════════════════════════════════════════════════════
-  // EXCLUSION FILTERS (CRITICAL for "not BOSCH" and "no low stock" queries)
-  // ═══════════════════════════════════════════════════════════════
-  if (filters.exclude && typeof filters.exclude === 'object') {
-    normalized.exclude = {
-      brands: Array.isArray(filters.exclude.brands)
-        ? filters.exclude.brands
-        : [],
-      conditions: Array.isArray(filters.exclude.conditions)
-        ? filters.exclude.conditions
-        : [],
-      origins: Array.isArray(filters.exclude.origins)
-        ? filters.exclude.origins
-        : [],
-      stockLevels: Array.isArray(filters.exclude.stockLevels)
-        ? filters.exclude.stockLevels.map((s) => s.toLowerCase())
-        : [],
-    };
-  }
-
-  // ═══════════════════════════════════════════════════════════════
-  // SUPPLIER & ORIGIN FILTERS
-  // ═══════════════════════════════════════════════════════════════
-  if (filters.supplierOrigin) {
-    normalized.supplierOrigin = filters.supplierOrigin.toUpperCase();
-  }
-  if (filters.partOrigin) {
-    normalized.partOrigin = filters.partOrigin.toUpperCase();
-  }
-  if (filters.certifiedOnly !== undefined) {
-    normalized.certifiedOnly = Boolean(filters.certifiedOnly);
-  }
-  if (filters.oemSupplier !== undefined) {
-    normalized.oemSupplier = Boolean(filters.oemSupplier);
-  }
-
-  // ═══════════════════════════════════════════════════════════════
-  // B2B QUANTITY FILTER
-  // ═══════════════════════════════════════════════════════════════
-  if (
-    filters.requestedQuantity !== undefined &&
-    filters.requestedQuantity !== null &&
-    !isNaN(filters.requestedQuantity)
-  ) {
-    normalized.requestedQuantity = Number(filters.requestedQuantity);
-  }
-
-  // ═══════════════════════════════════════════════════════════════
-  // SORTING & INTENT
-  // ═══════════════════════════════════════════════════════════════
-  if (filters.sortBy) {
-    normalized.sortBy = filters.sortBy;
-  }
-  if (filters.sortOrder) {
-    normalized.sortOrder = filters.sortOrder;
-  }
-  if (filters.intentType) {
-    normalized.intentType = filters.intentType;
-  }
-
-  return normalized;
-}
-
-/**
- * Basic keyword extraction fallback - Fast and intelligent
- */
-function extractBasicKeywords(query) {
-  if (!query) return [];
-
-  const stopWords = new Set([
-    'find',
-    'me',
-    'show',
-    'get',
-    'looking',
-    'for',
-    'need',
-    'want',
-    'the',
-    'a',
-    'an',
-    'some',
-    'with',
-    'from',
-    'by',
-    'i',
-    'am',
-    'please',
-    'can',
-    'you',
-    'under',
-    'below',
-    'above',
-    'over',
-    'price',
-    'priced',
-    'less',
-    'more',
-    'than',
-    'and',
-    'or',
-    'parts',
-    'part',
-    'verified',
-    'suppliers',
-    'supplier',
-    'around',
-    'about',
-    'not',
-    'no',
-    'exclude',
-    'without',
-  ]);
-
-  // Vehicle manufacturers - these go to vehicleBrand, not searchTerms
-  const vehicleBrands = new Set([
-    'toyota',
-    'honda',
-    'nissan',
-    'bmw',
-    'mercedes',
-    'audi',
-    'volkswagen',
-    'ford',
-    'chevrolet',
-    'hyundai',
-    'kia',
-    'mazda',
-    'subaru',
-    'lexus',
-    'porsche',
-    'volvo',
-    'infiniti',
-    'acura',
-    'jaguar',
-    'mitsubishi',
-    'suzuki',
-    'isuzu',
-    'jeep',
-    'dodge',
-    'chrysler',
-    'gmc',
-    'cadillac',
-    'buick',
-    'lincoln',
-    'tesla',
-  ]);
-
-  // Parts suppliers - these go to filters.brand, not searchTerms
-  const partsSuppliers = new Set([
-    'bosch',
-    'skf',
-    'denso',
-    'valeo',
-    'brembo',
-    'gates',
-    'continental',
-    'mann',
-    'mahle',
-    'sachs',
-    'bilstein',
-    'kyb',
-    'monroe',
-    'koni',
-    'acdelco',
-    'motorcraft',
-    'mopar',
-    'ntn',
-    'fag',
-    'timken',
-    'nsk',
-    'ngk',
-    'delphi',
-    'aisin',
-    'luk',
-    'trw',
-    'ate',
-    'ferodo',
-    'hella',
-    'osram',
-    'philips',
-    'febi',
-    'lemforder',
-    'meyle',
-    'swag',
-  ]);
-
-  // Important part keywords to keep
-  const importantKeywords = new Set([
-    'brake',
-    'brakes',
-    'filter',
-    'oil',
-    'air',
-    'fuel',
-    'engine',
-    'suspension',
-    'steering',
-    'transmission',
-    'clutch',
-    'alternator',
-    'starter',
-    'radiator',
-    'bearing',
-    'pump',
-    'valve',
-    'piston',
-    'gasket',
-    'belt',
-    'hose',
-    'sensor',
-    'shock',
-    'strut',
-    'rotor',
-    'caliper',
-    'pad',
-    'disc',
-    'wheel',
-    'tire',
-    'hub',
-    'axle',
-    'seal',
-    'mount',
-    'bushing',
-    'link',
-    'arm',
-    'rod',
-    'exhaust',
-    'muffler',
-    'injector',
-    'coil',
-    'spark',
-    'plug',
-    'battery',
-    'oem',
-    'genuine',
-    'original',
-  ]);
-
-  // Check for part numbers first - NEVER remove these
-  const partNumberPattern = /^[A-Za-z0-9][-A-Za-z0-9_]{3,19}$/;
-  const tokens = query.replace(/[^\w\s-]/g, ' ').split(/\s+/);
-  const partNumbers = tokens.filter(
-    (t) => partNumberPattern.test(t) && /\d/.test(t) && t.length >= 4,
-  );
-
-  const words = query
-    .toLowerCase()
-    .replace(/[^\w\s-]/g, ' ')
-    .split(/\s+/)
-    .filter((word) => {
-      if (word.length < 2) return false;
-      if (stopWords.has(word)) return false;
-      if (vehicleBrands.has(word)) return false; // Vehicle brands go to vehicleBrand filter
-      if (partsSuppliers.has(word)) return false; // Parts suppliers go to brand filter
-      // Keep important keywords
-      return importantKeywords.has(word) || word.length > 3;
-    });
-
-  // Combine part numbers with keywords
-  return [...new Set([...partNumbers, ...words])].slice(0, 8);
-}
-
-/**
- * Basic filter extraction fallback - Full enterprise-grade intelligence
- */
-function extractBasicFilters(query) {
-  if (!query) return { priceCurrency: 'USD' };
-
-  const filters = { priceCurrency: 'USD' };
-  const exclude = { brands: [], conditions: [], origins: [] };
-  let queryLower = query.toLowerCase();
-
-  // ═══════════════════════════════════════════════════════════════
-  // TYPO CORRECTIONS
-  // ═══════════════════════════════════════════════════════════════
-  const typoCorrections = {
-    toyta: 'toyota',
-    toyata: 'toyota',
-    tayota: 'toyota',
-    bosh: 'bosch',
-    bosc: 'bosch',
-    bremb: 'brembo',
-    bremboo: 'brembo',
-    nisaan: 'nissan',
-    nisan: 'nissan',
-    mercedez: 'mercedes',
-    mersedes: 'mercedes',
-    merc: 'mercedes',
-    hynudai: 'hyundai',
-    hyundia: 'hyundai',
-    hundai: 'hyundai',
-    volkswagon: 'volkswagen',
-    vw: 'volkswagen',
-    porshe: 'porsche',
-    porche: 'porsche',
-    chevrolete: 'chevrolet',
-    chevy: 'chevrolet',
-    acdelko: 'acdelco',
-  };
-
-  for (const [typo, correct] of Object.entries(typoCorrections)) {
-    queryLower = queryLower.replace(new RegExp(`\\b${typo}\\b`, 'gi'), correct);
-  }
-
-  // ═══════════════════════════════════════════════════════════════
-  // 1️⃣ VEHICLE BRAND vs PARTS BRAND DETECTION (CRITICAL!)
-  // ═══════════════════════════════════════════════════════════════
-  const vehicleBrands = [
-    'toyota',
-    'honda',
-    'nissan',
-    'bmw',
-    'mercedes',
-    'audi',
-    'volkswagen',
-    'ford',
-    'chevrolet',
-    'hyundai',
-    'kia',
-    'mazda',
-    'subaru',
-    'lexus',
-    'porsche',
-    'volvo',
-    'infiniti',
-    'acura',
-    'jaguar',
-    'mitsubishi',
-    'suzuki',
-    'isuzu',
-    'jeep',
-    'dodge',
-    'chrysler',
-    'gmc',
-    'cadillac',
-    'buick',
-    'lincoln',
-    'tesla',
-  ];
-
-  const partsSuppliers = [
-    'bosch',
-    'brembo',
-    'skf',
-    'denso',
-    'valeo',
-    'mann',
-    'mahle',
-    'sachs',
-    'bilstein',
-    'kyb',
-    'monroe',
-    'gates',
-    'continental',
-    'ngk',
-    'delphi',
-    'aisin',
-    'luk',
-    'fag',
-    'timken',
-    'nsk',
-    'ntn',
-    'trw',
-    'ate',
-    'ferodo',
-    'acdelco',
-    'motorcraft',
-    'mopar',
-    'hella',
-    'osram',
-    'philips',
-    'febi',
-    'lemforder',
-    'meyle',
-    'swag',
-    'stellox',
-  ];
-
-  // Check for OEM/GENUINE/ORIGINAL intent (treat vehicle brand as parts brand)
-  const hasOemIntent = queryLower.match(/\b(oem|genuine|original)\b/);
-
-  // Check for "from BRAND" pattern (treat as parts brand filter)
-  const hasFromBrandPattern = queryLower.match(/\bfrom\s+(\w+)/i);
-
-  // Check for "for BRAND" / "for my BRAND" pattern (vehicle compatibility)
-  const hasForBrandPattern = queryLower.match(
-    /\b(?:for|for\s+my|compatible\s+with)\s+(\w+)/i,
-  );
-
-  // Detect vehicle brands and classify correctly
-  for (const brand of vehicleBrands) {
-    if (new RegExp(`\\b${brand}\\b`, 'i').test(queryLower)) {
-      // RULE 1: OEM/GENUINE/ORIGINAL + vehicle brand = parts brand filter
-      // RULE 2: "from BRAND" = parts brand filter
-      // RULE 3: Brand alone without "for" = parts brand filter (user browsing)
-      // RULE 4: "for BRAND" / "for my BRAND" = vehicle compatibility
-
-      const isBrandForCompatibility =
-        hasForBrandPattern && hasForBrandPattern[1].toLowerCase() === brand;
-
-      if (
-        hasOemIntent ||
-        (hasFromBrandPattern &&
-          hasFromBrandPattern[1].toLowerCase() === brand) ||
-        !isBrandForCompatibility
-      ) {
-        // Apply as parts brand filter
-        filters.brand = filters.brand || [];
-        if (!filters.brand.includes(brand.toUpperCase())) {
-          filters.brand.push(brand.toUpperCase());
-        }
-        console.log(
-          `🏭 Fallback: Detected brand filter '${brand.toUpperCase()}' (OEM intent: ${!!hasOemIntent}, from pattern: ${!!(hasFromBrandPattern && hasFromBrandPattern[1].toLowerCase() === brand)})`,
-        );
-      } else {
-        // Vehicle compatibility only
-        filters.vehicleBrand = brand.toUpperCase();
-        console.log(
-          `🚗 Fallback: Detected vehicle compatibility '${brand.toUpperCase()}'`,
-        );
-      }
-      break; // Only take first vehicle brand
-    }
-  }
-
-  // Detect parts suppliers (ALWAYS go to filters.brand)
-  const foundPartsSuppliers = partsSuppliers.filter((brand) =>
-    new RegExp(`\\b${brand}\\b`, 'i').test(queryLower),
-  );
-  if (foundPartsSuppliers.length > 0) {
-    filters.brand = filters.brand || [];
-    filters.brand.push(...foundPartsSuppliers.map((b) => b.toUpperCase()));
-  }
-
-  // ═══════════════════════════════════════════════════════════════
-  // 4️⃣ NEGATIVE / EXCLUSION DETECTION
-  // ═══════════════════════════════════════════════════════════════
-  const excludeBrandMatch = queryLower.match(
-    /(?:not|exclude|without|no|except|avoid)\s+(\w+)/gi,
-  );
-  if (excludeBrandMatch) {
-    excludeBrandMatch.forEach((match) => {
-      const brand = match
-        .replace(/^(not|exclude|without|no|except|avoid)\s+/i, '')
-        .trim();
-      if ([...vehicleBrands, ...partsSuppliers].includes(brand.toLowerCase())) {
-        exclude.brands.push(brand.toUpperCase());
-      }
-    });
-  }
-
-  // Exclude conditions
-  if (queryLower.match(/(?:not|exclude|no)\s+used/))
-    exclude.conditions.push('used');
-  if (queryLower.match(/(?:not|exclude|no)\s+refurbished/))
-    exclude.conditions.push('refurbished');
-
-  // Exclude origins
-  if (queryLower.match(/(?:not|no|exclude)\s+chinese|no\s+china/))
-    exclude.origins.push('CN');
-
-  // ═══════════════════════════════════════════════════════════════
-  // 5️⃣ QUANTITY DETECTION (B2B)
-  // ═══════════════════════════════════════════════════════════════
-  const qtyMatch = queryLower.match(
-    /(?:x|qty|quantity|need|order)\s*(\d+)|(\d+)\s*(?:pcs|pieces|units)/i,
-  );
-  if (qtyMatch) {
-    filters.requestedQuantity = parseInt(qtyMatch[1] || qtyMatch[2]);
-  }
-
-  // ═══════════════════════════════════════════════════════════════
-  // 6️⃣ SUPPLIER & ORIGIN DETECTION
-  // ═══════════════════════════════════════════════════════════════
-  if (queryLower.match(/\bgerman\b/)) filters.supplierOrigin = 'DE';
-  if (queryLower.match(/\bjapanese\b/)) filters.supplierOrigin = 'JP';
-  if (queryLower.match(/\bamerican\b|\busa\b/)) filters.supplierOrigin = 'US';
-  if (queryLower.match(/\bcertified\b/)) filters.certifiedOnly = true;
-  if (queryLower.match(/\boem\s+supplier\b/)) filters.oemSupplier = true;
-  if (queryLower.match(/\blocal\s+supplier\b/)) filters.localSupplier = true;
-
-  // ═══════════════════════════════════════════════════════════════
-  // 8️⃣ SMART PRICE HANDLING
-  // ═══════════════════════════════════════════════════════════════
-
-  // Currency detection
-  if (queryLower.match(/\b(aed|dirham)/)) filters.priceCurrency = 'AED';
-  else if (queryLower.match(/\b(eur|euro|€)/)) filters.priceCurrency = 'EUR';
-
-  // "around $X" / "about $X" = ±20% range
-  const aroundMatch = queryLower.match(
-    /(?:around|about|approximately)\s*\$?\s*(\d+)/,
-  );
-  if (aroundMatch) {
-    const price = parseInt(aroundMatch[1]);
-    filters.minPrice = Math.round(price * 0.8);
-    filters.maxPrice = Math.round(price * 1.2);
-  }
-
-  // Price range: "$X-$Y", "X to Y", "between X and Y"
-  const rangeMatch = queryLower.match(
-    /\$?\s*(\d+)\s*[-–to]+\s*\$?\s*(\d+)|between\s*\$?\s*(\d+)\s*and\s*\$?\s*(\d+)/,
-  );
-  if (rangeMatch && !filters.minPrice && !filters.maxPrice) {
-    filters.minPrice = parseInt(rangeMatch[1] || rangeMatch[3]);
-    filters.maxPrice = parseInt(rangeMatch[2] || rangeMatch[4]);
-  }
-
-  // Max price patterns (explicit numbers override adjectives)
-  if (!filters.maxPrice) {
-    const maxPriceMatch = queryLower.match(
-      /(?:under|below|less\s+than|max|cheaper\s+than)\s*\$?\s*(\d+)|(\d+)\s*(?:usd|dollars?|max)|(?:\$)\s*(\d+)(?:\s|$)/i,
-    );
-    if (maxPriceMatch) {
-      const price = maxPriceMatch[1] || maxPriceMatch[2] || maxPriceMatch[3];
-      if (price) filters.maxPrice = parseInt(price);
-    }
-  }
-
-  // Min price patterns
-  if (!filters.minPrice) {
-    const minPriceMatch = queryLower.match(
-      /(?:over|above|more\s+than|min|at\s+least)\s*\$?\s*(\d+)/,
-    );
-    if (minPriceMatch) filters.minPrice = parseInt(minPriceMatch[1]);
-  }
-
-  // Adjective-based pricing (only if no explicit number)
-  if (!filters.maxPrice && !filters.minPrice) {
-    if (queryLower.match(/\b(cheap|budget|affordable|inexpensive)\b/))
-      filters.maxPrice = 100;
-    if (queryLower.match(/\b(premium|high-end|expensive|luxury)\b/))
-      filters.minPrice = 500;
-    if (queryLower.match(/\b(mid-range|moderate|average)\b/)) {
-      filters.minPrice = 100;
-      filters.maxPrice = 500;
-    }
-  }
-
-  // ═══════════════════════════════════════════════════════════════
-  // STOCK & DELIVERY
-  // ═══════════════════════════════════════════════════════════════
-  if (queryLower.match(/\b(in\s*stock|available|ready)\b/))
-    filters.inStock = true;
-  if (queryLower.match(/\b(fast|express|urgent|quick|asap)\b/))
-    filters.deliveryDays = 3;
-  else if (queryLower.match(/\b(soon|this\s*week)\b/)) filters.deliveryDays = 7;
-
-  // ═══════════════════════════════════════════════════════════════
-  // CATEGORY DETECTION
-  // ═══════════════════════════════════════════════════════════════
-  const categoryMappings = [
-    {
-      patterns: ['brake', 'brakes', 'rotor', 'caliper', 'pad', 'pads', 'disc'],
-      category: 'brakes',
-    },
-    {
-      patterns: [
-        'filter',
-        'filters',
-        'oil filter',
-        'air filter',
-        'fuel filter',
-      ],
-      category: 'filters',
-    },
-    {
-      patterns: ['bearing', 'bearings', 'hub', 'wheel bearing'],
-      category: 'wheels',
-    },
-    {
-      patterns: [
-        'suspension',
-        'shock',
-        'strut',
-        'spring',
-        'damper',
-        'control arm',
-      ],
-      category: 'suspension',
-    },
-    {
-      patterns: [
-        'electrical',
-        'alternator',
-        'starter',
-        'battery',
-        'ignition',
-        'spark plug',
-        'coil',
-      ],
-      category: 'electrical',
-    },
-    {
-      patterns: [
-        'engine',
-        'piston',
-        'valve',
-        'timing',
-        'camshaft',
-        'crankshaft',
-        'gasket',
-      ],
-      category: 'engine',
-    },
-    {
-      patterns: ['transmission', 'clutch', 'gearbox', 'cv joint', 'driveshaft'],
-      category: 'transmission',
-    },
-    {
-      patterns: ['cooling', 'radiator', 'thermostat', 'water pump', 'coolant'],
-      category: 'cooling',
-    },
-    {
-      patterns: ['steering', 'tie rod', 'rack', 'power steering', 'ball joint'],
-      category: 'steering',
-    },
-    {
-      patterns: ['exhaust', 'muffler', 'catalytic', 'manifold'],
-      category: 'exhaust',
-    },
-  ];
-
-  for (const { patterns, category } of categoryMappings) {
-    if (patterns.some((p) => queryLower.includes(p))) {
-      filters.category = category;
-      break;
-    }
-  }
-
-  // ═══════════════════════════════════════════════════════════════
-  // INTENT TYPE DETECTION
-  // ═══════════════════════════════════════════════════════════════
-  const hasPartNumber =
-    /\b[A-Za-z0-9][-A-Za-z0-9_]{3,19}\b/.test(query) && /\d/.test(query);
-  const hasOnlyBrand =
-    (filters.brand || filters.vehicleBrand) &&
-    !filters.category &&
-    !filters.maxPrice;
-  const hasOnlyCategory =
-    filters.category &&
-    !filters.brand &&
-    !filters.vehicleBrand &&
-    !filters.maxPrice;
-
-  if (hasPartNumber) {
-    filters.intentType = 'specific_part';
-  } else if (hasOnlyBrand || hasOnlyCategory) {
-    filters.intentType = 'browse';
-  } else {
-    filters.intentType = 'filtered_search';
-  }
-
-  // Add exclusions if any
-  if (
-    exclude.brands.length ||
-    exclude.conditions.length ||
-    exclude.origins.length
-  ) {
-    filters.exclude = exclude;
-  }
-
-  return filters;
-}
 
 // ====================================
 // EXCEL DATA ANALYSIS - AI POWERED

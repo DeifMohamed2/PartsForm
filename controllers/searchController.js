@@ -738,19 +738,22 @@ function convertCurrency(amount, fromCurrency = 'USD', toCurrency = 'AED') {
 }
 
 // Track active AI search requests to prevent duplicates
+// Track active AI search requests to prevent duplicates
 const activeAISearches = new Map();
-const AI_SEARCH_TIMEOUT = 15000; // 15 second timeout for AI parsing
-const DB_QUERY_TIMEOUT = 10000; // 10 second timeout for database queries
+const AI_SEARCH_TIMEOUT = 15000;
+const DB_QUERY_TIMEOUT = 10000;
 
 /**
- * AI-powered search - Professional grade with true AI understanding
- * POST /api/ai-search
+ * AI-Powered Smart Search (REBUILT)
+ * ─────────────────────────────────
+ * Architecture:
+ *   1. Parse user intent (local parser + optional Gemini enhancement)
+ *   2. Fetch data from DB / Elasticsearch using extracted search terms
+ *   3. Deterministic code-based filtering (price, stock, brand, delivery…)
+ *   4. Sort, deduplicate, return with clear explanation
  *
- * NEW ARCHITECTURE:
- * 1. AI parses user intent (understands what they want)
- * 2. Fetch data from database
- * 3. AI-driven filtering (smart filtering based on actual data)
- * 4. Return results with clear explanation
+ * CRITICAL: prices in DB are stored in AED.
+ *           User queries default to USD.  1 USD = 3.67 AED.
  */
 async function aiSearch(req, res) {
   const requestId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -768,11 +771,11 @@ async function aiSearch(req, res) {
       });
     }
 
-    // Prevent duplicate requests
+    // Prevent duplicate concurrent requests
     const normalizedQuery = query.trim().toLowerCase();
     if (activeAISearches.has(normalizedQuery)) {
-      const existingRequest = activeAISearches.get(normalizedQuery);
-      if (Date.now() - existingRequest.startTime < AI_SEARCH_TIMEOUT) {
+      const existing = activeAISearches.get(normalizedQuery);
+      if (Date.now() - existing.startTime < AI_SEARCH_TIMEOUT) {
         return res.json({
           success: false,
           error: 'Search in progress',
@@ -782,313 +785,212 @@ async function aiSearch(req, res) {
         });
       }
     }
-
     activeAISearches.set(normalizedQuery, { requestId, startTime: Date.now() });
+
     console.log(`🤖 AI Search [${requestId}]: "${query}"`);
     const startTime = Date.now();
 
-    // ═══════════════════════════════════════════════════════════════
-    // STEP 1: AI PARSES USER INTENT
-    // ═══════════════════════════════════════════════════════════════
+    // ─────────────────────────────────────────────────────────────
+    // STEP 1: PARSE USER INTENT  (local + optional Gemini merge)
+    // ─────────────────────────────────────────────────────────────
     let parsed;
     try {
       parsed = await geminiService.parseSearchQuery(query);
-      console.log(
-        '🧠 AI Intent:',
-        JSON.stringify(parsed.intent || parsed.filters, null, 2),
-      );
+      console.log('🧠 Parsed intent:', JSON.stringify(parsed.parsedIntent, null, 2));
     } catch (parseError) {
-      console.warn(`⚠️ AI parsing failed: ${parseError.message}`);
+      console.warn(`⚠️ parseSearchQuery failed: ${parseError.message}`);
       parsed = {
         success: false,
         searchTerms: [],
         filters: {},
         intent: query,
-        userIntent: null,
+        parsedIntent: null,
       };
     }
 
+    const parsedIntent = parsed.parsedIntent || {};
     const filters = parsed.filters || {};
-    const userIntent = parsed.userIntent || null;
-    const understood = userIntent?.understood || {};
 
-    // Log what AI understood
-    console.log('📋 Understood:', {
-      stockRequirements: understood.stockConstraints,
-      priceConstraints: understood.priceConstraints,
-      brands: understood.brands,
-    });
+    // Extract search components from the new flat parsedIntent
+    const partNumbers = parsedIntent.partNumbers || parsed.searchTerms || [];
+    const keywords = parsedIntent.searchKeywords || [];
+    const categories = parsedIntent.categories || [];
+    const partsBrands = parsedIntent.partsBrands || [];
 
-    // ═══════════════════════════════════════════════════════════════
-    // STEP 2: INTELLIGENT DATA FETCHING
-    // Use different search strategies based on what AI understood
-    // ═══════════════════════════════════════════════════════════════
-    let allResults = [];
-    let source = 'mongodb';
-
-    // Extract search components from AI understanding
-    const partNumbers = understood.partNumbers || parsed.searchTerms || [];
-    const keywords = understood.searchKeywords || [];
-    const categories = understood.categories || [];
-    const brands = understood.brands || filters.brand || [];
-
-    // Combine keywords and categories for text search
+    // Combine for text search
     const searchKeywords = [...new Set([...keywords, ...categories])];
+    const brandsList = partsBrands.length > 0 ? partsBrands : (filters.brand || []);
 
-    // Check if we have specific part numbers vs general keywords
-    const hasPartNumbers =
-      partNumbers.length > 0 &&
-      partNumbers.some((pn) => /^[A-Z0-9\-]+$/i.test(pn) && pn.length > 3);
+    const hasPartNumbers = partNumbers.length > 0 &&
+      partNumbers.some(pn => /^[A-Z0-9\-]{3,}$/i.test(pn));
     const hasKeywords = searchKeywords.length > 0;
 
-    console.log(
-      `🔍 Search strategy: partNumbers=${partNumbers.length}, keywords=${searchKeywords.length}, brands=${brands.length}`,
-    );
+    console.log(`🔍 Strategy: partNumbers=${partNumbers.length}, keywords=${searchKeywords.length}, brands=${brandsList.length}`);
 
+    // ─────────────────────────────────────────────────────────────
+    // STEP 2: FETCH DATA  (3 strategies: part#s → text → fallback)
+    // ─────────────────────────────────────────────────────────────
+    let allResults = [];
+    let source = 'mongodb';
     const useElasticsearch = await elasticsearchService.hasDocuments();
 
-    // STRATEGY 1: Search for specific part numbers (exact match)
+    // STRATEGY 1 — exact part number search
     if (hasPartNumbers && useElasticsearch) {
       try {
         const esResult = await elasticsearchService.searchMultiplePartNumbers(
-          partNumbers,
-          { limitPerPart: 200 },
+          partNumbers, { limitPerPart: 200 }
         );
         allResults = esResult.results;
         source = 'elasticsearch-parts';
-        console.log(
-          `📦 Part number search: ${esResult.found?.length || 0} found, ${esResult.notFound?.length || 0} not found`,
-        );
-      } catch (esError) {
-        console.error('ES part search failed:', esError.message);
-      }
+        console.log(`📦 Part# search: ${esResult.found?.length || 0} found, ${esResult.notFound?.length || 0} not found`);
+      } catch (e) { console.error('ES part search failed:', e.message); }
     }
 
-    // STRATEGY 2: Text search by keywords/categories/description
+    // STRATEGY 2 — text / keyword search
     if (allResults.length === 0 && (hasKeywords || !hasPartNumbers)) {
       const searchQuery = searchKeywords.join(' ') || query;
 
       if (useElasticsearch) {
         try {
-          // Use the full-text search that searches across descriptions, brands, etc.
           const esResult = await elasticsearchService.search(searchQuery, {
             limit: 500,
-            brand: brands.length > 0 ? brands[0] : undefined,
-            inStock: understood.stockConstraints?.requireInStock || false,
+            brand: brandsList.length > 0 ? brandsList[0] : undefined,
+            inStock: parsedIntent.requireInStock || false,
           });
           allResults = esResult.results || [];
           source = 'elasticsearch-text';
-          console.log(
-            `📦 Text search for "${searchQuery}": ${allResults.length} results`,
-          );
-        } catch (esError) {
-          console.error('ES text search failed:', esError.message);
-        }
+          console.log(`📦 Text search "${searchQuery}": ${allResults.length} results`);
+        } catch (e) { console.error('ES text search failed:', e.message); }
       }
 
-      // MongoDB fallback for text search
+      // MongoDB fallback
       if (allResults.length === 0) {
-        const searchTermsForMongo =
-          searchKeywords.length > 0 ? searchKeywords : [query];
-
-        for (const term of searchTermsForMongo.slice(0, 5)) {
-          const escapedTerm = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-          const mongoQuery = {
+        const terms = searchKeywords.length > 0 ? searchKeywords : [query];
+        for (const term of terms.slice(0, 5)) {
+          const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          const mongoQ = {
             $or: [
-              { partNumber: { $regex: escapedTerm, $options: 'i' } },
-              { description: { $regex: escapedTerm, $options: 'i' } },
-              { brand: { $regex: escapedTerm, $options: 'i' } },
-              { category: { $regex: escapedTerm, $options: 'i' } },
+              { partNumber: { $regex: escaped, $options: 'i' } },
+              { description: { $regex: escaped, $options: 'i' } },
+              { brand: { $regex: escaped, $options: 'i' } },
+              { category: { $regex: escaped, $options: 'i' } },
             ],
           };
-
-          // Add brand filter if specified
-          if (brands.length > 0) {
-            mongoQuery.brand = { $in: brands.map((b) => new RegExp(b, 'i')) };
+          if (brandsList.length > 0) {
+            mongoQ.brand = { $in: brandsList.map(b => new RegExp(b, 'i')) };
           }
-
-          const mongoResults = await Part.find(mongoQuery).limit(300).lean();
-          allResults.push(...mongoResults);
+          const rows = await Part.find(mongoQ).limit(300).lean();
+          allResults.push(...rows);
         }
         source = 'mongodb-text';
         console.log(`📦 MongoDB text search: ${allResults.length} results`);
       }
     }
 
-    // STRATEGY 3: Fallback - fetch broader dataset for AI filtering
+    // STRATEGY 3 — broad fallback
     if (allResults.length === 0) {
       const dbQuery = {};
-
-      // Brand filter
-      if (brands.length > 0) {
-        dbQuery.brand = { $in: brands.map((b) => new RegExp(b, 'i')) };
+      if (brandsList.length > 0) {
+        dbQuery.brand = { $in: brandsList.map(b => new RegExp(b, 'i')) };
       }
+      if (parsedIntent.requireInStock) { dbQuery.quantity = { $gt: 0 }; }
 
-      // Stock filter
-      if (understood.stockConstraints?.requireInStock) {
-        dbQuery.quantity = { $gt: 0 };
-      }
-
-      // Fetch a broader set of data for AI filtering
-      const queryPromise = Part.find(dbQuery).limit(1000).lean();
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('DB_TIMEOUT')), DB_QUERY_TIMEOUT),
-      );
-
-      try {
-        allResults = await Promise.race([queryPromise, timeoutPromise]);
-      } catch (err) {
-        console.warn('DB query timeout, using smaller limit');
-        allResults = await Part.find(dbQuery).limit(300).lean();
-      }
+      const qp = Part.find(dbQuery).limit(1000).lean();
+      const tp = new Promise((_, rej) => setTimeout(() => rej(new Error('DB_TIMEOUT')), DB_QUERY_TIMEOUT));
+      try { allResults = await Promise.race([qp, tp]); }
+      catch { allResults = await Part.find(dbQuery).limit(300).lean(); }
       source = 'mongodb-fallback';
     }
 
     console.log(`📦 Fetched ${allResults.length} parts from ${source}`);
 
-    // ═══════════════════════════════════════════════════════════════
-    // STEP 3: INTELLIGENT AI-DRIVEN FILTERING
-    // This is where the magic happens - AI filters based on understanding
-    // ═══════════════════════════════════════════════════════════════
+    // ─────────────────────────────────────────────────────────────
+    // STEP 3: DETERMINISTIC FILTERING  (code-only, no AI call)
+    // ─────────────────────────────────────────────────────────────
     let filteredResults;
     let filterAnalysis;
 
-    if (userIntent) {
-      // Use the new AI-driven filtering
-      const filterResult = await geminiService.filterDataWithAI(
-        allResults,
-        userIntent,
-        query,
-      );
+    if (parsedIntent && Object.keys(parsedIntent).length > 0) {
+      // Use the rebuilt deterministic filterDataWithAI (synchronous, code-only)
+      const filterResult = geminiService.filterDataWithAI(allResults, parsedIntent, query);
       filteredResults = filterResult.matchingParts;
       filterAnalysis = filterResult.analysis;
-      console.log('🎯 AI Filter Result:', filterAnalysis);
+      console.log('🎯 Filter result:', filterAnalysis);
     } else {
-      // Fallback to basic filtering
-      filteredResults = applyBasicFilters(allResults, filters, query);
-      filterAnalysis = { note: 'Used basic filtering (AI unavailable)' };
+      // Minimal fallback — just return everything (no intent parsed)
+      filteredResults = [...allResults];
+      filterAnalysis = { note: 'No intent parsed — returning raw results' };
     }
 
-    // ═══════════════════════════════════════════════════════════════
-    // STEP 4: SORT AND DEDUPLICATE
-    // ═══════════════════════════════════════════════════════════════
-
-    // Sort by relevance: in-stock items first, then by quantity (high to low), then price
+    // ─────────────────────────────────────────────────────────────
+    // STEP 4: SORT & DEDUPLICATE
+    // ─────────────────────────────────────────────────────────────
     filteredResults.sort((a, b) => {
-      // First priority: Stock availability
-      const aInStock = (a.quantity || 0) > 0 ? 1 : 0;
-      const bInStock = (b.quantity || 0) > 0 ? 1 : 0;
-      if (bInStock !== aInStock) return bInStock - aInStock;
-
-      // Second priority: Quantity (higher is better for "full stock" queries)
-      const aQty = a.quantity || 0;
-      const bQty = b.quantity || 0;
-      if (bQty !== aQty) return bQty - aQty;
-
-      // Third priority: Price (lower is better)
-      const aPrice = a.price || Infinity;
-      const bPrice = b.price || Infinity;
-      return aPrice - bPrice;
+      const aIn = (a.quantity || 0) > 0 ? 1 : 0;
+      const bIn = (b.quantity || 0) > 0 ? 1 : 0;
+      if (bIn !== aIn) return bIn - aIn;
+      if ((b.quantity || 0) !== (a.quantity || 0)) return (b.quantity || 0) - (a.quantity || 0);
+      return (a.price || Infinity) - (b.price || Infinity);
     });
 
-    // Deduplicate by partNumber + supplier
     const seen = new Set();
-    filteredResults = filteredResults.filter((p) => {
+    filteredResults = filteredResults.filter(p => {
       const key = `${p.partNumber}-${p.supplier}`;
       if (seen.has(key)) return false;
       seen.add(key);
       return true;
     });
 
-    // Limit results
     filteredResults = filteredResults.slice(0, 500);
 
     const searchTime = Date.now() - startTime;
-    console.log(
-      `✅ AI Search completed in ${searchTime}ms: ${filteredResults.length} results`,
-    );
+    console.log(`✅ AI Search done in ${searchTime}ms: ${filteredResults.length} results`);
 
-    // ═══════════════════════════════════════════════════════════════
-    // STEP 5: BUILD RESPONSE WITH CLEAR MESSAGING
-    // ═══════════════════════════════════════════════════════════════
+    // ─────────────────────────────────────────────────────────────
+    // STEP 5: BUILD RESPONSE
+    // ─────────────────────────────────────────────────────────────
     const stockStats = {
-      highStock: filteredResults.filter((p) => (p.quantity || 0) >= 10).length,
-      inStock: filteredResults.filter((p) => (p.quantity || 0) > 0).length,
-      lowStock: filteredResults.filter(
-        (p) => (p.quantity || 0) > 0 && (p.quantity || 0) < 10,
-      ).length,
-      outOfStock: filteredResults.filter((p) => (p.quantity || 0) === 0).length,
+      highStock: filteredResults.filter(p => (p.quantity || 0) >= 10).length,
+      inStock: filteredResults.filter(p => (p.quantity || 0) > 0).length,
+      lowStock: filteredResults.filter(p => (p.quantity || 0) > 0 && (p.quantity || 0) < 10).length,
+      outOfStock: filteredResults.filter(p => (p.quantity || 0) === 0).length,
     };
 
     let message = `Found ${filteredResults.length} parts`;
     if (filterAnalysis?.filtersApplied) {
-      const appliedFilters = [];
-      if (filterAnalysis.filtersApplied.stock)
-        appliedFilters.push(filterAnalysis.filtersApplied.stock);
-      if (filterAnalysis.filtersApplied.price)
-        appliedFilters.push(`price ${filterAnalysis.filtersApplied.price}`);
-      if (filterAnalysis.filtersApplied.brands)
-        appliedFilters.push(
-          `brands: ${filterAnalysis.filtersApplied.brands.join(', ')}`,
-        );
-
-      if (appliedFilters.length > 0) {
-        message += ` (filtered by: ${appliedFilters.join(', ')})`;
-      }
+      const fa = filterAnalysis.filtersApplied;
+      const applied = [];
+      if (fa.price) applied.push(`price ${fa.price}`);
+      if (fa.stock) applied.push(fa.stock);
+      if (fa.brands) applied.push(`brands: ${fa.brands.join(', ')}`);
+      if (fa.delivery) applied.push(fa.delivery);
+      if (fa.keywords) applied.push(`keywords: ${fa.keywords}`);
+      if (applied.length > 0) message += ` (filtered by: ${applied.join(', ')})`;
     }
 
-    if (
-      stockStats.highStock > 0 &&
-      (understood.stockConstraints?.requireHighStock ||
-        filters.stockLevel === 'high')
-    ) {
-      message += `. ${stockStats.highStock} with high stock (qty ≥ 10).`;
-    }
-
-    // Clean up
     activeAISearches.delete(normalizedQuery);
-
-    // Combine all search terms for the response
     const allSearchTerms = [...new Set([...partNumbers, ...searchKeywords])];
 
-    // ═══════════════════════════════════════════════════════════════
-    // LEARNING: Record this search for AI improvement
-    // ═══════════════════════════════════════════════════════════════
+    // Learning
     let learningRecordId = null;
     let learningSuggestions = [];
-
     try {
-      const learningResult = await aiLearningService.recordSearchAttempt({
+      const lr = await aiLearningService.recordSearchAttempt({
         query,
-        aiUnderstanding: understood,
+        aiUnderstanding: parsedIntent,
         resultsCount: filteredResults.length,
         searchTime,
         source,
         sessionId: req.sessionID || requestId,
         userId: req.buyer?._id,
       });
-
-      learningRecordId = learningResult.recordId;
-
-      // If search failed, include suggestions from learning
-      if (
-        !learningResult.wasSuccessful &&
-        learningResult.suggestions?.length > 0
-      ) {
-        learningSuggestions = learningResult.suggestions;
-        console.log(
-          '🧠 Learning suggestions for failed search:',
-          learningSuggestions,
-        );
+      learningRecordId = lr.recordId;
+      if (!lr.wasSuccessful && lr.suggestions?.length > 0) {
+        learningSuggestions = lr.suggestions;
       }
-    } catch (learningError) {
-      console.warn(
-        'Learning record error (non-blocking):',
-        learningError.message,
-      );
-    }
+    } catch (e) { console.warn('Learning record error:', e.message); }
 
-    // Build response with learning data
+    // Response — backward-compatible shape
     const response = {
       success: true,
       query,
@@ -1096,7 +998,8 @@ async function aiSearch(req, res) {
         searchTerms: allSearchTerms,
         filters: parsed.filters,
         intent: parsed.intent,
-        understood: understood,
+        parsedIntent,
+        understood: parsedIntent, // backward-compat alias
       },
       results: filteredResults,
       total: filteredResults.length,
@@ -1109,11 +1012,9 @@ async function aiSearch(req, res) {
         analysis: filterAnalysis,
         stockStats,
       },
-      // Include learning data for frontend
       learning: {
         recordId: learningRecordId,
-        suggestions:
-          learningSuggestions.length > 0 ? learningSuggestions : undefined,
+        suggestions: learningSuggestions.length > 0 ? learningSuggestions : undefined,
       },
     };
 
@@ -1123,8 +1024,7 @@ async function aiSearch(req, res) {
     activeAISearches.delete(normalizedQuery);
     console.error('AI Search error:', error);
 
-    const isTimeout =
-      error.message?.includes('TIMEOUT') || error.message?.includes('timeout');
+    const isTimeout = error.message?.includes('TIMEOUT') || error.message?.includes('timeout');
     res.status(isTimeout ? 408 : 500).json({
       success: false,
       error: isTimeout ? 'Search timed out' : 'Search failed',
@@ -1137,152 +1037,6 @@ async function aiSearch(req, res) {
   }
 }
 
-/**
- * Apply basic filters when AI is unavailable (fallback)
- */
-function applyBasicFilters(parts, filters, query) {
-  let filtered = [...parts];
-
-  // Price filter
-  if (filters.maxPrice !== undefined) {
-    const maxPriceAED = convertCurrency(
-      filters.maxPrice,
-      filters.priceCurrency || 'USD',
-      'AED',
-    );
-    filtered = filtered.filter(
-      (p) =>
-        p.price === null || p.price === undefined || p.price <= maxPriceAED,
-    );
-  }
-
-  if (filters.minPrice !== undefined) {
-    const minPriceAED = convertCurrency(
-      filters.minPrice,
-      filters.priceCurrency || 'USD',
-      'AED',
-    );
-    filtered = filtered.filter(
-      (p) =>
-        p.price !== null && p.price !== undefined && p.price >= minPriceAED,
-    );
-  }
-
-  // Stock filter
-  if (filters.stockLevel === 'high' || filters.minQuantity >= 10) {
-    filtered = filtered.filter((p) => (p.quantity || 0) >= 10);
-  } else if (filters.inStock) {
-    filtered = filtered.filter((p) => (p.quantity || 0) > 0);
-  }
-
-  // Exclude low stock if specified
-  if (filters.exclude?.stockLevels?.includes('low')) {
-    filtered = filtered.filter(
-      (p) => (p.quantity || 0) >= 10 || (p.quantity || 0) === 0,
-    );
-  }
-
-  // Brand filter
-  if (filters.brand && filters.brand.length > 0) {
-    const brandLower = filters.brand.map((b) => b.toLowerCase());
-    filtered = filtered.filter((p) => {
-      if (!p.brand) return false;
-      return brandLower.some((b) => p.brand.toLowerCase().includes(b));
-    });
-  }
-
-  // Exclude brands
-  if (filters.exclude?.brands?.length > 0) {
-    const excludeBrands = filters.exclude.brands.map((b) => b.toLowerCase());
-    filtered = filtered.filter((p) => {
-      if (!p.brand) return true;
-      return !excludeBrands.some((b) => p.brand.toLowerCase().includes(b));
-    });
-  }
-
-  return filtered;
-}
-
-/**
- * Fast basic keyword extraction for fallback
- */
-function extractBasicKeywordsFromQuery(query) {
-  const stopWords = new Set([
-    'find',
-    'me',
-    'show',
-    'get',
-    'looking',
-    'for',
-    'need',
-    'want',
-    'the',
-    'a',
-    'an',
-    'some',
-    'with',
-    'from',
-    'i',
-    'am',
-    'please',
-    'can',
-    'you',
-    'under',
-    'below',
-    'above',
-    'over',
-    'and',
-    'or',
-  ]);
-  const words = query
-    .toLowerCase()
-    .replace(/[^\w\s-]/g, ' ')
-    .split(/\s+/)
-    .filter(
-      (word) => word.length > 2 && !stopWords.has(word) && !/^\d+$/.test(word),
-    );
-
-  return [...new Set(words)].slice(0, 5);
-}
-
-/**
- * Fast basic filter extraction for fallback
- */
-function extractBasicFiltersFromQuery(query) {
-  const filters = { priceCurrency: 'USD' };
-  const queryLower = query.toLowerCase();
-
-  // Price extraction
-  const priceMatch = queryLower.match(
-    /(?:under|below|less than|max|cheaper than)\s*\$?\s*(\d+)/i,
-  );
-  if (priceMatch) filters.maxPrice = parseInt(priceMatch[1]);
-
-  const minPriceMatch = queryLower.match(
-    /(?:over|above|more than|min|at least)\s*\$?\s*(\d+)/i,
-  );
-  if (minPriceMatch) filters.minPrice = parseInt(minPriceMatch[1]);
-
-  // Currency detection
-  if (queryLower.match(/\b(aed|dirham)/)) filters.priceCurrency = 'AED';
-  else if (queryLower.match(/\b(eur|euro|€)/)) filters.priceCurrency = 'EUR';
-
-  // Stock filter
-  if (queryLower.includes('in stock') || queryLower.includes('available')) {
-    filters.inStock = true;
-  }
-
-  // Full/high stock
-  if (
-    queryLower.match(/\b(full\s*stock|high\s*stock|plenty|well\s*stocked)\b/)
-  ) {
-    filters.stockLevel = 'high';
-    filters.minQuantity = 10;
-    filters.inStock = true;
-  }
-
-  return filters;
-}
 
 /**
  * AI-powered suggestions

@@ -654,41 +654,66 @@
 
   /**
    * Convert parsed AI response to display filter cards
-   * Enhanced for enterprise-grade filters including vehicle brand, exclusions, quantity
+   * Uses the new flat parsedIntent format from the backend
+   * Falls back to parsed.filters for backward compatibility
    */
   function convertParsedToDisplayFilters(parsed) {
     const filters = [];
 
-    if (!parsed || !parsed.filters) return filters;
+    if (!parsed) return filters;
 
-    const f = parsed.filters;
+    // Use parsedIntent (new flat format) or fall back to filters (old format)
+    const pi = parsed.parsedIntent || parsed.understood || {};
+    const f = parsed.filters || {};
+
+    // Merge: prefer parsedIntent values over filters
+    const merged = {
+      vehicleBrand: pi.vehicleBrand || f.vehicleBrand || null,
+      brand: pi.partsBrands || f.brand || [],
+      exclude: pi.exclusions || f.exclude || null,
+      requestedQuantity: pi.requestedQuantity || f.requestedQuantity || null,
+      supplierOrigin: pi.supplierOrigin || f.supplierOrigin || null,
+      minPrice: pi.minPrice !== undefined ? pi.minPrice : f.minPrice,
+      maxPrice: pi.maxPrice !== undefined ? pi.maxPrice : f.maxPrice,
+      priceCurrency: pi.priceCurrency || f.priceCurrency || 'USD',
+      inStock: pi.requireInStock || f.inStock || false,
+      requireHighStock: pi.requireHighStock || false,
+      category: (pi.categories && pi.categories[0]) || f.category || null,
+      deliveryDays: pi.maxDeliveryDays || f.deliveryDays,
+      supplier: f.supplier || null,
+      certifiedOnly: pi.certifiedOnly || f.certifiedOnly || false,
+      sortBy: pi.sortBy || f.sortBy || null,
+    };
+
+    // Use merged values from here
+    const fv = merged;
 
     // ═══════════════════════════════════════════════════════════════
     // VEHICLE BRAND FILTER (compatibility - "Toyota brake pads")
     // ═══════════════════════════════════════════════════════════════
-    if (f.vehicleBrand) {
+    if (fv.vehicleBrand) {
       filters.push({
         type: 'vehicle',
         icon: 'car',
         label: 'Vehicle',
-        value: f.vehicleBrand.toUpperCase(),
+        value: String(fv.vehicleBrand).toUpperCase(),
         filterKey: 'vehicleBrand',
-        filterValue: f.vehicleBrand,
+        filterValue: fv.vehicleBrand,
       });
     }
 
     // ═══════════════════════════════════════════════════════════════
     // PARTS BRAND FILTER (manufacturer like BOSCH, SKF)
     // ═══════════════════════════════════════════════════════════════
-    if (f.brand && f.brand.length > 0) {
-      f.brand.forEach((brand) => {
+    if (fv.brand && fv.brand.length > 0) {
+      fv.brand.forEach((brand) => {
         filters.push({
           type: 'brand',
           icon: 'award',
           label: 'Brand',
-          value: brand.toUpperCase(),
+          value: String(brand).toUpperCase(),
           filterKey: 'brands',
-          filterValue: brand.toLowerCase(),
+          filterValue: String(brand).toLowerCase(),
         });
       });
     }
@@ -696,10 +721,10 @@
     // ═══════════════════════════════════════════════════════════════
     // EXCLUSION FILTERS ("not BOSCH", "exclude Chinese")
     // ═══════════════════════════════════════════════════════════════
-    if (f.exclude) {
+    if (fv.exclude) {
       // Excluded brands
-      if (f.exclude.brands && f.exclude.brands.length > 0) {
-        f.exclude.brands.forEach((brand) => {
+      if (fv.exclude.brands && fv.exclude.brands.length > 0) {
+        fv.exclude.brands.forEach((brand) => {
           filters.push({
             type: 'exclude',
             icon: 'ban',
@@ -712,8 +737,8 @@
       }
 
       // Excluded conditions
-      if (f.exclude.conditions && f.exclude.conditions.length > 0) {
-        f.exclude.conditions.forEach((condition) => {
+      if (fv.exclude.conditions && fv.exclude.conditions.length > 0) {
+        fv.exclude.conditions.forEach((condition) => {
           filters.push({
             type: 'exclude',
             icon: 'ban',
@@ -726,9 +751,9 @@
       }
 
       // Excluded origins
-      if (f.exclude.origins && f.exclude.origins.length > 0) {
+      if (fv.exclude.origins && fv.exclude.origins.length > 0) {
         const originLabels = { CN: 'Chinese', IN: 'Indian' };
-        f.exclude.origins.forEach((origin) => {
+        fv.exclude.origins.forEach((origin) => {
           filters.push({
             type: 'exclude',
             icon: 'ban',
@@ -744,123 +769,123 @@
     // ═══════════════════════════════════════════════════════════════
     // QUANTITY FILTER (B2B - "need x10", "qty 50")
     // ═══════════════════════════════════════════════════════════════
-    if (f.requestedQuantity && f.requestedQuantity > 1) {
+    if (fv.requestedQuantity && fv.requestedQuantity > 1) {
       filters.push({
         type: 'quantity',
         icon: 'boxes',
         label: 'Quantity Needed',
-        value: `${f.requestedQuantity} units`,
+        value: `${fv.requestedQuantity} units`,
         filterKey: 'requestedQuantity',
-        filterValue: f.requestedQuantity,
+        filterValue: fv.requestedQuantity,
       });
     }
 
     // ═══════════════════════════════════════════════════════════════
     // SUPPLIER ORIGIN FILTER ("German supplier", "Japanese parts")
     // ═══════════════════════════════════════════════════════════════
-    if (f.supplierOrigin) {
+    if (fv.supplierOrigin) {
       const originLabels = { DE: 'German', JP: 'Japanese', US: 'American' };
       filters.push({
         type: 'origin',
         icon: 'globe',
         label: 'Origin',
-        value: originLabels[f.supplierOrigin] || f.supplierOrigin,
+        value: originLabels[fv.supplierOrigin] || fv.supplierOrigin,
         filterKey: 'supplierOrigin',
-        filterValue: f.supplierOrigin,
+        filterValue: fv.supplierOrigin,
       });
     }
 
     // ═══════════════════════════════════════════════════════════════
     // PRICE FILTERS (with smart range support)
     // ═══════════════════════════════════════════════════════════════
-    if (f.minPrice !== undefined && f.maxPrice !== undefined) {
+    if (fv.minPrice !== undefined && fv.maxPrice !== undefined) {
       // Show as range if both present
       filters.push({
         type: 'price',
         icon: 'dollar-sign',
         label: 'Price Range',
-        value: `$${f.minPrice} - $${f.maxPrice}`,
+        value: `$${fv.minPrice} - $${fv.maxPrice}`,
         filterKey: 'priceRange',
-        filterValue: { min: f.minPrice, max: f.maxPrice },
+        filterValue: { min: fv.minPrice, max: fv.maxPrice },
       });
     } else {
-      if (f.minPrice !== undefined) {
+      if (fv.minPrice !== undefined) {
         filters.push({
           type: 'price',
           icon: 'dollar-sign',
           label: 'Min Price',
-          value: `$${f.minPrice}`,
+          value: `$${fv.minPrice}`,
           filterKey: 'priceMin',
-          filterValue: f.minPrice,
+          filterValue: fv.minPrice,
         });
       }
-      if (f.maxPrice !== undefined) {
+      if (fv.maxPrice !== undefined) {
         filters.push({
           type: 'price',
           icon: 'dollar-sign',
           label: 'Max Price',
-          value: `$${f.maxPrice}`,
+          value: `$${fv.maxPrice}`,
           filterKey: 'priceMax',
-          filterValue: f.maxPrice,
+          filterValue: fv.maxPrice,
         });
       }
     }
 
     // Stock filter
-    if (f.inStock) {
+    if (fv.inStock || fv.requireHighStock) {
       filters.push({
         type: 'stock',
         icon: 'package',
         label: 'Stock',
-        value: 'In Stock Only',
+        value: fv.requireHighStock ? 'High Stock (≥10)' : 'In Stock Only',
         filterKey: 'stockStatus',
-        filterValue: 'in-stock',
+        filterValue: fv.requireHighStock ? 'high-stock' : 'in-stock',
       });
     }
 
     // Category filter
-    if (f.category) {
+    if (fv.category) {
       filters.push({
         type: 'category',
         icon: 'component',
         label: 'Category',
-        value: f.category.charAt(0).toUpperCase() + f.category.slice(1),
+        value: String(fv.category).charAt(0).toUpperCase() + String(fv.category).slice(1),
         filterKey: 'partCategories',
-        filterValue: f.category,
+        filterValue: fv.category,
       });
     }
 
     // Delivery filter
-    if (f.deliveryDays !== undefined) {
+    if (fv.deliveryDays !== undefined) {
       filters.push({
         type: 'delivery',
         icon: 'truck',
         label: 'Delivery',
-        value: `Within ${f.deliveryDays} days`,
+        value: `Within ${fv.deliveryDays} days`,
         filterKey: 'deliveryTime',
         filterValue:
-          f.deliveryDays <= 3
+          fv.deliveryDays <= 3
             ? 'express'
-            : f.deliveryDays <= 7
+            : fv.deliveryDays <= 7
               ? 'fast'
               : 'standard',
       });
     }
 
     // Supplier filter
-    if (f.supplier) {
+    if (fv.supplier) {
       filters.push({
         type: 'supplier',
         icon: 'building',
         label: 'Supplier',
-        value: f.supplier,
+        value: fv.supplier,
         filterKey: 'supplier',
-        filterValue: f.supplier,
+        filterValue: fv.supplier,
       });
     }
 
     // Certified supplier filter
-    if (f.certifiedOnly) {
+    if (fv.certifiedOnly) {
       filters.push({
         type: 'certified',
         icon: 'shield-check',
@@ -872,7 +897,7 @@
     }
 
     // Sort filter
-    if (f.sortBy && f.sortBy !== 'price') {
+    if (fv.sortBy && fv.sortBy !== 'price') {
       const sortLabels = {
         quantity: 'Highest Stock',
         deliveryDays: 'Fastest Delivery',
@@ -882,110 +907,13 @@
         type: 'sort',
         icon: 'arrow-up-down',
         label: 'Sort By',
-        value: sortLabels[f.sortBy] || f.sortBy,
+        value: sortLabels[fv.sortBy] || fv.sortBy,
         filterKey: 'sortBy',
-        filterValue: f.sortBy,
+        filterValue: fv.sortBy,
       });
     }
 
     return filters;
-  }
-
-  function extractKeywords(query) {
-    // Extract meaningful keywords from query
-    const queryLower = query.toLowerCase();
-    const stopWords = [
-      'find',
-      'me',
-      'show',
-      'get',
-      'looking',
-      'for',
-      'need',
-      'want',
-      'the',
-      'a',
-      'an',
-      'some',
-      'with',
-      'from',
-      'under',
-      'over',
-      'i',
-      'am',
-    ];
-    const words = queryLower
-      .split(/\s+/)
-      .filter(
-        (word) =>
-          word.length > 2 && !stopWords.includes(word) && !/^\d+$/.test(word),
-      );
-    return words.slice(0, 3).join(' ') || 'parts';
-  }
-
-  function generateSampleProducts(query) {
-    const queryLower = query.toLowerCase();
-    const keywords = extractKeywords(query);
-
-    // Sample product database
-    const productTemplates = [
-      {
-        partNumber: 'BRK-45890-A',
-        description: 'Premium Brake Pad Set - Front',
-        brand: 'BOSCH',
-        price: '245.00',
-        stock: 'in-stock',
-        stockText: 'In Stock',
-      },
-      {
-        partNumber: 'ENG-78234-B',
-        description: 'High Performance Engine Air Filter',
-        brand: 'OEM',
-        price: '89.50',
-        stock: 'in-stock',
-        stockText: 'In Stock',
-      },
-      {
-        partNumber: 'SUS-23456-C',
-        description: 'Heavy Duty Suspension Strut Assembly',
-        brand: 'SKF',
-        price: '425.00',
-        stock: 'low-stock',
-        stockText: 'Low Stock',
-      },
-      {
-        partNumber: 'TRN-67890-D',
-        description: 'Transmission Oil Filter Kit',
-        brand: 'GATES',
-        price: '67.99',
-        stock: 'in-stock',
-        stockText: 'In Stock',
-      },
-      {
-        partNumber: 'ELC-90123-E',
-        description: 'Premium Spark Plug Set (4 pcs)',
-        brand: 'DENSO',
-        price: '128.00',
-        stock: 'in-stock',
-        stockText: 'In Stock',
-      },
-    ];
-
-    // Customize products based on query
-    if (queryLower.includes('brake')) {
-      productTemplates[0].description = `${keywords.charAt(0).toUpperCase() + keywords.slice(1)} - Premium Brake System`;
-      productTemplates[1].description = 'Brake Disc Rotor - Front Pair';
-      productTemplates[1].brand = 'BREMBO';
-    } else if (queryLower.includes('engine')) {
-      productTemplates[0].description = 'Engine Mount Assembly';
-      productTemplates[1].description = 'Engine Oil Pump';
-    } else if (queryLower.includes('filter')) {
-      productTemplates[0].description = 'Oil Filter - High Capacity';
-      productTemplates[1].description = 'Cabin Air Filter - Premium';
-      productTemplates[2].description = 'Fuel Filter Assembly';
-    }
-
-    return productTemplates.slice(0, 5);
   }
 
   function parseAIQuery(query) {
@@ -1434,7 +1362,7 @@
                             <span class="qty-display">${product.quantity || product.stock || 0}</span>
                           </td>
                           <td class="col-price">
-                            <span class="price-display">${product.price ? `$${Number(product.price).toFixed(2)}` : '—'}</span>
+                            <span class="price-display">${product.price ? `$${(Number(product.price) / 3.67).toFixed(2)}` : '—'}</span>
                           </td>
                           <td class="col-delivery">
                             <span class="delivery-badge">${product.deliveryDays ? `${product.deliveryDays}d` : '—'}</span>
