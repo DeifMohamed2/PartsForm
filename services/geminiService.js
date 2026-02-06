@@ -98,7 +98,11 @@ async function parseUserIntent(query) {
 
   try {
     if (!query || query.trim().length < 2) {
-      return { success: false, ...buildLocalParsedIntent(query), confidence: 'LOW' };
+      return {
+        success: false,
+        ...buildLocalParsedIntent(query),
+        confidence: 'LOW',
+      };
     }
 
     // STEP 1: Always do local parsing first (instant, reliable, never fails)
@@ -111,9 +115,12 @@ async function parseUserIntent(query) {
       let learnedContext = { hasPriorLearning: false };
       try {
         learnedContext = await aiLearningService.getLearnedContext(query);
-      } catch (e) { /* ignore */ }
+      } catch (e) {
+        /* ignore */
+      }
 
-      const learningPrompt = aiLearningService.generateLearningPrompt(learnedContext);
+      const learningPrompt =
+        aiLearningService.generateLearningPrompt(learnedContext);
 
       const prompt = `${INTENT_PARSER_INSTRUCTION}\n${learningPrompt}\nUser query: "${query}"\n\nReturn ONLY valid JSON.`;
 
@@ -123,10 +130,16 @@ async function parseUserIntent(query) {
           contents: prompt,
           config: { temperature: 0.05, topP: 0.9, maxOutputTokens: 1024 },
         }),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('TIMEOUT')), PARSE_TIMEOUT)),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('TIMEOUT')), PARSE_TIMEOUT),
+        ),
       ]);
 
-      let text = response.text.trim().replace(/```json\n?/gi, '').replace(/```\n?/gi, '').trim();
+      let text = response.text
+        .trim()
+        .replace(/```json\n?/gi, '')
+        .replace(/```\n?/gi, '')
+        .trim();
       const jsonMatch = text.match(/\{[\s\S]*\}/);
       if (jsonMatch) text = jsonMatch[0];
       geminiParsed = JSON.parse(text);
@@ -138,12 +151,19 @@ async function parseUserIntent(query) {
     const merged = mergeIntents(localParsed, geminiParsed);
     const parseTime = Date.now() - startTime;
 
-    console.log(`✅ Intent parsed in ${parseTime}ms:`, JSON.stringify(merged.summary));
+    console.log(
+      `✅ Intent parsed in ${parseTime}ms:`,
+      JSON.stringify(merged.summary),
+    );
 
     return { success: true, ...merged, parseTime };
   } catch (error) {
     console.warn(`⚠️ Intent parsing failed: ${error.message}`);
-    return { success: false, ...buildLocalParsedIntent(query), confidence: 'LOW' };
+    return {
+      success: false,
+      ...buildLocalParsedIntent(query),
+      confidence: 'LOW',
+    };
   }
 }
 
@@ -152,23 +172,44 @@ async function parseUserIntent(query) {
  * This is the reliable backbone - it NEVER fails
  */
 function buildLocalParsedIntent(query) {
-  if (!query) return { summary: '', searchKeywords: [], partNumbers: [], categories: [], confidence: 'LOW' };
+  if (!query)
+    return {
+      summary: '',
+      searchKeywords: [],
+      partNumbers: [],
+      categories: [],
+      confidence: 'LOW',
+    };
 
   let q = query.toLowerCase().trim();
 
   // ── Typo corrections ──
   const typoMap = {
-    'toyta': 'toyota', 'toyata': 'toyota', 'tayota': 'toyota',
-    'bosh': 'bosch', 'bosc': 'bosch',
-    'bremb': 'brembo', 'bremboo': 'brembo',
-    'nisaan': 'nissan', 'nisan': 'nissan',
-    'mercedez': 'mercedes', 'mersedes': 'mercedes', 'merc': 'mercedes',
-    'hynudai': 'hyundai', 'hyundia': 'hyundai', 'hundai': 'hyundai',
-    'volkswagon': 'volkswagen', 'vw': 'volkswagen',
-    'porshe': 'porsche', 'porche': 'porsche',
-    'chevrolete': 'chevrolet', 'chevy': 'chevrolet',
-    'acdelko': 'acdelco',
-    'germn': 'german', 'japnese': 'japanese', 'chines': 'chinese',
+    toyta: 'toyota',
+    toyata: 'toyota',
+    tayota: 'toyota',
+    bosh: 'bosch',
+    bosc: 'bosch',
+    bremb: 'brembo',
+    bremboo: 'brembo',
+    nisaan: 'nissan',
+    nisan: 'nissan',
+    mercedez: 'mercedes',
+    mersedes: 'mercedes',
+    merc: 'mercedes',
+    hynudai: 'hyundai',
+    hyundia: 'hyundai',
+    hundai: 'hyundai',
+    volkswagon: 'volkswagen',
+    vw: 'volkswagen',
+    porshe: 'porsche',
+    porche: 'porsche',
+    chevrolete: 'chevrolet',
+    chevy: 'chevrolet',
+    acdelko: 'acdelco',
+    germn: 'german',
+    japnese: 'japanese',
+    chines: 'chinese',
   };
   for (const [typo, fix] of Object.entries(typoMap)) {
     q = q.replace(new RegExp(`\\b${typo}\\b`, 'g'), fix);
@@ -200,26 +241,40 @@ function buildLocalParsedIntent(query) {
 
   // ── Price extraction (CRITICAL - must be exact) ──
   // "under $500" / "below 500" / "less than $500" / "max $500" / "cheaper than 500"
-  const maxPriceMatch = q.match(/(?:under|below|less\s+than|max|cheaper\s+than|up\s+to|no\s+more\s+than|budget|within)\s*\$?\s*(\d+(?:,\d{3})*(?:\.\d{1,2})?)/);
-  if (maxPriceMatch) result.maxPrice = parseFloat(maxPriceMatch[1].replace(/,/g, ''));
+  const maxPriceMatch = q.match(
+    /(?:under|below|less\s+than|max|cheaper\s+than|up\s+to|no\s+more\s+than|budget|within)\s*\$?\s*(\d+(?:,\d{3})*(?:\.\d{1,2})?)/,
+  );
+  if (maxPriceMatch)
+    result.maxPrice = parseFloat(maxPriceMatch[1].replace(/,/g, ''));
 
-  // "over $100" / "above 100" / "more than $100" / "min $100" / "at least $100"  
-  const minPriceMatch = q.match(/(?:over|above|more\s+than|min|at\s+least|starting\s+from|from)\s*\$?\s*(\d+(?:,\d{3})*(?:\.\d{1,2})?)/);
-  if (minPriceMatch) result.minPrice = parseFloat(minPriceMatch[1].replace(/,/g, ''));
+  // "over $100" / "above 100" / "more than $100" / "min $100" / "at least $100"
+  const minPriceMatch = q.match(
+    /(?:over|above|more\s+than|min|at\s+least|starting\s+from|from)\s*\$?\s*(\d+(?:,\d{3})*(?:\.\d{1,2})?)/,
+  );
+  if (minPriceMatch)
+    result.minPrice = parseFloat(minPriceMatch[1].replace(/,/g, ''));
 
   // "$100-$500" / "between $100 and $500"
-  const rangeMatch = q.match(/\$?\s*(\d+(?:,\d{3})*)\s*[-–to]+\s*\$?\s*(\d+(?:,\d{3})*)/);
+  const rangeMatch = q.match(
+    /\$?\s*(\d+(?:,\d{3})*)\s*[-–to]+\s*\$?\s*(\d+(?:,\d{3})*)/,
+  );
   if (rangeMatch && !maxPriceMatch && !minPriceMatch) {
     result.minPrice = parseFloat(rangeMatch[1].replace(/,/g, ''));
     result.maxPrice = parseFloat(rangeMatch[2].replace(/,/g, ''));
   }
 
   // "cheap" / "budget" / "affordable"
-  if (/\b(cheap|budget|affordable|economical|inexpensive)\b/.test(q) && !result.maxPrice) {
+  if (
+    /\b(cheap|budget|affordable|economical|inexpensive)\b/.test(q) &&
+    !result.maxPrice
+  ) {
     result.maxPrice = 100;
   }
   // "expensive" / "premium" / "high-end"
-  if (/\b(expensive|premium|high[\s-]?end|luxury)\b/.test(q) && !result.minPrice) {
+  if (
+    /\b(expensive|premium|high[\s-]?end|luxury)\b/.test(q) &&
+    !result.minPrice
+  ) {
     result.minPrice = 500;
   }
 
@@ -230,29 +285,80 @@ function buildLocalParsedIntent(query) {
 
   // ── Vehicle brands vs parts brands ──
   const vehicleBrandMap = {
-    'toyota': 'TOYOTA', 'honda': 'HONDA', 'nissan': 'NISSAN', 'bmw': 'BMW',
-    'mercedes': 'MERCEDES-BENZ', 'audi': 'AUDI', 'volkswagen': 'VOLKSWAGEN',
-    'ford': 'FORD', 'chevrolet': 'CHEVROLET', 'hyundai': 'HYUNDAI',
-    'kia': 'KIA', 'mazda': 'MAZDA', 'subaru': 'SUBARU', 'lexus': 'LEXUS',
-    'porsche': 'PORSCHE', 'volvo': 'VOLVO', 'jeep': 'JEEP', 'dodge': 'DODGE',
-    'mitsubishi': 'MITSUBISHI', 'suzuki': 'SUZUKI', 'isuzu': 'ISUZU',
-    'infiniti': 'INFINITI', 'acura': 'ACURA', 'jaguar': 'JAGUAR',
-    'land rover': 'LAND ROVER', 'tesla': 'TESLA', 'peugeot': 'PEUGEOT',
-    'renault': 'RENAULT', 'fiat': 'FIAT', 'alfa romeo': 'ALFA ROMEO',
+    toyota: 'TOYOTA',
+    honda: 'HONDA',
+    nissan: 'NISSAN',
+    bmw: 'BMW',
+    mercedes: 'MERCEDES-BENZ',
+    audi: 'AUDI',
+    volkswagen: 'VOLKSWAGEN',
+    ford: 'FORD',
+    chevrolet: 'CHEVROLET',
+    hyundai: 'HYUNDAI',
+    kia: 'KIA',
+    mazda: 'MAZDA',
+    subaru: 'SUBARU',
+    lexus: 'LEXUS',
+    porsche: 'PORSCHE',
+    volvo: 'VOLVO',
+    jeep: 'JEEP',
+    dodge: 'DODGE',
+    mitsubishi: 'MITSUBISHI',
+    suzuki: 'SUZUKI',
+    isuzu: 'ISUZU',
+    infiniti: 'INFINITI',
+    acura: 'ACURA',
+    jaguar: 'JAGUAR',
+    'land rover': 'LAND ROVER',
+    tesla: 'TESLA',
+    peugeot: 'PEUGEOT',
+    renault: 'RENAULT',
+    fiat: 'FIAT',
+    'alfa romeo': 'ALFA ROMEO',
   };
 
   const partsBrandMap = {
-    'bosch': 'BOSCH', 'skf': 'SKF', 'denso': 'DENSO', 'valeo': 'VALEO',
-    'brembo': 'BREMBO', 'gates': 'GATES', 'continental': 'CONTINENTAL',
-    'mann': 'MANN', 'mahle': 'MAHLE', 'sachs': 'SACHS', 'bilstein': 'BILSTEIN',
-    'kyb': 'KYB', 'monroe': 'MONROE', 'acdelco': 'ACDELCO', 'mopar': 'MOPAR',
-    'ngk': 'NGK', 'delphi': 'DELPHI', 'aisin': 'AISIN', 'luk': 'LUK',
-    'trw': 'TRW', 'ate': 'ATE', 'ferodo': 'FERODO', 'hella': 'HELLA',
-    'febi': 'FEBI', 'lemforder': 'LEMFORDER', 'meyle': 'MEYLE', 'swag': 'SWAG',
-    'timken': 'TIMKEN', 'nsk': 'NSK', 'ntn': 'NTN', 'fag': 'FAG',
-    'motorcraft': 'MOTORCRAFT', 'osram': 'OSRAM', 'philips': 'PHILIPS',
-    'moog': 'MOOG', 'dayco': 'DAYCO', 'walker': 'WALKER', 'wix': 'WIX',
-    'champion': 'CHAMPION', 'exedy': 'EXEDY', 'ina': 'INA',
+    bosch: 'BOSCH',
+    skf: 'SKF',
+    denso: 'DENSO',
+    valeo: 'VALEO',
+    brembo: 'BREMBO',
+    gates: 'GATES',
+    continental: 'CONTINENTAL',
+    mann: 'MANN',
+    mahle: 'MAHLE',
+    sachs: 'SACHS',
+    bilstein: 'BILSTEIN',
+    kyb: 'KYB',
+    monroe: 'MONROE',
+    acdelco: 'ACDELCO',
+    mopar: 'MOPAR',
+    ngk: 'NGK',
+    delphi: 'DELPHI',
+    aisin: 'AISIN',
+    luk: 'LUK',
+    trw: 'TRW',
+    ate: 'ATE',
+    ferodo: 'FERODO',
+    hella: 'HELLA',
+    febi: 'FEBI',
+    lemforder: 'LEMFORDER',
+    meyle: 'MEYLE',
+    swag: 'SWAG',
+    timken: 'TIMKEN',
+    nsk: 'NSK',
+    ntn: 'NTN',
+    fag: 'FAG',
+    motorcraft: 'MOTORCRAFT',
+    osram: 'OSRAM',
+    philips: 'PHILIPS',
+    moog: 'MOOG',
+    dayco: 'DAYCO',
+    walker: 'WALKER',
+    wix: 'WIX',
+    champion: 'CHAMPION',
+    exedy: 'EXEDY',
+    ina: 'INA',
   };
 
   // Check vehicle brands
@@ -272,36 +378,90 @@ function buildLocalParsedIntent(query) {
 
   // ── Categories ──
   const categoryMap = {
-    'brake pad': 'brake', 'brake disc': 'brake', 'brake rotor': 'brake',
-    'brake caliper': 'brake', 'brake fluid': 'brake', 'brake hose': 'brake',
-    'brake drum': 'brake', 'brake shoe': 'brake', 'brake line': 'brake',
-    'brake light': 'brake', 'brake': 'brake', 'braking': 'brake',
-    'oil filter': 'filter', 'air filter': 'filter', 'fuel filter': 'filter',
-    'cabin filter': 'filter', 'filter': 'filter',
-    'engine mount': 'engine', 'engine oil': 'engine', 'engine': 'engine',
-    'suspension': 'suspension', 'shock absorber': 'suspension', 'strut': 'suspension',
-    'spring': 'suspension', 'control arm': 'suspension',
-    'bearing': 'bearing', 'wheel bearing': 'bearing', 'hub bearing': 'bearing',
-    'clutch': 'clutch', 'clutch kit': 'clutch', 'clutch plate': 'clutch',
-    'steering': 'steering', 'power steering': 'steering', 'steering rack': 'steering',
-    'exhaust': 'exhaust', 'muffler': 'exhaust', 'catalytic': 'exhaust',
-    'alternator': 'electrical', 'starter': 'electrical', 'battery': 'electrical',
-    'spark plug': 'electrical', 'ignition': 'electrical', 'coil': 'electrical',
-    'radiator': 'cooling', 'thermostat': 'cooling', 'water pump': 'cooling',
-    'coolant': 'cooling', 'fan': 'cooling',
-    'transmission': 'transmission', 'gearbox': 'transmission',
-    'timing belt': 'belt', 'serpentine belt': 'belt', 'belt': 'belt',
-    'gasket': 'gasket', 'head gasket': 'gasket', 'seal': 'seal',
-    'sensor': 'sensor', 'oxygen sensor': 'sensor', 'abs sensor': 'sensor',
-    'injector': 'fuel', 'fuel pump': 'fuel', 'fuel': 'fuel',
-    'wiper': 'wiper', 'mirror': 'body', 'bumper': 'body', 'fender': 'body',
-    'headlight': 'lighting', 'tail light': 'lighting', 'lamp': 'lighting',
-    'hub': 'hub', 'axle': 'axle', 'cv joint': 'axle', 'driveshaft': 'axle',
-    'pump': 'pump', 'valve': 'valve', 'piston': 'engine',
-    'turbo': 'turbo', 'turbocharger': 'turbo', 'supercharger': 'turbo',
+    'brake pad': 'brake',
+    'brake disc': 'brake',
+    'brake rotor': 'brake',
+    'brake caliper': 'brake',
+    'brake fluid': 'brake',
+    'brake hose': 'brake',
+    'brake drum': 'brake',
+    'brake shoe': 'brake',
+    'brake line': 'brake',
+    'brake light': 'brake',
+    brake: 'brake',
+    braking: 'brake',
+    'oil filter': 'filter',
+    'air filter': 'filter',
+    'fuel filter': 'filter',
+    'cabin filter': 'filter',
+    filter: 'filter',
+    'engine mount': 'engine',
+    'engine oil': 'engine',
+    engine: 'engine',
+    suspension: 'suspension',
+    'shock absorber': 'suspension',
+    strut: 'suspension',
+    spring: 'suspension',
+    'control arm': 'suspension',
+    bearing: 'bearing',
+    'wheel bearing': 'bearing',
+    'hub bearing': 'bearing',
+    clutch: 'clutch',
+    'clutch kit': 'clutch',
+    'clutch plate': 'clutch',
+    steering: 'steering',
+    'power steering': 'steering',
+    'steering rack': 'steering',
+    exhaust: 'exhaust',
+    muffler: 'exhaust',
+    catalytic: 'exhaust',
+    alternator: 'electrical',
+    starter: 'electrical',
+    battery: 'electrical',
+    'spark plug': 'electrical',
+    ignition: 'electrical',
+    coil: 'electrical',
+    radiator: 'cooling',
+    thermostat: 'cooling',
+    'water pump': 'cooling',
+    coolant: 'cooling',
+    fan: 'cooling',
+    transmission: 'transmission',
+    gearbox: 'transmission',
+    'timing belt': 'belt',
+    'serpentine belt': 'belt',
+    belt: 'belt',
+    gasket: 'gasket',
+    'head gasket': 'gasket',
+    seal: 'seal',
+    sensor: 'sensor',
+    'oxygen sensor': 'sensor',
+    'abs sensor': 'sensor',
+    injector: 'fuel',
+    'fuel pump': 'fuel',
+    fuel: 'fuel',
+    wiper: 'wiper',
+    mirror: 'body',
+    bumper: 'body',
+    fender: 'body',
+    headlight: 'lighting',
+    'tail light': 'lighting',
+    lamp: 'lighting',
+    hub: 'hub',
+    axle: 'axle',
+    'cv joint': 'axle',
+    driveshaft: 'axle',
+    pump: 'pump',
+    valve: 'valve',
+    piston: 'engine',
+    turbo: 'turbo',
+    turbocharger: 'turbo',
+    supercharger: 'turbo',
   };
 
-  const sortedCategoryKeys = Object.keys(categoryMap).sort((a, b) => b.length - a.length);
+  const sortedCategoryKeys = Object.keys(categoryMap).sort(
+    (a, b) => b.length - a.length,
+  );
   const addedCategories = new Set();
   for (const key of sortedCategoryKeys) {
     if (q.includes(key) && !addedCategories.has(categoryMap[key])) {
@@ -312,103 +472,200 @@ function buildLocalParsedIntent(query) {
 
   // ── Search keywords (for description matching) ──
   const stopWords = new Set([
-    'find', 'me', 'show', 'get', 'looking', 'for', 'need', 'want', 'the', 'a', 'an',
-    'some', 'with', 'from', 'i', 'am', 'please', 'can', 'you', 'under', 'below',
-    'above', 'over', 'price', 'priced', 'less', 'more', 'than', 'and', 'or', 'not',
-    'no', 'up', 'to', 'at', 'least', 'most', 'around', 'about', 'in', 'of',
-    'search', 'parts', 'part', 'suppliers', 'supplier', 'verified', 'certified',
-    'available', 'stock', 'delivery', 'fast', 'quick', 'express', 'cheap', 'budget',
-    'best', 'good', 'high', 'quality', 'premium', 'professional', 'all', 'any',
+    'find',
+    'me',
+    'show',
+    'get',
+    'looking',
+    'for',
+    'need',
+    'want',
+    'the',
+    'a',
+    'an',
+    'some',
+    'with',
+    'from',
+    'i',
+    'am',
+    'please',
+    'can',
+    'you',
+    'under',
+    'below',
+    'above',
+    'over',
+    'price',
+    'priced',
+    'less',
+    'more',
+    'than',
+    'and',
+    'or',
+    'not',
+    'no',
+    'up',
+    'to',
+    'at',
+    'least',
+    'most',
+    'around',
+    'about',
+    'in',
+    'of',
+    'search',
+    'parts',
+    'part',
+    'suppliers',
+    'supplier',
+    'verified',
+    'certified',
+    'available',
+    'stock',
+    'delivery',
+    'fast',
+    'quick',
+    'express',
+    'cheap',
+    'budget',
+    'best',
+    'good',
+    'high',
+    'quality',
+    'premium',
+    'professional',
+    'all',
+    'any',
   ]);
 
-  const words = q.replace(/[^\w\s-]/g, ' ').split(/\s+/).filter(w => {
-    if (w.length < 2) return false;
-    if (stopWords.has(w)) return false;
-    if (/^\d+$/.test(w)) return false;
-    // Don't include brand names as search keywords (they're already in brands)
-    if (vehicleBrandMap[w] || partsBrandMap[w]) return false;
-    return true;
-  });
+  const words = q
+    .replace(/[^\w\s-]/g, ' ')
+    .split(/\s+/)
+    .filter((w) => {
+      if (w.length < 2) return false;
+      if (stopWords.has(w)) return false;
+      if (/^\d+$/.test(w)) return false;
+      // Don't include brand names as search keywords (they're already in brands)
+      if (vehicleBrandMap[w] || partsBrandMap[w]) return false;
+      return true;
+    });
 
   // Also expand categories to related keywords
   const categoryKeywordMap = {
-    'brake': ['brake', 'brakes', 'braking', 'brake pad', 'brake disc', 'brake fluid', 'brake drum', 'brake shoe'],
-    'filter': ['filter', 'filters', 'filtration'],
-    'engine': ['engine', 'motor'],
-    'bearing': ['bearing', 'bearings'],
-    'suspension': ['suspension', 'shock', 'strut', 'spring'],
-    'steering': ['steering', 'steer'],
-    'cooling': ['cooling', 'coolant', 'radiator', 'thermostat'],
-    'electrical': ['electrical', 'electric', 'alternator', 'starter', 'battery'],
-    'clutch': ['clutch'],
-    'exhaust': ['exhaust', 'muffler', 'catalytic'],
-    'transmission': ['transmission', 'gearbox'],
-    'belt': ['belt', 'timing', 'serpentine'],
-    'fuel': ['fuel', 'injector'],
-    'sensor': ['sensor', 'sensors'],
-    'seal': ['seal', 'sealing', 'o-ring'],
-    'gasket': ['gasket', 'gaskets'],
+    brake: [
+      'brake',
+      'brakes',
+      'braking',
+      'brake pad',
+      'brake disc',
+      'brake fluid',
+      'brake drum',
+      'brake shoe',
+    ],
+    filter: ['filter', 'filters', 'filtration'],
+    engine: ['engine', 'motor'],
+    bearing: ['bearing', 'bearings'],
+    suspension: ['suspension', 'shock', 'strut', 'spring'],
+    steering: ['steering', 'steer'],
+    cooling: ['cooling', 'coolant', 'radiator', 'thermostat'],
+    electrical: ['electrical', 'electric', 'alternator', 'starter', 'battery'],
+    clutch: ['clutch'],
+    exhaust: ['exhaust', 'muffler', 'catalytic'],
+    transmission: ['transmission', 'gearbox'],
+    belt: ['belt', 'timing', 'serpentine'],
+    fuel: ['fuel', 'injector'],
+    sensor: ['sensor', 'sensors'],
+    seal: ['seal', 'sealing', 'o-ring'],
+    gasket: ['gasket', 'gaskets'],
   };
 
   const expandedKeywords = new Set(words);
   for (const cat of result.categories) {
     const related = categoryKeywordMap[cat] || [cat];
-    related.forEach(k => expandedKeywords.add(k));
+    related.forEach((k) => expandedKeywords.add(k));
   }
 
   result.searchKeywords = [...expandedKeywords].slice(0, 15);
 
   // ── Part numbers ──
   const tokens = query.replace(/[^\w\s-]/g, ' ').split(/\s+/);
-  result.partNumbers = tokens.filter(t => /\d/.test(t) && /^[A-Za-z0-9][-A-Za-z0-9_]{3,}$/.test(t) && t.length >= 4);
+  result.partNumbers = tokens.filter(
+    (t) =>
+      /\d/.test(t) && /^[A-Za-z0-9][-A-Za-z0-9_]{3,}$/.test(t) && t.length >= 4,
+  );
 
   // ── Stock requirements ──
-  if (/\b(in\s*stock|available|have\s+it|ready)\b/.test(q)) result.requireInStock = true;
-  if (/\b(full\s*stock|high\s*stock|plenty|lots|well\s*stocked|large\s*qty|bulk)\b/.test(q)) {
+  if (/\b(in\s*stock|available|have\s+it|ready)\b/.test(q))
+    result.requireInStock = true;
+  if (
+    /\b(full\s*stock|high\s*stock|plenty|lots|well\s*stocked|large\s*qty|bulk)\b/.test(
+      q,
+    )
+  ) {
     result.requireHighStock = true;
     result.requireInStock = true;
   }
 
   // ── Delivery ──
-  if (/\b(fast|express|quick|urgent|rush|asap|immediate)\b/.test(q)) result.fastDelivery = true;
+  if (/\b(fast|express|quick|urgent|rush|asap|immediate)\b/.test(q))
+    result.fastDelivery = true;
   const deliveryMatch = q.match(/within\s+(\d+)\s*days?/);
   if (deliveryMatch) result.maxDeliveryDays = parseInt(deliveryMatch[1]);
 
   // ── OEM / Certified ──
   if (/\b(oem|genuine|original)\b/.test(q)) result.oem = true;
-  if (/\b(certified|verified|trusted|authorized)\b/.test(q)) result.certifiedSupplier = true;
+  if (/\b(certified|verified|trusted|authorized)\b/.test(q))
+    result.certifiedSupplier = true;
 
   // ── Quantity ──
-  const qtyMatch = q.match(/(?:qty|quantity|need|order)\s*:?\s*(\d+)|x\s*(\d+)\b|(\d+)\s*(?:units?|pcs?|pieces?)/);
-  if (qtyMatch) result.requestedQuantity = parseInt(qtyMatch[1] || qtyMatch[2] || qtyMatch[3]);
+  const qtyMatch = q.match(
+    /(?:qty|quantity|need|order)\s*:?\s*(\d+)|x\s*(\d+)\b|(\d+)\s*(?:units?|pcs?|pieces?)/,
+  );
+  if (qtyMatch)
+    result.requestedQuantity = parseInt(
+      qtyMatch[1] || qtyMatch[2] || qtyMatch[3],
+    );
 
   // ── Exclusions ──
-  const excludeBrandMatch = q.match(/(?:not|no|exclude|without|except)\s+(\w+)/g);
+  const excludeBrandMatch = q.match(
+    /(?:not|no|exclude|without|except)\s+(\w+)/g,
+  );
   if (excludeBrandMatch) {
-    excludeBrandMatch.forEach(match => {
-      const brand = match.replace(/^(not|no|exclude|without|except)\s+/i, '').trim();
+    excludeBrandMatch.forEach((match) => {
+      const brand = match
+        .replace(/^(not|no|exclude|without|except)\s+/i, '')
+        .trim();
       if (partsBrandMap[brand]) result.excludeBrands.push(partsBrandMap[brand]);
-      if (vehicleBrandMap[brand]) result.excludeBrands.push(vehicleBrandMap[brand]);
+      if (vehicleBrandMap[brand])
+        result.excludeBrands.push(vehicleBrandMap[brand]);
     });
   }
-  if (/\b(no|not|exclude|without)\s*(chinese|china)\b/.test(q)) result.excludeOrigins.push('CN');
-  if (/\b(no|not|exclude|without)\s*(indian|india)\b/.test(q)) result.excludeOrigins.push('IN');
+  if (/\b(no|not|exclude|without)\s*(chinese|china)\b/.test(q))
+    result.excludeOrigins.push('CN');
+  if (/\b(no|not|exclude|without)\s*(indian|india)\b/.test(q))
+    result.excludeOrigins.push('IN');
 
   // ── Origin preference ──
   if (/\bgerman\b/.test(q)) result.certifiedSupplier = true; // German = quality
   if (/\bjapanese\b/.test(q)) result.certifiedSupplier = true;
 
   // ── Sort preference ──
-  if (/\bcheapest|lowest\s+price|best\s+price\b/.test(q)) result.sortPreference = 'price_asc';
-  if (/\bmost\s+expensive|highest\s+price\b/.test(q)) result.sortPreference = 'price_desc';
-  if (/\bmost\s+stock|highest\s+quantity\b/.test(q)) result.sortPreference = 'quantity_desc';
-  if (/\bfastest\s+delivery|quickest\b/.test(q)) result.sortPreference = 'delivery_asc';
+  if (/\bcheapest|lowest\s+price|best\s+price\b/.test(q))
+    result.sortPreference = 'price_asc';
+  if (/\bmost\s+expensive|highest\s+price\b/.test(q))
+    result.sortPreference = 'price_desc';
+  if (/\bmost\s+stock|highest\s+quantity\b/.test(q))
+    result.sortPreference = 'quantity_desc';
+  if (/\bfastest\s+delivery|quickest\b/.test(q))
+    result.sortPreference = 'delivery_asc';
 
   // ── Build summary ──
   const summaryParts = [];
-  if (result.categories.length > 0) summaryParts.push(result.categories.join(', ') + ' parts');
+  if (result.categories.length > 0)
+    summaryParts.push(result.categories.join(', ') + ' parts');
   if (result.vehicleBrand) summaryParts.push(`for ${result.vehicleBrand}`);
-  if (result.partsBrands.length > 0) summaryParts.push(`by ${result.partsBrands.join(', ')}`);
+  if (result.partsBrands.length > 0)
+    summaryParts.push(`by ${result.partsBrands.join(', ')}`);
   if (result.maxPrice) summaryParts.push(`under $${result.maxPrice}`);
   if (result.minPrice) summaryParts.push(`over $${result.minPrice}`);
   if (result.requireInStock) summaryParts.push('in stock');
@@ -416,7 +673,10 @@ function buildLocalParsedIntent(query) {
   if (result.fastDelivery) summaryParts.push('with fast delivery');
   if (result.oem) summaryParts.push('OEM/genuine');
   if (result.certifiedSupplier) summaryParts.push('from certified suppliers');
-  result.summary = summaryParts.length > 0 ? `Find ${summaryParts.join(' ')}` : `Search for: ${query}`;
+  result.summary =
+    summaryParts.length > 0
+      ? `Find ${summaryParts.join(' ')}`
+      : `Search for: ${query}`;
 
   return result;
 }
@@ -432,12 +692,16 @@ function mergeIntents(local, gemini) {
 
   // Gemini can add search keywords we missed
   if (gemini.searchKeywords?.length > 0) {
-    merged.searchKeywords = [...new Set([...local.searchKeywords, ...gemini.searchKeywords])].slice(0, 20);
+    merged.searchKeywords = [
+      ...new Set([...local.searchKeywords, ...gemini.searchKeywords]),
+    ].slice(0, 20);
   }
 
   // Gemini can find part numbers we missed
   if (gemini.partNumbers?.length > 0) {
-    merged.partNumbers = [...new Set([...local.partNumbers, ...gemini.partNumbers])];
+    merged.partNumbers = [
+      ...new Set([...local.partNumbers, ...gemini.partNumbers]),
+    ];
   }
 
   // Gemini overrides vehicle brand only if local didn't find one
@@ -447,17 +711,29 @@ function mergeIntents(local, gemini) {
 
   // Gemini can add parts brands
   if (gemini.partsBrands?.length > 0) {
-    merged.partsBrands = [...new Set([...local.partsBrands, ...gemini.partsBrands.map(b => b.toUpperCase())])];
+    merged.partsBrands = [
+      ...new Set([
+        ...local.partsBrands,
+        ...gemini.partsBrands.map((b) => b.toUpperCase()),
+      ]),
+    ];
   }
 
   // Gemini can add categories
   if (gemini.categories?.length > 0) {
-    merged.categories = [...new Set([...local.categories, ...gemini.categories.map(c => c.toLowerCase())])];
+    merged.categories = [
+      ...new Set([
+        ...local.categories,
+        ...gemini.categories.map((c) => c.toLowerCase()),
+      ]),
+    ];
   }
 
   // CRITICAL: Price - use local parsing if found (it's reliable), only use Gemini if local missed it
-  if (local.maxPrice === null && gemini.maxPrice != null) merged.maxPrice = Number(gemini.maxPrice);
-  if (local.minPrice === null && gemini.minPrice != null) merged.minPrice = Number(gemini.minPrice);
+  if (local.maxPrice === null && gemini.maxPrice != null)
+    merged.maxPrice = Number(gemini.maxPrice);
+  if (local.minPrice === null && gemini.minPrice != null)
+    merged.minPrice = Number(gemini.minPrice);
 
   // Stock - OR them together (if either thinks user wants stock filter, apply it)
   if (gemini.requireInStock) merged.requireInStock = true;
@@ -465,25 +741,32 @@ function mergeIntents(local, gemini) {
 
   // Delivery
   if (gemini.fastDelivery) merged.fastDelivery = true;
-  if (gemini.maxDeliveryDays && !local.maxDeliveryDays) merged.maxDeliveryDays = gemini.maxDeliveryDays;
+  if (gemini.maxDeliveryDays && !local.maxDeliveryDays)
+    merged.maxDeliveryDays = gemini.maxDeliveryDays;
 
   // OEM / Certified
   if (gemini.oem) merged.oem = true;
   if (gemini.certifiedSupplier) merged.certifiedSupplier = true;
 
   // Quantity
-  if (!local.requestedQuantity && gemini.requestedQuantity) merged.requestedQuantity = gemini.requestedQuantity;
+  if (!local.requestedQuantity && gemini.requestedQuantity)
+    merged.requestedQuantity = gemini.requestedQuantity;
 
   // Exclusions
   if (gemini.excludeBrands?.length > 0) {
-    merged.excludeBrands = [...new Set([...local.excludeBrands, ...gemini.excludeBrands])];
+    merged.excludeBrands = [
+      ...new Set([...local.excludeBrands, ...gemini.excludeBrands]),
+    ];
   }
   if (gemini.excludeOrigins?.length > 0) {
-    merged.excludeOrigins = [...new Set([...local.excludeOrigins, ...gemini.excludeOrigins])];
+    merged.excludeOrigins = [
+      ...new Set([...local.excludeOrigins, ...gemini.excludeOrigins]),
+    ];
   }
 
   // Summary - prefer Gemini's if it has one
-  if (gemini.summary && gemini.summary.length > 10) merged.summary = gemini.summary;
+  if (gemini.summary && gemini.summary.length > 10)
+    merged.summary = gemini.summary;
 
   // Suggestions
   if (gemini.suggestions?.length > 0) merged.suggestions = gemini.suggestions;
@@ -503,7 +786,10 @@ function filterDataWithAI(parts, parsedIntent, originalQuery) {
   const startTime = Date.now();
 
   if (!parts || parts.length === 0) {
-    return { matchingParts: [], analysis: { totalReceived: 0, matching: 0, filtersApplied: {} } };
+    return {
+      matchingParts: [],
+      analysis: { totalReceived: 0, matching: 0, filtersApplied: {} },
+    };
   }
 
   let filtered = [...parts];
@@ -516,17 +802,21 @@ function filterDataWithAI(parts, parsedIntent, originalQuery) {
   const allSearchTerms = [...new Set([...keywords, ...categories])];
 
   if (allSearchTerms.length > 0) {
-    filtered = filtered.filter(p => {
+    filtered = filtered.filter((p) => {
       const searchText = [
         p.description || '',
         p.category || '',
         p.subcategory || '',
         p.partNumber || '',
         ...(p.tags || []),
-      ].join(' ').toLowerCase();
+      ]
+        .join(' ')
+        .toLowerCase();
 
       // At least ONE search term must appear in the part's searchable text
-      return allSearchTerms.some(term => searchText.includes(term.toLowerCase()));
+      return allSearchTerms.some((term) =>
+        searchText.includes(term.toLowerCase()),
+      );
     });
     filtersApplied.keywords = `Matched: ${allSearchTerms.join(', ')} (${totalBefore} → ${filtered.length})`;
   }
@@ -535,23 +825,29 @@ function filterDataWithAI(parts, parsedIntent, originalQuery) {
   if (parsedIntent.vehicleBrand) {
     const vBrand = parsedIntent.vehicleBrand.toLowerCase();
     const beforeCount = filtered.length;
-    filtered = filtered.filter(p => {
+    filtered = filtered.filter((p) => {
       const brandText = (p.brand || '').toLowerCase();
       const descText = (p.description || '').toLowerCase();
       const supplierText = (p.supplier || '').toLowerCase();
-      return brandText.includes(vBrand) || descText.includes(vBrand) || supplierText.includes(vBrand);
+      return (
+        brandText.includes(vBrand) ||
+        descText.includes(vBrand) ||
+        supplierText.includes(vBrand)
+      );
     });
     filtersApplied.vehicleBrand = `${parsedIntent.vehicleBrand} (${beforeCount} → ${filtered.length})`;
   }
 
   // ── 3. PARTS BRAND FILTERING ──
   if (parsedIntent.partsBrands && parsedIntent.partsBrands.length > 0) {
-    const brandsLower = parsedIntent.partsBrands.map(b => b.toLowerCase());
+    const brandsLower = parsedIntent.partsBrands.map((b) => b.toLowerCase());
     const beforeCount = filtered.length;
-    filtered = filtered.filter(p => {
+    filtered = filtered.filter((p) => {
       if (!p.brand) return false;
       const partBrand = p.brand.toLowerCase();
-      return brandsLower.some(b => partBrand.includes(b) || b.includes(partBrand));
+      return brandsLower.some(
+        (b) => partBrand.includes(b) || b.includes(partBrand),
+      );
     });
     filtersApplied.partsBrands = `${parsedIntent.partsBrands.join(', ')} (${beforeCount} → ${filtered.length})`;
   }
@@ -559,7 +855,13 @@ function filterDataWithAI(parts, parsedIntent, originalQuery) {
   // ── 4. PRICE FILTERING (CRITICAL - with proper currency conversion) ──
   // Database stores prices in AED. User typically specifies in USD.
   const CURRENCY_TO_AED = {
-    'USD': 3.67, 'EUR': 4.00, 'GBP': 4.65, 'AED': 1, 'SAR': 0.98, 'JPY': 0.025, 'CNY': 0.51,
+    USD: 3.67,
+    EUR: 4.0,
+    GBP: 4.65,
+    AED: 1,
+    SAR: 0.98,
+    JPY: 0.025,
+    CNY: 0.51,
   };
 
   const priceCurrency = (parsedIntent.priceCurrency || 'USD').toUpperCase();
@@ -568,7 +870,7 @@ function filterDataWithAI(parts, parsedIntent, originalQuery) {
   if (parsedIntent.maxPrice != null) {
     const maxPriceAED = parsedIntent.maxPrice * conversionRate;
     const beforeCount = filtered.length;
-    filtered = filtered.filter(p => {
+    filtered = filtered.filter((p) => {
       if (p.price == null || p.price === undefined) return true; // Include parts with no price listed
       return p.price <= maxPriceAED;
     });
@@ -578,7 +880,7 @@ function filterDataWithAI(parts, parsedIntent, originalQuery) {
   if (parsedIntent.minPrice != null) {
     const minPriceAED = parsedIntent.minPrice * conversionRate;
     const beforeCount = filtered.length;
-    filtered = filtered.filter(p => {
+    filtered = filtered.filter((p) => {
       if (p.price == null || p.price === undefined) return false; // Exclude parts with no price
       return p.price >= minPriceAED;
     });
@@ -588,11 +890,11 @@ function filterDataWithAI(parts, parsedIntent, originalQuery) {
   // ── 5. STOCK FILTERING ──
   if (parsedIntent.requireHighStock) {
     const beforeCount = filtered.length;
-    filtered = filtered.filter(p => (p.quantity || 0) >= 10);
+    filtered = filtered.filter((p) => (p.quantity || 0) >= 10);
     filtersApplied.stock = `High stock qty≥10 (${beforeCount} → ${filtered.length})`;
   } else if (parsedIntent.requireInStock) {
     const beforeCount = filtered.length;
-    filtered = filtered.filter(p => (p.quantity || 0) > 0);
+    filtered = filtered.filter((p) => (p.quantity || 0) > 0);
     filtersApplied.stock = `In stock qty>0 (${beforeCount} → ${filtered.length})`;
   }
 
@@ -600,7 +902,7 @@ function filterDataWithAI(parts, parsedIntent, originalQuery) {
   if (parsedIntent.fastDelivery || parsedIntent.maxDeliveryDays) {
     const maxDays = parsedIntent.maxDeliveryDays || 5;
     const beforeCount = filtered.length;
-    filtered = filtered.filter(p => {
+    filtered = filtered.filter((p) => {
       if (!p.deliveryDays) return true; // Include if delivery not specified
       return p.deliveryDays <= maxDays;
     });
@@ -609,11 +911,11 @@ function filterDataWithAI(parts, parsedIntent, originalQuery) {
 
   // ── 7. EXCLUSION FILTERING ──
   if (parsedIntent.excludeBrands && parsedIntent.excludeBrands.length > 0) {
-    const excludeLower = parsedIntent.excludeBrands.map(b => b.toLowerCase());
+    const excludeLower = parsedIntent.excludeBrands.map((b) => b.toLowerCase());
     const beforeCount = filtered.length;
-    filtered = filtered.filter(p => {
+    filtered = filtered.filter((p) => {
       if (!p.brand) return true;
-      return !excludeLower.some(b => p.brand.toLowerCase().includes(b));
+      return !excludeLower.some((b) => p.brand.toLowerCase().includes(b));
     });
     filtersApplied.excludeBrands = `Excluded: ${parsedIntent.excludeBrands.join(', ')} (${beforeCount} → ${filtered.length})`;
   }
@@ -621,7 +923,9 @@ function filterDataWithAI(parts, parsedIntent, originalQuery) {
   // ── 8. QUANTITY REQUIREMENT ──
   if (parsedIntent.requestedQuantity && parsedIntent.requestedQuantity > 1) {
     const beforeCount = filtered.length;
-    filtered = filtered.filter(p => (p.quantity || 0) >= parsedIntent.requestedQuantity);
+    filtered = filtered.filter(
+      (p) => (p.quantity || 0) >= parsedIntent.requestedQuantity,
+    );
     filtersApplied.quantity = `≥ ${parsedIntent.requestedQuantity} units (${beforeCount} → ${filtered.length})`;
   }
 
@@ -680,7 +984,10 @@ async function parseSearchQuery(query) {
 
     return {
       success: true,
-      searchTerms: [...(intent.partNumbers || []), ...(intent.searchKeywords || [])],
+      searchTerms: [
+        ...(intent.partNumbers || []),
+        ...(intent.searchKeywords || []),
+      ],
       filters,
       intent: intent.summary || `Search for: ${query}`,
       suggestions: intent.suggestions || [],
@@ -693,7 +1000,10 @@ async function parseSearchQuery(query) {
     const localParsed = buildLocalParsedIntent(query);
     return {
       success: false,
-      searchTerms: [...(localParsed.partNumbers || []), ...(localParsed.searchKeywords || [])],
+      searchTerms: [
+        ...(localParsed.partNumbers || []),
+        ...(localParsed.searchKeywords || []),
+      ],
       filters: {
         brand: localParsed.partsBrands || [],
         maxPrice: localParsed.maxPrice,
@@ -702,7 +1012,10 @@ async function parseSearchQuery(query) {
         inStock: localParsed.requireInStock || false,
       },
       intent: `Searching for: "${query}"`,
-      suggestions: ['Try being more specific', 'Include brand names or part numbers'],
+      suggestions: [
+        'Try being more specific',
+        'Include brand names or part numbers',
+      ],
       error: error.message,
       parsedIntent: localParsed,
     };
@@ -856,7 +1169,6 @@ Provide a brief, helpful summary and 2-3 recommendations. Respond with ONLY vali
 
 // Old normalizeFilters, extractBasicKeywords, extractBasicFilters removed
 // All functionality is now in buildLocalParsedIntent and filterDataWithAI above
-
 
 // ====================================
 // EXCEL DATA ANALYSIS - AI POWERED

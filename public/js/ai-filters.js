@@ -849,7 +849,9 @@
         type: 'category',
         icon: 'component',
         label: 'Category',
-        value: String(fv.category).charAt(0).toUpperCase() + String(fv.category).slice(1),
+        value:
+          String(fv.category).charAt(0).toUpperCase() +
+          String(fv.category).slice(1),
         filterKey: 'partCategories',
         filterValue: fv.category,
       });
