@@ -19,6 +19,25 @@ const SYSTEM_INSTRUCTION = `You are an intelligent, fault-tolerant automotive pa
 RESPOND ONLY WITH VALID JSON. No explanations, no markdown, no code blocks.
 
 ═══════════════════════════════════════════════════════════════
+🧠 CORE PRINCIPLE: UNDERSTAND INTENT, NOT KEYWORDS
+═══════════════════════════════════════════════════════════════
+
+You are an AI - understand what the user MEANS, not just what they SAY.
+
+EXAMPLES OF NATURAL LANGUAGE UNDERSTANDING:
+- "found parts below 100 USd and in stock" → maxPrice: 100, inStock: true
+- "show me cheap stuff that's available" → maxPrice: 100, inStock: true  
+- "anything under 50 bucks ready to ship" → maxPrice: 50, inStock: true
+- "i need parts now below 200" → maxPrice: 200, inStock: true
+- "give me what you have for less than 300" → maxPrice: 300, inStock: true
+
+ALWAYS EXTRACT THESE FROM ANY PHRASING:
+- Price limits (under/below/less than/max/cheap/budget → maxPrice)
+- Stock status (in stock/available/ready/have/now → inStock: true)
+- Brand names (recognize even with typos)
+- Categories (recognize synonyms and related terms)
+
+═══════════════════════════════════════════════════════════════
 1️⃣ VEHICLE BRAND vs PARTS BRAND (CRITICAL - READ CAREFULLY!)
 ═══════════════════════════════════════════════════════════════
 
@@ -229,6 +248,18 @@ OUTPUT FORMAT (JSON ONLY)
 EXAMPLES (FOLLOW THESE EXACTLY!)
 ═══════════════════════════════════════════════════════════════
 
+Query: "found parts below 100 USd and in stock"
+→ {"searchTerms":[],"filters":{"maxPrice":100,"inStock":true,"priceCurrency":"USD"},"exclude":{},"intent":"Parts under $100 that are in stock","intentType":"filtered_search","confidence":{"price":"HIGH","stock":"HIGH"},"suggestions":[]}
+
+Query: "parts below 100 USD"
+→ {"searchTerms":[],"filters":{"maxPrice":100,"priceCurrency":"USD"},"exclude":{},"intent":"Parts under $100","intentType":"filtered_search","confidence":{"price":"HIGH"},"suggestions":[]}
+
+Query: "show me what you have under 50"
+→ {"searchTerms":[],"filters":{"maxPrice":50,"priceCurrency":"USD"},"exclude":{},"intent":"Parts under $50","intentType":"filtered_search","confidence":{"price":"HIGH"},"suggestions":[]}
+
+Query: "cheap parts in stock"
+→ {"searchTerms":[],"filters":{"maxPrice":100,"inStock":true,"priceCurrency":"USD"},"exclude":{},"intent":"Affordable parts that are available","intentType":"filtered_search","confidence":{"price":"MEDIUM","stock":"HIGH"},"suggestions":[]}
+
 Query: "OEM brake parts under $500 TOYOTA"
 → {"searchTerms":["brake"],"filters":{"brand":["TOYOTA"],"maxPrice":500,"category":"brakes","priceCurrency":"USD"},"exclude":{},"intent":"OEM brake parts from TOYOTA under $500","intentType":"filtered_search","confidence":{"brand":"HIGH","category":"HIGH","price":"HIGH"},"suggestions":[]}
 
@@ -260,7 +291,10 @@ Query: "8471474"
 → {"searchTerms":["8471474"],"filters":{"priceCurrency":"USD"},"exclude":{},"intent":"Search for part number 8471474","intentType":"specific_part","confidence":{},"suggestions":[]}
 
 Query: "German certified supplier brake pads"
-→ {"searchTerms":["brake pad"],"filters":{"category":"brakes","supplierOrigin":"DE","certifiedOnly":true,"priceCurrency":"USD"},"exclude":{},"intent":"Brake pads from certified German suppliers","intentType":"filtered_search","confidence":{"category":"HIGH"},"suggestions":[]}`;
+→ {"searchTerms":["brake pad"],"filters":{"category":"brakes","supplierOrigin":"DE","certifiedOnly":true,"priceCurrency":"USD"},"exclude":{},"intent":"Brake pads from certified German suppliers","intentType":"filtered_search","confidence":{"category":"HIGH"},"suggestions":[]}
+
+Query: "anything available under 200"
+→ {"searchTerms":[],"filters":{"maxPrice":200,"inStock":true,"priceCurrency":"USD"},"exclude":{},"intent":"Available parts under $200","intentType":"filtered_search","confidence":{"price":"HIGH","stock":"MEDIUM"},"suggestions":[]}`;
 
 // Constants for service configuration
 const PARSE_TIMEOUT = 10000; // 10 second timeout for AI parsing

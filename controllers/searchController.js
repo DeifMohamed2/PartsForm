@@ -1151,24 +1151,31 @@ async function aiSearch(req, res) {
     }
 
     // Step 4: Apply AI-extracted filters to results
+    // ═══════════════════════════════════════════════════════════════
+    // INTELLIGENT ADAPTIVE FILTERING SYSTEM
+    // Instead of strict filtering that returns 0 results, we use:
+    // 1. HARD filters (price) - must match
+    // 2. SOFT filters (stock, category) - prefer but don't exclude
+    // 3. Progressive relaxation - if 0 results, explain why
+    // ═══════════════════════════════════════════════════════════════
+    
     let filteredResults = [...allResults];
+    const appliedFilters = [];
+    const relaxedFilters = [];
+    const filterStats = {};
 
     // ═══════════════════════════════════════════════════════════════
     // SMART BRAND DETECTION from rawResponse
-    // Check if AI detected "OEM/GENUINE + vehicle brand" which means filter by brand
     // ═══════════════════════════════════════════════════════════════
     const rawFilters = parsed.rawResponse?.filters || {};
     const queryLower = query.toLowerCase();
     const hasOemIntent = queryLower.match(/\b(oem|genuine|original)\b/);
 
-    // If user said "OEM TOYOTA" or "GENUINE TOYOTA", we should filter by brand=TOYOTA
-    // even if AI put it in vehicleBrand
     if (
       hasOemIntent &&
       rawFilters.vehicleBrand &&
       (!filters.brand || filters.brand.length === 0)
     ) {
-      // OEM + vehicle brand = filter by parts brand (not compatibility)
       filters.brand = [rawFilters.vehicleBrand.toUpperCase()];
       console.log(
         `🔧 OEM intent detected: treating vehicleBrand '${rawFilters.vehicleBrand}' as brand filter`,
@@ -1176,301 +1183,209 @@ async function aiSearch(req, res) {
     }
 
     // ═══════════════════════════════════════════════════════════════
-    // BRAND FILTER (HIGHEST PRIORITY - parts manufacturer like BOSCH, SKF, TOYOTA)
-    // Apply FIRST before other filters
+    // HELPER: Apply filter with fallback
+    // ═══════════════════════════════════════════════════════════════
+    const applyFilterSmart = (results, filterFn, filterName, isHardFilter = false) => {
+      const filtered = results.filter(filterFn);
+      const beforeCount = results.length;
+      const afterCount = filtered.length;
+      
+      filterStats[filterName] = { before: beforeCount, after: afterCount };
+      
+      if (afterCount > 0) {
+        appliedFilters.push(filterName);
+        console.log(`✅ ${filterName}: ${beforeCount} → ${afterCount} results`);
+        return filtered;
+      } else if (isHardFilter) {
+        // Hard filter with 0 results - still apply it
+        appliedFilters.push(filterName);
+        console.log(`⚠️ ${filterName}: ${beforeCount} → 0 results (hard filter)`);
+        return filtered;
+      } else {
+        // Soft filter - don't apply, just note it
+        relaxedFilters.push(filterName);
+        console.log(`🔄 ${filterName}: relaxed (would eliminate all ${beforeCount} results)`);
+        return results;
+      }
+    };
+
+    // ═══════════════════════════════════════════════════════════════
+    // 1. BRAND FILTER (Soft - prefer but don't exclude all)
     // ═══════════════════════════════════════════════════════════════
     if (filters.brand && filters.brand.length > 0) {
-      const beforeBrand = filteredResults.length;
-      const brandFiltered = filteredResults.filter((p) => {
-        if (!p.brand) return false;
-        const partBrand = p.brand.toLowerCase();
-        return filters.brand.some((b) => {
-          const filterBrand = b.toLowerCase();
-          // Exact match or contains match
-          return (
-            partBrand === filterBrand ||
-            partBrand.includes(filterBrand) ||
-            filterBrand.includes(partBrand)
-          );
-        });
-      });
-
-      if (brandFiltered.length > 0) {
-        filteredResults = brandFiltered;
-        console.log(
-          `🏭 Brand filter [${filters.brand.join(', ')}]: ${beforeBrand} → ${filteredResults.length} results`,
-        );
-      } else {
-        console.log(
-          `🏭 Brand filter [${filters.brand.join(', ')}] found 0 results from ${beforeBrand} - keeping all results`,
-        );
-      }
+      filteredResults = applyFilterSmart(
+        filteredResults,
+        (p) => {
+          if (!p.brand) return false;
+          const partBrand = p.brand.toLowerCase();
+          return filters.brand.some((b) => {
+            const filterBrand = b.toLowerCase();
+            return partBrand === filterBrand || 
+                   partBrand.includes(filterBrand) || 
+                   filterBrand.includes(partBrand);
+          });
+        },
+        `Brand [${filters.brand.join(', ')}]`,
+        false // Soft filter
+      );
     }
 
     // ═══════════════════════════════════════════════════════════════
-    // VEHICLE BRAND FILTER (for compatibility - "brake pads for TOYOTA")
-    // Only apply if brand filter was NOT already applied (no OEM intent)
+    // 2. VEHICLE COMPATIBILITY FILTER (Soft)
     // ═══════════════════════════════════════════════════════════════
-    // Note: vehicleBrand is for filtering parts compatible with vehicles,
-    // when user does NOT say OEM/genuine. We search in description/compatibility/brand fields.
     if (filters.vehicleBrand && !hasOemIntent) {
       const vehicleBrand = filters.vehicleBrand.toLowerCase();
-      const beforeVehicle = filteredResults.length;
-      const vehicleFiltered = filteredResults.filter((p) => {
-        const brand = (p.brand || '').toLowerCase();
-        const desc = (p.description || '').toLowerCase();
-        const compat = (p.compatibility || '').toLowerCase();
-        const notes = (p.notes || '').toLowerCase();
-        const partNumber = (p.partNumber || '').toLowerCase();
-        const combined = `${brand} ${desc} ${compat} ${notes} ${partNumber}`;
-        return combined.includes(vehicleBrand);
-      });
-
-      // Only apply if it doesn't eliminate all results
-      if (vehicleFiltered.length > 0) {
-        filteredResults = vehicleFiltered;
-        console.log(
-          `🚗 Vehicle compatibility filter '${filters.vehicleBrand}': ${beforeVehicle} → ${filteredResults.length} results`,
-        );
-      } else {
-        console.log(
-          `🚗 Vehicle compatibility filter '${filters.vehicleBrand}' skipped (would eliminate all ${beforeVehicle} results)`,
-        );
-      }
-    }
-
-    // ═══════════════════════════════════════════════════════════════
-    // NEW: EXCLUSION FILTERS ("not BOSCH", "exclude Chinese")
-    // ═══════════════════════════════════════════════════════════════
-    if (filters.exclude) {
-      // Exclude specific brands
-      if (filters.exclude.brands && filters.exclude.brands.length > 0) {
-        const beforeExclude = filteredResults.length;
-        filteredResults = filteredResults.filter((p) => {
-          if (!p.brand) return true; // Keep parts with no brand
-          return !filters.exclude.brands.some((b) =>
-            p.brand.toLowerCase().includes(b.toLowerCase()),
-          );
-        });
-        console.log(
-          `🚫 Brand exclusion filter: ${beforeExclude} → ${filteredResults.length} results`,
-        );
-      }
-
-      // Exclude conditions (used, refurbished)
-      if (filters.exclude.conditions && filters.exclude.conditions.length > 0) {
-        filteredResults = filteredResults.filter((p) => {
-          const condition = (p.condition || 'new').toLowerCase();
-          return !filters.exclude.conditions.some((c) =>
-            condition.includes(c.toLowerCase()),
-          );
-        });
-      }
-
-      // Exclude origins
-      if (filters.exclude.origins && filters.exclude.origins.length > 0) {
-        filteredResults = filteredResults.filter((p) => {
-          const origin = (p.origin || p.countryOfOrigin || '').toUpperCase();
-          return !filters.exclude.origins.includes(origin);
-        });
-      }
-    }
-
-    // Apply supplier filter
-    if (filters.supplier) {
-      filteredResults = filteredResults.filter(
-        (p) =>
-          p.supplier &&
-          p.supplier.toLowerCase().includes(filters.supplier.toLowerCase()),
+      filteredResults = applyFilterSmart(
+        filteredResults,
+        (p) => {
+          const combined = `${p.brand || ''} ${p.description || ''} ${p.compatibility || ''} ${p.notes || ''} ${p.partNumber || ''}`.toLowerCase();
+          return combined.includes(vehicleBrand);
+        },
+        `Vehicle [${filters.vehicleBrand}]`,
+        false
       );
     }
 
     // ═══════════════════════════════════════════════════════════════
-    // NEW: SUPPLIER ORIGIN FILTER ("German supplier")
+    // 3. EXCLUSION FILTERS (Hard - always apply)
     // ═══════════════════════════════════════════════════════════════
-    if (filters.supplierOrigin) {
-      filteredResults = filteredResults.filter((p) => {
-        const origin = (
-          p.supplierOrigin ||
-          p.origin ||
-          p.countryOfOrigin ||
-          ''
-        ).toUpperCase();
-        return origin === filters.supplierOrigin.toUpperCase();
-      });
+    if (filters.exclude?.brands?.length > 0) {
+      filteredResults = applyFilterSmart(
+        filteredResults,
+        (p) => !p.brand || !filters.exclude.brands.some(b => 
+          p.brand.toLowerCase().includes(b.toLowerCase())
+        ),
+        `Exclude brands [${filters.exclude.brands.join(', ')}]`,
+        true
+      );
     }
 
-    // Apply price filters with currency conversion
-    // Convert user's price filter (default USD) to each part's currency for accurate comparison
+    // ═══════════════════════════════════════════════════════════════
+    // 4. PRICE FILTER (Semi-hard - apply but show message if 0)
+    // ═══════════════════════════════════════════════════════════════
     const userCurrency = filters.priceCurrency || 'USD';
-
-    if (filters.minPrice !== undefined) {
-      filteredResults = filteredResults.filter((p) => {
-        if (p.price === null || p.price === undefined) return false;
-        // Convert user's minPrice to the part's currency for comparison
-        const partCurrency = p.currency || 'AED';
-        const convertedMinPrice = convertCurrency(
-          filters.minPrice,
-          userCurrency,
-          partCurrency,
-        );
-        return p.price >= convertedMinPrice;
-      });
-    }
+    let priceFilterApplied = false;
+    
     if (filters.maxPrice !== undefined) {
+      const beforePrice = filteredResults.length;
       filteredResults = filteredResults.filter((p) => {
-        if (p.price === null || p.price === undefined) return false;
-        // Convert user's maxPrice to the part's currency for comparison
+        if (p.price === null || p.price === undefined) return true; // Include parts without price
         const partCurrency = p.currency || 'AED';
-        const convertedMaxPrice = convertCurrency(
-          filters.maxPrice,
-          userCurrency,
-          partCurrency,
-        );
+        const convertedMaxPrice = convertCurrency(filters.maxPrice, userCurrency, partCurrency);
         return p.price <= convertedMaxPrice;
       });
+      priceFilterApplied = true;
+      filterStats['maxPrice'] = { before: beforePrice, after: filteredResults.length, value: filters.maxPrice };
+      appliedFilters.push(`Max Price $${filters.maxPrice}`);
+      console.log(`💰 Max price $${filters.maxPrice}: ${beforePrice} → ${filteredResults.length} results`);
+    }
+    
+    if (filters.minPrice !== undefined) {
+      const beforePrice = filteredResults.length;
+      filteredResults = filteredResults.filter((p) => {
+        if (p.price === null || p.price === undefined) return false;
+        const partCurrency = p.currency || 'AED';
+        const convertedMinPrice = convertCurrency(filters.minPrice, userCurrency, partCurrency);
+        return p.price >= convertedMinPrice;
+      });
+      priceFilterApplied = true;
+      filterStats['minPrice'] = { before: beforePrice, after: filteredResults.length, value: filters.minPrice };
+      appliedFilters.push(`Min Price $${filters.minPrice}`);
+      console.log(`💰 Min price $${filters.minPrice}: ${beforePrice} → ${filteredResults.length} results`);
     }
 
-    // Apply stock filter
-    if (filters.inStock) {
-      filteredResults = filteredResults.filter((p) => (p.quantity || 0) > 0);
+    // ═══════════════════════════════════════════════════════════════
+    // 5. STOCK FILTER (SOFT - boost in-stock to top, don't exclude)
+    // ═══════════════════════════════════════════════════════════════
+    let stockFilterRequested = filters.inStock || filters.stockStatus === 'in-stock';
+    let inStockCount = 0;
+    
+    if (stockFilterRequested) {
+      // Count how many are in stock
+      inStockCount = filteredResults.filter(p => (p.quantity || 0) > 0).length;
+      
+      if (inStockCount > 0) {
+        // Sort in-stock items to the top (boost, not filter)
+        filteredResults = filteredResults.map(p => ({
+          ...p,
+          _inStock: (p.quantity || 0) > 0,
+          _stockScore: (p.quantity || 0) > 10 ? 2 : (p.quantity || 0) > 0 ? 1 : 0
+        }));
+        filteredResults.sort((a, b) => b._stockScore - a._stockScore);
+        appliedFilters.push('In Stock (prioritized)');
+        console.log(`📦 Stock boost: ${inStockCount} in-stock items boosted to top`);
+      } else {
+        // No in-stock items - note but don't filter out
+        relaxedFilters.push('In Stock');
+        console.log(`🔄 Stock filter relaxed: 0 in-stock items found, showing all ${filteredResults.length}`);
+      }
+      filterStats['inStock'] = { requested: true, found: inStockCount, total: filteredResults.length };
     }
-    if (filters.stockStatus === 'in-stock') {
-      filteredResults = filteredResults.filter((p) => (p.quantity || 0) > 10);
-    } else if (filters.stockStatus === 'low-stock') {
-      filteredResults = filteredResults.filter(
-        (p) => (p.quantity || 0) > 0 && (p.quantity || 0) <= 10,
+
+    // ═══════════════════════════════════════════════════════════════
+    // 6. CATEGORY FILTER (Soft)
+    // ═══════════════════════════════════════════════════════════════
+    if (filters.category) {
+      const categorySearchTerms = {
+        brakes: ['brake', 'brakes', 'braking', 'rotor', 'caliper', 'pad', 'disc'],
+        filters: ['filter', 'filters', 'oil filter', 'air filter', 'fuel filter'],
+        suspension: ['suspension', 'shock', 'strut', 'spring', 'damper', 'absorber'],
+        electrical: ['electrical', 'electric', 'alternator', 'starter', 'battery', 'ignition'],
+        engine: ['engine', 'motor', 'piston', 'valve', 'timing', 'gasket', 'camshaft'],
+        transmission: ['transmission', 'gearbox', 'clutch', 'gear', 'cv joint', 'driveshaft'],
+        cooling: ['cooling', 'coolant', 'radiator', 'thermostat', 'water pump', 'fan'],
+        steering: ['steering', 'tie rod', 'rack', 'power steering', 'ball joint'],
+        exhaust: ['exhaust', 'muffler', 'catalytic', 'manifold', 'pipe'],
+        wheels: ['wheel', 'wheels', 'tire', 'tires', 'hub', 'rim', 'bearing'],
+      };
+      
+      const terms = categorySearchTerms[filters.category.toLowerCase()] || [filters.category.toLowerCase()];
+      
+      filteredResults = applyFilterSmart(
+        filteredResults,
+        (p) => {
+          const combined = `${p.category || ''} ${p.description || ''} ${p.partNumber || ''}`.toLowerCase();
+          return terms.some(term => combined.includes(term));
+        },
+        `Category [${filters.category}]`,
+        false
       );
     }
 
     // ═══════════════════════════════════════════════════════════════
-    // NEW: QUANTITY AVAILABILITY FILTER (for B2B "need x10")
+    // 7. DELIVERY FILTER (Soft - boost fast delivery)
+    // ═══════════════════════════════════════════════════════════════
+    if (filters.deliveryDays !== undefined) {
+      const fastDeliveryCount = filteredResults.filter(p => 
+        p.deliveryDays !== null && p.deliveryDays <= filters.deliveryDays
+      ).length;
+      
+      if (fastDeliveryCount > 0) {
+        filteredResults = filteredResults.map(p => ({
+          ...p,
+          _fastDelivery: p.deliveryDays !== null && p.deliveryDays <= filters.deliveryDays
+        }));
+        filteredResults.sort((a, b) => (b._fastDelivery ? 1 : 0) - (a._fastDelivery ? 1 : 0));
+        appliedFilters.push(`Fast Delivery (≤${filters.deliveryDays} days prioritized)`);
+      } else {
+        relaxedFilters.push(`Delivery ≤${filters.deliveryDays} days`);
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // 8. QUANTITY FILTER (Soft - boost sufficient stock)
     // ═══════════════════════════════════════════════════════════════
     if (filters.requestedQuantity && filters.requestedQuantity > 1) {
-      const beforeQty = filteredResults.length;
-      // Boost parts that have sufficient stock
       filteredResults = filteredResults.map((p) => ({
         ...p,
         _hasSufficientStock: (p.quantity || 0) >= filters.requestedQuantity,
       }));
-      // Sort to prioritize parts with sufficient stock
       filteredResults.sort((a, b) => {
         if (a._hasSufficientStock && !b._hasSufficientStock) return -1;
         if (!a._hasSufficientStock && b._hasSufficientStock) return 1;
         return 0;
       });
-      console.log(
-        `📦 Quantity filter: ${filters.requestedQuantity} units requested, prioritizing sufficient stock`,
-      );
-    }
-
-    // Apply delivery days filter
-    if (filters.deliveryDays !== undefined) {
-      filteredResults = filteredResults.filter(
-        (p) =>
-          p.deliveryDays !== null && p.deliveryDays <= filters.deliveryDays,
-      );
-    }
-
-    // Apply category filter (search in category or description)
-    // Use flexible matching with root words to avoid over-filtering
-    if (filters.category) {
-      // Map category to search terms (singular/plural variations)
-      const categorySearchTerms = {
-        brakes: [
-          'brake',
-          'brakes',
-          'braking',
-          'rotor',
-          'caliper',
-          'pad',
-          'disc',
-        ],
-        filters: [
-          'filter',
-          'filters',
-          'oil filter',
-          'air filter',
-          'fuel filter',
-        ],
-        suspension: [
-          'suspension',
-          'shock',
-          'strut',
-          'spring',
-          'damper',
-          'absorber',
-        ],
-        electrical: [
-          'electrical',
-          'electric',
-          'alternator',
-          'starter',
-          'battery',
-          'ignition',
-        ],
-        engine: [
-          'engine',
-          'motor',
-          'piston',
-          'valve',
-          'timing',
-          'gasket',
-          'camshaft',
-        ],
-        transmission: [
-          'transmission',
-          'gearbox',
-          'clutch',
-          'gear',
-          'cv joint',
-          'driveshaft',
-        ],
-        cooling: [
-          'cooling',
-          'coolant',
-          'radiator',
-          'thermostat',
-          'water pump',
-          'fan',
-        ],
-        steering: [
-          'steering',
-          'tie rod',
-          'rack',
-          'power steering',
-          'ball joint',
-        ],
-        exhaust: ['exhaust', 'muffler', 'catalytic', 'manifold', 'pipe'],
-        wheels: ['wheel', 'wheels', 'tire', 'tires', 'hub', 'rim', 'bearing'],
-      };
-
-      const searchTerms = categorySearchTerms[
-        filters.category.toLowerCase()
-      ] || [filters.category.toLowerCase()];
-
-      const beforeCount = filteredResults.length;
-      const categoryFiltered = filteredResults.filter((p) => {
-        const cat = (p.category || '').toLowerCase();
-        const desc = (p.description || '').toLowerCase();
-        const partNum = (p.partNumber || '').toLowerCase();
-        const combined = `${cat} ${desc} ${partNum}`;
-
-        return searchTerms.some((term) => combined.includes(term));
-      });
-
-      // Only apply category filter if it doesn't eliminate all results
-      // This prevents over-filtering when category data is sparse
-      if (categoryFiltered.length > 0) {
-        filteredResults = categoryFiltered;
-        console.log(
-          `📦 Category filter '${filters.category}': ${beforeCount} → ${filteredResults.length} results`,
-        );
-      } else {
-        console.log(
-          `📦 Category filter '${filters.category}' skipped (would eliminate all ${beforeCount} results)`,
-        );
-      }
+      console.log(`📦 Quantity boost: prioritizing parts with ${filters.requestedQuantity}+ units`);
     }
 
     // Step 5: Sort results
@@ -1550,67 +1465,79 @@ async function aiSearch(req, res) {
       total: filteredResults.length,
       source,
       searchTime,
+      // NEW: Include filter status for UI
+      filterStatus: {
+        applied: appliedFilters,
+        relaxed: relaxedFilters,
+        stats: filterStats,
+      },
     };
 
     // Add helpful messaging based on results and intent
     if (filteredResults.length === 0) {
       response.message =
-        'No parts found matching your criteria. Try adjusting your filters or using different keywords.';
+        'No parts found matching your criteria. Try adjusting your filters.';
       response.suggestions = [
+        'Remove some filters to broaden your search',
         'Check the spelling of part numbers or brand names',
-        'Try removing some filters to broaden your search',
-        'Search for a specific brand like BOSCH, SKF, or DENSO',
+        'Try a different price range',
       ];
-
-      // If we had exclusions, note that they may have filtered out results
-      if (
-        filters.exclude &&
-        (filters.exclude.brands?.length || filters.exclude.origins?.length)
-      ) {
-        response.suggestions.unshift(
-          'Your exclusion filters may have removed all matches - try without "not" or "exclude"',
-        );
+    } else if (relaxedFilters.length > 0) {
+      // Some filters were relaxed
+      const relaxedMsg = relaxedFilters.length === 1 
+        ? `Note: "${relaxedFilters[0]}" filter was relaxed to show more results.`
+        : `Note: Some filters were relaxed (${relaxedFilters.join(', ')}) to show more results.`;
+      
+      if (stockFilterRequested && inStockCount === 0) {
+        response.message = `Found ${filteredResults.length} parts matching price criteria. None currently in stock - in-stock items will appear first when available.`;
+        response.stockInfo = {
+          requested: true,
+          inStockFound: 0,
+          totalResults: filteredResults.length,
+          note: 'All matching parts are currently out of stock'
+        };
+      } else if (stockFilterRequested && inStockCount > 0) {
+        response.message = `Found ${filteredResults.length} parts. ${inStockCount} in stock (shown first).`;
+        response.stockInfo = {
+          requested: true,
+          inStockFound: inStockCount,
+          totalResults: filteredResults.length
+        };
+      } else {
+        response.message = `Found ${filteredResults.length} parts. ${relaxedMsg}`;
       }
+      response.filtersRelaxed = relaxedFilters;
     } else if (isBrowseMode) {
-      // Browse mode - user just exploring
       response.message = `Browsing ${filteredResults.length} parts. Add more criteria to narrow results.`;
       response.isBrowseMode = true;
 
-      // Add unique brands for browsing
       const uniqueBrands = [
         ...new Set(filteredResults.map((p) => p.brand).filter(Boolean)),
-      ]
-        .sort()
-        .slice(0, 20);
+      ].sort().slice(0, 20);
       response.availableBrands = uniqueBrands;
 
-      // Add categories
       const uniqueCategories = [
         ...new Set(filteredResults.map((p) => p.category).filter(Boolean)),
-      ]
-        .sort()
-        .slice(0, 10);
+      ].sort().slice(0, 10);
       response.availableCategories = uniqueCategories;
     } else if (isGenericSearch && filteredResults.length > 100) {
       response.message =
         'Showing results based on your filters. For more specific results, try adding a brand or part category.';
       response.isBroadSearch = true;
 
-      // Add unique part numbers for reference (first 30)
       const uniquePartNumbers = [
         ...new Set(filteredResults.map((p) => p.partNumber)),
       ].slice(0, 30);
       response.samplePartNumbers = uniquePartNumbers;
 
-      // Add available brands in results
       const uniqueBrands = [
         ...new Set(filteredResults.map((p) => p.brand).filter(Boolean)),
-      ]
-        .sort()
-        .slice(0, 15);
+      ].sort().slice(0, 15);
       response.availableBrands = uniqueBrands;
     } else if (filteredResults.length > 0 && filteredResults.length <= 10) {
       response.message = `Found ${filteredResults.length} part${filteredResults.length > 1 ? 's' : ''} matching your search.`;
+    } else if (filteredResults.length > 10) {
+      response.message = `Found ${filteredResults.length} parts matching your criteria.`;
     }
 
     // Add quantity availability info if requested
