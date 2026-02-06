@@ -511,6 +511,7 @@
 
   /**
    * Convert parsed AI response to display filter cards
+   * Enhanced for enterprise-grade filters including vehicle brand, exclusions, quantity
    */
   function convertParsedToDisplayFilters(parsed) {
     const filters = [];
@@ -519,7 +520,23 @@
     
     const f = parsed.filters;
     
-    // Brand filters
+    // ═══════════════════════════════════════════════════════════════
+    // VEHICLE BRAND FILTER (compatibility - "Toyota brake pads")
+    // ═══════════════════════════════════════════════════════════════
+    if (f.vehicleBrand) {
+      filters.push({
+        type: 'vehicle',
+        icon: 'car',
+        label: 'Vehicle',
+        value: f.vehicleBrand.toUpperCase(),
+        filterKey: 'vehicleBrand',
+        filterValue: f.vehicleBrand,
+      });
+    }
+    
+    // ═══════════════════════════════════════════════════════════════
+    // PARTS BRAND FILTER (manufacturer like BOSCH, SKF)
+    // ═══════════════════════════════════════════════════════════════
     if (f.brand && f.brand.length > 0) {
       f.brand.forEach(brand => {
         filters.push({
@@ -533,26 +550,117 @@
       });
     }
     
-    // Price filters
-    if (f.minPrice !== undefined) {
+    // ═══════════════════════════════════════════════════════════════
+    // EXCLUSION FILTERS ("not BOSCH", "exclude Chinese")
+    // ═══════════════════════════════════════════════════════════════
+    if (f.exclude) {
+      // Excluded brands
+      if (f.exclude.brands && f.exclude.brands.length > 0) {
+        f.exclude.brands.forEach(brand => {
+          filters.push({
+            type: 'exclude',
+            icon: 'ban',
+            label: 'Exclude Brand',
+            value: brand.toUpperCase(),
+            filterKey: 'excludeBrands',
+            filterValue: brand,
+          });
+        });
+      }
+      
+      // Excluded conditions
+      if (f.exclude.conditions && f.exclude.conditions.length > 0) {
+        f.exclude.conditions.forEach(condition => {
+          filters.push({
+            type: 'exclude',
+            icon: 'ban',
+            label: 'Exclude Condition',
+            value: condition.charAt(0).toUpperCase() + condition.slice(1),
+            filterKey: 'excludeConditions',
+            filterValue: condition,
+          });
+        });
+      }
+      
+      // Excluded origins
+      if (f.exclude.origins && f.exclude.origins.length > 0) {
+        const originLabels = { 'CN': 'Chinese', 'IN': 'Indian' };
+        f.exclude.origins.forEach(origin => {
+          filters.push({
+            type: 'exclude',
+            icon: 'ban',
+            label: 'Exclude Origin',
+            value: originLabels[origin] || origin,
+            filterKey: 'excludeOrigins',
+            filterValue: origin,
+          });
+        });
+      }
+    }
+    
+    // ═══════════════════════════════════════════════════════════════
+    // QUANTITY FILTER (B2B - "need x10", "qty 50")
+    // ═══════════════════════════════════════════════════════════════
+    if (f.requestedQuantity && f.requestedQuantity > 1) {
       filters.push({
-        type: 'price',
-        icon: 'dollar-sign',
-        label: 'Min Price',
-        value: `$${f.minPrice}`,
-        filterKey: 'priceMin',
-        filterValue: f.minPrice,
+        type: 'quantity',
+        icon: 'boxes',
+        label: 'Quantity Needed',
+        value: `${f.requestedQuantity} units`,
+        filterKey: 'requestedQuantity',
+        filterValue: f.requestedQuantity,
       });
     }
-    if (f.maxPrice !== undefined) {
+    
+    // ═══════════════════════════════════════════════════════════════
+    // SUPPLIER ORIGIN FILTER ("German supplier", "Japanese parts")
+    // ═══════════════════════════════════════════════════════════════
+    if (f.supplierOrigin) {
+      const originLabels = { 'DE': 'German', 'JP': 'Japanese', 'US': 'American' };
+      filters.push({
+        type: 'origin',
+        icon: 'globe',
+        label: 'Origin',
+        value: originLabels[f.supplierOrigin] || f.supplierOrigin,
+        filterKey: 'supplierOrigin',
+        filterValue: f.supplierOrigin,
+      });
+    }
+    
+    // ═══════════════════════════════════════════════════════════════
+    // PRICE FILTERS (with smart range support)
+    // ═══════════════════════════════════════════════════════════════
+    if (f.minPrice !== undefined && f.maxPrice !== undefined) {
+      // Show as range if both present
       filters.push({
         type: 'price',
         icon: 'dollar-sign',
-        label: 'Max Price',
-        value: `$${f.maxPrice}`,
-        filterKey: 'priceMax',
-        filterValue: f.maxPrice,
+        label: 'Price Range',
+        value: `$${f.minPrice} - $${f.maxPrice}`,
+        filterKey: 'priceRange',
+        filterValue: { min: f.minPrice, max: f.maxPrice },
       });
+    } else {
+      if (f.minPrice !== undefined) {
+        filters.push({
+          type: 'price',
+          icon: 'dollar-sign',
+          label: 'Min Price',
+          value: `$${f.minPrice}`,
+          filterKey: 'priceMin',
+          filterValue: f.minPrice,
+        });
+      }
+      if (f.maxPrice !== undefined) {
+        filters.push({
+          type: 'price',
+          icon: 'dollar-sign',
+          label: 'Max Price',
+          value: `$${f.maxPrice}`,
+          filterKey: 'priceMax',
+          filterValue: f.maxPrice,
+        });
+      }
     }
     
     // Stock filter
@@ -600,6 +708,18 @@
         value: f.supplier,
         filterKey: 'supplier',
         filterValue: f.supplier,
+      });
+    }
+    
+    // Certified supplier filter
+    if (f.certifiedOnly) {
+      filters.push({
+        type: 'certified',
+        icon: 'shield-check',
+        label: 'Certification',
+        value: 'Certified Only',
+        filterKey: 'certifiedOnly',
+        filterValue: true,
       });
     }
     

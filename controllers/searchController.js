@@ -887,8 +887,33 @@ async function aiSearch(req, res) {
 
     // Step 4: Apply AI-extracted filters to results
     let filteredResults = [...allResults];
+    
+    // ═══════════════════════════════════════════════════════════════
+    // NEW: VEHICLE BRAND FILTER (for compatibility - "TOYOTA brake pads")
+    // ═══════════════════════════════════════════════════════════════
+    // Note: vehicleBrand is for filtering parts compatible with vehicles,
+    // NOT the brand of the part itself. We search in description/compatibility fields.
+    if (filters.vehicleBrand) {
+      const vehicleBrand = filters.vehicleBrand.toLowerCase();
+      const beforeVehicle = filteredResults.length;
+      const vehicleFiltered = filteredResults.filter(p => {
+        const desc = (p.description || '').toLowerCase();
+        const compat = (p.compatibility || '').toLowerCase();
+        const notes = (p.notes || '').toLowerCase();
+        const combined = `${desc} ${compat} ${notes}`;
+        return combined.includes(vehicleBrand);
+      });
+      
+      // Only apply if it doesn't eliminate all results
+      if (vehicleFiltered.length > 0) {
+        filteredResults = vehicleFiltered;
+        console.log(`🚗 Vehicle brand filter '${filters.vehicleBrand}': ${beforeVehicle} → ${filteredResults.length} results`);
+      } else {
+        console.log(`🚗 Vehicle brand filter '${filters.vehicleBrand}' skipped (would eliminate all ${beforeVehicle} results)`);
+      }
+    }
 
-    // Apply brand filter
+    // Apply brand filter (parts manufacturer like BOSCH, SKF)
     if (filters.brand && filters.brand.length > 0) {
       filteredResults = filteredResults.filter(p => {
         if (!p.brand) return false;
@@ -897,12 +922,55 @@ async function aiSearch(req, res) {
         );
       });
     }
+    
+    // ═══════════════════════════════════════════════════════════════
+    // NEW: EXCLUSION FILTERS ("not BOSCH", "exclude Chinese")
+    // ═══════════════════════════════════════════════════════════════
+    if (filters.exclude) {
+      // Exclude specific brands
+      if (filters.exclude.brands && filters.exclude.brands.length > 0) {
+        const beforeExclude = filteredResults.length;
+        filteredResults = filteredResults.filter(p => {
+          if (!p.brand) return true; // Keep parts with no brand
+          return !filters.exclude.brands.some(b => 
+            p.brand.toLowerCase().includes(b.toLowerCase())
+          );
+        });
+        console.log(`🚫 Brand exclusion filter: ${beforeExclude} → ${filteredResults.length} results`);
+      }
+      
+      // Exclude conditions (used, refurbished)
+      if (filters.exclude.conditions && filters.exclude.conditions.length > 0) {
+        filteredResults = filteredResults.filter(p => {
+          const condition = (p.condition || 'new').toLowerCase();
+          return !filters.exclude.conditions.some(c => condition.includes(c.toLowerCase()));
+        });
+      }
+      
+      // Exclude origins
+      if (filters.exclude.origins && filters.exclude.origins.length > 0) {
+        filteredResults = filteredResults.filter(p => {
+          const origin = (p.origin || p.countryOfOrigin || '').toUpperCase();
+          return !filters.exclude.origins.includes(origin);
+        });
+      }
+    }
 
     // Apply supplier filter
     if (filters.supplier) {
       filteredResults = filteredResults.filter(p => 
         p.supplier && p.supplier.toLowerCase().includes(filters.supplier.toLowerCase())
       );
+    }
+    
+    // ═══════════════════════════════════════════════════════════════
+    // NEW: SUPPLIER ORIGIN FILTER ("German supplier")
+    // ═══════════════════════════════════════════════════════════════
+    if (filters.supplierOrigin) {
+      filteredResults = filteredResults.filter(p => {
+        const origin = (p.supplierOrigin || p.origin || p.countryOfOrigin || '').toUpperCase();
+        return origin === filters.supplierOrigin.toUpperCase();
+      });
     }
 
     // Apply price filters with currency conversion
@@ -936,6 +1004,25 @@ async function aiSearch(req, res) {
       filteredResults = filteredResults.filter(p => (p.quantity || 0) > 10);
     } else if (filters.stockStatus === 'low-stock') {
       filteredResults = filteredResults.filter(p => (p.quantity || 0) > 0 && (p.quantity || 0) <= 10);
+    }
+    
+    // ═══════════════════════════════════════════════════════════════
+    // NEW: QUANTITY AVAILABILITY FILTER (for B2B "need x10")
+    // ═══════════════════════════════════════════════════════════════
+    if (filters.requestedQuantity && filters.requestedQuantity > 1) {
+      const beforeQty = filteredResults.length;
+      // Boost parts that have sufficient stock
+      filteredResults = filteredResults.map(p => ({
+        ...p,
+        _hasSufficientStock: (p.quantity || 0) >= filters.requestedQuantity,
+      }));
+      // Sort to prioritize parts with sufficient stock
+      filteredResults.sort((a, b) => {
+        if (a._hasSufficientStock && !b._hasSufficientStock) return -1;
+        if (!a._hasSufficientStock && b._hasSufficientStock) return 1;
+        return 0;
+      });
+      console.log(`📦 Quantity filter: ${filters.requestedQuantity} units requested, prioritizing sufficient stock`);
     }
 
     // Apply delivery days filter
@@ -1039,6 +1126,10 @@ async function aiSearch(req, res) {
     const searchTime = Date.now() - startTime;
     console.log(`🤖 AI Search completed in ${searchTime}ms: ${filteredResults.length} results`);
 
+    // Determine if this is a browse intent
+    const intentType = filters.intentType || 'filtered_search';
+    const isBrowseMode = intentType === 'browse';
+
     // Build response with messaging for broad searches
     const response = {
       success: true,
@@ -1047,7 +1138,9 @@ async function aiSearch(req, res) {
         searchTerms: searchTerms, // Use filtered terms, not original
         filters: parsed.filters,
         intent: parsed.intent,
+        intentType: intentType,
         suggestions: parsed.suggestions,
+        confidence: parsed.confidence,
       },
       results: filteredResults.slice(0, 500),
       total: filteredResults.length,
@@ -1055,7 +1148,7 @@ async function aiSearch(req, res) {
       searchTime,
     };
 
-    // Add helpful messaging based on results
+    // Add helpful messaging based on results and intent
     if (filteredResults.length === 0) {
       response.message = 'No parts found matching your criteria. Try adjusting your filters or using different keywords.';
       response.suggestions = [
@@ -1063,6 +1156,23 @@ async function aiSearch(req, res) {
         'Try removing some filters to broaden your search',
         'Search for a specific brand like BOSCH, SKF, or DENSO',
       ];
+      
+      // If we had exclusions, note that they may have filtered out results
+      if (filters.exclude && (filters.exclude.brands?.length || filters.exclude.origins?.length)) {
+        response.suggestions.unshift('Your exclusion filters may have removed all matches - try without "not" or "exclude"');
+      }
+    } else if (isBrowseMode) {
+      // Browse mode - user just exploring
+      response.message = `Browsing ${filteredResults.length} parts. Add more criteria to narrow results.`;
+      response.isBrowseMode = true;
+      
+      // Add unique brands for browsing
+      const uniqueBrands = [...new Set(filteredResults.map(p => p.brand).filter(Boolean))].sort().slice(0, 20);
+      response.availableBrands = uniqueBrands;
+      
+      // Add categories
+      const uniqueCategories = [...new Set(filteredResults.map(p => p.category).filter(Boolean))].sort().slice(0, 10);
+      response.availableCategories = uniqueCategories;
     } else if (isGenericSearch && filteredResults.length > 100) {
       response.message = 'Showing results based on your filters. For more specific results, try adding a brand or part category.';
       response.isBroadSearch = true;
@@ -1076,6 +1186,24 @@ async function aiSearch(req, res) {
       response.availableBrands = uniqueBrands;
     } else if (filteredResults.length > 0 && filteredResults.length <= 10) {
       response.message = `Found ${filteredResults.length} part${filteredResults.length > 1 ? 's' : ''} matching your search.`;
+    }
+    
+    // Add quantity availability info if requested
+    if (filters.requestedQuantity && filters.requestedQuantity > 1) {
+      const withSufficientStock = filteredResults.filter(p => p._hasSufficientStock).length;
+      response.quantityInfo = {
+        requested: filters.requestedQuantity,
+        partsWithSufficientStock: withSufficientStock,
+        partsWithPartialStock: filteredResults.length - withSufficientStock,
+      };
+      if (withSufficientStock === 0 && filteredResults.length > 0) {
+        response.message = `Found ${filteredResults.length} parts but none have ${filters.requestedQuantity} units in stock. Contact suppliers for bulk orders.`;
+      }
+    }
+    
+    // Add vehicle compatibility info if filtered
+    if (filters.vehicleBrand) {
+      response.vehicleCompatibility = filters.vehicleBrand;
     }
 
     // Clean up active request tracking

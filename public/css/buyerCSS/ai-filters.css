@@ -3668,6 +3668,45 @@
 .ai-active-filter-chip.delivery i { color: #0891b2; }
 .ai-active-filter-chip.supplier i { color: #4f46e5; }
 
+/* NEW: Vehicle compatibility filter - cyan/teal for cars */
+.ai-active-filter-chip.vehicle i { color: #0d9488; }
+.ai-active-filter-chip.vehicle {
+    background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%);
+    border-color: #99f6e4;
+}
+
+/* NEW: Exclusion filter - red for blocked items */
+.ai-active-filter-chip.exclude i { color: #dc2626; }
+.ai-active-filter-chip.exclude {
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+    border-color: #fecaca;
+}
+.ai-active-filter-chip.exclude .filter-chip-value {
+    color: #b91c1c;
+    text-decoration: line-through;
+}
+
+/* NEW: Quantity filter - orange for B2B quantities */
+.ai-active-filter-chip.quantity i { color: #d97706; }
+.ai-active-filter-chip.quantity {
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+    border-color: #fde68a;
+}
+
+/* NEW: Origin filter - purple for geography */
+.ai-active-filter-chip.origin i { color: #7c3aed; }
+.ai-active-filter-chip.origin {
+    background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
+    border-color: #e9d5ff;
+}
+
+/* NEW: Certified filter - green shield for verified */
+.ai-active-filter-chip.certified i { color: #059669; }
+.ai-active-filter-chip.certified {
+    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+    border-color: #a7f3d0;
+}
+
 .filter-chip-content {
     flex: 1;
     display: flex;
