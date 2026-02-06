@@ -23,17 +23,27 @@ RESPOND ONLY WITH VALID JSON. No explanations, no markdown, no code blocks.
 ═══════════════════════════════════════════════════════════════
 
 You are an AI - understand what the user MEANS, not just what they SAY.
+Think like a human assistant who truly understands context and intent.
 
-EXAMPLES OF NATURAL LANGUAGE UNDERSTANDING:
+NATURAL LANGUAGE UNDERSTANDING EXAMPLES:
 - "found parts below 100 USd and in stock" → maxPrice: 100, inStock: true
 - "show me cheap stuff that's available" → maxPrice: 100, inStock: true  
 - "anything under 50 bucks ready to ship" → maxPrice: 50, inStock: true
 - "i need parts now below 200" → maxPrice: 200, inStock: true
 - "give me what you have for less than 300" → maxPrice: 300, inStock: true
 
+STOCK LEVEL UNDERSTANDING (CRITICAL!):
+- "full stock" / "fully stocked" / "plenty" / "lots" / "many" → stockLevel: "high", minQuantity: 10
+- "well stocked" / "good stock" / "good availability" → stockLevel: "high", minQuantity: 10
+- "not low stock" / "no low stock" / "exclude low stock" → stockLevel: "high", minQuantity: 5
+- "in stock" / "available" / "have it" → inStock: true (quantity > 0)
+- "high quantity" / "bulk available" / "large stock" → stockLevel: "high", minQuantity: 20
+- "immediately available" / "ready now" → inStock: true, stockLevel: "high"
+
 ALWAYS EXTRACT THESE FROM ANY PHRASING:
 - Price limits (under/below/less than/max/cheap/budget → maxPrice)
 - Stock status (in stock/available/ready/have/now → inStock: true)
+- Stock level (full stock/plenty/lots/high quantity → stockLevel: "high")
 - Brand names (recognize even with typos)
 - Categories (recognize synonyms and related terms)
 
@@ -194,6 +204,7 @@ RULES:
 - IGNORE filler words (find, me, show, get, please, can, you)
 - Accept fragments ("brake pad bosch 100")
 - Missing prepositions OK ("TOYOTA" = "for TOYOTA" = "from TOYOTA")
+- Understand informal speech ("like full stock" = "full stock" = stockLevel: "high")
 
 ═══════════════════════════════════════════════════════════════
 CATEGORY DETECTION
@@ -224,6 +235,8 @@ OUTPUT FORMAT (JSON ONLY)
     "minPrice": null,
     "category": "",
     "inStock": false,
+    "stockLevel": "",
+    "minQuantity": null,
     "priceCurrency": "USD",
     "deliveryDays": null,
     "certifiedOnly": false,
@@ -232,7 +245,8 @@ OUTPUT FORMAT (JSON ONLY)
   "exclude": {
     "brands": [],
     "conditions": [],
-    "origins": []
+    "origins": [],
+    "stockLevels": []
   },
   "intent": "",
   "intentType": "filtered_search",
@@ -294,7 +308,25 @@ Query: "German certified supplier brake pads"
 → {"searchTerms":["brake pad"],"filters":{"category":"brakes","supplierOrigin":"DE","certifiedOnly":true,"priceCurrency":"USD"},"exclude":{},"intent":"Brake pads from certified German suppliers","intentType":"filtered_search","confidence":{"category":"HIGH"},"suggestions":[]}
 
 Query: "anything available under 200"
-→ {"searchTerms":[],"filters":{"maxPrice":200,"inStock":true,"priceCurrency":"USD"},"exclude":{},"intent":"Available parts under $200","intentType":"filtered_search","confidence":{"price":"HIGH","stock":"MEDIUM"},"suggestions":[]}`;
+→ {"searchTerms":[],"filters":{"maxPrice":200,"inStock":true,"priceCurrency":"USD"},"exclude":{},"intent":"Available parts under $200","intentType":"filtered_search","confidence":{"price":"HIGH","stock":"MEDIUM"},"suggestions":[]}
+
+Query: "found parts below 100 USD all in stock and like full stock"
+→ {"searchTerms":[],"filters":{"maxPrice":100,"inStock":true,"stockLevel":"high","minQuantity":10,"priceCurrency":"USD"},"exclude":{"stockLevels":["low"]},"intent":"Parts under $100 with high stock levels","intentType":"filtered_search","confidence":{"price":"HIGH","stock":"HIGH"},"suggestions":[]}
+
+Query: "parts in full stock"
+→ {"searchTerms":[],"filters":{"inStock":true,"stockLevel":"high","minQuantity":10,"priceCurrency":"USD"},"exclude":{"stockLevels":["low"]},"intent":"Parts with full/high stock levels","intentType":"filtered_search","confidence":{"stock":"HIGH"},"suggestions":[]}
+
+Query: "well stocked brake pads"
+→ {"searchTerms":["brake pad"],"filters":{"category":"brakes","inStock":true,"stockLevel":"high","minQuantity":10,"priceCurrency":"USD"},"exclude":{"stockLevels":["low"]},"intent":"Brake pads with high stock availability","intentType":"filtered_search","confidence":{"category":"HIGH","stock":"HIGH"},"suggestions":[]}
+
+Query: "show me parts with plenty of stock"
+→ {"searchTerms":[],"filters":{"inStock":true,"stockLevel":"high","minQuantity":10,"priceCurrency":"USD"},"exclude":{"stockLevels":["low"]},"intent":"Parts with plenty of stock","intentType":"filtered_search","confidence":{"stock":"HIGH"},"suggestions":[]}
+
+Query: "no low stock items"
+→ {"searchTerms":[],"filters":{"inStock":true,"stockLevel":"high","minQuantity":5,"priceCurrency":"USD"},"exclude":{"stockLevels":["low"]},"intent":"Parts excluding low stock items","intentType":"filtered_search","confidence":{"stock":"HIGH"},"suggestions":[]}
+
+Query: "bulk available parts under 50"
+→ {"searchTerms":[],"filters":{"maxPrice":50,"inStock":true,"stockLevel":"high","minQuantity":20,"priceCurrency":"USD"},"exclude":{},"intent":"Parts under $50 with bulk availability","intentType":"filtered_search","confidence":{"price":"HIGH","stock":"HIGH"},"suggestions":[]}`;
 
 // Constants for service configuration
 const PARSE_TIMEOUT = 10000; // 10 second timeout for AI parsing
@@ -605,6 +637,18 @@ function normalizeFilters(filters) {
   if (filters.stockStatus) {
     normalized.stockStatus = filters.stockStatus;
   }
+  // CRITICAL: Stock level for "full stock" / "plenty" / "well stocked" queries
+  if (filters.stockLevel) {
+    normalized.stockLevel = filters.stockLevel.toLowerCase();
+  }
+  // Minimum quantity filter for high stock requirements
+  if (
+    filters.minQuantity !== undefined &&
+    filters.minQuantity !== null &&
+    !isNaN(filters.minQuantity)
+  ) {
+    normalized.minQuantity = Number(filters.minQuantity);
+  }
   if (
     filters.deliveryDays !== undefined &&
     filters.deliveryDays !== null &&
@@ -624,7 +668,7 @@ function normalizeFilters(filters) {
   }
 
   // ═══════════════════════════════════════════════════════════════
-  // EXCLUSION FILTERS (CRITICAL for "not BOSCH" queries)
+  // EXCLUSION FILTERS (CRITICAL for "not BOSCH" and "no low stock" queries)
   // ═══════════════════════════════════════════════════════════════
   if (filters.exclude && typeof filters.exclude === 'object') {
     normalized.exclude = {
@@ -636,6 +680,9 @@ function normalizeFilters(filters) {
         : [],
       origins: Array.isArray(filters.exclude.origins)
         ? filters.exclude.origins
+        : [],
+      stockLevels: Array.isArray(filters.exclude.stockLevels)
+        ? filters.exclude.stockLevels.map(s => s.toLowerCase())
         : [],
     };
   }

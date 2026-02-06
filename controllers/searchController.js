@@ -792,6 +792,17 @@ async function aiSearch(req, res) {
       );
       parsed = await Promise.race([parsePromise, timeoutPromise]);
       console.log('AI parsed query:', JSON.stringify(parsed, null, 2));
+      
+      // Enhanced logging for stock-related filters
+      if (parsed.filters) {
+        const stockInfo = {
+          inStock: parsed.filters.inStock,
+          stockLevel: parsed.filters.stockLevel,
+          minQuantity: parsed.filters.minQuantity,
+          excludeStockLevels: parsed.filters.exclude?.stockLevels,
+        };
+        console.log('📦 Stock filters detected:', JSON.stringify(stockInfo, null, 2));
+      }
     } catch (parseError) {
       console.warn(`⚠️ AI parsing failed/timeout: ${parseError.message}`);
       // Use fast fallback parsing
@@ -1329,14 +1340,93 @@ async function aiSearch(req, res) {
     }
 
     // ═══════════════════════════════════════════════════════════════
-    // 5. STOCK FILTER (SOFT - boost in-stock to top, don't exclude)
+    // 5. STOCK FILTER (INTELLIGENT - handles "full stock", "in stock", etc.)
     // ═══════════════════════════════════════════════════════════════
     let stockFilterRequested =
       filters.inStock || filters.stockStatus === 'in-stock';
+    let highStockRequested = 
+      filters.stockLevel === 'high' || 
+      filters.minQuantity > 0 ||
+      (filters.exclude?.stockLevels?.includes('low'));
+    
     let inStockCount = 0;
+    let highStockCount = 0;
+    
+    // Define quantity thresholds
+    const LOW_STOCK_THRESHOLD = 5;  // 1-5 = low stock
+    const HIGH_STOCK_THRESHOLD = filters.minQuantity || 10;  // 10+ = full/high stock
 
-    if (stockFilterRequested) {
-      // Count how many are in stock
+    // Helper to determine stock level
+    const getStockLevel = (quantity) => {
+      if (!quantity || quantity <= 0) return 'out';
+      if (quantity <= LOW_STOCK_THRESHOLD) return 'low';
+      return 'high';
+    };
+
+    if (highStockRequested) {
+      // User wants "full stock" / "plenty" / "well stocked" - EXCLUDE low stock items
+      console.log(`🔍 High stock requested (minQuantity: ${HIGH_STOCK_THRESHOLD})`);
+      
+      const beforeCount = filteredResults.length;
+      highStockCount = filteredResults.filter(
+        (p) => (p.quantity || 0) >= HIGH_STOCK_THRESHOLD,
+      ).length;
+
+      if (highStockCount > 0) {
+        // Filter OUT low stock items, sort by quantity
+        filteredResults = filteredResults
+          .filter((p) => (p.quantity || 0) >= HIGH_STOCK_THRESHOLD)
+          .map((p) => ({
+            ...p,
+            _inStock: true,
+            _stockLevel: 'high',
+            _stockScore: Math.min(100, p.quantity || 0), // Score by quantity
+          }))
+          .sort((a, b) => b._stockScore - a._stockScore);
+        
+        appliedFilters.push(`Full Stock (qty ≥${HIGH_STOCK_THRESHOLD})`);
+        console.log(
+          `📦 Full stock filter: ${beforeCount} → ${highStockCount} (excluded low stock items)`,
+        );
+      } else if (stockFilterRequested) {
+        // No high stock but user also wanted in-stock, try that
+        inStockCount = filteredResults.filter((p) => (p.quantity || 0) > 0).length;
+        
+        if (inStockCount > 0) {
+          filteredResults = filteredResults
+            .filter((p) => (p.quantity || 0) > 0)
+            .map((p) => ({
+              ...p,
+              _inStock: true,
+              _stockLevel: getStockLevel(p.quantity),
+              _stockScore: p.quantity || 0,
+            }))
+            .sort((a, b) => b._stockScore - a._stockScore);
+          
+          appliedFilters.push('In Stock (high stock not available)');
+          relaxedFilters.push(`Full Stock (only ${inStockCount} in-stock items found)`);
+          console.log(
+            `🔄 High stock relaxed: showing ${inStockCount} in-stock items sorted by quantity`,
+          );
+        } else {
+          relaxedFilters.push('Full Stock');
+          relaxedFilters.push('In Stock');
+          console.log(`🔄 All stock filters relaxed: no in-stock items found`);
+        }
+      } else {
+        relaxedFilters.push('Full Stock');
+        console.log(`🔄 Full stock filter relaxed: 0 high-stock items found`);
+      }
+      
+      filterStats['stockLevel'] = {
+        requested: 'high',
+        minQuantity: HIGH_STOCK_THRESHOLD,
+        highStockFound: highStockCount,
+        inStockFound: inStockCount,
+        total: filteredResults.length,
+      };
+    } else if (stockFilterRequested) {
+      // Basic in-stock request - boost but don't exclude
       inStockCount = filteredResults.filter(
         (p) => (p.quantity || 0) > 0,
       ).length;
@@ -1346,8 +1436,9 @@ async function aiSearch(req, res) {
         filteredResults = filteredResults.map((p) => ({
           ...p,
           _inStock: (p.quantity || 0) > 0,
+          _stockLevel: getStockLevel(p.quantity),
           _stockScore:
-            (p.quantity || 0) > 10 ? 2 : (p.quantity || 0) > 0 ? 1 : 0,
+            (p.quantity || 0) > HIGH_STOCK_THRESHOLD ? 2 : (p.quantity || 0) > 0 ? 1 : 0,
         }));
         filteredResults.sort((a, b) => b._stockScore - a._stockScore);
         appliedFilters.push('In Stock (prioritized)');
@@ -1366,6 +1457,18 @@ async function aiSearch(req, res) {
         found: inStockCount,
         total: filteredResults.length,
       };
+    }
+
+    // Handle explicit exclude low stock (even without high stock request)
+    if (filters.exclude?.stockLevels?.includes('low') && !highStockRequested) {
+      const beforeExclude = filteredResults.length;
+      filteredResults = filteredResults.filter(
+        (p) => (p.quantity || 0) > LOW_STOCK_THRESHOLD || (p.quantity || 0) === 0
+      );
+      appliedFilters.push('Exclude Low Stock');
+      console.log(
+        `🚫 Exclude low stock: ${beforeExclude} → ${filteredResults.length}`,
+      );
     }
 
     // ═══════════════════════════════════════════════════════════════
