@@ -350,10 +350,10 @@ function normalizeFilters(filters) {
 function extractBasicKeywords(query) {
   if (!query) return [];
   
-  const stopWords = new Set(['find', 'me', 'show', 'get', 'looking', 'for', 'need', 'want', 'the', 'a', 'an', 'some', 'with', 'from', 'i', 'am', 'please', 'can', 'you', 'under', 'below', 'above', 'over', 'price', 'priced', 'less', 'more', 'than', 'and', 'or', 'parts', 'part']);
+  const stopWords = new Set(['find', 'me', 'show', 'get', 'looking', 'for', 'need', 'want', 'the', 'a', 'an', 'some', 'with', 'from', 'i', 'am', 'please', 'can', 'you', 'under', 'below', 'above', 'over', 'price', 'priced', 'less', 'more', 'than', 'and', 'or', 'parts', 'part', 'oem', 'original', 'genuine', 'verified', 'suppliers', 'supplier']);
   
-  // Known brands to preserve
-  const knownBrands = new Set(['bosch', 'skf', 'denso', 'valeo', 'brembo', 'gates', 'continental', 'mann', 'mahle', 'sachs', 'bilstein', 'kyb', 'monroe', 'koni', 'toyota', 'honda', 'nissan', 'bmw', 'mercedes', 'audi', 'volkswagen', 'ford', 'chevrolet', 'hyundai', 'kia', 'acdelco', 'motorcraft', 'mopar', 'ntn', 'fag', 'timken', 'nsk', 'ngk', 'delphi', 'aisin', 'luk']);
+  // Known brands - don't include in keywords, they go to brand filter
+  const knownBrands = new Set(['bosch', 'skf', 'denso', 'valeo', 'brembo', 'gates', 'continental', 'mann', 'mahle', 'sachs', 'bilstein', 'kyb', 'monroe', 'koni', 'toyota', 'honda', 'nissan', 'bmw', 'mercedes', 'audi', 'volkswagen', 'ford', 'chevrolet', 'hyundai', 'kia', 'acdelco', 'motorcraft', 'mopar', 'ntn', 'fag', 'timken', 'nsk', 'ngk', 'delphi', 'aisin', 'luk', 'trw', 'ate', 'ferodo', 'mazda', 'subaru', 'lexus', 'porsche', 'mitsubishi', 'suzuki', 'isuzu', 'volvo', 'land rover', 'jaguar']);
   
   // Important part keywords
   const importantKeywords = new Set(['brake', 'brakes', 'filter', 'oil', 'air', 'fuel', 'engine', 'suspension', 'steering', 'transmission', 'clutch', 'alternator', 'starter', 'radiator', 'bearing', 'pump', 'valve', 'piston', 'gasket', 'belt', 'hose', 'sensor', 'shock', 'strut', 'rotor', 'caliper', 'pad', 'disc', 'wheel', 'tire', 'hub', 'axle', 'seal', 'mount', 'bushing', 'link', 'arm', 'rod', 'exhaust', 'muffler', 'injector', 'coil', 'spark', 'plug', 'battery']);
@@ -364,8 +364,9 @@ function extractBasicKeywords(query) {
     .filter(word => {
       if (word.length < 2) return false;
       if (stopWords.has(word)) return false;
-      // Keep brands, important keywords, or longer words
-      return knownBrands.has(word) || importantKeywords.has(word) || word.length > 3;
+      if (knownBrands.has(word)) return false; // Brands go to filter, not keywords
+      // Keep important keywords or longer words
+      return importantKeywords.has(word) || word.length > 3;
     });
   
   return [...new Set(words)].slice(0, 6);
@@ -373,6 +374,7 @@ function extractBasicKeywords(query) {
 
 /**
  * Basic filter extraction fallback - Fast and comprehensive
+ * SMART brand detection - finds brands ANYWHERE in query
  */
 function extractBasicFilters(query) {
   if (!query) return { priceCurrency: 'USD' };
@@ -380,24 +382,83 @@ function extractBasicFilters(query) {
   const filters = { priceCurrency: 'USD' };
   const queryLower = query.toLowerCase();
   
-  // Currency extraction - detect what currency user is searching in
+  // SMART BRAND DETECTION - find brands anywhere in query
+  // Include common typos
+  const brandMappings = {
+    // Car manufacturers
+    'toyota': 'TOYOTA', 'toyta': 'TOYOTA', 'toyata': 'TOYOTA',
+    'honda': 'HONDA', 'handa': 'HONDA',
+    'nissan': 'NISSAN', 'nisan': 'NISSAN',
+    'bmw': 'BMW',
+    'mercedes': 'MERCEDES', 'mercedez': 'MERCEDES', 'merc': 'MERCEDES',
+    'audi': 'AUDI',
+    'volkswagen': 'VOLKSWAGEN', 'vw': 'VOLKSWAGEN',
+    'ford': 'FORD',
+    'chevrolet': 'CHEVROLET', 'chevy': 'CHEVROLET',
+    'hyundai': 'HYUNDAI', 'hundai': 'HYUNDAI',
+    'kia': 'KIA',
+    'mazda': 'MAZDA',
+    'subaru': 'SUBARU',
+    'lexus': 'LEXUS',
+    'porsche': 'PORSCHE', 'porchhe': 'PORSCHE',
+    'mitsubishi': 'MITSUBISHI',
+    'suzuki': 'SUZUKI',
+    'isuzu': 'ISUZU',
+    'volvo': 'VOLVO',
+    // Parts brands
+    'bosch': 'BOSCH', 'bosh': 'BOSCH',
+    'brembo': 'BREMBO', 'bremb': 'BREMBO',
+    'skf': 'SKF',
+    'denso': 'DENSO',
+    'valeo': 'VALEO',
+    'mann': 'MANN',
+    'mahle': 'MAHLE',
+    'ngk': 'NGK',
+    'delphi': 'DELPHI',
+    'gates': 'GATES',
+    'continental': 'CONTINENTAL',
+    'sachs': 'SACHS',
+    'bilstein': 'BILSTEIN',
+    'kyb': 'KYB',
+    'monroe': 'MONROE',
+    'trw': 'TRW',
+    'ate': 'ATE',
+    'ferodo': 'FERODO',
+    'aisin': 'AISIN',
+    'ntn': 'NTN',
+    'fag': 'FAG',
+    'timken': 'TIMKEN',
+    'acdelco': 'ACDelco',
+    'motorcraft': 'MOTORCRAFT',
+    'mopar': 'MOPAR',
+  };
+  
+  // Find all brands in query (anywhere, with word boundaries)
+  const foundBrands = [];
+  for (const [pattern, brand] of Object.entries(brandMappings)) {
+    const regex = new RegExp(`\\b${pattern}\\b`, 'i');
+    if (regex.test(queryLower) && !foundBrands.includes(brand)) {
+      foundBrands.push(brand);
+    }
+  }
+  if (foundBrands.length > 0) {
+    filters.brand = foundBrands;
+  }
+  
+  // Currency extraction
   if (queryLower.match(/\b(aed|dirham|dirhams)\b/)) {
     filters.priceCurrency = 'AED';
   } else if (queryLower.match(/\b(eur|euro|euros|€)\b/)) {
     filters.priceCurrency = 'EUR';
-  } else if (queryLower.match(/\b(gbp|pound|pounds|£)\b/)) {
-    filters.priceCurrency = 'GBP';
   }
   
   // Price extraction - comprehensive patterns
-  // Match: "under $100", "below 100", "less than $500", "max $200", "100 USD or less"
   const maxPriceMatch = queryLower.match(/(?:under|below|less\s+than|max|cheaper\s+than)\s*\$?\s*(\d+)|(\d+)\s*(?:usd|dollars?|eur|euro|aed|dirhams?)\s*(?:or\s+less|max)/i);
   if (maxPriceMatch) {
     const price = maxPriceMatch[1] || maxPriceMatch[2];
     if (price) filters.maxPrice = parseInt(price);
   }
   
-  // Match: "over $100", "above 100", "more than $500", "min $200", "at least 100"
   const minPriceMatch = queryLower.match(/(?:over|above|more\s+than|min|at\s+least)\s*\$?\s*(\d+)/);
   if (minPriceMatch) {
     filters.minPrice = parseInt(minPriceMatch[1]);
@@ -408,16 +469,6 @@ function extractBasicFilters(query) {
   if (priceRangeMatch && !filters.maxPrice && !filters.minPrice) {
     filters.minPrice = parseInt(priceRangeMatch[1]);
     filters.maxPrice = parseInt(priceRangeMatch[2]);
-  }
-  
-  // Brand extraction - expanded list
-  const knownBrands = ['bosch', 'skf', 'denso', 'valeo', 'brembo', 'gates', 'continental', 'mann', 'mahle', 'sachs', 'bilstein', 'kyb', 'monroe', 'toyota', 'honda', 'nissan', 'bmw', 'mercedes', 'audi', 'volkswagen', 'ford', 'chevrolet', 'hyundai', 'kia', 'acdelco', 'ntn', 'fag', 'timken', 'ngk', 'delphi', 'aisin'];
-  const foundBrands = knownBrands.filter(brand => {
-    const regex = new RegExp(`\\b${brand}\\b`, 'i');
-    return regex.test(queryLower);
-  });
-  if (foundBrands.length > 0) {
-    filters.brand = foundBrands.map(b => b.toUpperCase());
   }
   
   // Stock extraction
