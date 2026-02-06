@@ -286,22 +286,53 @@
   // AI PROCESSING - GEMINI INTEGRATION
   // ====================================
   let currentAbortController = null;
+  let isSearchInProgress = false;
+  let lastSearchQuery = '';
+  const SEARCH_TIMEOUT = 20000; // 20 second timeout
+  const DEBOUNCE_DELAY = 300; // 300ms debounce
+  let searchDebounceTimer = null;
   
   async function handleAISubmit() {
     const query = elements.aiInput?.value.trim();
-    if (!query) return;
+    if (!query) {
+      showAIMessage('Please enter a search query', 'info');
+      return;
+    }
+    
+    // Prevent duplicate requests for same query
+    if (isSearchInProgress && query.toLowerCase() === lastSearchQuery.toLowerCase()) {
+      showAIMessage('Search in progress, please wait...', 'info');
+      return;
+    }
     
     // Cancel any pending request
     if (currentAbortController) {
       currentAbortController.abort();
     }
     
+    // Clear any pending debounce
+    if (searchDebounceTimer) {
+      clearTimeout(searchDebounceTimer);
+    }
+    
     // Create new abort controller for this request
     currentAbortController = new AbortController();
-    const timeoutId = setTimeout(() => currentAbortController.abort(), 30000); // 30s timeout
+    const timeoutId = setTimeout(() => {
+      if (currentAbortController) {
+        currentAbortController.abort();
+      }
+    }, SEARCH_TIMEOUT);
 
+    isSearchInProgress = true;
+    lastSearchQuery = query;
     AIFilterState.aiQuery = query;
     AIFilterState.isLoading = true;
+    
+    // Disable submit button during search
+    if (elements.aiSubmitBtn) {
+      elements.aiSubmitBtn.disabled = true;
+      elements.aiSubmitBtn.innerHTML = '<i data-lucide="loader-2" class="spin"></i>';
+    }
 
     // Show response section with thinking state
     if (elements.aiResponseSection) {
@@ -310,7 +341,25 @@
     if (elements.aiThinking) {
       elements.aiThinking.style.display = 'flex';
       const thinkingText = elements.aiThinking.querySelector('.thinking-text');
-      if (thinkingText) thinkingText.textContent = 'AI is analyzing your request...';
+      if (thinkingText) {
+        thinkingText.textContent = 'Analyzing your request...';
+        // Update thinking text periodically
+        const thinkingMessages = [
+          'Analyzing your request...',
+          'Understanding search criteria...',
+          'Finding matching parts...',
+          'Filtering results...',
+        ];
+        let msgIndex = 0;
+        const thinkingInterval = setInterval(() => {
+          if (!isSearchInProgress) {
+            clearInterval(thinkingInterval);
+            return;
+          }
+          msgIndex = (msgIndex + 1) % thinkingMessages.length;
+          thinkingText.textContent = thinkingMessages[msgIndex];
+        }, 2000);
+      }
     }
     if (elements.aiResponseTitle) {
       elements.aiResponseTitle.style.display = 'none';
@@ -364,33 +413,13 @@
       // Check if this was an abort (user cancelled or timeout)
       if (error.name === 'AbortError') {
         console.log('AI Search cancelled or timed out');
+        showAIError('timeout');
+      } else if (error.message && error.message.includes('429')) {
+        console.log('AI service rate limited');
+        showAIError('rate-limited');
       } else {
         console.error('AI Search error:', error);
-      }
-      
-      // Hide thinking indicator
-      if (elements.aiThinking) {
-        elements.aiThinking.style.display = 'none';
-      }
-      
-      // Show error message in the response title
-      if (elements.aiResponseTitle) {
-        elements.aiResponseTitle.style.display = 'flex';
-        const titleSpan = elements.aiResponseTitle.querySelector('span');
-        if (titleSpan) {
-          if (error.name === 'AbortError') {
-            titleSpan.textContent = 'Search timed out. Try a more specific query.';
-          } else if (error.message && error.message.includes('429')) {
-            titleSpan.textContent = 'AI service busy. Using basic search...';
-          } else {
-            titleSpan.textContent = 'Using basic search mode...';
-          }
-        }
-        // Change icon to info
-        const icon = elements.aiResponseTitle.querySelector('i');
-        if (icon) {
-          icon.setAttribute('data-lucide', 'info');
-        }
+        showAIError('general');
       }
       
       // Fallback to local parsing and still show results section
@@ -406,13 +435,78 @@
       
     } finally {
       AIFilterState.isLoading = false;
+      isSearchInProgress = false;
       currentAbortController = null;
+      
+      // Re-enable submit button
+      if (elements.aiSubmitBtn) {
+        elements.aiSubmitBtn.disabled = false;
+        elements.aiSubmitBtn.innerHTML = '<i data-lucide="sparkles"></i><span>Search</span>';
+      }
       
       // Reinitialize icons
       if (typeof lucide !== 'undefined') {
         lucide.createIcons();
       }
     }
+  }
+  
+  /**
+   * Show AI error message with professional styling
+   */
+  function showAIError(type) {
+    // Hide thinking indicator
+    if (elements.aiThinking) {
+      elements.aiThinking.style.display = 'none';
+    }
+    
+    const messages = {
+      'timeout': {
+        title: 'Search took too long',
+        subtitle: 'Try a more specific query or use filters below.',
+        icon: 'clock'
+      },
+      'rate-limited': {
+        title: 'High demand right now',
+        subtitle: 'Using quick search mode. Results may be less refined.',
+        icon: 'zap'
+      },
+      'general': {
+        title: 'Switching to quick search',
+        subtitle: 'We\'ll find parts using standard search.',
+        icon: 'search'
+      }
+    };
+    
+    const msg = messages[type] || messages['general'];
+    
+    if (elements.aiResponseTitle) {
+      elements.aiResponseTitle.style.display = 'flex';
+      const titleSpan = elements.aiResponseTitle.querySelector('span');
+      if (titleSpan) titleSpan.textContent = msg.title;
+      const icon = elements.aiResponseTitle.querySelector('i');
+      if (icon) icon.setAttribute('data-lucide', msg.icon);
+    }
+  }
+  
+  /**
+   * Show AI informational message
+   */
+  function showAIMessage(message, type = 'info') {
+    if (elements.aiResponseSection) {
+      elements.aiResponseSection.style.display = 'block';
+    }
+    if (elements.aiThinking) {
+      elements.aiThinking.style.display = 'none';
+    }
+    if (elements.aiResponseTitle) {
+      elements.aiResponseTitle.style.display = 'flex';
+      const titleSpan = elements.aiResponseTitle.querySelector('span');
+      if (titleSpan) titleSpan.textContent = message;
+      const icon = elements.aiResponseTitle.querySelector('i');
+      if (icon) icon.setAttribute('data-lucide', type === 'info' ? 'info' : 'alert-circle');
+    }
+    if (typeof lucide !== 'undefined') lucide.createIcons();
   }
 
   /**
@@ -774,6 +868,7 @@
     
     const hasResults = results && results.length > 0;
     const hasFilters = parsedFilters && parsedFilters.length > 0;
+    const isBroadSearch = AIFilterState.isBroadSearch;
     
     if (elements.aiResponseTitle) {
       elements.aiResponseTitle.style.display = 'flex';
@@ -781,13 +876,23 @@
       const icon = elements.aiResponseTitle.querySelector('i');
       
       if (hasResults) {
-        titleSpan.textContent = `Found ${results.length} parts matching your search!`;
+        // Professional result messaging
+        const resultCount = results.length;
+        if (resultCount === 1) {
+          titleSpan.textContent = 'Found 1 matching part';
+        } else if (resultCount < 10) {
+          titleSpan.textContent = `Found ${resultCount} matching parts`;
+        } else if (resultCount < 100) {
+          titleSpan.textContent = `Found ${resultCount} parts`;
+        } else {
+          titleSpan.textContent = `${resultCount}+ parts available`;
+        }
         icon?.setAttribute('data-lucide', 'check-circle');
       } else if (hasFilters) {
-        titleSpan.textContent = `Applied ${parsedFilters.length} filter${parsedFilters.length > 1 ? 's' : ''} from your request!`;
-        icon?.setAttribute('data-lucide', 'filter');
+        titleSpan.textContent = `Filters applied - No exact matches found`;
+        icon?.setAttribute('data-lucide', 'filter-x');
       } else {
-        titleSpan.textContent = parsedResponse?.intent || 'Understanding your request...';
+        titleSpan.textContent = parsedResponse?.intent || 'Processing your search...';
         icon?.setAttribute('data-lucide', 'search');
       }
     }
@@ -983,22 +1088,34 @@
                 <div class="ai-no-results">
                   <div class="no-results-visual">
                     <div class="no-results-icon-wrapper">
-                      <i data-lucide="package-x"></i>
+                      <i data-lucide="search-x"></i>
                     </div>
-                    <h4>No Parts Found</h4>
-                    <p>We couldn't find parts matching your search criteria.</p>
+                    <h4>No Matching Parts</h4>
+                    <p class="no-results-message">${AIFilterState.broadSearchMessage || 'No parts match your current search criteria.'}</p>
+                  </div>
+                  <div class="no-results-tips">
+                    <h5><i data-lucide="lightbulb"></i> Search Tips</h5>
+                    <ul class="tips-list">
+                      <li>Check spelling of part numbers and brand names</li>
+                      <li>Try broader terms (e.g., "brake" instead of "brake pad set")</li>
+                      <li>Remove some filters to expand results</li>
+                      <li>Search by brand name (BOSCH, SKF, DENSO)</li>
+                    </ul>
                   </div>
                   <div class="no-results-suggestions">
-                    <p class="suggestions-intro">Try searching for:</p>
+                    <p class="suggestions-intro">Popular searches:</p>
                     <div class="quick-search-chips">
-                      <button class="quick-chip" data-hint="Brake pads BOSCH under $300">
-                        <i data-lucide="disc"></i> Brake pads
+                      <button class="quick-chip" data-hint="BOSCH brake pads">
+                        <i data-lucide="disc"></i> BOSCH Brake Pads
                       </button>
-                      <button class="quick-chip" data-hint="SKF wheel bearings in stock">
-                        <i data-lucide="circle-dot"></i> SKF bearings
+                      <button class="quick-chip" data-hint="SKF wheel bearing">
+                        <i data-lucide="circle-dot"></i> SKF Bearings
                       </button>
-                      <button class="quick-chip" data-hint="Oil filters MANN MAHLE available">
-                        <i data-lucide="filter"></i> Oil filters
+                      <button class="quick-chip" data-hint="MANN oil filter">
+                        <i data-lucide="filter"></i> MANN Filters
+                      </button>
+                      <button class="quick-chip" data-hint="DENSO spark plug">
+                        <i data-lucide="zap"></i> DENSO Spark Plugs
                       </button>
                     </div>
                   </div>

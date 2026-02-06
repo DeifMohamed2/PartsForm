@@ -676,43 +676,98 @@ function convertCurrency(amount, fromCurrency = 'USD', toCurrency = 'AED') {
   return Math.round(converted * 100) / 100; // Round to 2 decimals
 }
 
+// Track active AI search requests to prevent duplicates
+const activeAISearches = new Map();
+const AI_SEARCH_TIMEOUT = 15000; // 15 second timeout for AI parsing
+const DB_QUERY_TIMEOUT = 10000; // 10 second timeout for database queries
+
 /**
  * AI-powered search - Parse natural language and search
  * POST /api/ai-search
  * Body: { query: "Find Bosch brake pads under $500" }
  */
 async function aiSearch(req, res) {
+  const requestId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  
   try {
     const { query } = req.body;
     
     if (!query || !query.trim()) {
       return res.json({
         success: false,
-        error: 'Query is required',
+        error: 'Please enter a search query',
         results: [],
         total: 0,
+        message: 'Enter a part number, brand name, or describe what you need.',
       });
     }
 
-    console.log(`🤖 AI Search: "${query}"`);
+    // Check for duplicate active request with same query
+    const normalizedQuery = query.trim().toLowerCase();
+    if (activeAISearches.has(normalizedQuery)) {
+      console.log(`⚡ Duplicate AI search request detected: "${query}"`);
+      // Wait for existing request or timeout
+      const existingRequest = activeAISearches.get(normalizedQuery);
+      if (Date.now() - existingRequest.startTime < AI_SEARCH_TIMEOUT) {
+        return res.json({
+          success: false,
+          error: 'Search in progress',
+          message: 'Please wait for the current search to complete.',
+          results: [],
+          total: 0,
+        });
+      }
+    }
+
+    // Register this search as active
+    activeAISearches.set(normalizedQuery, { requestId, startTime: Date.now() });
+    
+    console.log(`🤖 AI Search [${requestId}]: "${query}"`);
     const startTime = Date.now();
 
-    // Step 1: Parse the natural language query using Gemini
-    const parsed = await geminiService.parseSearchQuery(query);
-    console.log('AI parsed query:', JSON.stringify(parsed, null, 2));
+    // Step 1: Parse the natural language query using Gemini with timeout
+    let parsed;
+    try {
+      const parsePromise = geminiService.parseSearchQuery(query);
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('AI_PARSE_TIMEOUT')), AI_SEARCH_TIMEOUT)
+      );
+      parsed = await Promise.race([parsePromise, timeoutPromise]);
+      console.log('AI parsed query:', JSON.stringify(parsed, null, 2));
+    } catch (parseError) {
+      console.warn(`⚠️ AI parsing failed/timeout: ${parseError.message}`);
+      // Use fast fallback parsing
+      parsed = {
+        success: false,
+        searchTerms: extractBasicKeywordsFromQuery(query),
+        filters: extractBasicFiltersFromQuery(query),
+        intent: `Searching for: "${query}"`,
+        suggestions: ['Try being more specific', 'Include brand names or part numbers'],
+      };
+    }
 
     // Step 2: Build search parameters from AI output
     // Filter out generic/useless search terms that would match too many results
-    const genericWords = ['parts', 'part', 'find', 'get', 'show', 'search', 'looking', 'need', 'want', 'items', 'products', 'all', 'any', 'some', 'oem', 'original', 'genuine', 'new', 'used'];
+    const genericWords = new Set(['parts', 'part', 'find', 'get', 'show', 'search', 'looking', 'need', 'want', 'items', 'products', 'all', 'any', 'some', 'oem', 'original', 'genuine', 'new', 'used', 'verified', 'suppliers', 'supplier', 'from', 'for', 'the', 'and', 'with', 'under', 'below', 'above', 'over', 'price', 'priced', 'quality', 'best', 'good']);
     
-    // Split compound terms and filter out generic words
+    // Important automotive keywords that should be kept even if they seem generic
+    const importantKeywords = new Set(['brake', 'brakes', 'engine', 'filter', 'oil', 'air', 'fuel', 'suspension', 'steering', 'transmission', 'clutch', 'alternator', 'starter', 'radiator', 'bearing', 'pump', 'valve', 'piston', 'gasket', 'belt', 'hose', 'sensor', 'shock', 'strut', 'rotor', 'caliper', 'pad', 'disc', 'wheel', 'tire', 'hub', 'axle', 'cv', 'joint', 'seal', 'mount', 'bushing', 'link', 'arm', 'rod', 'rack', 'pinion', 'exhaust', 'muffler', 'catalytic', 'converter', 'manifold', 'injector', 'coil', 'plug', 'spark', 'battery', 'fuse', 'relay', 'switch', 'motor', 'compressor', 'condenser', 'evaporator', 'heater', 'blower', 'wiper', 'mirror', 'light', 'lamp', 'bulb', 'headlight', 'taillight', 'indicator', 'door', 'window', 'glass', 'bumper', 'fender', 'hood', 'trunk', 'panel', 'trim', 'carpet', 'seat', 'console', 'dashboard', 'gauge', 'cluster', 'clock', 'radio', 'speaker', 'antenna', 'cable', 'wire', 'harness', 'connector', 'terminal', 'clip', 'bolt', 'nut', 'screw', 'washer', 'clamp', 'bracket', 'spring', 'damper']);
+    
+    // Known brand names that should always be kept
+    const knownBrands = new Set(['bosch', 'brembo', 'denso', 'valeo', 'skf', 'fag', 'timken', 'nsk', 'ntn', 'mann', 'mahle', 'sachs', 'bilstein', 'kyb', 'monroe', 'koni', 'gates', 'continental', 'delphi', 'aisin', 'luk', 'ngk', 'toyota', 'honda', 'nissan', 'bmw', 'mercedes', 'audi', 'volkswagen', 'ford', 'chevrolet', 'hyundai', 'kia', 'mazda', 'subaru', 'lexus', 'porsche', 'acdelco', 'motorcraft', 'mopar']);
+    
+    // Split compound terms and filter intelligently
     let searchTerms = [];
     for (const term of (parsed.searchTerms || [])) {
-      // Split compound terms like "brake parts" into individual words
       const words = term.toLowerCase().trim().split(/\s+/);
       for (const word of words) {
-        if (word.length > 2 && !genericWords.includes(word) && !searchTerms.includes(word)) {
-          searchTerms.push(word);
+        const cleanWord = word.replace(/[^a-z0-9-]/g, '');
+        if (cleanWord.length < 2) continue;
+        if (searchTerms.includes(cleanWord)) continue;
+        
+        // Keep if it's an important keyword, known brand, or not generic
+        if (importantKeywords.has(cleanWord) || knownBrands.has(cleanWord) || !genericWords.has(cleanWord)) {
+          searchTerms.push(cleanWord);
         }
       }
     }
@@ -971,29 +1026,89 @@ async function aiSearch(req, res) {
       searchTime,
     };
 
-    // Add helpful messaging for very broad searches
-    if (isGenericSearch && filteredResults.length > 100) {
-      response.message = 'Your search is quite broad. For better results, try specifying a brand, part number, or category.';
+    // Add helpful messaging based on results
+    if (filteredResults.length === 0) {
+      response.message = 'No parts found matching your criteria. Try adjusting your filters or using different keywords.';
+      response.suggestions = [
+        'Check the spelling of part numbers or brand names',
+        'Try removing some filters to broaden your search',
+        'Search for a specific brand like BOSCH, SKF, or DENSO',
+      ];
+    } else if (isGenericSearch && filteredResults.length > 100) {
+      response.message = 'Showing results based on your filters. For more specific results, try adding a brand or part category.';
       response.isBroadSearch = true;
       
-      // Add unique part numbers for reference (first 50)
-      const uniquePartNumbers = [...new Set(filteredResults.map(p => p.partNumber))].slice(0, 50);
+      // Add unique part numbers for reference (first 30)
+      const uniquePartNumbers = [...new Set(filteredResults.map(p => p.partNumber))].slice(0, 30);
       response.samplePartNumbers = uniquePartNumbers;
       
       // Add available brands in results
-      const uniqueBrands = [...new Set(filteredResults.map(p => p.brand).filter(Boolean))].slice(0, 20);
+      const uniqueBrands = [...new Set(filteredResults.map(p => p.brand).filter(Boolean))].sort().slice(0, 15);
       response.availableBrands = uniqueBrands;
+    } else if (filteredResults.length > 0 && filteredResults.length <= 10) {
+      response.message = `Found ${filteredResults.length} part${filteredResults.length > 1 ? 's' : ''} matching your search.`;
     }
 
+    // Clean up active request tracking
+    activeAISearches.delete(normalizedQuery);
+    
     res.json(response);
   } catch (error) {
+    // Clean up active request tracking on error
+    const normalizedQuery = (req.body?.query || '').trim().toLowerCase();
+    activeAISearches.delete(normalizedQuery);
+    
     console.error('AI Search error:', error);
-    res.status(500).json({
+    
+    // Return user-friendly error message
+    const isTimeout = error.message?.includes('TIMEOUT') || error.message?.includes('timeout');
+    res.status(isTimeout ? 408 : 500).json({
       success: false,
-      error: 'AI Search failed',
-      message: error.message,
+      error: isTimeout ? 'Search timed out' : 'Search failed',
+      message: isTimeout 
+        ? 'The search took too long. Please try a more specific query.'
+        : 'An error occurred while searching. Please try again.',
+      results: [],
+      total: 0,
     });
   }
+}
+
+/**
+ * Fast basic keyword extraction for fallback
+ */
+function extractBasicKeywordsFromQuery(query) {
+  const stopWords = new Set(['find', 'me', 'show', 'get', 'looking', 'for', 'need', 'want', 'the', 'a', 'an', 'some', 'with', 'from', 'i', 'am', 'please', 'can', 'you', 'under', 'below', 'above', 'over', 'and', 'or']);
+  const words = query.toLowerCase()
+    .replace(/[^\w\s-]/g, ' ')
+    .split(/\s+/)
+    .filter(word => word.length > 2 && !stopWords.has(word) && !/^\d+$/.test(word));
+  
+  return [...new Set(words)].slice(0, 5);
+}
+
+/**
+ * Fast basic filter extraction for fallback
+ */
+function extractBasicFiltersFromQuery(query) {
+  const filters = { priceCurrency: 'USD' };
+  const queryLower = query.toLowerCase();
+  
+  // Price extraction
+  const priceMatch = queryLower.match(/(?:under|below|less than|max|cheaper than)\s*\$?\s*(\d+)/i);
+  if (priceMatch) filters.maxPrice = parseInt(priceMatch[1]);
+  
+  const minPriceMatch = queryLower.match(/(?:over|above|more than|min|at least)\s*\$?\s*(\d+)/i);
+  if (minPriceMatch) filters.minPrice = parseInt(minPriceMatch[1]);
+  
+  // Currency detection
+  if (queryLower.match(/\b(aed|dirham)/)) filters.priceCurrency = 'AED';
+  else if (queryLower.match(/\b(eur|euro|€)/)) filters.priceCurrency = 'EUR';
+  
+  // Stock filter
+  if (queryLower.includes('in stock') || queryLower.includes('available')) filters.inStock = true;
+  
+  return filters;
 }
 
 /**

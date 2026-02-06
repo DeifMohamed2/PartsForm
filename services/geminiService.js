@@ -99,29 +99,49 @@ Respond ONLY with this exact JSON structure (no markdown, no code blocks):
   "suggestions": []
 }`;
 
+// Constants for service configuration
+const PARSE_TIMEOUT = 10000; // 10 second timeout for AI parsing
+const MAX_RETRIES = 1; // Only retry once on failure
+
 /**
  * Parse a natural language query into structured search parameters
  * @param {string} query - The user's natural language query
  * @returns {Promise<Object>} Parsed search parameters
  */
 async function parseSearchQuery(query) {
+  const startTime = Date.now();
+  
   try {
+    // Quick validation
+    if (!query || query.trim().length < 2) {
+      return createFallbackResponse(query, 'Query too short');
+    }
+    
     const prompt = `${SYSTEM_INSTRUCTION}
 
 Parse this parts search query and extract filters: "${query}"
 
 Remember: Respond with ONLY valid JSON, no markdown formatting, no code blocks, no explanations.`;
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
-      contents: prompt,
-      config: {
-        temperature: 0.1,
-        topP: 0.8,
-        topK: 40,
-        maxOutputTokens: 1024,
-      },
+    // Create a promise that rejects after timeout
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('AI_PARSE_TIMEOUT')), PARSE_TIMEOUT);
     });
+
+    // Race between AI call and timeout
+    const response = await Promise.race([
+      ai.models.generateContent({
+        model: 'gemini-2.0-flash',
+        contents: prompt,
+        config: {
+          temperature: 0.1,
+          topP: 0.8,
+          topK: 40,
+          maxOutputTokens: 512, // Reduced for faster response
+        },
+      }),
+      timeoutPromise,
+    ]);
     
     let text = response.text.trim();
     
@@ -137,6 +157,9 @@ Remember: Respond with ONLY valid JSON, no markdown formatting, no code blocks, 
     // Parse the JSON response
     const parsed = JSON.parse(text);
     
+    const parseTime = Date.now() - startTime;
+    console.log(`✅ AI parsed query in ${parseTime}ms`);
+    
     // Validate and normalize the response
     return {
       success: true,
@@ -145,20 +168,32 @@ Remember: Respond with ONLY valid JSON, no markdown formatting, no code blocks, 
       intent: parsed.intent || 'Search for parts',
       suggestions: Array.isArray(parsed.suggestions) ? parsed.suggestions : [],
       rawResponse: parsed,
+      parseTime,
     };
   } catch (error) {
-    console.error('Gemini API error:', error);
+    const parseTime = Date.now() - startTime;
+    const isTimeout = error.message === 'AI_PARSE_TIMEOUT';
     
-    // Fallback to basic keyword extraction
-    return {
-      success: false,
-      searchTerms: extractBasicKeywords(query),
-      filters: extractBasicFilters(query),
-      intent: 'Search for parts matching your query',
-      suggestions: ['Try being more specific', 'Include brand names or part numbers'],
-      error: error.message,
-    };
+    console.warn(`⚠️ Gemini API ${isTimeout ? 'timeout' : 'error'} after ${parseTime}ms:`, error.message);
+    
+    // Return fast fallback response
+    return createFallbackResponse(query, error.message);
   }
+}
+
+/**
+ * Create a fallback response using basic parsing
+ */
+function createFallbackResponse(query, errorReason) {
+  return {
+    success: false,
+    searchTerms: extractBasicKeywords(query),
+    filters: extractBasicFilters(query),
+    intent: `Searching for: "${query}"`,
+    suggestions: ['Try being more specific', 'Include brand names or part numbers'],
+    error: errorReason,
+    usedFallback: true,
+  };
 }
 
 /**
@@ -340,88 +375,109 @@ function normalizeFilters(filters) {
 }
 
 /**
- * Basic keyword extraction fallback
+ * Basic keyword extraction fallback - Fast and efficient
  */
 function extractBasicKeywords(query) {
-  const stopWords = ['find', 'me', 'show', 'get', 'looking', 'for', 'need', 'want', 'the', 'a', 'an', 'some', 'with', 'from', 'i', 'am', 'please', 'can', 'you'];
+  if (!query) return [];
+  
+  const stopWords = new Set(['find', 'me', 'show', 'get', 'looking', 'for', 'need', 'want', 'the', 'a', 'an', 'some', 'with', 'from', 'i', 'am', 'please', 'can', 'you', 'under', 'below', 'above', 'over', 'price', 'priced', 'less', 'more', 'than', 'and', 'or', 'parts', 'part']);
+  
+  // Known brands to preserve
+  const knownBrands = new Set(['bosch', 'skf', 'denso', 'valeo', 'brembo', 'gates', 'continental', 'mann', 'mahle', 'sachs', 'bilstein', 'kyb', 'monroe', 'koni', 'toyota', 'honda', 'nissan', 'bmw', 'mercedes', 'audi', 'volkswagen', 'ford', 'chevrolet', 'hyundai', 'kia', 'acdelco', 'motorcraft', 'mopar', 'ntn', 'fag', 'timken', 'nsk', 'ngk', 'delphi', 'aisin', 'luk']);
+  
+  // Important part keywords
+  const importantKeywords = new Set(['brake', 'brakes', 'filter', 'oil', 'air', 'fuel', 'engine', 'suspension', 'steering', 'transmission', 'clutch', 'alternator', 'starter', 'radiator', 'bearing', 'pump', 'valve', 'piston', 'gasket', 'belt', 'hose', 'sensor', 'shock', 'strut', 'rotor', 'caliper', 'pad', 'disc', 'wheel', 'tire', 'hub', 'axle', 'seal', 'mount', 'bushing', 'link', 'arm', 'rod', 'exhaust', 'muffler', 'injector', 'coil', 'spark', 'plug', 'battery']);
+  
   const words = query.toLowerCase()
     .replace(/[^\w\s-]/g, ' ')
     .split(/\s+/)
-    .filter(word => word.length > 2 && !stopWords.includes(word));
+    .filter(word => {
+      if (word.length < 2) return false;
+      if (stopWords.has(word)) return false;
+      // Keep brands, important keywords, or longer words
+      return knownBrands.has(word) || importantKeywords.has(word) || word.length > 3;
+    });
   
-  return [...new Set(words)].slice(0, 5);
+  return [...new Set(words)].slice(0, 6);
 }
 
 /**
- * Basic filter extraction fallback
+ * Basic filter extraction fallback - Fast and comprehensive
  */
 function extractBasicFilters(query) {
-  const filters = {};
+  if (!query) return { priceCurrency: 'USD' };
+  
+  const filters = { priceCurrency: 'USD' };
   const queryLower = query.toLowerCase();
   
   // Currency extraction - detect what currency user is searching in
-  // Default to USD if not specified
-  filters.priceCurrency = 'USD';
   if (queryLower.match(/\b(aed|dirham|dirhams)\b/)) {
     filters.priceCurrency = 'AED';
   } else if (queryLower.match(/\b(eur|euro|euros|€)\b/)) {
     filters.priceCurrency = 'EUR';
   } else if (queryLower.match(/\b(gbp|pound|pounds|£)\b/)) {
     filters.priceCurrency = 'GBP';
-  } else if (queryLower.match(/\b(usd|dollar|dollars|\$)\b/)) {
-    filters.priceCurrency = 'USD';
   }
   
-  // Price extraction - enhanced patterns
-  const priceUnderMatch = queryLower.match(/under\s*\$?\s*(\d+)|below\s*\$?\s*(\d+)|less\s+than\s*\$?\s*(\d+)|max\s*\$?\s*(\d+)|(\d+)\s*(usd|dollars?|eur|euro|aed|dirhams?)\s*(or\s+less|max)?/i);
-  if (priceUnderMatch) {
-    const price = priceUnderMatch[1] || priceUnderMatch[2] || priceUnderMatch[3] || priceUnderMatch[4] || priceUnderMatch[5];
-    if (price) {
-      filters.maxPrice = parseInt(price);
-    }
+  // Price extraction - comprehensive patterns
+  // Match: "under $100", "below 100", "less than $500", "max $200", "100 USD or less"
+  const maxPriceMatch = queryLower.match(/(?:under|below|less\s+than|max|cheaper\s+than)\s*\$?\s*(\d+)|(\d+)\s*(?:usd|dollars?|eur|euro|aed|dirhams?)\s*(?:or\s+less|max)/i);
+  if (maxPriceMatch) {
+    const price = maxPriceMatch[1] || maxPriceMatch[2];
+    if (price) filters.maxPrice = parseInt(price);
   }
   
-  const priceOverMatch = queryLower.match(/over\s*\$?\s*(\d+)|above\s*\$?\s*(\d+)|more\s+than\s*\$?\s*(\d+)|min\s*\$?\s*(\d+)|at\s+least\s*\$?\s*(\d+)/);
-  if (priceOverMatch) {
-    filters.minPrice = parseInt(priceOverMatch[1] || priceOverMatch[2] || priceOverMatch[3] || priceOverMatch[4] || priceOverMatch[5]);
+  // Match: "over $100", "above 100", "more than $500", "min $200", "at least 100"
+  const minPriceMatch = queryLower.match(/(?:over|above|more\s+than|min|at\s+least)\s*\$?\s*(\d+)/);
+  if (minPriceMatch) {
+    filters.minPrice = parseInt(minPriceMatch[1]);
   }
   
-  // Price range extraction (e.g., "$10 to $50", "between 10 and 50")
+  // Price range: "$10 to $50", "between 10 and 50", "$100-$500"
   const priceRangeMatch = queryLower.match(/\$?\s*(\d+)\s*(?:to|-|and)\s*\$?\s*(\d+)/);
-  if (priceRangeMatch) {
+  if (priceRangeMatch && !filters.maxPrice && !filters.minPrice) {
     filters.minPrice = parseInt(priceRangeMatch[1]);
     filters.maxPrice = parseInt(priceRangeMatch[2]);
   }
   
-  // Brand extraction
-  const brands = ['bosch', 'skf', 'denso', 'valeo', 'brembo', 'gates', 'continental', 'mann', 'mahle', 'sachs', 'bilstein', 'kyb'];
-  const foundBrands = brands.filter(brand => queryLower.includes(brand));
+  // Brand extraction - expanded list
+  const knownBrands = ['bosch', 'skf', 'denso', 'valeo', 'brembo', 'gates', 'continental', 'mann', 'mahle', 'sachs', 'bilstein', 'kyb', 'monroe', 'toyota', 'honda', 'nissan', 'bmw', 'mercedes', 'audi', 'volkswagen', 'ford', 'chevrolet', 'hyundai', 'kia', 'acdelco', 'ntn', 'fag', 'timken', 'ngk', 'delphi', 'aisin'];
+  const foundBrands = knownBrands.filter(brand => {
+    const regex = new RegExp(`\\b${brand}\\b`, 'i');
+    return regex.test(queryLower);
+  });
   if (foundBrands.length > 0) {
     filters.brand = foundBrands.map(b => b.toUpperCase());
   }
   
   // Stock extraction
-  if (queryLower.includes('in stock') || queryLower.includes('available') || queryLower.includes('ready')) {
+  if (queryLower.match(/\b(in\s*stock|available|ready|have)\b/)) {
     filters.inStock = true;
   }
   
-  // Category extraction
-  const categoryMappings = {
-    'brake': 'brakes',
-    'filter': 'filters',
-    'suspension': 'suspension',
-    'shock': 'suspension',
-    'electrical': 'electrical',
-    'engine': 'engine',
-    'transmission': 'transmission',
-    'cooling': 'cooling',
-    'steering': 'steering',
-    'exhaust': 'exhaust',
-    'wheel': 'wheels',
-  };
+  // Delivery extraction
+  if (queryLower.match(/\b(fast|express|urgent|quick|asap)\b/)) {
+    filters.deliveryDays = 3;
+  } else if (queryLower.match(/\b(soon|this\s*week)\b/)) {
+    filters.deliveryDays = 7;
+  }
   
-  for (const [keyword, category] of Object.entries(categoryMappings)) {
-    if (queryLower.includes(keyword)) {
+  // Category extraction - with word boundaries
+  const categoryMappings = [
+    { patterns: ['brake', 'brakes', 'rotor', 'caliper', 'pad'], category: 'brakes' },
+    { patterns: ['filter', 'oil filter', 'air filter', 'fuel filter'], category: 'filters' },
+    { patterns: ['suspension', 'shock', 'strut', 'spring', 'control arm'], category: 'suspension' },
+    { patterns: ['electrical', 'alternator', 'starter', 'battery', 'fuse'], category: 'electrical' },
+    { patterns: ['engine', 'piston', 'valve', 'timing', 'camshaft'], category: 'engine' },
+    { patterns: ['transmission', 'clutch', 'gearbox', 'cv joint'], category: 'transmission' },
+    { patterns: ['cooling', 'radiator', 'thermostat', 'water pump'], category: 'cooling' },
+    { patterns: ['steering', 'tie rod', 'rack', 'power steering'], category: 'steering' },
+    { patterns: ['exhaust', 'muffler', 'catalytic', 'manifold'], category: 'exhaust' },
+    { patterns: ['wheel', 'tire', 'hub', 'bearing'], category: 'wheels' },
+  ];
+  
+  for (const { patterns, category } of categoryMappings) {
+    if (patterns.some(p => queryLower.includes(p))) {
       filters.category = category;
       break;
     }
