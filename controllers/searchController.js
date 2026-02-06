@@ -1158,7 +1158,7 @@ async function aiSearch(req, res) {
     // 2. SOFT filters (stock, category) - prefer but don't exclude
     // 3. Progressive relaxation - if 0 results, explain why
     // ═══════════════════════════════════════════════════════════════
-    
+
     let filteredResults = [...allResults];
     const appliedFilters = [];
     const relaxedFilters = [];
@@ -1185,13 +1185,18 @@ async function aiSearch(req, res) {
     // ═══════════════════════════════════════════════════════════════
     // HELPER: Apply filter with fallback
     // ═══════════════════════════════════════════════════════════════
-    const applyFilterSmart = (results, filterFn, filterName, isHardFilter = false) => {
+    const applyFilterSmart = (
+      results,
+      filterFn,
+      filterName,
+      isHardFilter = false,
+    ) => {
       const filtered = results.filter(filterFn);
       const beforeCount = results.length;
       const afterCount = filtered.length;
-      
+
       filterStats[filterName] = { before: beforeCount, after: afterCount };
-      
+
       if (afterCount > 0) {
         appliedFilters.push(filterName);
         console.log(`✅ ${filterName}: ${beforeCount} → ${afterCount} results`);
@@ -1199,12 +1204,16 @@ async function aiSearch(req, res) {
       } else if (isHardFilter) {
         // Hard filter with 0 results - still apply it
         appliedFilters.push(filterName);
-        console.log(`⚠️ ${filterName}: ${beforeCount} → 0 results (hard filter)`);
+        console.log(
+          `⚠️ ${filterName}: ${beforeCount} → 0 results (hard filter)`,
+        );
         return filtered;
       } else {
         // Soft filter - don't apply, just note it
         relaxedFilters.push(filterName);
-        console.log(`🔄 ${filterName}: relaxed (would eliminate all ${beforeCount} results)`);
+        console.log(
+          `🔄 ${filterName}: relaxed (would eliminate all ${beforeCount} results)`,
+        );
         return results;
       }
     };
@@ -1220,13 +1229,15 @@ async function aiSearch(req, res) {
           const partBrand = p.brand.toLowerCase();
           return filters.brand.some((b) => {
             const filterBrand = b.toLowerCase();
-            return partBrand === filterBrand || 
-                   partBrand.includes(filterBrand) || 
-                   filterBrand.includes(partBrand);
+            return (
+              partBrand === filterBrand ||
+              partBrand.includes(filterBrand) ||
+              filterBrand.includes(partBrand)
+            );
           });
         },
         `Brand [${filters.brand.join(', ')}]`,
-        false // Soft filter
+        false, // Soft filter
       );
     }
 
@@ -1238,11 +1249,12 @@ async function aiSearch(req, res) {
       filteredResults = applyFilterSmart(
         filteredResults,
         (p) => {
-          const combined = `${p.brand || ''} ${p.description || ''} ${p.compatibility || ''} ${p.notes || ''} ${p.partNumber || ''}`.toLowerCase();
+          const combined =
+            `${p.brand || ''} ${p.description || ''} ${p.compatibility || ''} ${p.notes || ''} ${p.partNumber || ''}`.toLowerCase();
           return combined.includes(vehicleBrand);
         },
         `Vehicle [${filters.vehicleBrand}]`,
-        false
+        false,
       );
     }
 
@@ -1252,11 +1264,13 @@ async function aiSearch(req, res) {
     if (filters.exclude?.brands?.length > 0) {
       filteredResults = applyFilterSmart(
         filteredResults,
-        (p) => !p.brand || !filters.exclude.brands.some(b => 
-          p.brand.toLowerCase().includes(b.toLowerCase())
-        ),
+        (p) =>
+          !p.brand ||
+          !filters.exclude.brands.some((b) =>
+            p.brand.toLowerCase().includes(b.toLowerCase()),
+          ),
         `Exclude brands [${filters.exclude.brands.join(', ')}]`,
-        true
+        true,
       );
     }
 
@@ -1265,61 +1279,93 @@ async function aiSearch(req, res) {
     // ═══════════════════════════════════════════════════════════════
     const userCurrency = filters.priceCurrency || 'USD';
     let priceFilterApplied = false;
-    
+
     if (filters.maxPrice !== undefined) {
       const beforePrice = filteredResults.length;
       filteredResults = filteredResults.filter((p) => {
         if (p.price === null || p.price === undefined) return true; // Include parts without price
         const partCurrency = p.currency || 'AED';
-        const convertedMaxPrice = convertCurrency(filters.maxPrice, userCurrency, partCurrency);
+        const convertedMaxPrice = convertCurrency(
+          filters.maxPrice,
+          userCurrency,
+          partCurrency,
+        );
         return p.price <= convertedMaxPrice;
       });
       priceFilterApplied = true;
-      filterStats['maxPrice'] = { before: beforePrice, after: filteredResults.length, value: filters.maxPrice };
+      filterStats['maxPrice'] = {
+        before: beforePrice,
+        after: filteredResults.length,
+        value: filters.maxPrice,
+      };
       appliedFilters.push(`Max Price $${filters.maxPrice}`);
-      console.log(`💰 Max price $${filters.maxPrice}: ${beforePrice} → ${filteredResults.length} results`);
+      console.log(
+        `💰 Max price $${filters.maxPrice}: ${beforePrice} → ${filteredResults.length} results`,
+      );
     }
-    
+
     if (filters.minPrice !== undefined) {
       const beforePrice = filteredResults.length;
       filteredResults = filteredResults.filter((p) => {
         if (p.price === null || p.price === undefined) return false;
         const partCurrency = p.currency || 'AED';
-        const convertedMinPrice = convertCurrency(filters.minPrice, userCurrency, partCurrency);
+        const convertedMinPrice = convertCurrency(
+          filters.minPrice,
+          userCurrency,
+          partCurrency,
+        );
         return p.price >= convertedMinPrice;
       });
       priceFilterApplied = true;
-      filterStats['minPrice'] = { before: beforePrice, after: filteredResults.length, value: filters.minPrice };
+      filterStats['minPrice'] = {
+        before: beforePrice,
+        after: filteredResults.length,
+        value: filters.minPrice,
+      };
       appliedFilters.push(`Min Price $${filters.minPrice}`);
-      console.log(`💰 Min price $${filters.minPrice}: ${beforePrice} → ${filteredResults.length} results`);
+      console.log(
+        `💰 Min price $${filters.minPrice}: ${beforePrice} → ${filteredResults.length} results`,
+      );
     }
 
     // ═══════════════════════════════════════════════════════════════
     // 5. STOCK FILTER (SOFT - boost in-stock to top, don't exclude)
     // ═══════════════════════════════════════════════════════════════
-    let stockFilterRequested = filters.inStock || filters.stockStatus === 'in-stock';
+    let stockFilterRequested =
+      filters.inStock || filters.stockStatus === 'in-stock';
     let inStockCount = 0;
-    
+
     if (stockFilterRequested) {
       // Count how many are in stock
-      inStockCount = filteredResults.filter(p => (p.quantity || 0) > 0).length;
-      
+      inStockCount = filteredResults.filter(
+        (p) => (p.quantity || 0) > 0,
+      ).length;
+
       if (inStockCount > 0) {
         // Sort in-stock items to the top (boost, not filter)
-        filteredResults = filteredResults.map(p => ({
+        filteredResults = filteredResults.map((p) => ({
           ...p,
           _inStock: (p.quantity || 0) > 0,
-          _stockScore: (p.quantity || 0) > 10 ? 2 : (p.quantity || 0) > 0 ? 1 : 0
+          _stockScore:
+            (p.quantity || 0) > 10 ? 2 : (p.quantity || 0) > 0 ? 1 : 0,
         }));
         filteredResults.sort((a, b) => b._stockScore - a._stockScore);
         appliedFilters.push('In Stock (prioritized)');
-        console.log(`📦 Stock boost: ${inStockCount} in-stock items boosted to top`);
+        console.log(
+          `📦 Stock boost: ${inStockCount} in-stock items boosted to top`,
+        );
       } else {
         // No in-stock items - note but don't filter out
         relaxedFilters.push('In Stock');
-        console.log(`🔄 Stock filter relaxed: 0 in-stock items found, showing all ${filteredResults.length}`);
+        console.log(
+          `🔄 Stock filter relaxed: 0 in-stock items found, showing all ${filteredResults.length}`,
+        );
       }
-      filterStats['inStock'] = { requested: true, found: inStockCount, total: filteredResults.length };
+      filterStats['inStock'] = {
+        requested: true,
+        found: inStockCount,
+        total: filteredResults.length,
+      };
     }
 
     // ═══════════════════════════════════════════════════════════════
@@ -1327,28 +1373,87 @@ async function aiSearch(req, res) {
     // ═══════════════════════════════════════════════════════════════
     if (filters.category) {
       const categorySearchTerms = {
-        brakes: ['brake', 'brakes', 'braking', 'rotor', 'caliper', 'pad', 'disc'],
-        filters: ['filter', 'filters', 'oil filter', 'air filter', 'fuel filter'],
-        suspension: ['suspension', 'shock', 'strut', 'spring', 'damper', 'absorber'],
-        electrical: ['electrical', 'electric', 'alternator', 'starter', 'battery', 'ignition'],
-        engine: ['engine', 'motor', 'piston', 'valve', 'timing', 'gasket', 'camshaft'],
-        transmission: ['transmission', 'gearbox', 'clutch', 'gear', 'cv joint', 'driveshaft'],
-        cooling: ['cooling', 'coolant', 'radiator', 'thermostat', 'water pump', 'fan'],
-        steering: ['steering', 'tie rod', 'rack', 'power steering', 'ball joint'],
+        brakes: [
+          'brake',
+          'brakes',
+          'braking',
+          'rotor',
+          'caliper',
+          'pad',
+          'disc',
+        ],
+        filters: [
+          'filter',
+          'filters',
+          'oil filter',
+          'air filter',
+          'fuel filter',
+        ],
+        suspension: [
+          'suspension',
+          'shock',
+          'strut',
+          'spring',
+          'damper',
+          'absorber',
+        ],
+        electrical: [
+          'electrical',
+          'electric',
+          'alternator',
+          'starter',
+          'battery',
+          'ignition',
+        ],
+        engine: [
+          'engine',
+          'motor',
+          'piston',
+          'valve',
+          'timing',
+          'gasket',
+          'camshaft',
+        ],
+        transmission: [
+          'transmission',
+          'gearbox',
+          'clutch',
+          'gear',
+          'cv joint',
+          'driveshaft',
+        ],
+        cooling: [
+          'cooling',
+          'coolant',
+          'radiator',
+          'thermostat',
+          'water pump',
+          'fan',
+        ],
+        steering: [
+          'steering',
+          'tie rod',
+          'rack',
+          'power steering',
+          'ball joint',
+        ],
         exhaust: ['exhaust', 'muffler', 'catalytic', 'manifold', 'pipe'],
         wheels: ['wheel', 'wheels', 'tire', 'tires', 'hub', 'rim', 'bearing'],
       };
-      
-      const terms = categorySearchTerms[filters.category.toLowerCase()] || [filters.category.toLowerCase()];
-      
+
+      const terms = categorySearchTerms[filters.category.toLowerCase()] || [
+        filters.category.toLowerCase(),
+      ];
+
       filteredResults = applyFilterSmart(
         filteredResults,
         (p) => {
-          const combined = `${p.category || ''} ${p.description || ''} ${p.partNumber || ''}`.toLowerCase();
-          return terms.some(term => combined.includes(term));
+          const combined =
+            `${p.category || ''} ${p.description || ''} ${p.partNumber || ''}`.toLowerCase();
+          return terms.some((term) => combined.includes(term));
         },
         `Category [${filters.category}]`,
-        false
+        false,
       );
     }
 
@@ -1356,17 +1461,23 @@ async function aiSearch(req, res) {
     // 7. DELIVERY FILTER (Soft - boost fast delivery)
     // ═══════════════════════════════════════════════════════════════
     if (filters.deliveryDays !== undefined) {
-      const fastDeliveryCount = filteredResults.filter(p => 
-        p.deliveryDays !== null && p.deliveryDays <= filters.deliveryDays
+      const fastDeliveryCount = filteredResults.filter(
+        (p) =>
+          p.deliveryDays !== null && p.deliveryDays <= filters.deliveryDays,
       ).length;
-      
+
       if (fastDeliveryCount > 0) {
-        filteredResults = filteredResults.map(p => ({
+        filteredResults = filteredResults.map((p) => ({
           ...p,
-          _fastDelivery: p.deliveryDays !== null && p.deliveryDays <= filters.deliveryDays
+          _fastDelivery:
+            p.deliveryDays !== null && p.deliveryDays <= filters.deliveryDays,
         }));
-        filteredResults.sort((a, b) => (b._fastDelivery ? 1 : 0) - (a._fastDelivery ? 1 : 0));
-        appliedFilters.push(`Fast Delivery (≤${filters.deliveryDays} days prioritized)`);
+        filteredResults.sort(
+          (a, b) => (b._fastDelivery ? 1 : 0) - (a._fastDelivery ? 1 : 0),
+        );
+        appliedFilters.push(
+          `Fast Delivery (≤${filters.deliveryDays} days prioritized)`,
+        );
       } else {
         relaxedFilters.push(`Delivery ≤${filters.deliveryDays} days`);
       }
@@ -1385,7 +1496,9 @@ async function aiSearch(req, res) {
         if (!a._hasSufficientStock && b._hasSufficientStock) return 1;
         return 0;
       });
-      console.log(`📦 Quantity boost: prioritizing parts with ${filters.requestedQuantity}+ units`);
+      console.log(
+        `📦 Quantity boost: prioritizing parts with ${filters.requestedQuantity}+ units`,
+      );
     }
 
     // Step 5: Sort results
@@ -1484,24 +1597,25 @@ async function aiSearch(req, res) {
       ];
     } else if (relaxedFilters.length > 0) {
       // Some filters were relaxed
-      const relaxedMsg = relaxedFilters.length === 1 
-        ? `Note: "${relaxedFilters[0]}" filter was relaxed to show more results.`
-        : `Note: Some filters were relaxed (${relaxedFilters.join(', ')}) to show more results.`;
-      
+      const relaxedMsg =
+        relaxedFilters.length === 1
+          ? `Note: "${relaxedFilters[0]}" filter was relaxed to show more results.`
+          : `Note: Some filters were relaxed (${relaxedFilters.join(', ')}) to show more results.`;
+
       if (stockFilterRequested && inStockCount === 0) {
         response.message = `Found ${filteredResults.length} parts matching price criteria. None currently in stock - in-stock items will appear first when available.`;
         response.stockInfo = {
           requested: true,
           inStockFound: 0,
           totalResults: filteredResults.length,
-          note: 'All matching parts are currently out of stock'
+          note: 'All matching parts are currently out of stock',
         };
       } else if (stockFilterRequested && inStockCount > 0) {
         response.message = `Found ${filteredResults.length} parts. ${inStockCount} in stock (shown first).`;
         response.stockInfo = {
           requested: true,
           inStockFound: inStockCount,
-          totalResults: filteredResults.length
+          totalResults: filteredResults.length,
         };
       } else {
         response.message = `Found ${filteredResults.length} parts. ${relaxedMsg}`;
@@ -1513,12 +1627,16 @@ async function aiSearch(req, res) {
 
       const uniqueBrands = [
         ...new Set(filteredResults.map((p) => p.brand).filter(Boolean)),
-      ].sort().slice(0, 20);
+      ]
+        .sort()
+        .slice(0, 20);
       response.availableBrands = uniqueBrands;
 
       const uniqueCategories = [
         ...new Set(filteredResults.map((p) => p.category).filter(Boolean)),
-      ].sort().slice(0, 10);
+      ]
+        .sort()
+        .slice(0, 10);
       response.availableCategories = uniqueCategories;
     } else if (isGenericSearch && filteredResults.length > 100) {
       response.message =
@@ -1532,7 +1650,9 @@ async function aiSearch(req, res) {
 
       const uniqueBrands = [
         ...new Set(filteredResults.map((p) => p.brand).filter(Boolean)),
-      ].sort().slice(0, 15);
+      ]
+        .sort()
+        .slice(0, 15);
       response.availableBrands = uniqueBrands;
     } else if (filteredResults.length > 0 && filteredResults.length <= 10) {
       response.message = `Found ${filteredResults.length} part${filteredResults.length > 1 ? 's' : ''} matching your search.`;
