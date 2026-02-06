@@ -19,25 +19,46 @@ const SYSTEM_INSTRUCTION = `You are an intelligent, fault-tolerant automotive pa
 RESPOND ONLY WITH VALID JSON. No explanations, no markdown, no code blocks.
 
 ═══════════════════════════════════════════════════════════════
-1️⃣ VEHICLE BRAND vs PARTS BRAND (CRITICAL)
+1️⃣ VEHICLE BRAND vs PARTS BRAND (CRITICAL - READ CAREFULLY!)
 ═══════════════════════════════════════════════════════════════
 
-VEHICLE MANUFACTURERS (compatibility intent, NOT filter):
+VEHICLE MANUFACTURERS LIST:
 TOYOTA, HONDA, NISSAN, BMW, MERCEDES, AUDI, VOLKSWAGEN, FORD, 
 CHEVROLET, HYUNDAI, KIA, MAZDA, SUBARU, LEXUS, PORSCHE, VOLVO,
 INFINITI, ACURA, JAGUAR, LAND ROVER, MITSUBISHI, SUZUKI, ISUZU,
 JEEP, DODGE, CHRYSLER, GMC, CADILLAC, BUICK, LINCOLN, TESLA
 
-PARTS SUPPLIERS (apply to filters.brand):
+AFTERMARKET PARTS SUPPLIERS LIST:
 BOSCH, BREMBO, SKF, DENSO, VALEO, MANN, MAHLE, NGK, DELPHI,
 SACHS, BILSTEIN, KYB, MONROE, GATES, CONTINENTAL, AISIN, LUK,
 FAG, TIMKEN, NSK, NTN, TRW, ATE, FERODO, ACDelco, MOTORCRAFT,
-MOPAR, HELLA, OSRAM, PHILIPS, FEBI, LEMFORDER, MEYLE, SWAG
+MOPAR, HELLA, OSRAM, PHILIPS, FEBI, LEMFORDER, MEYLE, SWAG, STELLOX
 
-RULES:
-- Vehicle brand alone (e.g., "TOYOTA brakes") → vehicleBrand: "TOYOTA", NOT filters.brand
-- Parts supplier (e.g., "BOSCH brake pads") → filters.brand: ["BOSCH"]
-- EXCEPTION: "OEM TOYOTA" / "GENUINE TOYOTA" / "ORIGINAL TOYOTA" → filters.brand: ["TOYOTA"]
+CRITICAL RULES (FOLLOW EXACTLY):
+
+✅ RULE 1: "OEM" or "GENUINE" or "ORIGINAL" + VEHICLE BRAND = filters.brand
+   Example: "OEM TOYOTA brake pads" → filters.brand: ["TOYOTA"]
+   Example: "Genuine Honda parts" → filters.brand: ["HONDA"]
+   Example: "Original BMW oil filter" → filters.brand: ["BMW"]
+   Reason: User wants parts MADE BY the vehicle manufacturer
+
+✅ RULE 2: "from TOYOTA" / "TOYOTA parts" (without OEM) = filters.brand: ["TOYOTA"]
+   Example: "brake parts from TOYOTA" → filters.brand: ["TOYOTA"]
+   Example: "Find TOYOTA brake pads" → filters.brand: ["TOYOTA"]
+   Reason: "from [brand]" indicates the manufacturer/source
+
+✅ RULE 3: "for TOYOTA" / "TOYOTA car" / "my TOYOTA" = vehicleBrand ONLY
+   Example: "brake pads for my Toyota Camry" → vehicleBrand: "TOYOTA", filters.brand: []
+   Example: "parts for Toyota vehicles" → vehicleBrand: "TOYOTA", filters.brand: []
+   Reason: User wants parts COMPATIBLE with Toyota, not necessarily made by Toyota
+
+✅ RULE 4: Aftermarket supplier = ALWAYS filters.brand
+   Example: "BOSCH brake pads" → filters.brand: ["BOSCH"]
+   Example: "SKF bearings" → filters.brand: ["SKF"]
+
+✅ RULE 5: Vehicle brand ALONE = filters.brand (user browsing that brand's parts)
+   Example: "TOYOTA" → filters.brand: ["TOYOTA"]
+   Example: "show me Honda" → filters.brand: ["HONDA"]
 
 ═══════════════════════════════════════════════════════════════
 2️⃣ PART NUMBER DOMINANCE (ABSOLUTE PRIORITY)
@@ -205,20 +226,29 @@ OUTPUT FORMAT (JSON ONLY)
 }
 
 ═══════════════════════════════════════════════════════════════
-EXAMPLES
+EXAMPLES (FOLLOW THESE EXACTLY!)
 ═══════════════════════════════════════════════════════════════
 
-Query: "TOYOTA brakes under $500"
-→ {"searchTerms":["brake"],"filters":{"vehicleBrand":"TOYOTA","maxPrice":500,"category":"brakes","priceCurrency":"USD"},"exclude":{},"intent":"Brake parts for TOYOTA under $500","intentType":"filtered_search","confidence":{"category":"HIGH","price":"HIGH"},"suggestions":[]}
+Query: "OEM brake parts under $500 TOYOTA"
+→ {"searchTerms":["brake"],"filters":{"brand":["TOYOTA"],"maxPrice":500,"category":"brakes","priceCurrency":"USD"},"exclude":{},"intent":"OEM brake parts from TOYOTA under $500","intentType":"filtered_search","confidence":{"brand":"HIGH","category":"HIGH","price":"HIGH"},"suggestions":[]}
+
+Query: "Find OEM brake parts under $500 from TOYOTA"
+→ {"searchTerms":["brake"],"filters":{"brand":["TOYOTA"],"maxPrice":500,"category":"brakes","priceCurrency":"USD"},"exclude":{},"intent":"OEM brake parts from TOYOTA under $500","intentType":"filtered_search","confidence":{"brand":"HIGH","category":"HIGH","price":"HIGH"},"suggestions":[]}
 
 Query: "OEM TOYOTA brake pads"
-→ {"searchTerms":["OEM","brake pad"],"filters":{"brand":["TOYOTA"],"category":"brakes","priceCurrency":"USD"},"exclude":{},"intent":"OEM TOYOTA brake pads","intentType":"filtered_search","confidence":{"brand":"HIGH","category":"HIGH"},"suggestions":[]}
+→ {"searchTerms":["brake pad"],"filters":{"brand":["TOYOTA"],"category":"brakes","priceCurrency":"USD"},"exclude":{},"intent":"OEM TOYOTA brake pads","intentType":"filtered_search","confidence":{"brand":"HIGH","category":"HIGH"},"suggestions":[]}
+
+Query: "brake pads for my Toyota Camry"
+→ {"searchTerms":["brake pad"],"filters":{"vehicleBrand":"TOYOTA","category":"brakes","priceCurrency":"USD"},"exclude":{},"intent":"Brake pads compatible with Toyota Camry","intentType":"filtered_search","confidence":{"category":"HIGH"},"suggestions":[]}
 
 Query: "BOSCH brake pads"
 → {"searchTerms":["brake pad"],"filters":{"brand":["BOSCH"],"category":"brakes","priceCurrency":"USD"},"exclude":{},"intent":"BOSCH brake pads","intentType":"filtered_search","confidence":{"brand":"HIGH","category":"HIGH"},"suggestions":[]}
 
 Query: "TOYOTA"
-→ {"searchTerms":[],"filters":{"vehicleBrand":"TOYOTA","priceCurrency":"USD"},"exclude":{},"intent":"Browse parts for TOYOTA vehicles","intentType":"browse","confidence":{},"suggestions":["Add a category like brakes, filters, or engine parts"]}
+→ {"searchTerms":[],"filters":{"brand":["TOYOTA"],"priceCurrency":"USD"},"exclude":{},"intent":"Browse TOYOTA parts","intentType":"browse","confidence":{"brand":"HIGH"},"suggestions":["Add a category like brakes, filters, or engine parts"]}
+
+Query: "brake parts from TOYOTA under 500"
+→ {"searchTerms":["brake"],"filters":{"brand":["TOYOTA"],"maxPrice":500,"category":"brakes","priceCurrency":"USD"},"exclude":{},"intent":"TOYOTA brake parts under $500","intentType":"filtered_search","confidence":{"brand":"HIGH","category":"HIGH","price":"HIGH"},"suggestions":[]}
 
 Query: "SKF bearings not Chinese qty 10"
 → {"searchTerms":["bearing"],"filters":{"brand":["SKF"],"category":"wheels","requestedQuantity":10,"priceCurrency":"USD"},"exclude":{"origins":["CN"]},"intent":"SKF bearings, quantity 10, excluding Chinese origin","intentType":"filtered_search","confidence":{"brand":"HIGH","category":"HIGH"},"suggestions":[]}
@@ -460,48 +490,111 @@ Provide a brief, helpful summary and 2-3 recommendations. Respond with ONLY vali
 
 /**
  * Normalize filters to ensure consistent format
+ * CRITICAL: Preserve ALL filter fields from AI parsing
  */
 function normalizeFilters(filters) {
   const normalized = {};
   
+  // ═══════════════════════════════════════════════════════════════
+  // BRAND FILTERS (CRITICAL)
+  // ═══════════════════════════════════════════════════════════════
   if (filters.brand) {
     normalized.brand = Array.isArray(filters.brand) ? filters.brand : [filters.brand];
   }
+  
+  // CRITICAL: Preserve vehicleBrand for vehicle compatibility filtering
+  if (filters.vehicleBrand) {
+    normalized.vehicleBrand = filters.vehicleBrand.toUpperCase();
+  }
+  
   if (filters.supplier) {
     normalized.supplier = filters.supplier;
   }
-  if (filters.minPrice !== undefined && !isNaN(filters.minPrice)) {
+  
+  // ═══════════════════════════════════════════════════════════════
+  // PRICE FILTERS
+  // ═══════════════════════════════════════════════════════════════
+  if (filters.minPrice !== undefined && filters.minPrice !== null && !isNaN(filters.minPrice)) {
     normalized.minPrice = Number(filters.minPrice);
   }
-  if (filters.maxPrice !== undefined && !isNaN(filters.maxPrice)) {
+  if (filters.maxPrice !== undefined && filters.maxPrice !== null && !isNaN(filters.maxPrice)) {
     normalized.maxPrice = Number(filters.maxPrice);
-  }
-  if (filters.inStock !== undefined) {
-    normalized.inStock = Boolean(filters.inStock);
-  }
-  if (filters.category) {
-    normalized.category = filters.category;
-  }
-  if (filters.stockStatus) {
-    normalized.stockStatus = filters.stockStatus;
-  }
-  if (filters.deliveryDays !== undefined && !isNaN(filters.deliveryDays)) {
-    normalized.deliveryDays = Number(filters.deliveryDays);
-  }
-  if (filters.condition && filters.condition !== 'all') {
-    normalized.condition = filters.condition;
-  }
-  if (filters.sortBy) {
-    normalized.sortBy = filters.sortBy;
-  }
-  if (filters.sortOrder) {
-    normalized.sortOrder = filters.sortOrder;
   }
   // Preserve the price currency for accurate filtering
   if (filters.priceCurrency) {
     normalized.priceCurrency = filters.priceCurrency.toUpperCase();
   } else {
     normalized.priceCurrency = 'USD'; // Default to USD
+  }
+  
+  // ═══════════════════════════════════════════════════════════════
+  // STOCK & DELIVERY FILTERS
+  // ═══════════════════════════════════════════════════════════════
+  if (filters.inStock !== undefined) {
+    normalized.inStock = Boolean(filters.inStock);
+  }
+  if (filters.stockStatus) {
+    normalized.stockStatus = filters.stockStatus;
+  }
+  if (filters.deliveryDays !== undefined && filters.deliveryDays !== null && !isNaN(filters.deliveryDays)) {
+    normalized.deliveryDays = Number(filters.deliveryDays);
+  }
+  
+  // ═══════════════════════════════════════════════════════════════
+  // CATEGORY & CONDITION FILTERS
+  // ═══════════════════════════════════════════════════════════════
+  if (filters.category) {
+    normalized.category = filters.category.toLowerCase();
+  }
+  if (filters.condition && filters.condition !== 'all') {
+    normalized.condition = filters.condition;
+  }
+  
+  // ═══════════════════════════════════════════════════════════════
+  // EXCLUSION FILTERS (CRITICAL for "not BOSCH" queries)
+  // ═══════════════════════════════════════════════════════════════
+  if (filters.exclude && typeof filters.exclude === 'object') {
+    normalized.exclude = {
+      brands: Array.isArray(filters.exclude.brands) ? filters.exclude.brands : [],
+      conditions: Array.isArray(filters.exclude.conditions) ? filters.exclude.conditions : [],
+      origins: Array.isArray(filters.exclude.origins) ? filters.exclude.origins : [],
+    };
+  }
+  
+  // ═══════════════════════════════════════════════════════════════
+  // SUPPLIER & ORIGIN FILTERS
+  // ═══════════════════════════════════════════════════════════════
+  if (filters.supplierOrigin) {
+    normalized.supplierOrigin = filters.supplierOrigin.toUpperCase();
+  }
+  if (filters.partOrigin) {
+    normalized.partOrigin = filters.partOrigin.toUpperCase();
+  }
+  if (filters.certifiedOnly !== undefined) {
+    normalized.certifiedOnly = Boolean(filters.certifiedOnly);
+  }
+  if (filters.oemSupplier !== undefined) {
+    normalized.oemSupplier = Boolean(filters.oemSupplier);
+  }
+  
+  // ═══════════════════════════════════════════════════════════════
+  // B2B QUANTITY FILTER
+  // ═══════════════════════════════════════════════════════════════
+  if (filters.requestedQuantity !== undefined && filters.requestedQuantity !== null && !isNaN(filters.requestedQuantity)) {
+    normalized.requestedQuantity = Number(filters.requestedQuantity);
+  }
+  
+  // ═══════════════════════════════════════════════════════════════
+  // SORTING & INTENT
+  // ═══════════════════════════════════════════════════════════════
+  if (filters.sortBy) {
+    normalized.sortBy = filters.sortBy;
+  }
+  if (filters.sortOrder) {
+    normalized.sortOrder = filters.sortOrder;
+  }
+  if (filters.intentType) {
+    normalized.intentType = filters.intentType;
   }
   
   return normalized;
@@ -576,31 +669,51 @@ function extractBasicFilters(query) {
   }
   
   // ═══════════════════════════════════════════════════════════════
-  // 1️⃣ VEHICLE BRAND vs PARTS BRAND DETECTION
+  // 1️⃣ VEHICLE BRAND vs PARTS BRAND DETECTION (CRITICAL!)
   // ═══════════════════════════════════════════════════════════════
   const vehicleBrands = ['toyota', 'honda', 'nissan', 'bmw', 'mercedes', 'audi', 'volkswagen', 'ford', 'chevrolet', 'hyundai', 'kia', 'mazda', 'subaru', 'lexus', 'porsche', 'volvo', 'infiniti', 'acura', 'jaguar', 'mitsubishi', 'suzuki', 'isuzu', 'jeep', 'dodge', 'chrysler', 'gmc', 'cadillac', 'buick', 'lincoln', 'tesla'];
   
-  const partsSuppliers = ['bosch', 'brembo', 'skf', 'denso', 'valeo', 'mann', 'mahle', 'sachs', 'bilstein', 'kyb', 'monroe', 'gates', 'continental', 'ngk', 'delphi', 'aisin', 'luk', 'fag', 'timken', 'nsk', 'ntn', 'trw', 'ate', 'ferodo', 'acdelco', 'motorcraft', 'mopar', 'hella', 'osram', 'philips', 'febi', 'lemforder', 'meyle', 'swag'];
+  const partsSuppliers = ['bosch', 'brembo', 'skf', 'denso', 'valeo', 'mann', 'mahle', 'sachs', 'bilstein', 'kyb', 'monroe', 'gates', 'continental', 'ngk', 'delphi', 'aisin', 'luk', 'fag', 'timken', 'nsk', 'ntn', 'trw', 'ate', 'ferodo', 'acdelco', 'motorcraft', 'mopar', 'hella', 'osram', 'philips', 'febi', 'lemforder', 'meyle', 'swag', 'stellox'];
   
-  // Check for OEM/GENUINE + vehicle brand = treat as parts brand
+  // Check for OEM/GENUINE/ORIGINAL intent (treat vehicle brand as parts brand)
   const hasOemIntent = queryLower.match(/\b(oem|genuine|original)\b/);
   
-  // Detect vehicle brands
+  // Check for "from BRAND" pattern (treat as parts brand filter)
+  const hasFromBrandPattern = queryLower.match(/\bfrom\s+(\w+)/i);
+  
+  // Check for "for BRAND" / "for my BRAND" pattern (vehicle compatibility)
+  const hasForBrandPattern = queryLower.match(/\b(?:for|for\s+my|compatible\s+with)\s+(\w+)/i);
+  
+  // Detect vehicle brands and classify correctly
   for (const brand of vehicleBrands) {
     if (new RegExp(`\\b${brand}\\b`, 'i').test(queryLower)) {
-      if (hasOemIntent) {
-        // OEM + vehicle brand = apply as parts brand filter
+      // RULE 1: OEM/GENUINE/ORIGINAL + vehicle brand = parts brand filter
+      // RULE 2: "from BRAND" = parts brand filter
+      // RULE 3: Brand alone without "for" = parts brand filter (user browsing)
+      // RULE 4: "for BRAND" / "for my BRAND" = vehicle compatibility
+      
+      const isBrandForCompatibility = hasForBrandPattern && 
+        hasForBrandPattern[1].toLowerCase() === brand;
+      
+      if (hasOemIntent || 
+          (hasFromBrandPattern && hasFromBrandPattern[1].toLowerCase() === brand) ||
+          !isBrandForCompatibility) {
+        // Apply as parts brand filter
         filters.brand = filters.brand || [];
-        filters.brand.push(brand.toUpperCase());
+        if (!filters.brand.includes(brand.toUpperCase())) {
+          filters.brand.push(brand.toUpperCase());
+        }
+        console.log(`🏭 Fallback: Detected brand filter '${brand.toUpperCase()}' (OEM intent: ${!!hasOemIntent}, from pattern: ${!!(hasFromBrandPattern && hasFromBrandPattern[1].toLowerCase() === brand)})`);
       } else {
-        // Vehicle brand alone = compatibility intent
+        // Vehicle compatibility only
         filters.vehicleBrand = brand.toUpperCase();
+        console.log(`🚗 Fallback: Detected vehicle compatibility '${brand.toUpperCase()}'`);
       }
       break; // Only take first vehicle brand
     }
   }
   
-  // Detect parts suppliers (always go to filters.brand)
+  // Detect parts suppliers (ALWAYS go to filters.brand)
   const foundPartsSuppliers = partsSuppliers.filter(brand => 
     new RegExp(`\\b${brand}\\b`, 'i').test(queryLower)
   );

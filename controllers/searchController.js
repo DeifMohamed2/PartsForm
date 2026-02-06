@@ -889,38 +889,71 @@ async function aiSearch(req, res) {
     let filteredResults = [...allResults];
     
     // ═══════════════════════════════════════════════════════════════
-    // NEW: VEHICLE BRAND FILTER (for compatibility - "TOYOTA brake pads")
+    // SMART BRAND DETECTION from rawResponse
+    // Check if AI detected "OEM/GENUINE + vehicle brand" which means filter by brand
+    // ═══════════════════════════════════════════════════════════════
+    const rawFilters = parsed.rawResponse?.filters || {};
+    const queryLower = query.toLowerCase();
+    const hasOemIntent = queryLower.match(/\b(oem|genuine|original)\b/);
+    
+    // If user said "OEM TOYOTA" or "GENUINE TOYOTA", we should filter by brand=TOYOTA
+    // even if AI put it in vehicleBrand
+    if (hasOemIntent && rawFilters.vehicleBrand && (!filters.brand || filters.brand.length === 0)) {
+      // OEM + vehicle brand = filter by parts brand (not compatibility)
+      filters.brand = [rawFilters.vehicleBrand.toUpperCase()];
+      console.log(`🔧 OEM intent detected: treating vehicleBrand '${rawFilters.vehicleBrand}' as brand filter`);
+    }
+    
+    // ═══════════════════════════════════════════════════════════════
+    // BRAND FILTER (HIGHEST PRIORITY - parts manufacturer like BOSCH, SKF, TOYOTA)
+    // Apply FIRST before other filters
+    // ═══════════════════════════════════════════════════════════════
+    if (filters.brand && filters.brand.length > 0) {
+      const beforeBrand = filteredResults.length;
+      const brandFiltered = filteredResults.filter(p => {
+        if (!p.brand) return false;
+        const partBrand = p.brand.toLowerCase();
+        return filters.brand.some(b => {
+          const filterBrand = b.toLowerCase();
+          // Exact match or contains match
+          return partBrand === filterBrand || partBrand.includes(filterBrand) || filterBrand.includes(partBrand);
+        });
+      });
+      
+      if (brandFiltered.length > 0) {
+        filteredResults = brandFiltered;
+        console.log(`🏭 Brand filter [${filters.brand.join(', ')}]: ${beforeBrand} → ${filteredResults.length} results`);
+      } else {
+        console.log(`🏭 Brand filter [${filters.brand.join(', ')}] found 0 results from ${beforeBrand} - keeping all results`);
+      }
+    }
+    
+    // ═══════════════════════════════════════════════════════════════
+    // VEHICLE BRAND FILTER (for compatibility - "brake pads for TOYOTA")
+    // Only apply if brand filter was NOT already applied (no OEM intent)
     // ═══════════════════════════════════════════════════════════════
     // Note: vehicleBrand is for filtering parts compatible with vehicles,
-    // NOT the brand of the part itself. We search in description/compatibility fields.
-    if (filters.vehicleBrand) {
+    // when user does NOT say OEM/genuine. We search in description/compatibility/brand fields.
+    if (filters.vehicleBrand && !hasOemIntent) {
       const vehicleBrand = filters.vehicleBrand.toLowerCase();
       const beforeVehicle = filteredResults.length;
       const vehicleFiltered = filteredResults.filter(p => {
+        const brand = (p.brand || '').toLowerCase();
         const desc = (p.description || '').toLowerCase();
         const compat = (p.compatibility || '').toLowerCase();
         const notes = (p.notes || '').toLowerCase();
-        const combined = `${desc} ${compat} ${notes}`;
+        const partNumber = (p.partNumber || '').toLowerCase();
+        const combined = `${brand} ${desc} ${compat} ${notes} ${partNumber}`;
         return combined.includes(vehicleBrand);
       });
       
       // Only apply if it doesn't eliminate all results
       if (vehicleFiltered.length > 0) {
         filteredResults = vehicleFiltered;
-        console.log(`🚗 Vehicle brand filter '${filters.vehicleBrand}': ${beforeVehicle} → ${filteredResults.length} results`);
+        console.log(`🚗 Vehicle compatibility filter '${filters.vehicleBrand}': ${beforeVehicle} → ${filteredResults.length} results`);
       } else {
-        console.log(`🚗 Vehicle brand filter '${filters.vehicleBrand}' skipped (would eliminate all ${beforeVehicle} results)`);
+        console.log(`🚗 Vehicle compatibility filter '${filters.vehicleBrand}' skipped (would eliminate all ${beforeVehicle} results)`);
       }
-    }
-
-    // Apply brand filter (parts manufacturer like BOSCH, SKF)
-    if (filters.brand && filters.brand.length > 0) {
-      filteredResults = filteredResults.filter(p => {
-        if (!p.brand) return false;
-        return filters.brand.some(b => 
-          p.brand.toLowerCase().includes(b.toLowerCase())
-        );
-      });
     }
     
     // ═══════════════════════════════════════════════════════════════
