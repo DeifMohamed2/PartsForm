@@ -27,6 +27,12 @@
     quickSearchModal.classList.add('active');
     document.body.style.overflow = 'hidden';
     
+    // Close tools dropdown if open
+    const toolsMenu = document.getElementById('toolsDropdownMenu');
+    const toolsBtn = document.getElementById('toolsHamburgerBtn');
+    if (toolsMenu) toolsMenu.classList.remove('show');
+    if (toolsBtn) toolsBtn.setAttribute('aria-expanded', 'false');
+
     // Focus on input after animation
     setTimeout(() => {
       quickSearchInput?.focus();

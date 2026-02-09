@@ -97,6 +97,7 @@ async function loadPreferredCurrency() {
         }
     } catch (error) {
         console.warn('Could not load preferred currency:', error);
+        showNotification('Could not load your preferred currency setting.', 'error');
     }
 }
 
@@ -214,6 +215,7 @@ function loadSettings() {
         }
     } catch (error) {
         console.error('Error loading settings:', error);
+        showNotification('Failed to load saved settings.', 'error');
     }
 }
 

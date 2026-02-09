@@ -24,9 +24,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // Set current language display
   const setCurrentLanguageDisplay = () => {
     const lang = getCurrentLanguage();
-    const langOption = document.querySelector(`.lang-option[data-lang="${lang}"]`);
+    const langOption = document.querySelector(`.lang-option[data-lang="${lang}"]`) || 
+                       document.querySelector(`.tools-lang-option[data-lang="${lang}"]`);
     
-    if (langOption) {
+    if (langOption && currentFlag && currentLang) {
       const flag = langOption.dataset.flag;
       const code = lang.toUpperCase();
       
@@ -39,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setCurrentLanguageDisplay();
 
   // Toggle language dropdown
-  if (languageBtn) {
+  if (languageBtn && languageDropdown) {
     languageBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       languageDropdown.classList.toggle('active');
@@ -62,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Close dropdown when clicking outside
   document.addEventListener('click', (e) => {
-    if (!e.target.closest('.language-selector')) {
+    if (languageDropdown && !e.target.closest('.language-selector')) {
       languageDropdown.classList.remove('active');
     }
   });

@@ -155,9 +155,10 @@
         if (DOM.addressesLoading) DOM.addressesLoading.style.display = 'none';
         if (DOM.noAddresses) {
           DOM.noAddresses.style.display = 'flex';
-          DOM.noAddresses.querySelector('.no-addresses-text').textContent = 
-            'Failed to load addresses. Please try again.';
+          const textEl = DOM.noAddresses.querySelector('.no-addresses-text');
+          if (textEl) textEl.textContent = 'Failed to load addresses. Please try again.';
         }
+        showError('Failed to load shipping addresses. Please refresh the page.');
       }
     }
 
@@ -302,7 +303,8 @@
         }
       } catch (error) {
         console.error('Error loading cart:', error);
-        window.location.href = '/buyer/cart';
+        showError('Failed to load cart data. Redirecting...');
+        setTimeout(() => { window.location.href = '/buyer/cart'; }, 2000);
       }
     }
 

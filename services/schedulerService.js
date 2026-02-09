@@ -60,6 +60,14 @@ class SchedulerService {
       case 'hourly':
         return `${minute} * * * *`;
 
+      case '6hours':
+        // Run every 6 hours starting from the configured time
+        return `${minute} ${hour},${(hour + 6) % 24},${(hour + 12) % 24},${(hour + 18) % 24} * * *`;
+
+      case '12hours':
+        // Run every 12 hours starting from the configured time
+        return `${minute} ${hour},${(hour + 12) % 24} * * *`;
+
       case 'daily':
         return `${minute} ${hour} * * *`;
 
@@ -71,6 +79,9 @@ class SchedulerService {
 
       case 'monthly':
         return `${minute} ${hour} ${dayOfMonth || 1} * *`;
+
+      case 'manual':
+        return null; // No automatic scheduling
 
       default:
         return `${minute} ${hour} * * *`; // Default: daily
@@ -95,10 +106,16 @@ class SchedulerService {
       return;
     }
 
+    // Manual frequency means no automatic scheduling
+    if (integration.syncSchedule.frequency === 'manual') {
+      console.log(`⏸️  Manual sync only for: ${integration.name}`);
+      return;
+    }
+
     const cronExpression = this.scheduleToCronExpression(integration.syncSchedule);
 
     // Validate cron expression
-    if (!cron.validate(cronExpression)) {
+    if (!cronExpression || !cron.validate(cronExpression)) {
       console.error(`❌ Invalid cron expression for ${integration.name}: ${cronExpression}`);
       return;
     }
@@ -120,7 +137,7 @@ class SchedulerService {
     );
 
     this.tasks.set(integrationId, task);
-    console.log(`📅 Scheduled: ${integration.name} (${cronExpression})${this.useWorker ? ' [worker mode]' : ''}`);
+    console.log(`📅 Scheduled: ${integration.name} | ${integration.syncSchedule.frequency} (${cronExpression})${this.useWorker ? ' [worker mode]' : ''}`);
   }
 
   /**
@@ -145,7 +162,7 @@ class SchedulerService {
       
       const integrations = await Integration.find({
         'syncSchedule.enabled': true,
-        status: { $in: ['active', 'inactive'] },
+        status: { $in: ['active', 'inactive', 'error'] },
       });
 
       console.log(`📅 Initializing scheduler for ${integrations.length} integrations...`);

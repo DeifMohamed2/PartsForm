@@ -341,6 +341,9 @@ const searchMultipleParts = async (req, res) => {
         .filter((p) => p.length > 0);
     }
 
+    // Strip leading single quotes/backticks/double quotes (Excel text-prefix artifacts)
+    partNumbers = partNumbers.map(p => p.replace(/^['‘’`"]+/, '').trim()).filter(p => p.length > 0);
+
     if (partNumbers.length === 0) {
       return res.json({
         success: true,
@@ -352,10 +355,19 @@ const searchMultipleParts = async (req, res) => {
       });
     }
 
-    // Limit to 100 parts at once
+    // Deduplicate part numbers (case-insensitive)
+    const seen = new Set();
+    partNumbers = partNumbers.filter(p => {
+      const upper = p.toUpperCase();
+      if (seen.has(upper)) return false;
+      seen.add(upper);
+      return true;
+    });
+
+    // Limit to 1000 parts at once to prevent browser lag from too many results
     const originalCount = partNumbers.length;
-    if (partNumbers.length > 100) {
-      partNumbers = partNumbers.slice(0, 100);
+    if (partNumbers.length > 1000) {
+      partNumbers = partNumbers.slice(0, 1000);
     }
 
     console.log(
@@ -376,7 +388,7 @@ const searchMultipleParts = async (req, res) => {
         const esResult = await elasticsearchService.searchMultiplePartNumbers(
           partNumbers,
           {
-            limitPerPart: 50,
+            limitPerPart: 5,
           },
         );
 
@@ -420,7 +432,7 @@ const searchMultipleParts = async (req, res) => {
           partNumber: { $in: allVariations },
         };
 
-        const mongoResults = await Part.find(mongoQuery).limit(1000).lean();
+        const mongoResults = await Part.find(mongoQuery).limit(5000).lean();
 
         if (mongoResults.length > 0) {
           // Determine which parts were found in MongoDB
@@ -480,15 +492,23 @@ const searchMultipleParts = async (req, res) => {
  * POST /api/excel/analyze
  * Body: { data: [[...], [...]], filename: "parts.xlsx" }
  */
+const MAX_EXCEL_ROWS = 5000;
+
 const aiExcelAnalyze = async (req, res) => {
   try {
-    const { data, filename, sheetName } = req.body;
+    let { data, filename, sheetName } = req.body;
 
     if (!data || !Array.isArray(data)) {
       return res.status(400).json({
         success: false,
         error: 'Excel data array is required',
       });
+    }
+
+    // Cap rows to prevent excessive processing
+    if (data.length > MAX_EXCEL_ROWS) {
+      console.warn(`⚠️ Excel data trimmed from ${data.length} to ${MAX_EXCEL_ROWS} rows`);
+      data = data.slice(0, MAX_EXCEL_ROWS);
     }
 
     if (data.length === 0) {
@@ -933,15 +953,23 @@ async function aiSearch(req, res) {
       return (a.price || Infinity) - (b.price || Infinity);
     });
 
+    // Deduplicate only truly identical entries (same part + supplier + price + quantity)
     const seen = new Set();
     filteredResults = filteredResults.filter(p => {
-      const key = `${p.partNumber}-${p.supplier}`;
-      if (seen.has(key)) return false;
-      seen.add(key);
+      const id = p._id ? p._id.toString() : `${p.partNumber}-${p.supplier || ''}-${p.price || 0}-${p.quantity || 0}-${p.stockCode || ''}`;
+      if (seen.has(id)) return false;
+      seen.add(id);
       return true;
     });
 
     filteredResults = filteredResults.slice(0, 500);
+
+    // Apply topN limit if user asked for specific number of results (e.g. "best 3", "top 5")
+    // Only apply when topN >= 2 ("best 1" or "best" = sort by best, not limit)
+    if (parsedIntent.topN && parsedIntent.topN >= 2) {
+      filteredResults = filteredResults.slice(0, parsedIntent.topN);
+      console.log(`🎯 Applied topN=${parsedIntent.topN}, showing ${filteredResults.length} results`);
+    }
 
     const searchTime = Date.now() - startTime;
     console.log(`✅ AI Search done in ${searchTime}ms: ${filteredResults.length} results`);

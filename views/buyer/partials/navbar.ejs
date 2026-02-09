@@ -94,78 +94,89 @@
 
     <!-- Action Buttons -->
     <div class="nav-actions" id="navActions">
-      <!-- Shopping Cart Button -->
+      <!-- Shopping Cart Button - Always visible -->
       <a href="/buyer/cart" class="btn-cart" id="cart-btn" title="<%= t('nav.cart') %>">
         <i data-lucide="shopping-cart"></i>
         <span class="cart-badge" id="cart-badge" style="display: none;">0</span>
       </a>
 
-      <!-- Quick Search Button -->
-      <button class="btn-quick-search" id="quick-search-btn" title="<%= t('nav.quickSearch') %>">
-        <i data-lucide="search"></i>
-        <span><%= t('nav.quickSearch') %></span>
-      </button>
-
-      <!-- Currency Converter -->
-      <button class="btn-currency-converter" id="currency-converter-btn" title="<%= t('nav.currencyConverter') %>">
-        <i data-lucide="repeat"></i>
-        <span class="currency-label"><%= t('nav.currency.label') %>:</span>
-        <span id="current-currency-code" class="currency-code-display">USD</span>
-      </button>
-
-      <!-- Preferred Currency Dropdown -->
-      <div class="preferred-currency-dropdown" id="preferredCurrencyDropdown">
-        <button class="btn-preferred-currency" id="preferredCurrencyBtn" title="<%= t('nav.preferredCurrency') || 'Preferred Currency' %>">
-          <i data-lucide="wallet"></i>
-          <span class="preferred-currency-code" id="preferredCurrencyCode"><%= user && user.preferredCurrency ? user.preferredCurrency : 'USD' %></span>
-          <i data-lucide="chevron-down" class="currency-dropdown-chevron"></i>
+      <!-- Tools Hamburger Menu -->
+      <div class="nav-tools-wrapper" id="navToolsWrapper">
+        <button class="btn-tools-hamburger" id="toolsHamburgerBtn" title="Tools & Settings" aria-expanded="false">
+          <span class="tools-hamburger-icon">
+            <span class="tools-line"></span>
+            <span class="tools-line"></span>
+            <span class="tools-line"></span>
+          </span>
         </button>
-        <div class="preferred-currency-menu" id="preferredCurrencyMenu">
-          <div class="preferred-currency-header">
-            <span><%= t('nav.preferredCurrencyTitle') || 'Preferred Currency' %></span>
+        
+        <div class="tools-dropdown-menu" id="toolsDropdownMenu">
+          <div class="tools-dropdown-arrow"></div>
+          
+          <!-- Quick Search -->
+          <div class="tools-dropdown-section">
+            <button class="tools-dropdown-item" id="quick-search-btn" title="<%= t('nav.quickSearch') %>">
+              <i data-lucide="search"></i>
+              <span><%= t('nav.quickSearch') || 'Quick Search' %></span>
+              <span class="tools-item-shortcut">⌘K</span>
+            </button>
           </div>
-          <div class="preferred-currency-search">
-            <i data-lucide="search" class="search-icon"></i>
-            <input type="text" id="preferredCurrencySearch" placeholder="<%= t('nav.searchCurrency') || 'Search currency...' %>">
-          </div>
-          <div class="preferred-currency-list" id="preferredCurrencyList">
-            <!-- Currency options populated by JavaScript -->
-          </div>
-        </div>
-      </div>
 
-      <!-- Language Selector -->
-      <div class="language-selector">
-        <button class="language-btn" id="language-btn">
-          <span class="lang-flag" id="current-flag">🇬🇧</span>
-          <span class="lang-code" id="current-lang">EN</span>
-          <i data-lucide="chevron-down" class="lang-chevron"></i>
-        </button>
-        <div class="language-dropdown" id="language-dropdown">
-          <button class="lang-option" data-lang="en" data-flag="🇬🇧">
-            <span class="lang-flag">🇬🇧</span>
-            <span class="lang-name"><%= t('nav.language.english') %></span>
-          </button>
-          <button class="lang-option" data-lang="ar" data-flag="🇸🇦">
-            <span class="lang-flag">🇸🇦</span>
-            <span class="lang-name"><%= t('nav.language.arabic') %></span>
-          </button>
-          <button class="lang-option" data-lang="ru" data-flag="🇷🇺">
-            <span class="lang-flag">🇷🇺</span>
-            <span class="lang-name"><%= t('nav.language.russian') %></span>
-          </button>
-          <button class="lang-option" data-lang="ua" data-flag="🇺🇦">
-            <span class="lang-flag">🇺🇦</span>
-            <span class="lang-name"><%= t('nav.language.ukrainian') %></span>
-          </button>
-          <button class="lang-option" data-lang="fr" data-flag="🇫🇷">
-            <span class="lang-flag">🇫🇷</span>
-            <span class="lang-name"><%= t('nav.language.french') %></span>
-          </button>
-          <button class="lang-option" data-lang="es" data-flag="🇪🇸">
-            <span class="lang-flag">🇪🇸</span>
-            <span class="lang-name"><%= t('nav.language.spanish') %></span>
-          </button>
+          <div class="tools-dropdown-divider"></div>
+
+          <!-- Currency -->
+          <div class="tools-dropdown-section">
+            <div class="tools-section-label">Currency</div>
+            <button class="tools-dropdown-item" id="currency-converter-btn" title="<%= t('nav.currencyConverter') %>">
+              <i data-lucide="repeat"></i>
+              <span><%= t('nav.currencyConverter') || 'Converter' %></span>
+              <span class="tools-item-badge" id="current-currency-code">USD</span>
+            </button>
+            <div class="tools-dropdown-item tools-currency-select" id="toolsPreferredCurrency">
+              <i data-lucide="wallet"></i>
+              <span><%= t('nav.preferredCurrency') || 'Preferred' %></span>
+              <span class="tools-item-badge tools-currency-active" id="preferredCurrencyCode"><%= user && user.preferredCurrency ? user.preferredCurrency : 'USD' %></span>
+              <i data-lucide="chevron-right" class="tools-expand-icon"></i>
+            </div>
+            <div class="tools-currency-submenu" id="toolsCurrencySubmenu">
+              <div class="tools-currency-grid" id="preferredCurrencyList">
+                <!-- Popular currencies grid - populated by JS -->
+              </div>
+            </div>
+          </div>
+
+          <div class="tools-dropdown-divider"></div>
+
+          <!-- Language -->
+          <div class="tools-dropdown-section">
+            <div class="tools-section-label">Language</div>
+            <div class="tools-language-grid" id="toolsLanguageGrid">
+              <button class="tools-lang-option" data-lang="en" data-flag="🇬🇧">
+                <span class="lang-flag">🇬🇧</span>
+                <span class="lang-name">English</span>
+              </button>
+              <button class="tools-lang-option" data-lang="ar" data-flag="🇸🇦">
+                <span class="lang-flag">🇸🇦</span>
+                <span class="lang-name">العربية</span>
+              </button>
+              <button class="tools-lang-option" data-lang="ru" data-flag="🇷🇺">
+                <span class="lang-flag">🇷🇺</span>
+                <span class="lang-name">Русский</span>
+              </button>
+              <button class="tools-lang-option" data-lang="ua" data-flag="🇺🇦">
+                <span class="lang-flag">🇺🇦</span>
+                <span class="lang-name">Українська</span>
+              </button>
+              <button class="tools-lang-option" data-lang="fr" data-flag="🇫🇷">
+                <span class="lang-flag">🇫🇷</span>
+                <span class="lang-name">Français</span>
+              </button>
+              <button class="tools-lang-option" data-lang="es" data-flag="🇪🇸">
+                <span class="lang-flag">🇪🇸</span>
+                <span class="lang-name">Español</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 

@@ -64,6 +64,9 @@ async function loadTickets() {
     allTickets = [];
     currentTickets = [];
     renderTickets();
+    if (typeof window.showCartAlert === 'function') {
+      window.showCartAlert('error', 'Loading Error', 'Failed to load support tickets. Please refresh the page.');
+    }
   }
 }
 

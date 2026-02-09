@@ -32,6 +32,9 @@
     },
     currentResults: [],
     filteredResults: [],
+    currentPage: 1,
+    resultsPerPage: 250,
+    selectedItems: new Map(), // Track selections across pages: globalIndex -> {qty}
     recentSearches: JSON.parse(localStorage.getItem('recentSearches') || '[]'),
     autocompleteIndex: -1,
     autocompleteResults: [],
@@ -69,6 +72,8 @@
     tryAgainBtn: document.getElementById('try-again-btn'),
     // Quick Sort Bar
     quickSortBar: document.getElementById('quick-sort-bar'),
+    // Pagination
+    paginationContainer: document.getElementById('results-pagination'),
     // Recent Searches Modal
     recentSearchesModal: document.getElementById('recent-searches-modal'),
     recentSearchesOverlay: document.getElementById('recent-searches-overlay'),
@@ -585,6 +590,8 @@
           // Store results (filtering now happens in applyAdvancedFiltersToResults)
           state.currentResults = data.results;
           state.filteredResults = data.results;
+          state.currentPage = 1;
+          state.selectedItems.clear();
           displayResults(data.results);
 
           // Populate dynamic filters based on search results
@@ -611,7 +618,7 @@
       })
       .catch((error) => {
         console.error('Search error:', error);
-        if (error.message.includes('Authentication')) {
+        if (error.message && error.message.includes('Authentication')) {
           // Show login modal
           if (typeof window.showLoginModal === 'function') {
             window.showLoginModal();
@@ -625,6 +632,7 @@
             elements.resultsTableBody.innerHTML =
               '<tr><td colspan="12" style="text-align: center; padding: 40px; color: #e74c3c;">Error searching for parts. Please try again.</td></tr>';
           }
+          showCartAlert('error', 'Search Error', 'Failed to search for parts. Please try again.');
         }
       });
   }
@@ -634,17 +642,26 @@
    * Handles comma or semicolon separated part numbers
    */
   function performMultiSearch(query) {
-    // Parse part numbers
-    const partNumbers = query
+    // Parse part numbers and strip leading quotes (Excel text-prefix artifacts)
+    let partNumbers = query
       .split(/[,;]+/)
-      .map(p => p.trim())
+      .map(p => p.trim().replace(/^['‘’`"]+/, '').trim())
       .filter(p => p.length > 0);
 
     if (partNumbers.length === 0) {
       return;
     }
 
-    console.log('Multi-part search:', partNumbers);
+    // Cap at 1000 parts to prevent browser lag from too many results
+    const MAX_SEARCH_PARTS = 1000;
+    if (partNumbers.length > MAX_SEARCH_PARTS) {
+      const originalLength = partNumbers.length;
+      partNumbers = partNumbers.slice(0, MAX_SEARCH_PARTS);
+      showCartAlert('info', 'Parts Limit', 
+        `Searching first ${MAX_SEARCH_PARTS.toLocaleString()} of ${originalLength.toLocaleString()} parts. Upload remaining parts in another batch.`);
+    }
+
+    console.log('Multi-part search:', partNumbers.length, 'parts');
 
     // Show loading state
     if (elements.resultsHeader) elements.resultsHeader.style.display = 'flex';
@@ -660,13 +677,15 @@
         `<tr><td colspan="12" style="text-align: center; padding: 40px;"><div class="loading-spinner"></div> Searching for ${partNumbers.length} part numbers...</td></tr>`;
     }
 
-    // Make API call to multi-search endpoint
-    fetch(`/buyer/api/search/multi?q=${encodeURIComponent(query)}`, {
-      method: 'GET',
+    // Make API call to multi-search endpoint via POST to avoid 431 header-too-large
+    fetch('/buyer/api/search/multi', {
+      method: 'POST',
       headers: {
+        'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
       credentials: 'include',
+      body: JSON.stringify({ partNumbers }),
     })
       .then((response) => {
         if (response.status === 401) {
@@ -683,6 +702,8 @@
         if (data.success && data.results && data.results.length > 0) {
           state.currentResults = data.results;
           state.filteredResults = data.results;
+          state.currentPage = 1;
+          state.selectedItems.clear();
           displayResults(data.results);
 
           // Populate dynamic filters based on search results
@@ -757,6 +778,9 @@
       showCartAlert('error', 'Error', 'No valid part numbers found in Excel file');
       return;
     }
+
+    // Strip leading quotes from part numbers (Excel text-prefix artifacts)
+    partNumbers = partNumbers.map(p => p.replace(/^['''\u2018\u2019`"]+/, '').trim()).filter(Boolean);
 
     // Check if user is logged in
     if (typeof window.BuyerAuth === 'undefined' || !window.BuyerAuth.isLoggedIn()) {
@@ -949,6 +973,11 @@
     elements.resultsTableContainer.style.display = 'none';
     elements.noResultsState.style.display = 'none';
 
+    // Hide advanced filter trigger when resetting
+    if (elements.advancedFilterTrigger) {
+      elements.advancedFilterTrigger.style.display = 'none';
+    }
+
     // Show empty state
     elements.emptyState.style.display = 'block';
 
@@ -1037,6 +1066,7 @@
       .catch((error) => {
         console.error('Autocomplete error:', error);
         hideAutocomplete();
+        // Autocomplete failures are silent by design - non-critical background feature
       });
   }
 
@@ -1085,8 +1115,18 @@
   function displayResults(results) {
     if (results.length === 0) {
       showNoResults();
+      renderPagination(0, 0);
       return;
     }
+
+    // Calculate pagination
+    const totalResults = results.length;
+    const totalPages = Math.ceil(totalResults / state.resultsPerPage);
+    if (state.currentPage > totalPages) state.currentPage = totalPages;
+    if (state.currentPage < 1) state.currentPage = 1;
+    const startIndex = (state.currentPage - 1) * state.resultsPerPage;
+    const endIndex = Math.min(startIndex + state.resultsPerPage, totalResults);
+    const pageResults = results.slice(startIndex, endIndex);
 
     hideEmptyState();
     hideNoResults();
@@ -1096,8 +1136,19 @@
       elements.resetBtn.style.display = 'flex';
     }
 
-    // Update count
-    elements.resultsCount.textContent = results.length;
+    // Show advanced filter trigger when results are displayed
+    if (elements.advancedFilterTrigger) {
+      elements.advancedFilterTrigger.style.display = 'flex';
+    }
+
+    // Update count — show total and page range
+    elements.resultsCount.textContent = totalResults;
+    // Update page info text
+    const pageInfoEl = document.getElementById('results-page-info');
+    if (pageInfoEl) {
+      pageInfoEl.textContent = `Showing ${startIndex + 1}–${endIndex} of ${totalResults}`;
+      pageInfoEl.style.display = totalResults > state.resultsPerPage ? 'inline' : 'none';
+    }
     elements.resultsHeader.style.display = 'flex';
     elements.resultsGrid ? (elements.resultsGrid.style.display = 'none') : null;
 
@@ -1111,9 +1162,10 @@
       // Get user's preferred currency for price conversion
       const preferredCurrency = window.getPreferredCurrency ? window.getPreferredCurrency() : 'USD';
 
-      // Render table rows - Updated to use Elasticsearch/MongoDB API data format
-      tableBody.innerHTML = results
-        .map((part) => {
+      // Render table rows — only the current page slice, with global index
+      tableBody.innerHTML = pageResults
+        .map((part, localIdx) => {
+          const globalIndex = startIndex + localIdx;
           // Handle both API formats (new Elasticsearch format and legacy)
           const price = part.price || part.unitPrice || 0;
           const partCurrency = part.currency || 'USD';
@@ -1156,12 +1208,14 @@
           // If showing original, use the part's currency, otherwise use preferred currency
           const displayCurrency = isOriginal ? partCurrency : preferredCurrency;
 
+          // Check if this item was previously selected
+          const isSelected = state.selectedItems.has(globalIndex);
+          const savedQty = isSelected ? state.selectedItems.get(globalIndex).qty : minOrderQty;
+
           return `
-                <tr data-part-code="${code}" data-part-id="${partId}" data-part-index="${results.indexOf(
-            part
-          )}" data-min-order-qty="${minOrderQty}" data-stock-code="${stockCode}" data-original-price="${price}" data-original-currency="${partCurrency}">
+                <tr data-part-code="${code}" data-part-id="${partId}" data-part-index="${globalIndex}" data-min-order-qty="${minOrderQty}" data-stock-code="${stockCode}" data-original-price="${price}" data-original-currency="${partCurrency}">
                     <td>
-                        <input type="checkbox" class="table-checkbox" data-price="${price}" data-currency="${partCurrency}" onchange="updateSelectedTotal()">
+                        <input type="checkbox" class="table-checkbox" data-price="${price}" data-currency="${partCurrency}" ${isSelected ? 'checked' : ''} onchange="handleRowSelectionChange(this, ${globalIndex})">
                     </td>
                     <td><strong>${part.brand || 'N/A'}</strong></td>
                     <td><strong>${code}</strong></td>
@@ -1186,9 +1240,7 @@
                         )}</strong> ${displayCurrency}
                     </td>
                     <td>
-                        <button class="btn-add-single-to-cart" data-part-index="${results.indexOf(
-                          part
-                        )}" title="Add to cart">
+                        <button class="btn-add-single-to-cart" data-part-index="${globalIndex}" title="Add to cart">
                             <i data-lucide="shopping-cart"></i>
                             <i data-lucide="plus" class="plus-icon"></i>
                         </button>
@@ -1200,18 +1252,202 @@
 
       // Attach event listeners to add-to-cart buttons
       attachSingleAddToCartListeners();
+
+      // Render pagination controls
+      renderPagination(totalResults, totalPages);
+
+      // Scroll table to top on page change
+      tableContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
     // Reinitialize Lucide icons
     if (typeof lucide !== 'undefined') {
       lucide.createIcons();
     }
+
+    // Update selected total from state (cross-page selections)
+    updateSelectedTotalFromState();
+  }
+
+  // ====================================
+  // PAGINATION
+  // ====================================
+  function renderPagination(totalResults, totalPages) {
+    const container = elements.paginationContainer || document.getElementById('results-pagination');
+    if (!container) return;
+
+    if (totalPages <= 1) {
+      container.style.display = 'none';
+      return;
+    }
+
+    container.style.display = 'flex';
+    const page = state.currentPage;
+
+    // Build page buttons — show max 7 buttons with ellipsis
+    let pages = [];
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      if (page > 3) pages.push('...');
+      const start = Math.max(2, page - 1);
+      const end = Math.min(totalPages - 1, page + 1);
+      for (let i = start; i <= end; i++) pages.push(i);
+      if (page < totalPages - 2) pages.push('...');
+      pages.push(totalPages);
+    }
+
+    const perPage = state.resultsPerPage;
+    const startItem = (page - 1) * perPage + 1;
+    const endItem = Math.min(page * perPage, totalResults);
+
+    container.innerHTML = `
+      <div class="pagination-info">
+        Showing <strong>${startItem}–${endItem}</strong> of <strong>${totalResults}</strong> parts
+      </div>
+      <div class="pagination-controls">
+        <button class="pagination-btn pagination-prev" ${page <= 1 ? 'disabled' : ''} data-page="${page - 1}">
+          <i data-lucide="chevron-left"></i>
+        </button>
+        ${pages.map(p => {
+          if (p === '...') return `<span class="pagination-ellipsis">…</span>`;
+          return `<button class="pagination-btn pagination-num ${p === page ? 'active' : ''}" data-page="${p}">${p}</button>`;
+        }).join('')}
+        <button class="pagination-btn pagination-next" ${page >= totalPages ? 'disabled' : ''} data-page="${page + 1}">
+          <i data-lucide="chevron-right"></i>
+        </button>
+      </div>
+      <div class="pagination-per-page">
+        <label>Per page:</label>
+        <select id="results-per-page-select">
+          <option value="100" ${perPage === 100 ? 'selected' : ''}>100</option>
+          <option value="250" ${perPage === 250 ? 'selected' : ''}>250</option>
+          <option value="500" ${perPage === 500 ? 'selected' : ''}>500</option>
+        </select>
+      </div>
+    `;
+
+    // Attach pagination event listeners
+    container.querySelectorAll('.pagination-btn[data-page]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetPage = parseInt(btn.dataset.page);
+        if (targetPage >= 1 && targetPage <= totalPages) {
+          goToPage(targetPage);
+        }
+      });
+    });
+
+    // Per-page select
+    const perPageSelect = container.querySelector('#results-per-page-select');
+    if (perPageSelect) {
+      perPageSelect.addEventListener('change', (e) => {
+        state.resultsPerPage = parseInt(e.target.value);
+        state.currentPage = 1;
+        const activeResults = state.filteredResults.length > 0 ? state.filteredResults : state.currentResults;
+        displayResults(activeResults);
+      });
+    }
+
+    // Re-init lucide icons for chevrons
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+    }
+  }
+
+  function goToPage(page) {
+    state.currentPage = page;
+    const activeResults = state.filteredResults.length > 0 ? state.filteredResults : state.currentResults;
+    displayResults(activeResults);
+  }
+
+  // ====================================
+  // CROSS-PAGE SELECTION TRACKING
+  // ====================================
+  window.handleRowSelectionChange = function(checkbox, globalIndex) {
+    if (checkbox.checked) {
+      const row = checkbox.closest('tr');
+      const qtyInput = row ? row.querySelector('.qty-input') : null;
+      const qty = parseInt(qtyInput?.value) || 1;
+      state.selectedItems.set(globalIndex, { qty });
+    } else {
+      state.selectedItems.delete(globalIndex);
+    }
+    updateSelectedTotalFromState();
+  };
+
+  function updateSelectedTotalFromState() {
+    // Calculate totals from state.selectedItems (works across pages)
+    const activeResults = state.filteredResults.length > 0 ? state.filteredResults : state.currentResults;
+    let total = 0;
+    let count = state.selectedItems.size;
+    const preferredCurrency = window.getPreferredCurrency ? window.getPreferredCurrency() : 'USD';
+    const isOriginal = window.isShowingOriginalPrice ? window.isShowingOriginalPrice() : false;
+    let currenciesUsed = new Set();
+
+    state.selectedItems.forEach(({ qty }, globalIndex) => {
+      const part = activeResults[globalIndex];
+      if (!part) return;
+      const price = parseFloat(part.price || part.unitPrice) || 0;
+      const partCurrency = part.currency || 'USD';
+
+      // Check if this row is visible on current page, use its live qty
+      const visibleRow = document.querySelector(`tr[data-part-index="${globalIndex}"]`);
+      const liveQty = visibleRow ? (parseInt(visibleRow.querySelector('.qty-input')?.value) || qty) : qty;
+
+      const itemTotal = price * liveQty;
+      const convertedTotal = window.convertToPreferredCurrency
+        ? window.convertToPreferredCurrency(itemTotal, partCurrency)
+        : itemTotal;
+      total += convertedTotal;
+      if (isOriginal) currenciesUsed.add(partCurrency);
+    });
+
+    // Determine currency display
+    let totalCurrencyDisplay = preferredCurrency;
+    if (isOriginal) {
+      if (currenciesUsed.size === 1) totalCurrencyDisplay = Array.from(currenciesUsed)[0];
+      else if (currenciesUsed.size > 1) totalCurrencyDisplay = 'Mixed';
+    }
+
+    // Update all UI elements
+    const selectedTotal = document.getElementById('selected-total');
+    const selectedTotalFooter = document.getElementById('selected-total-footer');
+    const selectedCount = document.getElementById('selected-count');
+    const selectedCountHeader = document.getElementById('selected-count-header');
+    const selectionStatus = document.getElementById('selection-status');
+    const selectedBadge = document.getElementById('selected-badge');
+    const selectedItemsCount = document.getElementById('selected-items-count');
+
+    if (selectedTotal) selectedTotal.textContent = formatPrice(total) + ' ' + totalCurrencyDisplay;
+    if (selectedTotalFooter) selectedTotalFooter.textContent = formatPrice(total) + ' ' + totalCurrencyDisplay;
+    if (selectedCount) selectedCount.textContent = count;
+    if (selectedCountHeader) selectedCountHeader.textContent = count;
+
+    if (count > 0) {
+      if (selectionStatus) selectionStatus.style.display = 'none';
+      if (selectedBadge) selectedBadge.style.display = 'inline-flex';
+      if (selectedItemsCount) selectedItemsCount.textContent = count;
+    } else {
+      if (selectionStatus) selectionStatus.style.display = 'inline';
+      if (selectedBadge) selectedBadge.style.display = 'none';
+    }
+
+    const addToCartBtn = document.getElementById('add-to-cart-btn');
+    const addToCartBtnHeader = document.getElementById('add-to-cart-btn-header');
+    if (addToCartBtn) addToCartBtn.disabled = count === 0;
+    if (addToCartBtnHeader) addToCartBtnHeader.disabled = count === 0;
   }
 
   function showNoResults() {
     // Show reset button
     if (elements.resetBtn) {
       elements.resetBtn.style.display = 'flex';
+    }
+
+    // Show advanced filter trigger even on no results (user is searching)
+    if (elements.advancedFilterTrigger) {
+      elements.advancedFilterTrigger.style.display = 'flex';
     }
 
     elements.resultsHeader.style.display = 'none';
@@ -1342,6 +1578,9 @@
 
   function applySortAndFilter() {
     let results = [...state.currentResults];
+
+    // Reset to page 1 on sort/filter
+    state.currentPage = 1;
 
     // Apply quick filters
     if (state.quickFilters.inStockOnly) {
@@ -2601,6 +2840,8 @@
   }
 
   function handleApplyAdvancedFilters() {
+    // Reset to page 1 on filter change
+    state.currentPage = 1;
     // Apply filters to current results
     applyAdvancedFiltersToResults();
     hideFiltersPanel();
@@ -2705,6 +2946,8 @@
   }
 
   function handleClearAdvancedFilters() {
+    // Reset page on filter clear
+    state.currentPage = 1;
     // Reset state to use current filter bounds
     state.selectedFilters = {
       brand: 'all',
@@ -3263,89 +3506,19 @@
       }
     }
 
-    // Update selected total if checkbox is checked
+    // Update selected total if checkbox is checked — also sync qty in selectedItems state
     if (checkbox && checkbox.checked) {
-      updateSelectedTotal();
+      const globalIndex = parseInt(row.dataset.partIndex);
+      if (!isNaN(globalIndex)) {
+        state.selectedItems.set(globalIndex, { qty });
+      }
+      updateSelectedTotalFromState();
     }
   };
 
   window.updateSelectedTotal = function () {
-    let total = 0;
-    let count = 0;
-    const preferredCurrency = window.getPreferredCurrency ? window.getPreferredCurrency() : 'USD';
-    const isOriginal = window.isShowingOriginalPrice ? window.isShowingOriginalPrice() : false;
-    // Track currencies when showing original prices
-    let currenciesUsed = new Set();
-
-    document.querySelectorAll('.table-checkbox:checked').forEach((checkbox) => {
-      const row = checkbox.closest('tr');
-      const qtyInput = row.querySelector('.qty-input');
-      const price = parseFloat(checkbox.dataset.price) || 0;
-      const partCurrency = checkbox.dataset.currency || 'USD';
-      const qty = parseInt(qtyInput?.value) || 1;
-
-      // Convert each item's price to preferred currency
-      const itemTotal = price * qty;
-      const convertedTotal = window.convertToPreferredCurrency 
-        ? window.convertToPreferredCurrency(itemTotal, partCurrency)
-        : itemTotal;
-
-      total += convertedTotal;
-      count++;
-      
-      // Track currencies when showing original
-      if (isOriginal) {
-        currenciesUsed.add(partCurrency);
-      }
-    });
-
-    // Update totals with preferred currency
-    const selectedTotal = document.getElementById('selected-total');
-    const selectedTotalFooter = document.getElementById(
-      'selected-total-footer'
-    );
-    const selectedCount = document.getElementById('selected-count');
-    const selectedCountHeader = document.getElementById('selected-count-header');
-
-    // Determine currency display for totals
-    let totalCurrencyDisplay = preferredCurrency;
-    if (isOriginal) {
-      if (currenciesUsed.size === 1) {
-        totalCurrencyDisplay = Array.from(currenciesUsed)[0];
-      } else if (currenciesUsed.size > 1) {
-        totalCurrencyDisplay = 'Mixed';
-      }
-    }
-    
-    if (selectedTotal) selectedTotal.textContent = formatPrice(total) + ' ' + totalCurrencyDisplay;
-    if (selectedTotalFooter)
-      selectedTotalFooter.textContent = formatPrice(total) + ' ' + totalCurrencyDisplay;
-    if (selectedCount) selectedCount.textContent = count;
-    if (selectedCountHeader) selectedCountHeader.textContent = count;
-
-    // Update selection badge
-    const selectionStatus = document.getElementById('selection-status');
-    const selectedBadge = document.getElementById('selected-badge');
-    const selectedItemsCount = document.getElementById('selected-items-count');
-
-    if (count > 0) {
-      if (selectionStatus) selectionStatus.style.display = 'none';
-      if (selectedBadge) selectedBadge.style.display = 'inline-flex';
-      if (selectedItemsCount) selectedItemsCount.textContent = count;
-    } else {
-      if (selectionStatus) selectionStatus.style.display = 'inline';
-      if (selectedBadge) selectedBadge.style.display = 'none';
-    }
-
-    // Enable/disable add to cart buttons (both header and footer)
-    const addToCartBtn = document.getElementById('add-to-cart-btn');
-    const addToCartBtnHeader = document.getElementById('add-to-cart-btn-header');
-    if (addToCartBtn) {
-      addToCartBtn.disabled = count === 0;
-    }
-    if (addToCartBtnHeader) {
-      addToCartBtnHeader.disabled = count === 0;
-    }
+    // Delegate to cross-page state-based calculation
+    updateSelectedTotalFromState();
   };
 
   // ====================================
@@ -3446,10 +3619,8 @@
       return;
     }
 
-    // Get all checked items
-    const checkedBoxes = document.querySelectorAll('.table-checkbox:checked');
-
-    if (checkedBoxes.length === 0) {
+    // Use state.selectedItems for cross-page selections
+    if (state.selectedItems.size === 0) {
       showCartAlert(
         'info',
         'No Selection',
@@ -3458,16 +3629,12 @@
       return;
     }
 
+    const activeResults = state.filteredResults.length > 0 ? state.filteredResults : state.currentResults;
     let addedCount = 0;
 
-    checkedBoxes.forEach((checkbox) => {
-      const row = checkbox.closest('tr');
-      const partIndex = parseInt(row.dataset.partIndex);
-      const qtyInput = row.querySelector('.qty-input');
-      const quantity = parseInt(qtyInput?.value) || 1;
-
-      // Find the part data from current results using the unique index
-      const partData = state.currentResults[partIndex];
+    state.selectedItems.forEach(({ qty }, globalIndex) => {
+      const partData = activeResults[globalIndex];
+      const quantity = qty || 1;
 
       if (partData) {
         // Determine current page category
@@ -3495,16 +3662,16 @@
         // Add to cart
         window.PartsFormCart.addToCart(cartItem);
         addedCount++;
-
-        // Uncheck the checkbox
-        checkbox.checked = false;
       }
     });
 
+    // Clear all selections
+    state.selectedItems.clear();
+    // Uncheck visible checkboxes
+    document.querySelectorAll('.table-checkbox:checked').forEach(cb => cb.checked = false);
+
     // Update selected total
-    if (typeof window.updateSelectedTotal === 'function') {
-      window.updateSelectedTotal();
-    }
+    updateSelectedTotalFromState();
 
     // Show success message
     if (addedCount > 0) {
@@ -3750,6 +3917,9 @@
 
   // Expose hideNotFoundBanner globally for the close button
   window.hideNotFoundBanner = hideNotFoundBanner;
+
+  // Expose showCartAlert globally so other scripts (ai-excel.js etc.) can show notifications
+  window.showCartAlert = showCartAlert;
 
   function showCartAlert(type, title, message) {
     // Get or create a single persistent alerts container

@@ -672,6 +672,7 @@
       brand: pi.partsBrands || f.brand || [],
       exclude: pi.exclusions || f.exclude || null,
       requestedQuantity: pi.requestedQuantity || f.requestedQuantity || null,
+      topN: pi.topN || null,
       supplierOrigin: pi.supplierOrigin || f.supplierOrigin || null,
       minPrice: pi.minPrice !== undefined ? pi.minPrice : f.minPrice,
       maxPrice: pi.maxPrice !== undefined ? pi.maxPrice : f.maxPrice,
@@ -767,9 +768,23 @@
     }
 
     // ═══════════════════════════════════════════════════════════════
+    // TOP N FILTER ("best 3", "top 5", "show me 3 options")
+    // ═══════════════════════════════════════════════════════════════
+    if (fv.topN && fv.topN >= 2) {
+      filters.push({
+        type: 'quantity',
+        icon: 'list-ordered',
+        label: 'Show Top',
+        value: `${fv.topN} options`,
+        filterKey: 'topN',
+        filterValue: fv.topN,
+      });
+    }
+
+    // ═══════════════════════════════════════════════════════════════
     // QUANTITY FILTER (B2B - "need x10", "qty 50")
     // ═══════════════════════════════════════════════════════════════
-    if (fv.requestedQuantity && fv.requestedQuantity > 1) {
+    if (fv.requestedQuantity && fv.requestedQuantity > 1 && !fv.topN) {
       filters.push({
         type: 'quantity',
         icon: 'boxes',
@@ -798,8 +813,8 @@
     // ═══════════════════════════════════════════════════════════════
     // PRICE FILTERS (with smart range support)
     // ═══════════════════════════════════════════════════════════════
-    if (fv.minPrice !== undefined && fv.maxPrice !== undefined) {
-      // Show as range if both present
+    if (fv.minPrice != null && fv.maxPrice != null) {
+      // Show as range if both present and not null
       filters.push({
         type: 'price',
         icon: 'dollar-sign',
@@ -809,7 +824,7 @@
         filterValue: { min: fv.minPrice, max: fv.maxPrice },
       });
     } else {
-      if (fv.minPrice !== undefined) {
+      if (fv.minPrice != null) {
         filters.push({
           type: 'price',
           icon: 'dollar-sign',
@@ -819,7 +834,7 @@
           filterValue: fv.minPrice,
         });
       }
-      if (fv.maxPrice !== undefined) {
+      if (fv.maxPrice != null) {
         filters.push({
           type: 'price',
           icon: 'dollar-sign',
@@ -1347,7 +1362,7 @@
                     </thead>
                     <tbody>
                       ${results
-                        .slice(0, 10)
+                        .slice(0, 15)
                         .map(
                           (product, idx) => `
                         <tr class="result-row" style="animation-delay: ${idx * 0.04}s" data-part-id="${product._id || product.id || ''}">
@@ -1358,7 +1373,7 @@
                             <span class="part-number-cell">${escapeHtml(product.partNumber || product.vendorCode || 'N/A')}</span>
                           </td>
                           <td class="col-desc">
-                            <span class="description-text" title="${escapeHtml(product.description || '')}">${escapeHtml(truncateText(product.description || 'No description', 30))}</span>
+                            <span class="description-text" title="${escapeHtml(product.description || '')}">${escapeHtml(truncateText(product.description || 'No description', 35))}</span>
                           </td>
                           <td class="col-qty">
                             <span class="qty-display">${product.quantity || product.stock || 0}</span>
@@ -1367,12 +1382,11 @@
                             <span class="price-display">${product.price ? `$${(Number(product.price) / 3.67).toFixed(2)}` : '—'}</span>
                           </td>
                           <td class="col-delivery">
-                            <span class="delivery-badge">${product.deliveryDays ? `${product.deliveryDays}d` : '—'}</span>
+                            <span class="delivery-badge">${product.deliveryDays ? `${product.deliveryDays}D` : '—'}</span>
                           </td>
                           <td class="col-stock">
-                            <span class="stock-indicator ${getStockStatus(product)}">
-                              <span class="stock-dot"></span>
-                              <span class="stock-text">${getStockLabel(product)}</span>
+                            <span class="stock-badge-mini ${getStockStatus(product)}">
+                              ${getStockBadgeLabel(product)}
                             </span>
                           </td>
                         </tr>
@@ -1383,11 +1397,11 @@
                   </table>
                 </div>
                 ${
-                  results.length > 10
+                  results.length > 15
                     ? `
                   <div class="ai-results-more">
                     <i data-lucide="chevrons-down"></i>
-                    <span>+${results.length - 10} more results — Click Apply to see all</span>
+                    <span>+${results.length - 15} more results — Click Apply to see all</span>
                   </div>
                 `
                     : ''
@@ -1548,6 +1562,12 @@
     if (!product.quantity || product.quantity === 0) return 'Out of Stock';
     if (product.quantity <= 10) return 'Low Stock';
     return 'In Stock';
+  }
+
+  function getStockBadgeLabel(product) {
+    if (!product.quantity || product.quantity === 0) return 'OUT';
+    if (product.quantity <= 10) return 'LOW';
+    return 'IN STOCK';
   }
 
   function removeAIParsedFilter(index) {
