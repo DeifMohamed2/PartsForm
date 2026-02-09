@@ -43,9 +43,12 @@ const CONFIG = {
   FTP_TIMEOUT: 60000,            // 60s timeout per file
   FTP_RETRIES: 3,                // Retry failed downloads 3 times
   
-  // MongoDB - mongoimport settings (fewer parallel to reduce disk contention)
+  // MongoDB - mongoimport settings
+  // With Rust transform, NDJSON files are ready instantly so MongoDB is now the bottleneck.
+  // 18 cores can handle 8 concurrent mongoimport processes (each uses ~2 cores avg).
+  // NVMe can sustain 8 concurrent write streams without contention.
   MONGO_WORKERS: 18,             // Use all 18 cores per process
-  MONGO_PARALLEL: 4,             // 4 parallel (less disk contention)
+  MONGO_PARALLEL: 8,             // 8 parallel (was 4 — Rust freed up CPU headroom)
   MONGO_BATCH_SIZE: 10000,       // mongoimport batch size
   SKIP_INDEXES: true,            // Skip index creation (do in background later)
   
