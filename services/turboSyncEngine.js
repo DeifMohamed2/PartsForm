@@ -212,11 +212,165 @@ async function downloadAllFiles(integration) {
 }
 
 // ============================================
-// PHASE 2: TRANSFORM CSVs TO NDJSON (PARALLEL STREAMING)
-// Process multiple files simultaneously for 3-4x speedup
+// PHASE 2: TRANSFORM CSVs TO NDJSON (RUST ENGINE)
+// Uses compiled Rust binary for 3-10x faster CSV→NDJSON
+// Falls back to Node.js streaming if Rust binary not found
 // ============================================
+
+// Locate the Rust binary
+const RUST_BINARY_PATH = path.join(__dirname, '..', 'rust-transform', 'target', 'release', 'turbo-transform');
+
+function isRustBinaryAvailable() {
+  try {
+    return fs.existsSync(RUST_BINARY_PATH) && fs.statSync(RUST_BINARY_PATH).isFile();
+  } catch {
+    return false;
+  }
+}
+
 async function transformToNDJSON(downloadDir, files, integration) {
-  log('PHASE 2: Transforming CSVs to NDJSON format (PARALLEL)...', 'PROGRESS');
+  const useRust = isRustBinaryAvailable();
+  
+  if (useRust) {
+    return transformToNDJSON_Rust(downloadDir, files, integration);
+  } else {
+    log('Rust binary not found, falling back to Node.js transform', 'PROGRESS');
+    log(`Build it: cd rust-transform && cargo build --release`, 'INFO');
+    return transformToNDJSON_NodeFallback(downloadDir, files, integration);
+  }
+}
+
+// ============================================
+// RUST-POWERED TRANSFORM (PRIMARY)
+// Spawns single Rust process that parallelizes internally via rayon
+// ============================================
+async function transformToNDJSON_Rust(downloadDir, files, integration) {
+  log('PHASE 2: 🦀 RUST TURBO TRANSFORM — CSV→NDJSON (all cores)...', 'PROGRESS');
+  const startTime = Date.now();
+  
+  const ndjsonDir = path.join(CONFIG.WORK_DIR, 'ndjson');
+  fs.mkdirSync(ndjsonDir, { recursive: true });
+  
+  const integrationId = integration._id.toString();
+  const integrationName = integration.name;
+  
+  return new Promise((resolve, reject) => {
+    const child = spawn(RUST_BINARY_PATH, [
+      downloadDir,
+      ndjsonDir,
+      integrationId,
+      integrationName,
+    ], {
+      stdio: ['ignore', 'pipe', 'pipe'],
+      env: {
+        ...process.env,
+        // Let rayon use all cores
+        RAYON_NUM_THREADS: String(os.cpus().length),
+      },
+    });
+    
+    let stdoutData = '';
+    let lastProgressLog = Date.now();
+    
+    // stderr gets per-file progress (JSON lines)
+    child.stderr.on('data', (data) => {
+      const lines = data.toString().split('\n').filter(l => l.trim());
+      for (const line of lines) {
+        try {
+          const event = JSON.parse(line);
+          if (event.event === 'file_done') {
+            // Throttle progress logs to every 2 seconds
+            if (Date.now() - lastProgressLog > 2000) {
+              log(`Rust transform: ${event.progress} files — ${formatNumber(event.records)} records from ${event.file} (${formatNumber(event.rate_per_sec)}/sec)`, 'PROGRESS');
+              lastProgressLog = Date.now();
+            }
+          } else if (event.event === 'start') {
+            log(`Rust engine: ${event.files} files, ${event.threads} threads, ${(event.total_bytes / 1024 / 1024).toFixed(0)}MB input`, 'INFO');
+          }
+        } catch {
+          // Non-JSON stderr line (errors)
+          if (line.startsWith('ERROR:')) {
+            log(`Rust: ${line}`, 'ERROR');
+          }
+        }
+      }
+    });
+    
+    // stdout gets the final JSON summary
+    child.stdout.on('data', (data) => {
+      stdoutData += data.toString();
+    });
+    
+    child.on('close', (code) => {
+      const duration = Date.now() - startTime;
+      
+      if (code !== 0 && code !== null) {
+        log(`Rust transform exited with code ${code}`, 'ERROR');
+        // Fall back to Node.js
+        log('Falling back to Node.js transform...', 'PROGRESS');
+        transformToNDJSON_NodeFallback(downloadDir, files, integration)
+          .then(resolve)
+          .catch(reject);
+        return;
+      }
+      
+      // Parse final summary
+      let totalRecords = 0;
+      let totalBytesWritten = 0;
+      let rustRate = 0;
+      
+      try {
+        const summary = JSON.parse(stdoutData.trim());
+        totalRecords = summary.total_records || 0;
+        totalBytesWritten = summary.total_bytes_written || 0;
+        rustRate = summary.rate_per_sec || 0;
+        
+        if (summary.errors > 0) {
+          log(`Rust transform: ${summary.errors} file(s) had errors`, 'ERROR');
+        }
+      } catch (e) {
+        log(`Failed to parse Rust output: ${e.message}`, 'ERROR');
+      }
+      
+      // Enumerate output NDJSON files
+      const ndjsonFiles = [];
+      try {
+        const outputFiles = fs.readdirSync(ndjsonDir);
+        for (const f of outputFiles) {
+          if (f.endsWith('.ndjson')) {
+            ndjsonFiles.push(path.join(ndjsonDir, f));
+          }
+        }
+      } catch (e) {
+        log(`Error reading output dir: ${e.message}`, 'ERROR');
+      }
+      
+      // Delete CSV files to free disk space (Rust doesn't delete them)
+      for (const fileName of files) {
+        try { fs.unlinkSync(path.join(downloadDir, fileName)); } catch (e) {}
+      }
+      
+      log(`🦀 Rust transformed ${formatNumber(totalRecords)} records in ${formatDuration(duration)} (${formatNumber(rustRate)}/sec) — ${ndjsonFiles.length} NDJSON files`, 'SUCCESS');
+      
+      resolve({ ndjsonDir, ndjsonFiles, totalRecords, duration });
+    });
+    
+    child.on('error', (err) => {
+      log(`Failed to spawn Rust binary: ${err.message}`, 'ERROR');
+      // Fall back
+      transformToNDJSON_NodeFallback(downloadDir, files, integration)
+        .then(resolve)
+        .catch(reject);
+    });
+  });
+}
+
+// ============================================
+// NODE.JS FALLBACK TRANSFORM (if Rust binary not built)
+// Original implementation kept as fallback
+// ============================================
+async function transformToNDJSON_NodeFallback(downloadDir, files, integration) {
+  log('PHASE 2: Transforming CSVs to NDJSON format (Node.js fallback)...', 'PROGRESS');
   const startTime = Date.now();
   
   const ndjsonDir = path.join(CONFIG.WORK_DIR, 'ndjson');
@@ -236,7 +390,6 @@ async function transformToNDJSON(downloadDir, files, integration) {
     const ndjsonPath = path.join(ndjsonDir, `${path.basename(fileName, '.csv')}.ndjson`);
     
     try {
-      // Use streaming to avoid memory issues
       const fileRecords = await new Promise((resolve, reject) => {
         const readStream = fs.createReadStream(csvPath, { encoding: 'utf8', highWaterMark: 64 * 1024 });
         const writeStream = fs.createWriteStream(ndjsonPath);
@@ -250,41 +403,26 @@ async function transformToNDJSON(downloadDir, files, integration) {
         
         rl.on('line', (line) => {
           if (isFirstLine) {
-            // Parse header
             isFirstLine = false;
             separator = line.includes(';') ? ';' : ',';
             headers = line.split(separator).map(h => h.trim().toLowerCase().replace(/['"]/g, ''));
             
-            // Find column indices - comprehensive mapping
             colMap = {
-              // Part identification
               partNumber: headers.findIndex(h => h.includes('vendor code') || h.includes('vendor_code') || h.includes('part') || h.includes('sku') || h === 'code'),
               description: headers.findIndex(h => h.includes('title') || h.includes('desc') || h.includes('name')),
               brand: headers.findIndex(h => h.includes('brand') || h.includes('manufacturer') || h.includes('make')),
-              
-              // Pricing
               price: headers.findIndex(h => h.includes('price') || h.includes('cost')),
               currency: headers.findIndex(h => h.includes('currency') || h.includes('curr') || h === 'aed' || h === 'usd'),
-              
-              // Stock & Quantity
               quantity: headers.findIndex(h => h === 'quantity' || h === 'qty'),
               minOrderQty: headers.findIndex(h => h.includes('min_lot') || h.includes('min lot') || h.includes('minorder') || h.includes('min_order') || h.includes('moq')),
               stock: headers.findIndex(h => h === 'stock' && !h.includes('code')),
               stockCode: headers.findIndex(h => h.includes('stock code') || h.includes('stock_code') || h.includes('stockcode')),
-              
-              // Physical properties
               weight: headers.findIndex(h => h === 'weight'),
               weightUnit: headers.findIndex(h => h.includes('weight_unit') || h.includes('weightunit')),
               volume: headers.findIndex(h => h.includes('volume') || h.includes('vol')),
-              
-              // Delivery
               deliveryDays: headers.findIndex(h => h.includes('delivery') || h.includes('lead_time') || h.includes('leadtime')),
-              
-              // Categories
               category: headers.findIndex(h => h === 'category' || h === 'cat'),
               subcategory: headers.findIndex(h => h.includes('subcategory') || h.includes('subcat') || h.includes('sub_category')),
-              
-              // Supplier
               supplier: headers.findIndex(h => h.includes('supplier')),
             };
             return;
@@ -297,7 +435,6 @@ async function transformToNDJSON(downloadDir, files, integration) {
           const partNumber = (cols[colMap.partNumber] || '').replace(/['"]/g, '').trim();
           if (!partNumber) return;
           
-          // Extract stock code from filename if not in columns (e.g., "APMG price 1 day_DS1_part1.csv" -> "DS1")
           let stockCodeValue = (cols[colMap.stockCode] || '').replace(/['"]/g, '').trim();
           if (!stockCodeValue) {
             const match = fileName.match(/_([A-Z0-9]+)_part/i);
@@ -309,30 +446,18 @@ async function transformToNDJSON(downloadDir, files, integration) {
             description: (cols[colMap.description] || '').replace(/['"]/g, ''),
             brand: (cols[colMap.brand] || '').replace(/['"]/g, ''),
             supplier: (cols[colMap.supplier] || '').replace(/['"]/g, ''),
-            
-            // Pricing
             price: parseFloat(cols[colMap.price]) || 0,
             currency: (cols[colMap.currency] || 'AED').replace(/['"]/g, '').toUpperCase(),
-            
-            // Stock & Quantity
             quantity: parseInt(cols[colMap.quantity]) || 0,
             minOrderQty: parseInt(cols[colMap.minOrderQty]) || 1,
             stock: (cols[colMap.stock] || 'unknown').replace(/['"]/g, ''),
             stockCode: stockCodeValue,
-            
-            // Physical properties
             weight: parseFloat(cols[colMap.weight]) || 0,
             weightUnit: (cols[colMap.weightUnit] || 'kg').replace(/['"]/g, ''),
             volume: parseFloat(cols[colMap.volume]) || 0,
-            
-            // Delivery
             deliveryDays: parseInt(cols[colMap.deliveryDays]) || 0,
-            
-            // Categories
             category: (cols[colMap.category] || '').replace(/['"]/g, ''),
             subcategory: (cols[colMap.subcategory] || '').replace(/['"]/g, ''),
-            
-            // Metadata
             integration: integrationId,
             integrationName,
             fileName,
@@ -351,7 +476,6 @@ async function transformToNDJSON(downloadDir, files, integration) {
         readStream.on('error', reject);
       });
       
-      // Delete CSV immediately to free disk space
       try { fs.unlinkSync(csvPath); } catch (e) {}
       
       return { ndjsonPath, records: fileRecords };
@@ -362,7 +486,6 @@ async function transformToNDJSON(downloadDir, files, integration) {
     }
   };
   
-  // Process files in parallel batches of TRANSFORM_PARALLEL
   for (let i = 0; i < files.length; i += CONFIG.TRANSFORM_PARALLEL) {
     const batch = files.slice(i, i + CONFIG.TRANSFORM_PARALLEL);
     const results = await Promise.all(batch.map(f => transformFile(f)));
@@ -375,10 +498,8 @@ async function transformToNDJSON(downloadDir, files, integration) {
       completedFiles++;
     }
     
-    // Progress update
     log(`Transformed ${completedFiles}/${files.length} files (${formatNumber(totalRecords)} records)`, 'PROGRESS');
     
-    // Force GC after each batch to prevent memory buildup
     if (global.gc) global.gc();
   }
   

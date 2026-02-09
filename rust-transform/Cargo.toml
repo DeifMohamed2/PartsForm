@@ -1,0 +1,19 @@
+[package]
+name = "turbo-transform"
+version = "1.0.0"
+edition = "2021"
+
+[dependencies]
+csv = "1.3"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+rayon = "1.10"
+memchr = "2"
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+target-cpu = "native"
+strip = true
+panic = "abort"
