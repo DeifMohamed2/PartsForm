@@ -1938,10 +1938,14 @@ const getIntegrationEdit = async (req, res) => {
       return res.status(404).render('error', { title: 'Not Found', error: 'Integration not found' });
     }
     
-    res.render('admin/integration-create', {
+    // For edit page we need the raw object (not toSafeJSON which masks passwords)
+    const integrationData = integration.toObject();
+    integrationData._id = integration._id.toString();
+    
+    res.render('admin/integration-edit', {
       title: 'Edit Connection - Admin',
       activePage: 'integrations',
-      integration: integration.toSafeJSON(),
+      integration: integrationData,
     });
   } catch (error) {
     console.error('Error in getIntegrationEdit:', error);
@@ -2098,6 +2102,25 @@ const updateIntegration = async (req, res) => {
                 (data.ftpSecure !== undefined ? (data.ftpSecure === 'true' || data.ftpSecure === true) : integration.ftp.secure),
         remotePath: ftpData.remotePath || data.ftpRemotePath || integration.ftp.remotePath,
         filePattern: ftpData.filePattern || data.ftpFilePattern || integration.ftp.filePattern,
+      };
+    } else if (integration.type === 'api') {
+      const apiData = data.api || {};
+      integration.api = {
+        ...integration.api,
+        apiType: apiData.apiType || data.apiType || integration.api.apiType,
+        baseUrl: apiData.baseUrl || data.apiBaseUrl || integration.api.baseUrl,
+        authType: apiData.authType || data.apiAuthType || integration.api.authType,
+        apiKey: apiData.apiKey || data.apiKey || integration.api.apiKey,
+        authHeader: apiData.authHeader || data.apiAuthHeader || integration.api.authHeader,
+        rateLimit: parseInt(apiData.rateLimit || data.apiRateLimit) || integration.api.rateLimit,
+        timeout: parseInt(apiData.timeout || data.apiTimeout) || integration.api.timeout,
+      };
+    } else if (integration.type === 'google-sheets') {
+      const gsData = data.googleSheets || {};
+      integration.googleSheets = {
+        ...integration.googleSheets,
+        spreadsheetId: gsData.spreadsheetId || data.spreadsheetId || integration.googleSheets.spreadsheetId,
+        sheetName: gsData.sheetName || data.sheetName || integration.googleSheets.sheetName,
       };
     }
     

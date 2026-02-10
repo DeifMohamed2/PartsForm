@@ -1232,7 +1232,6 @@
    ================================ */
 .connection-create-page {
     width: 100%;
-    /* Full width - no max-width constraint to avoid right padding */
 }
 
 .create-header {
@@ -1244,6 +1243,7 @@
     font-weight: 700;
     color: var(--admin-text-primary);
     margin-bottom: 0.35rem;
+    letter-spacing: -0.01em;
 }
 
 .create-header p {
@@ -1254,9 +1254,14 @@
 .create-section {
     background: var(--admin-bg-secondary);
     border: 1px solid var(--admin-border);
-    border-radius: 16px;
+    border-radius: 20px;
     padding: 1.75rem;
     margin-bottom: 1.5rem;
+    transition: border-color 0.2s;
+}
+
+.create-section:hover {
+    border-color: rgba(14, 165, 233, 0.15);
 }
 
 .section-title {
@@ -1267,9 +1272,9 @@
 }
 
 .step-number {
-    width: 32px;
-    height: 32px;
-    background: var(--module-primary, #3b82f6);
+    width: 34px;
+    height: 34px;
+    background: linear-gradient(135deg, #0ea5e9, #0284c7);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -1278,6 +1283,7 @@
     font-size: 0.9rem;
     font-weight: 700;
     flex-shrink: 0;
+    box-shadow: 0 3px 10px rgba(14, 165, 233, 0.2);
 }
 
 .section-title h2 {
@@ -1290,17 +1296,17 @@
 /* Connection Type Grid */
 .connection-type-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 1rem;
 }
 
 .connection-type-card {
     background: var(--admin-bg-primary);
     border: 2px solid var(--admin-border);
-    border-radius: 14px;
+    border-radius: 16px;
     padding: 1.25rem;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
 }
 
@@ -1312,11 +1318,14 @@
 
 .connection-type-card:hover {
     border-color: var(--admin-text-muted);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
 }
 
 .connection-type-card.selected {
-    border-color: var(--module-primary, #3b82f6);
-    background: rgba(59, 130, 246, 0.04);
+    border-color: #0ea5e9;
+    background: rgba(14, 165, 233, 0.03);
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.08);
 }
 
 .type-card-content {
@@ -1340,13 +1349,13 @@
 }
 
 .type-icon.ftp {
-    background: rgba(59, 130, 246, 0.12);
-    color: #3b82f6;
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.15), rgba(59, 130, 246, 0.06));
+    color: #0ea5e9;
 }
 
 .type-icon.api {
-    background: rgba(139, 92, 246, 0.12);
-    color: #8b5cf6;
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(139, 92, 246, 0.06));
+    color: #a855f7;
 }
 
 .type-icon.soap {
@@ -1401,7 +1410,7 @@
     top: 1rem;
     right: 1rem;
     display: none;
-    color: var(--module-primary, #3b82f6);
+    color: #0ea5e9;
 }
 
 .type-checked i {
@@ -1557,7 +1566,7 @@
 }
 
 .option-toggle input:checked+.toggle-slider {
-    background: var(--module-primary, #3b82f6);
+    background: #0ea5e9;
 }
 
 .option-toggle input:checked+.toggle-slider::after {
@@ -1596,8 +1605,8 @@
 }
 
 .type-icon.google-sheets {
-    background: rgba(59, 130, 246, 0.1) !important;
-    color: #3b82f6 !important;
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(16, 185, 129, 0.06)) !important;
+    color: #22c55e !important;
 }
 
 /* File Upload Box Design */
@@ -1690,6 +1699,12 @@
 
     .options-grid {
         grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 1024px) {
+    .connection-type-grid {
+        grid-template-columns: repeat(2, 1fr);
     }
 }
 

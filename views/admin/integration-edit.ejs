@@ -1,0 +1,1379 @@
+<%- include('partials/header') %>
+<link rel="stylesheet" href="/css/adminCSS/admin-dashboard.css">
+<link rel="stylesheet" href="/css/adminCSS/admin-integrations.css">
+<style>
+  /* ============================================
+     Integration Edit Page Styles
+     ============================================ */
+
+  .edit-breadcrumb {
+    margin-bottom: 1.5rem;
+  }
+  .edit-breadcrumb a {
+    color: var(--admin-text-muted);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    transition: color 0.2s;
+  }
+  .edit-breadcrumb a:hover {
+    color: var(--admin-accent);
+  }
+
+  /* Page Header */
+  .edit-page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .edit-page-header-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .edit-page-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+  }
+  .edit-page-icon.ftp { background: linear-gradient(135deg, rgba(14, 165, 233, 0.15), rgba(59, 130, 246, 0.08)); color: #0ea5e9; }
+  .edit-page-icon.api { background: linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(139, 92, 246, 0.08)); color: #a855f7; }
+  .edit-page-icon.google-sheets { background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(16, 185, 129, 0.08)); color: #22c55e; }
+  .edit-page-icon i { width: 28px; height: 28px; }
+  .edit-page-title h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--admin-text-primary);
+    margin: 0 0 0.25rem;
+  }
+  .edit-page-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.85rem;
+    color: var(--admin-text-muted);
+  }
+  .edit-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.2rem 0.65rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .edit-status-badge.active { background: rgba(34, 197, 94, 0.12); color: #22c55e; }
+  .edit-status-badge.inactive { background: rgba(239, 68, 68, 0.12); color: #ef4444; }
+  .edit-status-badge.error { background: rgba(245, 158, 11, 0.12); color: #f59e0b; }
+  .edit-status-badge .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+  .edit-page-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  /* Stats Summary Row */
+  .edit-stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .edit-stat-card {
+    background: var(--admin-bg-primary);
+    border: 1px solid var(--admin-border);
+    border-radius: 16px;
+    padding: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.2s;
+  }
+  .edit-stat-card:hover {
+    border-color: rgba(14, 165, 233, 0.3);
+    box-shadow: 0 4px 16px rgba(14, 165, 233, 0.06);
+  }
+  .edit-stat-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .edit-stat-icon i { width: 20px; height: 20px; }
+  .edit-stat-icon.records { background: rgba(14, 165, 233, 0.1); color: #0ea5e9; }
+  .edit-stat-icon.syncs { background: rgba(168, 85, 247, 0.1); color: #a855f7; }
+  .edit-stat-icon.success { background: rgba(34, 197, 94, 0.1); color: #22c55e; }
+  .edit-stat-icon.duration { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+  .edit-stat-value {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--admin-text-primary);
+    line-height: 1.2;
+  }
+  .edit-stat-label {
+    font-size: 0.78rem;
+    color: var(--admin-text-muted);
+    margin-top: 0.15rem;
+  }
+
+  /* Form Cards */
+  .edit-form-card {
+    background: var(--admin-bg-primary);
+    border: 1px solid var(--admin-border);
+    border-radius: 20px;
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .edit-form-card:hover {
+    border-color: rgba(14, 165, 233, 0.2);
+  }
+  .edit-form-card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--admin-border);
+    background: var(--admin-bg-secondary);
+  }
+  .edit-form-card-header-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(14, 165, 233, 0.1);
+    color: #0ea5e9;
+  }
+  .edit-form-card-header-icon i { width: 20px; height: 20px; }
+  .edit-form-card-header h3 {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--admin-text-primary);
+    margin: 0;
+  }
+  .edit-form-card-header p {
+    font-size: 0.82rem;
+    color: var(--admin-text-muted);
+    margin: 0.15rem 0 0;
+  }
+  .edit-form-card-body {
+    padding: 1.5rem;
+  }
+
+  /* Form Grid */
+  .edit-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+  }
+  .edit-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+  .edit-form-group.full-width {
+    grid-column: 1 / -1;
+  }
+  .edit-form-group label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--admin-text-secondary);
+  }
+  .edit-form-group label .required {
+    color: #ef4444;
+    margin-left: 2px;
+  }
+  .edit-form-input,
+  .edit-form-select {
+    padding: 0.7rem 1rem;
+    border: 1px solid var(--admin-border);
+    border-radius: 10px;
+    background: var(--admin-bg-secondary);
+    color: var(--admin-text-primary);
+    font-size: 0.9rem;
+    font-family: 'Inter', sans-serif;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .edit-form-input:focus,
+  .edit-form-select:focus {
+    border-color: var(--admin-accent, #0ea5e9);
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+  }
+  .edit-form-input:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background: var(--admin-bg-tertiary, var(--admin-bg-secondary));
+  }
+  .edit-form-input.mono {
+    font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
+    font-size: 0.82rem;
+  }
+  .edit-form-hint {
+    font-size: 0.78rem;
+    color: var(--admin-text-muted);
+    margin-top: 0.15rem;
+  }
+
+  /* Toggle Switch */
+  .edit-toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.85rem 0;
+    border-bottom: 1px solid var(--admin-border);
+  }
+  .edit-toggle-row:last-child {
+    border-bottom: none;
+  }
+  .edit-toggle-info h4 {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--admin-text-primary);
+    margin: 0 0 0.15rem;
+  }
+  .edit-toggle-info p {
+    font-size: 0.78rem;
+    color: var(--admin-text-muted);
+    margin: 0;
+  }
+  .edit-toggle {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+  .edit-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  .edit-toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--admin-border);
+    border-radius: 24px;
+    transition: 0.3s;
+  }
+  .edit-toggle-slider::before {
+    content: '';
+    position: absolute;
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background: white;
+    border-radius: 50%;
+    transition: 0.3s;
+  }
+  .edit-toggle input:checked + .edit-toggle-slider {
+    background: #0ea5e9;
+  }
+  .edit-toggle input:checked + .edit-toggle-slider::before {
+    transform: translateX(20px);
+  }
+
+  /* Test Connection Result */
+  .test-result {
+    display: none;
+    margin-top: 1rem;
+    padding: 1rem 1.25rem;
+    border-radius: 12px;
+    font-size: 0.88rem;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .test-result.show { display: flex; }
+  .test-result.success {
+    background: rgba(34, 197, 94, 0.08);
+    border: 1px solid rgba(34, 197, 94, 0.2);
+    color: #22c55e;
+  }
+  .test-result.error {
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+  }
+  .test-result i { width: 20px; height: 20px; flex-shrink: 0; }
+
+  /* Danger Zone */
+  .danger-zone {
+    background: rgba(239, 68, 68, 0.03);
+    border: 1px solid rgba(239, 68, 68, 0.15);
+    border-radius: 20px;
+    padding: 1.5rem;
+    margin-top: 2rem;
+  }
+  .danger-zone-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  .danger-zone-header i { width: 20px; height: 20px; color: #ef4444; }
+  .danger-zone-header h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #ef4444;
+    margin: 0;
+  }
+  .danger-zone-body {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .danger-zone-body p {
+    font-size: 0.85rem;
+    color: var(--admin-text-muted);
+    margin: 0;
+    flex: 1;
+  }
+
+  /* Last Sync Info */
+  .last-sync-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    background: var(--admin-bg-secondary);
+    border-radius: 12px;
+    margin-top: 1rem;
+  }
+  .last-sync-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .last-sync-icon.completed { background: rgba(34, 197, 94, 0.1); color: #22c55e; }
+  .last-sync-icon.failed { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+  .last-sync-icon.pending { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+  .last-sync-icon i { width: 20px; height: 20px; }
+  .last-sync-details h4 {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--admin-text-primary);
+    margin: 0 0 0.2rem;
+  }
+  .last-sync-details p {
+    font-size: 0.78rem;
+    color: var(--admin-text-muted);
+    margin: 0;
+  }
+
+  /* Form Actions */
+  .edit-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--admin-border);
+  }
+
+  /* Button styles */
+  .btn-edit-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.65rem 1.5rem;
+    background: linear-gradient(135deg, #0ea5e9, #0284c7);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Inter', sans-serif;
+  }
+  .btn-edit-primary:hover {
+    background: linear-gradient(135deg, #0284c7, #0369a1);
+    box-shadow: 0 4px 16px rgba(14, 165, 233, 0.25);
+    transform: translateY(-1px);
+  }
+  .btn-edit-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+  .btn-edit-primary i { width: 16px; height: 16px; }
+
+  .btn-edit-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.65rem 1.25rem;
+    background: var(--admin-bg-secondary);
+    color: var(--admin-text-secondary);
+    border: 1px solid var(--admin-border);
+    border-radius: 10px;
+    font-size: 0.88rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    font-family: 'Inter', sans-serif;
+  }
+  .btn-edit-secondary:hover {
+    background: var(--admin-bg-tertiary, var(--admin-bg-secondary));
+    border-color: var(--admin-text-muted);
+  }
+  .btn-edit-secondary i { width: 16px; height: 16px; }
+
+  .btn-edit-outline {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.65rem 1.25rem;
+    background: transparent;
+    color: #0ea5e9;
+    border: 1px solid rgba(14, 165, 233, 0.3);
+    border-radius: 10px;
+    font-size: 0.88rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Inter', sans-serif;
+  }
+  .btn-edit-outline:hover {
+    background: rgba(14, 165, 233, 0.06);
+    border-color: #0ea5e9;
+  }
+  .btn-edit-outline i { width: 16px; height: 16px; }
+
+  .btn-edit-danger {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.65rem 1.25rem;
+    background: rgba(239, 68, 68, 0.08);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: 10px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Inter', sans-serif;
+  }
+  .btn-edit-danger:hover {
+    background: #ef4444;
+    color: white;
+    border-color: #ef4444;
+  }
+  .btn-edit-danger i { width: 16px; height: 16px; }
+
+  .btn-edit-success {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.65rem 1.25rem;
+    background: rgba(34, 197, 94, 0.08);
+    color: #22c55e;
+    border: 1px solid rgba(34, 197, 94, 0.2);
+    border-radius: 10px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Inter', sans-serif;
+  }
+  .btn-edit-success:hover {
+    background: #22c55e;
+    color: white;
+    border-color: #22c55e;
+  }
+  .btn-edit-success i { width: 16px; height: 16px; }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .edit-form-grid { grid-template-columns: 1fr; }
+    .edit-page-header { flex-direction: column; align-items: flex-start; }
+    .edit-stats-row { grid-template-columns: repeat(2, 1fr); }
+    .danger-zone-body { flex-direction: column; align-items: flex-start; }
+  }
+  @media (max-width: 480px) {
+    .edit-stats-row { grid-template-columns: 1fr; }
+    .edit-page-actions { width: 100%; }
+    .edit-page-actions button,
+    .edit-page-actions a { flex: 1; justify-content: center; }
+  }
+
+  /* Toast */
+  .edit-toast {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    padding: 1rem 1.5rem;
+    border-radius: 14px;
+    font-size: 0.88rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    z-index: 10000;
+    transform: translateY(120%);
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  }
+  .edit-toast.show {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  .edit-toast.success {
+    background: linear-gradient(135deg, #065f46, #047857);
+    color: white;
+  }
+  .edit-toast.error {
+    background: linear-gradient(135deg, #991b1b, #dc2626);
+    color: white;
+  }
+  .edit-toast i { width: 18px; height: 18px; }
+
+  /* Password field */
+  .password-field-wrapper {
+    position: relative;
+  }
+  .password-field-wrapper .toggle-password {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--admin-text-muted);
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .password-field-wrapper .toggle-password i { width: 18px; height: 18px; }
+  .password-field-wrapper input { padding-right: 40px; }
+
+  /* Spinner */
+  .btn-spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spinBtn 0.7s linear infinite;
+  }
+  @keyframes spinBtn {
+    to { transform: rotate(360deg); }
+  }
+</style>
+</head>
+<body>
+  <div class="admin-wrapper">
+    <%- include('partials/sidebar', { activePage: 'integrations' }) %>
+
+    <main class="admin-main">
+      <%- include('partials/topbar', { pageTitle: 'Edit Connection' }) %>
+
+      <div class="admin-content">
+        <!-- Breadcrumb -->
+        <div class="edit-breadcrumb">
+          <a href="/admin/integrations">
+            <i data-lucide="arrow-left" style="width: 16px; height: 16px;"></i>
+            Back to Connections
+          </a>
+        </div>
+
+        <!-- Page Header -->
+        <div class="edit-page-header">
+          <div class="edit-page-header-left">
+            <div class="edit-page-icon <%= integration.type %>">
+              <% if (integration.type === 'ftp') { %>
+                <i data-lucide="hard-drive"></i>
+              <% } else if (integration.type === 'api') { %>
+                <i data-lucide="code-2"></i>
+              <% } else { %>
+                <i data-lucide="file-spreadsheet"></i>
+              <% } %>
+            </div>
+            <div class="edit-page-title">
+              <h2><%= integration.name %></h2>
+              <div class="edit-page-meta">
+                <span class="edit-status-badge <%= integration.status %>">
+                  <span class="dot"></span>
+                  <%= integration.status %>
+                </span>
+                <span><%= integration.type.toUpperCase() %> Connection</span>
+                <% if (integration.createdAt) { %>
+                  <span>Created <%= new Date(integration.createdAt).toLocaleDateString() %></span>
+                <% } %>
+              </div>
+            </div>
+          </div>
+          <div class="edit-page-actions">
+            <button type="button" class="btn-edit-outline" onclick="testConnection()">
+              <i data-lucide="wifi"></i>
+              Test Connection
+            </button>
+            <button type="button" class="btn-edit-success" onclick="syncNow()">
+              <i data-lucide="refresh-cw"></i>
+              Sync Now
+            </button>
+          </div>
+        </div>
+
+        <!-- Stats Row -->
+        <div class="edit-stats-row">
+          <div class="edit-stat-card">
+            <div class="edit-stat-icon records">
+              <i data-lucide="database"></i>
+            </div>
+            <div>
+              <div class="edit-stat-value"><%= (integration.stats && integration.stats.totalRecords || 0).toLocaleString() %></div>
+              <div class="edit-stat-label">Total Records</div>
+            </div>
+          </div>
+          <div class="edit-stat-card">
+            <div class="edit-stat-icon syncs">
+              <i data-lucide="refresh-cw"></i>
+            </div>
+            <div>
+              <div class="edit-stat-value"><%= (integration.stats && integration.stats.totalSyncs || 0) %></div>
+              <div class="edit-stat-label">Total Syncs</div>
+            </div>
+          </div>
+          <div class="edit-stat-card">
+            <div class="edit-stat-icon success">
+              <i data-lucide="check-circle"></i>
+            </div>
+            <div>
+              <div class="edit-stat-value"><%= (integration.stats && integration.stats.successfulSyncs || 0) %></div>
+              <div class="edit-stat-label">Successful</div>
+            </div>
+          </div>
+          <div class="edit-stat-card">
+            <div class="edit-stat-icon duration">
+              <i data-lucide="clock"></i>
+            </div>
+            <div>
+              <% 
+                var lastDuration = integration.lastSync && integration.lastSync.duration ? integration.lastSync.duration : 0;
+                var durationMin = Math.floor(lastDuration / 60000);
+                var durationSec = Math.floor((lastDuration % 60000) / 1000);
+                var durationStr = lastDuration > 0 ? (durationMin > 0 ? durationMin + 'm ' + durationSec + 's' : durationSec + 's') : '--';
+              %>
+              <div class="edit-stat-value"><%= durationStr %></div>
+              <div class="edit-stat-label">Last Duration</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Last Sync Info -->
+        <% if (integration.lastSync && integration.lastSync.date) { %>
+          <div class="last-sync-card" style="margin-bottom: 2rem;">
+            <div class="last-sync-icon <%= integration.lastSync.status || 'pending' %>">
+              <% if (integration.lastSync.status === 'completed') { %>
+                <i data-lucide="check-circle"></i>
+              <% } else if (integration.lastSync.status === 'failed') { %>
+                <i data-lucide="alert-circle"></i>
+              <% } else { %>
+                <i data-lucide="clock"></i>
+              <% } %>
+            </div>
+            <div class="last-sync-details">
+              <h4>Last Sync: <%= integration.lastSync.status ? integration.lastSync.status.charAt(0).toUpperCase() + integration.lastSync.status.slice(1) : 'Unknown' %></h4>
+              <p>
+                <%= new Date(integration.lastSync.date).toLocaleString() %>
+                <% if (integration.lastSync.recordsProcessed) { %>
+                  &middot; <%= integration.lastSync.recordsProcessed.toLocaleString() %> records processed
+                <% } %>
+                <% if (integration.lastSync.recordsInserted) { %>
+                  &middot; <%= integration.lastSync.recordsInserted.toLocaleString() %> inserted
+                <% } %>
+              </p>
+            </div>
+          </div>
+        <% } %>
+
+        <!-- Edit Form -->
+        <form id="editIntegrationForm">
+          <!-- General Settings -->
+          <div class="edit-form-card">
+            <div class="edit-form-card-header">
+              <div class="edit-form-card-header-icon">
+                <i data-lucide="settings"></i>
+              </div>
+              <div>
+                <h3>General Settings</h3>
+                <p>Connection name and status</p>
+              </div>
+            </div>
+            <div class="edit-form-card-body">
+              <div class="edit-form-grid">
+                <div class="edit-form-group">
+                  <label>Connection Name <span class="required">*</span></label>
+                  <input type="text" class="edit-form-input" name="name" value="<%= integration.name %>" required>
+                </div>
+                <div class="edit-form-group">
+                  <label>Status</label>
+                  <select class="edit-form-select" name="status" id="statusSelect">
+                    <option value="active" <%= integration.status === 'active' ? 'selected' : '' %>>Active</option>
+                    <option value="inactive" <%= integration.status === 'inactive' ? 'selected' : '' %>>Inactive</option>
+                  </select>
+                </div>
+                <div class="edit-form-group">
+                  <label>Connection Type</label>
+                  <input type="text" class="edit-form-input" value="<%= integration.type.toUpperCase() %>" disabled style="text-transform: uppercase; font-weight: 600;">
+                </div>
+                <div class="edit-form-group">
+                  <label>Connection ID</label>
+                  <input type="text" class="edit-form-input mono" value="<%= integration._id %>" disabled>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- FTP Configuration -->
+          <% if (integration.type === 'ftp') { %>
+          <div class="edit-form-card">
+            <div class="edit-form-card-header">
+              <div class="edit-form-card-header-icon" style="background: rgba(14, 165, 233, 0.1); color: #0ea5e9;">
+                <i data-lucide="hard-drive"></i>
+              </div>
+              <div>
+                <h3>FTP Configuration</h3>
+                <p>Server connection and file settings</p>
+              </div>
+            </div>
+            <div class="edit-form-card-body">
+              <div class="edit-form-grid">
+                <div class="edit-form-group">
+                  <label>Host <span class="required">*</span></label>
+                  <input type="text" class="edit-form-input" name="ftpHost" value="<%= integration.ftp && integration.ftp.host || '' %>" placeholder="ftp.example.com" required>
+                </div>
+                <div class="edit-form-group">
+                  <label>Port</label>
+                  <input type="number" class="edit-form-input" name="ftpPort" value="<%= integration.ftp && integration.ftp.port || 21 %>" min="1" max="65535">
+                </div>
+                <div class="edit-form-group">
+                  <label>Username <span class="required">*</span></label>
+                  <input type="text" class="edit-form-input" name="ftpUsername" value="<%= integration.ftp && integration.ftp.username || '' %>" required>
+                </div>
+                <div class="edit-form-group">
+                  <label>Password <span class="required">*</span></label>
+                  <div class="password-field-wrapper">
+                    <input type="password" class="edit-form-input" name="ftpPassword" id="ftpPassword" value="<%= integration.ftp && integration.ftp.password || '' %>" required>
+                    <button type="button" class="toggle-password" onclick="togglePassword('ftpPassword')">
+                      <i data-lucide="eye"></i>
+                    </button>
+                  </div>
+                </div>
+                <div class="edit-form-group">
+                  <label>Protocol</label>
+                  <select class="edit-form-select" name="ftpProtocol" id="ftpProtocol">
+                    <option value="ftp" <%= (integration.ftp && !integration.ftp.secure) ? 'selected' : '' %>>FTP</option>
+                    <option value="ftps" <%= (integration.ftp && integration.ftp.secure) ? 'selected' : '' %>>FTPS (Secure)</option>
+                  </select>
+                </div>
+                <div class="edit-form-group">
+                  <label>Remote Path</label>
+                  <input type="text" class="edit-form-input mono" name="ftpRemotePath" value="<%= integration.ftp && integration.ftp.remotePath || '/' %>" placeholder="/">
+                </div>
+                <div class="edit-form-group full-width">
+                  <label>File Pattern</label>
+                  <input type="text" class="edit-form-input mono" name="ftpFilePattern" value="<%= integration.ftp && integration.ftp.filePattern || '*.csv' %>" placeholder="*.csv">
+                  <span class="edit-form-hint">Glob pattern for matching files (e.g. *.csv, data_*.xlsx)</span>
+                </div>
+              </div>
+
+              <!-- Test Connection Result -->
+              <div class="test-result" id="testResult">
+                <i data-lucide="check-circle"></i>
+                <span id="testResultMessage"></span>
+              </div>
+            </div>
+          </div>
+          <% } %>
+
+          <!-- API Configuration -->
+          <% if (integration.type === 'api') { %>
+          <div class="edit-form-card">
+            <div class="edit-form-card-header">
+              <div class="edit-form-card-header-icon" style="background: rgba(168, 85, 247, 0.1); color: #a855f7;">
+                <i data-lucide="code-2"></i>
+              </div>
+              <div>
+                <h3>API Configuration</h3>
+                <p>Endpoint and authentication settings</p>
+              </div>
+            </div>
+            <div class="edit-form-card-body">
+              <div class="edit-form-grid">
+                <div class="edit-form-group">
+                  <label>API Type</label>
+                  <select class="edit-form-select" name="apiType">
+                    <option value="rest" <%= (integration.api && integration.api.apiType === 'rest') ? 'selected' : '' %>>REST API</option>
+                    <option value="graphql" <%= (integration.api && integration.api.apiType === 'graphql') ? 'selected' : '' %>>GraphQL</option>
+                  </select>
+                </div>
+                <div class="edit-form-group">
+                  <label>Base URL <span class="required">*</span></label>
+                  <input type="url" class="edit-form-input" name="apiBaseUrl" value="<%= integration.api && integration.api.baseUrl || '' %>" placeholder="https://api.example.com" required>
+                </div>
+                <div class="edit-form-group">
+                  <label>Auth Type</label>
+                  <select class="edit-form-select" name="apiAuthType">
+                    <option value="api-key" <%= (integration.api && integration.api.authType === 'api-key') ? 'selected' : '' %>>API Key</option>
+                    <option value="bearer" <%= (integration.api && integration.api.authType === 'bearer') ? 'selected' : '' %>>Bearer Token</option>
+                    <option value="basic" <%= (integration.api && integration.api.authType === 'basic') ? 'selected' : '' %>>Basic Auth</option>
+                    <option value="oauth2" <%= (integration.api && integration.api.authType === 'oauth2') ? 'selected' : '' %>>OAuth 2.0</option>
+                    <option value="none" <%= (integration.api && integration.api.authType === 'none') ? 'selected' : '' %>>No Auth</option>
+                  </select>
+                </div>
+                <div class="edit-form-group">
+                  <label>API Key / Token</label>
+                  <div class="password-field-wrapper">
+                    <input type="password" class="edit-form-input" name="apiKey" id="apiKey" value="<%= integration.api && integration.api.apiKey || '' %>">
+                    <button type="button" class="toggle-password" onclick="togglePassword('apiKey')">
+                      <i data-lucide="eye"></i>
+                    </button>
+                  </div>
+                </div>
+                <div class="edit-form-group">
+                  <label>Auth Header Name</label>
+                  <input type="text" class="edit-form-input" name="apiAuthHeader" value="<%= integration.api && integration.api.authHeader || 'Authorization' %>" placeholder="Authorization">
+                </div>
+                <div class="edit-form-group">
+                  <label>Rate Limit (req/min)</label>
+                  <input type="number" class="edit-form-input" name="apiRateLimit" value="<%= integration.api && integration.api.rateLimit || 60 %>" min="1">
+                </div>
+                <div class="edit-form-group">
+                  <label>Timeout (ms)</label>
+                  <input type="number" class="edit-form-input" name="apiTimeout" value="<%= integration.api && integration.api.timeout || 30000 %>" min="1000" step="1000">
+                </div>
+              </div>
+            </div>
+          </div>
+          <% } %>
+
+          <!-- Google Sheets Configuration -->
+          <% if (integration.type === 'google-sheets') { %>
+          <div class="edit-form-card">
+            <div class="edit-form-card-header">
+              <div class="edit-form-card-header-icon" style="background: rgba(34, 197, 94, 0.1); color: #22c55e;">
+                <i data-lucide="file-spreadsheet"></i>
+              </div>
+              <div>
+                <h3>Google Sheets Configuration</h3>
+                <p>Spreadsheet connection settings</p>
+              </div>
+            </div>
+            <div class="edit-form-card-body">
+              <div class="edit-form-grid">
+                <div class="edit-form-group">
+                  <label>Spreadsheet ID <span class="required">*</span></label>
+                  <input type="text" class="edit-form-input mono" name="spreadsheetId" value="<%= integration.googleSheets && integration.googleSheets.spreadsheetId || '' %>" required>
+                  <span class="edit-form-hint">Found in the URL: docs.google.com/spreadsheets/d/{SPREADSHEET_ID}/edit</span>
+                </div>
+                <div class="edit-form-group">
+                  <label>Sheet Name</label>
+                  <input type="text" class="edit-form-input" name="sheetName" value="<%= integration.googleSheets && integration.googleSheets.sheetName || '' %>" placeholder="Sheet1">
+                </div>
+              </div>
+            </div>
+          </div>
+          <% } %>
+
+          <!-- Sync Schedule -->
+          <div class="edit-form-card">
+            <div class="edit-form-card-header">
+              <div class="edit-form-card-header-icon" style="background: rgba(168, 85, 247, 0.1); color: #a855f7;">
+                <i data-lucide="calendar-clock"></i>
+              </div>
+              <div>
+                <h3>Sync Schedule</h3>
+                <p>Configure automatic synchronization</p>
+              </div>
+            </div>
+            <div class="edit-form-card-body">
+              <div class="edit-form-grid">
+                <div class="edit-form-group">
+                  <label>Schedule Enabled</label>
+                  <select class="edit-form-select" name="syncEnabled">
+                    <option value="true" <%= (integration.syncSchedule && integration.syncSchedule.enabled) ? 'selected' : '' %>>Enabled</option>
+                    <option value="false" <%= (integration.syncSchedule && !integration.syncSchedule.enabled) ? 'selected' : '' %>>Disabled</option>
+                  </select>
+                </div>
+                <div class="edit-form-group">
+                  <label>Frequency</label>
+                  <select class="edit-form-select" name="syncFrequency">
+                    <option value="hourly" <%= (integration.syncSchedule && integration.syncSchedule.frequency === 'hourly') ? 'selected' : '' %>>Every Hour</option>
+                    <option value="every4hours" <%= (integration.syncSchedule && integration.syncSchedule.frequency === 'every4hours') ? 'selected' : '' %>>Every 4 Hours</option>
+                    <option value="every6hours" <%= (integration.syncSchedule && integration.syncSchedule.frequency === 'every6hours') ? 'selected' : '' %>>Every 6 Hours</option>
+                    <option value="every12hours" <%= (integration.syncSchedule && integration.syncSchedule.frequency === 'every12hours') ? 'selected' : '' %>>Every 12 Hours</option>
+                    <option value="daily" <%= (integration.syncSchedule && integration.syncSchedule.frequency === 'daily') ? 'selected' : '' %>>Daily</option>
+                    <option value="weekly" <%= (integration.syncSchedule && integration.syncSchedule.frequency === 'weekly') ? 'selected' : '' %>>Weekly</option>
+                  </select>
+                </div>
+                <div class="edit-form-group">
+                  <label>Preferred Time</label>
+                  <input type="time" class="edit-form-input" name="syncTime" value="<%= integration.syncSchedule && integration.syncSchedule.time || '02:00' %>">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Options -->
+          <div class="edit-form-card">
+            <div class="edit-form-card-header">
+              <div class="edit-form-card-header-icon" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;">
+                <i data-lucide="sliders-horizontal"></i>
+              </div>
+              <div>
+                <h3>Advanced Options</h3>
+                <p>Fine-tune sync behavior</p>
+              </div>
+            </div>
+            <div class="edit-form-card-body">
+              <div class="edit-toggle-row">
+                <div class="edit-toggle-info">
+                  <h4>Auto Sync</h4>
+                  <p>Automatically sync data when schedule triggers</p>
+                </div>
+                <label class="edit-toggle">
+                  <input type="checkbox" name="autoSync" <%= (integration.options && integration.options.autoSync) ? 'checked' : '' %>>
+                  <span class="edit-toggle-slider"></span>
+                </label>
+              </div>
+              <div class="edit-toggle-row">
+                <div class="edit-toggle-info">
+                  <h4>Notify on Complete</h4>
+                  <p>Send notification when sync finishes</p>
+                </div>
+                <label class="edit-toggle">
+                  <input type="checkbox" name="notifyOnComplete" <%= (integration.options && integration.options.notifyOnComplete !== false) ? 'checked' : '' %>>
+                  <span class="edit-toggle-slider"></span>
+                </label>
+              </div>
+              <div class="edit-toggle-row">
+                <div class="edit-toggle-info">
+                  <h4>Delta Sync</h4>
+                  <p>Only sync changes since last run (incremental)</p>
+                </div>
+                <label class="edit-toggle">
+                  <input type="checkbox" name="deltaSync" <%= (integration.options && integration.options.deltaSync) ? 'checked' : '' %>>
+                  <span class="edit-toggle-slider"></span>
+                </label>
+              </div>
+              <div class="edit-toggle-row">
+                <div class="edit-toggle-info">
+                  <h4>Retry on Failure</h4>
+                  <p>Automatically retry if sync fails</p>
+                </div>
+                <label class="edit-toggle">
+                  <input type="checkbox" name="retryOnFail" <%= (integration.options && integration.options.retryOnFail !== false) ? 'checked' : '' %>>
+                  <span class="edit-toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Form Actions -->
+          <div class="edit-form-actions">
+            <a href="/admin/integrations" class="btn-edit-secondary">
+              <i data-lucide="x"></i>
+              Cancel
+            </a>
+            <button type="submit" class="btn-edit-primary" id="saveBtn">
+              <i data-lucide="save"></i>
+              Save Changes
+            </button>
+          </div>
+        </form>
+
+        <!-- Danger Zone -->
+        <div class="danger-zone">
+          <div class="danger-zone-header">
+            <i data-lucide="alert-triangle"></i>
+            <h3>Danger Zone</h3>
+          </div>
+          <div class="danger-zone-body">
+            <p>Permanently delete this connection and all its sync history. This action cannot be undone.</p>
+            <button type="button" class="btn-edit-danger" onclick="confirmDelete()">
+              <i data-lucide="trash-2"></i>
+              Delete Connection
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="status-modal-overlay" id="deleteModalOverlay" onclick="closeDeleteModal()">
+    <div class="status-modal" onclick="event.stopPropagation()" style="max-width: 440px;">
+      <div class="status-modal-header">
+        <div class="status-modal-icon" style="background: rgba(239, 68, 68, 0.1);">
+          <i data-lucide="trash-2" style="color: #ef4444;"></i>
+        </div>
+        <div>
+          <h3>Delete Connection</h3>
+          <p style="color: var(--admin-text-muted);">This action cannot be undone</p>
+        </div>
+        <button class="status-modal-close" onclick="closeDeleteModal()">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="status-modal-body">
+        <p style="color: var(--admin-text-secondary);">Are you sure you want to delete <strong><%= integration.name %></strong>? All sync history and configuration will be permanently removed.</p>
+      </div>
+      <div class="status-modal-footer">
+        <button class="btn-edit-secondary" onclick="closeDeleteModal()">Cancel</button>
+        <button class="btn-edit-danger" onclick="deleteConnection()">
+          <i data-lucide="trash-2"></i>
+          Delete Connection
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="edit-toast" id="editToast">
+    <i data-lucide="check-circle"></i>
+    <span id="editToastMessage"></span>
+  </div>
+
+  <style>
+    .status-modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.25s ease;
+    }
+    .status-modal-overlay.active { opacity: 1; visibility: visible; }
+    .status-modal {
+      background: var(--admin-bg-primary);
+      border-radius: 20px;
+      width: 100%;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+      transform: scale(0.9);
+      transition: all 0.25s ease;
+    }
+    .status-modal-overlay.active .status-modal { transform: scale(1); }
+    .status-modal-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--admin-border);
+    }
+    .status-modal-icon {
+      width: 48px; height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .status-modal-icon i { width: 24px; height: 24px; }
+    .status-modal-header h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--admin-text-primary);
+      margin: 0 0 0.15rem;
+    }
+    .status-modal-close {
+      margin-left: auto;
+      width: 36px; height: 36px;
+      border: none;
+      background: var(--admin-bg-secondary);
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--admin-text-muted);
+    }
+    .status-modal-close i { width: 18px; height: 18px; }
+    .status-modal-body { padding: 1.5rem; }
+    .status-modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      padding: 1rem 1.5rem;
+      background: var(--admin-bg-secondary);
+      border-top: 1px solid var(--admin-border);
+      border-radius: 0 0 20px 20px;
+    }
+  </style>
+
+  <script>
+    var integrationId = '<%= integration._id %>';
+    var integrationType = '<%= integration.type %>';
+
+    // Toggle password visibility
+    function togglePassword(fieldId) {
+      var field = document.getElementById(fieldId);
+      var btn = field.parentElement.querySelector('.toggle-password');
+      if (field.type === 'password') {
+        field.type = 'text';
+        btn.innerHTML = '<i data-lucide="eye-off"></i>';
+      } else {
+        field.type = 'password';
+        btn.innerHTML = '<i data-lucide="eye"></i>';
+      }
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    // Show toast
+    function showToast(message, type) {
+      var toast = document.getElementById('editToast');
+      var toastMsg = document.getElementById('editToastMessage');
+      toast.className = 'edit-toast ' + type;
+      toastMsg.textContent = message;
+      var iconHtml = type === 'success' 
+        ? '<i data-lucide="check-circle"></i>' 
+        : '<i data-lucide="alert-circle"></i>';
+      toast.innerHTML = iconHtml + '<span>' + message + '</span>';
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+      
+      setTimeout(function() { toast.classList.add('show'); }, 10);
+      setTimeout(function() { toast.classList.remove('show'); }, 4000);
+    }
+
+    // Collect form data
+    function collectFormData() {
+      var form = document.getElementById('editIntegrationForm');
+      var data = {
+        name: form.querySelector('[name="name"]').value,
+        status: form.querySelector('[name="status"]').value,
+        isEnabled: form.querySelector('[name="status"]').value === 'active',
+        syncSchedule: {
+          enabled: form.querySelector('[name="syncEnabled"]').value === 'true',
+          frequency: form.querySelector('[name="syncFrequency"]').value,
+          time: form.querySelector('[name="syncTime"]').value,
+        },
+        autoSync: form.querySelector('[name="autoSync"]').checked,
+        notifyOnComplete: form.querySelector('[name="notifyOnComplete"]').checked,
+        deltaSync: form.querySelector('[name="deltaSync"]').checked,
+        retryOnFail: form.querySelector('[name="retryOnFail"]').checked,
+      };
+
+      if (integrationType === 'ftp') {
+        data.ftp = {
+          host: form.querySelector('[name="ftpHost"]').value,
+          port: parseInt(form.querySelector('[name="ftpPort"]').value) || 21,
+          username: form.querySelector('[name="ftpUsername"]').value,
+          password: form.querySelector('[name="ftpPassword"]').value,
+          protocol: form.querySelector('[name="ftpProtocol"]').value,
+          remotePath: form.querySelector('[name="ftpRemotePath"]').value || '/',
+          filePattern: form.querySelector('[name="ftpFilePattern"]').value || '*.csv',
+        };
+      } else if (integrationType === 'api') {
+        data.api = {
+          apiType: form.querySelector('[name="apiType"]').value,
+          baseUrl: form.querySelector('[name="apiBaseUrl"]').value,
+          authType: form.querySelector('[name="apiAuthType"]').value,
+          apiKey: form.querySelector('[name="apiKey"]').value,
+          authHeader: form.querySelector('[name="apiAuthHeader"]').value,
+          rateLimit: parseInt(form.querySelector('[name="apiRateLimit"]').value) || 60,
+          timeout: parseInt(form.querySelector('[name="apiTimeout"]').value) || 30000,
+        };
+      } else if (integrationType === 'google-sheets') {
+        data.googleSheets = {
+          spreadsheetId: form.querySelector('[name="spreadsheetId"]').value,
+          sheetName: form.querySelector('[name="sheetName"]').value,
+        };
+      }
+
+      return data;
+    }
+
+    // Save form
+    document.getElementById('editIntegrationForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      var saveBtn = document.getElementById('saveBtn');
+      saveBtn.disabled = true;
+      saveBtn.innerHTML = '<span class="btn-spinner"></span> Saving...';
+
+      var data = collectFormData();
+
+      fetch('/admin/api/integrations/' + integrationId, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      })
+      .then(function(response) { return response.json(); })
+      .then(function(result) {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = '<i data-lucide="save"></i> Save Changes';
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+
+        if (result.success) {
+          showToast('Connection updated successfully', 'success');
+        } else {
+          showToast(result.error || 'Failed to update connection', 'error');
+        }
+      })
+      .catch(function(err) {
+        console.error('Error saving integration:', err);
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = '<i data-lucide="save"></i> Save Changes';
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+        showToast('Failed to save changes', 'error');
+      });
+    });
+
+    // Test connection
+    function testConnection() {
+      var testResultEl = document.getElementById('testResult');
+      var testMsgEl = document.getElementById('testResultMessage');
+      
+      if (testResultEl) {
+        testResultEl.className = 'test-result';
+        testResultEl.style.display = 'none';
+      }
+
+      var data = collectFormData();
+      data._id = integrationId;
+      data.type = integrationType;
+
+      showToast('Testing connection...', 'success');
+
+      fetch('/admin/api/integrations/test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      })
+      .then(function(response) { return response.json(); })
+      .then(function(result) {
+        if (testResultEl && testMsgEl) {
+          testResultEl.style.display = 'flex';
+          if (result.success) {
+            testResultEl.className = 'test-result show success';
+            var msg = result.message || 'Connection successful';
+            if (result.data && result.data.filesCount) {
+              msg += ' (' + result.data.filesCount + ' files found)';
+            }
+            testMsgEl.textContent = msg;
+            testResultEl.innerHTML = '<i data-lucide="check-circle"></i><span>' + msg + '</span>';
+          } else {
+            testResultEl.className = 'test-result show error';
+            testMsgEl.textContent = result.error || 'Connection failed';
+            testResultEl.innerHTML = '<i data-lucide="alert-circle"></i><span>' + (result.error || 'Connection failed') + '</span>';
+          }
+          if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        if (result.success) {
+          showToast('Connection test passed!', 'success');
+        } else {
+          showToast(result.error || 'Connection test failed', 'error');
+        }
+      })
+      .catch(function(err) {
+        console.error('Error testing connection:', err);
+        showToast('Connection test failed', 'error');
+      });
+    }
+
+    // Sync now
+    function syncNow() {
+      if (!confirm('Start a sync now? This may take a while for large datasets.')) return;
+
+      showToast('Starting sync...', 'success');
+
+      fetch('/admin/api/integrations/' + integrationId + '/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      })
+      .then(function(response) { return response.json(); })
+      .then(function(result) {
+        if (result.success) {
+          showToast('Sync started successfully', 'success');
+          // Redirect to integrations page to see progress
+          setTimeout(function() {
+            window.location.href = '/admin/integrations';
+          }, 1500);
+        } else {
+          showToast(result.error || 'Failed to start sync', 'error');
+        }
+      })
+      .catch(function(err) {
+        console.error('Error starting sync:', err);
+        showToast('Failed to start sync', 'error');
+      });
+    }
+
+    // Delete
+    function confirmDelete() {
+      document.getElementById('deleteModalOverlay').classList.add('active');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function closeDeleteModal() {
+      document.getElementById('deleteModalOverlay').classList.remove('active');
+    }
+
+    function deleteConnection() {
+      fetch('/admin/api/integrations/' + integrationId, {
+        method: 'DELETE',
+      })
+      .then(function(response) { return response.json(); })
+      .then(function(result) {
+        if (result.success) {
+          window.location.href = '/admin/integrations';
+        } else {
+          showToast(result.error || 'Failed to delete connection', 'error');
+          closeDeleteModal();
+        }
+      })
+      .catch(function(err) {
+        console.error('Error deleting connection:', err);
+        showToast('Failed to delete connection', 'error');
+        closeDeleteModal();
+      });
+    }
+
+    // Close modal with Escape key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeDeleteModal();
+    });
+  </script>
+
+<%- include('partials/footer') %>
