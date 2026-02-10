@@ -72,21 +72,13 @@ class SyncWorker {
   async updateProgress(requestId, progress) {
     const db = mongoose.connection.db;
     
-    // Calculate elapsedMs if startTime exists
-    const existingRequest = await db.collection('sync_requests').findOne({
-      _id: new mongoose.Types.ObjectId(requestId)
-    });
-    
-    let elapsedMs = 0;
-    if (existingRequest?.progress?.startTime) {
-      elapsedMs = Date.now() - existingRequest.progress.startTime;
-    } else if (progress.startTime) {
+    // Use elapsedMs from caller if provided, otherwise calculate from startTime
+    let elapsedMs = progress.elapsedMs || 0;
+    if (!elapsedMs && progress.startTime) {
       elapsedMs = Date.now() - progress.startTime;
     }
     
-    // Merge with existing progress and add elapsedMs
     const updatedProgress = {
-      ...existingRequest?.progress,
       ...progress,
       elapsedMs,
       updatedAt: new Date()
@@ -144,8 +136,18 @@ class SyncWorker {
           phase: 'turbo',
           message: 'Starting Turbo Sync Engine...',
         });
+
+        // Progress callback — turbo engine calls this with live stats
+        const requestId = request._id;
+        const progressCallback = async (data) => {
+          try {
+            await this.updateProgress(requestId, data);
+          } catch (e) {
+            // Swallow progress update errors
+          }
+        };
         
-        const turboResult = await runTurboSync(integrationId);
+        const turboResult = await runTurboSync(integrationId, { onProgress: progressCallback });
         
         result = {
           success: turboResult.success,

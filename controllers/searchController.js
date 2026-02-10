@@ -78,7 +78,7 @@ const searchParts = async (req, res) => {
 
     // Fallback to MongoDB if Elasticsearch didn't work
     if (results.length === 0 && source === 'mongodb') {
-      // EXACT part number match only (case-insensitive)
+      // EXACT part number match only (case-insensitive) with timeout guard
       const mongoQuery = {
         partNumber: {
           $regex: `^${partNumber.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`,
@@ -86,14 +86,23 @@ const searchParts = async (req, res) => {
         },
       };
 
-      const mongoResults = await Part.find(mongoQuery)
-        .sort({ [sortBy]: sortOrder === 'asc' ? 1 : -1 })
-        .skip(skip)
-        .limit(limitNum)
-        .lean();
+      try {
+        const mongoResults = await Part.find(mongoQuery)
+          .sort({ [sortBy]: sortOrder === 'asc' ? 1 : -1 })
+          .skip(skip)
+          .limit(limitNum)
+          .maxTimeMS(15000)
+          .lean();
 
-      total = await Part.countDocuments(mongoQuery);
-      results = mongoResults;
+        total = await Part.countDocuments(mongoQuery).maxTimeMS(10000);
+        results = mongoResults;
+      } catch (mongoErr) {
+        console.error('MongoDB fallback search timeout/error:', mongoErr.message);
+        // Return empty rather than hanging until 504
+        results = [];
+        total = 0;
+        source = 'mongodb-timeout';
+      }
     }
 
     // Apply additional filters (brand, supplier, price, stock) client-side if needed

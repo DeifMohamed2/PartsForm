@@ -47,12 +47,12 @@ const CONFIG = {
   FTP_RETRIES: 3,
 
   // MongoDB - reduced concurrent to avoid disk contention
-  MONGO_WORKERS: 4,              // Workers PER mongoimport process
-  MONGO_CONCURRENT: 3,           // 3 concurrent mongoimport (was 10 — disk contention)
+  MONGO_WORKERS: 6,              // Workers PER mongoimport process (18 cores / 4 procs ≈ 4-5)
+  MONGO_CONCURRENT: 4,           // 4 concurrent mongoimport (NVMe handles parallel well)
 
   // Elasticsearch - pipeline via raw .bulk files
   ES_BULK_CONCURRENT: 8,         // 8 concurrent .bulk file streams to ES
-  ES_CHUNK_LINES: 20000,         // 20k doc pairs (40k lines) per /_bulk POST (~20MB)
+  ES_CHUNK_LINES: 30000,         // 30k doc pairs (60k lines) per /_bulk POST (~30MB)
   ES_REFRESH_INTERVAL: '-1',
   ES_SHARDS: 5,
 
@@ -194,6 +194,8 @@ const ES_INDEX_MAPPING = {
       integration: { type: 'keyword' },
       integrationName: { type: 'keyword' },
       fileName: { type: 'keyword' },
+      importedAt: { type: 'date' },
+      createdAt: { type: 'date' },
     },
   },
 };
@@ -316,7 +318,7 @@ function isRustBinaryAvailable() {
 // Rust transforms all files → as each file completes,
 // mongoimport and ES bulk start immediately (overlapping)
 // ============================================
-async function runPipeline(downloadDir, files, integration, esClient, esAliasName) {
+async function runPipeline(downloadDir, files, integration, esClient, esAliasName, reportProgress, totalFilesCount) {
   log('PHASE 2-4: 🦀 PIPELINE — Rust transform → MongoDB + ES (overlapping)...', 'PROGRESS');
   const pipelineStart = Date.now();
 
@@ -439,6 +441,8 @@ async function runPipeline(downloadDir, files, integration, esClient, esAliasNam
         '--type', 'json',
         '--file', ndjsonPath,
         '--numInsertionWorkers', String(CONFIG.MONGO_WORKERS),
+        '--writeConcern', '{w:0}',        // Fire-and-forget for max speed (we verify count after)
+        '--bypassDocumentValidation',      // Skip schema validation during bulk import
       ];
       if (mongoBaseArgs.username && mongoBaseArgs.password) {
         args.push('--username', mongoBaseArgs.username);
@@ -608,8 +612,11 @@ async function runPipeline(downloadDir, files, integration, esClient, esAliasNam
     });
   };
 
-  // === MongoDB Worker (pulls from queue) ===
+  // === Shared counters (declared before workers so both can read) ===
   let mongoCompletedFiles = 0;
+  let esCompletedFiles = 0;
+
+  // === MongoDB Worker (pulls from queue) ===
   const mongoLastProgress = { time: Date.now() };
   const mongoWorkerFn = async (workerId) => {
     while (true) {
@@ -629,11 +636,29 @@ async function runPipeline(downloadDir, files, integration, esClient, esAliasNam
       } else {
         log(`MongoDB [W${workerId}]: ${result.file} FAILED: ${result.error}`, 'ERROR');
       }
+
+      // Report progress — estimate mongo inserted from file completion ratio
+      if (reportProgress) {
+        const totalFiles = totalFilesCount || files.length;
+        const filesProcessed = Math.max(mongoCompletedFiles, esCompletedFiles);
+        const estimatedMongoInserted = totalFiles > 0
+          ? Math.round((mongoCompletedFiles / totalFiles) * totalRecords)
+          : 0;
+        await reportProgress({
+          status: 'syncing',
+          phase: 'pipeline',
+          message: `MongoDB: ${mongoCompletedFiles}/${totalFiles} files | ES: ${formatNumber(totalESIndexed)} docs`,
+          filesTotal: totalFiles,
+          filesProcessed,
+          recordsProcessed: totalRecords,
+          recordsInserted: estimatedMongoInserted,
+          currentFile: result.file || '',
+        });
+      }
     }
   };
 
   // === ES Worker (pulls from queue) ===
-  let esCompletedFiles = 0;
   let esLastProgressTime = Date.now();
   const esWorkerFn = async (workerId) => {
     while (true) {
@@ -652,6 +677,22 @@ async function runPipeline(downloadDir, files, integration, esClient, esAliasNam
         const rate = Math.round(totalESIndexed / elapsed);
         log(`ES [W${workerId}]: ${formatNumber(totalESIndexed)} indexed (${formatNumber(rate)}/sec) [${esCompletedFiles} files]`, 'PROGRESS');
         esLastProgressTime = Date.now();
+      }
+
+      // Report progress
+      if (reportProgress) {
+        const totalFiles = totalFilesCount || files.length;
+        const filesProcessed = Math.max(mongoCompletedFiles, esCompletedFiles);
+        await reportProgress({
+          status: 'syncing',
+          phase: 'pipeline',
+          message: `MongoDB: ${mongoCompletedFiles}/${totalFiles} files | ES: ${formatNumber(totalESIndexed)} docs`,
+          filesTotal: totalFiles,
+          filesProcessed,
+          recordsProcessed: totalRecords,
+          recordsInserted: totalESIndexed,
+          currentFile: path.basename(item, '.bulk'),
+        });
       }
     }
   };
@@ -718,6 +759,20 @@ async function runPipeline(downloadDir, files, integration, esClient, esAliasNam
               if (Date.now() - lastProgressLog > 2000) {
                 log(`Rust: ${event.progress} files — ${formatNumber(totalRecords)} records (${formatNumber(event.rate_per_sec)}/sec)`, 'PROGRESS');
                 lastProgressLog = Date.now();
+
+                // Report progress during Rust transform
+                if (reportProgress) {
+                  reportProgress({
+                    status: 'syncing',
+                    phase: 'pipeline',
+                    message: `Rust: ${event.progress} | MongoDB: ${mongoCompletedFiles} files | ES: ${formatNumber(totalESIndexed)} docs`,
+                    filesTotal: totalFilesCount || files.length,
+                    filesProcessed: Math.max(mongoCompletedFiles, esCompletedFiles),
+                    recordsProcessed: totalRecords,
+                    recordsInserted: totalESIndexed,
+                    currentFile: event.file || '',
+                  });
+                }
               }
             } else if (event.event === 'start') {
               log(`Rust engine: ${event.files} files, ${event.threads} threads, ${(event.total_bytes / 1024 / 1024).toFixed(0)}MB input`, 'INFO');
@@ -790,6 +845,20 @@ async function runPipeline(downloadDir, files, integration, esClient, esAliasNam
 
   // Wait for all workers to drain
   log('Waiting for MongoDB + ES workers to finish draining...', 'PROGRESS');
+
+  if (reportProgress) {
+    await reportProgress({
+      status: 'syncing',
+      phase: 'draining',
+      message: 'Rust done — waiting for MongoDB + ES workers to drain...',
+      filesTotal: totalFilesCount || files.length,
+      filesProcessed: Math.max(mongoCompletedFiles, esCompletedFiles),
+      recordsProcessed: totalRecords,
+      recordsInserted: totalESIndexed,
+      currentFile: 'Draining queues',
+    });
+  }
+
   const mongoWaitStart = Date.now();
   await Promise.all(mongoWorkers);
   const mongoWaitDuration = Date.now() - mongoWaitStart;
@@ -807,12 +876,40 @@ async function runPipeline(downloadDir, files, integration, esClient, esAliasNam
   // === ES: Refresh new index, swap alias, delete old ===
   await swapESAlias(esClient, esAliasName, esIndexName);
 
-  // === MongoDB: create integration index ===
-  log('Creating MongoDB integration index...');
-  await collection.createIndex({ integration: 1 }, { background: true });
-  log('Integration index created', 'SUCCESS');
+  // === MongoDB: recreate critical indexes ===
+  log('Recreating MongoDB indexes...');
+  const indexOps = [
+    collection.createIndex({ integration: 1 }, { background: true }),
+    collection.createIndex({ partNumber: 1, supplier: 1 }, { background: true }),
+    collection.createIndex({ partNumber: 1, integration: 1 }, { background: true }),
+    collection.createIndex({ brand: 1, supplier: 1 }, { background: true }),
+    collection.createIndex({ integrationName: 1 }, { background: true }),
+    collection.createIndex({ importedAt: -1 }, { background: true }),
+    collection.createIndex(
+      { partNumber: 'text', description: 'text', brand: 'text', supplier: 'text' },
+      { weights: { partNumber: 10, brand: 5, description: 3, supplier: 2 }, name: 'parts_text_index', background: true }
+    ),
+  ];
+  const indexResults = await Promise.allSettled(indexOps);
+  const indexOk = indexResults.filter(r => r.status === 'fulfilled').length;
+  log(`Created ${indexOk}/${indexOps.length} MongoDB indexes`, 'SUCCESS');
 
   const pipelineDuration = Date.now() - pipelineStart;
+
+  // Report final pipeline stats
+  if (reportProgress) {
+    await reportProgress({
+      _force: true,
+      status: 'syncing',
+      phase: 'finalizing',
+      message: `Pipeline done: ${formatNumber(totalMongoImported)} MongoDB, ${formatNumber(totalESIndexed)} ES`,
+      filesTotal: totalFilesCount || files.length,
+      filesProcessed: totalFilesCount || files.length,
+      recordsProcessed: totalRecords,
+      recordsInserted: totalMongoImported,
+      currentFile: 'Finalizing',
+    });
+  }
 
   return {
     totalRecords,
@@ -840,7 +937,7 @@ async function swapESAlias(esClient, aliasName, newIndexName) {
     await esClient.indices.putSettings({
       index: newIndexName,
       body: {
-        'index.refresh_interval': '30s',
+        'index.refresh_interval': '5s',
         'index.translog.durability': 'request',
         'index.translog.sync_interval': '5s',
         'index.merge.scheduler.max_thread_count': null,
@@ -1079,7 +1176,10 @@ async function updateIntegrationStatus(integration, results) {
 // ============================================
 // MAIN ENTRY POINT
 // ============================================
-async function runTurboSync(integrationId) {
+async function runTurboSync(integrationId, options = {}) {
+  // options: { onProgress: async (progressData) => {} }
+  const onProgress = typeof options === 'function' ? options : (options.onProgress || null);
+
   console.log('\n' + '═'.repeat(60));
   console.log('🚀 TURBO SYNC ENGINE v4.0 - PIPELINE + ALIAS SWAP');
   console.log('═'.repeat(60));
@@ -1093,6 +1193,23 @@ async function runTurboSync(integrationId) {
   console.log('═'.repeat(60) + '\n');
 
   const overallStart = Date.now();
+
+  // Throttled progress reporter — max once per 2 seconds
+  let lastProgressReport = 0;
+  const reportProgress = async (data) => {
+    if (!onProgress) return;
+    const now = Date.now();
+    if (now - lastProgressReport < 2000 && !data._force) return;
+    lastProgressReport = now;
+    try {
+      await onProgress({
+        ...data,
+        elapsedMs: Date.now() - overallStart,
+      });
+    } catch (e) {
+      // Don't let progress reporting break the sync
+    }
+  };
 
   // Clean up previous downloads
   log('Cleaning up previous sync files...');
@@ -1128,6 +1245,19 @@ async function runTurboSync(integrationId) {
 
     await Integration.findByIdAndUpdate(integration._id, { status: 'syncing' });
 
+    // Report initial progress
+    await reportProgress({
+      _force: true,
+      status: 'syncing',
+      phase: 'connecting',
+      message: 'Connecting to services...',
+      filesTotal: 0,
+      filesProcessed: 0,
+      recordsProcessed: 0,
+      recordsInserted: 0,
+      currentFile: '',
+    });
+
     // ES client
     const esNode = process.env.ELASTICSEARCH_NODE || 'http://localhost:9200';
     const esAliasName = process.env.ELASTICSEARCH_INDEX || 'automotive_parts';
@@ -1157,7 +1287,33 @@ async function runTurboSync(integrationId) {
     }
 
     // Phase 1: Download
+    await reportProgress({
+      _force: true,
+      status: 'syncing',
+      phase: 'downloading',
+      message: 'Downloading files from FTP...',
+      filesTotal: 0,
+      filesProcessed: 0,
+      recordsProcessed: 0,
+      recordsInserted: 0,
+      currentFile: 'FTP download',
+    });
+
     const downloadResult = await downloadAllFiles(integration);
+
+    const totalFilesCount = downloadResult.files.length;
+
+    await reportProgress({
+      _force: true,
+      status: 'syncing',
+      phase: 'pipeline',
+      message: `Downloaded ${totalFilesCount} files, starting pipeline...`,
+      filesTotal: totalFilesCount,
+      filesProcessed: 0,
+      recordsProcessed: 0,
+      recordsInserted: 0,
+      currentFile: 'Starting Rust transform',
+    });
 
     // Phase 2-4 merged: Pipeline
     const pipelineResult = await runPipeline(
@@ -1166,6 +1322,8 @@ async function runTurboSync(integrationId) {
       integration,
       esClient,
       esAliasName,
+      reportProgress,
+      totalFilesCount,
     );
 
     // Update integration status
@@ -1182,6 +1340,19 @@ async function runTurboSync(integrationId) {
     await esClient.close();
 
     const totalDuration = Date.now() - overallStart;
+
+    // Report completion
+    await reportProgress({
+      _force: true,
+      status: 'completed',
+      phase: 'done',
+      message: `Sync complete: ${formatNumber(pipelineResult.mongoImported)} records`,
+      filesTotal: totalFilesCount,
+      filesProcessed: totalFilesCount,
+      recordsProcessed: pipelineResult.totalRecords,
+      recordsInserted: pipelineResult.mongoImported,
+      currentFile: '',
+    });
 
     console.log('\n' + '═'.repeat(60));
     console.log('📊 SYNC COMPLETE - SUMMARY');

@@ -16,7 +16,7 @@ class ElasticsearchService {
     // Cache for document count to avoid checking on every request
     this._cachedDocCount = null;
     this._docCountCacheTime = null;
-    this._docCountCacheTTL = 60000; // 60 seconds cache
+    this._docCountCacheTTL = 30000; // 30 seconds cache (shorter for fast recovery after sync)
     // Production mode - less logging
     this.productionMode = process.env.NODE_ENV === 'production' || process.env.SYNC_PRODUCTION_MODE === 'true';
     this._indexedCount = 0;
@@ -759,10 +759,18 @@ class ElasticsearchService {
         this.client.count({ index: this.indexName }),
       ]);
 
+      // When using aliases, stats are keyed by the real index name, not the alias
+      let indexStats = stats.indices[this.indexName];
+      if (!indexStats) {
+        // Find the actual index behind the alias
+        const realIndex = Object.keys(stats.indices)[0];
+        if (realIndex) indexStats = stats.indices[realIndex];
+      }
+
       return {
         documentCount: count.count,
-        indexSize: stats.indices[this.indexName]?.total?.store?.size_in_bytes || 0,
-        indexSizeHuman: this._formatBytes(stats.indices[this.indexName]?.total?.store?.size_in_bytes || 0),
+        indexSize: indexStats?.total?.store?.size_in_bytes || 0,
+        indexSizeHuman: this._formatBytes(indexStats?.total?.store?.size_in_bytes || 0),
       };
     } catch (error) {
       console.error('Error getting ES stats:', error.message);
