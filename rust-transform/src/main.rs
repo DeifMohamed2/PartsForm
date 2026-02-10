@@ -1,14 +1,18 @@
 // =============================================================================
-// TURBO TRANSFORM v1.0 — Rust CSV→NDJSON Engine
+// TURBO TRANSFORM v2.0 — Rust CSV→NDJSON+BULK Engine
 // =============================================================================
 // Zero-copy streaming CSV parser with file-level parallelism.
 // Designed for 75M+ records on multi-core servers.
 //
+// v2.0: DUAL OUTPUT per CSV file:
+//   - .ndjson  → for mongoimport (one JSON doc per line)
+//   - .bulk    → pre-formatted ES _bulk API body (action+doc pairs)
+//
 // Architecture:
 //   1. Enumerate CSV files in input directory
 //   2. rayon parallel iterator: one thread per file
-//   3. Each thread: BufReader → csv::Reader → serde serialize → BufWriter
-//   4. Machine-readable JSON progress on stdout
+//   3. Each thread: BufReader → csv::Reader → serde serialize → 2× BufWriter
+//   4. Machine-readable JSON progress on stderr, final summary on stdout
 //   5. Exit 0 on success, 1 on failure
 // =============================================================================
 
@@ -24,7 +28,7 @@ use std::sync::Arc;
 use std::time::{Duration, Instant};
 
 // =============================================================================
-// Output record — flat struct, zero optional boxing
+// Output record for NDJSON (MongoDB) — all fields
 // Matches the exact schema the Node.js turboSyncEngine produces.
 // =============================================================================
 #[derive(Serialize)]
@@ -50,6 +54,33 @@ struct PartRecord<'a> {
     integration_name: &'a str,
     file_name: &'a str,
     imported_at: &'a str,
+}
+
+// =============================================================================
+// Output record for ES _bulk — same fields minus imported_at
+// =============================================================================
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct PartRecordES<'a> {
+    part_number: &'a str,
+    description: &'a str,
+    brand: &'a str,
+    supplier: &'a str,
+    price: f64,
+    currency: &'a str,
+    quantity: i64,
+    min_order_qty: i64,
+    stock: &'a str,
+    stock_code: &'a str,
+    weight: f64,
+    weight_unit: &'a str,
+    volume: f64,
+    delivery_days: i64,
+    category: &'a str,
+    subcategory: &'a str,
+    integration: &'a str,
+    integration_name: &'a str,
+    file_name: &'a str,
 }
 
 // =============================================================================
@@ -349,13 +380,14 @@ fn detect_delimiter(path: &Path) -> u8 {
 struct FileResult {
     file_name: String,
     records: u64,
-    bytes_written: u64,
+    ndjson_bytes: u64,
+    bulk_bytes: u64,
     duration_ms: u64,
     error: Option<String>,
 }
 
 // =============================================================================
-// Process a single CSV file → NDJSON
+// Process a single CSV file → NDJSON + ES .bulk
 // =============================================================================
 fn process_file(
     csv_path: &Path,
@@ -363,6 +395,7 @@ fn process_file(
     integration_id: &str,
     integration_name: &str,
     imported_at: &str,
+    es_index_name: &str,
     global_records: &AtomicU64,
     completed_files: &AtomicUsize,
     total_files: usize,
@@ -374,12 +407,13 @@ fn process_file(
         .to_string();
     let start = Instant::now();
 
-    // Output path: input.csv → input.ndjson
+    // Output path: input.csv → input.ndjson + input.bulk
     let stem = csv_path
         .file_stem()
         .unwrap_or_default()
         .to_string_lossy();
     let ndjson_path = output_dir.join(format!("{}.ndjson", stem));
+    let bulk_path = output_dir.join(format!("{}.bulk", stem));
 
     // Detect delimiter
     let delimiter = detect_delimiter(csv_path);
@@ -391,7 +425,8 @@ fn process_file(
             return FileResult {
                 file_name,
                 records: 0,
-                bytes_written: 0,
+                ndjson_bytes: 0,
+                bulk_bytes: 0,
                 duration_ms: start.elapsed().as_millis() as u64,
                 error: Some(format!("open failed: {}", e)),
             };
@@ -415,7 +450,8 @@ fn process_file(
             return FileResult {
                 file_name,
                 records: 0,
-                bytes_written: 0,
+                ndjson_bytes: 0,
+                bulk_bytes: 0,
                 duration_ms: start.elapsed().as_millis() as u64,
                 error: Some(format!("header parse failed: {}", e)),
             };
@@ -428,35 +464,60 @@ fn process_file(
         return FileResult {
             file_name,
             records: 0,
-            bytes_written: 0,
+            ndjson_bytes: 0,
+            bulk_bytes: 0,
             duration_ms: start.elapsed().as_millis() as u64,
             error: Some("no part number column detected".into()),
         };
     }
 
-    // Open output — 1MB write buffer for large sequential writes
-    let out_file = match File::create(&ndjson_path) {
+    // Open NDJSON output — 1MB write buffer for large sequential writes
+    let ndjson_file = match File::create(&ndjson_path) {
         Ok(f) => f,
         Err(e) => {
             return FileResult {
                 file_name,
                 records: 0,
-                bytes_written: 0,
+                ndjson_bytes: 0,
+                bulk_bytes: 0,
                 duration_ms: start.elapsed().as_millis() as u64,
-                error: Some(format!("create output failed: {}", e)),
+                error: Some(format!("create ndjson output failed: {}", e)),
             };
         }
     };
-    let mut writer = BufWriter::with_capacity(1024 * 1024, out_file);
+    let mut ndjson_writer = BufWriter::with_capacity(1024 * 1024, ndjson_file);
+
+    // Open ES .bulk output — pre-formatted ES _bulk API body
+    let bulk_file = match File::create(&bulk_path) {
+        Ok(f) => f,
+        Err(e) => {
+            return FileResult {
+                file_name,
+                records: 0,
+                ndjson_bytes: 0,
+                bulk_bytes: 0,
+                duration_ms: start.elapsed().as_millis() as u64,
+                error: Some(format!("create bulk output failed: {}", e)),
+            };
+        }
+    };
+    let mut bulk_writer = BufWriter::with_capacity(1024 * 1024, bulk_file);
+
+    // Pre-compute ES action line (same for every record in this index)
+    let es_action_line = format!(r#"{{"index":{{"_index":"{}"}}}}
+"#, es_index_name);
+    let es_action_bytes = es_action_line.as_bytes();
 
     // Pre-extract stock code from filename
     let filename_stock_code = extract_stock_code_from_filename(&file_name);
 
-    // Reusable serialization buffer — avoids per-record allocation
-    let mut json_buf = Vec::with_capacity(1024);
+    // Reusable serialization buffers — avoids per-record allocation
+    let mut ndjson_buf = Vec::with_capacity(1024);
+    let mut bulk_doc_buf = Vec::with_capacity(1024);
 
     let mut record_count: u64 = 0;
-    let mut bytes_written: u64 = 0;
+    let mut ndjson_bytes_written: u64 = 0;
+    let mut bulk_bytes_written: u64 = 0;
     let mut csv_record = csv::StringRecord::new();
 
     // Main loop — stream records one by one
@@ -527,16 +588,53 @@ fn process_file(
             imported_at,
         };
 
-        // Serialize directly into reusable buffer
-        json_buf.clear();
-        if serde_json::to_writer(&mut json_buf, &doc).is_ok() {
-            json_buf.push(b'\n');
-            let n = json_buf.len();
-            if writer.write_all(&json_buf).is_ok() {
-                bytes_written += n as u64;
-                record_count += 1;
+        // ES document — same fields minus imported_at
+        let es_doc = PartRecordES {
+            part_number,
+            description: doc.description,
+            brand: doc.brand,
+            supplier: doc.supplier,
+            price: doc.price,
+            currency,
+            quantity: doc.quantity,
+            min_order_qty: doc.min_order_qty,
+            stock,
+            stock_code,
+            weight: doc.weight,
+            weight_unit,
+            volume: doc.volume,
+            delivery_days: doc.delivery_days,
+            category: doc.category,
+            subcategory: doc.subcategory,
+            integration: integration_id,
+            integration_name,
+            file_name: &file_name,
+        };
+
+        // Write NDJSON (for mongoimport)
+        ndjson_buf.clear();
+        if serde_json::to_writer(&mut ndjson_buf, &doc).is_ok() {
+            ndjson_buf.push(b'\n');
+            let n = ndjson_buf.len();
+            if ndjson_writer.write_all(&ndjson_buf).is_ok() {
+                ndjson_bytes_written += n as u64;
             }
         }
+
+        // Write ES _bulk body (action line + document)
+        bulk_doc_buf.clear();
+        if serde_json::to_writer(&mut bulk_doc_buf, &es_doc).is_ok() {
+            bulk_doc_buf.push(b'\n');
+            let action_n = es_action_bytes.len();
+            let doc_n = bulk_doc_buf.len();
+            if bulk_writer.write_all(es_action_bytes).is_ok()
+                && bulk_writer.write_all(&bulk_doc_buf).is_ok()
+            {
+                bulk_bytes_written += (action_n + doc_n) as u64;
+            }
+        }
+
+        record_count += 1;
 
         // Periodic progress: every 500k records, update global counter
         if record_count % 500_000 == 0 {
@@ -544,8 +642,9 @@ fn process_file(
         }
     }
 
-    // Flush remaining
-    let _ = writer.flush();
+    // Flush both writers
+    let _ = ndjson_writer.flush();
+    let _ = bulk_writer.flush();
 
     // Add leftover count to global
     let leftover = record_count % 500_000;
@@ -564,10 +663,11 @@ fn process_file(
     };
 
     let progress = format!(
-        r#"{{"event":"file_done","file":"{}","records":{},"bytes":{},"duration_ms":{},"rate_per_sec":{},"progress":"{}/{}"}}"#,
+        r#"{{"event":"file_done","file":"{}","records":{},"ndjson_bytes":{},"bulk_bytes":{},"duration_ms":{},"rate_per_sec":{},"progress":"{}/{}"}}"#,
         file_name,
         record_count,
-        bytes_written,
+        ndjson_bytes_written,
+        bulk_bytes_written,
         elapsed.as_millis(),
         rate,
         done,
@@ -579,7 +679,8 @@ fn process_file(
     FileResult {
         file_name,
         records: record_count,
-        bytes_written,
+        ndjson_bytes: ndjson_bytes_written,
+        bulk_bytes: bulk_bytes_written,
         duration_ms: elapsed.as_millis() as u64,
         error: None,
     }
@@ -593,13 +694,14 @@ fn main() {
 
     if args.len() < 3 {
         eprintln!(
-            "Usage: {} <input_dir> <output_dir> [integration_id] [integration_name]",
+            "Usage: {} <input_dir> <output_dir> [integration_id] [integration_name] [es_index_name]",
             args[0]
         );
         eprintln!("  input_dir:        Directory containing CSV files");
-        eprintln!("  output_dir:       Directory to write NDJSON files");
+        eprintln!("  output_dir:       Directory to write NDJSON + .bulk files");
         eprintln!("  integration_id:   MongoDB ObjectId (optional)");
         eprintln!("  integration_name: Human-readable name (optional)");
+        eprintln!("  es_index_name:    Elasticsearch index name for .bulk action lines (optional)");
         std::process::exit(1);
     }
 
@@ -607,6 +709,7 @@ fn main() {
     let output_dir = PathBuf::from(&args[2]);
     let integration_id = args.get(3).map(|s| s.as_str()).unwrap_or("");
     let integration_name = args.get(4).map(|s| s.as_str()).unwrap_or("");
+    let es_index_name = args.get(5).map(|s| s.as_str()).unwrap_or("automotive_parts");
 
     // Validate input directory
     if !input_dir.is_dir() {
@@ -689,6 +792,7 @@ fn main() {
                 integration_id,
                 integration_name,
                 &imported_at,
+                es_index_name,
                 &global_records,
                 &completed_files,
                 total_files,
@@ -700,19 +804,21 @@ fn main() {
 
     // Aggregate results
     let mut total_records: u64 = 0;
-    let mut total_bytes_written: u64 = 0;
+    let mut total_ndjson_bytes: u64 = 0;
+    let mut total_bulk_bytes: u64 = 0;
     let mut errors: Vec<String> = Vec::new();
     let mut file_results: Vec<String> = Vec::new();
 
     for r in &results {
         total_records += r.records;
-        total_bytes_written += r.bytes_written;
+        total_ndjson_bytes += r.ndjson_bytes;
+        total_bulk_bytes += r.bulk_bytes;
         if let Some(ref e) = r.error {
             errors.push(format!("{}: {}", r.file_name, e));
         }
         file_results.push(format!(
-            r#"{{"file":"{}","records":{},"bytes":{},"duration_ms":{}}}"#,
-            r.file_name, r.records, r.bytes_written, r.duration_ms
+            r#"{{"file":"{}","records":{},"ndjson_bytes":{},"bulk_bytes":{},"duration_ms":{}}}"#,
+            r.file_name, r.records, r.ndjson_bytes, r.bulk_bytes, r.duration_ms
         ));
     }
 
@@ -725,16 +831,18 @@ fn main() {
 
     // Final summary on stdout — machine-readable JSON
     println!(
-        r#"{{"event":"complete","total_records":{},"total_bytes_written":{},"total_input_bytes":{},"duration_ms":{},"rate_per_sec":{},"files_processed":{},"files_total":{},"errors":{},"threads":{}}}"#,
+        r#"{{"event":"complete","total_records":{},"total_ndjson_bytes":{},"total_bulk_bytes":{},"total_input_bytes":{},"duration_ms":{},"rate_per_sec":{},"files_processed":{},"files_total":{},"errors":{},"threads":{},"es_index":"{}"}}"#,
         total_records,
-        total_bytes_written,
+        total_ndjson_bytes,
+        total_bulk_bytes,
         total_input_bytes,
         duration_ms,
         rate,
         results.len() - errors.len(),
         total_files,
         errors.len(),
-        num_threads
+        num_threads,
+        es_index_name
     );
 
     if !errors.is_empty() {
