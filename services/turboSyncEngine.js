@@ -876,23 +876,7 @@ async function runPipeline(downloadDir, files, integration, esClient, esAliasNam
   // === ES: Refresh new index, swap alias, delete old ===
   await swapESAlias(esClient, esAliasName, esIndexName);
 
-  // === MongoDB: recreate critical indexes ===
-  log('Recreating MongoDB indexes...');
-  const indexOps = [
-    collection.createIndex({ integration: 1 }, { background: true }),
-    collection.createIndex({ partNumber: 1, supplier: 1 }, { background: true }),
-    collection.createIndex({ partNumber: 1, integration: 1 }, { background: true }),
-    collection.createIndex({ brand: 1, supplier: 1 }, { background: true }),
-    collection.createIndex({ integrationName: 1 }, { background: true }),
-    collection.createIndex({ importedAt: -1 }, { background: true }),
-    collection.createIndex(
-      { partNumber: 'text', description: 'text', brand: 'text', supplier: 'text' },
-      { weights: { partNumber: 10, brand: 5, description: 3, supplier: 2 }, name: 'parts_text_index', background: true }
-    ),
-  ];
-  const indexResults = await Promise.allSettled(indexOps);
-  const indexOk = indexResults.filter(r => r.status === 'fulfilled').length;
-  log(`Created ${indexOk}/${indexOps.length} MongoDB indexes`, 'SUCCESS');
+  // MongoDB indexes skipped — search depends entirely on Elasticsearch
 
   const pipelineDuration = Date.now() - pipelineStart;
 

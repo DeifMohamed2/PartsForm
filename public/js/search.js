@@ -2623,7 +2623,7 @@
     const container = document.querySelector('#price-distribution .distribution-bars');
     if (!container) return;
 
-    const prices = results.map(r => parseFloat(r.price) || 0).filter(p => p > 0);
+    const prices = results.map(r => getComparablePrice(r)).filter(p => p > 0);
     if (prices.length === 0) {
       container.innerHTML = '';
       return;
@@ -2664,8 +2664,18 @@
     previewCountEl.textContent = count;
   }
 
+  function getComparablePrice(part) {
+    const rawPrice = parseFloat(part.price) || 0;
+    const partCurrency = part.currency || 'USD';
+    const isOriginal = window.isShowingOriginalPrice ? window.isShowingOriginalPrice() : false;
+    if (window.convertToPreferredCurrency && !isOriginal) {
+      return window.convertToPreferredCurrency(rawPrice, partCurrency);
+    }
+    return rawPrice;
+  }
+
   function partMatchesFilters(part) {
-    const price = parseFloat(part.price) || 0;
+    const price = getComparablePrice(part);
     const weight = parseFloat(part.weight) || 0;
     const qty = parseInt(part.quantity) || 0;
     const days = parseInt(part.deliveryDays) || parseInt(part.terms) || 999;
@@ -2857,7 +2867,7 @@
                                state.selectedFilters.maxPrice < filterBounds.price.max;
     if (priceBoundsChanged) {
       results = results.filter(part => {
-        const price = parseFloat(part.price) || 0;
+        const price = getComparablePrice(part);
         return price >= state.selectedFilters.minPrice && price <= state.selectedFilters.maxPrice;
       });
     }
