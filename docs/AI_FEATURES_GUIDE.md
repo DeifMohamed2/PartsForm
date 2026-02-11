@@ -32,15 +32,15 @@ Instead of manually filling out filters, dropdowns, and checkboxes, you simply *
 
 ### Key Capabilities
 
-| Capability | What It Does |
-|:---|:---|
-| 🔍 **Smart Search** | Understands natural language queries like a human would |
+| Capability                 | What It Does                                                 |
+| :------------------------- | :----------------------------------------------------------- |
+| 🔍 **Smart Search**        | Understands natural language queries like a human would      |
 | 📊 **Intelligent Ranking** | Scores every result on price, delivery, stock & availability |
-| 🏅 **AI Badges** | Labels the best, cheapest, fastest & highest-stock options |
-| 💡 **Comparison Insights** | Explains tradeoffs when options are close |
-| 📋 **Excel Import** | Reads your spreadsheet and searches all parts at once |
-| 📧 **Email Processing** | Processes inquiry emails and auto-generates quotations |
-| 🧠 **Continuous Learning** | Gets smarter with every search across all users |
+| 🏅 **AI Badges**           | Labels the best, cheapest, fastest & highest-stock options   |
+| 💡 **Comparison Insights** | Explains tradeoffs when options are close                    |
+| 📋 **Excel Import**        | Reads your spreadsheet and searches all parts at once        |
+| 📧 **Email Processing**    | Processes inquiry emails and auto-generates quotations       |
+| 🧠 **Continuous Learning** | Gets smarter with every search across all users              |
 
 ### Technology
 
@@ -61,15 +61,15 @@ PartsForm AI is powered by **Google Gemini 2.0 Flash** — one of the most advan
 
 ### Example Queries
 
-| What You Type | What the AI Understands |
-|:---|:---|
+| What You Type                               | What the AI Understands                                             |
+| :------------------------------------------ | :------------------------------------------------------------------ |
 | `find the best one for R000000195 only one` | Search for part number R000000195, quantity = 1, rank by best value |
-| `cheap Toyota brake pads under $50` | Vehicle: Toyota · Category: Brake Pads · Max Price: $50 |
-| `SKF bearings with fast delivery` | Brand: SKF · Category: Bearings · Delivery: Express |
-| `Bosch oil filter in stock` | Brand: Bosch · Category: Oil Filters · Stock: Available |
-| `German suppliers, not Chinese, over $100` | Origin: Germany · Exclude: China · Min Price: $100 |
-| `need 50 units of spark plugs` | Category: Spark Plugs · Quantity: 50 units |
-| `OEM brake discs between $30 and $80` | Quality: OEM · Category: Brake Discs · Price: $30–$80 |
+| `cheap Toyota brake pads under $50`         | Vehicle: Toyota · Category: Brake Pads · Max Price: $50             |
+| `SKF bearings with fast delivery`           | Brand: SKF · Category: Bearings · Delivery: Express                 |
+| `Bosch oil filter in stock`                 | Brand: Bosch · Category: Oil Filters · Stock: Available             |
+| `German suppliers, not Chinese, over $100`  | Origin: Germany · Exclude: China · Min Price: $100                  |
+| `need 50 units of spark plugs`              | Category: Spark Plugs · Quantity: 50 units                          |
+| `OEM brake discs between $30 and $80`       | Quality: OEM · Category: Brake Discs · Price: $30–$80               |
 
 ### What Happens Behind the Scenes
 
@@ -87,12 +87,12 @@ Your Query → AI Understands Intent → Searches Database → Filters Results �
 
 The AI automatically corrects common typos:
 
-| You Type | AI Understands |
-|:---|:---|
-| `bosh` | **BOSCH** |
-| `toyta` | **TOYOTA** |
-| `mersedes` | **MERCEDES** |
-| `bremb` | **BREMBO** |
+| You Type   | AI Understands |
+| :--------- | :------------- |
+| `bosh`     | **BOSCH**      |
+| `toyta`    | **TOYOTA**     |
+| `mersedes` | **MERCEDES**   |
+| `bremb`    | **BREMBO**     |
 
 ---
 
@@ -117,27 +117,28 @@ Now, the AI evaluates every result on **four weighted factors** and calculates a
 └─────────────────────────────────────────────────┘
 ```
 
-| Factor | Weight | Why It Matters |
-|:---|:---:|:---|
-| 💰 **Price** | **35%** | Lower price = higher score. Your budget matters most. |
-| 🚚 **Delivery Time** | **30%** | Faster delivery = higher score. Time is money. |
-| 📦 **Quantity Available** | **20%** | More stock = higher score. Ensures you can get what you need. |
-| ✅ **In Stock** | **15%** | Available items get a bonus. No point ranking out-of-stock parts. |
+| Factor                    | Weight  | Why It Matters                                                    |
+| :------------------------ | :-----: | :---------------------------------------------------------------- |
+| 💰 **Price**              | **35%** | Lower price = higher score. Your budget matters most.             |
+| 🚚 **Delivery Time**      | **30%** | Faster delivery = higher score. Time is money.                    |
+| 📦 **Quantity Available** | **20%** | More stock = higher score. Ensures you can get what you need.     |
+| ✅ **In Stock**           | **15%** | Available items get a bonus. No point ranking out-of-stock parts. |
 
 ### How Scoring Works — An Example
 
 Imagine you search for part **R000000195** and get two results:
 
-| | Option A | Option B |
-|:---|:---:|:---:|
-| **Price** | $18.82 | $21.89 |
-| **Delivery** | 60 days | 30 days |
-| **Quantity** | 10,000 | 10,000 |
-| **In Stock** | ✅ Yes | ✅ Yes |
+|              | Option A | Option B |
+| :----------- | :------: | :------: |
+| **Price**    |  $18.82  |  $21.89  |
+| **Delivery** | 60 days  | 30 days  |
+| **Quantity** |  10,000  |  10,000  |
+| **In Stock** |  ✅ Yes  |  ✅ Yes  |
 
 **Old system:** Both would tie (same quantity).
 
 **New AI system:**
+
 - Option A: Cheaper price (higher price score) but slower delivery (lower delivery score)
 - Option B: More expensive but **much faster delivery**
 - AI might score Option B higher because the 30-day faster delivery (30% weight) outweighs the $3 price difference (35% weight)
@@ -152,13 +153,13 @@ The AI doesn't just pick blindly — it **balances all factors** and explains wh
 
 When results appear, you'll see colored badges next to the top options. Each badge tells you something specific:
 
-| Badge | Icon | Meaning |
-|:---|:---:|:---|
-| 🏆 **Best Overall** | Crown | Highest combined AI score across all factors |
-| 💰 **Cheapest** | Tag | Lowest price among the results |
-| ⚡ **Fastest Delivery** | Lightning | Fewest delivery days |
-| 📦 **Highest Stock** | Warehouse | Most units available |
-| ✅ **Only Option** | Checkmark | The only matching result found |
+| Badge                   |   Icon    | Meaning                                      |
+| :---------------------- | :-------: | :------------------------------------------- |
+| 🏆 **Best Overall**     |   Crown   | Highest combined AI score across all factors |
+| 💰 **Cheapest**         |    Tag    | Lowest price among the results               |
+| ⚡ **Fastest Delivery** | Lightning | Fewest delivery days                         |
+| 📦 **Highest Stock**    | Warehouse | Most units available                         |
+| ✅ **Only Option**      | Checkmark | The only matching result found               |
 
 ### Visual Example
 
@@ -202,7 +203,7 @@ When the top 2 results score within 5 points of each other, the AI shows:
 
 When the cheapest option and the fastest option are different, the AI calculates exactly what you'd save vs. how much time you'd gain:
 
-> *"Save ~15% choosing the cheapest, or get it 30 days sooner with the faster option"*
+> _"Save ~15% choosing the cheapest, or get it 30 days sooner with the faster option"_
 
 This helps you decide: **Do I prioritize saving money or saving time?**
 
@@ -229,11 +230,11 @@ This helps you decide: **Do I prioritize saving money or saving time?**
 
 ### Supported Formats
 
-| Format | Extension |
-|:---|:---|
-| Microsoft Excel | `.xlsx`, `.xls` |
-| CSV (Comma-Separated) | `.csv` |
-| Maximum File Size | **10 MB** |
+| Format                | Extension       |
+| :-------------------- | :-------------- |
+| Microsoft Excel       | `.xlsx`, `.xls` |
+| CSV (Comma-Separated) | `.csv`          |
+| Maximum File Size     | **10 MB**       |
 
 ### What the AI Detects
 
@@ -247,11 +248,11 @@ The AI reads your spreadsheet and intelligently identifies:
 
 Each extracted part gets a **confidence level**:
 
-| Level | Meaning |
-|:---|:---|
-| 🟢 **High** | AI is very confident this is a valid part number |
-| 🟡 **Medium** | Likely a part number but may need verification |
-| 🔴 **Low** | Uncertain — please review manually |
+| Level         | Meaning                                          |
+| :------------ | :----------------------------------------------- |
+| 🟢 **High**   | AI is very confident this is a valid part number |
+| 🟡 **Medium** | Likely a part number but may need verification   |
+| 🔴 **Low**    | Uncertain — please review manually               |
 
 ---
 
@@ -292,6 +293,7 @@ Ahmed
 ### What You Receive
 
 A professionally formatted quotation email with:
+
 - ✅ All parts listed with prices, availability, and delivery estimates
 - ✅ Parts not in stock listed separately as "being sourced"
 - ✅ Urgency badge (if applicable)
@@ -333,17 +335,17 @@ Every quotation generated — whether from email processing or manual creation �
 
 ### Features
 
-| Feature | Description |
-|:---|:---|
-| **Auto-numbered** | Format: `QT-YYMMDD-XXXX` |
-| **7-day validity** | Configurable expiration date |
-| **Itemized pricing** | Unit price, quantity, line total per part |
+| Feature                 | Description                                                  |
+| :---------------------- | :----------------------------------------------------------- |
+| **Auto-numbered**       | Format: `QT-YYMMDD-XXXX`                                     |
+| **7-day validity**      | Configurable expiration date                                 |
+| **Itemized pricing**    | Unit price, quantity, line total per part                    |
 | **Availability status** | In Stock ✅ · Low Stock ⚠️ · Out of Stock ❌ · On Request 📋 |
-| **Delivery estimates** | ETA in days for each item |
-| **Not-found section** | Parts being sourced listed separately |
-| **Priority badge** | Red "PRIORITY" label for urgent requests |
-| **Responsive design** | Looks great on desktop, tablet, and mobile email clients |
-| **Plain text fallback** | Text-only version for basic email clients |
+| **Delivery estimates**  | ETA in days for each item                                    |
+| **Not-found section**   | Parts being sourced listed separately                        |
+| **Priority badge**      | Red "PRIORITY" label for urgent requests                     |
+| **Responsive design**   | Looks great on desktop, tablet, and mobile email clients     |
+| **Plain text fallback** | Text-only version for basic email clients                    |
 
 ---
 
@@ -363,23 +365,23 @@ You Search → AI Learns from Outcome → Future Searches Improve
 
 The system tracks:
 
-| Signal | What It Learns |
-|:---|:---|
+| Signal                    | What It Learns                                                          |
+| :------------------------ | :---------------------------------------------------------------------- |
 | 🔍 **Search refinements** | If you change "brak pads" to "brake pads", the AI learns the correction |
-| 👆 **Part clicks** | Which results users actually click on (= relevant) |
-| 🛒 **Add to cart** | Which parts users buy (= best matches) |
-| ⏱️ **Time on results** | How long you look at results (longer = more useful) |
-| 📊 **Scroll depth** | How far you scroll (helps understand if results were relevant) |
-| 👍👎 **Feedback** | Optional thumbs-up/down if shown |
+| 👆 **Part clicks**        | Which results users actually click on (= relevant)                      |
+| 🛒 **Add to cart**        | Which parts users buy (= best matches)                                  |
+| ⏱️ **Time on results**    | How long you look at results (longer = more useful)                     |
+| 📊 **Scroll depth**       | How far you scroll (helps understand if results were relevant)          |
+| 👍👎 **Feedback**         | Optional thumbs-up/down if shown                                        |
 
 ### What It Improves
 
-| Area | Before Learning | After Learning |
-|:---|:---|:---|
-| **Synonyms** | Doesn't know "braking pad" = "brake pad" | Learns equivalents from user behavior |
-| **Failed searches** | Doesn't know why a search failed | Suggests better alternatives |
-| **Keyword effectiveness** | Treats all words equally | Prioritizes keywords that led to purchases |
-| **Typo corrections** | Only handles known typos | Learns new misspellings over time |
+| Area                      | Before Learning                          | After Learning                             |
+| :------------------------ | :--------------------------------------- | :----------------------------------------- |
+| **Synonyms**              | Doesn't know "braking pad" = "brake pad" | Learns equivalents from user behavior      |
+| **Failed searches**       | Doesn't know why a search failed         | Suggests better alternatives               |
+| **Keyword effectiveness** | Treats all words equally                 | Prioritizes keywords that led to purchases |
+| **Typo corrections**      | Only handles known typos                 | Learns new misspellings over time          |
 
 ### Privacy
 
@@ -397,30 +399,30 @@ The system tracks:
 
 The AI can understand queries in:
 
-| Language | Example Query |
-|:---|:---|
-| 🇬🇧 English | "brake pads under $50" |
-| 🇸🇦 Arabic | "قطع فرامل تويوتا" |
-| 🇫🇷 French | "plaquettes de frein Bosch" |
-| 🇪🇸 Spanish | "filtro de aceite barato" |
-| 🇷🇺 Russian | "тормозные колодки Bosch" |
-| 🇺🇦 Ukrainian | "фільтр масляний" |
+| Language     | Example Query               |
+| :----------- | :-------------------------- |
+| 🇬🇧 English   | "brake pads under $50"      |
+| 🇸🇦 Arabic    | "قطع فرامل تويوتا"          |
+| 🇫🇷 French    | "plaquettes de frein Bosch" |
+| 🇪🇸 Spanish   | "filtro de aceite barato"   |
+| 🇷🇺 Russian   | "тормозные колодки Bosch"   |
+| 🇺🇦 Ukrainian | "фільтр масляний"           |
 
 ### Currencies
 
 Prices in the database are stored in **AED** (UAE Dirhams). You can search in any of these currencies, and the AI converts automatically:
 
-| Currency | Symbol | Conversion |
-|:---|:---:|:---|
-| US Dollar | $ USD | Automatic |
-| Euro | € EUR | Automatic |
-| British Pound | £ GBP | Automatic |
-| UAE Dirham | د.إ AED | Native (no conversion) |
-| Saudi Riyal | ﷼ SAR | Automatic |
-| Japanese Yen | ¥ JPY | Automatic |
-| Chinese Yuan | ¥ CNY | Automatic |
+| Currency      | Symbol  | Conversion             |
+| :------------ | :-----: | :--------------------- |
+| US Dollar     |  $ USD  | Automatic              |
+| Euro          |  € EUR  | Automatic              |
+| British Pound |  £ GBP  | Automatic              |
+| UAE Dirham    | د.إ AED | Native (no conversion) |
+| Saudi Riyal   |  ﷼ SAR  | Automatic              |
+| Japanese Yen  |  ¥ JPY  | Automatic              |
+| Chinese Yuan  |  ¥ CNY  | Automatic              |
 
-**Example:** If you search *"under $50"*, the AI filters for parts priced under 183.50 AED.
+**Example:** If you search _"under $50"_, the AI filters for parts priced under 183.50 AED.
 
 ---
 
@@ -432,51 +434,51 @@ Here is the complete list of everything the AI can detect from your natural lang
 
 ### Part Identification
 
-| Filter | How to Use | Example |
-|:---|:---|:---|
-| Part Number | Type any part number | `R000000195`, `CAF-000267` |
-| Part Category | Name the type of part | `brake pads`, `oil filter`, `spark plugs` |
-| Keywords | Describe what you need | `cooling system for truck` |
+| Filter        | How to Use             | Example                                   |
+| :------------ | :--------------------- | :---------------------------------------- |
+| Part Number   | Type any part number   | `R000000195`, `CAF-000267`                |
+| Part Category | Name the type of part  | `brake pads`, `oil filter`, `spark plugs` |
+| Keywords      | Describe what you need | `cooling system for truck`                |
 
 ### Brands
 
-| Filter | How to Use | Example |
-|:---|:---|:---|
-| Vehicle Brand | Name the vehicle make | `Toyota`, `BMW`, `Mercedes` |
-| Parts Brand | Name the manufacturer | `Bosch`, `SKF`, `Denso`, `Brembo` |
-| Exclude Brand | Say "not" or "exclude" | `not Bosch`, `exclude Chinese` |
+| Filter        | How to Use             | Example                           |
+| :------------ | :--------------------- | :-------------------------------- |
+| Vehicle Brand | Name the vehicle make  | `Toyota`, `BMW`, `Mercedes`       |
+| Parts Brand   | Name the manufacturer  | `Bosch`, `SKF`, `Denso`, `Brembo` |
+| Exclude Brand | Say "not" or "exclude" | `not Bosch`, `exclude Chinese`    |
 
 ### Pricing
 
-| Filter | How to Use | Example |
-|:---|:---|:---|
-| Max Price | "under", "below", "less than" | `under $500`, `below $100` |
-| Min Price | "over", "above", "more than" | `over $100`, `above $50` |
-| Price Range | Use dash or "between" | `$50-$200`, `between $100 and $500` |
-| Budget | Use descriptive words | `cheap`, `budget`, `affordable` |
+| Filter      | How to Use                    | Example                             |
+| :---------- | :---------------------------- | :---------------------------------- |
+| Max Price   | "under", "below", "less than" | `under $500`, `below $100`          |
+| Min Price   | "over", "above", "more than"  | `over $100`, `above $50`            |
+| Price Range | Use dash or "between"         | `$50-$200`, `between $100 and $500` |
+| Budget      | Use descriptive words         | `cheap`, `budget`, `affordable`     |
 
 ### Availability
 
-| Filter | How to Use | Example |
-|:---|:---|:---|
-| In Stock | "in stock", "available" | `available brake pads` |
-| High Stock | "full stock", "plenty" | `plenty of stock` |
-| Quantity | "need X units", "qty X" | `need 50 units`, `qty 100` |
+| Filter     | How to Use              | Example                    |
+| :--------- | :---------------------- | :------------------------- |
+| In Stock   | "in stock", "available" | `available brake pads`     |
+| High Stock | "full stock", "plenty"  | `plenty of stock`          |
+| Quantity   | "need X units", "qty X" | `need 50 units`, `qty 100` |
 
 ### Delivery
 
-| Filter | How to Use | Example |
-|:---|:---|:---|
-| Fast Delivery | "fast", "express", "urgent" | `express delivery` |
-| Max Days | "within X days" | `within 3 days`, `delivered by next week` |
+| Filter        | How to Use                  | Example                                   |
+| :------------ | :-------------------------- | :---------------------------------------- |
+| Fast Delivery | "fast", "express", "urgent" | `express delivery`                        |
+| Max Days      | "within X days"             | `within 3 days`, `delivered by next week` |
 
 ### Quality & Supplier
 
-| Filter | How to Use | Example |
-|:---|:---|:---|
-| OEM/Genuine | "OEM", "genuine", "original" | `OEM parts only` |
-| Certified | "certified", "verified" | `certified suppliers` |
-| Supplier Origin | Name the country | `German suppliers`, `Japanese parts` |
+| Filter          | How to Use                   | Example                              |
+| :-------------- | :--------------------------- | :----------------------------------- |
+| OEM/Genuine     | "OEM", "genuine", "original" | `OEM parts only`                     |
+| Certified       | "certified", "verified"      | `certified suppliers`                |
+| Supplier Origin | Name the country             | `German suppliers`, `Japanese parts` |
 
 ### Part Categories Recognized
 
@@ -501,12 +503,15 @@ The AI recognizes **20+ part categories** automatically:
 ### General
 
 **Q: Do I need to learn special commands or syntax?**
+
 > No! Just type what you need in plain language. The AI understands everyday words.
 
 **Q: What if the AI doesn't understand my query?**
+
 > The system will still search using standard methods. You can also try rephrasing your query or using the manual filters available in the sidebar.
 
 **Q: Is the AI available 24/7?**
+
 > Yes. The AI processes all searches instantly, around the clock.
 
 ---
@@ -514,15 +519,19 @@ The AI recognizes **20+ part categories** automatically:
 ### Search & Results
 
 **Q: Why does the AI rank one option over another?**
+
 > The AI uses a balanced scoring system: **35% price** + **30% delivery time** + **20% stock quantity** + **15% availability**. The option with the best combined score ranks first. You can see badges that explain why each top result was selected.
 
 **Q: What do the colored badges mean?**
+
 > 🏆 Gold Crown = Best overall value · 💰 Green Tag = Cheapest price · ⚡ Blue Lightning = Fastest delivery · 📦 Purple Box = Most stock available
 
 **Q: Can the AI handle multiple part numbers at once?**
+
 > Yes! You can type multiple part numbers in one query, or use the Excel Import feature for bulk searches of 100+ parts.
 
 **Q: What if two options are equally good?**
+
 > The AI detects ties and shows a comparison: "Option A has lower price, Option B has faster delivery" — so you can choose what matters more to you.
 
 ---
@@ -530,12 +539,15 @@ The AI recognizes **20+ part categories** automatically:
 ### Excel Import
 
 **Q: What file formats are supported?**
+
 > Excel (.xlsx, .xls) and CSV files up to 10 MB.
 
 **Q: Does my spreadsheet need specific column names?**
+
 > No! The AI automatically detects which columns contain part numbers, quantities, and brands — regardless of what you named them.
 
 **Q: What happens with duplicate parts in my spreadsheet?**
+
 > Duplicates are automatically merged, and quantities are combined.
 
 ---
@@ -543,12 +555,15 @@ The AI recognizes **20+ part categories** automatically:
 ### Email Inquiries
 
 **Q: How quickly will I receive a quotation?**
+
 > Typically within **1–5 minutes** of sending your email, depending on the number of parts and server load.
 
 **Q: Can I attach a spreadsheet to my email?**
+
 > Yes! Attach Excel or CSV files, and the AI will extract parts from both your email text and the attachment.
 
 **Q: What if some parts aren't found?**
+
 > The quotation will list available parts with prices and separately list unfound parts as "being sourced" — so you know exactly what's covered.
 
 ---
@@ -556,9 +571,11 @@ The AI recognizes **20+ part categories** automatically:
 ### Privacy & Data
 
 **Q: Does the AI store my searches?**
+
 > Search patterns are stored anonymously to improve results for all users. No personal data is linked to learning records.
 
 **Q: Is my pricing information shared?**
+
 > Never. Your quotes, prices, and cart data are private to your account.
 
 ---
@@ -571,7 +588,7 @@ The AI recognizes **20+ part categories** automatically:
 
 **PartsForm AI** — Smarter Parts Sourcing
 
-*Powered by Google Gemini 2.0 Flash*
+_Powered by Google Gemini 2.0 Flash_
 
 © 2026 PartsForm. All rights reserved.
 

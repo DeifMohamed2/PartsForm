@@ -2,13 +2,14 @@
 <link rel="stylesheet" href="/css/adminCSS/admin-dashboard.css">
 <link rel="stylesheet" href="/css/adminCSS/admin-users.css">
 </head>
+
 <body>
   <div class="admin-wrapper">
     <%- include('partials/sidebar', { activePage: 'users' }) %>
-    
+
     <main class="admin-main">
       <%- include('partials/topbar', { pageTitle: 'Edit User' }) %>
-      
+
       <div class="admin-content">
         <!-- Breadcrumb -->
         <div style="margin-bottom: 1.5rem;">
@@ -207,10 +208,12 @@
       visibility: hidden;
       transition: all 0.25s ease;
     }
+
     .status-modal-overlay.active {
       opacity: 1;
       visibility: visible;
     }
+
     .status-modal {
       background: var(--admin-bg-primary);
       border-radius: 20px;
@@ -219,9 +222,11 @@
       transform: scale(0.9);
       transition: all 0.25s ease;
     }
+
     .status-modal-overlay.active .status-modal {
       transform: scale(1);
     }
+
     .status-modal-header {
       display: flex;
       align-items: center;
@@ -229,6 +234,7 @@
       padding: 1.25rem 1.5rem;
       border-bottom: 1px solid var(--admin-border);
     }
+
     .status-modal-icon {
       width: 48px;
       height: 48px;
@@ -237,16 +243,19 @@
       align-items: center;
       justify-content: center;
     }
+
     .status-modal-icon i {
       width: 24px;
       height: 24px;
     }
+
     .status-modal-header h3 {
       font-size: 1.1rem;
       font-weight: 600;
       color: var(--admin-text-primary);
       margin: 0 0 0.15rem;
     }
+
     .status-modal-close {
       margin-left: auto;
       width: 36px;
@@ -260,13 +269,16 @@
       justify-content: center;
       color: var(--admin-text-muted);
     }
+
     .status-modal-close i {
       width: 18px;
       height: 18px;
     }
+
     .status-modal-body {
       padding: 1.5rem;
     }
+
     .status-modal-footer {
       display: flex;
       justify-content: flex-end;
@@ -280,18 +292,18 @@
 
   <script>
     var userId = '<%= user.id %>';
-    
+
     function confirmDelete() {
       document.getElementById('deleteModalOverlay').classList.add('active');
       if (typeof lucide !== 'undefined') {
         lucide.createIcons();
       }
     }
-    
+
     function closeDeleteModal() {
       document.getElementById('deleteModalOverlay').classList.remove('active');
     }
-    
+
     function deleteUser() {
       fetch('/admin/api/users/' + userId, {
         method: 'DELETE'
@@ -306,19 +318,21 @@
         alert('Failed to delete user');
       });
     }
-    
+
     document.getElementById('editUserForm').addEventListener('submit', function(e) {
       e.preventDefault();
-      
+
       var formData = new FormData(this);
       var userData = {};
       formData.forEach(function(value, key) {
         userData[key] = value;
       });
-      
+
       fetch('/admin/api/users/' + userId, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json'
+        },
         body: JSON.stringify(userData)
       }).then(function(response) {
         if (response.ok) {
@@ -333,7 +347,7 @@
         alert('Failed to update user');
       });
     });
-    
+
     // Close modal with Escape key
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape') {
@@ -342,4 +356,4 @@
     });
   </script>
 
-<%- include('partials/footer') %>
+  <%- include('partials/footer') %>

@@ -2,18 +2,19 @@
 <link rel="stylesheet" href="/css/adminCSS/admin-dashboard.css">
 <style>
   /* ========== INTEGRATIONS PAGE STYLES ========== */
-  
+
   /* Override content padding for full page usage */
   .admin-content.intg-page {
     padding: 0 !important;
-    padding-top: 70px !important; /* Keep topbar offset */
+    padding-top: 70px !important;
+    /* Keep topbar offset */
     max-width: 100%;
   }
-  
+
   .intg-container {
     padding: 1.5rem 2rem 2rem;
   }
-  
+
   /* Page Header - Sticky Top Bar Style */
   .intg-header {
     background: var(--admin-card-bg);
@@ -23,13 +24,13 @@
     justify-content: space-between;
     align-items: center;
   }
-  
+
   .intg-header-left {
     display: flex;
     align-items: center;
     gap: 1rem;
   }
-  
+
   .intg-header-icon {
     width: 44px;
     height: 44px;
@@ -41,28 +42,31 @@
     justify-content: center;
     flex-shrink: 0;
   }
-  
-  .intg-header-icon svg { width: 22px; height: 22px; }
-  
+
+  .intg-header-icon svg {
+    width: 22px;
+    height: 22px;
+  }
+
   .intg-header-text h1 {
     font-size: 1.25rem;
     font-weight: 600;
     color: var(--admin-text-primary);
     margin: 0;
   }
-  
+
   .intg-header-text p {
     font-size: 0.8rem;
     color: var(--admin-text-muted);
     margin: 0.15rem 0 0 0;
   }
-  
+
   .intg-header-actions {
     display: flex;
     gap: 0.75rem;
     align-items: center;
   }
-  
+
   .btn-sync-all {
     display: flex;
     align-items: center;
@@ -77,15 +81,18 @@
     cursor: pointer;
     transition: all 0.2s;
   }
-  
+
   .btn-sync-all:hover {
     background: var(--admin-bg);
     border-color: var(--admin-accent);
     color: var(--admin-accent);
   }
-  
-  .btn-sync-all svg { width: 16px; height: 16px; }
-  
+
+  .btn-sync-all svg {
+    width: 16px;
+    height: 16px;
+  }
+
   .btn-add-connection {
     display: flex;
     align-items: center;
@@ -101,15 +108,29 @@
     transition: all 0.2s;
     text-decoration: none;
   }
-  
-  .btn-add-connection:hover { opacity: 0.9; }
-  .btn-add-connection svg { width: 16px; height: 16px; }
-  
+
+  .btn-add-connection:hover {
+    opacity: 0.9;
+  }
+
+  .btn-add-connection svg {
+    width: 16px;
+    height: 16px;
+  }
+
   /* Remove old page header styles */
-  .page-header { display: none; }
-  .page-title { display: none; }
-  .page-actions { display: none; }
-  
+  .page-header {
+    display: none;
+  }
+
+  .page-title {
+    display: none;
+  }
+
+  .page-actions {
+    display: none;
+  }
+
   /* Stats Row */
   .stats-row {
     display: grid;
@@ -117,7 +138,7 @@
     gap: 1.25rem;
     margin-bottom: 1.5rem;
   }
-  
+
   .stat-card {
     background: var(--admin-card-bg);
     border: 1px solid var(--admin-border);
@@ -128,12 +149,12 @@
     gap: 1rem;
     transition: box-shadow 0.2s, transform 0.2s;
   }
-  
+
   .stat-card:hover {
-    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
     transform: translateY(-2px);
   }
-  
+
   .stat-icon {
     width: 52px;
     height: 52px;
@@ -143,37 +164,55 @@
     justify-content: center;
     flex-shrink: 0;
   }
-  
-  .stat-icon.green { background: #ecfdf5; color: #10b981; }
-  .stat-icon.blue { background: #eff6ff; color: #3b82f6; }
-  .stat-icon.purple { background: #f5f3ff; color: #8b5cf6; }
-  .stat-icon.orange { background: #fff7ed; color: #f97316; }
-  
-  .stat-icon svg { width: 24px; height: 24px; }
-  
+
+  .stat-icon.green {
+    background: #ecfdf5;
+    color: #10b981;
+  }
+
+  .stat-icon.blue {
+    background: #eff6ff;
+    color: #3b82f6;
+  }
+
+  .stat-icon.purple {
+    background: #f5f3ff;
+    color: #8b5cf6;
+  }
+
+  .stat-icon.orange {
+    background: #fff7ed;
+    color: #f97316;
+  }
+
+  .stat-icon svg {
+    width: 24px;
+    height: 24px;
+  }
+
   .stat-info .value {
     font-size: 2rem;
     font-weight: 700;
     color: var(--admin-text-primary);
     line-height: 1;
   }
-  
+
   .stat-info .label {
     font-size: 0.8rem;
     color: var(--admin-text-muted);
     margin-top: 0.35rem;
     font-weight: 500;
   }
-  
+
   /* Connection List */
   .connections-section {
     background: var(--admin-card-bg);
     border: 1px solid var(--admin-border);
     border-radius: 14px;
     overflow: hidden;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   }
-  
+
   .section-header {
     padding: 1.25rem 1.5rem;
     border-bottom: 1px solid var(--admin-border);
@@ -182,7 +221,7 @@
     align-items: center;
     background: var(--admin-bg);
   }
-  
+
   .section-title {
     font-size: 1rem;
     font-weight: 600;
@@ -191,9 +230,13 @@
     align-items: center;
     gap: 0.5rem;
   }
-  
-  .section-title svg { width: 18px; height: 18px; color: var(--admin-text-muted); }
-  
+
+  .section-title svg {
+    width: 18px;
+    height: 18px;
+    color: var(--admin-text-muted);
+  }
+
   .connection-count {
     background: white;
     border: 1px solid var(--admin-border);
@@ -203,14 +246,16 @@
     color: var(--admin-text-secondary);
     font-weight: 500;
   }
-  
+
   /* Connection Item */
   .connection-item {
     border-bottom: 1px solid var(--admin-border);
   }
-  
-  .connection-item:last-child { border-bottom: none; }
-  
+
+  .connection-item:last-child {
+    border-bottom: none;
+  }
+
   .connection-row {
     padding: 1.25rem 1.5rem;
     display: grid;
@@ -220,15 +265,17 @@
     cursor: pointer;
     transition: background 0.2s;
   }
-  
-  .connection-row:hover { background: var(--admin-bg); }
-  
+
+  .connection-row:hover {
+    background: var(--admin-bg);
+  }
+
   .conn-info {
     display: flex;
     align-items: center;
     gap: 1rem;
   }
-  
+
   .conn-icon {
     width: 44px;
     height: 44px;
@@ -240,16 +287,19 @@
     color: var(--admin-accent);
     flex-shrink: 0;
   }
-  
-  .conn-icon svg { width: 20px; height: 20px; }
-  
+
+  .conn-icon svg {
+    width: 20px;
+    height: 20px;
+  }
+
   .conn-details h4 {
     font-size: 0.95rem;
     font-weight: 600;
     color: var(--admin-text-primary);
     margin: 0 0 0.25rem 0;
   }
-  
+
   .conn-details .meta {
     font-size: 0.8rem;
     color: var(--admin-text-muted);
@@ -257,37 +307,40 @@
     align-items: center;
     gap: 0.35rem;
   }
-  
-  .conn-details .meta svg { width: 12px; height: 12px; }
-  
+
+  .conn-details .meta svg {
+    width: 12px;
+    height: 12px;
+  }
+
   .conn-stats {
     display: flex;
     gap: 2rem;
   }
-  
+
   .conn-stat {
     text-align: center;
   }
-  
+
   .conn-stat .value {
     font-size: 1.1rem;
     font-weight: 700;
     color: var(--admin-text-primary);
   }
-  
+
   .conn-stat .label {
     font-size: 0.7rem;
     color: var(--admin-text-muted);
     text-transform: uppercase;
     letter-spacing: 0.5px;
   }
-  
+
   .conn-status-section {
     display: flex;
     align-items: center;
     gap: 1rem;
   }
-  
+
   .status-badge {
     padding: 0.35rem 0.75rem;
     border-radius: 6px;
@@ -297,14 +350,32 @@
     align-items: center;
     gap: 0.35rem;
   }
-  
-  .status-badge svg { width: 12px; height: 12px; }
-  
-  .status-badge.active { background: #ecfdf5; color: #059669; }
-  .status-badge.syncing { background: #eff6ff; color: #2563eb; }
-  .status-badge.error { background: #fef2f2; color: #dc2626; }
-  .status-badge.pending { background: #f9fafb; color: #6b7280; }
-  
+
+  .status-badge svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  .status-badge.active {
+    background: #ecfdf5;
+    color: #059669;
+  }
+
+  .status-badge.syncing {
+    background: #eff6ff;
+    color: #2563eb;
+  }
+
+  .status-badge.error {
+    background: #fef2f2;
+    color: #dc2626;
+  }
+
+  .status-badge.pending {
+    background: #f9fafb;
+    color: #6b7280;
+  }
+
   .last-sync-time {
     font-size: 0.8rem;
     color: var(--admin-text-muted);
@@ -312,14 +383,17 @@
     align-items: center;
     gap: 0.35rem;
   }
-  
-  .last-sync-time svg { width: 14px; height: 14px; }
-  
+
+  .last-sync-time svg {
+    width: 14px;
+    height: 14px;
+  }
+
   .conn-actions {
     display: flex;
     gap: 0.5rem;
   }
-  
+
   .action-btn {
     width: 36px;
     height: 36px;
@@ -333,29 +407,37 @@
     justify-content: center;
     transition: all 0.2s;
   }
-  
+
   .action-btn:hover {
     background: var(--admin-accent);
     border-color: var(--admin-accent);
     color: white;
   }
-  
+
   .action-btn.danger:hover {
     background: #ef4444;
     border-color: #ef4444;
   }
-  
-  .action-btn svg { width: 16px; height: 16px; }
-  
+
+  .action-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+
   .action-btn.syncing svg {
     animation: spin 1s linear infinite;
   }
-  
+
   @keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+    from {
+      transform: rotate(0deg);
+    }
+
+    to {
+      transform: rotate(360deg);
+    }
   }
-  
+
   /* Sync Details Panel (expandable) */
   .sync-panel {
     max-height: 0;
@@ -364,22 +446,22 @@
     border-top: 1px solid var(--admin-border);
     transition: max-height 0.3s ease;
   }
-  
+
   .sync-panel.expanded {
     max-height: 800px;
   }
-  
+
   .sync-panel-content {
     padding: 1.5rem;
   }
-  
+
   .sync-panel-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 1.5rem;
   }
-  
+
   .sync-panel-title {
     font-size: 1rem;
     font-weight: 600;
@@ -388,14 +470,18 @@
     align-items: center;
     gap: 0.5rem;
   }
-  
-  .sync-panel-title svg { width: 18px; height: 18px; color: var(--admin-accent); }
-  
+
+  .sync-panel-title svg {
+    width: 18px;
+    height: 18px;
+    color: var(--admin-accent);
+  }
+
   .sync-tabs {
     display: flex;
     gap: 0.5rem;
   }
-  
+
   .sync-tab {
     padding: 0.5rem 1rem;
     border-radius: 6px;
@@ -407,13 +493,13 @@
     cursor: pointer;
     transition: all 0.2s;
   }
-  
+
   .sync-tab.active {
     background: var(--admin-accent);
     border-color: var(--admin-accent);
     color: white;
   }
-  
+
   /* Live Sync Progress */
   .sync-progress-section {
     background: white;
@@ -422,20 +508,20 @@
     padding: 1.5rem;
     margin-bottom: 1rem;
   }
-  
+
   .progress-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 1rem;
   }
-  
+
   .progress-status {
     display: flex;
     align-items: center;
     gap: 0.75rem;
   }
-  
+
   .progress-icon {
     width: 40px;
     height: 40px;
@@ -446,31 +532,41 @@
     align-items: center;
     justify-content: center;
   }
-  
-  .progress-icon.success { background: #ecfdf5; color: #10b981; }
-  .progress-icon.error { background: #fef2f2; color: #ef4444; }
-  
-  .progress-icon svg { width: 20px; height: 20px; }
-  
+
+  .progress-icon.success {
+    background: #ecfdf5;
+    color: #10b981;
+  }
+
+  .progress-icon.error {
+    background: #fef2f2;
+    color: #ef4444;
+  }
+
+  .progress-icon svg {
+    width: 20px;
+    height: 20px;
+  }
+
   .progress-text h5 {
     font-size: 0.95rem;
     font-weight: 600;
     color: var(--admin-text-primary);
     margin: 0;
   }
-  
+
   .progress-text p {
     font-size: 0.8rem;
     color: var(--admin-text-muted);
     margin: 0.15rem 0 0 0;
   }
-  
+
   .progress-percentage {
     font-size: 1.25rem;
     font-weight: 700;
     color: var(--admin-accent);
   }
-  
+
   .progress-bar-container {
     height: 8px;
     background: #e5e7eb;
@@ -478,40 +574,40 @@
     overflow: hidden;
     margin-bottom: 1rem;
   }
-  
+
   .progress-bar-fill {
     height: 100%;
     background: var(--admin-accent);
     border-radius: 4px;
     transition: width 0.3s ease;
   }
-  
+
   .progress-stats {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 1rem;
   }
-  
+
   .progress-stat {
     text-align: center;
     padding: 0.75rem;
     background: #f9fafb;
     border-radius: 8px;
   }
-  
+
   .progress-stat .value {
     font-size: 1.25rem;
     font-weight: 700;
     color: var(--admin-text-primary);
   }
-  
+
   .progress-stat .label {
     font-size: 0.7rem;
     color: var(--admin-text-muted);
     text-transform: uppercase;
     margin-top: 0.25rem;
   }
-  
+
   /* Current File */
   .current-file {
     background: white;
@@ -523,7 +619,7 @@
     align-items: center;
     gap: 0.75rem;
   }
-  
+
   .current-file-icon {
     width: 36px;
     height: 36px;
@@ -534,24 +630,27 @@
     align-items: center;
     justify-content: center;
   }
-  
-  .current-file-icon svg { width: 18px; height: 18px; }
-  
+
+  .current-file-icon svg {
+    width: 18px;
+    height: 18px;
+  }
+
   .current-file-info {
     flex: 1;
   }
-  
+
   .current-file-info strong {
     display: block;
     font-size: 0.875rem;
     color: var(--admin-text-primary);
   }
-  
+
   .current-file-info span {
     font-size: 0.75rem;
     color: var(--admin-text-muted);
   }
-  
+
   /* Sync History */
   .sync-history {
     background: white;
@@ -559,7 +658,7 @@
     border-radius: 10px;
     overflow: hidden;
   }
-  
+
   .history-header {
     padding: 1rem 1.25rem;
     border-bottom: 1px solid var(--admin-border);
@@ -570,14 +669,18 @@
     align-items: center;
     gap: 0.5rem;
   }
-  
-  .history-header svg { width: 16px; height: 16px; color: var(--admin-text-muted); }
-  
+
+  .history-header svg {
+    width: 16px;
+    height: 16px;
+    color: var(--admin-text-muted);
+  }
+
   .history-list {
     max-height: 300px;
     overflow-y: auto;
   }
-  
+
   .history-item {
     padding: 1rem 1.25rem;
     border-bottom: 1px solid var(--admin-border);
@@ -587,51 +690,64 @@
     cursor: pointer;
     transition: background 0.2s;
   }
-  
-  .history-item:last-child { border-bottom: none; }
-  .history-item:hover { background: #f9fafb; }
-  
+
+  .history-item:last-child {
+    border-bottom: none;
+  }
+
+  .history-item:hover {
+    background: #f9fafb;
+  }
+
   .history-info {
     display: flex;
     align-items: center;
     gap: 0.75rem;
   }
-  
+
   .history-status {
     width: 8px;
     height: 8px;
     border-radius: 50%;
   }
-  
-  .history-status.success { background: #10b981; }
-  .history-status.error { background: #ef4444; }
-  .history-status.warning { background: #f59e0b; }
-  
+
+  .history-status.success {
+    background: #10b981;
+  }
+
+  .history-status.error {
+    background: #ef4444;
+  }
+
+  .history-status.warning {
+    background: #f59e0b;
+  }
+
   .history-details h6 {
     font-size: 0.85rem;
     font-weight: 500;
     color: var(--admin-text-primary);
     margin: 0;
   }
-  
+
   .history-details span {
     font-size: 0.75rem;
     color: var(--admin-text-muted);
   }
-  
+
   .history-stats {
     display: flex;
     gap: 1.5rem;
     font-size: 0.8rem;
     color: var(--admin-text-secondary);
   }
-  
+
   /* Empty State */
   .empty-state {
     padding: 4rem 2rem;
     text-align: center;
   }
-  
+
   .empty-icon {
     width: 80px;
     height: 80px;
@@ -643,16 +759,19 @@
     justify-content: center;
     margin: 0 auto 1.5rem;
   }
-  
-  .empty-icon svg { width: 40px; height: 40px; }
-  
+
+  .empty-icon svg {
+    width: 40px;
+    height: 40px;
+  }
+
   .empty-state h3 {
     font-size: 1.25rem;
     font-weight: 600;
     color: var(--admin-text-primary);
     margin: 0 0 0.5rem 0;
   }
-  
+
   .empty-state p {
     color: var(--admin-text-muted);
     margin: 0 0 1.5rem 0;
@@ -660,7 +779,7 @@
     margin-left: auto;
     margin-right: auto;
   }
-  
+
   /* Test Connection Modal */
   .modal-overlay {
     position: fixed;
@@ -674,12 +793,12 @@
     visibility: hidden;
     transition: all 0.2s;
   }
-  
+
   .modal-overlay.active {
     opacity: 1;
     visibility: visible;
   }
-  
+
   .modal-box {
     background: white;
     border-radius: 16px;
@@ -689,18 +808,18 @@
     transform: scale(0.95) translateY(10px);
     transition: transform 0.2s;
   }
-  
+
   .modal-overlay.active .modal-box {
     transform: scale(1) translateY(0);
   }
-  
+
   .modal-header {
     padding: 1.5rem 1.5rem 0;
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
   }
-  
+
   .modal-icon {
     width: 56px;
     height: 56px;
@@ -709,13 +828,27 @@
     align-items: center;
     justify-content: center;
   }
-  
-  .modal-icon.testing { background: #eff6ff; color: #3b82f6; }
-  .modal-icon.success { background: #ecfdf5; color: #10b981; }
-  .modal-icon.error { background: #fef2f2; color: #ef4444; }
-  
-  .modal-icon svg { width: 28px; height: 28px; }
-  
+
+  .modal-icon.testing {
+    background: #eff6ff;
+    color: #3b82f6;
+  }
+
+  .modal-icon.success {
+    background: #ecfdf5;
+    color: #10b981;
+  }
+
+  .modal-icon.error {
+    background: #fef2f2;
+    color: #ef4444;
+  }
+
+  .modal-icon svg {
+    width: 28px;
+    height: 28px;
+  }
+
   .modal-close {
     width: 32px;
     height: 32px;
@@ -729,27 +862,34 @@
     justify-content: center;
     transition: all 0.2s;
   }
-  
-  .modal-close:hover { background: #e5e7eb; color: #374151; }
-  .modal-close svg { width: 18px; height: 18px; }
-  
+
+  .modal-close:hover {
+    background: #e5e7eb;
+    color: #374151;
+  }
+
+  .modal-close svg {
+    width: 18px;
+    height: 18px;
+  }
+
   .modal-body {
     padding: 1.25rem 1.5rem 1.5rem;
   }
-  
+
   .modal-title {
     font-size: 1.125rem;
     font-weight: 600;
     color: var(--admin-text-primary);
     margin: 0 0 0.35rem 0;
   }
-  
+
   .modal-subtitle {
     font-size: 0.875rem;
     color: var(--admin-text-muted);
     margin: 0 0 1.25rem 0;
   }
-  
+
   .modal-result {
     background: #f9fafb;
     border-radius: 10px;
@@ -758,27 +898,27 @@
     grid-template-columns: repeat(2, 1fr);
     gap: 1rem;
   }
-  
+
   .modal-result-item {
     text-align: center;
   }
-  
+
   .modal-result-item .value {
     font-size: 1.5rem;
     font-weight: 700;
     color: var(--admin-text-primary);
   }
-  
+
   .modal-result-item .label {
     font-size: 0.75rem;
     color: var(--admin-text-muted);
     text-transform: uppercase;
   }
-  
+
   .modal-footer {
     padding: 0 1.5rem 1.5rem;
   }
-  
+
   .modal-btn {
     width: 100%;
     padding: 0.875rem;
@@ -789,27 +929,31 @@
     cursor: pointer;
     transition: all 0.2s;
   }
-  
+
   .modal-btn.primary {
     background: var(--admin-accent);
     color: white;
   }
-  
-  .modal-btn.primary:hover { opacity: 0.9; }
-  
+
+  .modal-btn.primary:hover {
+    opacity: 0.9;
+  }
+
   .modal-btn.secondary {
     background: #f3f4f6;
     color: var(--admin-text-primary);
   }
-  
-  .modal-btn.secondary:hover { background: #e5e7eb; }
-  
+
+  .modal-btn.secondary:hover {
+    background: #e5e7eb;
+  }
+
   /* Delete Modal */
   .delete-modal-body {
     text-align: center;
     padding: 1.5rem;
   }
-  
+
   .delete-icon {
     width: 64px;
     height: 64px;
@@ -821,37 +965,44 @@
     justify-content: center;
     margin: 0 auto 1rem;
   }
-  
-  .delete-icon svg { width: 28px; height: 28px; }
-  
+
+  .delete-icon svg {
+    width: 28px;
+    height: 28px;
+  }
+
   .delete-modal-body h3 {
     font-size: 1.125rem;
     font-weight: 600;
     color: var(--admin-text-primary);
     margin: 0 0 0.5rem 0;
   }
-  
+
   .delete-modal-body p {
     font-size: 0.875rem;
     color: var(--admin-text-muted);
     margin: 0;
   }
-  
+
   .delete-actions {
     padding: 0 1.5rem 1.5rem;
     display: flex;
     gap: 0.75rem;
   }
-  
-  .delete-actions button { flex: 1; }
-  
+
+  .delete-actions button {
+    flex: 1;
+  }
+
   .btn-delete {
     background: #ef4444;
     color: white;
   }
-  
-  .btn-delete:hover { background: #dc2626; }
-  
+
+  .btn-delete:hover {
+    background: #dc2626;
+  }
+
   /* Toast */
   .toast {
     position: fixed;
@@ -869,72 +1020,108 @@
     transform: translateY(120%);
     transition: transform 0.3s ease;
   }
-  
-  .toast.show { transform: translateY(0); }
-  
-  .toast svg { width: 20px; height: 20px; flex-shrink: 0; }
-  .toast.success svg { color: #10b981; }
-  .toast.error svg { color: #ef4444; }
-  
+
+  .toast.show {
+    transform: translateY(0);
+  }
+
+  .toast svg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+  }
+
+  .toast.success svg {
+    color: #10b981;
+  }
+
+  .toast.error svg {
+    color: #ef4444;
+  }
+
   /* Responsive */
   @media (max-width: 1200px) {
-    .stats-row { grid-template-columns: repeat(2, 1fr); }
+    .stats-row {
+      grid-template-columns: repeat(2, 1fr);
+    }
   }
-  
+
   @media (max-width: 1024px) {
-    .connection-row { 
-      grid-template-columns: 1fr auto; 
+    .connection-row {
+      grid-template-columns: 1fr auto;
       gap: 1rem;
     }
-    .conn-stats { display: none; }
-    .conn-status-section { 
+
+    .conn-stats {
+      display: none;
+    }
+
+    .conn-status-section {
       flex-direction: column;
       align-items: flex-end;
       gap: 0.5rem;
     }
+
     .intg-header {
       flex-direction: column;
       gap: 1rem;
       align-items: flex-start;
     }
+
     .intg-header-actions {
       width: 100%;
     }
+
     .intg-header-actions a,
     .intg-header-actions button {
       flex: 1;
       justify-content: center;
     }
   }
-  
+
   @media (max-width: 640px) {
-    .stats-row { grid-template-columns: 1fr; }
-    .intg-container { padding: 1rem; }
-    .connection-row { 
+    .stats-row {
+      grid-template-columns: 1fr;
+    }
+
+    .intg-container {
+      padding: 1rem;
+    }
+
+    .connection-row {
       padding: 1rem;
       grid-template-columns: 1fr;
       gap: 1rem;
     }
+
     .conn-actions {
       justify-content: flex-start;
     }
-    .progress-stats { grid-template-columns: repeat(2, 1fr); }
+
+    .progress-stats {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
     .intg-header-left {
       flex-direction: column;
       align-items: flex-start;
       gap: 0.5rem;
     }
-    .intg-header-icon { display: none; }
+
+    .intg-header-icon {
+      display: none;
+    }
   }
 </style>
 </head>
+
 <body>
   <div class="admin-wrapper">
     <%- include('partials/sidebar', { activePage: 'integrations' }) %>
-    
+
     <main class="admin-main">
       <%- include('partials/topbar', { pageTitle: 'Integrations' }) %>
-      
+
       <div class="admin-content intg-page">
         <!-- Page Header Bar -->
         <div class="intg-header">
@@ -1009,7 +1196,7 @@
               </div>
               <span class="connection-count"><%= typeof integrations !== 'undefined' ? integrations.length : 0 %> connections</span>
             </div>
-            
+
             <% 
             var allConnections = typeof integrations !== 'undefined' ? integrations : [];
             if (allConnections.length === 0) { 
@@ -1023,10 +1210,10 @@
               <a href="/admin/integrations/create" class="btn-add-connection">
                 <i data-lucide="plus"></i>
                 Add Your First Connection
-            </a>
-          </div>
-          <% } else { %>
-          <% allConnections.forEach(function(conn) { 
+              </a>
+            </div>
+            <% } else { %>
+            <% allConnections.forEach(function(conn) { 
             var statusClass = conn.status === 'active' ? 'active' : conn.status === 'syncing' ? 'syncing' : conn.status === 'error' ? 'error' : 'pending';
             var statusText = conn.status === 'active' ? 'Active' : conn.status === 'syncing' ? 'Syncing' : conn.status === 'error' ? 'Error' : 'Pending';
             var statusIcon = conn.status === 'active' ? 'check-circle' : conn.status === 'syncing' ? 'loader-2' : conn.status === 'error' ? 'alert-circle' : 'circle';
@@ -1049,167 +1236,167 @@
             var hostInfo = conn.type === 'ftp' && conn.ftp ? conn.ftp.host : conn.type === 'api' && conn.api ? conn.api.baseUrl : 'N/A';
             var scheduleText = conn.syncSchedule && conn.syncSchedule.enabled ? conn.syncSchedule.frequency : 'Manual';
           %>
-          <div class="connection-item" id="conn-item-<%= conn._id %>">
-            <div class="connection-row" onclick="toggleSyncPanel('<%= conn._id %>')">
-              <div class="conn-info">
-                <div class="conn-icon">
-                  <i data-lucide="<%= conn.type === 'ftp' ? 'hard-drive' : 'code' %>"></i>
-                </div>
-                <div class="conn-details">
-                  <h4><%= conn.name %></h4>
-                  <div class="meta">
-                    <i data-lucide="server"></i>
-                    <span><%= hostInfo %></span>
+            <div class="connection-item" id="conn-item-<%= conn._id %>">
+              <div class="connection-row" onclick="toggleSyncPanel('<%= conn._id %>')">
+                <div class="conn-info">
+                  <div class="conn-icon">
+                    <i data-lucide="<%= conn.type === 'ftp' ? 'hard-drive' : 'code' %>"></i>
                   </div>
-                </div>
-              </div>
-              
-              <div class="conn-stats">
-                <div class="conn-stat">
-                  <div class="value" id="files-<%= conn._id %>"><%= filesCount %></div>
-                  <div class="label">Files</div>
-                </div>
-                <div class="conn-stat">
-                  <div class="value" id="records-<%= conn._id %>"><%= recordsFormatted %></div>
-                  <div class="label">Records</div>
-                </div>
-                <div class="conn-stat">
-                  <div class="value"><%= scheduleText %></div>
-                  <div class="label">Schedule</div>
-                </div>
-              </div>
-              
-              <div class="conn-status-section">
-                <div class="status-badge <%= statusClass %>" id="status-<%= conn._id %>">
-                  <i data-lucide="<%= statusIcon %>"></i>
-                  <span><%= statusText %></span>
-                </div>
-                <div class="last-sync-time" id="lastsync-<%= conn._id %>">
-                  <i data-lucide="clock"></i>
-                  <span><%= lastSyncText %></span>
-                </div>
-              </div>
-              
-              <div class="conn-actions" onclick="event.stopPropagation()">
-                <button class="action-btn" title="Sync Now" onclick="syncConnection('<%= conn._id %>')" id="sync-btn-<%= conn._id %>">
-                  <i data-lucide="refresh-cw"></i>
-                </button>
-                <button class="action-btn" title="Test Connection" onclick="testConnection('<%= conn._id %>')">
-                  <i data-lucide="play"></i>
-                </button>
-                <button class="action-btn" title="Edit" onclick="editConnection('<%= conn._id %>')">
-                  <i data-lucide="edit-2"></i>
-                </button>
-                <button class="action-btn danger" title="Delete" onclick="deleteConnection('<%= conn._id %>', '<%= conn.name %>')">
-                  <i data-lucide="trash-2"></i>
-                </button>
-              </div>
-            </div>
-            
-            <!-- Expandable Sync Panel -->
-            <div class="sync-panel" id="sync-panel-<%= conn._id %>">
-              <div class="sync-panel-content">
-                <div class="sync-panel-header">
-                  <div class="sync-panel-title">
-                    <i data-lucide="activity"></i>
-                    Sync Details
-                  </div>
-                  <div class="sync-tabs">
-                    <button class="sync-tab active" onclick="showSyncTab('<%= conn._id %>', 'progress')">Live Progress</button>
-                    <button class="sync-tab" onclick="showSyncTab('<%= conn._id %>', 'history')">History</button>
-                  </div>
-                </div>
-                
-                <!-- Progress Tab -->
-                <div class="sync-tab-content" id="progress-tab-<%= conn._id %>">
-                  <div class="sync-progress-section" id="progress-section-<%= conn._id %>">
-                    <div class="progress-header">
-                      <div class="progress-status">
-                        <div class="progress-icon" id="progress-icon-<%= conn._id %>">
-                          <i data-lucide="<%= conn.status === 'syncing' ? 'loader-2' : 'check-circle' %>"></i>
-                        </div>
-                        <div class="progress-text">
-                          <h5 id="progress-title-<%= conn._id %>"><%= conn.status === 'syncing' ? 'Syncing...' : 'Last Sync Completed' %></h5>
-                          <p id="progress-subtitle-<%= conn._id %>"><%= conn.lastSync && conn.lastSync.date ? 'Completed ' + lastSyncText : 'No sync yet' %></p>
-                        </div>
-                      </div>
-                      <div class="progress-percentage" id="progress-percent-<%= conn._id %>">
-                        <%= conn.status === 'syncing' ? '0%' : '100%' %>
-                      </div>
-                    </div>
-                    
-                    <div class="progress-bar-container">
-                      <div class="progress-bar-fill" id="progress-bar-<%= conn._id %>" style="width: <%= conn.status === 'syncing' ? '0%' : '100%' %>"></div>
-                    </div>
-                    
-                    <div class="current-file" id="current-file-<%= conn._id %>" style="display: none;">
-                      <div class="current-file-icon">
-                        <i data-lucide="file-text"></i>
-                      </div>
-                      <div class="current-file-info">
-                        <strong id="current-file-name-<%= conn._id %>">file.csv</strong>
-                        <span>Processing...</span>
-                      </div>
-                    </div>
-                    
-                    <div class="progress-stats">
-                      <div class="progress-stat">
-                        <div class="value" id="pstat-files-<%= conn._id %>"><%= filesCount %></div>
-                        <div class="label">Files</div>
-                      </div>
-                      <div class="progress-stat">
-                        <div class="value" id="pstat-records-<%= conn._id %>"><%= conn.lastSync && conn.lastSync.recordsProcessed ? conn.lastSync.recordsProcessed.toLocaleString() : '0' %></div>
-                        <div class="label">Records</div>
-                      </div>
-                      <div class="progress-stat">
-                        <div class="value" id="pstat-inserted-<%= conn._id %>"><%= conn.lastSync && conn.lastSync.recordsInserted ? conn.lastSync.recordsInserted.toLocaleString() : '0' %></div>
-                        <div class="label">Inserted</div>
-                      </div>
-                      <div class="progress-stat">
-                        <div class="value" id="pstat-duration-<%= conn._id %>"><%= conn.lastSync && conn.lastSync.duration ? Math.ceil(conn.lastSync.duration / 1000) + 's' : '-' %></div>
-                        <div class="label">Duration</div>
-                      </div>
+                  <div class="conn-details">
+                    <h4><%= conn.name %></h4>
+                    <div class="meta">
+                      <i data-lucide="server"></i>
+                      <span><%= hostInfo %></span>
                     </div>
                   </div>
                 </div>
-                
-                <!-- History Tab -->
-                <div class="sync-tab-content" id="history-tab-<%= conn._id %>" style="display: none;">
-                  <div class="sync-history">
-                    <div class="history-header">
-                      <i data-lucide="history"></i>
-                      Sync History
+
+                <div class="conn-stats">
+                  <div class="conn-stat">
+                    <div class="value" id="files-<%= conn._id %>"><%= filesCount %></div>
+                    <div class="label">Files</div>
+                  </div>
+                  <div class="conn-stat">
+                    <div class="value" id="records-<%= conn._id %>"><%= recordsFormatted %></div>
+                    <div class="label">Records</div>
+                  </div>
+                  <div class="conn-stat">
+                    <div class="value"><%= scheduleText %></div>
+                    <div class="label">Schedule</div>
+                  </div>
+                </div>
+
+                <div class="conn-status-section">
+                  <div class="status-badge <%= statusClass %>" id="status-<%= conn._id %>">
+                    <i data-lucide="<%= statusIcon %>"></i>
+                    <span><%= statusText %></span>
+                  </div>
+                  <div class="last-sync-time" id="lastsync-<%= conn._id %>">
+                    <i data-lucide="clock"></i>
+                    <span><%= lastSyncText %></span>
+                  </div>
+                </div>
+
+                <div class="conn-actions" onclick="event.stopPropagation()">
+                  <button class="action-btn" title="Sync Now" onclick="syncConnection('<%= conn._id %>')" id="sync-btn-<%= conn._id %>">
+                    <i data-lucide="refresh-cw"></i>
+                  </button>
+                  <button class="action-btn" title="Test Connection" onclick="testConnection('<%= conn._id %>')">
+                    <i data-lucide="play"></i>
+                  </button>
+                  <button class="action-btn" title="Edit" onclick="editConnection('<%= conn._id %>')">
+                    <i data-lucide="edit-2"></i>
+                  </button>
+                  <button class="action-btn danger" title="Delete" onclick="deleteConnection('<%= conn._id %>', '<%= conn.name %>')">
+                    <i data-lucide="trash-2"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Expandable Sync Panel -->
+              <div class="sync-panel" id="sync-panel-<%= conn._id %>">
+                <div class="sync-panel-content">
+                  <div class="sync-panel-header">
+                    <div class="sync-panel-title">
+                      <i data-lucide="activity"></i>
+                      Sync Details
                     </div>
-                    <div class="history-list" id="history-list-<%= conn._id %>">
-                      <% if (conn.lastSync && conn.lastSync.date) { %>
-                      <div class="history-item">
-                        <div class="history-info">
-                          <div class="history-status <%= conn.lastSync.status === 'success' ? 'success' : conn.lastSync.status === 'error' ? 'error' : 'warning' %>"></div>
-                          <div class="history-details">
-                            <h6><%= new Date(conn.lastSync.date).toLocaleDateString() %> at <%= new Date(conn.lastSync.date).toLocaleTimeString() %></h6>
-                            <span><%= conn.lastSync.status === 'success' ? 'Completed successfully' : conn.lastSync.error || 'Completed with issues' %></span>
+                    <div class="sync-tabs">
+                      <button class="sync-tab active" onclick="showSyncTab('<%= conn._id %>', 'progress')">Live Progress</button>
+                      <button class="sync-tab" onclick="showSyncTab('<%= conn._id %>', 'history')">History</button>
+                    </div>
+                  </div>
+
+                  <!-- Progress Tab -->
+                  <div class="sync-tab-content" id="progress-tab-<%= conn._id %>">
+                    <div class="sync-progress-section" id="progress-section-<%= conn._id %>">
+                      <div class="progress-header">
+                        <div class="progress-status">
+                          <div class="progress-icon" id="progress-icon-<%= conn._id %>">
+                            <i data-lucide="<%= conn.status === 'syncing' ? 'loader-2' : 'check-circle' %>"></i>
+                          </div>
+                          <div class="progress-text">
+                            <h5 id="progress-title-<%= conn._id %>"><%= conn.status === 'syncing' ? 'Syncing...' : 'Last Sync Completed' %></h5>
+                            <p id="progress-subtitle-<%= conn._id %>"><%= conn.lastSync && conn.lastSync.date ? 'Completed ' + lastSyncText : 'No sync yet' %></p>
                           </div>
                         </div>
-                        <div class="history-stats">
-                          <span><%= conn.lastSync.files ? conn.lastSync.files.length : 0 %> files</span>
-                          <span><%= conn.lastSync.recordsProcessed || 0 %> records</span>
-                          <span><%= conn.lastSync.duration ? Math.ceil(conn.lastSync.duration / 1000) + 's' : '-' %></span>
+                        <div class="progress-percentage" id="progress-percent-<%= conn._id %>">
+                          <%= conn.status === 'syncing' ? '0%' : '100%' %>
                         </div>
                       </div>
-                      <% } else { %>
-                      <div style="padding: 2rem; text-align: center; color: var(--admin-text-muted);">
-                        <i data-lucide="inbox" style="width: 32px; height: 32px; margin-bottom: 0.5rem; opacity: 0.5;"></i>
-                        <p style="margin: 0;">No sync history yet</p>
+
+                      <div class="progress-bar-container">
+                        <div class="progress-bar-fill" id="progress-bar-<%= conn._id %>" style="width: <%= conn.status === 'syncing' ? '0%' : '100%' %>"></div>
                       </div>
-                      <% } %>
+
+                      <div class="current-file" id="current-file-<%= conn._id %>" style="display: none;">
+                        <div class="current-file-icon">
+                          <i data-lucide="file-text"></i>
+                        </div>
+                        <div class="current-file-info">
+                          <strong id="current-file-name-<%= conn._id %>">file.csv</strong>
+                          <span>Processing...</span>
+                        </div>
+                      </div>
+
+                      <div class="progress-stats">
+                        <div class="progress-stat">
+                          <div class="value" id="pstat-files-<%= conn._id %>"><%= filesCount %></div>
+                          <div class="label">Files</div>
+                        </div>
+                        <div class="progress-stat">
+                          <div class="value" id="pstat-records-<%= conn._id %>"><%= conn.lastSync && conn.lastSync.recordsProcessed ? conn.lastSync.recordsProcessed.toLocaleString() : '0' %></div>
+                          <div class="label">Records</div>
+                        </div>
+                        <div class="progress-stat">
+                          <div class="value" id="pstat-inserted-<%= conn._id %>"><%= conn.lastSync && conn.lastSync.recordsInserted ? conn.lastSync.recordsInserted.toLocaleString() : '0' %></div>
+                          <div class="label">Inserted</div>
+                        </div>
+                        <div class="progress-stat">
+                          <div class="value" id="pstat-duration-<%= conn._id %>"><%= conn.lastSync && conn.lastSync.duration ? Math.ceil(conn.lastSync.duration / 1000) + 's' : '-' %></div>
+                          <div class="label">Duration</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- History Tab -->
+                  <div class="sync-tab-content" id="history-tab-<%= conn._id %>" style="display: none;">
+                    <div class="sync-history">
+                      <div class="history-header">
+                        <i data-lucide="history"></i>
+                        Sync History
+                      </div>
+                      <div class="history-list" id="history-list-<%= conn._id %>">
+                        <% if (conn.lastSync && conn.lastSync.date) { %>
+                        <div class="history-item">
+                          <div class="history-info">
+                            <div class="history-status <%= conn.lastSync.status === 'success' ? 'success' : conn.lastSync.status === 'error' ? 'error' : 'warning' %>"></div>
+                            <div class="history-details">
+                              <h6><%= new Date(conn.lastSync.date).toLocaleDateString() %> at <%= new Date(conn.lastSync.date).toLocaleTimeString() %></h6>
+                              <span><%= conn.lastSync.status === 'success' ? 'Completed successfully' : conn.lastSync.error || 'Completed with issues' %></span>
+                            </div>
+                          </div>
+                          <div class="history-stats">
+                            <span><%= conn.lastSync.files ? conn.lastSync.files.length : 0 %> files</span>
+                            <span><%= conn.lastSync.recordsProcessed || 0 %> records</span>
+                            <span><%= conn.lastSync.duration ? Math.ceil(conn.lastSync.duration / 1000) + 's' : '-' %></span>
+                          </div>
+                        </div>
+                        <% } else { %>
+                        <div style="padding: 2rem; text-align: center; color: var(--admin-text-muted);">
+                          <i data-lucide="inbox" style="width: 32px; height: 32px; margin-bottom: 0.5rem; opacity: 0.5;"></i>
+                          <p style="margin: 0;">No sync history yet</p>
+                        </div>
+                        <% } %>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-          <% }); %>
-          <% } %>
+            <% }); %>
+            <% } %>
           </div>
         </div>
       </div>
@@ -1273,7 +1460,7 @@
   <script>
     let pendingDeleteId = null;
     let activeSyncs = new Map();
-    
+
     // Init icons
     if (typeof lucide !== 'undefined') lucide.createIcons();
 
@@ -1304,9 +1491,9 @@
       const progressTab = document.getElementById('progress-tab-' + id);
       const historyTab = document.getElementById('history-tab-' + id);
       const tabs = document.querySelectorAll('#sync-panel-' + id + ' .sync-tab');
-      
+
       tabs.forEach(t => t.classList.remove('active'));
-      
+
       if (tab === 'progress') {
         progressTab.style.display = 'block';
         historyTab.style.display = 'none';
@@ -1339,11 +1526,13 @@
     async function confirmDelete() {
       if (!pendingDeleteId) return;
       closeDeleteModal();
-      
+
       try {
-        const response = await fetch('/admin/api/integrations/' + pendingDeleteId, { method: 'DELETE' });
+        const response = await fetch('/admin/api/integrations/' + pendingDeleteId, {
+          method: 'DELETE'
+        });
         const result = await response.json();
-        
+
         if (result.success) {
           showToast('Connection deleted', 'success');
           const item = document.getElementById('conn-item-' + pendingDeleteId);
@@ -1368,33 +1557,35 @@
       const title = document.getElementById('testModalTitle');
       const subtitle = document.getElementById('testModalSubtitle');
       const result = document.getElementById('testModalResult');
-      
+
       icon.className = 'modal-icon testing';
       icon.innerHTML = '<i data-lucide="loader-2" class="spin"></i>';
       title.textContent = 'Testing Connection';
       subtitle.textContent = 'Verifying server credentials...';
       result.style.display = 'none';
-      
+
       modal.classList.add('active');
       if (typeof lucide !== 'undefined') lucide.createIcons();
-      
+
       const startTime = Date.now();
-      
+
       try {
         const getResponse = await fetch('/admin/api/integrations/' + id);
         const integrationData = await getResponse.json();
-        
+
         if (!integrationData.success) throw new Error('Failed to get integration');
 
         const response = await fetch('/admin/api/integrations/test', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json'
+          },
           body: JSON.stringify(integrationData.integration)
         });
-        
+
         const testResult = await response.json();
         const elapsed = Date.now() - startTime;
-        
+
         if (testResult.success) {
           icon.className = 'modal-icon success';
           icon.innerHTML = '<i data-lucide="check-circle"></i>';
@@ -1415,7 +1606,7 @@
         title.textContent = 'Test Failed';
         subtitle.textContent = error.message;
       }
-      
+
       if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 
@@ -1429,45 +1620,59 @@
         showToast('Sync already in progress', 'error');
         return;
       }
-      
+
       // Expand panel
       const panel = document.getElementById('sync-panel-' + id);
       if (panel && !panel.classList.contains('expanded')) {
         panel.classList.add('expanded');
       }
-      
+
       // Show progress tab
       showSyncTab(id, 'progress');
-      
+
       // Update UI
       updateConnectionStatus(id, 'syncing');
-      updateProgressUI(id, { status: 'syncing', message: 'Starting...', progress: 0 });
-      
+      updateProgressUI(id, {
+        status: 'syncing',
+        message: 'Starting...',
+        progress: 0
+      });
+
       const syncBtn = document.getElementById('sync-btn-' + id);
       if (syncBtn) syncBtn.classList.add('syncing');
-      
+
       try {
         const response = await fetch('/admin/api/integrations/' + id + '/sync', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' }
+          headers: {
+            'Content-Type': 'application/json'
+          }
         });
-        
+
         const result = await response.json();
-        
+
         if (result.success) {
           activeSyncs.set(id, true);
           startPolling(id);
         } else {
-          updateProgressUI(id, { status: 'error', message: result.error || 'Failed to start', progress: 0 });
+          updateProgressUI(id, {
+            status: 'error',
+            message: result.error || 'Failed to start',
+            progress: 0
+          });
           updateConnectionStatus(id, 'error');
           if (syncBtn) syncBtn.classList.remove('syncing');
         }
       } catch (error) {
-        updateProgressUI(id, { status: 'error', message: error.message, progress: 0 });
+        updateProgressUI(id, {
+          status: 'error',
+          message: error.message,
+          progress: 0
+        });
         updateConnectionStatus(id, 'error');
         if (syncBtn) syncBtn.classList.remove('syncing');
       }
-      
+
       if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 
@@ -1477,15 +1682,15 @@
         try {
           const response = await fetch('/admin/api/integrations/' + id + '/progress');
           const data = await response.json();
-          
+
           if (data.success && data.progress) {
             const p = data.progress;
-            
+
             let percent = 0;
             if (p.filesTotal > 0) {
               percent = Math.round((p.filesProcessed / p.filesTotal) * 100);
             }
-            
+
             updateProgressUI(id, {
               status: p.status,
               message: p.currentFile ? 'Processing: ' + p.currentFile : (p.message || 'Processing...'),
@@ -1497,19 +1702,19 @@
               currentFile: p.currentFile,
               duration: p.elapsedMs ? Math.ceil(p.elapsedMs / 1000) : 0
             });
-            
+
             if (p.status === 'completed' || p.status === 'error') {
               clearInterval(interval);
               activeSyncs.delete(id);
-              
+
               const syncBtn = document.getElementById('sync-btn-' + id);
               if (syncBtn) syncBtn.classList.remove('syncing');
-              
+
               updateConnectionStatus(id, p.status === 'completed' ? 'active' : 'error');
-              
+
               // Refresh card data
               await refreshCardData(id);
-              
+
               if (p.status === 'completed') {
                 showToast('Sync completed: ' + (p.recordsInserted || 0) + ' records', 'success');
               }
@@ -1517,17 +1722,17 @@
           } else if (!data.isSyncing) {
             clearInterval(interval);
             activeSyncs.delete(id);
-            
+
             const syncBtn = document.getElementById('sync-btn-' + id);
             if (syncBtn) syncBtn.classList.remove('syncing');
-            
+
             await refreshCardData(id);
           }
         } catch (error) {
           console.error('Polling error:', error);
         }
       }, 1500);
-      
+
       // Timeout
       setTimeout(() => {
         if (activeSyncs.has(id)) {
@@ -1546,7 +1751,7 @@
       const bar = document.getElementById('progress-bar-' + id);
       const currentFile = document.getElementById('current-file-' + id);
       const currentFileName = document.getElementById('current-file-name-' + id);
-      
+
       if (data.status === 'syncing') {
         icon.className = 'progress-icon';
         icon.innerHTML = '<i data-lucide="loader-2" class="spin"></i>';
@@ -1560,29 +1765,29 @@
         icon.innerHTML = '<i data-lucide="alert-circle"></i>';
         title.textContent = 'Sync Failed';
       }
-      
+
       subtitle.textContent = data.message || '';
       percent.textContent = data.progress + '%';
       bar.style.width = data.progress + '%';
-      
+
       if (data.currentFile && data.status === 'syncing') {
         currentFile.style.display = 'flex';
         currentFileName.textContent = data.currentFile;
       } else {
         currentFile.style.display = 'none';
       }
-      
+
       // Update stats
       const files = document.getElementById('pstat-files-' + id);
       const records = document.getElementById('pstat-records-' + id);
       const inserted = document.getElementById('pstat-inserted-' + id);
       const duration = document.getElementById('pstat-duration-' + id);
-      
+
       if (files && data.files !== undefined) files.textContent = (data.files || 0) + '/' + (data.filesTotal || 0);
       if (records && data.records !== undefined) records.textContent = (data.records || 0).toLocaleString();
       if (inserted && data.inserted !== undefined) inserted.textContent = (data.inserted || 0).toLocaleString();
       if (duration && data.duration !== undefined) duration.textContent = data.duration + 's';
-      
+
       if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 
@@ -1593,7 +1798,7 @@
         const statusClass = status === 'active' ? 'active' : status === 'syncing' ? 'syncing' : status === 'error' ? 'error' : 'pending';
         const statusText = status === 'active' ? 'Active' : status === 'syncing' ? 'Syncing' : status === 'error' ? 'Error' : 'Pending';
         const statusIcon = status === 'active' ? 'check-circle' : status === 'syncing' ? 'loader-2' : status === 'error' ? 'alert-circle' : 'circle';
-        
+
         badge.className = 'status-badge ' + statusClass;
         badge.innerHTML = '<i data-lucide="' + statusIcon + '"></i><span>' + statusText + '</span>';
         if (typeof lucide !== 'undefined') lucide.createIcons();
@@ -1605,24 +1810,24 @@
       try {
         const response = await fetch('/admin/api/integrations/' + id);
         const data = await response.json();
-        
+
         if (data.success && data.integration) {
           const conn = data.integration;
-          
+
           // Update status
           updateConnectionStatus(id, conn.status);
-          
+
           // Update files
           const filesEl = document.getElementById('files-' + id);
           if (filesEl) filesEl.textContent = conn.lastSync && conn.lastSync.files ? conn.lastSync.files.length : 0;
-          
+
           // Update records
           const recordsEl = document.getElementById('records-' + id);
           if (recordsEl) {
             const count = conn.stats && conn.stats.totalRecords ? conn.stats.totalRecords : 0;
             recordsEl.textContent = count >= 1000000 ? (count / 1000000).toFixed(1) + 'M' : count >= 1000 ? Math.floor(count / 1000) + 'K' : count;
           }
-          
+
           // Update last sync
           const lastSyncEl = document.getElementById('lastsync-' + id);
           if (lastSyncEl && conn.lastSync && conn.lastSync.date) {
@@ -1635,7 +1840,7 @@
             else if (diff >= 1440) text = Math.floor(diff / 1440) + 'd ago';
             lastSyncEl.querySelector('span').textContent = text;
           }
-          
+
           // Update progress stats
           if (conn.lastSync) {
             document.getElementById('pstat-files-' + id).textContent = conn.lastSync.files ? conn.lastSync.files.length : 0;
@@ -1656,9 +1861,9 @@
         showToast('No connections to sync', 'error');
         return;
       }
-      
+
       showToast('Starting sync for all connections...', 'success');
-      
+
       for (const item of items) {
         const id = item.id.replace('conn-item-', '');
         if (id && !activeSyncs.has(id)) {
@@ -1679,26 +1884,26 @@
           console.log('Resuming sync for:', id);
           const syncBtn = document.getElementById('sync-btn-' + id);
           if (syncBtn) syncBtn.classList.add('syncing');
-          
+
           const panel = document.getElementById('sync-panel-' + id);
           if (panel) panel.classList.add('expanded');
-          
+
           activeSyncs.set(id, true);
           startPolling(id);
         }
       }
-      
+
       // Check for syncStarted param
       const urlParams = new URLSearchParams(window.location.search);
       const syncStartedId = urlParams.get('syncStarted');
-      
+
       if (syncStartedId) {
         showToast('Auto-sync started!', 'success');
-        
+
         // Expand panel
         const panel = document.getElementById('sync-panel-' + syncStartedId);
         if (panel) panel.classList.add('expanded');
-        
+
         // Start polling if not already
         if (!activeSyncs.has(syncStartedId)) {
           activeSyncs.set(syncStartedId, true);
@@ -1707,7 +1912,7 @@
           if (syncBtn) syncBtn.classList.add('syncing');
           startPolling(syncStartedId);
         }
-        
+
         // Clean URL
         window.history.replaceState({}, '', window.location.pathname);
       }
@@ -1719,4 +1924,4 @@
     document.head.appendChild(style);
   </script>
 
-<%- include('partials/footer') %>
+  <%- include('partials/footer') %>

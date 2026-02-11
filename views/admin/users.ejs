@@ -2,13 +2,14 @@
 <link rel="stylesheet" href="/css/adminCSS/admin-dashboard.css">
 <link rel="stylesheet" href="/css/adminCSS/admin-users.css">
 </head>
+
 <body>
   <div class="admin-wrapper">
     <%- include('partials/sidebar', { activePage: 'users' }) %>
-    
+
     <main class="admin-main">
       <%- include('partials/topbar', { pageTitle: 'Users' }) %>
-      
+
       <div class="admin-content">
         <!-- Page Header -->
         <div class="users-page-header">
@@ -198,9 +199,9 @@
                 <td>
                   <span class="user-status-badge <%= user.status %>">
                     <% if (user.status === 'active') { %>
-                      <i data-lucide="check-circle"></i>
+                    <i data-lucide="check-circle"></i>
                     <% } else { %>
-                      <i data-lucide="x-circle"></i>
+                    <i data-lucide="x-circle"></i>
                     <% } %>
                     <%= user.status.charAt(0).toUpperCase() + user.status.slice(1) %>
                   </span>
@@ -236,18 +237,18 @@
 
   <script>
     var selectedUsers = [];
-    
+
     // Handle row click to navigate to user details
     function handleRowClick(event, userId) {
       window.location.href = '/admin/users/' + userId;
     }
-    
+
     // Toggle single user selection
     function toggleUserSelection(userId) {
       var checkbox = document.querySelector('.user-checkbox[data-id="' + userId + '"]');
       var row = document.querySelector('tr[data-user-id="' + userId + '"]');
       var index = selectedUsers.indexOf(userId);
-      
+
       if (index > -1) {
         selectedUsers.splice(index, 1);
         checkbox.classList.remove('checked');
@@ -257,22 +258,26 @@
         checkbox.classList.add('checked');
         row.classList.add('selected');
       }
-      
+
       updateBulkActionBar();
     }
-    
+
     // Toggle select all
     function toggleSelectAll() {
       var selectAllCheckbox = document.getElementById('selectAll');
       var allCheckboxes = document.querySelectorAll('.user-checkbox[data-id]');
       var allRows = document.querySelectorAll('#usersTableBody tr');
-      
+
       if (selectAllCheckbox.classList.contains('checked')) {
         // Deselect all
         selectAllCheckbox.classList.remove('checked');
         selectedUsers = [];
-        allCheckboxes.forEach(function(cb) { cb.classList.remove('checked'); });
-        allRows.forEach(function(row) { row.classList.remove('selected'); });
+        allCheckboxes.forEach(function(cb) {
+          cb.classList.remove('checked');
+        });
+        allRows.forEach(function(row) {
+          row.classList.remove('selected');
+        });
       } else {
         // Select all visible
         selectAllCheckbox.classList.add('checked');
@@ -286,49 +291,58 @@
           }
         });
       }
-      
+
       updateBulkActionBar();
     }
-    
+
     // Update bulk action bar visibility
     function updateBulkActionBar() {
       var bar = document.getElementById('bulkActionBar');
       var countEl = document.getElementById('selectedCount');
-      
+
       if (selectedUsers.length > 0) {
         bar.classList.add('active');
         countEl.textContent = selectedUsers.length;
       } else {
         bar.classList.remove('active');
       }
-      
+
       // Re-initialize lucide icons
       if (typeof lucide !== 'undefined') {
         lucide.createIcons();
       }
     }
-    
+
     // Clear selection
     function clearSelection() {
       var selectAllCheckbox = document.getElementById('selectAll');
       var allCheckboxes = document.querySelectorAll('.user-checkbox[data-id]');
       var allRows = document.querySelectorAll('#usersTableBody tr');
-      
+
       selectAllCheckbox.classList.remove('checked');
       selectedUsers = [];
-      allCheckboxes.forEach(function(cb) { cb.classList.remove('checked'); });
-      allRows.forEach(function(row) { row.classList.remove('selected'); });
+      allCheckboxes.forEach(function(cb) {
+        cb.classList.remove('checked');
+      });
+      allRows.forEach(function(row) {
+        row.classList.remove('selected');
+      });
       updateBulkActionBar();
     }
-    
+
     // Bulk update status
     function bulkUpdateStatus(newStatus) {
       if (selectedUsers.length === 0) return;
-      
+
       fetch('/admin/api/users/bulk', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userIds: selectedUsers, status: newStatus })
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          userIds: selectedUsers,
+          status: newStatus
+        })
       }).then(function(response) {
         if (response.ok) {
           location.reload();
@@ -337,15 +351,19 @@
         console.error('Error updating users:', err);
       });
     }
-    
+
     // Toggle single user status
     function toggleUserStatus(userId, currentStatus) {
       var newStatus = currentStatus === 'active' ? 'inactive' : 'active';
-      
+
       fetch('/admin/api/users/' + userId + '/status', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus })
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          status: newStatus
+        })
       }).then(function(response) {
         if (response.ok) {
           location.reload();
@@ -354,17 +372,21 @@
         console.error('Error updating user:', err);
       });
     }
-    
+
     // Approve user
     function approveUser(userId) {
       if (!confirm('Are you sure you want to approve this user? They will be able to access their buyer dashboard.')) {
         return;
       }
-      
+
       fetch('/admin/api/users/' + userId + '/approve', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ notes: 'Approved by admin' })
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          notes: 'Approved by admin'
+        })
       }).then(function(response) {
         if (response.ok) {
           location.reload();
@@ -376,16 +398,20 @@
         alert('Failed to approve user');
       });
     }
-    
+
     // Reject user
     function rejectUser(userId) {
       var reason = prompt('Please provide a reason for rejection (optional):');
       if (reason === null) return; // User cancelled
-      
+
       fetch('/admin/api/users/' + userId + '/reject', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reason: reason || 'Application rejected by admin' })
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          reason: reason || 'Application rejected by admin'
+        })
       }).then(function(response) {
         if (response.ok) {
           location.reload();
@@ -397,23 +423,23 @@
         alert('Failed to reject user');
       });
     }
-    
+
     // Search functionality
     document.getElementById('usersSearch').addEventListener('input', function(e) {
       var searchTerm = e.target.value.toLowerCase();
       var rows = document.querySelectorAll('#usersTableBody tr');
-      
+
       rows.forEach(function(row) {
         var text = row.textContent.toLowerCase();
         row.style.display = text.includes(searchTerm) ? '' : 'none';
       });
     });
-    
+
     // Filter by status
     document.getElementById('filterStatus').addEventListener('change', function(e) {
       var status = e.target.value;
       var rows = document.querySelectorAll('#usersTableBody tr');
-      
+
       rows.forEach(function(row) {
         if (!status || row.dataset.status === status) {
           row.style.display = '';
@@ -422,14 +448,16 @@
         }
       });
     });
-    
+
     // Clear filters
     function clearFilters() {
       document.getElementById('filterStatus').value = '';
       document.getElementById('sortBy').value = 'recent';
       document.getElementById('usersSearch').value = '';
       var rows = document.querySelectorAll('#usersTableBody tr');
-      rows.forEach(function(row) { row.style.display = ''; });
+      rows.forEach(function(row) {
+        row.style.display = '';
+      });
     }
   </script>
 
@@ -445,43 +473,52 @@
       font-weight: 600;
       white-space: nowrap;
     }
+
     .markup-badge.custom {
       background: rgba(139, 92, 246, 0.12);
       color: #8b5cf6;
     }
+
     .markup-badge.default {
       background: var(--admin-bg-tertiary, rgba(100, 116, 139, 0.1));
       color: var(--admin-text-muted, #64748b);
     }
+
     .markup-badge small {
       font-size: 0.65rem;
       opacity: 0.7;
     }
+
     /* Pending status badge */
     .user-status-badge.pending {
       background: rgba(245, 158, 11, 0.12);
       color: #d97706;
     }
+
     .user-status-badge.rejected {
       background: rgba(239, 68, 68, 0.12);
       color: #dc2626;
     }
+
     /* Approve/Reject/Activate/Deactivate buttons */
     .user-action-btn.approve,
     .user-action-btn.activate {
       background: rgba(16, 185, 129, 0.1);
       color: #10b981;
     }
+
     .user-action-btn.approve:hover,
     .user-action-btn.activate:hover {
       background: #10b981;
       color: white;
     }
+
     .user-action-btn.reject,
     .user-action-btn.deactivate {
       background: rgba(239, 68, 68, 0.1);
       color: #ef4444;
     }
+
     .user-action-btn.reject:hover,
     .user-action-btn.deactivate:hover {
       background: #ef4444;
@@ -489,4 +526,4 @@
     }
   </style>
 
-<%- include('partials/footer') %>
+  <%- include('partials/footer') %>

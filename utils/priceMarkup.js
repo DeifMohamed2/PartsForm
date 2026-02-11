@@ -18,7 +18,10 @@ let settingsCache = {
  */
 const getDefaultMarkupPercentage = async () => {
   const now = Date.now();
-  if (settingsCache.data !== null && now - settingsCache.timestamp < settingsCache.TTL) {
+  if (
+    settingsCache.data !== null &&
+    now - settingsCache.timestamp < settingsCache.TTL
+  ) {
     return settingsCache.data;
   }
 
@@ -99,7 +102,12 @@ const applyMarkupToPart = (part, markupPercentage) => {
  * @returns {Array} The same array with markup applied to all prices
  */
 const applyMarkupToParts = (parts, markupPercentage) => {
-  if (!parts || !Array.isArray(parts) || !markupPercentage || markupPercentage <= 0) {
+  if (
+    !parts ||
+    !Array.isArray(parts) ||
+    !markupPercentage ||
+    markupPercentage <= 0
+  ) {
     return parts;
   }
 

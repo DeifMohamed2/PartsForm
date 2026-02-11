@@ -2,13 +2,14 @@
 <link rel="stylesheet" href="/css/adminCSS/admin-dashboard.css">
 <link rel="stylesheet" href="/css/adminCSS/admin-integrations.css">
 </head>
+
 <body>
   <div class="admin-wrapper">
     <%- include('partials/sidebar', { activePage: 'integrations' }) %>
-    
+
     <main class="admin-main">
       <%- include('partials/topbar', { pageTitle: 'New Connection' }) %>
-      
+
       <div class="admin-content">
         <div class="connection-create-page">
           <!-- Simplified Breadcrumb -->
@@ -32,7 +33,7 @@
               <span class="step-number">1</span>
               <h2>Select Connection Type</h2>
             </div>
-            
+
             <div class="connection-type-grid">
               <label class="connection-type-card" data-type="ftp">
                 <input type="radio" name="connectionType" value="ftp" checked>
@@ -105,7 +106,7 @@
               <span class="step-number">2</span>
               <h2>FTP Connection Details</h2>
             </div>
-            
+
             <div class="config-form">
               <div class="form-row">
                 <div class="form-group">
@@ -149,7 +150,7 @@
               <div class="form-divider"></div>
 
               <h3 class="subsection-title"><i data-lucide="clock"></i> Sync Schedule</h3>
-              
+
               <div class="form-row">
                 <div class="form-group">
                   <label>Sync Frequency</label>
@@ -177,7 +178,7 @@
               <div class="form-divider"></div>
 
               <h3 class="subsection-title"><i data-lucide="sliders"></i> Advanced Options</h3>
-              
+
               <div class="options-grid">
                 <label class="option-toggle">
                   <input type="checkbox" id="ftpEnabled" checked>
@@ -224,7 +225,7 @@
               <span class="step-number">2</span>
               <h2>API Connection Details</h2>
             </div>
-            
+
             <div class="config-form">
               <div class="form-row">
                 <div class="form-group">
@@ -251,7 +252,7 @@
               <div class="form-divider"></div>
 
               <h3 class="subsection-title"><i data-lucide="key"></i> Authentication</h3>
-              
+
               <div class="form-row">
                 <div class="form-group">
                   <label>Auth Type</label>
@@ -335,7 +336,7 @@
               <div class="form-divider"></div>
 
               <h3 class="subsection-title"><i data-lucide="link"></i> API Endpoints</h3>
-              
+
               <div id="endpointsContainer">
                 <div class="endpoint-item" data-index="0">
                   <div class="endpoint-header">
@@ -369,7 +370,7 @@
                   </div>
                 </div>
               </div>
-              
+
               <button type="button" class="add-endpoint-btn" onclick="addEndpoint()">
                 <i data-lucide="plus"></i> Add Another Endpoint
               </button>
@@ -377,7 +378,7 @@
               <div class="form-divider"></div>
 
               <h3 class="subsection-title"><i data-lucide="layers"></i> Pagination</h3>
-              
+
               <div class="form-row">
                 <div class="form-group">
                   <label>Pagination Type</label>
@@ -436,7 +437,7 @@
 
               <h3 class="subsection-title"><i data-lucide="shuffle"></i> Field Mapping</h3>
               <p class="section-desc">Map API response fields to parts database fields. Leave empty to auto-detect common field names.</p>
-              
+
               <div class="field-mapping-grid">
                 <div class="form-row">
                   <div class="form-group">
@@ -483,7 +484,7 @@
               <div class="form-divider"></div>
 
               <h3 class="subsection-title"><i data-lucide="sliders"></i> Advanced Options</h3>
-              
+
               <div class="form-row">
                 <div class="form-group">
                   <label>Request Timeout (ms)</label>
@@ -504,7 +505,7 @@
                     <span class="option-desc">Automatically retry failed requests with exponential backoff</span>
                   </div>
                 </label>
-                
+
                 <label class="option-toggle">
                   <input type="checkbox" id="apiAutoSync" checked>
                   <span class="toggle-slider"></span>
@@ -519,7 +520,7 @@
               <div id="graphqlSection" style="display: none;">
                 <div class="form-divider"></div>
                 <h3 class="subsection-title"><i data-lucide="code-2"></i> GraphQL Query</h3>
-                
+
                 <div class="form-row">
                   <div class="form-group full-width">
                     <label>GraphQL Endpoint</label>
@@ -527,7 +528,7 @@
                     <span class="form-hint">Usually /graphql - will be appended to base URL</span>
                   </div>
                 </div>
-                
+
                 <div class="form-row">
                   <div class="form-group full-width">
                     <label>Query</label>
@@ -549,7 +550,7 @@
 }"></textarea>
                   </div>
                 </div>
-                
+
                 <div class="form-row">
                   <div class="form-group full-width">
                     <label>Variables (JSON)</label>
@@ -566,7 +567,7 @@
               <span class="step-number">2</span>
               <h2>Google Sheets Sync Details</h2>
             </div>
-            
+
             <div class="config-form">
               <div class="form-row">
                 <div class="form-group full-width">
@@ -598,7 +599,7 @@
                 <i data-lucide="info"></i>
                 <p>This connection uses the <strong>Google Sheets API v4</strong>. Real-time syncing requires a Google Cloud Project setup with Webhooks enabled.</p>
               </div>
-              
+
               <div class="options-grid" style="margin-top: 1.5rem;">
                 <label class="option-toggle">
                   <input type="checkbox" id="gsBidirectional" checked>
@@ -767,7 +768,7 @@
     function addEndpoint() {
       const container = document.getElementById('endpointsContainer');
       const index = endpointCount;
-      
+
       const endpointHtml = `
         <div class="endpoint-item" data-index="${index}">
           <div class="endpoint-header">
@@ -800,17 +801,17 @@
           </div>
         </div>
       `;
-      
+
       container.insertAdjacentHTML('beforeend', endpointHtml);
       endpointCount++;
-      
+
       // Show remove buttons on first endpoint if we have more than one
       if (endpointCount > 1) {
         document.querySelectorAll('.endpoint-remove-btn').forEach(btn => {
           btn.style.display = 'flex';
         });
       }
-      
+
       if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 
@@ -819,13 +820,13 @@
       const endpoint = document.querySelector(`.endpoint-item[data-index="${index}"]`);
       if (endpoint) {
         endpoint.remove();
-        
+
         // Re-number remaining endpoints
         const remaining = document.querySelectorAll('.endpoint-item');
         remaining.forEach((item, i) => {
           item.querySelector('.endpoint-badge').textContent = `Endpoint ${i + 1}`;
         });
-        
+
         // Hide remove button if only one endpoint left
         if (remaining.length === 1) {
           remaining[0].querySelector('.endpoint-remove-btn').style.display = 'none';
@@ -841,7 +842,7 @@
         const path = document.getElementById(`endpoint${index}Path`)?.value;
         const method = document.getElementById(`endpoint${index}Method`)?.value || 'GET';
         const dataPath = document.getElementById(`endpoint${index}DataPath`)?.value;
-        
+
         if (path) {
           endpoints.push({
             path,
@@ -857,25 +858,48 @@
     // Collect field mapping
     function collectFieldMapping() {
       const mapping = {};
-      
-      const fields = [
-        { id: 'mapPartNumber', target: 'partNumber' },
-        { id: 'mapDescription', target: 'description' },
-        { id: 'mapSupplier', target: 'supplier' },
-        { id: 'mapPrice', target: 'price' },
-        { id: 'mapQuantity', target: 'quantity' },
-        { id: 'mapCondition', target: 'condition' },
-        { id: 'mapBrand', target: 'brand' },
-        { id: 'mapCategory', target: 'category' }
+
+      const fields = [{
+          id: 'mapPartNumber',
+          target: 'partNumber'
+        },
+        {
+          id: 'mapDescription',
+          target: 'description'
+        },
+        {
+          id: 'mapSupplier',
+          target: 'supplier'
+        },
+        {
+          id: 'mapPrice',
+          target: 'price'
+        },
+        {
+          id: 'mapQuantity',
+          target: 'quantity'
+        },
+        {
+          id: 'mapCondition',
+          target: 'condition'
+        },
+        {
+          id: 'mapBrand',
+          target: 'brand'
+        },
+        {
+          id: 'mapCategory',
+          target: 'category'
+        }
       ];
-      
+
       fields.forEach(field => {
         const value = document.getElementById(field.id)?.value?.trim();
         if (value) {
           mapping[field.target] = value;
         }
       });
-      
+
       return Object.keys(mapping).length > 0 ? mapping : undefined;
     }
 
@@ -883,7 +907,7 @@
     function collectFormData() {
       const connectionType = document.querySelector('input[name="connectionType"]:checked').value;
       const frequency = document.getElementById('syncFrequency').value;
-      
+
       const formData = {
         type: connectionType,
         isEnabled: true,
@@ -911,14 +935,14 @@
         const apiType = document.getElementById('apiType').value;
         const authType = document.getElementById('apiAuthType').value;
         const paginationType = document.getElementById('apiPaginationType').value;
-        
+
         formData.name = document.getElementById('apiName').value;
         formData.options = {
           autoSync: document.getElementById('apiAutoSync')?.checked ?? true,
           retryOnFail: document.getElementById('apiRetryOnError')?.checked ?? true,
           maxRetries: parseInt(document.getElementById('apiMaxRetries')?.value) || 3
         };
-        
+
         formData.api = {
           apiType: apiType,
           baseUrl: document.getElementById('apiBaseUrl').value,
@@ -927,10 +951,10 @@
           apiKey: document.getElementById('apiKey')?.value,
           rateLimit: parseInt(document.getElementById('apiRateLimit')?.value) || 60,
           timeout: parseInt(document.getElementById('apiTimeout')?.value) || 30000,
-          
+
           // Endpoints (for REST)
           endpoints: apiType === 'rest' ? collectEndpoints() : undefined,
-          
+
           // Pagination
           pagination: paginationType !== 'none' ? {
             paginationType: paginationType,
@@ -942,11 +966,13 @@
             maxPages: parseInt(document.getElementById('apiMaxPages')?.value) || 100,
             totalPath: document.getElementById('apiTotalPath')?.value,
             cursorPath: document.getElementById('apiCursorPath')?.value
-          } : { paginationType: 'none' },
-          
+          } : {
+            paginationType: 'none'
+          },
+
           // Field mapping
           fieldMapping: collectFieldMapping(),
-          
+
           // Error handling
           errorHandling: {
             retryOnError: document.getElementById('apiRetryOnError')?.checked ?? true,
@@ -954,13 +980,13 @@
             retryDelay: 1000
           }
         };
-        
+
         // Add basic auth credentials
         if (authType === 'basic') {
           formData.api.username = document.getElementById('apiUsername')?.value;
           formData.api.password = document.getElementById('apiPassword')?.value;
         }
-        
+
         // Add OAuth2 configuration
         if (authType === 'oauth2') {
           formData.api.oauth2 = {
@@ -970,7 +996,7 @@
             scope: document.getElementById('oauth2Scope')?.value
           };
         }
-        
+
         // Add GraphQL configuration
         if (apiType === 'graphql') {
           formData.api.graphqlEndpoint = document.getElementById('graphqlEndpoint')?.value || '/graphql';
@@ -998,7 +1024,7 @@
     // Test connection
     async function testConnection() {
       const formData = collectFormData();
-      
+
       if (!formData.name) {
         showNotification('Please enter a connection name', 'error');
         return;
@@ -1010,7 +1036,7 @@
           showNotification('Please enter the API base URL', 'error');
           return;
         }
-        
+
         const endpoints = formData.api.endpoints || [];
         if (formData.api.apiType === 'rest' && endpoints.length === 0) {
           showNotification('Please add at least one API endpoint', 'error');
@@ -1057,7 +1083,7 @@
     // Save connection
     async function saveConnection() {
       const formData = collectFormData();
-      
+
       if (!formData.name) {
         showNotification('Please enter a connection name', 'error');
         return;
@@ -1074,7 +1100,7 @@
           showNotification('Please enter the API base URL', 'error');
           return;
         }
-        
+
         const endpoints = formData.api.endpoints || [];
         if (formData.api.apiType === 'rest' && endpoints.length === 0) {
           showNotification('Please add at least one API endpoint', 'error');
@@ -1097,7 +1123,7 @@
       try {
         const url = editMode ? '/admin/api/integrations/' + editIntegrationId : '/admin/api/integrations';
         const method = editMode ? 'PUT' : 'POST';
-        
+
         const response = await fetch(url, {
           method: method,
           headers: {
@@ -1109,11 +1135,11 @@
         const result = await response.json();
 
         if (result.success) {
-          const message = editMode 
-            ? 'Connection updated successfully!'
-            : (result.autoSyncStarted 
-              ? 'Connection created successfully! Auto-sync is starting...'
-              : 'Connection created successfully!');
+          const message = editMode ?
+            'Connection updated successfully!' :
+            (result.autoSyncStarted ?
+              'Connection created successfully! Auto-sync is starting...' :
+              'Connection created successfully!');
           showNotification(message, 'success');
           // Redirect to integrations list after a short delay
           setTimeout(() => {
@@ -1136,14 +1162,14 @@
     // Pre-populate form data in edit mode
     function populateEditForm(data) {
       if (!data) return;
-      
+
       // Select connection type
       const typeRadio = document.querySelector('input[name="connectionType"][value="' + data.type + '"]');
       if (typeRadio) {
         typeRadio.checked = true;
         typeRadio.dispatchEvent(new Event('change'));
       }
-      
+
       // Sync schedule
       if (data.syncSchedule) {
         const freqSelect = document.getElementById('syncFrequency');
@@ -1162,34 +1188,40 @@
         const syncTime = document.getElementById('syncTime');
         if (syncTime && data.syncSchedule.time) syncTime.value = data.syncSchedule.time;
       }
-      
+
       // FTP fields
       if (data.type === 'ftp' && data.ftp) {
         const ftp = data.ftp;
-        const setVal = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
+        const setVal = (id, val) => {
+          const el = document.getElementById(id);
+          if (el && val) el.value = val;
+        };
         setVal('ftpName', data.name);
         setVal('ftpHost', ftp.host);
         setVal('ftpUsername', ftp.username);
         if (ftp.password && ftp.password !== '********') setVal('ftpPassword', ftp.password);
-        
+
         // Protocol
         const protocolEl = document.getElementById('ftpProtocol');
         if (protocolEl) {
           if (ftp.secure === true) protocolEl.value = 'ftps';
           else protocolEl.value = 'ftp';
         }
-        
+
         // Checkboxes
         const ftpEnabled = document.getElementById('ftpEnabled');
         if (ftpEnabled) ftpEnabled.checked = data.status === 'active';
         const ftpNotif = document.getElementById('ftpNotifications');
         if (ftpNotif && data.options) ftpNotif.checked = data.options.notifyOnComplete !== false;
       }
-      
+
       // API fields
       if (data.type === 'api' && data.api) {
         const api = data.api;
-        const setVal = (id, val) => { const el = document.getElementById(id); if (el && val !== undefined && val !== null) el.value = val; };
+        const setVal = (id, val) => {
+          const el = document.getElementById(id);
+          if (el && val !== undefined && val !== null) el.value = val;
+        };
         setVal('apiName', data.name);
         setVal('apiType', api.apiType || 'rest');
         setVal('apiBaseUrl', api.baseUrl);
@@ -1199,23 +1231,23 @@
         setVal('apiRateLimit', api.rateLimit || 60);
         setVal('apiTimeout', api.timeout || 30000);
         setVal('apiMaxRetries', api.errorHandling?.maxRetries || 3);
-        
+
         // Auth type visibility
         toggleAuthOptions();
-        
+
         // Basic auth
         if (api.authType === 'basic') {
           setVal('apiUsername', api.username);
           if (api.password && api.password !== '********') setVal('apiPassword', api.password);
         }
-        
+
         // OAuth2
         if (api.authType === 'oauth2' && api.oauth2) {
           setVal('oauth2ClientId', api.oauth2.clientId);
           setVal('oauth2TokenUrl', api.oauth2.tokenUrl);
           setVal('oauth2Scope', api.oauth2.scope);
         }
-        
+
         // Endpoints
         if (api.endpoints && api.endpoints.length > 0) {
           api.endpoints.forEach(function(ep, idx) {
@@ -1225,7 +1257,7 @@
             setVal('endpoint' + idx + 'DataPath', ep.dataPath || '');
           });
         }
-        
+
         // Pagination
         if (api.pagination) {
           setVal('apiPaginationType', api.pagination.paginationType || 'none');
@@ -1235,7 +1267,7 @@
           setVal('apiMaxPages', api.pagination.maxPages || 100);
           togglePaginationOptions();
         }
-        
+
         // Field mapping
         if (api.fieldMapping) {
           const fm = api.fieldMapping;
@@ -1248,13 +1280,13 @@
           setVal('mapBrand', fm.brand);
           setVal('mapCategory', fm.category);
         }
-        
+
         // Checkboxes
         const apiRetry = document.getElementById('apiRetryOnError');
         if (apiRetry && api.errorHandling) apiRetry.checked = api.errorHandling.retryOnError !== false;
         const apiAutoSync = document.getElementById('apiAutoSync');
         if (apiAutoSync && data.options) apiAutoSync.checked = data.options.autoSync !== false;
-        
+
         // GraphQL
         if (api.apiType === 'graphql') {
           toggleGraphQLOptions();
@@ -1263,11 +1295,14 @@
           if (gqQuery && api.graphqlQuery) gqQuery.value = api.graphqlQuery;
         }
       }
-      
+
       // Google Sheets fields
       if (data.type === 'google-sheets' && data.googleSheets) {
         const gs = data.googleSheets;
-        const setVal = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
+        const setVal = (id, val) => {
+          const el = document.getElementById(id);
+          if (el && val) el.value = val;
+        };
         setVal('gsName', data.name);
         setVal('gsSpreadsheetUrl', gs.spreadsheetId);
         setVal('gsSheetName', gs.sheetName || 'Sheet1');
@@ -1279,12 +1314,12 @@
       toggleAuthOptions();
       togglePaginationOptions();
       toggleGraphQLOptions();
-      
+
       // Populate form if in edit mode
       if (editMode && existingIntegration) {
         populateEditForm(existingIntegration);
       }
-      
+
       if (typeof lucide !== 'undefined') lucide.createIcons();
     });
 
@@ -1292,4 +1327,4 @@
     // The global notificationManager handles all toast notifications
   </script>
 
-<%- include('partials/footer') %>
+  <%- include('partials/footer') %>

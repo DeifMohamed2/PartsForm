@@ -63,7 +63,7 @@ const addressSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 const buyerSchema = new mongoose.Schema(
@@ -101,7 +101,9 @@ const buyerSchema = new mongoose.Schema(
       validate: {
         validator: function (value) {
           // Allow various phone formats with country codes
-          return /^[\+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,4}[-\s\.]?[0-9]{1,9}$/.test(value.replace(/\s/g, ''));
+          return /^[\+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,4}[-\s\.]?[0-9]{1,9}$/.test(
+            value.replace(/\s/g, ''),
+          );
         },
         message: 'Please provide a valid phone number',
       },
@@ -167,9 +169,52 @@ const buyerSchema = new mongoose.Schema(
       type: String,
       default: 'USD',
       uppercase: true,
-      enum: ['ORIGINAL', 'USD', 'EUR', 'GBP', 'AED', 'JPY', 'CNY', 'RUB', 'CAD', 'AUD', 'CHF', 'INR', 'KRW', 'SGD', 'HKD', 'NOK', 'SEK', 'DKK', 'PLN', 'THB', 'MYR', 'MXN', 'BRL', 'ZAR', 'TRY', 'SAR', 'QAR', 'KWD', 'OMR', 'BHD', 'EGP', 'PKR', 'PHP', 'IDR', 'VND', 'NZD', 'CZK', 'HUF', 'RON', 'BGN', 'HRK', 'UAH'],
+      enum: [
+        'ORIGINAL',
+        'USD',
+        'EUR',
+        'GBP',
+        'AED',
+        'JPY',
+        'CNY',
+        'RUB',
+        'CAD',
+        'AUD',
+        'CHF',
+        'INR',
+        'KRW',
+        'SGD',
+        'HKD',
+        'NOK',
+        'SEK',
+        'DKK',
+        'PLN',
+        'THB',
+        'MYR',
+        'MXN',
+        'BRL',
+        'ZAR',
+        'TRY',
+        'SAR',
+        'QAR',
+        'KWD',
+        'OMR',
+        'BHD',
+        'EGP',
+        'PKR',
+        'PHP',
+        'IDR',
+        'VND',
+        'NZD',
+        'CZK',
+        'HUF',
+        'RON',
+        'BGN',
+        'HRK',
+        'UAH',
+      ],
     },
-    
+
     // Profile Image
     avatar: {
       type: String,
@@ -219,7 +264,7 @@ const buyerSchema = new mongoose.Schema(
         return ret;
       },
     },
-  }
+  },
 );
 
 // Indexes for better query performance

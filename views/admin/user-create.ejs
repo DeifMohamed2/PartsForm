@@ -2,13 +2,14 @@
 <link rel="stylesheet" href="/css/adminCSS/admin-dashboard.css">
 <link rel="stylesheet" href="/css/adminCSS/admin-users.css">
 </head>
+
 <body>
   <div class="admin-wrapper">
     <%- include('partials/sidebar', { activePage: 'users' }) %>
-    
+
     <main class="admin-main">
       <%- include('partials/topbar', { pageTitle: 'Add User' }) %>
-      
+
       <div class="admin-content">
         <!-- Breadcrumb -->
         <div style="margin-bottom: 1.5rem;">
@@ -166,7 +167,7 @@
       var toggle = document.getElementById('statusToggle');
       var label = document.getElementById('statusLabel');
       var input = document.getElementById('statusInput');
-      
+
       if (toggle.classList.contains('active')) {
         toggle.classList.remove('active');
         label.textContent = 'Inactive';
@@ -177,11 +178,11 @@
         input.value = 'active';
       }
     }
-    
+
     function toggleEmail() {
       var toggle = document.getElementById('emailToggle');
       var label = document.getElementById('emailLabel');
-      
+
       if (toggle.classList.contains('active')) {
         toggle.classList.remove('active');
         label.textContent = 'No email';
@@ -190,20 +191,22 @@
         label.textContent = 'Yes, send email';
       }
     }
-    
+
     document.getElementById('createUserForm').addEventListener('submit', function(e) {
       e.preventDefault();
-      
+
       var formData = new FormData(this);
       var userData = {};
       formData.forEach(function(value, key) {
         userData[key] = value;
       });
-      
+
       // Send to API
       fetch('/admin/api/users', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json'
+        },
         body: JSON.stringify(userData)
       }).then(function(response) {
         if (response.ok) {
@@ -223,4 +226,4 @@
     });
   </script>
 
-<%- include('partials/footer') %>
+  <%- include('partials/footer') %>

@@ -22,7 +22,7 @@ const socketService = require('../services/socketService');
 const dashboardCache = {
   data: null,
   timestamp: 0,
-  TTL: 30000 // 30 seconds cache
+  TTL: 30000, // 30 seconds cache
 };
 
 /**
@@ -31,39 +31,54 @@ const dashboardCache = {
 const getAdminDashboard = async (req, res) => {
   try {
     const now = Date.now();
-    
+
     // Use cached data if fresh (within 30 seconds)
-    if (dashboardCache.data && (now - dashboardCache.timestamp) < dashboardCache.TTL) {
+    if (
+      dashboardCache.data &&
+      now - dashboardCache.timestamp < dashboardCache.TTL
+    ) {
       return res.render('admin/dashboard', {
         ...dashboardCache.data,
         title: 'Admin Dashboard | PARTSFORM',
       });
     }
-    
+
     // Get current date info
-    const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+    const startOfMonth = new Date(
+      new Date().getFullYear(),
+      new Date().getMonth(),
+      1,
+    );
     const startOfYear = new Date(new Date().getFullYear(), 0, 1);
-    const startOfLastMonth = new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1);
-    const endOfLastMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 0);
-    
+    const startOfLastMonth = new Date(
+      new Date().getFullYear(),
+      new Date().getMonth() - 1,
+      1,
+    );
+    const endOfLastMonth = new Date(
+      new Date().getFullYear(),
+      new Date().getMonth(),
+      0,
+    );
+
     // ===== ULTRA-FAST QUERIES =====
     const [
       // Use estimatedDocumentCount for speed (doesn't scan collection)
       totalOrdersCount,
       totalBuyers,
       totalParts,
-      
+
       // Minimal data fetch
       recentOrders,
       recentTickets,
-      
+
       // Combined aggregation for all order stats
-      orderStats
+      orderStats,
     ] = await Promise.all([
       Order.estimatedDocumentCount(),
       Buyer.estimatedDocumentCount(),
       Part.estimatedDocumentCount(),
-      
+
       // Only fetch 10 orders with minimal fields
       Order.find({})
         .select('orderNumber pricing.total status createdAt updatedAt buyer')
@@ -71,22 +86,22 @@ const getAdminDashboard = async (req, res) => {
         .sort({ createdAt: -1 })
         .limit(10)
         .lean(),
-      
+
       // Only fetch 5 tickets
       Ticket.find({})
-        .select('ticketNumber subject category status priority createdAt updatedAt buyerName')
+        .select(
+          'ticketNumber subject category status priority createdAt updatedAt buyerName',
+        )
         .sort({ createdAt: -1 })
         .limit(5)
         .lean(),
-      
+
       // Single aggregation for ALL order statistics
       Order.aggregate([
         {
           $facet: {
             // Status counts
-            statusCounts: [
-              { $group: { _id: '$status', count: { $sum: 1 } } }
-            ],
+            statusCounts: [{ $group: { _id: '$status', count: { $sum: 1 } } }],
             // Revenue stats
             revenue: [
               { $match: { status: { $ne: 'cancelled' } } },
@@ -95,82 +110,168 @@ const getAdminDashboard = async (req, res) => {
                   _id: null,
                   total: { $sum: '$pricing.total' },
                   thisMonth: {
-                    $sum: { $cond: [{ $gte: ['$createdAt', startOfMonth] }, '$pricing.total', 0] }
+                    $sum: {
+                      $cond: [
+                        { $gte: ['$createdAt', startOfMonth] },
+                        '$pricing.total',
+                        0,
+                      ],
+                    },
                   },
                   lastMonth: {
                     $sum: {
                       $cond: [
-                        { $and: [{ $gte: ['$createdAt', startOfLastMonth] }, { $lte: ['$createdAt', endOfLastMonth] }] },
-                        '$pricing.total', 0
-                      ]
-                    }
-                  }
-                }
-              }
+                        {
+                          $and: [
+                            { $gte: ['$createdAt', startOfLastMonth] },
+                            { $lte: ['$createdAt', endOfLastMonth] },
+                          ],
+                        },
+                        '$pricing.total',
+                        0,
+                      ],
+                    },
+                  },
+                },
+              },
             ],
             // Monthly data for chart (simplified)
             monthly: [
-              { $match: { createdAt: { $gte: startOfYear }, status: { $ne: 'cancelled' } } },
-              { $group: { _id: { $month: '$createdAt' }, revenue: { $sum: '$pricing.total' }, count: { $sum: 1 } } },
-              { $sort: { _id: 1 } }
+              {
+                $match: {
+                  createdAt: { $gte: startOfYear },
+                  status: { $ne: 'cancelled' },
+                },
+              },
+              {
+                $group: {
+                  _id: { $month: '$createdAt' },
+                  revenue: { $sum: '$pricing.total' },
+                  count: { $sum: 1 },
+                },
+              },
+              { $sort: { _id: 1 } },
             ],
             // Top buyers
             topBuyers: [
               { $match: { status: { $ne: 'cancelled' } } },
-              { $group: { _id: '$buyer', totalSpent: { $sum: '$pricing.total' }, orderCount: { $sum: 1 } } },
+              {
+                $group: {
+                  _id: '$buyer',
+                  totalSpent: { $sum: '$pricing.total' },
+                  orderCount: { $sum: 1 },
+                },
+              },
               { $sort: { totalSpent: -1 } },
               { $limit: 5 },
-              { $lookup: { from: 'buyers', localField: '_id', foreignField: '_id', as: 'buyerInfo' } },
-              { $unwind: { path: '$buyerInfo', preserveNullAndEmptyArrays: true } }
+              {
+                $lookup: {
+                  from: 'buyers',
+                  localField: '_id',
+                  foreignField: '_id',
+                  as: 'buyerInfo',
+                },
+              },
+              {
+                $unwind: {
+                  path: '$buyerInfo',
+                  preserveNullAndEmptyArrays: true,
+                },
+              },
             ],
             // Orders by country (for Global Reach)
             ordersByCountry: [
               { $match: { status: { $ne: 'cancelled' } } },
-              { $lookup: { from: 'buyers', localField: 'buyer', foreignField: '_id', as: 'buyerInfo' } },
-              { $unwind: { path: '$buyerInfo', preserveNullAndEmptyArrays: true } },
-              { $group: { _id: '$buyerInfo.country', orderCount: { $sum: 1 }, revenue: { $sum: '$pricing.total' } } },
+              {
+                $lookup: {
+                  from: 'buyers',
+                  localField: 'buyer',
+                  foreignField: '_id',
+                  as: 'buyerInfo',
+                },
+              },
+              {
+                $unwind: {
+                  path: '$buyerInfo',
+                  preserveNullAndEmptyArrays: true,
+                },
+              },
+              {
+                $group: {
+                  _id: '$buyerInfo.country',
+                  orderCount: { $sum: 1 },
+                  revenue: { $sum: '$pricing.total' },
+                },
+              },
               { $match: { _id: { $ne: null } } },
               { $sort: { orderCount: -1 } },
-              { $limit: 8 }
-            ]
-          }
-        }
-      ])
+              { $limit: 8 },
+            ],
+          },
+        },
+      ]),
     ]);
-    
+
     // Process order stats from facet
     const stats_data = orderStats[0] || {};
     const statusCounts = {};
-    (stats_data.statusCounts || []).forEach(s => { statusCounts[s._id] = s.count; });
-    
-    const revData = stats_data.revenue?.[0] || { total: 0, thisMonth: 0, lastMonth: 0 };
+    (stats_data.statusCounts || []).forEach((s) => {
+      statusCounts[s._id] = s.count;
+    });
+
+    const revData = stats_data.revenue?.[0] || {
+      total: 0,
+      thisMonth: 0,
+      lastMonth: 0,
+    };
     const totalRevenue = revData.total || 0;
     const thisMonthRevenue = revData.thisMonth || 0;
     const prevMonthRevenue = revData.lastMonth || 1;
-    const growthPercent = prevMonthRevenue > 0 ? Math.round(((thisMonthRevenue - prevMonthRevenue) / prevMonthRevenue) * 100) : 0;
-    
+    const growthPercent =
+      prevMonthRevenue > 0
+        ? Math.round(
+            ((thisMonthRevenue - prevMonthRevenue) / prevMonthRevenue) * 100,
+          )
+        : 0;
+
     // Chart data
-    const monthLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const monthLabels = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
     const revenueData = new Array(12).fill(0);
     const orderCountData = new Array(12).fill(0);
-    (stats_data.monthly || []).forEach(item => {
+    (stats_data.monthly || []).forEach((item) => {
       revenueData[item._id - 1] = item.revenue || 0;
       orderCountData[item._id - 1] = item.count || 0;
     });
-    
+
     // Format orders
-    const formattedOrders = recentOrders.map(order => ({
+    const formattedOrders = recentOrders.map((order) => ({
       id: order.orderNumber,
       _id: order._id,
-      customer: order.buyer?.companyName || `${order.buyer?.firstName || ''} ${order.buyer?.lastName || ''}`.trim() || 'Unknown',
+      customer:
+        order.buyer?.companyName ||
+        `${order.buyer?.firstName || ''} ${order.buyer?.lastName || ''}`.trim() ||
+        'Unknown',
       amount: order.pricing?.total || 0,
       status: order.status || 'pending',
       date: formatOrderDate(order.createdAt),
-      createdAt: order.createdAt
+      createdAt: order.createdAt,
     }));
-    
+
     // Format tickets
-    const formattedTickets = recentTickets.map(ticket => ({
+    const formattedTickets = recentTickets.map((ticket) => ({
       id: ticket.ticketNumber,
       _id: ticket._id,
       subject: ticket.subject,
@@ -178,9 +279,9 @@ const getAdminDashboard = async (req, res) => {
       status: ticket.status,
       priority: ticket.priority,
       buyerName: ticket.buyerName || 'Unknown',
-      createdAt: ticket.createdAt
+      createdAt: ticket.createdAt,
     }));
-    
+
     // Format top buyers with real buyer details
     const topBuyersData = (stats_data.topBuyers || []).map((buyer, index) => {
       const info = buyer.buyerInfo || {};
@@ -189,39 +290,69 @@ const getAdminDashboard = async (req, res) => {
         _id: buyer._id,
         firstName: info.firstName || '',
         lastName: info.lastName || '',
-        fullName: info.firstName && info.lastName ? `${info.firstName} ${info.lastName}` : 'Unknown',
+        fullName:
+          info.firstName && info.lastName
+            ? `${info.firstName} ${info.lastName}`
+            : 'Unknown',
         companyName: info.companyName || 'Unknown Company',
         avatar: info.avatar || null,
         country: info.country || 'N/A',
         email: info.email || '',
         totalSpent: buyer.totalSpent || 0,
         orderCount: buyer.orderCount || 0,
-        fulfillmentRate: 95 + (index % 5)
+        fulfillmentRate: 95 + (index % 5),
       };
     });
-    
+
     // Format country data for Global Reach
     const countryNames = {
-      'US': 'United States', 'GB': 'United Kingdom', 'DE': 'Germany', 'FR': 'France',
-      'CA': 'Canada', 'AU': 'Australia', 'JP': 'Japan', 'CN': 'China', 'IN': 'India',
-      'BR': 'Brazil', 'MX': 'Mexico', 'RU': 'Russia', 'AE': 'United Arab Emirates',
-      'SA': 'Saudi Arabia', 'KR': 'South Korea', 'IT': 'Italy', 'ES': 'Spain',
-      'NL': 'Netherlands', 'SE': 'Sweden', 'CH': 'Switzerland', 'PL': 'Poland',
-      'TR': 'Turkey', 'EG': 'Egypt', 'ZA': 'South Africa', 'NG': 'Nigeria',
-      'UA': 'Ukraine', 'PK': 'Pakistan', 'ID': 'Indonesia', 'TH': 'Thailand',
-      'MY': 'Malaysia', 'SG': 'Singapore', 'PH': 'Philippines', 'VN': 'Vietnam'
+      US: 'United States',
+      GB: 'United Kingdom',
+      DE: 'Germany',
+      FR: 'France',
+      CA: 'Canada',
+      AU: 'Australia',
+      JP: 'Japan',
+      CN: 'China',
+      IN: 'India',
+      BR: 'Brazil',
+      MX: 'Mexico',
+      RU: 'Russia',
+      AE: 'United Arab Emirates',
+      SA: 'Saudi Arabia',
+      KR: 'South Korea',
+      IT: 'Italy',
+      ES: 'Spain',
+      NL: 'Netherlands',
+      SE: 'Sweden',
+      CH: 'Switzerland',
+      PL: 'Poland',
+      TR: 'Turkey',
+      EG: 'Egypt',
+      ZA: 'South Africa',
+      NG: 'Nigeria',
+      UA: 'Ukraine',
+      PK: 'Pakistan',
+      ID: 'Indonesia',
+      TH: 'Thailand',
+      MY: 'Malaysia',
+      SG: 'Singapore',
+      PH: 'Philippines',
+      VN: 'Vietnam',
     };
-    
-    const ordersByCountry = (stats_data.ordersByCountry || []).map(item => ({
+
+    const ordersByCountry = (stats_data.ordersByCountry || []).map((item) => ({
       code: item._id || 'N/A',
       name: countryNames[item._id] || item._id || 'Unknown',
       orderCount: item.orderCount || 0,
-      revenue: item.revenue || 0
+      revenue: item.revenue || 0,
     }));
-    
+
     // Pending tickets
-    const pendingTicketsCount = formattedTickets.filter(t => t.status === 'open' || t.status === 'in-progress').length;
-    
+    const pendingTicketsCount = formattedTickets.filter(
+      (t) => t.status === 'open' || t.status === 'in-progress',
+    ).length;
+
     // Build stats object
     const stats = {
       totalOrders: totalOrdersCount,
@@ -241,9 +372,14 @@ const getAdminDashboard = async (req, res) => {
       inStock: 0,
       lowStock: 0,
       outOfStock: 0,
-      automotive: { orders: totalOrdersCount, revenue: totalRevenue, growth: growthPercent, topParts: [] }
+      automotive: {
+        orders: totalOrdersCount,
+        revenue: totalRevenue,
+        growth: growthPercent,
+        topParts: [],
+      },
     };
-    
+
     const chartData = {
       revenueLabels: monthLabels,
       revenueData,
@@ -251,25 +387,48 @@ const getAdminDashboard = async (req, res) => {
       orderData: [40, 25, 20, 10, 5],
       orderCountByMonth: orderCountData,
       statusLabels: ['Pending', 'Processing', 'Shipped', 'Delivered'],
-      statusData: [statusCounts['pending'] || 0, statusCounts['processing'] || 0, statusCounts['shipped'] || 0, statusCounts['delivered'] || 0]
+      statusData: [
+        statusCounts['pending'] || 0,
+        statusCounts['processing'] || 0,
+        statusCounts['shipped'] || 0,
+        statusCounts['delivered'] || 0,
+      ],
     };
-    
+
     const performanceMetrics = {
-      fulfillmentRate: 94.2, fulfillmentTarget: 95, fulfillmentChange: 2.1,
-      satisfactionScore: 4.8, satisfactionReviews: formattedTickets.length, satisfactionChange: 0.3,
-      avgDeliveryDays: 3.2, deliveryTarget: 3, deliveryChange: -0.5,
-      avgResponseHours: 1.8, responseTarget: 2, resolvedPercent: 98
+      fulfillmentRate: 94.2,
+      fulfillmentTarget: 95,
+      fulfillmentChange: 2.1,
+      satisfactionScore: 4.8,
+      satisfactionReviews: formattedTickets.length,
+      satisfactionChange: 0.3,
+      avgDeliveryDays: 3.2,
+      deliveryTarget: 3,
+      deliveryChange: -0.5,
+      avgResponseHours: 1.8,
+      responseTarget: 2,
+      resolvedPercent: 98,
     };
-    
+
     // Recent activity from orders
-    const recentActivity = formattedOrders.slice(0, 4).map(order => ({
-      icon: order.status === 'shipped' ? 'truck' : order.status === 'delivered' ? 'check-circle' : 'shopping-cart',
+    const recentActivity = formattedOrders.slice(0, 4).map((order) => ({
+      icon:
+        order.status === 'shipped'
+          ? 'truck'
+          : order.status === 'delivered'
+            ? 'check-circle'
+            : 'shopping-cart',
       iconClass: order.status === 'delivered' ? 'success' : '',
       title: `Order #${order.id}`,
-      description: order.status === 'shipped' ? 'was shipped' : order.status === 'delivered' ? 'was delivered' : 'was placed',
-      timeAgo: getTimeAgo(order.createdAt)
+      description:
+        order.status === 'shipped'
+          ? 'was shipped'
+          : order.status === 'delivered'
+            ? 'was delivered'
+            : 'was placed',
+      timeAgo: getTimeAgo(order.createdAt),
     }));
-    
+
     // Cache the result
     const cacheData = {
       activePage: 'dashboard',
@@ -282,19 +441,24 @@ const getAdminDashboard = async (req, res) => {
       mostWantedParts: [],
       performanceMetrics,
       topSellingParts: [],
-      recentActivity
+      recentActivity,
     };
-    
+
     dashboardCache.data = cacheData;
     dashboardCache.timestamp = now;
 
     res.render('admin/dashboard', {
       title: 'Admin Dashboard | PARTSFORM',
-      ...cacheData
+      ...cacheData,
     });
   } catch (error) {
     console.error('Error in getAdminDashboard:', error);
-    res.status(500).render('error', { title: 'Error', error: 'Failed to load admin dashboard' });
+    res
+      .status(500)
+      .render('error', {
+        title: 'Error',
+        error: 'Failed to load admin dashboard',
+      });
   }
 };
 
@@ -309,7 +473,7 @@ const getTimeAgo = (date) => {
   const diffMins = Math.floor(diffMs / 60000);
   const diffHours = Math.floor(diffMs / 3600000);
   const diffDays = Math.floor(diffMs / 86400000);
-  
+
   if (diffMins < 1) return 'Just now';
   if (diffMins < 60) return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
   if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
@@ -323,7 +487,11 @@ const getTimeAgo = (date) => {
 const formatOrderDate = (date) => {
   if (!date) return 'N/A';
   const d = new Date(date);
-  return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+  return d.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
 };
 
 /**
@@ -345,14 +513,16 @@ const getOrdersManagement = async (req, res) => {
       .populate('buyer', 'firstName lastName email companyName phone')
       .sort({ createdAt: -1 })
       .lean();
-    
+
     // Transform database orders to view format
-    const orders = dbOrders.map(order => ({
+    const orders = dbOrders.map((order) => ({
       id: order.orderNumber,
       _id: order._id,
-      customer: order.buyer ? 
-        (order.buyer.companyName || `${order.buyer.firstName || ''} ${order.buyer.lastName || ''}`.trim() || 'Unknown') : 
-        'Unknown Customer',
+      customer: order.buyer
+        ? order.buyer.companyName ||
+          `${order.buyer.firstName || ''} ${order.buyer.lastName || ''}`.trim() ||
+          'Unknown'
+        : 'Unknown Customer',
       email: order.buyer?.email || 'N/A',
       phone: order.buyer?.phone || 'N/A',
       amount: order.pricing?.total || 0,
@@ -366,17 +536,19 @@ const getOrdersManagement = async (req, res) => {
       paymentStatus: order.payment?.status || 'pending',
       paymentMethod: order.payment?.method || 'N/A',
       createdAt: order.createdAt,
-      updatedAt: order.updatedAt
+      updatedAt: order.updatedAt,
     }));
 
     res.render('admin/orders', {
       title: 'Orders Management | PARTSFORM',
       activePage: 'orders',
-      orders
+      orders,
     });
   } catch (error) {
     console.error('Error in getOrdersManagement:', error);
-    res.status(500).render('error', { title: 'Error', error: 'Failed to load orders' });
+    res
+      .status(500)
+      .render('error', { title: 'Error', error: 'Failed to load orders' });
   }
 };
 
@@ -386,33 +558,43 @@ const getOrdersManagement = async (req, res) => {
 const getOrderDetails = async (req, res) => {
   try {
     const orderId = req.params.id;
-    
+
     // Try to find by order number first, then by _id
     let order = await Order.findOne({ orderNumber: orderId })
-      .populate('buyer', 'firstName lastName email companyName phone country city shippingAddress')
+      .populate(
+        'buyer',
+        'firstName lastName email companyName phone country city shippingAddress',
+      )
       .lean();
-    
+
     if (!order) {
       // Try finding by MongoDB _id
       const mongoose = require('mongoose');
       if (mongoose.Types.ObjectId.isValid(orderId)) {
         order = await Order.findById(orderId)
-          .populate('buyer', 'firstName lastName email companyName phone country city shippingAddress')
+          .populate(
+            'buyer',
+            'firstName lastName email companyName phone country city shippingAddress',
+          )
           .lean();
       }
     }
-    
+
     if (!order) {
-      return res.status(404).render('error', { title: 'Error', error: 'Order not found' });
+      return res
+        .status(404)
+        .render('error', { title: 'Error', error: 'Order not found' });
     }
 
     // Transform for view - full order details
     const orderData = {
       id: order.orderNumber,
       _id: order._id,
-      customer: order.buyer ? 
-        (order.buyer.companyName || `${order.buyer.firstName || ''} ${order.buyer.lastName || ''}`.trim() || 'Unknown') : 
-        'Unknown Customer',
+      customer: order.buyer
+        ? order.buyer.companyName ||
+          `${order.buyer.firstName || ''} ${order.buyer.lastName || ''}`.trim() ||
+          'Unknown'
+        : 'Unknown Customer',
       email: order.buyer?.email || 'N/A',
       phone: order.buyer?.phone || 'N/A',
       amount: order.pricing?.total || 0,
@@ -429,20 +611,21 @@ const getOrderDetails = async (req, res) => {
       totalItems: order.totalItems || order.items?.length || 0,
       totalWeight: order.totalWeight || 0,
       notes: order.notes || '',
-      
+
       // Items with full details
-      items: order.items?.map(item => ({
-        partNumber: item.partNumber,
-        description: item.description || item.partNumber,
-        brand: item.brand || 'N/A',
-        supplier: item.supplier || 'N/A',
-        price: item.price || 0,
-        currency: item.currency || 'AED',
-        weight: item.weight || 0,
-        stock: item.stock || 'N/A',
-        addedAt: item.addedAt
-      })) || [],
-      
+      items:
+        order.items?.map((item) => ({
+          partNumber: item.partNumber,
+          description: item.description || item.partNumber,
+          brand: item.brand || 'N/A',
+          supplier: item.supplier || 'N/A',
+          price: item.price || 0,
+          currency: item.currency || 'AED',
+          weight: item.weight || 0,
+          stock: item.stock || 'N/A',
+          addedAt: item.addedAt,
+        })) || [],
+
       // Payment info
       payment: {
         type: order.payment?.type || 'full',
@@ -450,12 +633,13 @@ const getOrderDetails = async (req, res) => {
         status: order.payment?.status || 'pending',
         amountPaid: order.payment?.amountPaid || 0,
         amountDue: order.payment?.amountDue || order.pricing?.total || 0,
-        transactions: order.payment?.transactions || []
+        transactions: order.payment?.transactions || [],
       },
-      
+
       // Shipping info
       shipping: {
-        fullName: order.shipping?.fullName || order.shipping?.firstName || 'N/A',
+        fullName:
+          order.shipping?.fullName || order.shipping?.firstName || 'N/A',
         phone: order.shipping?.phone || 'N/A',
         street: order.shipping?.street || order.shipping?.address || 'N/A',
         city: order.shipping?.city || 'N/A',
@@ -465,45 +649,55 @@ const getOrderDetails = async (req, res) => {
         trackingNumber: order.shipping?.trackingNumber || '',
         carrier: order.shipping?.carrier || '',
         estimatedDelivery: order.shipping?.estimatedDelivery,
-        actualDelivery: order.shipping?.actualDelivery
+        actualDelivery: order.shipping?.actualDelivery,
       },
-      
+
       // Timeline
-      timeline: order.timeline?.map(event => ({
-        status: event.status,
-        message: event.message,
-        timestamp: event.timestamp,
-        updatedBy: event.updatedBy || 'System',
-        formattedDate: formatOrderDate(event.timestamp),
-        formattedTime: formatOrderTime(event.timestamp)
-      })) || [],
-      
+      timeline:
+        order.timeline?.map((event) => ({
+          status: event.status,
+          message: event.message,
+          timestamp: event.timestamp,
+          updatedBy: event.updatedBy || 'System',
+          formattedDate: formatOrderDate(event.timestamp),
+          formattedTime: formatOrderTime(event.timestamp),
+        })) || [],
+
       // Buyer info
-      buyer: order.buyer ? {
-        id: order.buyer._id,
-        name: order.buyer.companyName || `${order.buyer.firstName || ''} ${order.buyer.lastName || ''}`.trim(),
-        email: order.buyer.email,
-        phone: order.buyer.phone,
-        country: order.buyer.country,
-        city: order.buyer.city
-      } : null,
-      
+      buyer: order.buyer
+        ? {
+            id: order.buyer._id,
+            name:
+              order.buyer.companyName ||
+              `${order.buyer.firstName || ''} ${order.buyer.lastName || ''}`.trim(),
+            email: order.buyer.email,
+            phone: order.buyer.phone,
+            country: order.buyer.country,
+            city: order.buyer.city,
+          }
+        : null,
+
       // Cancellation info
       cancellation: order.cancellation || null,
-      
+
       // Timestamps
       createdAt: order.createdAt,
-      updatedAt: order.updatedAt
+      updatedAt: order.updatedAt,
     };
 
     res.render('admin/order-details', {
       title: `Order ${order.orderNumber} | PARTSFORM Admin`,
       activePage: 'orders',
-      order: orderData
+      order: orderData,
     });
   } catch (error) {
     console.error('Error in getOrderDetails:', error);
-    res.status(500).render('error', { title: 'Error', error: 'Failed to load order details' });
+    res
+      .status(500)
+      .render('error', {
+        title: 'Error',
+        error: 'Failed to load order details',
+      });
   }
 };
 
@@ -514,20 +708,27 @@ const getOrderCreate = async (req, res) => {
   try {
     // Get all buyers for the dropdown (include all statuses for admin)
     const buyers = await Buyer.find({})
-      .select('firstName lastName email companyName phone country city accountStatus')
+      .select(
+        'firstName lastName email companyName phone country city accountStatus',
+      )
       .sort({ companyName: 1, lastName: 1 })
       .lean();
-    
+
     console.log('Found buyers for order create:', buyers.length);
 
     res.render('admin/order-create', {
       title: 'Create Order | PARTSFORM Admin',
       activePage: 'orders',
-      buyers
+      buyers,
     });
   } catch (error) {
     console.error('Error in getOrderCreate:', error);
-    res.status(500).render('error', { title: 'Error', error: 'Failed to load create order page' });
+    res
+      .status(500)
+      .render('error', {
+        title: 'Error',
+        error: 'Failed to load create order page',
+      });
   }
 };
 
@@ -537,12 +738,12 @@ const getOrderCreate = async (req, res) => {
 const getOrderEdit = async (req, res) => {
   try {
     const orderId = req.params.id;
-    
+
     // Try to find by order number first, then by _id
     let order = await Order.findOne({ orderNumber: orderId })
       .populate('buyer', 'firstName lastName email companyName phone')
       .lean();
-    
+
     if (!order) {
       const mongoose = require('mongoose');
       if (mongoose.Types.ObjectId.isValid(orderId)) {
@@ -551,11 +752,13 @@ const getOrderEdit = async (req, res) => {
           .lean();
       }
     }
-    
+
     if (!order) {
-      return res.status(404).render('error', { title: 'Error', error: 'Order not found' });
+      return res
+        .status(404)
+        .render('error', { title: 'Error', error: 'Order not found' });
     }
-    
+
     // Get all buyers for the dropdown
     const buyers = await Buyer.find({ accountStatus: 'active' })
       .select('firstName lastName email companyName phone')
@@ -567,9 +770,10 @@ const getOrderEdit = async (req, res) => {
       id: order.orderNumber,
       _id: order._id,
       buyerId: order.buyer?._id,
-      customer: order.buyer ? 
-        (order.buyer.companyName || `${order.buyer.firstName || ''} ${order.buyer.lastName || ''}`.trim()) : 
-        'Unknown',
+      customer: order.buyer
+        ? order.buyer.companyName ||
+          `${order.buyer.firstName || ''} ${order.buyer.lastName || ''}`.trim()
+        : 'Unknown',
       email: order.buyer?.email || 'N/A',
       status: order.status || 'pending',
       priority: order.priority || 'normal',
@@ -579,7 +783,7 @@ const getOrderEdit = async (req, res) => {
       subtotal: order.pricing?.subtotal || 0,
       currency: order.pricing?.currency || 'AED',
       notes: order.notes || '',
-      
+
       // Pricing object for edit view
       pricing: {
         subtotal: order.pricing?.subtotal || 0,
@@ -588,26 +792,27 @@ const getOrderEdit = async (req, res) => {
         processingFee: order.pricing?.processingFee || 0,
         discount: order.pricing?.discount || 0,
         total: order.pricing?.total || 0,
-        currency: order.pricing?.currency || 'AED'
+        currency: order.pricing?.currency || 'AED',
       },
-      
+
       // Items
-      items: order.items?.map(item => ({
-        partNumber: item.partNumber,
-        description: item.description || item.partNumber,
-        brand: item.brand || 'N/A',
-        supplier: item.supplier || 'N/A',
-        price: item.price || 0,
-        currency: item.currency || 'AED'
-      })) || [],
-      
+      items:
+        order.items?.map((item) => ({
+          partNumber: item.partNumber,
+          description: item.description || item.partNumber,
+          brand: item.brand || 'N/A',
+          supplier: item.supplier || 'N/A',
+          price: item.price || 0,
+          currency: item.currency || 'AED',
+        })) || [],
+
       // Payment
       payment: {
         type: order.payment?.type || 'full',
         method: order.payment?.method || 'bank-dubai',
-        status: order.payment?.status || 'pending'
+        status: order.payment?.status || 'pending',
       },
-      
+
       // Shipping
       shipping: {
         fullName: order.shipping?.fullName || '',
@@ -616,19 +821,24 @@ const getOrderEdit = async (req, res) => {
         city: order.shipping?.city || '',
         state: order.shipping?.state || '',
         country: order.shipping?.country || '',
-        postalCode: order.shipping?.postalCode || ''
-      }
+        postalCode: order.shipping?.postalCode || '',
+      },
     };
 
     res.render('admin/order-edit', {
       title: `Edit Order ${order.orderNumber} | PARTSFORM Admin`,
       activePage: 'orders',
       order: orderData,
-      buyers
+      buyers,
     });
   } catch (error) {
     console.error('Error in getOrderEdit:', error);
-    res.status(500).render('error', { title: 'Error', error: 'Failed to load edit order page' });
+    res
+      .status(500)
+      .render('error', {
+        title: 'Error',
+        error: 'Failed to load edit order page',
+      });
   }
 };
 
@@ -638,10 +848,10 @@ const getOrderEdit = async (req, res) => {
 const deleteOrder = async (req, res) => {
   try {
     const orderId = req.params.id;
-    
+
     // Try to find and delete by order number first
     let deletedOrder = await Order.findOneAndDelete({ orderNumber: orderId });
-    
+
     if (!deletedOrder) {
       // Try by MongoDB _id
       const mongoose = require('mongoose');
@@ -649,14 +859,14 @@ const deleteOrder = async (req, res) => {
         deletedOrder = await Order.findByIdAndDelete(orderId);
       }
     }
-    
+
     if (!deletedOrder) {
       return res.status(404).json({ success: false, error: 'Order not found' });
     }
-    
-    res.json({ 
-      success: true, 
-      message: `Order ${deletedOrder.orderNumber} deleted successfully` 
+
+    res.json({
+      success: true,
+      message: `Order ${deletedOrder.orderNumber} deleted successfully`,
     });
   } catch (error) {
     console.error('Error in deleteOrder:', error);
@@ -670,30 +880,37 @@ const deleteOrder = async (req, res) => {
 const createOrder = async (req, res) => {
   try {
     const { buyerId, items, priority, notes, payment, shipping } = req.body;
-    
+
     // Validate buyer
     const buyer = await Buyer.findById(buyerId);
     if (!buyer) {
-      return res.status(400).json({ success: false, error: 'Invalid buyer selected' });
+      return res
+        .status(400)
+        .json({ success: false, error: 'Invalid buyer selected' });
     }
-    
+
     // Validate items
     if (!items || !Array.isArray(items) || items.length === 0) {
-      return res.status(400).json({ success: false, error: 'At least one item is required' });
+      return res
+        .status(400)
+        .json({ success: false, error: 'At least one item is required' });
     }
-    
+
     // Generate order number
     const orderNumber = await Order.generateOrderNumber();
-    
+
     // Calculate totals
-    const subtotal = items.reduce((sum, item) => sum + (parseFloat(item.price) || 0), 0);
+    const subtotal = items.reduce(
+      (sum, item) => sum + (parseFloat(item.price) || 0),
+      0,
+    );
     const processingFee = parseFloat(payment?.processingFee) || 0;
     const tax = parseFloat(payment?.tax) || 0;
     const shippingCost = parseFloat(payment?.shippingCost) || 0;
     const total = subtotal + processingFee + tax + shippingCost;
-    
+
     // Create order items
-    const orderItems = items.map(item => ({
+    const orderItems = items.map((item) => ({
       partNumber: item.partNumber,
       description: item.description || item.partNumber,
       brand: item.brand || 'N/A',
@@ -702,9 +919,9 @@ const createOrder = async (req, res) => {
       currency: item.currency || 'AED',
       weight: parseFloat(item.weight) || 0,
       stock: item.stock || 'N/A',
-      addedAt: new Date()
+      addedAt: new Date(),
     }));
-    
+
     // Create order
     const order = await Order.create({
       orderNumber,
@@ -717,7 +934,7 @@ const createOrder = async (req, res) => {
         processingFee,
         discount: 0,
         total,
-        currency: payment?.currency || 'AED'
+        currency: payment?.currency || 'AED',
       },
       payment: {
         type: payment?.type || 'full',
@@ -725,7 +942,7 @@ const createOrder = async (req, res) => {
         status: 'pending',
         amountPaid: 0,
         amountDue: total,
-        transactions: []
+        transactions: [],
       },
       shipping: {
         fullName: shipping?.fullName || `${buyer.firstName} ${buyer.lastName}`,
@@ -734,33 +951,43 @@ const createOrder = async (req, res) => {
         city: shipping?.city || buyer.city,
         state: shipping?.state || '',
         country: shipping?.country || buyer.country,
-        postalCode: shipping?.postalCode || ''
+        postalCode: shipping?.postalCode || '',
       },
       status: 'pending',
       priority: priority || 'normal',
       notes: notes || '',
       totalItems: orderItems.length,
-      totalWeight: orderItems.reduce((sum, item) => sum + (item.weight || 0), 0),
-      timeline: [{
-        status: 'pending',
-        message: 'Order created by admin',
-        timestamp: new Date(),
-        updatedBy: req.admin?.username || 'Admin'
-      }]
+      totalWeight: orderItems.reduce(
+        (sum, item) => sum + (item.weight || 0),
+        0,
+      ),
+      timeline: [
+        {
+          status: 'pending',
+          message: 'Order created by admin',
+          timestamp: new Date(),
+          updatedBy: req.admin?.username || 'Admin',
+        },
+      ],
     });
-    
+
     res.json({
       success: true,
       message: 'Order created successfully',
       order: {
         id: order.orderNumber,
         _id: order._id,
-        total: order.pricing.total
-      }
+        total: order.pricing.total,
+      },
     });
   } catch (error) {
     console.error('Error in createOrder:', error);
-    res.status(500).json({ success: false, error: error.message || 'Failed to create order' });
+    res
+      .status(500)
+      .json({
+        success: false,
+        error: error.message || 'Failed to create order',
+      });
   }
 };
 
@@ -771,7 +998,7 @@ const updateOrder = async (req, res) => {
   try {
     const orderId = req.params.id;
     const { status, priority, notes, shipping, items, payment } = req.body;
-    
+
     // Find order
     let order = await Order.findOne({ orderNumber: orderId });
     if (!order) {
@@ -780,30 +1007,30 @@ const updateOrder = async (req, res) => {
         order = await Order.findById(orderId);
       }
     }
-    
+
     if (!order) {
       return res.status(404).json({ success: false, error: 'Order not found' });
     }
-    
+
     // Track status change
     const statusChanged = status && status !== order.status;
-    
+
     // Update fields
     if (status) order.status = status;
     if (priority) order.priority = priority;
     if (notes !== undefined) order.notes = notes;
-    
+
     // Update shipping
     if (shipping) {
       order.shipping = {
         ...order.shipping,
-        ...shipping
+        ...shipping,
       };
     }
-    
+
     // Update items if provided
     if (items && Array.isArray(items)) {
-      order.items = items.map(item => ({
+      order.items = items.map((item) => ({
         partNumber: item.partNumber,
         description: item.description || item.partNumber,
         brand: item.brand || 'N/A',
@@ -811,25 +1038,27 @@ const updateOrder = async (req, res) => {
         price: parseFloat(item.price) || 0,
         currency: item.currency || 'AED',
         weight: parseFloat(item.weight) || 0,
-        stock: item.stock || 'N/A'
+        stock: item.stock || 'N/A',
       }));
-      
+
       // Recalculate pricing
       const subtotal = order.items.reduce((sum, item) => sum + item.price, 0);
       order.pricing.subtotal = subtotal;
-      order.pricing.total = subtotal + (order.pricing.tax || 0) + 
-                           (order.pricing.shipping || 0) + 
-                           (order.pricing.processingFee || 0) - 
-                           (order.pricing.discount || 0);
+      order.pricing.total =
+        subtotal +
+        (order.pricing.tax || 0) +
+        (order.pricing.shipping || 0) +
+        (order.pricing.processingFee || 0) -
+        (order.pricing.discount || 0);
       order.totalItems = order.items.length;
     }
-    
+
     // Update payment if provided
     if (payment) {
       if (payment.status) order.payment.status = payment.status;
       if (payment.method) order.payment.method = payment.method;
     }
-    
+
     // Add timeline event if status changed
     if (statusChanged) {
       const statusMessages = {
@@ -838,31 +1067,36 @@ const updateOrder = async (req, res) => {
         shipped: 'Order has been shipped',
         delivered: 'Order has been delivered',
         completed: 'Order completed',
-        cancelled: 'Order has been cancelled'
+        cancelled: 'Order has been cancelled',
       };
-      
+
       order.timeline.push({
         status,
         message: statusMessages[status] || `Status changed to ${status}`,
         timestamp: new Date(),
-        updatedBy: req.admin?.username || 'Admin'
+        updatedBy: req.admin?.username || 'Admin',
       });
     }
-    
+
     await order.save();
-    
+
     res.json({
       success: true,
       message: 'Order updated successfully',
       order: {
         id: order.orderNumber,
         status: order.status,
-        total: order.pricing.total
-      }
+        total: order.pricing.total,
+      },
     });
   } catch (error) {
     console.error('Error in updateOrder:', error);
-    res.status(500).json({ success: false, error: error.message || 'Failed to update order' });
+    res
+      .status(500)
+      .json({
+        success: false,
+        error: error.message || 'Failed to update order',
+      });
   }
 };
 
@@ -873,11 +1107,13 @@ const updateOrderStatus = async (req, res) => {
   try {
     const orderId = req.params.id;
     const { status, message } = req.body;
-    
+
     if (!status) {
-      return res.status(400).json({ success: false, error: 'Status is required' });
+      return res
+        .status(400)
+        .json({ success: false, error: 'Status is required' });
     }
-    
+
     // Find order
     let order = await Order.findOne({ orderNumber: orderId });
     if (!order) {
@@ -886,34 +1122,36 @@ const updateOrderStatus = async (req, res) => {
         order = await Order.findById(orderId);
       }
     }
-    
+
     if (!order) {
       return res.status(404).json({ success: false, error: 'Order not found' });
     }
-    
+
     const statusMessages = {
       pending: 'Order marked as pending',
       processing: 'Order is now being processed',
       shipped: 'Order has been shipped',
       delivered: 'Order has been delivered',
       completed: 'Order completed',
-      cancelled: 'Order has been cancelled'
+      cancelled: 'Order has been cancelled',
     };
-    
+
     await order.updateStatus(
-      status, 
+      status,
       message || statusMessages[status] || `Status changed to ${status}`,
-      req.admin?.username || 'Admin'
+      req.admin?.username || 'Admin',
     );
-    
+
     res.json({
       success: true,
       message: 'Order status updated successfully',
-      newStatus: status
+      newStatus: status,
     });
   } catch (error) {
     console.error('Error in updateOrderStatus:', error);
-    res.status(500).json({ success: false, error: 'Failed to update order status' });
+    res
+      .status(500)
+      .json({ success: false, error: 'Failed to update order status' });
   }
 };
 
@@ -927,16 +1165,16 @@ const getOrderStats = async (req, res) => {
         $group: {
           _id: '$status',
           count: { $sum: 1 },
-          totalAmount: { $sum: '$pricing.total' }
-        }
-      }
+          totalAmount: { $sum: '$pricing.total' },
+        },
+      },
     ]);
-    
+
     const totalOrders = await Order.countDocuments();
     const totalRevenue = await Order.aggregate([
-      { $group: { _id: null, total: { $sum: '$pricing.total' } } }
+      { $group: { _id: null, total: { $sum: '$pricing.total' } } },
     ]);
-    
+
     res.json({
       success: true,
       stats: {
@@ -945,12 +1183,14 @@ const getOrderStats = async (req, res) => {
         byStatus: stats.reduce((acc, s) => {
           acc[s._id] = { count: s.count, amount: s.totalAmount };
           return acc;
-        }, {})
-      }
+        }, {}),
+      },
     });
   } catch (error) {
     console.error('Error in getOrderStats:', error);
-    res.status(500).json({ success: false, error: 'Failed to get order stats' });
+    res
+      .status(500)
+      .json({ success: false, error: 'Failed to get order stats' });
   }
 };
 
@@ -965,7 +1205,7 @@ const getTicketsManagement = async (req, res) => {
       .lean();
 
     // Format tickets for the view
-    const tickets = dbTickets.map(ticket => ({
+    const tickets = dbTickets.map((ticket) => ({
       id: ticket.ticketNumber,
       subject: ticket.subject,
       category: ticket.category,
@@ -980,23 +1220,26 @@ const getTicketsManagement = async (req, res) => {
       createdAt: ticket.createdAt,
       updatedAt: ticket.updatedAt,
       unreadCount: ticket.unreadByAdmin || 0,
-      lastMessage: ticket.messages && ticket.messages.length > 0 
-        ? { 
-            content: ticket.messages[ticket.messages.length - 1].content,
-            time: ticket.messages[ticket.messages.length - 1].createdAt
-          }
-        : null,
-      messages: ticket.messages || []
+      lastMessage:
+        ticket.messages && ticket.messages.length > 0
+          ? {
+              content: ticket.messages[ticket.messages.length - 1].content,
+              time: ticket.messages[ticket.messages.length - 1].createdAt,
+            }
+          : null,
+      messages: ticket.messages || [],
     }));
-    
+
     res.render('admin/tickets', {
       title: 'Tickets Management | PARTSFORM',
       activePage: 'tickets',
-      tickets
+      tickets,
     });
   } catch (error) {
     console.error('Error in getTicketsManagement:', error);
-    res.status(500).render('error', { title: 'Error', error: 'Failed to load tickets' });
+    res
+      .status(500)
+      .render('error', { title: 'Error', error: 'Failed to load tickets' });
   }
 };
 
@@ -1006,28 +1249,30 @@ const getTicketsManagement = async (req, res) => {
 const getTicketDetails = async (req, res) => {
   try {
     const ticketId = req.params.id;
-    
+
     // Find ticket in database
     const dbTicket = await Ticket.findOne({ ticketNumber: ticketId })
       .populate('buyer', 'firstName lastName email companyName phone industry')
       .lean();
-    
+
     if (!dbTicket) {
-      return res.status(404).render('error', { title: 'Error', error: 'Ticket not found' });
+      return res
+        .status(404)
+        .render('error', { title: 'Error', error: 'Ticket not found' });
     }
 
     // Mark messages as read by admin
     await Ticket.updateOne(
       { _id: dbTicket._id },
-      { 
-        $set: { 
+      {
+        $set: {
           unreadByAdmin: 0,
-          'messages.$[elem].readByAdmin': true 
-        } 
+          'messages.$[elem].readByAdmin': true,
+        },
       },
-      { 
-        arrayFilters: [{ 'elem.sender': 'buyer' }] 
-      }
+      {
+        arrayFilters: [{ 'elem.sender': 'buyer' }],
+      },
     );
 
     // Format ticket for the view
@@ -1049,7 +1294,7 @@ const getTicketDetails = async (req, res) => {
       createdAt: dbTicket.createdAt,
       updatedAt: dbTicket.updatedAt,
       attachments: dbTicket.attachments || [],
-      messages: dbTicket.messages.map(msg => ({
+      messages: dbTicket.messages.map((msg) => ({
         _id: msg._id,
         sender: msg.sender,
         senderName: msg.senderName,
@@ -1058,18 +1303,20 @@ const getTicketDetails = async (req, res) => {
         attachments: msg.attachments || [],
         time: msg.createdAt,
         createdAt: msg.createdAt,
-        read: msg.readByAdmin
-      }))
+        read: msg.readByAdmin,
+      })),
     };
 
     res.render('admin/ticket-details', {
       title: `Ticket ${ticketId} | PARTSFORM Admin`,
       activePage: 'tickets',
-      ticket
+      ticket,
     });
   } catch (error) {
     console.error('Error in getTicketDetails:', error);
-    res.status(500).render('error', { title: 'Error', error: 'Failed to load ticket' });
+    res
+      .status(500)
+      .render('error', { title: 'Error', error: 'Failed to load ticket' });
   }
 };
 
@@ -1081,18 +1328,22 @@ const postTicketReply = async (req, res) => {
     const ticketId = req.params.id;
     const { message } = req.body;
     const admin = req.user;
-    
+
     if (!message || message.trim() === '') {
-      return res.status(400).json({ success: false, error: 'Message is required' });
+      return res
+        .status(400)
+        .json({ success: false, error: 'Message is required' });
     }
 
     // Find the ticket
     const ticket = await Ticket.findOne({ ticketNumber: ticketId });
-    
+
     if (!ticket) {
-      return res.status(404).json({ success: false, error: 'Ticket not found' });
+      return res
+        .status(404)
+        .json({ success: false, error: 'Ticket not found' });
     }
-    
+
     // Handle file attachments if any
     const attachments = [];
     if (req.files && req.files.length > 0) {
@@ -1102,20 +1353,23 @@ const postTicketReply = async (req, res) => {
           originalName: file.originalname,
           mimetype: file.mimetype,
           size: file.size,
-          path: `/uploads/tickets/${file.filename}`
+          path: `/uploads/tickets/${file.filename}`,
         });
       }
     }
 
     // Add the message
-    const adminName = admin ? `${admin.firstName || ''} ${admin.lastName || ''}`.trim() || 'Support Team' : 'Support Team';
-    
+    const adminName = admin
+      ? `${admin.firstName || ''} ${admin.lastName || ''}`.trim() ||
+        'Support Team'
+      : 'Support Team';
+
     const newMessage = await ticket.addMessage({
       sender: 'admin',
       senderName: adminName,
       senderId: admin?._id,
       content: message.trim(),
-      attachments
+      attachments,
     });
 
     // Emit socket event for real-time update
@@ -1127,8 +1381,8 @@ const postTicketReply = async (req, res) => {
         senderName: adminName,
         content: message.trim(),
         attachments,
-        timestamp: newMessage.createdAt
-      }
+        timestamp: newMessage.createdAt,
+      },
     });
 
     // Notify the buyer
@@ -1139,20 +1393,20 @@ const postTicketReply = async (req, res) => {
         sender: 'admin',
         senderName: adminName,
         content: message.trim().substring(0, 100),
-        timestamp: newMessage.createdAt
-      }
+        timestamp: newMessage.createdAt,
+      },
     });
-    
-    res.json({ 
-      success: true, 
+
+    res.json({
+      success: true,
       message: {
         id: newMessage._id,
         sender: 'admin',
         senderName: adminName,
         content: message.trim(),
         attachments,
-        timestamp: newMessage.createdAt
-      }
+        timestamp: newMessage.createdAt,
+      },
     });
   } catch (error) {
     console.error('Error in postTicketReply:', error);
@@ -1167,29 +1421,35 @@ const updateTicketStatus = async (req, res) => {
   try {
     const ticketId = req.params.id;
     const { status } = req.body;
-    
+
     const ticket = await Ticket.findOne({ ticketNumber: ticketId });
-    
+
     if (!ticket) {
-      return res.status(404).json({ success: false, error: 'Ticket not found' });
+      return res
+        .status(404)
+        .json({ success: false, error: 'Ticket not found' });
     }
-    
+
     await ticket.updateStatus(status, 'admin');
 
     // Emit socket event for real-time update
     socketService.emitToTicket(ticketId, 'ticket-status-changed', {
       ticketId,
       status,
-      updatedBy: 'admin'
+      updatedBy: 'admin',
     });
 
     // Notify the buyer
-    socketService.emitToBuyer(ticket.buyer.toString(), 'ticket-status-changed', {
-      ticketId: ticket.ticketNumber,
-      subject: ticket.subject,
-      status
-    });
-    
+    socketService.emitToBuyer(
+      ticket.buyer.toString(),
+      'ticket-status-changed',
+      {
+        ticketId: ticket.ticketNumber,
+        subject: ticket.subject,
+        status,
+      },
+    );
+
     res.json({ success: true, message: `Ticket status updated to ${status}` });
   } catch (error) {
     console.error('Error in updateTicketStatus:', error);
@@ -1203,19 +1463,26 @@ const updateTicketStatus = async (req, res) => {
  */
 const getTicketsApi = async (req, res) => {
   try {
-    const { status, priority, category, search, page = 1, limit = 20 } = req.query;
+    const {
+      status,
+      priority,
+      category,
+      search,
+      page = 1,
+      limit = 20,
+    } = req.query;
 
     // Build query
     const query = {};
-    
+
     if (status && status !== '') {
       query.status = status;
     }
-    
+
     if (priority && priority !== '') {
       query.priority = priority;
     }
-    
+
     if (category && category !== '') {
       query.category = category;
     }
@@ -1227,33 +1494,34 @@ const getTicketsApi = async (req, res) => {
         { subject: searchRegex },
         { orderNumber: searchRegex },
         { buyerName: searchRegex },
-        { buyerEmail: searchRegex }
+        { buyerEmail: searchRegex },
       ];
     }
 
     // Get tickets with pagination
     const skip = (parseInt(page) - 1) * parseInt(limit);
-    
+
     const [tickets, total] = await Promise.all([
       Ticket.find(query)
         .sort({ lastMessageAt: -1, createdAt: -1 })
         .skip(skip)
         .limit(parseInt(limit))
         .lean(),
-      Ticket.countDocuments(query)
+      Ticket.countDocuments(query),
     ]);
 
     // Get status counts
-    const [openCount, inProgressCount, resolvedCount, closedCount] = await Promise.all([
-      Ticket.countDocuments({ status: 'open' }),
-      Ticket.countDocuments({ status: 'in-progress' }),
-      Ticket.countDocuments({ status: 'resolved' }),
-      Ticket.countDocuments({ status: 'closed' })
-    ]);
+    const [openCount, inProgressCount, resolvedCount, closedCount] =
+      await Promise.all([
+        Ticket.countDocuments({ status: 'open' }),
+        Ticket.countDocuments({ status: 'in-progress' }),
+        Ticket.countDocuments({ status: 'resolved' }),
+        Ticket.countDocuments({ status: 'closed' }),
+      ]);
 
     res.json({
       success: true,
-      tickets: tickets.map(t => ({
+      tickets: tickets.map((t) => ({
         id: t.ticketNumber,
         subject: t.subject,
         category: t.category,
@@ -1265,21 +1533,21 @@ const getTicketsApi = async (req, res) => {
         createdAt: t.createdAt,
         unreadCount: t.unreadByAdmin || 0,
         messageCount: t.messages?.length || 0,
-        lastMessageAt: t.lastMessageAt
+        lastMessageAt: t.lastMessageAt,
       })),
       pagination: {
         page: parseInt(page),
         limit: parseInt(limit),
         total,
-        pages: Math.ceil(total / parseInt(limit))
+        pages: Math.ceil(total / parseInt(limit)),
       },
       stats: {
         open: openCount,
         'in-progress': inProgressCount,
         resolved: resolvedCount,
         closed: closedCount,
-        total: openCount + inProgressCount + resolvedCount + closedCount
-      }
+        total: openCount + inProgressCount + resolvedCount + closedCount,
+      },
     });
   } catch (error) {
     console.error('Error in getTicketsApi:', error);
@@ -1298,7 +1566,9 @@ const markTicketAsReadAdmin = async (req, res) => {
     const ticket = await Ticket.findOne({ ticketNumber: ticketId });
 
     if (!ticket) {
-      return res.status(404).json({ success: false, error: 'Ticket not found' });
+      return res
+        .status(404)
+        .json({ success: false, error: 'Ticket not found' });
     }
 
     await ticket.markAsRead('admin');
@@ -1306,7 +1576,7 @@ const markTicketAsReadAdmin = async (req, res) => {
     // Notify via socket
     socketService.emitToTicket(ticketId, 'messages-marked-read', {
       ticketId,
-      readBy: 'admin'
+      readBy: 'admin',
     });
 
     res.json({ success: true });
@@ -1324,40 +1594,45 @@ const getUsersManagement = async (req, res) => {
   try {
     // Get all buyers from database
     const buyers = await Buyer.find({}).sort({ createdAt: -1 }).lean();
-    
+
     // Get order counts and total spent for each buyer
-    const usersWithStats = await Promise.all(buyers.map(async (buyer) => {
-      // Get orders for this buyer
-      const orders = await Order.find({ buyer: buyer._id }).lean();
-      const orderCount = orders.length;
-      const totalSpent = orders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
-      
-      // Map isActive to status for view compatibility
-      const status = buyer.isActive ? 'active' : 'inactive';
-      
-      return {
-        id: buyer._id,
-        name: `${buyer.firstName} ${buyer.lastName}`,
-        firstName: buyer.firstName,
-        lastName: buyer.lastName,
-        email: buyer.email,
-        company: buyer.companyName,
-        companyName: buyer.companyName,
-        phone: buyer.phone,
-        country: buyer.country,
-        city: buyer.city,
-        shippingAddress: buyer.shippingAddress,
-        orders: orderCount,
-        totalSpent: totalSpent,
-        status: status,
-        isActive: buyer.isActive,
-        joined: buyer.createdAt,
-        createdAt: buyer.createdAt,
-        lastLogin: buyer.lastLogin,
-        avatar: buyer.avatar,
-        markupPercentage: buyer.markupPercentage,
-      };
-    }));
+    const usersWithStats = await Promise.all(
+      buyers.map(async (buyer) => {
+        // Get orders for this buyer
+        const orders = await Order.find({ buyer: buyer._id }).lean();
+        const orderCount = orders.length;
+        const totalSpent = orders.reduce(
+          (sum, order) => sum + (order.totalAmount || 0),
+          0,
+        );
+
+        // Map isActive to status for view compatibility
+        const status = buyer.isActive ? 'active' : 'inactive';
+
+        return {
+          id: buyer._id,
+          name: `${buyer.firstName} ${buyer.lastName}`,
+          firstName: buyer.firstName,
+          lastName: buyer.lastName,
+          email: buyer.email,
+          company: buyer.companyName,
+          companyName: buyer.companyName,
+          phone: buyer.phone,
+          country: buyer.country,
+          city: buyer.city,
+          shippingAddress: buyer.shippingAddress,
+          orders: orderCount,
+          totalSpent: totalSpent,
+          status: status,
+          isActive: buyer.isActive,
+          joined: buyer.createdAt,
+          createdAt: buyer.createdAt,
+          lastLogin: buyer.lastLogin,
+          avatar: buyer.avatar,
+          markupPercentage: buyer.markupPercentage,
+        };
+      }),
+    );
 
     // Get system default markup for display
     const systemSettings = await SystemSettings.getSettings();
@@ -1366,11 +1641,13 @@ const getUsersManagement = async (req, res) => {
       title: 'Users Management | PARTSFORM',
       activePage: 'users',
       users: usersWithStats,
-      defaultMarkup: systemSettings.defaultMarkupPercentage || 0
+      defaultMarkup: systemSettings.defaultMarkupPercentage || 0,
     });
   } catch (error) {
     console.error('Error in getUsersManagement:', error);
-    res.status(500).render('error', { title: 'Error', error: 'Failed to load users' });
+    res
+      .status(500)
+      .render('error', { title: 'Error', error: 'Failed to load users' });
   }
 };
 
@@ -1380,22 +1657,29 @@ const getUsersManagement = async (req, res) => {
 const getUserDetails = async (req, res) => {
   try {
     const userId = req.params.id;
-    
+
     // Find buyer in database
     const buyer = await Buyer.findById(userId).lean();
-    
+
     if (!buyer) {
-      return res.status(404).render('error', { title: 'Error', error: 'User not found' });
+      return res
+        .status(404)
+        .render('error', { title: 'Error', error: 'User not found' });
     }
 
     // Get orders for this buyer
-    const orders = await Order.find({ buyer: userId }).sort({ createdAt: -1 }).lean();
+    const orders = await Order.find({ buyer: userId })
+      .sort({ createdAt: -1 })
+      .lean();
     const orderCount = orders.length;
-    const totalSpent = orders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
-    
+    const totalSpent = orders.reduce(
+      (sum, order) => sum + (order.totalAmount || 0),
+      0,
+    );
+
     // Map isActive to status for view compatibility
     const status = buyer.isActive ? 'active' : 'inactive';
-    
+
     // Build user object for view
     const user = {
       id: buyer._id,
@@ -1423,24 +1707,26 @@ const getUserDetails = async (req, res) => {
       preferredCurrency: buyer.preferredCurrency,
       markupPercentage: buyer.markupPercentage,
       // Include recent orders for display
-      recentOrders: orders.slice(0, 5).map(order => ({
+      recentOrders: orders.slice(0, 5).map((order) => ({
         id: order.orderNumber || order._id,
         date: order.createdAt,
         items: order.items ? order.items.length : 0,
         amount: order.totalAmount || 0,
-        status: order.status || 'pending'
-      }))
+        status: order.status || 'pending',
+      })),
     };
 
     res.render('admin/user-details', {
       title: `${user.name} | PARTSFORM Admin`,
       activePage: 'users',
       user,
-      orders: orders
+      orders: orders,
     });
   } catch (error) {
     console.error('Error in getUserDetails:', error);
-    res.status(500).render('error', { title: 'Error', error: 'Failed to load user' });
+    res
+      .status(500)
+      .render('error', { title: 'Error', error: 'Failed to load user' });
   }
 };
 
@@ -1451,11 +1737,13 @@ const getUserCreate = async (req, res) => {
   try {
     res.render('admin/user-create', {
       title: 'Create User | PARTSFORM Admin',
-      activePage: 'users'
+      activePage: 'users',
     });
   } catch (error) {
     console.error('Error in getUserCreate:', error);
-    res.status(500).render('error', { title: 'Error', error: 'Failed to load form' });
+    res
+      .status(500)
+      .render('error', { title: 'Error', error: 'Failed to load form' });
   }
 };
 
@@ -1465,12 +1753,14 @@ const getUserCreate = async (req, res) => {
 const getUserEdit = async (req, res) => {
   try {
     const userId = req.params.id;
-    
+
     // Find buyer in database
     const buyer = await Buyer.findById(userId).lean();
-    
+
     if (!buyer) {
-      return res.status(404).render('error', { title: 'Error', error: 'User not found' });
+      return res
+        .status(404)
+        .render('error', { title: 'Error', error: 'User not found' });
     }
 
     // Map isActive to status for view compatibility
@@ -1499,11 +1789,13 @@ const getUserEdit = async (req, res) => {
     res.render('admin/user-edit', {
       title: `Edit ${user.name} | PARTSFORM Admin`,
       activePage: 'users',
-      user
+      user,
     });
   } catch (error) {
     console.error('Error in getUserEdit:', error);
-    res.status(500).render('error', { title: 'Error', error: 'Failed to load user' });
+    res
+      .status(500)
+      .render('error', { title: 'Error', error: 'Failed to load user' });
   }
 };
 
@@ -1514,19 +1806,19 @@ const updateUserStatus = async (req, res) => {
   try {
     const userId = req.params.id;
     const { status } = req.body;
-    
+
     // Find and update buyer in database
     const buyer = await Buyer.findById(userId);
-    
+
     if (!buyer) {
       return res.status(404).json({ success: false, error: 'User not found' });
     }
-    
+
     // Update isActive based on status
-    buyer.isActive = (status === 'active');
-    
+    buyer.isActive = status === 'active';
+
     await buyer.save();
-    
+
     res.json({ success: true, message: `User status updated to ${status}` });
   } catch (error) {
     console.error('Error in updateUserStatus:', error);
@@ -1540,17 +1832,17 @@ const updateUserStatus = async (req, res) => {
 const bulkUpdateUsers = async (req, res) => {
   try {
     const { userIds, status } = req.body;
-    
+
     // Map status to isActive
-    const isActive = (status === 'active');
-    
+    const isActive = status === 'active';
+
     // Update all users in database
-    await Buyer.updateMany(
-      { _id: { $in: userIds } },
-      { isActive: isActive }
-    );
-    
-    res.json({ success: true, message: `${userIds.length} users updated to ${status}` });
+    await Buyer.updateMany({ _id: { $in: userIds } }, { isActive: isActive });
+
+    res.json({
+      success: true,
+      message: `${userIds.length} users updated to ${status}`,
+    });
   } catch (error) {
     console.error('Error in bulkUpdateUsers:', error);
     res.status(500).json({ success: false, error: 'Failed to update users' });
@@ -1563,17 +1855,17 @@ const bulkUpdateUsers = async (req, res) => {
 const deleteUser = async (req, res) => {
   try {
     const userId = req.params.id;
-    
+
     // Find and delete buyer from database
     const buyer = await Buyer.findByIdAndDelete(userId);
-    
+
     if (!buyer) {
       return res.status(404).json({ success: false, error: 'User not found' });
     }
-    
+
     // Optionally: Delete related orders (or keep them for records)
     // await Order.deleteMany({ buyer: userId });
-    
+
     res.json({ success: true, message: 'User deleted successfully' });
   } catch (error) {
     console.error('Error in deleteUser:', error);
@@ -1598,7 +1890,7 @@ const createUser = async (req, res) => {
       status,
       industry,
       position,
-      markupPercentage
+      markupPercentage,
     } = req.body;
 
     // Check if email already exists
@@ -1606,7 +1898,7 @@ const createUser = async (req, res) => {
     if (existingBuyer) {
       return res.status(409).json({
         success: false,
-        error: 'A user with this email already exists'
+        error: 'A user with this email already exists',
       });
     }
 
@@ -1626,7 +1918,10 @@ const createUser = async (req, res) => {
       password: tempPassword,
       isActive: status === 'active',
       termsAcceptedAt: new Date(),
-      markupPercentage: markupPercentage !== undefined && markupPercentage !== '' ? parseFloat(markupPercentage) : null,
+      markupPercentage:
+        markupPercentage !== undefined && markupPercentage !== ''
+          ? parseFloat(markupPercentage)
+          : null,
     });
 
     await buyer.save();
@@ -1637,8 +1932,8 @@ const createUser = async (req, res) => {
       data: {
         id: buyer._id,
         email: buyer.email,
-        name: `${buyer.firstName} ${buyer.lastName}`
-      }
+        name: `${buyer.firstName} ${buyer.lastName}`,
+      },
     });
   } catch (error) {
     console.error('Error in createUser:', error);
@@ -1664,11 +1959,11 @@ const updateUser = async (req, res) => {
       status,
       industry,
       position,
-      markupPercentage
+      markupPercentage,
     } = req.body;
 
     const buyer = await Buyer.findById(userId);
-    
+
     if (!buyer) {
       return res.status(404).json({ success: false, error: 'User not found' });
     }
@@ -1678,9 +1973,14 @@ const updateUser = async (req, res) => {
     if (lastName) buyer.lastName = lastName.trim();
     if (email && email !== buyer.email) {
       // Check if new email exists
-      const existingBuyer = await Buyer.findOne({ email: email.toLowerCase(), _id: { $ne: userId } });
+      const existingBuyer = await Buyer.findOne({
+        email: email.toLowerCase(),
+        _id: { $ne: userId },
+      });
       if (existingBuyer) {
-        return res.status(409).json({ success: false, error: 'Email already in use' });
+        return res
+          .status(409)
+          .json({ success: false, error: 'Email already in use' });
       }
       buyer.email = email.toLowerCase().trim();
     }
@@ -1689,10 +1989,10 @@ const updateUser = async (req, res) => {
     if (country) buyer.country = country.trim();
     if (city) buyer.city = city.trim();
     if (shippingAddress) buyer.shippingAddress = shippingAddress.trim();
-    
+
     // Update status - simple active/inactive
     if (status) {
-      buyer.isActive = (status === 'active');
+      buyer.isActive = status === 'active';
     }
 
     // Update markup percentage
@@ -1712,8 +2012,8 @@ const updateUser = async (req, res) => {
       data: {
         id: buyer._id,
         email: buyer.email,
-        name: `${buyer.firstName} ${buyer.lastName}`
-      }
+        name: `${buyer.firstName} ${buyer.lastName}`,
+      },
     });
   } catch (error) {
     console.error('Error in updateUser:', error);
@@ -1727,20 +2027,20 @@ const updateUser = async (req, res) => {
 const approveUser = async (req, res) => {
   try {
     const userId = req.params.id;
-    
+
     const buyer = await Buyer.findById(userId);
-    
+
     if (!buyer) {
       return res.status(404).json({ success: false, error: 'User not found' });
     }
-    
+
     buyer.isActive = true;
-    
+
     await buyer.save();
-    
+
     res.json({
       success: true,
-      message: 'User account activated successfully'
+      message: 'User account activated successfully',
     });
   } catch (error) {
     console.error('Error in approveUser:', error);
@@ -1754,24 +2054,26 @@ const approveUser = async (req, res) => {
 const rejectUser = async (req, res) => {
   try {
     const userId = req.params.id;
-    
+
     const buyer = await Buyer.findById(userId);
-    
+
     if (!buyer) {
       return res.status(404).json({ success: false, error: 'User not found' });
     }
-    
+
     buyer.isActive = false;
-    
+
     await buyer.save();
-    
+
     res.json({
       success: true,
-      message: 'User account deactivated'
+      message: 'User account deactivated',
     });
   } catch (error) {
     console.error('Error in rejectUser:', error);
-    res.status(500).json({ success: false, error: 'Failed to deactivate user' });
+    res
+      .status(500)
+      .json({ success: false, error: 'Failed to deactivate user' });
   }
 };
 
@@ -1781,20 +2083,20 @@ const rejectUser = async (req, res) => {
 const suspendUser = async (req, res) => {
   try {
     const userId = req.params.id;
-    
+
     const buyer = await Buyer.findById(userId);
-    
+
     if (!buyer) {
       return res.status(404).json({ success: false, error: 'User not found' });
     }
-    
+
     buyer.isActive = false;
-    
+
     await buyer.save();
-    
+
     res.json({
       success: true,
-      message: 'User account suspended'
+      message: 'User account suspended',
     });
   } catch (error) {
     console.error('Error in suspendUser:', error);
@@ -1809,22 +2111,78 @@ const getPaymentsManagement = async (req, res) => {
   try {
     // Mock payments data - automotive only
     const payments = [
-      { id: 'PAY-2025-001', orderId: 'ORD-2025-1247', customer: 'AutoMax Germany', amount: 45200, method: 'wire', status: 'completed', date: '2025-12-26', industry: 'automotive' },
-      { id: 'PAY-2025-002', orderId: 'ORD-2025-1246', customer: 'Premium Auto Parts', amount: 12800, method: 'credit_card', status: 'completed', date: '2025-12-26', industry: 'automotive' },
-      { id: 'PAY-2025-003', orderId: 'ORD-2025-1245', customer: 'Euro Auto Systems', amount: 89500, method: 'wire', status: 'pending', date: '2025-12-25', industry: 'automotive' },
-      { id: 'PAY-2025-004', orderId: 'ORD-2025-1244', customer: 'PartsWorld Inc', amount: 156000, method: 'letter_of_credit', status: 'processing', date: '2025-12-25', industry: 'automotive' },
-      { id: 'PAY-2025-005', orderId: 'ORD-2025-1243', customer: 'Car Components Ltd', amount: 8750, method: 'credit_card', status: 'completed', date: '2025-12-24', industry: 'automotive' },
-      { id: 'PAY-2025-006', orderId: 'ORD-2025-1242', customer: 'Drive Parts Co', amount: 67300, method: 'wire', status: 'completed', date: '2025-12-24', industry: 'automotive' },
+      {
+        id: 'PAY-2025-001',
+        orderId: 'ORD-2025-1247',
+        customer: 'AutoMax Germany',
+        amount: 45200,
+        method: 'wire',
+        status: 'completed',
+        date: '2025-12-26',
+        industry: 'automotive',
+      },
+      {
+        id: 'PAY-2025-002',
+        orderId: 'ORD-2025-1246',
+        customer: 'Premium Auto Parts',
+        amount: 12800,
+        method: 'credit_card',
+        status: 'completed',
+        date: '2025-12-26',
+        industry: 'automotive',
+      },
+      {
+        id: 'PAY-2025-003',
+        orderId: 'ORD-2025-1245',
+        customer: 'Euro Auto Systems',
+        amount: 89500,
+        method: 'wire',
+        status: 'pending',
+        date: '2025-12-25',
+        industry: 'automotive',
+      },
+      {
+        id: 'PAY-2025-004',
+        orderId: 'ORD-2025-1244',
+        customer: 'PartsWorld Inc',
+        amount: 156000,
+        method: 'letter_of_credit',
+        status: 'processing',
+        date: '2025-12-25',
+        industry: 'automotive',
+      },
+      {
+        id: 'PAY-2025-005',
+        orderId: 'ORD-2025-1243',
+        customer: 'Car Components Ltd',
+        amount: 8750,
+        method: 'credit_card',
+        status: 'completed',
+        date: '2025-12-24',
+        industry: 'automotive',
+      },
+      {
+        id: 'PAY-2025-006',
+        orderId: 'ORD-2025-1242',
+        customer: 'Drive Parts Co',
+        amount: 67300,
+        method: 'wire',
+        status: 'completed',
+        date: '2025-12-24',
+        industry: 'automotive',
+      },
     ];
 
     res.render('admin/payments', {
       title: 'Payments Management | PARTSFORM',
       activePage: 'payments',
-      payments
+      payments,
     });
   } catch (error) {
     console.error('Error in getPaymentsManagement:', error);
-    res.status(500).render('error', { title: 'Error', error: 'Failed to load payments' });
+    res
+      .status(500)
+      .render('error', { title: 'Error', error: 'Failed to load payments' });
   }
 };
 
@@ -1834,12 +2192,44 @@ const getPaymentsManagement = async (req, res) => {
 const getPaymentDetails = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     const payments = {
-      'PAY-2025-001': { id: 'PAY-2025-001', orderId: 'ORD-2025-1247', customer: 'AutoMax Germany', amount: 45200, method: 'wire', status: 'completed', date: 'Dec 26, 2025' },
-      'PAY-2025-002': { id: 'PAY-2025-002', orderId: 'ORD-2025-1246', customer: 'Premium Auto Parts', amount: 12800, method: 'credit_card', status: 'completed', date: 'Dec 26, 2025' },
-      'PAY-2025-003': { id: 'PAY-2025-003', orderId: 'ORD-2025-1245', customer: 'Euro Auto Systems', amount: 89500, method: 'wire', status: 'pending', date: 'Dec 25, 2025' },
-      'PAY-2025-004': { id: 'PAY-2025-004', orderId: 'ORD-2025-1244', customer: 'PartsWorld Inc', amount: 156000, method: 'letter_of_credit', status: 'processing', date: 'Dec 25, 2025' },
+      'PAY-2025-001': {
+        id: 'PAY-2025-001',
+        orderId: 'ORD-2025-1247',
+        customer: 'AutoMax Germany',
+        amount: 45200,
+        method: 'wire',
+        status: 'completed',
+        date: 'Dec 26, 2025',
+      },
+      'PAY-2025-002': {
+        id: 'PAY-2025-002',
+        orderId: 'ORD-2025-1246',
+        customer: 'Premium Auto Parts',
+        amount: 12800,
+        method: 'credit_card',
+        status: 'completed',
+        date: 'Dec 26, 2025',
+      },
+      'PAY-2025-003': {
+        id: 'PAY-2025-003',
+        orderId: 'ORD-2025-1245',
+        customer: 'Euro Auto Systems',
+        amount: 89500,
+        method: 'wire',
+        status: 'pending',
+        date: 'Dec 25, 2025',
+      },
+      'PAY-2025-004': {
+        id: 'PAY-2025-004',
+        orderId: 'ORD-2025-1244',
+        customer: 'PartsWorld Inc',
+        amount: 156000,
+        method: 'letter_of_credit',
+        status: 'processing',
+        date: 'Dec 25, 2025',
+      },
     };
 
     const payment = payments[id] || {
@@ -1849,17 +2239,22 @@ const getPaymentDetails = async (req, res) => {
       amount: 0,
       method: 'wire',
       status: 'pending',
-      date: new Date().toLocaleDateString()
+      date: new Date().toLocaleDateString(),
     };
 
     res.render('admin/payment-details', {
       title: `Payment ${id} | PARTSFORM Admin`,
       activePage: 'payments',
-      payment
+      payment,
     });
   } catch (error) {
     console.error('Error in getPaymentDetails:', error);
-    res.status(500).render('error', { title: 'Error', error: 'Failed to load payment details' });
+    res
+      .status(500)
+      .render('error', {
+        title: 'Error',
+        error: 'Failed to load payment details',
+      });
   }
 };
 
@@ -1870,11 +2265,13 @@ const getPaymentCreate = async (req, res) => {
   try {
     res.render('admin/payment-create', {
       title: 'Record Payment | PARTSFORM Admin',
-      activePage: 'payments'
+      activePage: 'payments',
     });
   } catch (error) {
     console.error('Error in getPaymentCreate:', error);
-    res.status(500).render('error', { title: 'Error', error: 'Failed to load create page' });
+    res
+      .status(500)
+      .render('error', { title: 'Error', error: 'Failed to load create page' });
   }
 };
 
@@ -1887,11 +2284,13 @@ const getAdminSettings = async (req, res) => {
     res.render('admin/settings', {
       title: 'Admin Settings | PARTSFORM',
       activePage: 'settings',
-      systemSettings
+      systemSettings,
     });
   } catch (error) {
     console.error('Error in getAdminSettings:', error);
-    res.status(500).render('error', { title: 'Error', error: 'Failed to load settings' });
+    res
+      .status(500)
+      .render('error', { title: 'Error', error: 'Failed to load settings' });
   }
 };
 
@@ -1901,27 +2300,36 @@ const getAdminSettings = async (req, res) => {
 const getIntegrationsManagement = async (req, res) => {
   try {
     // Get all integrations from database
-    const integrations = await Integration.find({}).sort({ createdAt: -1 }).lean();
-    
+    const integrations = await Integration.find({})
+      .sort({ createdAt: -1 })
+      .lean();
+
     // Get statistics
     const stats = {
       totalConnections: integrations.length,
-      activeConnections: integrations.filter(i => i.status === 'active').length,
-      totalRecords: integrations.reduce((sum, i) => sum + (i.stats?.totalRecords || 0), 0),
+      activeConnections: integrations.filter((i) => i.status === 'active')
+        .length,
+      totalRecords: integrations.reduce(
+        (sum, i) => sum + (i.stats?.totalRecords || 0),
+        0,
+      ),
       lastSync: integrations.reduce((latest, i) => {
-        if (i.lastSync?.date && (!latest || new Date(i.lastSync.date) > new Date(latest))) {
+        if (
+          i.lastSync?.date &&
+          (!latest || new Date(i.lastSync.date) > new Date(latest))
+        ) {
           return i.lastSync.date;
         }
         return latest;
       }, null),
     };
-    
+
     // Get Elasticsearch stats if available
     let esStats = null;
     if (elasticsearchService.isAvailable) {
       esStats = await elasticsearchService.getStats();
     }
-    
+
     res.render('admin/integrations', {
       title: 'Integrations - Admin',
       activePage: 'integrations',
@@ -1931,7 +2339,12 @@ const getIntegrationsManagement = async (req, res) => {
     });
   } catch (error) {
     console.error('Error in getIntegrationsManagement:', error);
-    res.status(500).render('error', { title: 'Error', error: 'Failed to load integrations' });
+    res
+      .status(500)
+      .render('error', {
+        title: 'Error',
+        error: 'Failed to load integrations',
+      });
   }
 };
 
@@ -1947,7 +2360,12 @@ const getIntegrationCreate = async (req, res) => {
     });
   } catch (error) {
     console.error('Error in getIntegrationCreate:', error);
-    res.status(500).render('error', { title: 'Error', error: 'Failed to load connection create page' });
+    res
+      .status(500)
+      .render('error', {
+        title: 'Error',
+        error: 'Failed to load connection create page',
+      });
   }
 };
 
@@ -1958,9 +2376,14 @@ const getIntegrationEdit = async (req, res) => {
   try {
     const integration = await Integration.findById(req.params.id);
     if (!integration) {
-      return res.status(404).render('error', { title: 'Not Found', error: 'Integration not found' });
+      return res
+        .status(404)
+        .render('error', {
+          title: 'Not Found',
+          error: 'Integration not found',
+        });
     }
-    
+
     res.render('admin/integration-create', {
       title: 'Edit Connection - Admin',
       activePage: 'integrations',
@@ -1968,7 +2391,12 @@ const getIntegrationEdit = async (req, res) => {
     });
   } catch (error) {
     console.error('Error in getIntegrationEdit:', error);
-    res.status(500).render('error', { title: 'Error', error: 'Failed to load connection edit page' });
+    res
+      .status(500)
+      .render('error', {
+        title: 'Error',
+        error: 'Failed to load connection edit page',
+      });
   }
 };
 
@@ -1978,92 +2406,126 @@ const getIntegrationEdit = async (req, res) => {
 const createIntegration = async (req, res) => {
   try {
     const data = req.body;
-    
+
     // Handle both nested format (from frontend) and flat format
     const ftpData = data.ftp || {};
     const apiData = data.api || {};
     const googleSheetsData = data.googleSheets || {};
     const syncScheduleData = data.syncSchedule || {};
     const optionsData = data.options || {};
-    
+
     const integration = new Integration({
       name: data.name,
       type: data.type || 'ftp',
       status: data.isEnabled === false ? 'inactive' : 'active',
-      ftp: data.type === 'ftp' ? {
-        host: ftpData.host || data.ftpHost,
-        port: parseInt(ftpData.port || data.ftpPort) || 21,
-        username: ftpData.username || data.ftpUsername,
-        password: ftpData.password || data.ftpPassword,
-        secure: ftpData.protocol === 'ftps' || ftpData.protocol === 'sftp' || data.ftpSecure === true,
-        remotePath: ftpData.remotePath || data.ftpRemotePath || '/',
-        filePattern: ftpData.filePattern || data.ftpFilePattern || '*.csv',
-      } : undefined,
-      api: data.type === 'api' ? {
-        // Basic Configuration
-        name: apiData.name || data.apiName,
-        apiType: apiData.apiType || 'rest',
-        baseUrl: apiData.baseUrl || data.apiBaseUrl,
-        
-        // Authentication
-        authType: apiData.authType || data.apiAuthType || 'api-key',
-        authHeader: apiData.authHeader || data.apiAuthHeader || 'X-API-Key',
-        apiKey: apiData.apiKey || data.apiKey,
-        username: apiData.username,
-        password: apiData.password,
-        
-        // OAuth2 Configuration
-        oauth2: apiData.oauth2 || undefined,
-        
-        // Endpoints Configuration
-        endpoints: apiData.endpoints || [],
-        
-        // Pagination Configuration
-        pagination: apiData.pagination || { type: 'none' },
-        
-        // Data Configuration
-        dataPath: apiData.dataPath,
-        fieldMapping: apiData.fieldMapping,
-        
-        // Request Configuration
-        headers: apiData.headers || {},
-        rateLimit: parseInt(apiData.rateLimit) || 60,
-        timeout: parseInt(apiData.timeout) || 30000,
-        
-        // Error Handling
-        errorHandling: apiData.errorHandling || {
-          retryOnError: true,
-          maxRetries: 3,
-          retryDelay: 1000
-        },
-        
-        // GraphQL specific
-        graphqlEndpoint: apiData.graphqlEndpoint,
-        graphqlQuery: apiData.graphqlQuery,
-        graphqlVariables: apiData.graphqlVariables
-      } : undefined,
-      googleSheets: data.type === 'google-sheets' ? {
-        spreadsheetId: googleSheetsData.spreadsheetId || data.sheetsSpreadsheetId,
-        sheetName: googleSheetsData.sheetName || data.sheetsSheetName || 'Sheet1',
-        range: googleSheetsData.range || data.sheetsRange || 'A:Z',
-      } : undefined,
+      ftp:
+        data.type === 'ftp'
+          ? {
+              host: ftpData.host || data.ftpHost,
+              port: parseInt(ftpData.port || data.ftpPort) || 21,
+              username: ftpData.username || data.ftpUsername,
+              password: ftpData.password || data.ftpPassword,
+              secure:
+                ftpData.protocol === 'ftps' ||
+                ftpData.protocol === 'sftp' ||
+                data.ftpSecure === true,
+              remotePath: ftpData.remotePath || data.ftpRemotePath || '/',
+              filePattern:
+                ftpData.filePattern || data.ftpFilePattern || '*.csv',
+            }
+          : undefined,
+      api:
+        data.type === 'api'
+          ? {
+              // Basic Configuration
+              name: apiData.name || data.apiName,
+              apiType: apiData.apiType || 'rest',
+              baseUrl: apiData.baseUrl || data.apiBaseUrl,
+
+              // Authentication
+              authType: apiData.authType || data.apiAuthType || 'api-key',
+              authHeader:
+                apiData.authHeader || data.apiAuthHeader || 'X-API-Key',
+              apiKey: apiData.apiKey || data.apiKey,
+              username: apiData.username,
+              password: apiData.password,
+
+              // OAuth2 Configuration
+              oauth2: apiData.oauth2 || undefined,
+
+              // Endpoints Configuration
+              endpoints: apiData.endpoints || [],
+
+              // Pagination Configuration
+              pagination: apiData.pagination || { type: 'none' },
+
+              // Data Configuration
+              dataPath: apiData.dataPath,
+              fieldMapping: apiData.fieldMapping,
+
+              // Request Configuration
+              headers: apiData.headers || {},
+              rateLimit: parseInt(apiData.rateLimit) || 60,
+              timeout: parseInt(apiData.timeout) || 30000,
+
+              // Error Handling
+              errorHandling: apiData.errorHandling || {
+                retryOnError: true,
+                maxRetries: 3,
+                retryDelay: 1000,
+              },
+
+              // GraphQL specific
+              graphqlEndpoint: apiData.graphqlEndpoint,
+              graphqlQuery: apiData.graphqlQuery,
+              graphqlVariables: apiData.graphqlVariables,
+            }
+          : undefined,
+      googleSheets:
+        data.type === 'google-sheets'
+          ? {
+              spreadsheetId:
+                googleSheetsData.spreadsheetId || data.sheetsSpreadsheetId,
+              sheetName:
+                googleSheetsData.sheetName || data.sheetsSheetName || 'Sheet1',
+              range: googleSheetsData.range || data.sheetsRange || 'A:Z',
+            }
+          : undefined,
       syncSchedule: {
-        enabled: syncScheduleData.enabled !== undefined ? syncScheduleData.enabled : (data.syncEnabled !== 'false' && data.syncEnabled !== false),
+        enabled:
+          syncScheduleData.enabled !== undefined
+            ? syncScheduleData.enabled
+            : data.syncEnabled !== 'false' && data.syncEnabled !== false,
         frequency: syncScheduleData.frequency || data.syncFrequency || 'daily',
         time: syncScheduleData.time || data.syncTime || '08:00',
       },
       options: {
-        autoSync: optionsData.autoSync !== undefined ? optionsData.autoSync : (data.autoSync === 'true' || data.autoSync === true || data.isEnabled !== false),
-        notifyOnComplete: optionsData.notifyOnComplete !== undefined ? optionsData.notifyOnComplete : (data.notifyOnComplete !== 'false' && data.notifyOnComplete !== false),
-        deltaSync: optionsData.deltaSync !== undefined ? optionsData.deltaSync : (data.deltaSync === 'true' || data.deltaSync === true),
-        retryOnFail: optionsData.retryOnFail !== undefined ? optionsData.retryOnFail : (data.retryOnFail !== 'false' && data.retryOnFail !== false),
+        autoSync:
+          optionsData.autoSync !== undefined
+            ? optionsData.autoSync
+            : data.autoSync === 'true' ||
+              data.autoSync === true ||
+              data.isEnabled !== false,
+        notifyOnComplete:
+          optionsData.notifyOnComplete !== undefined
+            ? optionsData.notifyOnComplete
+            : data.notifyOnComplete !== 'false' &&
+              data.notifyOnComplete !== false,
+        deltaSync:
+          optionsData.deltaSync !== undefined
+            ? optionsData.deltaSync
+            : data.deltaSync === 'true' || data.deltaSync === true,
+        retryOnFail:
+          optionsData.retryOnFail !== undefined
+            ? optionsData.retryOnFail
+            : data.retryOnFail !== 'false' && data.retryOnFail !== false,
         maxRetries: optionsData.maxRetries || 3,
       },
       createdBy: req.admin?._id,
     });
-    
+
     await integration.save();
-    
+
     // Schedule if enabled
     if (integration.syncSchedule.enabled) {
       await schedulerService.scheduleIntegration(integration);
@@ -2071,13 +2533,18 @@ const createIntegration = async (req, res) => {
 
     // Auto-sync immediately after creation if autoSync is enabled
     if (integration.options.autoSync) {
-      console.log(`🚀 Starting automatic sync for newly created integration: ${integration.name}`);
+      console.log(
+        `🚀 Starting automatic sync for newly created integration: ${integration.name}`,
+      );
       // Fire and forget - don't wait for sync to complete
-      syncService.syncIntegration(integration._id).catch(error => {
-        console.error(`Auto-sync failed for ${integration._id}:`, error.message);
+      syncService.syncIntegration(integration._id).catch((error) => {
+        console.error(
+          `Auto-sync failed for ${integration._id}:`,
+          error.message,
+        );
       });
     }
-    
+
     res.status(201).json({
       success: true,
       message: 'Integration created successfully',
@@ -2097,116 +2564,227 @@ const updateIntegration = async (req, res) => {
   try {
     const data = req.body;
     const integration = await Integration.findById(req.params.id);
-    
+
     if (!integration) {
-      return res.status(404).json({ success: false, error: 'Integration not found' });
+      return res
+        .status(404)
+        .json({ success: false, error: 'Integration not found' });
     }
-    
+
     // Handle both nested format (from frontend) and flat format
     const ftpData = data.ftp || {};
     const apiData = data.api || {};
     const googleSheetsData = data.googleSheets || {};
     const syncScheduleData = data.syncSchedule || {};
     const optionsData = data.options || {};
-    
+
     // Normalize frequency value
     const FREQUENCY_NORMALIZE = {
-      'every1hour': 'hourly', 'every1hours': 'hourly', '1hour': 'hourly',
-      '2hours': 'every2hours', '3hours': 'every3hours', '4hours': 'every4hours',
+      every1hour: 'hourly',
+      every1hours: 'hourly',
+      '1hour': 'hourly',
+      '2hours': 'every2hours',
+      '3hours': 'every3hours',
+      '4hours': 'every4hours',
       '8hours': 'every8hours',
     };
-    let rawFrequency = syncScheduleData.frequency || data.syncFrequency || integration.syncSchedule.frequency;
+    let rawFrequency =
+      syncScheduleData.frequency ||
+      data.syncFrequency ||
+      integration.syncSchedule.frequency;
     if (FREQUENCY_NORMALIZE[rawFrequency]) {
       rawFrequency = FREQUENCY_NORMALIZE[rawFrequency];
     }
-    
+
     // Valid frequency values
-    const validFrequencies = ['manual', 'hourly', 'every2hours', 'every3hours', 'every4hours', '6hours', 'every6hours', 'every8hours', '12hours', 'every12hours', 'daily', 'weekly', 'monthly', 'custom'];
+    const validFrequencies = [
+      'manual',
+      'hourly',
+      'every2hours',
+      'every3hours',
+      'every4hours',
+      '6hours',
+      'every6hours',
+      'every8hours',
+      '12hours',
+      'every12hours',
+      'daily',
+      'weekly',
+      'monthly',
+      'custom',
+    ];
     if (!validFrequencies.includes(rawFrequency)) {
       rawFrequency = 'daily'; // Safe fallback
     }
-    
+
     // Update fields
     integration.name = data.name || integration.name;
-    integration.status = data.isEnabled === false ? 'inactive' : (data.isEnabled === true ? 'active' : integration.status);
-    
+    integration.status =
+      data.isEnabled === false
+        ? 'inactive'
+        : data.isEnabled === true
+          ? 'active'
+          : integration.status;
+
     // Update type-specific configuration
     if (integration.type === 'ftp') {
       integration.ftp = {
-        ...integration.ftp.toObject ? integration.ftp.toObject() : integration.ftp,
+        ...(integration.ftp.toObject
+          ? integration.ftp.toObject()
+          : integration.ftp),
         host: ftpData.host || data.ftpHost || integration.ftp.host,
         port: parseInt(ftpData.port || data.ftpPort) || integration.ftp.port,
-        username: ftpData.username || data.ftpUsername || integration.ftp.username,
-        password: (ftpData.password && ftpData.password !== '********') ? ftpData.password : 
-                  (data.ftpPassword && data.ftpPassword !== '********') ? data.ftpPassword : integration.ftp.password,
-        secure: ftpData.protocol ? (ftpData.protocol === 'ftps' || ftpData.protocol === 'sftp') : 
-                (data.ftpSecure !== undefined ? (data.ftpSecure === 'true' || data.ftpSecure === true) : integration.ftp.secure),
-        remotePath: ftpData.remotePath || data.ftpRemotePath || integration.ftp.remotePath,
-        filePattern: ftpData.filePattern || data.ftpFilePattern || integration.ftp.filePattern,
+        username:
+          ftpData.username || data.ftpUsername || integration.ftp.username,
+        password:
+          ftpData.password && ftpData.password !== '********'
+            ? ftpData.password
+            : data.ftpPassword && data.ftpPassword !== '********'
+              ? data.ftpPassword
+              : integration.ftp.password,
+        secure: ftpData.protocol
+          ? ftpData.protocol === 'ftps' || ftpData.protocol === 'sftp'
+          : data.ftpSecure !== undefined
+            ? data.ftpSecure === 'true' || data.ftpSecure === true
+            : integration.ftp.secure,
+        remotePath:
+          ftpData.remotePath ||
+          data.ftpRemotePath ||
+          integration.ftp.remotePath,
+        filePattern:
+          ftpData.filePattern ||
+          data.ftpFilePattern ||
+          integration.ftp.filePattern,
       };
     } else if (integration.type === 'api') {
-      const existingApi = integration.api ? (integration.api.toObject ? integration.api.toObject() : integration.api) : {};
+      const existingApi = integration.api
+        ? integration.api.toObject
+          ? integration.api.toObject()
+          : integration.api
+        : {};
       integration.api = {
         ...existingApi,
         name: apiData.name || data.apiName || existingApi.name,
         apiType: apiData.apiType || existingApi.apiType || 'rest',
         baseUrl: apiData.baseUrl || data.apiBaseUrl || existingApi.baseUrl,
-        authType: apiData.authType || data.apiAuthType || existingApi.authType || 'api-key',
-        authHeader: apiData.authHeader || data.apiAuthHeader || existingApi.authHeader || 'X-API-Key',
-        apiKey: (apiData.apiKey && apiData.apiKey !== '********') ? apiData.apiKey : existingApi.apiKey,
-        token: (apiData.token && apiData.token !== '********') ? apiData.token : existingApi.token,
+        authType:
+          apiData.authType ||
+          data.apiAuthType ||
+          existingApi.authType ||
+          'api-key',
+        authHeader:
+          apiData.authHeader ||
+          data.apiAuthHeader ||
+          existingApi.authHeader ||
+          'X-API-Key',
+        apiKey:
+          apiData.apiKey && apiData.apiKey !== '********'
+            ? apiData.apiKey
+            : existingApi.apiKey,
+        token:
+          apiData.token && apiData.token !== '********'
+            ? apiData.token
+            : existingApi.token,
         username: apiData.username || existingApi.username,
-        password: (apiData.password && apiData.password !== '********') ? apiData.password : existingApi.password,
+        password:
+          apiData.password && apiData.password !== '********'
+            ? apiData.password
+            : existingApi.password,
         oauth2: apiData.oauth2 || existingApi.oauth2,
         endpoints: apiData.endpoints || existingApi.endpoints || [],
-        pagination: apiData.pagination || existingApi.pagination || { paginationType: 'none' },
+        pagination: apiData.pagination ||
+          existingApi.pagination || { paginationType: 'none' },
         dataPath: apiData.dataPath || existingApi.dataPath,
         fieldMapping: apiData.fieldMapping || existingApi.fieldMapping,
         headers: apiData.headers || existingApi.headers || {},
         rateLimit: parseInt(apiData.rateLimit) || existingApi.rateLimit || 60,
         timeout: parseInt(apiData.timeout) || existingApi.timeout || 30000,
-        errorHandling: apiData.errorHandling || existingApi.errorHandling || { retryOnError: true, maxRetries: 3, retryDelay: 1000 },
+        errorHandling: apiData.errorHandling ||
+          existingApi.errorHandling || {
+            retryOnError: true,
+            maxRetries: 3,
+            retryDelay: 1000,
+          },
         graphqlEndpoint: apiData.graphqlEndpoint || existingApi.graphqlEndpoint,
         graphqlQuery: apiData.graphqlQuery || existingApi.graphqlQuery,
-        graphqlVariables: apiData.graphqlVariables || existingApi.graphqlVariables,
+        graphqlVariables:
+          apiData.graphqlVariables || existingApi.graphqlVariables,
       };
     } else if (integration.type === 'google-sheets') {
-      const existingGS = integration.googleSheets ? (integration.googleSheets.toObject ? integration.googleSheets.toObject() : integration.googleSheets) : {};
+      const existingGS = integration.googleSheets
+        ? integration.googleSheets.toObject
+          ? integration.googleSheets.toObject()
+          : integration.googleSheets
+        : {};
       integration.googleSheets = {
         ...existingGS,
-        spreadsheetId: googleSheetsData.spreadsheetId || data.sheetsSpreadsheetId || existingGS.spreadsheetId,
-        sheetName: googleSheetsData.sheetName || data.sheetsSheetName || existingGS.sheetName || 'Sheet1',
-        range: googleSheetsData.range || data.sheetsRange || existingGS.range || 'A:Z',
+        spreadsheetId:
+          googleSheetsData.spreadsheetId ||
+          data.sheetsSpreadsheetId ||
+          existingGS.spreadsheetId,
+        sheetName:
+          googleSheetsData.sheetName ||
+          data.sheetsSheetName ||
+          existingGS.sheetName ||
+          'Sheet1',
+        range:
+          googleSheetsData.range ||
+          data.sheetsRange ||
+          existingGS.range ||
+          'A:Z',
         credentials: googleSheetsData.credentials || existingGS.credentials,
       };
     }
-    
+
     integration.syncSchedule = {
-      enabled: syncScheduleData.enabled !== undefined ? syncScheduleData.enabled : 
-               (data.syncEnabled !== undefined ? (data.syncEnabled !== 'false' && data.syncEnabled !== false) : integration.syncSchedule.enabled),
+      enabled:
+        syncScheduleData.enabled !== undefined
+          ? syncScheduleData.enabled
+          : data.syncEnabled !== undefined
+            ? data.syncEnabled !== 'false' && data.syncEnabled !== false
+            : integration.syncSchedule.enabled,
       frequency: rawFrequency,
-      time: syncScheduleData.time || data.syncTime || integration.syncSchedule.time,
+      time:
+        syncScheduleData.time || data.syncTime || integration.syncSchedule.time,
     };
-    
+
     integration.options = {
-      autoSync: optionsData.autoSync !== undefined ? optionsData.autoSync : (data.autoSync === 'true' || data.autoSync === true || integration.options?.autoSync),
-      notifyOnComplete: optionsData.notifyOnComplete !== undefined ? optionsData.notifyOnComplete : (data.notifyOnComplete !== 'false'),
-      deltaSync: optionsData.deltaSync !== undefined ? optionsData.deltaSync : (data.deltaSync === 'true' || data.deltaSync === true),
-      retryOnFail: optionsData.retryOnFail !== undefined ? optionsData.retryOnFail : (data.retryOnFail !== 'false'),
-      maxRetries: optionsData.maxRetries || integration.options?.maxRetries || 3,
+      autoSync:
+        optionsData.autoSync !== undefined
+          ? optionsData.autoSync
+          : data.autoSync === 'true' ||
+            data.autoSync === true ||
+            integration.options?.autoSync,
+      notifyOnComplete:
+        optionsData.notifyOnComplete !== undefined
+          ? optionsData.notifyOnComplete
+          : data.notifyOnComplete !== 'false',
+      deltaSync:
+        optionsData.deltaSync !== undefined
+          ? optionsData.deltaSync
+          : data.deltaSync === 'true' || data.deltaSync === true,
+      retryOnFail:
+        optionsData.retryOnFail !== undefined
+          ? optionsData.retryOnFail
+          : data.retryOnFail !== 'false',
+      maxRetries:
+        optionsData.maxRetries || integration.options?.maxRetries || 3,
     };
-    
+
     // Update column mapping if provided
     if (data.columnMapping) {
-      integration.columnMapping = { ...integration.columnMapping, ...data.columnMapping };
+      integration.columnMapping = {
+        ...integration.columnMapping,
+        ...data.columnMapping,
+      };
     }
-    
+
     integration.updatedBy = req.admin?._id;
     await integration.save();
-    
+
     // Reschedule
     await schedulerService.rescheduleIntegration(integration._id);
-    
+
     res.json({
       success: true,
       message: 'Integration updated successfully',
@@ -2224,20 +2802,22 @@ const updateIntegration = async (req, res) => {
 const deleteIntegration = async (req, res) => {
   try {
     const integration = await Integration.findById(req.params.id);
-    
+
     if (!integration) {
-      return res.status(404).json({ success: false, error: 'Integration not found' });
+      return res
+        .status(404)
+        .json({ success: false, error: 'Integration not found' });
     }
-    
+
     // Stop scheduler
     schedulerService.stopIntegration(integration._id);
-    
+
     // Clear associated data
     await syncService.clearIntegrationData(integration._id);
-    
+
     // Delete integration
     await Integration.findByIdAndDelete(req.params.id);
-    
+
     res.json({
       success: true,
       message: 'Integration deleted successfully',
@@ -2255,7 +2835,7 @@ const testIntegrationConnection = async (req, res) => {
   try {
     let data = req.body;
     let result;
-    
+
     // If testing an existing integration, fetch real credentials from DB (password is masked in toSafeJSON)
     if (data._id) {
       const existingIntegration = await Integration.findById(data._id);
@@ -2264,25 +2844,30 @@ const testIntegrationConnection = async (req, res) => {
         data = existingIntegration.toObject();
       }
     }
-    
+
     // Handle nested ftp object from frontend
     const ftpData = data.ftp || {};
-    
+
     if (data.type === 'ftp' || (!data.type && (data.ftpHost || ftpData.host))) {
       const credentials = {
         host: ftpData.host || data.ftpHost,
         port: parseInt(ftpData.port || data.ftpPort) || 21,
         username: ftpData.username || data.ftpUsername,
         password: ftpData.password || data.ftpPassword,
-        secure: ftpData.protocol ? (ftpData.protocol === 'ftps' || ftpData.protocol === 'sftp') : 
-                (data.ftpSecure === 'true' || data.ftpSecure === true),
+        secure: ftpData.protocol
+          ? ftpData.protocol === 'ftps' || ftpData.protocol === 'sftp'
+          : data.ftpSecure === 'true' || data.ftpSecure === true,
         remotePath: ftpData.remotePath || data.ftpRemotePath || '/',
         filePattern: ftpData.filePattern || data.ftpFilePattern || '*.csv',
       };
-      
-      console.log('Testing FTP connection:', { host: credentials.host, port: credentials.port, username: credentials.username });
+
+      console.log('Testing FTP connection:', {
+        host: credentials.host,
+        port: credentials.port,
+        username: credentials.username,
+      });
       result = await ftpService.testConnection(credentials);
-      
+
       // Ensure proper response format
       if (result.success) {
         return res.json({
@@ -2290,20 +2875,20 @@ const testIntegrationConnection = async (req, res) => {
           message: result.message || 'Connection successful',
           data: {
             filesCount: result.filesFound || 0,
-            message: result.message
-          }
+            message: result.message,
+          },
         });
       } else {
         return res.json({
           success: false,
-          error: result.message || result.error || 'Connection failed'
+          error: result.message || result.error || 'Connection failed',
         });
       }
     } else if (data.type === 'api') {
       // API connection test - use the professional apiService
       const apiService = require('../services/apiService');
       const apiData = data.api || {};
-      
+
       // Build test configuration
       const testConfig = {
         baseUrl: apiData.baseUrl || data.apiBaseUrl,
@@ -2315,34 +2900,37 @@ const testIntegrationConnection = async (req, res) => {
         password: apiData.password,
         headers: apiData.headers || {},
         // Use first endpoint path for testing if available
-        testEndpoint: apiData.endpoints && apiData.endpoints.length > 0 
-          ? apiData.endpoints[0].path 
-          : undefined,
+        testEndpoint:
+          apiData.endpoints && apiData.endpoints.length > 0
+            ? apiData.endpoints[0].path
+            : undefined,
       };
 
       // Handle OAuth2
       if (apiData.oauth2) {
         testConfig.oauth2 = apiData.oauth2;
       }
-      
+
       if (!testConfig.baseUrl) {
         return res.json({
           success: false,
-          error: 'API base URL is required'
+          error: 'API base URL is required',
         });
       }
 
-      console.log('Testing API connection:', { 
-        baseUrl: testConfig.baseUrl, 
+      console.log('Testing API connection:', {
+        baseUrl: testConfig.baseUrl,
         authType: testConfig.authType,
-        testEndpoint: testConfig.testEndpoint 
+        testEndpoint: testConfig.testEndpoint,
       });
-      
+
       result = await apiService.testConnection(testConfig);
-      
+
       return res.json({
         success: result.success,
-        message: result.message || (result.success ? 'Connection successful' : 'Connection failed'),
+        message:
+          result.message ||
+          (result.success ? 'Connection successful' : 'Connection failed'),
         error: result.error,
         status: result.status,
         estimatedRecords: result.estimatedRecords,
@@ -2350,34 +2938,38 @@ const testIntegrationConnection = async (req, res) => {
           status: result.status,
           contentType: result.contentType,
           estimatedRecords: result.estimatedRecords,
-          details: result.details
-        }
+          details: result.details,
+        },
       });
     } else if (data.type === 'google-sheets') {
       // Google Sheets test - validate spreadsheet ID format
       const gsData = data.googleSheets || {};
       const spreadsheetId = gsData.spreadsheetId || data.gsSpreadsheetId;
-      
+
       if (!spreadsheetId) {
         return res.json({
           success: false,
-          error: 'Spreadsheet ID is required'
+          error: 'Spreadsheet ID is required',
         });
       }
-      
+
       // Extract spreadsheet ID from URL if full URL is provided
       let extractedId = spreadsheetId;
-      const urlMatch = spreadsheetId.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+      const urlMatch = spreadsheetId.match(
+        /\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/,
+      );
       if (urlMatch) {
         extractedId = urlMatch[1];
       }
-      
+
       // Basic validation of spreadsheet ID format
       const isValidFormat = /^[a-zA-Z0-9_-]+$/.test(extractedId);
       return res.json({
         success: isValidFormat,
-        message: isValidFormat ? 'Spreadsheet ID format is valid' : 'Invalid spreadsheet ID format',
-        data: { spreadsheetId: extractedId }
+        message: isValidFormat
+          ? 'Spreadsheet ID format is valid'
+          : 'Invalid spreadsheet ID format',
+        data: { spreadsheetId: extractedId },
       });
     } else {
       return res.status(400).json({
@@ -2400,31 +2992,31 @@ const syncIntegration = async (req, res) => {
   try {
     const integrationId = req.params.id;
     const useWorker = process.env.SYNC_USE_WORKER === 'true';
-    
+
     if (useWorker) {
       // WORKER MODE: Create sync request in MongoDB
       // The sync-worker process will pick it up and process it
       const mongoose = require('mongoose');
       const db = mongoose.connection.db;
-      
+
       // Clean up stale requests (older than 1 hour or failed)
       const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
       await db.collection('sync_requests').updateMany(
         {
           integrationId,
           status: { $in: ['pending', 'processing'] },
-          createdAt: { $lt: oneHourAgo }
+          createdAt: { $lt: oneHourAgo },
         },
-        { $set: { status: 'stale', error: 'Cleaned up stale request' } }
+        { $set: { status: 'stale', error: 'Cleaned up stale request' } },
       );
-      
+
       // Check if already syncing (only recent requests)
       const existing = await db.collection('sync_requests').findOne({
         integrationId,
         status: { $in: ['pending', 'processing'] },
-        createdAt: { $gte: oneHourAgo }
+        createdAt: { $gte: oneHourAgo },
       });
-      
+
       if (existing) {
         return res.status(409).json({
           success: false,
@@ -2432,7 +3024,7 @@ const syncIntegration = async (req, res) => {
           requestId: existing._id,
         });
       }
-      
+
       // Create sync request for worker
       const result = await db.collection('sync_requests').insertOne({
         integrationId,
@@ -2440,9 +3032,9 @@ const syncIntegration = async (req, res) => {
         createdAt: new Date(),
         progress: { status: 'pending', phase: 'queued' },
       });
-      
+
       console.log(`📤 Sync request created for worker: ${result.insertedId}`);
-      
+
       return res.json({
         success: true,
         message: 'Sync request sent to worker',
@@ -2450,7 +3042,7 @@ const syncIntegration = async (req, res) => {
         integrationId,
       });
     }
-    
+
     // MAIN PROCESS MODE: Run sync directly
     if (syncService.isSyncing(integrationId)) {
       return res.status(409).json({
@@ -2458,13 +3050,16 @@ const syncIntegration = async (req, res) => {
         error: 'Sync already in progress',
       });
     }
-    
-    syncService.syncIntegration(integrationId).then(result => {
-      console.log('Sync completed:', result);
-    }).catch(error => {
-      console.error('Sync error:', error);
-    });
-    
+
+    syncService
+      .syncIntegration(integrationId)
+      .then((result) => {
+        console.log('Sync completed:', result);
+      })
+      .catch((error) => {
+        console.error('Sync error:', error);
+      });
+
     res.json({
       success: true,
       message: 'Sync started',
@@ -2483,26 +3078,28 @@ const syncIntegration = async (req, res) => {
 const getSyncStatus = async (req, res) => {
   try {
     const integration = await Integration.findById(req.params.id).lean();
-    
+
     if (!integration) {
-      return res.status(404).json({ success: false, error: 'Integration not found' });
+      return res
+        .status(404)
+        .json({ success: false, error: 'Integration not found' });
     }
-    
+
     const integrationId = integration._id.toString();
     const useWorker = process.env.SYNC_USE_WORKER === 'true';
-    
+
     let isSyncing = false;
     let progress = null;
-    
+
     if (useWorker) {
       // Check worker's sync request
       const mongoose = require('mongoose');
       const db = mongoose.connection.db;
       const request = await db.collection('sync_requests').findOne({
         integrationId,
-        status: { $in: ['pending', 'processing'] }
+        status: { $in: ['pending', 'processing'] },
       });
-      
+
       if (request) {
         isSyncing = true;
         progress = request.progress || { status: request.status };
@@ -2510,9 +3107,11 @@ const getSyncStatus = async (req, res) => {
     } else {
       // Check main process sync
       isSyncing = syncService.isSyncing(integrationId);
-      progress = syncService.getSyncProgress ? syncService.getSyncProgress(integrationId) : null;
+      progress = syncService.getSyncProgress
+        ? syncService.getSyncProgress(integrationId)
+        : null;
     }
-    
+
     res.json({
       success: true,
       isSyncing,
@@ -2535,35 +3134,39 @@ const getSyncProgress = async (req, res) => {
   try {
     const integrationId = req.params.id;
     const useWorker = process.env.SYNC_USE_WORKER === 'true';
-    
+
     let isSyncing = false;
     let progress = null;
-    
+
     if (useWorker) {
       // Check worker's sync request
       const mongoose = require('mongoose');
       const db = mongoose.connection.db;
       const request = await db.collection('sync_requests').findOne({
         integrationId,
-        status: { $in: ['pending', 'processing'] }
+        status: { $in: ['pending', 'processing'] },
       });
-      
+
       if (request) {
         isSyncing = true;
         progress = request.progress || { status: request.status };
       }
     } else {
       isSyncing = syncService.isSyncing(integrationId);
-      progress = syncService.getSyncProgress ? syncService.getSyncProgress(integrationId) : null;
+      progress = syncService.getSyncProgress
+        ? syncService.getSyncProgress(integrationId)
+        : null;
     }
-    
+
     if (!isSyncing && !progress) {
       // If not syncing and no progress, check the integration for last sync info
       const integration = await Integration.findById(integrationId).lean();
       if (!integration) {
-        return res.status(404).json({ success: false, error: 'Integration not found' });
+        return res
+          .status(404)
+          .json({ success: false, error: 'Integration not found' });
       }
-      
+
       return res.json({
         success: true,
         isSyncing: false,
@@ -2572,7 +3175,7 @@ const getSyncProgress = async (req, res) => {
         status: integration.status,
       });
     }
-    
+
     res.json({
       success: true,
       isSyncing,
@@ -2590,10 +3193,10 @@ const getSyncProgress = async (req, res) => {
 const getIntegrations = async (req, res) => {
   try {
     const integrations = await Integration.find({}).sort({ createdAt: -1 });
-    
+
     res.json({
       success: true,
-      integrations: integrations.map(i => i.toSafeJSON()),
+      integrations: integrations.map((i) => i.toSafeJSON()),
     });
   } catch (error) {
     console.error('Error getting integrations:', error);
@@ -2607,11 +3210,13 @@ const getIntegrations = async (req, res) => {
 const getIntegration = async (req, res) => {
   try {
     const integration = await Integration.findById(req.params.id);
-    
+
     if (!integration) {
-      return res.status(404).json({ success: false, error: 'Integration not found' });
+      return res
+        .status(404)
+        .json({ success: false, error: 'Integration not found' });
     }
-    
+
     res.json({
       success: true,
       integration: integration.toSafeJSON(),
@@ -2628,9 +3233,11 @@ const getIntegration = async (req, res) => {
 const getSyncDetails = async (req, res) => {
   try {
     const integration = await Integration.findById(req.params.id);
-    
+
     if (!integration) {
-      return res.status(404).json({ success: false, error: 'Integration not found' });
+      return res
+        .status(404)
+        .json({ success: false, error: 'Integration not found' });
     }
 
     // Calculate estimated sync time based on file sizes and past performance
@@ -2641,8 +3248,14 @@ const getSyncDetails = async (req, res) => {
     if (integration.lastSync?.files && integration.lastSync.files.length > 0) {
       // Calculate average sync speed (bytes per second)
       const lastSyncDuration = integration.lastSync.duration || 1000; // Default 1 second
-      const lastTotalSize = integration.lastSync.files.reduce((sum, f) => sum + (f.size || 0), 0);
-      const avgSpeed = lastTotalSize > 0 ? lastTotalSize / (lastSyncDuration / 1000) : 1024 * 100; // 100KB/s default
+      const lastTotalSize = integration.lastSync.files.reduce(
+        (sum, f) => sum + (f.size || 0),
+        0,
+      );
+      const avgSpeed =
+        lastTotalSize > 0
+          ? lastTotalSize / (lastSyncDuration / 1000)
+          : 1024 * 100; // 100KB/s default
 
       // Process each file
       for (const file of integration.lastSync.files) {
@@ -2657,11 +3270,12 @@ const getSyncDetails = async (req, res) => {
         fileDetails.push({
           name: file.name,
           size: fileSize,
-          sizeFormatted: fileSize > 1024 * 1024 
-            ? `${fileSizeMB} MB` 
-            : fileSize > 1024 
-            ? `${fileSizeKB} KB` 
-            : `${fileSize} B`,
+          sizeFormatted:
+            fileSize > 1024 * 1024
+              ? `${fileSizeMB} MB`
+              : fileSize > 1024
+                ? `${fileSizeKB} KB`
+                : `${fileSize} B`,
           records: file.records || 0,
           status: file.status || 'pending',
           estimatedTime: estimatedFileTime,
@@ -2670,11 +3284,12 @@ const getSyncDetails = async (req, res) => {
       }
     }
 
-    const totalSizeFormatted = totalFileSize > 1024 * 1024
-      ? `${(totalFileSize / (1024 * 1024)).toFixed(2)} MB`
-      : totalFileSize > 1024
-      ? `${(totalFileSize / 1024).toFixed(2)} KB`
-      : `${totalFileSize} B`;
+    const totalSizeFormatted =
+      totalFileSize > 1024 * 1024
+        ? `${(totalFileSize / (1024 * 1024)).toFixed(2)} MB`
+        : totalFileSize > 1024
+          ? `${(totalFileSize / 1024).toFixed(2)} KB`
+          : `${totalFileSize} B`;
 
     const estimatedTimeFormatted = formatDuration(estimatedTime);
 
@@ -2695,15 +3310,19 @@ const getSyncDetails = async (req, res) => {
         totalRecords: fileDetails.reduce((sum, f) => sum + (f.records || 0), 0),
         files: fileDetails,
       },
-      lastSync: integration.lastSync ? {
-        date: integration.lastSync.date,
-        status: integration.lastSync.status,
-        duration: integration.lastSync.duration,
-        durationFormatted: formatDuration(integration.lastSync.duration / 1000),
-        recordsProcessed: integration.lastSync.recordsProcessed,
-        recordsInserted: integration.lastSync.recordsInserted,
-        recordsUpdated: integration.lastSync.recordsUpdated,
-      } : null,
+      lastSync: integration.lastSync
+        ? {
+            date: integration.lastSync.date,
+            status: integration.lastSync.status,
+            duration: integration.lastSync.duration,
+            durationFormatted: formatDuration(
+              integration.lastSync.duration / 1000,
+            ),
+            recordsProcessed: integration.lastSync.recordsProcessed,
+            recordsInserted: integration.lastSync.recordsInserted,
+            recordsUpdated: integration.lastSync.recordsUpdated,
+          }
+        : null,
     });
   } catch (error) {
     console.error('Error getting sync details:', error);
@@ -2716,7 +3335,7 @@ const getSyncDetails = async (req, res) => {
  */
 const formatDuration = (seconds) => {
   if (!seconds || seconds < 0) return '0s';
-  
+
   if (seconds < 60) {
     return `${Math.ceil(seconds)}s`;
   } else if (seconds < 3600) {
@@ -2742,46 +3361,122 @@ const getPartsAnalytics = async (req, res) => {
       purchases: 3847,
       conversionRate: 23.4,
       missedOpportunities: 1234,
-      trendingParts: 89
+      trendingParts: 89,
     };
-    
+
     // Most searched parts
     const mostSearchedParts = [
-      { name: 'Ceramic Brake Pads Set', partNumber: 'BP-4521-CER', searches: 2847, conversion: 68, status: 'available', category: 'brake' },
-      { name: 'Alternator Assembly 150A', partNumber: 'ALT-7890-PRO', searches: 2156, conversion: 72, status: 'available', category: 'engine' },
-      { name: 'Front Strut Assembly', partNumber: 'SUS-3456-FR', searches: 1892, conversion: 45, status: 'limited', category: 'suspension' },
-      { name: 'Spark Plug Platinum Set', partNumber: 'SP-1234-PLT', searches: 1654, conversion: 78, status: 'available', category: 'electrical' },
-      { name: 'Oil Filter Premium', partNumber: 'OF-7890-PRO', searches: 1423, conversion: 28, status: 'out-of-stock', category: 'body' }
+      {
+        name: 'Ceramic Brake Pads Set',
+        partNumber: 'BP-4521-CER',
+        searches: 2847,
+        conversion: 68,
+        status: 'available',
+        category: 'brake',
+      },
+      {
+        name: 'Alternator Assembly 150A',
+        partNumber: 'ALT-7890-PRO',
+        searches: 2156,
+        conversion: 72,
+        status: 'available',
+        category: 'engine',
+      },
+      {
+        name: 'Front Strut Assembly',
+        partNumber: 'SUS-3456-FR',
+        searches: 1892,
+        conversion: 45,
+        status: 'limited',
+        category: 'suspension',
+      },
+      {
+        name: 'Spark Plug Platinum Set',
+        partNumber: 'SP-1234-PLT',
+        searches: 1654,
+        conversion: 78,
+        status: 'available',
+        category: 'electrical',
+      },
+      {
+        name: 'Oil Filter Premium',
+        partNumber: 'OF-7890-PRO',
+        searches: 1423,
+        conversion: 28,
+        status: 'out-of-stock',
+        category: 'body',
+      },
     ];
-    
+
     // Missed opportunities (searched but not bought)
     const missedOpportunities = [
-      { name: 'Turbocharger Assembly', reason: 'Not in inventory', searches: 847 },
+      {
+        name: 'Turbocharger Assembly',
+        reason: 'Not in inventory',
+        searches: 847,
+      },
       { name: 'LED Headlight Kit', reason: 'Price too high', searches: 623 },
-      { name: 'Performance Exhaust System', reason: 'Out of stock frequently', searches: 512 },
-      { name: 'Cold Air Intake Kit', reason: 'Compatibility issues', searches: 398 },
-      { name: 'Racing Clutch Kit', reason: 'Limited fitment options', searches: 287 }
+      {
+        name: 'Performance Exhaust System',
+        reason: 'Out of stock frequently',
+        searches: 512,
+      },
+      {
+        name: 'Cold Air Intake Kit',
+        reason: 'Compatibility issues',
+        searches: 398,
+      },
+      {
+        name: 'Racing Clutch Kit',
+        reason: 'Limited fitment options',
+        searches: 287,
+      },
     ];
-    
+
     // Top purchased parts
     const topPurchasedParts = [
-      { name: 'Ceramic Brake Pads Set', category: 'Brake Systems', orders: 1847, revenue: 165000 },
-      { name: 'Alternator Assembly', category: 'Electrical', orders: 1456, revenue: 298000 },
-      { name: 'Oil Filter Premium', category: 'Filters', orders: 1234, revenue: 24000 },
-      { name: 'Front Strut Assembly', category: 'Suspension', orders: 987, revenue: 145000 }
+      {
+        name: 'Ceramic Brake Pads Set',
+        category: 'Brake Systems',
+        orders: 1847,
+        revenue: 165000,
+      },
+      {
+        name: 'Alternator Assembly',
+        category: 'Electrical',
+        orders: 1456,
+        revenue: 298000,
+      },
+      {
+        name: 'Oil Filter Premium',
+        category: 'Filters',
+        orders: 1234,
+        revenue: 24000,
+      },
+      {
+        name: 'Front Strut Assembly',
+        category: 'Suspension',
+        orders: 987,
+        revenue: 145000,
+      },
     ];
-    
+
     res.render('admin/parts-analytics', {
       title: 'Parts Analytics | PARTSFORM Admin',
       activePage: 'parts-analytics',
       analyticsData,
       mostSearchedParts,
       missedOpportunities,
-      topPurchasedParts
+      topPurchasedParts,
     });
   } catch (error) {
     console.error('Error in getPartsAnalytics:', error);
-    res.status(500).render('error', { title: 'Error', error: 'Failed to load parts analytics' });
+    res
+      .status(500)
+      .render('error', {
+        title: 'Error',
+        error: 'Failed to load parts analytics',
+      });
   }
 };
 
@@ -2792,14 +3487,16 @@ const getPartsAnalytics = async (req, res) => {
 const uploadPartsFromFile = async (req, res) => {
   try {
     if (!req.file) {
-      return res.status(400).json({ success: false, error: 'No file uploaded' });
+      return res
+        .status(400)
+        .json({ success: false, error: 'No file uploaded' });
     }
 
     const fileBuffer = req.file.buffer;
     const fileName = req.file.originalname.toLowerCase();
-    
+
     let parts = [];
-    
+
     // Check file type and parse accordingly
     if (fileName.endsWith('.csv')) {
       // Parse CSV file
@@ -2812,51 +3509,73 @@ const uploadPartsFromFile = async (req, res) => {
         const ExcelJS = require('exceljs');
         const workbook = new ExcelJS.Workbook();
         await workbook.xlsx.load(fileBuffer);
-        
+
         const worksheet = workbook.worksheets[0];
         if (!worksheet || worksheet.rowCount < 2) {
-          return res.status(400).json({ success: false, error: 'Excel file is empty or has no data rows' });
+          return res
+            .status(400)
+            .json({
+              success: false,
+              error: 'Excel file is empty or has no data rows',
+            });
         }
-        
+
         // Get headers from first row
         const headerRow = worksheet.getRow(1);
         const headers = [];
         headerRow.eachCell({ includeEmpty: true }, (cell, colNumber) => {
-          headers[colNumber] = String(cell.value || '').toLowerCase().trim();
+          headers[colNumber] = String(cell.value || '')
+            .toLowerCase()
+            .trim();
         });
-        
+
         // Find column indices
-        const partNumberIdx = headers.findIndex(h => 
-          h && (h.includes('part') || h.includes('number') || h.includes('sku') || h.includes('code'))
+        const partNumberIdx = headers.findIndex(
+          (h) =>
+            h &&
+            (h.includes('part') ||
+              h.includes('number') ||
+              h.includes('sku') ||
+              h.includes('code')),
         );
-        const quantityIdx = headers.findIndex(h => 
-          h && (h.includes('qty') || h.includes('quantity'))
+        const quantityIdx = headers.findIndex(
+          (h) => h && (h.includes('qty') || h.includes('quantity')),
         );
-        
+
         // Parse data rows
         for (let rowNumber = 2; rowNumber <= worksheet.rowCount; rowNumber++) {
           const row = worksheet.getRow(rowNumber);
-          const partNumber = row.getCell(partNumberIdx !== -1 ? partNumberIdx : 1).value;
-          const quantity = row.getCell(quantityIdx !== -1 ? quantityIdx : 2).value;
-          
+          const partNumber = row.getCell(
+            partNumberIdx !== -1 ? partNumberIdx : 1,
+          ).value;
+          const quantity = row.getCell(
+            quantityIdx !== -1 ? quantityIdx : 2,
+          ).value;
+
           if (partNumber) {
             // Search for part in database to get full details
             const Part = require('../models/Part');
-            const existingPart = await Part.findOne({ 
-              partNumber: { $regex: new RegExp('^' + String(partNumber).toString().trim() + '$', 'i') }
+            const existingPart = await Part.findOne({
+              partNumber: {
+                $regex: new RegExp(
+                  '^' + String(partNumber).toString().trim() + '$',
+                  'i',
+                ),
+              },
             });
-            
+
             if (existingPart) {
               parts.push({
                 partNumber: existingPart.partNumber,
-                description: existingPart.description || existingPart.partNumber,
+                description:
+                  existingPart.description || existingPart.partNumber,
                 brand: existingPart.brand || 'N/A',
                 supplier: existingPart.supplier || 'N/A',
                 price: parseFloat(existingPart.price) || 0,
                 currency: existingPart.currency || 'AED',
                 weight: parseFloat(existingPart.weight) || 0,
                 quantity: parseInt(quantity) || 1,
-                stock: existingPart.quantity || existingPart.stock || 'N/A'
+                stock: existingPart.quantity || existingPart.stock || 'N/A',
               });
             } else {
               // Add as unknown part
@@ -2869,29 +3588,31 @@ const uploadPartsFromFile = async (req, res) => {
                 currency: 'AED',
                 weight: 0,
                 quantity: parseInt(quantity) || 1,
-                stock: 'N/A'
+                stock: 'N/A',
               });
             }
           }
         }
       } catch (xlsxError) {
         console.error('Excel parsing error:', xlsxError);
-        return res.status(400).json({ 
-          success: false, 
-          error: 'Failed to parse Excel file. Please ensure it is a valid .xlsx or .xls file.'
+        return res.status(400).json({
+          success: false,
+          error:
+            'Failed to parse Excel file. Please ensure it is a valid .xlsx or .xls file.',
         });
       }
     } else {
-      return res.status(400).json({ 
-        success: false, 
-        error: 'Unsupported file format. Please upload a .csv, .xlsx, or .xls file.'
+      return res.status(400).json({
+        success: false,
+        error:
+          'Unsupported file format. Please upload a .csv, .xlsx, or .xls file.',
       });
     }
-    
+
     res.json({
       success: true,
       parts: parts,
-      count: parts.length
+      count: parts.length,
     });
   } catch (error) {
     console.error('Error uploading parts file:', error);
@@ -2908,16 +3629,18 @@ const getAdminsManagement = async (req, res) => {
       .select('-password -passwordResetToken -passwordResetExpires')
       .sort({ createdAt: -1 })
       .lean();
-    
+
     res.render('admin/admins', {
       title: 'Administrators | PARTSFORM',
       activePage: 'admins',
       admins,
-      sidebarCounts: { newOrders: 0, openTickets: 0 }
+      sidebarCounts: { newOrders: 0, openTickets: 0 },
     });
   } catch (error) {
     console.error('Error fetching admins:', error);
-    res.status(500).render('error', { message: 'Error loading administrators page' });
+    res
+      .status(500)
+      .render('error', { message: 'Error loading administrators page' });
   }
 };
 
@@ -2926,14 +3649,20 @@ const getAdminsManagement = async (req, res) => {
  */
 const createAdmin = async (req, res) => {
   try {
-    const { firstName, lastName, email, phone, password, role, permissions } = req.body;
-    
+    const { firstName, lastName, email, phone, password, role, permissions } =
+      req.body;
+
     // Check if email already exists
     const existingAdmin = await Admin.findOne({ email: email.toLowerCase() });
     if (existingAdmin) {
-      return res.status(400).json({ success: false, message: 'An admin with this email already exists' });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: 'An admin with this email already exists',
+        });
     }
-    
+
     const newAdmin = new Admin({
       firstName,
       lastName,
@@ -2942,11 +3671,11 @@ const createAdmin = async (req, res) => {
       password,
       role: role || 'admin',
       permissions: permissions || ['read', 'write'],
-      isActive: true
+      isActive: true,
     });
-    
+
     await newAdmin.save();
-    
+
     res.status(201).json({
       success: true,
       message: 'Administrator created successfully',
@@ -2955,12 +3684,17 @@ const createAdmin = async (req, res) => {
         firstName: newAdmin.firstName,
         lastName: newAdmin.lastName,
         email: newAdmin.email,
-        role: newAdmin.role
-      }
+        role: newAdmin.role,
+      },
     });
   } catch (error) {
     console.error('Error creating admin:', error);
-    res.status(500).json({ success: false, message: error.message || 'Failed to create administrator' });
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: error.message || 'Failed to create administrator',
+      });
   }
 };
 
@@ -2970,31 +3704,39 @@ const createAdmin = async (req, res) => {
 const updateAdmin = async (req, res) => {
   try {
     const { id } = req.params;
-    const { firstName, lastName, email, phone, password, role, permissions } = req.body;
-    
+    const { firstName, lastName, email, phone, password, role, permissions } =
+      req.body;
+
     const admin = await Admin.findById(id);
     if (!admin) {
-      return res.status(404).json({ success: false, message: 'Administrator not found' });
+      return res
+        .status(404)
+        .json({ success: false, message: 'Administrator not found' });
     }
-    
+
     // Check if email is being changed and if it's already in use
     if (email && email.toLowerCase() !== admin.email) {
       const existingAdmin = await Admin.findOne({ email: email.toLowerCase() });
       if (existingAdmin) {
-        return res.status(400).json({ success: false, message: 'An admin with this email already exists' });
+        return res
+          .status(400)
+          .json({
+            success: false,
+            message: 'An admin with this email already exists',
+          });
       }
       admin.email = email.toLowerCase();
     }
-    
+
     if (firstName) admin.firstName = firstName;
     if (lastName) admin.lastName = lastName;
     if (phone !== undefined) admin.phone = phone;
     if (role) admin.role = role;
     if (permissions) admin.permissions = permissions;
     if (password) admin.password = password; // Will be hashed by pre-save hook
-    
+
     await admin.save();
-    
+
     res.json({
       success: true,
       message: 'Administrator updated successfully',
@@ -3003,12 +3745,17 @@ const updateAdmin = async (req, res) => {
         firstName: admin.firstName,
         lastName: admin.lastName,
         email: admin.email,
-        role: admin.role
-      }
+        role: admin.role,
+      },
     });
   } catch (error) {
     console.error('Error updating admin:', error);
-    res.status(500).json({ success: false, message: error.message || 'Failed to update administrator' });
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: error.message || 'Failed to update administrator',
+      });
   }
 };
 
@@ -3019,30 +3766,45 @@ const updateAdminStatus = async (req, res) => {
   try {
     const { id } = req.params;
     const { isActive } = req.body;
-    
+
     const admin = await Admin.findById(id);
     if (!admin) {
-      return res.status(404).json({ success: false, message: 'Administrator not found' });
+      return res
+        .status(404)
+        .json({ success: false, message: 'Administrator not found' });
     }
-    
+
     // Prevent deactivating the last super admin
     if (!isActive && admin.role === 'super_admin') {
-      const superAdminCount = await Admin.countDocuments({ role: 'super_admin', isActive: true });
+      const superAdminCount = await Admin.countDocuments({
+        role: 'super_admin',
+        isActive: true,
+      });
       if (superAdminCount <= 1) {
-        return res.status(400).json({ success: false, message: 'Cannot deactivate the last super admin' });
+        return res
+          .status(400)
+          .json({
+            success: false,
+            message: 'Cannot deactivate the last super admin',
+          });
       }
     }
-    
+
     admin.isActive = isActive;
     await admin.save();
-    
+
     res.json({
       success: true,
-      message: `Administrator ${isActive ? 'activated' : 'deactivated'} successfully`
+      message: `Administrator ${isActive ? 'activated' : 'deactivated'} successfully`,
     });
   } catch (error) {
     console.error('Error updating admin status:', error);
-    res.status(500).json({ success: false, message: 'Failed to update administrator status' });
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: 'Failed to update administrator status',
+      });
   }
 };
 
@@ -3052,29 +3814,40 @@ const updateAdminStatus = async (req, res) => {
 const deleteAdmin = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     const admin = await Admin.findById(id);
     if (!admin) {
-      return res.status(404).json({ success: false, message: 'Administrator not found' });
+      return res
+        .status(404)
+        .json({ success: false, message: 'Administrator not found' });
     }
-    
+
     // Prevent deleting the last super admin
     if (admin.role === 'super_admin') {
-      const superAdminCount = await Admin.countDocuments({ role: 'super_admin' });
+      const superAdminCount = await Admin.countDocuments({
+        role: 'super_admin',
+      });
       if (superAdminCount <= 1) {
-        return res.status(400).json({ success: false, message: 'Cannot delete the last super admin' });
+        return res
+          .status(400)
+          .json({
+            success: false,
+            message: 'Cannot delete the last super admin',
+          });
       }
     }
-    
+
     await Admin.findByIdAndDelete(id);
-    
+
     res.json({
       success: true,
-      message: 'Administrator deleted successfully'
+      message: 'Administrator deleted successfully',
     });
   } catch (error) {
     console.error('Error deleting admin:', error);
-    res.status(500).json({ success: false, message: 'Failed to delete administrator' });
+    res
+      .status(500)
+      .json({ success: false, message: 'Failed to delete administrator' });
   }
 };
 
@@ -3093,7 +3866,7 @@ const getSystemSettings = async (req, res) => {
       success: true,
       data: {
         defaultMarkupPercentage: settings.defaultMarkupPercentage || 0,
-      }
+      },
     });
   } catch (error) {
     console.error('Error fetching system settings:', error);
@@ -3115,14 +3888,14 @@ const updateSystemSettings = async (req, res) => {
       if (isNaN(markup) || markup < 0 || markup > 100) {
         return res.status(400).json({
           success: false,
-          error: 'Default markup must be between 0 and 100'
+          error: 'Default markup must be between 0 and 100',
         });
       }
       updates.defaultMarkupPercentage = markup;
     }
 
     const settings = await SystemSettings.updateSettings(updates);
-    
+
     // Clear the cached default markup so new value takes effect immediately
     clearSettingsCache();
 
@@ -3131,11 +3904,13 @@ const updateSystemSettings = async (req, res) => {
       message: 'Settings updated successfully',
       data: {
         defaultMarkupPercentage: settings.defaultMarkupPercentage,
-      }
+      },
     });
   } catch (error) {
     console.error('Error updating system settings:', error);
-    res.status(500).json({ success: false, error: 'Failed to update settings' });
+    res
+      .status(500)
+      .json({ success: false, error: 'Failed to update settings' });
   }
 };
 
@@ -3146,36 +3921,36 @@ const updateSystemSettings = async (req, res) => {
 const getSidebarCounts = async (req, res) => {
   try {
     // Count new/pending orders (orders that need attention)
-    const newOrdersCount = await Order.countDocuments({ 
-      status: { $in: ['pending', 'processing'] } 
+    const newOrdersCount = await Order.countDocuments({
+      status: { $in: ['pending', 'processing'] },
     });
-    
+
     // Count open/in-progress tickets (tickets that need attention)
-    const openTicketsCount = await Ticket.countDocuments({ 
-      status: { $in: ['open', 'in-progress'] } 
+    const openTicketsCount = await Ticket.countDocuments({
+      status: { $in: ['open', 'in-progress'] },
     });
-    
+
     // Count unread email inquiries
     const unreadInquiriesCount = await EmailInquiry.getUnreadCount();
-    
+
     res.json({
       success: true,
       counts: {
         newOrders: newOrdersCount,
         openTickets: openTicketsCount,
-        unreadInquiries: unreadInquiriesCount
-      }
+        unreadInquiries: unreadInquiriesCount,
+      },
     });
   } catch (error) {
     console.error('Error fetching sidebar counts:', error);
-    res.status(500).json({ 
-      success: false, 
+    res.status(500).json({
+      success: false,
       error: 'Failed to fetch counts',
       counts: {
         newOrders: 0,
         openTickets: 0,
-        unreadInquiries: 0
-      }
+        unreadInquiries: 0,
+      },
     });
   }
 };
@@ -3244,4 +4019,3 @@ module.exports = {
   // Admin Settings page
   getAdminSettings,
 };
-

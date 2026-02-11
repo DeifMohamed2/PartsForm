@@ -1342,13 +1342,13 @@
                             <div class="insight-comparison">
                               <div class="insight-option">
                                 <span class="option-label">${escapeHtml(insight.first.supplier || 'Option 1')}</span>
-                                ${insight.first.advantages.map(a => `<span class="advantage-tag"><i data-lucide="plus"></i>${escapeHtml(a)}</span>`).join('')}
+                                ${insight.first.advantages.map((a) => `<span class="advantage-tag"><i data-lucide="plus"></i>${escapeHtml(a)}</span>`).join('')}
                                 ${insight.first.advantages.length === 0 ? '<span class="advantage-tag neutral">similar</span>' : ''}
                               </div>
                               <div class="insight-vs">VS</div>
                               <div class="insight-option">
                                 <span class="option-label">${escapeHtml(insight.second.supplier || 'Option 2')}</span>
-                                ${insight.second.advantages.map(a => `<span class="advantage-tag"><i data-lucide="plus"></i>${escapeHtml(a)}</span>`).join('')}
+                                ${insight.second.advantages.map((a) => `<span class="advantage-tag"><i data-lucide="plus"></i>${escapeHtml(a)}</span>`).join('')}
                                 ${insight.second.advantages.length === 0 ? '<span class="advantage-tag neutral">similar</span>' : ''}
                               </div>
                             </div>
@@ -1434,13 +1434,17 @@
                             </span>
                           </td>
                         </tr>
-                        ${product._aiBadges && product._aiBadges.length > 0 ? `
+                        ${
+                          product._aiBadges && product._aiBadges.length > 0
+                            ? `
                         <tr class="ai-reason-row">
                           <td colspan="8">
                             <div class="ai-reason-text">${getAIReasonText(product, results)}</div>
                           </td>
                         </tr>
-                        ` : ''}
+                        `
+                            : ''
+                        }
                       `,
                         )
                         .join('')}
@@ -1632,8 +1636,16 @@
       'best-overall': { icon: 'crown', label: 'Best', cls: 'badge-best' },
       'lowest-price': { icon: 'tag', label: 'Cheapest', cls: 'badge-cheap' },
       'fastest-delivery': { icon: 'zap', label: 'Fastest', cls: 'badge-fast' },
-      'highest-stock': { icon: 'warehouse', label: 'Top Stock', cls: 'badge-stock' },
-      'only-option': { icon: 'check-circle', label: 'Only Option', cls: 'badge-only' },
+      'highest-stock': {
+        icon: 'warehouse',
+        label: 'Top Stock',
+        cls: 'badge-stock',
+      },
+      'only-option': {
+        icon: 'check-circle',
+        label: 'Only Option',
+        cls: 'badge-only',
+      },
     };
 
     let html = '';
@@ -1661,7 +1673,9 @@
       reasons.push(`⚡ Fastest delivery (${days} days)`);
     }
     if (badges.includes('highest-stock')) {
-      reasons.push(`📦 Highest stock availability (${product.quantity || 0} units)`);
+      reasons.push(
+        `📦 Highest stock availability (${product.quantity || 0} units)`,
+      );
     }
     if (badges.includes('only-option')) {
       reasons.push('✅ Only matching option found');

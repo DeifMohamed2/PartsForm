@@ -22,18 +22,18 @@ class SchedulerService {
     if (this.useWorker) {
       // Create sync request for worker to pick up
       const db = mongoose.connection.db;
-      
+
       // Check if already syncing
       const existing = await db.collection('sync_requests').findOne({
         integrationId,
-        status: { $in: ['pending', 'processing'] }
+        status: { $in: ['pending', 'processing'] },
       });
-      
+
       if (existing) {
         console.log(`⏭️  Sync already in progress for ${integrationId}`);
         return;
       }
-      
+
       await db.collection('sync_requests').insertOne({
         integrationId,
         status: 'pending',
@@ -41,7 +41,7 @@ class SchedulerService {
         source: 'scheduler',
         progress: { status: 'pending', phase: 'queued' },
       });
-      
+
       console.log(`📤 Scheduled sync request sent to worker: ${integrationId}`);
     } else {
       // Direct sync in main process
@@ -115,11 +115,15 @@ class SchedulerService {
       return;
     }
 
-    const cronExpression = this.scheduleToCronExpression(integration.syncSchedule);
+    const cronExpression = this.scheduleToCronExpression(
+      integration.syncSchedule,
+    );
 
     // Validate cron expression
     if (!cron.validate(cronExpression)) {
-      console.error(`❌ Invalid cron expression for ${integration.name}: ${cronExpression}`);
+      console.error(
+        `❌ Invalid cron expression for ${integration.name}: ${cronExpression}`,
+      );
       return;
     }
 
@@ -130,17 +134,22 @@ class SchedulerService {
         try {
           await this.triggerSync(integrationId);
         } catch (error) {
-          console.error(`❌ Scheduled sync failed for ${integration.name}:`, error.message);
+          console.error(
+            `❌ Scheduled sync failed for ${integration.name}:`,
+            error.message,
+          );
         }
       },
       {
         scheduled: true,
         timezone: integration.syncSchedule.timezone || 'UTC',
-      }
+      },
     );
 
     this.tasks.set(integrationId, task);
-    console.log(`📅 Scheduled: ${integration.name} (${cronExpression})${this.useWorker ? ' [worker mode]' : ''}`);
+    console.log(
+      `📅 Scheduled: ${integration.name} (${cronExpression})${this.useWorker ? ' [worker mode]' : ''}`,
+    );
   }
 
   /**
@@ -151,24 +160,28 @@ class SchedulerService {
       // First, cleanup any stuck "syncing" status from previous server instance
       const stuckSyncing = await Integration.updateMany(
         { status: 'syncing' },
-        { 
-          $set: { 
+        {
+          $set: {
             status: 'error',
             'lastSync.status': 'failed',
-            'lastSync.error': 'Sync interrupted by server restart'
-          }
-        }
+            'lastSync.error': 'Sync interrupted by server restart',
+          },
+        },
       );
       if (stuckSyncing.modifiedCount > 0) {
-        console.log(`🔧 Cleaned up ${stuckSyncing.modifiedCount} stuck syncing integrations`);
+        console.log(
+          `🔧 Cleaned up ${stuckSyncing.modifiedCount} stuck syncing integrations`,
+        );
       }
-      
+
       const integrations = await Integration.find({
         'syncSchedule.enabled': true,
         status: { $in: ['active', 'inactive'] },
       });
 
-      console.log(`📅 Initializing scheduler for ${integrations.length} integrations...`);
+      console.log(
+        `📅 Initializing scheduler for ${integrations.length} integrations...`,
+      );
 
       for (const integration of integrations) {
         await this.scheduleIntegration(integration);

@@ -32,7 +32,7 @@ const systemSettingsSchema = new mongoose.Schema(
         return ret;
       },
     },
-  }
+  },
 );
 
 /**
@@ -56,7 +56,7 @@ systemSettingsSchema.statics.updateSettings = async function (updates) {
   const settings = await this.findOneAndUpdate(
     { _singleton: 'global' },
     { $set: updates },
-    { new: true, upsert: true, runValidators: true }
+    { new: true, upsert: true, runValidators: true },
   );
   return settings;
 };

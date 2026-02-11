@@ -86,7 +86,10 @@ const {
 } = require('../controllers/emailInquiryController');
 
 // Import search controller for parts search API
-const { searchParts, autocomplete } = require('../controllers/searchController');
+const {
+  searchParts,
+  autocomplete,
+} = require('../controllers/searchController');
 
 // Configure multer for file uploads (memory storage for parts)
 const upload = multer({
@@ -97,14 +100,17 @@ const upload = multer({
       'text/csv',
       'application/vnd.ms-excel',
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      'application/octet-stream' // For some Excel files
+      'application/octet-stream', // For some Excel files
     ];
-    if (allowedTypes.includes(file.mimetype) || file.originalname.match(/\.(csv|xlsx|xls)$/i)) {
+    if (
+      allowedTypes.includes(file.mimetype) ||
+      file.originalname.match(/\.(csv|xlsx|xls)$/i)
+    ) {
       cb(null, true);
     } else {
       cb(new Error('Only CSV and Excel files are allowed'), false);
     }
-  }
+  },
 });
 
 // Configure multer for ticket file uploads
@@ -118,9 +124,9 @@ const ticketStorage = multer.diskStorage({
     cb(null, ticketUploadDir);
   },
   filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
     cb(null, 'ticket-admin-' + uniqueSuffix + path.extname(file.originalname));
-  }
+  },
 });
 
 const ticketUpload = multer({
@@ -129,7 +135,15 @@ const ticketUpload = multer({
   fileFilter: (req, file, cb) => {
     const allowedTypes = [
       // Images
-      'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/bmp', 'image/tiff', 'image/svg+xml', 'image/heic', 'image/heif',
+      'image/jpeg',
+      'image/png',
+      'image/gif',
+      'image/webp',
+      'image/bmp',
+      'image/tiff',
+      'image/svg+xml',
+      'image/heic',
+      'image/heif',
       // PDF
       'application/pdf',
       // Documents
@@ -145,14 +159,19 @@ const ticketUpload = multer({
       'application/zip',
       'application/x-zip-compressed',
       'application/rtf',
-      'text/rtf'
+      'text/rtf',
     ];
     if (allowedTypes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error('File type not allowed. Allowed: images, PDF, CSV, Excel, Word documents.'), false);
+      cb(
+        new Error(
+          'File type not allowed. Allowed: images, PDF, CSV, Excel, Word documents.',
+        ),
+        false,
+      );
     }
-  }
+  },
 });
 
 // Apply admin auth middleware to all routes
@@ -173,7 +192,11 @@ router.get('/orders/:id/edit', getOrderEdit);
 // Orders management - API endpoints
 router.get('/api/orders/stats', getOrderStats);
 router.post('/api/orders', createOrder);
-router.post('/api/orders/upload-parts', upload.single('file'), uploadPartsFromFile);
+router.post(
+  '/api/orders/upload-parts',
+  upload.single('file'),
+  uploadPartsFromFile,
+);
 router.put('/api/orders/:id', updateOrder);
 router.put('/api/orders/:id/status', updateOrderStatus);
 router.delete('/api/orders/:id', deleteOrder);
@@ -188,7 +211,11 @@ router.delete('/orders/:id', deleteOrder);
 // Tickets management
 router.get('/tickets', getTicketsManagement);
 router.get('/tickets/:id', getTicketDetails);
-router.post('/tickets/:id/reply', ticketUpload.array('attachments', 5), postTicketReply);
+router.post(
+  '/tickets/:id/reply',
+  ticketUpload.array('attachments', 5),
+  postTicketReply,
+);
 router.put('/tickets/:id/status', updateTicketStatus);
 
 // Tickets API endpoints
@@ -270,13 +297,13 @@ router.post('/api/email-inquiries/test-config', testEmailConfig);
 router.post('/api/email-inquiries/scheduler/toggle', toggleScheduler);
 router.post('/api/email-inquiries/:id/retry', retryInquiry);
 router.post('/api/email-inquiries/:id/resend-quotation', resendQuotation);
-router.post('/api/email-inquiries/:id/regenerate-quotation', regenerateQuotation);
+router.post(
+  '/api/email-inquiries/:id/regenerate-quotation',
+  regenerateQuotation,
+);
 router.post('/api/email-inquiries/:id/notes', addNote);
 router.patch('/api/email-inquiries/:id/status', updateInquiryStatus);
 router.patch('/api/email-inquiries/:id/read', markAsRead);
 router.delete('/api/email-inquiries/:id', deleteInquiry);
 
 module.exports = router;
-
-
-

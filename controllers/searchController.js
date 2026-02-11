@@ -7,7 +7,11 @@ const Part = require('../models/Part');
 const elasticsearchService = require('../services/elasticsearchService');
 const geminiService = require('../services/geminiService');
 const aiLearningService = require('../services/aiLearningService');
-const { applyMarkupToParts, applyMarkupToPart, getRequestMarkup } = require('../utils/priceMarkup');
+const {
+  applyMarkupToParts,
+  applyMarkupToPart,
+  getRequestMarkup,
+} = require('../utils/priceMarkup');
 
 /**
  * Search parts by EXACT part number
@@ -828,7 +832,10 @@ async function aiSearch(req, res) {
     let parsed;
     try {
       parsed = await geminiService.parseSearchQuery(query);
-      console.log('🧠 Parsed intent:', JSON.stringify(parsed.parsedIntent, null, 2));
+      console.log(
+        '🧠 Parsed intent:',
+        JSON.stringify(parsed.parsedIntent, null, 2),
+      );
     } catch (parseError) {
       console.warn(`⚠️ parseSearchQuery failed: ${parseError.message}`);
       parsed = {
@@ -851,13 +858,17 @@ async function aiSearch(req, res) {
 
     // Combine for text search
     const searchKeywords = [...new Set([...keywords, ...categories])];
-    const brandsList = partsBrands.length > 0 ? partsBrands : (filters.brand || []);
+    const brandsList =
+      partsBrands.length > 0 ? partsBrands : filters.brand || [];
 
-    const hasPartNumbers = partNumbers.length > 0 &&
-      partNumbers.some(pn => /^[A-Z0-9\-]{3,}$/i.test(pn));
+    const hasPartNumbers =
+      partNumbers.length > 0 &&
+      partNumbers.some((pn) => /^[A-Z0-9\-]{3,}$/i.test(pn));
     const hasKeywords = searchKeywords.length > 0;
 
-    console.log(`🔍 Strategy: partNumbers=${partNumbers.length}, keywords=${searchKeywords.length}, brands=${brandsList.length}`);
+    console.log(
+      `🔍 Strategy: partNumbers=${partNumbers.length}, keywords=${searchKeywords.length}, brands=${brandsList.length}`,
+    );
 
     // ─────────────────────────────────────────────────────────────
     // STEP 2: FETCH DATA  (3 strategies: part#s → text → fallback)
@@ -870,12 +881,17 @@ async function aiSearch(req, res) {
     if (hasPartNumbers && useElasticsearch) {
       try {
         const esResult = await elasticsearchService.searchMultiplePartNumbers(
-          partNumbers, { limitPerPart: 200 }
+          partNumbers,
+          { limitPerPart: 200 },
         );
         allResults = esResult.results;
         source = 'elasticsearch-parts';
-        console.log(`📦 Part# search: ${esResult.found?.length || 0} found, ${esResult.notFound?.length || 0} not found`);
-      } catch (e) { console.error('ES part search failed:', e.message); }
+        console.log(
+          `📦 Part# search: ${esResult.found?.length || 0} found, ${esResult.notFound?.length || 0} not found`,
+        );
+      } catch (e) {
+        console.error('ES part search failed:', e.message);
+      }
     }
 
     // STRATEGY 2 — text / keyword search
@@ -891,8 +907,12 @@ async function aiSearch(req, res) {
           });
           allResults = esResult.results || [];
           source = 'elasticsearch-text';
-          console.log(`📦 Text search "${searchQuery}": ${allResults.length} results`);
-        } catch (e) { console.error('ES text search failed:', e.message); }
+          console.log(
+            `📦 Text search "${searchQuery}": ${allResults.length} results`,
+          );
+        } catch (e) {
+          console.error('ES text search failed:', e.message);
+        }
       }
 
       // MongoDB fallback
@@ -909,7 +929,7 @@ async function aiSearch(req, res) {
             ],
           };
           if (brandsList.length > 0) {
-            mongoQ.brand = { $in: brandsList.map(b => new RegExp(b, 'i')) };
+            mongoQ.brand = { $in: brandsList.map((b) => new RegExp(b, 'i')) };
           }
           const rows = await Part.find(mongoQ).limit(300).lean();
           allResults.push(...rows);
@@ -923,14 +943,21 @@ async function aiSearch(req, res) {
     if (allResults.length === 0) {
       const dbQuery = {};
       if (brandsList.length > 0) {
-        dbQuery.brand = { $in: brandsList.map(b => new RegExp(b, 'i')) };
+        dbQuery.brand = { $in: brandsList.map((b) => new RegExp(b, 'i')) };
       }
-      if (parsedIntent.requireInStock) { dbQuery.quantity = { $gt: 0 }; }
+      if (parsedIntent.requireInStock) {
+        dbQuery.quantity = { $gt: 0 };
+      }
 
       const qp = Part.find(dbQuery).limit(1000).lean();
-      const tp = new Promise((_, rej) => setTimeout(() => rej(new Error('DB_TIMEOUT')), DB_QUERY_TIMEOUT));
-      try { allResults = await Promise.race([qp, tp]); }
-      catch { allResults = await Part.find(dbQuery).limit(300).lean(); }
+      const tp = new Promise((_, rej) =>
+        setTimeout(() => rej(new Error('DB_TIMEOUT')), DB_QUERY_TIMEOUT),
+      );
+      try {
+        allResults = await Promise.race([qp, tp]);
+      } catch {
+        allResults = await Part.find(dbQuery).limit(300).lean();
+      }
       source = 'mongodb-fallback';
     }
 
@@ -944,7 +971,11 @@ async function aiSearch(req, res) {
 
     if (parsedIntent && Object.keys(parsedIntent).length > 0) {
       // Use the rebuilt deterministic filterDataWithAI (synchronous, code-only)
-      const filterResult = geminiService.filterDataWithAI(allResults, parsedIntent, query);
+      const filterResult = geminiService.filterDataWithAI(
+        allResults,
+        parsedIntent,
+        query,
+      );
       filteredResults = filterResult.matchingParts;
       filterAnalysis = filterResult.analysis;
       console.log('🎯 Filter result:', filterAnalysis);
@@ -960,7 +991,7 @@ async function aiSearch(req, res) {
 
     // Deduplicate first
     const seen = new Set();
-    filteredResults = filteredResults.filter(p => {
+    filteredResults = filteredResults.filter((p) => {
       const key = `${p.partNumber}-${p.supplier}`;
       if (seen.has(key)) return false;
       seen.add(key);
@@ -968,9 +999,11 @@ async function aiSearch(req, res) {
     });
 
     // Calculate min/max for normalization
-    const prices = filteredResults.map(p => p.price || 0).filter(p => p > 0);
-    const quantities = filteredResults.map(p => p.quantity || 0);
-    const deliveries = filteredResults.map(p => p.deliveryDays || 999);
+    const prices = filteredResults
+      .map((p) => p.price || 0)
+      .filter((p) => p > 0);
+    const quantities = filteredResults.map((p) => p.quantity || 0);
+    const deliveries = filteredResults.map((p) => p.deliveryDays || 999);
 
     const minPrice = Math.min(...(prices.length ? prices : [0]));
     const maxPrice = Math.max(...(prices.length ? prices : [1]));
@@ -980,33 +1013,46 @@ async function aiSearch(req, res) {
     const maxDelivery = Math.max(...deliveries);
 
     // Score each result on multiple factors (0-100 scale each)
-    filteredResults.forEach(p => {
+    filteredResults.forEach((p) => {
       const price = p.price || 0;
       const qty = p.quantity || 0;
       const delivery = p.deliveryDays || 999;
       const inStock = qty > 0 ? 1 : 0;
 
       // Price score: lower is better (inverted)
-      const priceScore = price > 0 && maxPrice > minPrice
-        ? ((maxPrice - price) / (maxPrice - minPrice)) * 100
-        : (price > 0 ? 50 : 0);
+      const priceScore =
+        price > 0 && maxPrice > minPrice
+          ? ((maxPrice - price) / (maxPrice - minPrice)) * 100
+          : price > 0
+            ? 50
+            : 0;
 
       // Quantity score: higher is better
-      const qtyScore = maxQty > minQty
-        ? ((qty - minQty) / (maxQty - minQty)) * 100
-        : (qty > 0 ? 50 : 0);
+      const qtyScore =
+        maxQty > minQty
+          ? ((qty - minQty) / (maxQty - minQty)) * 100
+          : qty > 0
+            ? 50
+            : 0;
 
       // Delivery score: fewer days is better (inverted)
-      const deliveryScore = delivery < 999 && maxDelivery > minDelivery
-        ? ((maxDelivery - delivery) / (maxDelivery - minDelivery)) * 100
-        : (delivery < 999 ? 50 : 0);
+      const deliveryScore =
+        delivery < 999 && maxDelivery > minDelivery
+          ? ((maxDelivery - delivery) / (maxDelivery - minDelivery)) * 100
+          : delivery < 999
+            ? 50
+            : 0;
 
       // Stock bonus
       const stockBonus = inStock ? 20 : 0;
 
       // Weighted composite score
       // Price: 35%, Delivery: 30%, Quantity: 20%, Stock: 15%
-      const compositeScore = (priceScore * 0.35) + (deliveryScore * 0.30) + (qtyScore * 0.20) + (stockBonus * 0.15);
+      const compositeScore =
+        priceScore * 0.35 +
+        deliveryScore * 0.3 +
+        qtyScore * 0.2 +
+        stockBonus * 0.15;
 
       p._aiScore = Math.round(compositeScore * 10) / 10;
       p._aiPriceScore = Math.round(priceScore);
@@ -1029,60 +1075,103 @@ async function aiSearch(req, res) {
     if (filteredResults.length >= 2) {
       const top = filteredResults.slice(0, 10);
       // Find best in each category
-      const cheapest = [...top].sort((a, b) => (a.price || Infinity) - (b.price || Infinity))[0];
-      const fastestDelivery = [...top].sort((a, b) => (a.deliveryDays || 999) - (b.deliveryDays || 999))[0];
-      const highestStock = [...top].sort((a, b) => (b.quantity || 0) - (a.quantity || 0))[0];
+      const cheapest = [...top].sort(
+        (a, b) => (a.price || Infinity) - (b.price || Infinity),
+      )[0];
+      const fastestDelivery = [...top].sort(
+        (a, b) => (a.deliveryDays || 999) - (b.deliveryDays || 999),
+      )[0];
+      const highestStock = [...top].sort(
+        (a, b) => (b.quantity || 0) - (a.quantity || 0),
+      )[0];
       const bestOverall = top[0]; // Already sorted by composite
 
       // Assign badges to results
-      filteredResults.forEach(p => {
+      filteredResults.forEach((p) => {
         p._aiBadges = [];
         const pid = p._id?.toString() || `${p.partNumber}-${p.supplier}`;
-        const cheapestId = cheapest._id?.toString() || `${cheapest.partNumber}-${cheapest.supplier}`;
-        const fastestId = fastestDelivery._id?.toString() || `${fastestDelivery.partNumber}-${fastestDelivery.supplier}`;
-        const stockId = highestStock._id?.toString() || `${highestStock.partNumber}-${highestStock.supplier}`;
-        const bestId = bestOverall._id?.toString() || `${bestOverall.partNumber}-${bestOverall.supplier}`;
+        const cheapestId =
+          cheapest._id?.toString() ||
+          `${cheapest.partNumber}-${cheapest.supplier}`;
+        const fastestId =
+          fastestDelivery._id?.toString() ||
+          `${fastestDelivery.partNumber}-${fastestDelivery.supplier}`;
+        const stockId =
+          highestStock._id?.toString() ||
+          `${highestStock.partNumber}-${highestStock.supplier}`;
+        const bestId =
+          bestOverall._id?.toString() ||
+          `${bestOverall.partNumber}-${bestOverall.supplier}`;
 
         if (pid === bestId) p._aiBadges.push('best-overall');
         if (pid === cheapestId) p._aiBadges.push('lowest-price');
-        if (pid === fastestId && (fastestDelivery.deliveryDays || 999) < 999) p._aiBadges.push('fastest-delivery');
-        if (pid === stockId && (highestStock.quantity || 0) > 0) p._aiBadges.push('highest-stock');
+        if (pid === fastestId && (fastestDelivery.deliveryDays || 999) < 999)
+          p._aiBadges.push('fastest-delivery');
+        if (pid === stockId && (highestStock.quantity || 0) > 0)
+          p._aiBadges.push('highest-stock');
       });
 
       // Build tie/comparison explanations
       const topTwo = top.slice(0, 2);
       if (topTwo.length === 2) {
         const [first, second] = topTwo;
-        const scoreDiff = Math.abs((first._aiScore || 0) - (second._aiScore || 0));
+        const scoreDiff = Math.abs(
+          (first._aiScore || 0) - (second._aiScore || 0),
+        );
         if (scoreDiff < 5) {
           // Very close - explain why both are good
           const firstAdvantages = [];
           const secondAdvantages = [];
 
-          if ((first.price || Infinity) < (second.price || Infinity)) firstAdvantages.push('lower price');
-          else if ((second.price || Infinity) < (first.price || Infinity)) secondAdvantages.push('lower price');
+          if ((first.price || Infinity) < (second.price || Infinity))
+            firstAdvantages.push('lower price');
+          else if ((second.price || Infinity) < (first.price || Infinity))
+            secondAdvantages.push('lower price');
 
-          if ((first.deliveryDays || 999) < (second.deliveryDays || 999)) firstAdvantages.push('faster delivery');
-          else if ((second.deliveryDays || 999) < (first.deliveryDays || 999)) secondAdvantages.push('faster delivery');
+          if ((first.deliveryDays || 999) < (second.deliveryDays || 999))
+            firstAdvantages.push('faster delivery');
+          else if ((second.deliveryDays || 999) < (first.deliveryDays || 999))
+            secondAdvantages.push('faster delivery');
 
-          if ((first.quantity || 0) > (second.quantity || 0)) firstAdvantages.push('more stock');
-          else if ((second.quantity || 0) > (first.quantity || 0)) secondAdvantages.push('more stock');
+          if ((first.quantity || 0) > (second.quantity || 0))
+            firstAdvantages.push('more stock');
+          else if ((second.quantity || 0) > (first.quantity || 0))
+            secondAdvantages.push('more stock');
 
           aiInsights.push({
             type: 'tie',
             message: `Top 2 options are very close in overall score`,
-            first: { supplier: first.supplier || first.brand, advantages: firstAdvantages },
-            second: { supplier: second.supplier || second.brand, advantages: secondAdvantages },
+            first: {
+              supplier: first.supplier || first.brand,
+              advantages: firstAdvantages,
+            },
+            second: {
+              supplier: second.supplier || second.brand,
+              advantages: secondAdvantages,
+            },
           });
         }
       }
 
       // Price vs delivery tradeoff insight
-      const cheapestPid = cheapest._id?.toString() || `${cheapest.partNumber}-${cheapest.supplier}`;
-      const fastestPid = fastestDelivery._id?.toString() || `${fastestDelivery.partNumber}-${fastestDelivery.supplier}`;
-      if (cheapestPid !== fastestPid && (cheapest.price || 0) > 0 && (fastestDelivery.deliveryDays || 999) < 999) {
-        const priceDiffPercent = Math.round(Math.abs((cheapest.price || 0) - (fastestDelivery.price || 0)) / (cheapest.price || 1) * 100);
-        const deliveryDiff = (cheapest.deliveryDays || 0) - (fastestDelivery.deliveryDays || 0);
+      const cheapestPid =
+        cheapest._id?.toString() ||
+        `${cheapest.partNumber}-${cheapest.supplier}`;
+      const fastestPid =
+        fastestDelivery._id?.toString() ||
+        `${fastestDelivery.partNumber}-${fastestDelivery.supplier}`;
+      if (
+        cheapestPid !== fastestPid &&
+        (cheapest.price || 0) > 0 &&
+        (fastestDelivery.deliveryDays || 999) < 999
+      ) {
+        const priceDiffPercent = Math.round(
+          (Math.abs((cheapest.price || 0) - (fastestDelivery.price || 0)) /
+            (cheapest.price || 1)) *
+            100,
+        );
+        const deliveryDiff =
+          (cheapest.deliveryDays || 0) - (fastestDelivery.deliveryDays || 0);
         if (priceDiffPercent > 5 && deliveryDiff > 0) {
           aiInsights.push({
             type: 'tradeoff',
@@ -1097,16 +1186,20 @@ async function aiSearch(req, res) {
     filteredResults = filteredResults.slice(0, 500);
 
     const searchTime = Date.now() - startTime;
-    console.log(`✅ AI Search done in ${searchTime}ms: ${filteredResults.length} results`);
+    console.log(
+      `✅ AI Search done in ${searchTime}ms: ${filteredResults.length} results`,
+    );
 
     // ─────────────────────────────────────────────────────────────
     // STEP 5: BUILD RESPONSE
     // ─────────────────────────────────────────────────────────────
     const stockStats = {
-      highStock: filteredResults.filter(p => (p.quantity || 0) >= 10).length,
-      inStock: filteredResults.filter(p => (p.quantity || 0) > 0).length,
-      lowStock: filteredResults.filter(p => (p.quantity || 0) > 0 && (p.quantity || 0) < 10).length,
-      outOfStock: filteredResults.filter(p => (p.quantity || 0) === 0).length,
+      highStock: filteredResults.filter((p) => (p.quantity || 0) >= 10).length,
+      inStock: filteredResults.filter((p) => (p.quantity || 0) > 0).length,
+      lowStock: filteredResults.filter(
+        (p) => (p.quantity || 0) > 0 && (p.quantity || 0) < 10,
+      ).length,
+      outOfStock: filteredResults.filter((p) => (p.quantity || 0) === 0).length,
     };
 
     let message = `Found ${filteredResults.length} parts`;
@@ -1118,7 +1211,8 @@ async function aiSearch(req, res) {
       if (fa.brands) applied.push(`brands: ${fa.brands.join(', ')}`);
       if (fa.delivery) applied.push(fa.delivery);
       if (fa.keywords) applied.push(`keywords: ${fa.keywords}`);
-      if (applied.length > 0) message += ` (filtered by: ${applied.join(', ')})`;
+      if (applied.length > 0)
+        message += ` (filtered by: ${applied.join(', ')})`;
     }
 
     activeAISearches.delete(normalizedQuery);
@@ -1141,7 +1235,9 @@ async function aiSearch(req, res) {
       if (!lr.wasSuccessful && lr.suggestions?.length > 0) {
         learningSuggestions = lr.suggestions;
       }
-    } catch (e) { console.warn('Learning record error:', e.message); }
+    } catch (e) {
+      console.warn('Learning record error:', e.message);
+    }
 
     // Response — backward-compatible shape
     const response = {
@@ -1168,7 +1264,8 @@ async function aiSearch(req, res) {
       },
       learning: {
         recordId: learningRecordId,
-        suggestions: learningSuggestions.length > 0 ? learningSuggestions : undefined,
+        suggestions:
+          learningSuggestions.length > 0 ? learningSuggestions : undefined,
       },
     };
 
@@ -1184,7 +1281,8 @@ async function aiSearch(req, res) {
     activeAISearches.delete(normalizedQuery);
     console.error('AI Search error:', error);
 
-    const isTimeout = error.message?.includes('TIMEOUT') || error.message?.includes('timeout');
+    const isTimeout =
+      error.message?.includes('TIMEOUT') || error.message?.includes('timeout');
     res.status(isTimeout ? 408 : 500).json({
       success: false,
       error: isTimeout ? 'Search timed out' : 'Search failed',
@@ -1196,7 +1294,6 @@ async function aiSearch(req, res) {
     });
   }
 }
-
 
 /**
  * AI-powered suggestions
