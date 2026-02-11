@@ -1142,13 +1142,13 @@ function buildLocalParsedIntent(query) {
   if (/\bfastest\s+delivery|quickest|soonest|earliest\s+delivery|shortest\s+delivery|fastest\s+shipping|quickest\s+delivery|minimum\s+delivery\b/.test(q))
     result.sortPreference = 'delivery_asc';
 
-  // "based on" patterns — full coverage
+  // "based on" patterns — full coverage (allows filler words like "the", "a", "its", "their")
   const basedOnMatch = q.match(
-    /based\s+on\s+(qty|quantity|stock|availab\w*|price|cost|value|delivery|shipping|speed|lead\s*time|weight|brand|quality|rating)/,
+    /based\s+on\s+(?:the\s+|a\s+|its\s+|their\s+)?(qty|quantity|quantities|stock|availab\w*|price|prices|cost|costs|value|delivery|delivery\s*time|shipping|shipping\s*time|speed|lead\s*time|weight|brand|quality|rating)/,
   );
   if (basedOnMatch) {
     const criterion = basedOnMatch[1];
-    if (/qty|quantity/.test(criterion)) {
+    if (/qty|quantit/.test(criterion)) {
       result.sortPreference = 'quantity_desc';
     } else if (/stock|availab/.test(criterion)) {
       result.sortPreference = 'stock_priority';
@@ -1163,9 +1163,9 @@ function buildLocalParsedIntent(query) {
     }
   }
 
-  // "by QTY", "by price", "by stock", "by delivery" patterns
+  // "by QTY", "by price", "by stock", "by delivery", "by delivery time" patterns
   const byMatch = q.match(
-    /\bby\s+(qty|quantity|stock|availab\w*|price|cost|delivery|shipping|lead\s*time|weight|quality)\b/,
+    /\bby\s+(?:the\s+|a\s+)?(qty|quantity|stock|availab\w*|price|cost|delivery|delivery\s*time|shipping|shipping\s*time|lead\s*time|weight|quality)\b/,
   );
   if (byMatch && !result.sortPreference) {
     const criterion = byMatch[1];

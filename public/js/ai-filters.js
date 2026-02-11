@@ -1188,381 +1188,192 @@
     // Store parsed filters
     AIFilterState.aiParsedFilters = parsedFilters;
 
-    // Render the redesigned results layout
+    // Render the redesigned results layout — clean, full-width, professional
     if (elements.aiFiltersGrid) {
-      // Check if this is a broad search
       const isBroad = AIFilterState.isBroadSearch;
       const availableBrands = AIFilterState.availableBrands || [];
       const broadMessage = AIFilterState.broadSearchMessage || '';
 
-      // Build the new 3-column layout
       let contentHTML = `<div class="ai-results-container">`;
 
-      // LEFT COLUMN - AI Understanding & Filters
+      // ── TOP BAR: AI summary + filters inline ──
       contentHTML += `
-        <div class="ai-results-left-col">
-          <!-- AI Understanding Section -->
-          <div class="ai-section ai-understanding-section">
-            <div class="ai-section-header">
-              <div class="ai-section-icon understanding-icon">
-                <i data-lucide="brain"></i>
-              </div>
-              <h3 class="ai-section-title">AI Understanding</h3>
-            </div>
-            <div class="ai-section-content">
-              <div class="ai-intent-display">
-                <i data-lucide="sparkles"></i>
-                <span>${escapeHtml(parsedResponse?.intent || 'Searching for parts matching your query')}</span>
-              </div>
-              ${
-                isBroad
-                  ? `
-                <div class="ai-broad-search-warning">
-                  <i data-lucide="alert-triangle"></i>
-                  <div class="broad-warning-content">
-                    <span class="broad-warning-title">Broad Search Detected</span>
-                    <span class="broad-warning-text">${escapeHtml(broadMessage)}</span>
-                  </div>
-                </div>
-                ${
-                  availableBrands.length > 0
-                    ? `
-                  <div class="ai-brand-suggestions">
-                    <span class="brand-suggestions-label">Try filtering by brand:</span>
-                    <div class="brand-chips">
-                      ${availableBrands
-                        .slice(0, 8)
-                        .map(
-                          (brand) => `
-                        <button class="brand-chip" data-brand="${escapeHtml(brand)}">
-                          ${escapeHtml(brand)}
-                        </button>
-                      `,
-                        )
-                        .join('')}
-                    </div>
-                  </div>
-                `
-                    : ''
-                }
-              `
-                  : ''
-              }
-            </div>
+        <div class="ai-summary-bar">
+          <div class="ai-summary-left">
+            <span class="ai-summary-text">${escapeHtml(parsedResponse?.intent || 'Searching for parts matching your query')}</span>
           </div>
-          
-          <!-- Active Filters Section -->
-          <div class="ai-section ai-active-filters-section">
-            <div class="ai-section-header">
-              <div class="ai-section-icon filters-icon">
-                <i data-lucide="sliders-horizontal"></i>
-              </div>
-              <h3 class="ai-section-title">Applied Filters</h3>
-              <span class="ai-filter-count">${hasFilters ? parsedFilters.length : 0}</span>
-            </div>
-            <div class="ai-section-content">
-              ${
-                hasFilters
-                  ? `
-                <div class="ai-active-filters-grid">
-                  ${parsedFilters
-                    .map(
-                      (filter, index) => `
-                    <div class="ai-active-filter-chip ${filter.type}" data-index="${index}">
-                      <i data-lucide="${filter.icon}"></i>
-                      <div class="filter-chip-content">
-                        <span class="filter-chip-label">${filter.label}</span>
-                        <span class="filter-chip-value">${filter.value}</span>
-                      </div>
-                      <button class="filter-chip-remove" data-index="${index}">
-                        <i data-lucide="x"></i>
-                      </button>
-                    </div>
-                  `,
-                    )
-                    .join('')}
-                </div>
-              `
-                  : `
-                <div class="ai-no-filters">
-                  <i data-lucide="filter-x"></i>
-                  <span>No specific filters detected</span>
-                </div>
-              `
-              }
-            </div>
-          </div>
-          
-          <!-- Suggestions Section -->
-          ${
-            parsedResponse?.suggestions && parsedResponse.suggestions.length > 0
-              ? `
-            <div class="ai-section ai-suggestions-section">
-              <div class="ai-section-header">
-                <div class="ai-section-icon suggestions-icon">
-                  <i data-lucide="lightbulb"></i>
-                </div>
-                <h3 class="ai-section-title">Try Also</h3>
-              </div>
-              <div class="ai-section-content">
-                <div class="ai-suggestion-buttons">
-                  ${parsedResponse.suggestions
-                    .slice(0, 3)
-                    .map(
-                      (suggestion) => `
-                    <button class="ai-suggestion-btn" data-suggestion="${escapeHtml(suggestion)}">
-                      <i data-lucide="search"></i>
-                      <span>${escapeHtml(truncateText(suggestion, 40))}</span>
-                    </button>
-                  `,
-                    )
-                    .join('')}
-                </div>
-              </div>
-            </div>
-          `
-              : ''
-          }
-        </div>
-      `;
-
-      // RIGHT COLUMN - Results Preview
-      contentHTML += `
-        <div class="ai-results-right-col">
-          ${
-            AIFilterState.aiInsights && AIFilterState.aiInsights.length > 0
-              ? `
-            <div class="ai-section ai-insights-section">
-              <div class="ai-section-header">
-                <div class="ai-section-icon insights-icon">
-                  <i data-lucide="sparkles"></i>
-                </div>
-                <h3 class="ai-section-title">AI Recommendation</h3>
-              </div>
-              <div class="ai-section-content">
-                <div class="ai-insights-list">
-                  ${AIFilterState.aiInsights
-                    .map((insight) => {
-                      if (insight.type === 'tie') {
-                        return `
-                          <div class="ai-insight-card tie-insight">
-                            <div class="insight-header">
-                              <i data-lucide="equal"></i>
-                              <span>${escapeHtml(insight.message)}</span>
-                            </div>
-                            <div class="insight-comparison">
-                              <div class="insight-option">
-                                <span class="option-label">${escapeHtml(insight.first.supplier || 'Option 1')}</span>
-                                ${insight.first.advantages.map((a) => `<span class="advantage-tag"><i data-lucide="plus"></i>${escapeHtml(a)}</span>`).join('')}
-                                ${insight.first.advantages.length === 0 ? '<span class="advantage-tag neutral">similar</span>' : ''}
-                              </div>
-                              <div class="insight-vs">VS</div>
-                              <div class="insight-option">
-                                <span class="option-label">${escapeHtml(insight.second.supplier || 'Option 2')}</span>
-                                ${insight.second.advantages.map((a) => `<span class="advantage-tag"><i data-lucide="plus"></i>${escapeHtml(a)}</span>`).join('')}
-                                ${insight.second.advantages.length === 0 ? '<span class="advantage-tag neutral">similar</span>' : ''}
-                              </div>
-                            </div>
-                          </div>
-                        `;
-                      } else if (insight.type === 'tradeoff') {
-                        return `
-                          <div class="ai-insight-card tradeoff-insight">
-                            <i data-lucide="scale"></i>
-                            <span>${escapeHtml(insight.message)}</span>
-                          </div>
-                        `;
-                      }
-                      return '';
-                    })
-                    .join('')}
-                </div>
-              </div>
-            </div>
-          `
-              : ''
-          }
-          <div class="ai-section ai-results-section">
-            <div class="ai-section-header">
-              <div class="ai-section-icon results-icon">
-                <i data-lucide="package-search"></i>
-              </div>
-              <h3 class="ai-section-title">Search Results</h3>
-              <div class="ai-results-badge ${hasResults ? 'has-results' : 'no-results'}">
-                <span class="results-number">${hasResults ? results.length : 0}</span>
-                <span class="results-label">found</span>
-              </div>
-            </div>
-            <div class="ai-section-content">
-              ${
-                hasResults
-                  ? `
-                <div class="ai-results-table-container">
-                  <table class="ai-results-table">
-                    <thead>
-                      <tr>
-                        <th class="col-rank">AI</th>
-                        <th class="col-brand">Brand</th>
-                        <th class="col-part">Part Number</th>
-                        <th class="col-desc">Description</th>
-                        <th class="col-qty">Qty</th>
-                        <th class="col-price">Price</th>
-                        <th class="col-delivery">Delivery</th>
-                        <th class="col-stock">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      ${results
-                        .slice(0, 15)
-                        .map(
-                          (product, idx) => `
-                        <tr class="result-row ${product._aiBadges && product._aiBadges.includes('best-overall') ? 'best-row' : ''}" style="animation-delay: ${idx * 0.04}s" data-part-id="${product._id || product.id || ''}">
-                          <td class="col-rank">
-                            ${getAIBadgesHTML(product, idx)}
-                          </td>
-                          <td class="col-brand">
-                            <span class="brand-tag">${escapeHtml(product.brand || 'N/A')}</span>
-                          </td>
-                          <td class="col-part">
-                            <span class="part-number-cell">${escapeHtml(product.partNumber || product.vendorCode || 'N/A')}</span>
-                          </td>
-                          <td class="col-desc">
-                            <span class="description-text" title="${escapeHtml(product.description || '')}">${escapeHtml(truncateText(product.description || 'No description', 25))}</span>
-                          </td>
-                          <td class="col-qty">
-                            <span class="qty-display">${product.quantity || product.stock || 0}</span>
-                          </td>
-                          <td class="col-price">
-                            <span class="price-display">${product.price ? `$${(Number(product.price) / 3.67).toFixed(2)}` : '—'}</span>
-                          </td>
-                          <td class="col-delivery">
-                            <span class="delivery-badge ${getDeliveryClass(product)}">${product.deliveryDays ? `${product.deliveryDays}d` : '—'}</span>
-                          </td>
-                          <td class="col-stock">
-                            <span class="stock-indicator ${getStockStatus(product)}">
-                              <span class="stock-dot"></span>
-                              <span class="stock-text">${getStockLabel(product)}</span>
-                            </span>
-                          </td>
-                        </tr>
-                        ${
-                          product._aiBadges && product._aiBadges.length > 0
-                            ? `
-                        <tr class="ai-reason-row">
-                          <td colspan="8">
-                            <div class="ai-reason-text">${getAIReasonText(product, results)}</div>
-                          </td>
-                        </tr>
-                        `
-                            : ''
-                        }
-                      `,
-                        )
-                        .join('')}
-                    </tbody>
-                  </table>
-                </div>
-                ${
-                  results.length > 15
-                    ? `
-                  <div class="ai-results-more">
-                    <i data-lucide="chevrons-down"></i>
-                    <span>+${results.length - 15} more results — Click Apply to see all</span>
-                  </div>
-                `
-                    : ''
-                }
-              `
-                  : `
-                <div class="ai-no-results">
-                  <div class="no-results-visual">
-                    <div class="no-results-icon-wrapper">
-                      <i data-lucide="search-x"></i>
-                    </div>
-                    <h4>No Matching Parts</h4>
-                    <p class="no-results-message">${AIFilterState.broadSearchMessage || 'No parts match your current search criteria.'}</p>
-                  </div>
-                  <div class="no-results-tips">
-                    <h5><i data-lucide="lightbulb"></i> Search Tips</h5>
-                    <ul class="tips-list">
-                      <li>Check spelling of part numbers and brand names</li>
-                      <li>Try broader terms (e.g., "brake" instead of "brake pad set")</li>
-                      <li>Remove some filters to expand results</li>
-                      <li>Search by brand name (BOSCH, SKF, DENSO)</li>
-                    </ul>
-                  </div>
-                  <div class="no-results-suggestions">
-                    <p class="suggestions-intro">Popular searches:</p>
-                    <div class="quick-search-chips">
-                      <button class="quick-chip" data-hint="BOSCH brake pads">
-                        <i data-lucide="disc"></i> BOSCH Brake Pads
-                      </button>
-                      <button class="quick-chip" data-hint="SKF wheel bearing">
-                        <i data-lucide="circle-dot"></i> SKF Bearings
-                      </button>
-                      <button class="quick-chip" data-hint="MANN oil filter">
-                        <i data-lucide="filter"></i> MANN Filters
-                      </button>
-                      <button class="quick-chip" data-hint="DENSO spark plug">
-                        <i data-lucide="zap"></i> DENSO Spark Plugs
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              `
-              }
-            </div>
+          <div class="ai-summary-right">
+            ${hasFilters ? parsedFilters.map((filter, index) => `
+              <span class="ai-chip ${filter.type}">
+                ${filter.label}: <strong>${filter.value}</strong>
+                <button class="chip-x" data-index="${index}">&times;</button>
+              </span>
+            `).join('') : '<span class="ai-chip neutral">No filters</span>'}
           </div>
         </div>
       `;
 
-      contentHTML += `</div>`; // Close ai-results-container
+      // ── BROAD SEARCH WARNING (if applicable) ──
+      if (isBroad) {
+        contentHTML += `
+          <div class="ai-broad-bar">
+            <span>${escapeHtml(broadMessage)}</span>
+            ${availableBrands.length > 0 ? `
+              <div class="ai-brand-chips">
+                ${availableBrands.slice(0, 6).map(brand => `
+                  <button class="brand-chip" data-brand="${escapeHtml(brand)}">${escapeHtml(brand)}</button>
+                `).join('')}
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }
 
+      // ── AI RECOMMENDATION (if insights exist) ──
+      if (AIFilterState.aiInsights && AIFilterState.aiInsights.length > 0) {
+        const insight = AIFilterState.aiInsights[0];
+        if (insight.type === 'tradeoff') {
+          contentHTML += `
+            <div class="ai-rec-bar">
+              <span class="rec-label">Tip</span>
+              <span class="rec-text">${escapeHtml(insight.message)}</span>
+            </div>
+          `;
+        } else if (insight.type === 'tie') {
+          contentHTML += `
+            <div class="ai-rec-bar">
+              <span class="rec-label">Compare</span>
+              <span class="rec-text">${escapeHtml(insight.message)}</span>
+            </div>
+          `;
+        }
+      }
+
+      // ── RESULTS TABLE ──
+      if (hasResults) {
+        contentHTML += `
+          <div class="ai-table-wrap">
+            <table class="ai-results-table">
+              <thead>
+                <tr>
+                  <th class="col-rank">#</th>
+                  <th class="col-brand">Brand</th>
+                  <th class="col-part">Part Number</th>
+                  <th class="col-desc">Description</th>
+                  <th class="col-qty">Qty</th>
+                  <th class="col-price">Price</th>
+                  <th class="col-delivery">Delivery</th>
+                  <th class="col-stock">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${results.slice(0, 15).map((product, idx) => {
+                  const badges = product._aiBadges || [];
+                  const isBest = badges.includes('best-overall');
+                  const reasonText = getAIReasonText(product, results);
+                  return `
+                    <tr class="result-row ${isBest ? 'best-row' : ''}" data-part-id="${product._id || product.id || ''}">
+                      <td class="col-rank">
+                        <span class="rank-num">${idx + 1}</span>
+                        ${isBest ? '<span class="rank-label best">Best</span>' : ''}
+                        ${!isBest && badges.includes('lowest-price') ? '<span class="rank-label price">Low $</span>' : ''}
+                        ${!isBest && !badges.includes('lowest-price') && badges.includes('fastest-delivery') ? '<span class="rank-label fast">Fast</span>' : ''}
+                      </td>
+                      <td class="col-brand">${escapeHtml(product.brand || 'N/A')}</td>
+                      <td class="col-part"><span class="mono">${escapeHtml(product.partNumber || product.vendorCode || 'N/A')}</span></td>
+                      <td class="col-desc"><span class="desc-text" title="${escapeHtml(product.description || '')}">${escapeHtml(truncateText(product.description || 'No description', 30))}</span></td>
+                      <td class="col-qty">${product.quantity || product.stock || 0}</td>
+                      <td class="col-price"><strong>${product.price ? `$${(Number(product.price) / 3.67).toFixed(2)}` : '—'}</strong></td>
+                      <td class="col-delivery">${product.deliveryDays ? `${product.deliveryDays}d` : '—'}</td>
+                      <td class="col-stock">
+                        <span class="stock-dot ${getStockStatus(product)}"></span>
+                        ${getStockLabel(product)}
+                      </td>
+                    </tr>
+                    ${reasonText ? `
+                    <tr class="reason-row">
+                      <td></td>
+                      <td colspan="7"><span class="reason-text">${reasonText}</span></td>
+                    </tr>
+                    ` : ''}
+                  `;
+                }).join('')}
+              </tbody>
+            </table>
+            ${results.length > 15 ? `
+              <div class="ai-more-bar">+${results.length - 15} more — click Apply to see all</div>
+            ` : ''}
+          </div>
+        `;
+      } else {
+        // No results
+        contentHTML += `
+          <div class="ai-empty-state">
+            <div class="empty-main">
+              <h4>No Matching Parts</h4>
+              <p>${AIFilterState.broadSearchMessage || 'No parts match your current search criteria.'}</p>
+            </div>
+            <div class="empty-tips">
+              <p><strong>Tips:</strong> Check spelling of part numbers · Try broader terms · Remove some filters</p>
+            </div>
+            <div class="empty-suggestions">
+              <button class="quick-chip" data-hint="BOSCH brake pads">BOSCH Brake Pads</button>
+              <button class="quick-chip" data-hint="SKF wheel bearing">SKF Bearings</button>
+              <button class="quick-chip" data-hint="MANN oil filter">MANN Filters</button>
+              <button class="quick-chip" data-hint="DENSO spark plug">DENSO Spark Plugs</button>
+            </div>
+          </div>
+        `;
+      }
+
+      // ── SUGGESTIONS (if any) ──
+      if (parsedResponse?.suggestions && parsedResponse.suggestions.length > 0) {
+        contentHTML += `
+          <div class="ai-suggest-bar">
+            <span class="suggest-label">Try also:</span>
+            ${parsedResponse.suggestions.slice(0, 3).map(s => `
+              <button class="ai-suggestion-btn" data-suggestion="${escapeHtml(s)}">${escapeHtml(truncateText(s, 40))}</button>
+            `).join('')}
+          </div>
+        `;
+      }
+
+      contentHTML += `</div>`;
       elements.aiFiltersGrid.innerHTML = contentHTML;
 
-      // Add event handlers for filter removal
-      elements.aiFiltersGrid
-        .querySelectorAll('.filter-chip-remove')
-        .forEach((btn) => {
-          btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const index = parseInt(btn.dataset.index);
-            removeAIParsedFilter(index);
-          });
+      // Event handlers — filter removal
+      elements.aiFiltersGrid.querySelectorAll('.chip-x').forEach(btn => {
+        btn.addEventListener('click', e => {
+          e.stopPropagation();
+          removeAIParsedFilter(parseInt(btn.dataset.index));
         });
+      });
 
-      // Add event handlers for suggestion buttons
-      elements.aiFiltersGrid
-        .querySelectorAll('.ai-suggestion-btn')
-        .forEach((btn) => {
-          btn.addEventListener('click', () => {
-            const suggestion = btn.dataset.suggestion;
-            if (elements.aiInput) {
-              elements.aiInput.value = suggestion;
-              handleAISubmit();
-            }
-          });
-        });
-
-      // Add event handlers for quick search chips
-      elements.aiFiltersGrid.querySelectorAll('.quick-chip').forEach((chip) => {
-        chip.addEventListener('click', () => {
-          const hint = chip.dataset.hint;
+      // Event handlers — suggestions
+      elements.aiFiltersGrid.querySelectorAll('.ai-suggestion-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
           if (elements.aiInput) {
-            elements.aiInput.value = hint;
+            elements.aiInput.value = btn.dataset.suggestion;
             handleAISubmit();
           }
         });
       });
 
-      // Add event handlers for brand suggestion chips (broad search)
-      elements.aiFiltersGrid.querySelectorAll('.brand-chip').forEach((chip) => {
+      // Event handlers — quick chips
+      elements.aiFiltersGrid.querySelectorAll('.quick-chip').forEach(chip => {
         chip.addEventListener('click', () => {
-          const brand = chip.dataset.brand;
-          const currentQuery = elements.aiInput?.value || '';
-          // Append brand to current search
           if (elements.aiInput) {
-            elements.aiInput.value = `${currentQuery} ${brand}`.trim();
+            elements.aiInput.value = chip.dataset.hint;
+            handleAISubmit();
+          }
+        });
+      });
+
+      // Event handlers — brand chips
+      elements.aiFiltersGrid.querySelectorAll('.brand-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+          if (elements.aiInput) {
+            elements.aiInput.value = `${elements.aiInput.value || ''} ${chip.dataset.brand}`.trim();
             handleAISubmit();
           }
         });
@@ -1638,35 +1449,8 @@
   }
 
   function getAIBadgesHTML(product, idx) {
-    const badges = product._aiBadges || [];
-    if (badges.length === 0) {
-      return `<span class="ai-rank-num">#${idx + 1}</span>`;
-    }
-
-    const badgeMap = {
-      'best-overall': { icon: 'crown', label: 'Best', cls: 'badge-best' },
-      'lowest-price': { icon: 'tag', label: 'Cheapest', cls: 'badge-cheap' },
-      'fastest-delivery': { icon: 'zap', label: 'Fastest', cls: 'badge-fast' },
-      'highest-stock': {
-        icon: 'warehouse',
-        label: 'Top Stock',
-        cls: 'badge-stock',
-      },
-      'only-option': {
-        icon: 'check-circle',
-        label: 'Only Option',
-        cls: 'badge-only',
-      },
-    };
-
-    let html = '';
-    badges.forEach((b) => {
-      const info = badgeMap[b];
-      if (info) {
-        html += `<span class="ai-badge ${info.cls}" title="${info.label}"><i data-lucide="${info.icon}"></i></span>`;
-      }
-    });
-    return html || `<span class="ai-rank-num">#${idx + 1}</span>`;
+    // Legacy function kept for compatibility — new design uses inline rank labels
+    return `<span class="rank-num">${idx + 1}</span>`;
   }
 
   function getAIReasonText(product, allResults) {

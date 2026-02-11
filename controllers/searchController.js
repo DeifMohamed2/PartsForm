@@ -1019,30 +1019,24 @@ async function aiSearch(req, res) {
     // Weights are dynamic based on the user's sort/priority preference
     const sortPref = parsedIntent.sortPreference || null;
 
-    // Dynamic weight calculation
+    // Dynamic weight calculation — when user specifies a preference, that factor
+    // gets heavy dominant weight (70%) so it truly drives the ranking
     let wPrice = 0.35, wDelivery = 0.30, wQty = 0.20, wStock = 0.15;
 
     if (sortPref === 'quantity_desc') {
-      // User prioritizes quantity/stock availability
-      wQty = 0.50; wStock = 0.25; wPrice = 0.15; wDelivery = 0.10;
+      wQty = 0.70; wStock = 0.15; wPrice = 0.10; wDelivery = 0.05;
     } else if (sortPref === 'stock_priority') {
-      // User prioritizes in-stock / availability
-      wStock = 0.40; wQty = 0.30; wPrice = 0.15; wDelivery = 0.15;
+      wStock = 0.60; wQty = 0.20; wPrice = 0.10; wDelivery = 0.10;
     } else if (sortPref === 'price_asc') {
-      // User prioritizes lowest price
-      wPrice = 0.55; wDelivery = 0.20; wQty = 0.15; wStock = 0.10;
+      wPrice = 0.70; wDelivery = 0.15; wQty = 0.10; wStock = 0.05;
     } else if (sortPref === 'price_desc') {
-      // User wants highest price (premium)
-      wPrice = 0.55; wDelivery = 0.20; wQty = 0.15; wStock = 0.10;
+      wPrice = 0.70; wDelivery = 0.15; wQty = 0.10; wStock = 0.05;
     } else if (sortPref === 'delivery_asc') {
-      // User prioritizes fastest delivery
-      wDelivery = 0.50; wPrice = 0.20; wQty = 0.15; wStock = 0.15;
+      wDelivery = 0.70; wPrice = 0.15; wQty = 0.10; wStock = 0.05;
     } else if (sortPref === 'weight_asc') {
-      // User prioritizes lightest weight — fall back to price-like scoring
       wPrice = 0.40; wDelivery = 0.25; wQty = 0.20; wStock = 0.15;
     } else if (sortPref === 'quality_desc') {
-      // User prioritizes quality — favor OEM/premium, in-stock, reasonable price
-      wStock = 0.35; wQty = 0.30; wPrice = 0.20; wDelivery = 0.15;
+      wStock = 0.40; wQty = 0.30; wPrice = 0.15; wDelivery = 0.15;
     }
 
     console.log(`📊 Scoring weights: Price=${wPrice}, Delivery=${wDelivery}, Qty=${wQty}, Stock=${wStock} (pref: ${sortPref || 'balanced'})`);
