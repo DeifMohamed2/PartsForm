@@ -899,21 +899,32 @@
       });
     }
 
-    // Sort filter
-    if (fv.sortBy && fv.sortBy !== 'price') {
+    // Sort / Priority filter
+    const sortPref = pi.sortPreference || fv.sortBy || null;
+    if (sortPref) {
       const sortLabels = {
+        'price_asc': 'Lowest Price First',
+        'price_desc': 'Highest Price First',
+        'quantity_desc': 'Highest Quantity First',
+        'stock_priority': 'Best Availability First',
+        'delivery_asc': 'Fastest Delivery First',
+        'weight_asc': 'Lightest Weight First',
+        'quality_desc': 'Highest Quality First',
         quantity: 'Highest Stock',
         deliveryDays: 'Fastest Delivery',
         brand: 'Brand Name',
       };
-      filters.push({
-        type: 'sort',
-        icon: 'arrow-up-down',
-        label: 'Sort By',
-        value: sortLabels[fv.sortBy] || fv.sortBy,
-        filterKey: 'sortBy',
-        filterValue: fv.sortBy,
-      });
+      const label = sortLabels[sortPref];
+      if (label) {
+        filters.push({
+          type: 'sort',
+          icon: 'arrow-up-down',
+          label: 'Priority',
+          value: label,
+          filterKey: 'sortBy',
+          filterValue: sortPref,
+        });
+      }
     }
 
     return filters;
@@ -1662,23 +1673,40 @@
     const badges = product._aiBadges || [];
     const reasons = [];
 
+    // Determine the user's priority from parsed response
+    const sortPref = AIFilterState.aiParsedResponse?.parsedIntent?.sortPreference || null;
+    const priorityLabels = {
+      'quantity_desc': 'quantity',
+      'stock_priority': 'stock availability',
+      'price_asc': 'lowest price',
+      'price_desc': 'highest price',
+      'delivery_asc': 'fastest delivery',
+      'weight_asc': 'lightest weight',
+      'quality_desc': 'highest quality',
+    };
+    const priorityLabel = priorityLabels[sortPref] || null;
+
     if (badges.includes('best-overall')) {
-      reasons.push('⭐ Best overall value — balanced price, stock & delivery');
+      if (priorityLabel) {
+        reasons.push(`Best option — ranked by ${priorityLabel}`);
+      } else {
+        reasons.push('Best overall value — balanced price, stock & delivery');
+      }
     }
     if (badges.includes('lowest-price') && !badges.includes('best-overall')) {
-      reasons.push('💰 Lowest price among results');
+      reasons.push('Lowest price among results');
     }
     if (badges.includes('fastest-delivery')) {
       const days = product.deliveryDays || '?';
-      reasons.push(`⚡ Fastest delivery (${days} days)`);
+      reasons.push(`Fastest delivery (${days} days)`);
     }
     if (badges.includes('highest-stock')) {
       reasons.push(
-        `📦 Highest stock availability (${product.quantity || 0} units)`,
+        `Highest stock availability (${product.quantity || 0} units)`,
       );
     }
     if (badges.includes('only-option')) {
-      reasons.push('✅ Only matching option found');
+      reasons.push('Only matching option found');
     }
 
     return reasons.join(' · ') || '';

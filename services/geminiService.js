@@ -83,22 +83,47 @@ CRITICAL RULES — Follow these EXACTLY:
      "Bosch brake pads" → vehicleBrand:null, partsBrands:["BOSCH"]
    - "Bosch brake pads for Toyota" → vehicleBrand:"TOYOTA", partsBrands:["BOSCH"]
 
-4. CATEGORIES: Extract part types — brake, filter, engine, suspension, bearing, clutch, steering, exhaust, electrical, cooling, transmission, wheel, pump, sensor, gasket, belt, hose, turbo, fuel, seal, wiper, body, lighting, hub, axle, valve
+4. CATEGORIES: Extract part types — brake, filter, engine, suspension, bearing, clutch, steering, exhaust, electrical, cooling, transmission, wheel, pump, sensor, gasket, belt, hose, turbo, fuel, seal, wiper, body, lighting, hub, axle, valve, ac, interior, ignition
 
 5. STOCK REQUIREMENTS:
-   - "in stock" / "available" / "have it" → requireInStock:true
-   - "full stock" / "plenty" / "bulk" / "large qty" → requireHighStock:true
+   - "in stock" / "available" / "have it" / "on hand" / "in warehouse" → requireInStock:true
+   - "full stock" / "plenty" / "bulk" / "large qty" / "abundant" / "sufficient" → requireHighStock:true
 
 6. DELIVERY:
-   - "fast delivery" / "express" / "urgent" / "rush" / "asap" → fastDelivery:true
-   - "within 3 days" → maxDeliveryDays:3
-   - "same day" → maxDeliveryDays:0
+   - "fast delivery" / "express" / "urgent" / "rush" / "asap" / "same day" / "next day" / "overnight" → fastDelivery:true
+   - "within 3 days" / "3-day delivery" → maxDeliveryDays:3
+   - "same day" / "today" → maxDeliveryDays:0
+   - "ready to ship" / "quick turnaround" → fastDelivery:true
 
-7. QUALITY: "OEM" / "genuine" / "original" → oem:true. "certified" / "verified" → certifiedSupplier:true.
+7. QUALITY:
+   - "OEM" / "genuine" / "original" → oem:true
+   - "aftermarket" / "non-oem" / "generic" → aftermarket:true
+   - "premium" / "high quality" / "top quality" → premiumQuality:true
+   - "with warranty" / "guaranteed" / "warrantied" → requireWarranty:true
+   - "certified" / "verified" / "approved" → certifiedSupplier:true
 
-8. EXCLUSIONS: "not Bosch" / "exclude Chinese" / "no aftermarket" → exclude relevant items.
+8. EXCLUSIONS:
+   - "not Bosch" / "no Bosch" / "without Bosch" / "exclude Bosch" → excludeBrands:["BOSCH"]
+   - "no Chinese" / "exclude Turkish" / "non-Chinese" → excludeOrigins:["Chinese"]
+   - "only OEM" → oem:true, aftermarket exclusion context
+   - "only aftermarket" → aftermarket:true
 
-9. KEYWORDS: Extract words that should match part DESCRIPTIONS. Include synonyms.
+9. ORIGIN PREFERENCES:
+   - "German parts" / "made in Germany" → supplierOrigin:"German"
+   - "Japanese" / "European" / "American" / "Italian" / "French" / "Korean" → supplierOrigin
+
+10. VEHICLE CONTEXT:
+    - Year: "2019 Toyota" → vehicleYear:2019. "2015-2020" → vehicleYearMin:2015, vehicleYearMax:2020
+    - Fuel: "diesel" / "petrol" / "gasoline" / "hybrid" / "electric" → fuelType
+    - Application: "passenger" / "commercial" / "heavy duty" / "performance" → applicationType
+
+11. CONDITION: "new" / "used" / "refurbished" / "remanufactured" / "reman" / "rebuilt" → condition
+
+12. COMPARISON: "compare" / "versus" / "vs" → compareMode:true. "alternative" / "substitute" / "equivalent" → findAlternatives:true
+
+13. SUPPLIER TYPE: "wholesale" / "distributor" → "wholesale". "manufacturer" / "factory direct" → "manufacturer". "local" / "nearby" → "local"
+
+14. KEYWORDS: Extract words that should match part DESCRIPTIONS. Include synonyms.
    "brake pads" → ["brake","pad","pads","braking"]
    BUT if a part number is found, leave searchKeywords EMPTY.
 
@@ -106,29 +131,33 @@ CRITICAL RULES — Follow these EXACTLY:
 CRITICAL: topN vs requestedQuantity — MUST distinguish correctly:
 ═══════════════════════════════════════════════════════════════
 
-10. topN (RESULT LIMIT — how many different options/suppliers to show):
+15. topN (RESULT LIMIT — how many different options/suppliers to show):
    - "best 3" / "top 5" / "show me 3 options" / "find 5 suppliers" → topN:3/5
    - "get 3 for this part" / "find best 3 for RC0009" → topN:3
-   - "compare top 4" → topN:4
+   - "compare top 4" / "list 5" / "display 3" / "recommend 3" → topN:4/5/3/3
+   - "first 5" / "limit to 3" / "only show 5" → topN:5/3/5
    - IMPORTANT: "best" / "best option" / "best price" WITHOUT a number → topN:null (just sort by best)
-   - Only set topN when a NUMBER >= 2 is specified with "best/top/show/find/get"
+   - Only set topN when a NUMBER >= 2 is specified
 
-11. requestedQuantity (STOCK MINIMUM — how many units the buyer needs):
+16. requestedQuantity (STOCK MINIMUM — how many units the buyer needs):
    - "need 50 units" / "qty 100" / "order 200 pieces" → requestedQuantity:50/100/200
-   - "x10" / "10 pcs" → requestedQuantity:10
-   - This filters OUT results that don't have enough stock
+   - "x10" / "10 pcs" / "require 30" / "minimum 20" → requestedQuantity:10/10/30/20
+   - "wholesale" / "bulk order" (no number) → requestedQuantity:100
 
-NEVER confuse these: "find best 3 for RC0009" → topN:3, requestedQuantity:null
-                      "need 50 units of RC0009" → topN:null, requestedQuantity:50
-
-12. SORT PREFERENCE:
-   - "cheapest" / "lowest price" / "best price" → sortPreference:"price_asc"
+17. SORT PREFERENCE (affects scoring weights — the mentioned factor gets highest priority):
+   - "cheapest" / "lowest price" / "best price" / "based on price" / "by price" / "sort by price" / "order by cost" → sortPreference:"price_asc"
    - "most expensive" / "highest price" → sortPreference:"price_desc"
-   - "most stock" / "highest quantity" → sortPreference:"quantity_desc"
-   - "fastest delivery" / "quickest" → sortPreference:"delivery_asc"
+   - "most stock" / "highest quantity" / "based on QTY" / "by quantity" / "sort by quantity" / "with most stock" → sortPreference:"quantity_desc"
+   - "based on stock" / "based on availability" / "by stock" / "by availability" / "prioritize availability" → sortPreference:"stock_priority"
+   - "fastest delivery" / "quickest" / "based on delivery" / "by delivery" / "sort by delivery" / "soonest" → sortPreference:"delivery_asc"
+   - "by quality" / "best quality" / "highest quality" / "sort by quality" → sortPreference:"quality_desc"
+   - "lightest" / "by weight" / "sort by weight" → sortPreference:"weight_asc"
    - "best" (general, no specific factor) → sortPreference:null (composite scoring handles it)
+   
+   CRITICAL: When user says "best 2 based on QTY", extract BOTH topN:2 AND sortPreference:"quantity_desc"
+             When user says "best 3 based on price", extract BOTH topN:3 AND sortPreference:"price_asc"
 
-13. TYPO TOLERANCE: "bosh"=BOSCH, "toyta"=TOYOTA, "bremb"=BREMBO, "mersedes"=MERCEDES, "nisan"=NISSAN, "hynudai"=HYUNDAI
+18. TYPO TOLERANCE: "bosh"=BOSCH, "toyta"=TOYOTA, "bremb"=BREMBO, "mersedes"=MERCEDES, "nisan"=NISSAN, "hynudai"=HYUNDAI
 
 ═══════════════════════════════════════════════════════════════
 
@@ -148,12 +177,27 @@ OUTPUT FORMAT (STRICT — return exactly this shape):
   "fastDelivery": false,
   "maxDeliveryDays": null,
   "oem": false,
+  "aftermarket": false,
+  "premiumQuality": false,
+  "requireWarranty": false,
   "certifiedSupplier": false,
   "requestedQuantity": null,
   "topN": null,
   "sortPreference": null,
   "excludeBrands": [],
   "excludeOrigins": [],
+  "supplierOrigin": null,
+  "compareMode": false,
+  "findAlternatives": false,
+  "vehicleYear": null,
+  "vehicleYearMin": null,
+  "vehicleYearMax": null,
+  "condition": "new",
+  "fuelType": null,
+  "applicationType": null,
+  "heavyDuty": false,
+  "supplierType": null,
+  "freeShipping": false,
   "confidence": "HIGH",
   "suggestions": []
 }
@@ -267,33 +311,80 @@ function buildLocalParsedIntent(query) {
 
   let q = query.toLowerCase().trim();
 
-  // ── Typo corrections ──
+  // ── Typo corrections (comprehensive B2B auto parts marketplace) ──
   const typoMap = {
-    toyta: 'toyota',
-    toyata: 'toyota',
-    tayota: 'toyota',
-    bosh: 'bosch',
-    bosc: 'bosch',
-    bremb: 'brembo',
-    bremboo: 'brembo',
-    nisaan: 'nissan',
-    nisan: 'nissan',
-    mercedez: 'mercedes',
-    mersedes: 'mercedes',
-    merc: 'mercedes',
-    hynudai: 'hyundai',
-    hyundia: 'hyundai',
-    hundai: 'hyundai',
-    volkswagon: 'volkswagen',
-    vw: 'volkswagen',
-    porshe: 'porsche',
-    porche: 'porsche',
-    chevrolete: 'chevrolet',
-    chevy: 'chevrolet',
-    acdelko: 'acdelco',
-    germn: 'german',
-    japnese: 'japanese',
-    chines: 'chinese',
+    // Vehicle brands
+    toyta: 'toyota', toyata: 'toyota', tayota: 'toyota', toyot: 'toyota',
+    bosh: 'bosch', bosc: 'bosch',
+    bremb: 'brembo', bremboo: 'brembo', bremo: 'brembo',
+    nisaan: 'nissan', nisan: 'nissan', nisson: 'nissan', niss: 'nissan',
+    mercedez: 'mercedes', mersedes: 'mercedes', merc: 'mercedes', mercdes: 'mercedes', mersedez: 'mercedes', benz: 'mercedes',
+    hynudai: 'hyundai', hyundia: 'hyundai', hundai: 'hyundai', hyunadi: 'hyundai', hundayi: 'hyundai', huyndai: 'hyundai',
+    volkswagon: 'volkswagen', vw: 'volkswagen', volkswagen: 'volkswagen', folkswagen: 'volkswagen',
+    porshe: 'porsche', porche: 'porsche', porscha: 'porsche',
+    chevrolete: 'chevrolet', chevy: 'chevrolet', chev: 'chevrolet', shevy: 'chevrolet',
+    acdelko: 'acdelco', acdelc: 'acdelco',
+    germn: 'german', grman: 'german',
+    japnese: 'japanese', japanes: 'japanese', japanse: 'japanese',
+    chines: 'chinese', chinse: 'chinese',
+    suabru: 'subaru', subru: 'subaru',
+    mitsibishi: 'mitsubishi', mitsibushi: 'mitsubishi', mitsubshi: 'mitsubishi', mitsubisi: 'mitsubishi',
+    suzki: 'suzuki', suzuky: 'suzuki',
+    volks: 'volkswagen', volksw: 'volkswagen',
+    peugot: 'peugeot', peugeut: 'peugeot', pugeot: 'peugeot',
+    reno: 'renault', renalt: 'renault',
+    landrover: 'land rover', lndrover: 'land rover',
+    jaquar: 'jaguar', jagaur: 'jaguar',
+    masda: 'mazda', mazada: 'mazda',
+    infinti: 'infiniti', infinty: 'infiniti',
+    crysler: 'chrysler', chryslar: 'chrysler',
+    // Parts brands
+    delpih: 'delphi', delfi: 'delphi',
+    contiental: 'continental', continetal: 'continental',
+    lemmforder: 'lemforder', lemforder: 'lemforder', lemförder: 'lemforder',
+    bistein: 'bilstein', billstein: 'bilstein',
+    ferod: 'ferodo', ferrodo: 'ferodo',
+    hela: 'hella', hela: 'hella',
+    myle: 'meyle', meile: 'meyle',
+    timkn: 'timken', timkin: 'timken',
+    dayko: 'dayco', daico: 'dayco',
+    champin: 'champion', champoin: 'champion',
+    filtr: 'filter', fliter: 'filter', filer: 'filter',
+    brak: 'brake', braek: 'brake', brek: 'brake',
+    engin: 'engine', engien: 'engine',
+    suspnsion: 'suspension', suspenion: 'suspension', suspention: 'suspension',
+    stearing: 'steering', steerin: 'steering',
+    exhuast: 'exhaust', exhust: 'exhaust', exhast: 'exhaust',
+    trasmission: 'transmission', transmision: 'transmission', transmisson: 'transmission',
+    alternatr: 'alternator', alternater: 'alternator',
+    radaitor: 'radiator', readiator: 'radiator', raditor: 'radiator',
+    genune: 'genuine', genuien: 'genuine',
+    orignal: 'original', orignial: 'original',
+    waranty: 'warranty', warrnty: 'warranty', garanty: 'warranty',
+    avalible: 'available', avaliable: 'available', avalable: 'available', availble: 'available',
+    avlaibelity: 'availability', availibility: 'availability', availabilty: 'availability',
+    delevery: 'delivery', delivry: 'delivery', delivary: 'delivery', delievry: 'delivery',
+    shiping: 'shipping', shippping: 'shipping',
+    quntity: 'quantity', quanity: 'quantity', quantiy: 'quantity', qantity: 'quantity', quantty: 'quantity',
+    proce: 'price', pirce: 'price', prise: 'price', prce: 'price',
+    chepest: 'cheapest', cheapst: 'cheapest', cheepest: 'cheapest',
+    fastes: 'fastest', fastet: 'fastest',
+    replasment: 'replacement', replacemnt: 'replacement', replacment: 'replacement',
+    compatble: 'compatible', compatable: 'compatible', compatibel: 'compatible',
+    aftermarkt: 'aftermarket', aftarmarket: 'aftermarket', aftrmarket: 'aftermarket',
+    accesory: 'accessory', acessory: 'accessory', accesories: 'accessories',
+    maintanance: 'maintenance', maintenace: 'maintenance', maintainance: 'maintenance',
+    disel: 'diesel', diesle: 'diesel',
+    petrl: 'petrol', petrel: 'petrol',
+    hybrd: 'hybrid', hibrid: 'hybrid',
+    elctric: 'electric', electrc: 'electric',
+    cmpare: 'compare', compre: 'compare',
+    alternativ: 'alternative', alternatve: 'alternative',
+    equivelant: 'equivalent', equvalent: 'equivalent', equivalnt: 'equivalent',
+    interchageable: 'interchangeable', interchangable: 'interchangeable',
+    suuplier: 'supplier', suplier: 'supplier', suppliar: 'supplier',
+    distributer: 'distributor', distribtor: 'distributor',
+    wholsale: 'wholesale', wholesle: 'wholesale',
   };
   for (const [typo, fix] of Object.entries(typoMap)) {
     q = q.replace(new RegExp(`\\b${typo}\\b`, 'g'), fix);
@@ -314,32 +405,49 @@ function buildLocalParsedIntent(query) {
     fastDelivery: false,
     maxDeliveryDays: null,
     oem: false,
+    aftermarket: false,
     certifiedSupplier: false,
+    premiumQuality: false,
+    requireWarranty: false,
     requestedQuantity: null,
     topN: null,
     sortPreference: null,
     excludeBrands: [],
     excludeOrigins: [],
+    supplierOrigin: null,
+    compareMode: false,
+    findAlternatives: false,
+    vehicleYear: null,
+    vehicleYearMin: null,
+    vehicleYearMax: null,
+    condition: null,
+    minOrderValue: null,
+    maxWeight: null,
+    heavyDuty: false,
+    applicationType: null,
+    fuelType: null,
+    supplierType: null,
+    freeShipping: false,
     confidence: 'MEDIUM',
     suggestions: [],
   };
 
-  // ── Price extraction (CRITICAL - must be exact) ──
-  // "under $500" / "below 500" / "less than $500" / "max $500" / "cheaper than 500"
+  // ── Price extraction (comprehensive B2B patterns) ──
+  // "under $500" / "below 500" / "less than $500" / "max $500" / "cheaper than 500" / "not more than $500"
   const maxPriceMatch = q.match(
-    /(?:under|below|less\s+than|max|cheaper\s+than|up\s+to|no\s+more\s+than|budget|within)\s*\$?\s*(\d+(?:,\d{3})*(?:\.\d{1,2})?)/,
+    /(?:under|below|less\s+than|max|cheaper\s+than|up\s+to|no\s+more\s+than|budget|within|not\s+(?:more|over)\s+than|limit|ceiling|cap)\s*\$?\s*(\d+(?:,\d{3})*(?:\.\d{1,2})?)/,
   );
   if (maxPriceMatch)
     result.maxPrice = parseFloat(maxPriceMatch[1].replace(/,/g, ''));
 
   // "over $100" / "above 100" / "more than $100" / "min $100" / "at least $100"
   const minPriceMatch = q.match(
-    /(?:over|above|more\s+than|min|at\s+least|starting\s+from|from)\s*\$?\s*(\d+(?:,\d{3})*(?:\.\d{1,2})?)/,
+    /(?:over|above|more\s+than|min|at\s+least|starting\s+from|from|no\s+less\s+than|floor|minimum)\s*\$?\s*(\d+(?:,\d{3})*(?:\.\d{1,2})?)/,
   );
   if (minPriceMatch)
     result.minPrice = parseFloat(minPriceMatch[1].replace(/,/g, ''));
 
-  // "$100-$500" / "between $100 and $500"
+  // "$100-$500" / "between $100 and $500" / "$100 to $500"
   const rangeMatch = q.match(
     /\$?\s*(\d+(?:,\d{3})*)\s*[-–to]+\s*\$?\s*(\d+(?:,\d{3})*)/,
   );
@@ -348,102 +456,157 @@ function buildLocalParsedIntent(query) {
     result.maxPrice = parseFloat(rangeMatch[2].replace(/,/g, ''));
   }
 
+  // "between X and Y" pattern
+  const betweenMatch = q.match(
+    /between\s*\$?\s*(\d+(?:,\d{3})*)\s+and\s+\$?\s*(\d+(?:,\d{3})*)/,
+  );
+  if (betweenMatch && !result.minPrice && !result.maxPrice) {
+    result.minPrice = parseFloat(betweenMatch[1].replace(/,/g, ''));
+    result.maxPrice = parseFloat(betweenMatch[2].replace(/,/g, ''));
+  }
+
+  // "around $50" / "about $50" / "approximately $50" (±30% range)
+  const approxPriceMatch = q.match(
+    /(?:around|about|approximately|roughly|circa|~)\s*\$?\s*(\d+(?:,\d{3})*(?:\.\d{1,2})?)/,
+  );
+  if (approxPriceMatch && !result.minPrice && !result.maxPrice) {
+    const price = parseFloat(approxPriceMatch[1].replace(/,/g, ''));
+    result.minPrice = Math.round(price * 0.7);
+    result.maxPrice = Math.round(price * 1.3);
+  }
+
   // "cheap" / "budget" / "affordable"
   if (
-    /\b(cheap|budget|affordable|economical|inexpensive)\b/.test(q) &&
+    /\b(cheap|budget|affordable|economical|inexpensive|low[\s-]*cost|bargain|discount)\b/.test(q) &&
     !result.maxPrice
   ) {
     result.maxPrice = 100;
+    if (!result.sortPreference) result.sortPreference = 'price_asc';
   }
   // "expensive" / "premium" / "high-end"
   if (
-    /\b(expensive|premium|high[\s-]?end|luxury)\b/.test(q) &&
+    /\b(expensive|premium|high[\s-]?end|luxury|top[\s-]*tier|flagship)\b/.test(q) &&
     !result.minPrice
   ) {
     result.minPrice = 500;
   }
 
-  // Currency detection
-  if (/\b(aed|dirham|dhs)\b/.test(q)) result.priceCurrency = 'AED';
-  else if (/\b(eur|euro|€)\b/.test(q)) result.priceCurrency = 'EUR';
-  else if (/\b(gbp|pound|£)\b/.test(q)) result.priceCurrency = 'GBP';
+  // "free shipping" / "no shipping cost"
+  if (/\b(free\s+shipping|no\s+shipping\s+cost|shipping\s+included|delivery\s+included)\b/.test(q))
+    result.freeShipping = true;
 
-  // ── Vehicle brands vs parts brands ──
+  // Currency detection (comprehensive)
+  if (/\b(aed|dirham|dhs|drhm)\b/.test(q)) result.priceCurrency = 'AED';
+  else if (/\b(eur|euro|€)\b/.test(q)) result.priceCurrency = 'EUR';
+  else if (/\b(gbp|pound|£|sterling)\b/.test(q)) result.priceCurrency = 'GBP';
+  else if (/\b(sar|riyal|sr)\b/.test(q)) result.priceCurrency = 'SAR';
+  else if (/\b(kwd|kuwaiti\s+dinar)\b/.test(q)) result.priceCurrency = 'KWD';
+  else if (/\b(qar|qatari\s+riyal)\b/.test(q)) result.priceCurrency = 'QAR';
+  else if (/\b(bhd|bahraini\s+dinar)\b/.test(q)) result.priceCurrency = 'BHD';
+  else if (/\b(omr|omani\s+riyal)\b/.test(q)) result.priceCurrency = 'OMR';
+  else if (/\b(egp|egyptian\s+pound)\b/.test(q)) result.priceCurrency = 'EGP';
+  else if (/\b(inr|rupee|₹)\b/.test(q)) result.priceCurrency = 'INR';
+  else if (/\b(jpy|yen|¥)\b/.test(q)) result.priceCurrency = 'JPY';
+  else if (/\b(cny|yuan|rmb)\b/.test(q)) result.priceCurrency = 'CNY';
+  else if (/\b(aud|australian\s+dollar)\b/.test(q)) result.priceCurrency = 'AUD';
+  else if (/\b(cad|canadian\s+dollar)\b/.test(q)) result.priceCurrency = 'CAD';
+  else if (/\b(try|turkish\s+lira|tl)\b/.test(q)) result.priceCurrency = 'TRY';
+
+  // ── Vehicle brands vs parts brands (comprehensive global coverage) ──
   const vehicleBrandMap = {
-    toyota: 'TOYOTA',
-    honda: 'HONDA',
-    nissan: 'NISSAN',
-    bmw: 'BMW',
-    mercedes: 'MERCEDES-BENZ',
-    audi: 'AUDI',
-    volkswagen: 'VOLKSWAGEN',
-    ford: 'FORD',
-    chevrolet: 'CHEVROLET',
-    hyundai: 'HYUNDAI',
-    kia: 'KIA',
-    mazda: 'MAZDA',
-    subaru: 'SUBARU',
-    lexus: 'LEXUS',
-    porsche: 'PORSCHE',
-    volvo: 'VOLVO',
-    jeep: 'JEEP',
-    dodge: 'DODGE',
-    mitsubishi: 'MITSUBISHI',
-    suzuki: 'SUZUKI',
-    isuzu: 'ISUZU',
-    infiniti: 'INFINITI',
-    acura: 'ACURA',
-    jaguar: 'JAGUAR',
-    'land rover': 'LAND ROVER',
-    tesla: 'TESLA',
-    peugeot: 'PEUGEOT',
-    renault: 'RENAULT',
-    fiat: 'FIAT',
-    'alfa romeo': 'ALFA ROMEO',
+    // Japanese
+    toyota: 'TOYOTA', honda: 'HONDA', nissan: 'NISSAN', mazda: 'MAZDA',
+    subaru: 'SUBARU', suzuki: 'SUZUKI', mitsubishi: 'MITSUBISHI',
+    lexus: 'LEXUS', infiniti: 'INFINITI', acura: 'ACURA', isuzu: 'ISUZU',
+    daihatsu: 'DAIHATSU', hino: 'HINO',
+    // German
+    bmw: 'BMW', mercedes: 'MERCEDES-BENZ', audi: 'AUDI', volkswagen: 'VOLKSWAGEN',
+    porsche: 'PORSCHE', opel: 'OPEL', 'mini cooper': 'MINI', mini: 'MINI',
+    // American
+    ford: 'FORD', chevrolet: 'CHEVROLET', dodge: 'DODGE', jeep: 'JEEP',
+    chrysler: 'CHRYSLER', gmc: 'GMC', cadillac: 'CADILLAC', lincoln: 'LINCOLN',
+    buick: 'BUICK', ram: 'RAM', tesla: 'TESLA',
+    // Korean
+    hyundai: 'HYUNDAI', kia: 'KIA', genesis: 'GENESIS', ssangyong: 'SSANGYONG',
+    // Swedish
+    volvo: 'VOLVO', saab: 'SAAB',
+    // British
+    jaguar: 'JAGUAR', 'land rover': 'LAND ROVER', 'range rover': 'LAND ROVER',
+    bentley: 'BENTLEY', 'rolls royce': 'ROLLS ROYCE', 'aston martin': 'ASTON MARTIN',
+    mclaren: 'MCLAREN', 'mg': 'MG',
+    // French
+    peugeot: 'PEUGEOT', renault: 'RENAULT', citroen: 'CITROEN', 'ds': 'DS',
+    // Italian
+    fiat: 'FIAT', 'alfa romeo': 'ALFA ROMEO', maserati: 'MASERATI',
+    ferrari: 'FERRARI', lamborghini: 'LAMBORGHINI', lancia: 'LANCIA',
+    // Chinese
+    geely: 'GEELY', chery: 'CHERY', byd: 'BYD', haval: 'HAVAL',
+    'great wall': 'GREAT WALL', changan: 'CHANGAN', mg: 'MG',
+    // Indian
+    tata: 'TATA', mahindra: 'MAHINDRA', maruti: 'MARUTI',
+    // Other
+    seat: 'SEAT', skoda: 'SKODA', dacia: 'DACIA',
+    proton: 'PROTON', perodua: 'PERODUA',
   };
 
   const partsBrandMap = {
-    bosch: 'BOSCH',
-    skf: 'SKF',
-    denso: 'DENSO',
-    valeo: 'VALEO',
-    brembo: 'BREMBO',
-    gates: 'GATES',
-    continental: 'CONTINENTAL',
-    mann: 'MANN',
-    mahle: 'MAHLE',
-    sachs: 'SACHS',
-    bilstein: 'BILSTEIN',
-    kyb: 'KYB',
-    monroe: 'MONROE',
-    acdelco: 'ACDELCO',
-    mopar: 'MOPAR',
-    ngk: 'NGK',
-    delphi: 'DELPHI',
-    aisin: 'AISIN',
-    luk: 'LUK',
-    trw: 'TRW',
-    ate: 'ATE',
-    ferodo: 'FERODO',
-    hella: 'HELLA',
-    febi: 'FEBI',
-    lemforder: 'LEMFORDER',
-    meyle: 'MEYLE',
-    swag: 'SWAG',
-    timken: 'TIMKEN',
-    nsk: 'NSK',
-    ntn: 'NTN',
-    fag: 'FAG',
-    motorcraft: 'MOTORCRAFT',
-    osram: 'OSRAM',
-    philips: 'PHILIPS',
-    moog: 'MOOG',
-    dayco: 'DAYCO',
-    walker: 'WALKER',
-    wix: 'WIX',
-    champion: 'CHAMPION',
-    exedy: 'EXEDY',
-    ina: 'INA',
+    // Major global parts manufacturers
+    bosch: 'BOSCH', skf: 'SKF', denso: 'DENSO', valeo: 'VALEO',
+    brembo: 'BREMBO', gates: 'GATES', continental: 'CONTINENTAL',
+    mann: 'MANN', mahle: 'MAHLE', sachs: 'SACHS',
+    bilstein: 'BILSTEIN', kyb: 'KYB', monroe: 'MONROE',
+    acdelco: 'ACDELCO', mopar: 'MOPAR', ngk: 'NGK',
+    delphi: 'DELPHI', aisin: 'AISIN', luk: 'LUK',
+    trw: 'TRW', ate: 'ATE', ferodo: 'FERODO',
+    hella: 'HELLA', febi: 'FEBI', lemforder: 'LEMFORDER',
+    meyle: 'MEYLE', swag: 'SWAG', timken: 'TIMKEN',
+    nsk: 'NSK', ntn: 'NTN', fag: 'FAG',
+    motorcraft: 'MOTORCRAFT', osram: 'OSRAM', philips: 'PHILIPS',
+    moog: 'MOOG', dayco: 'DAYCO', walker: 'WALKER',
+    wix: 'WIX', champion: 'CHAMPION', exedy: 'EXEDY', ina: 'INA',
+    // Additional important brands
+    vernet: 'VERNET', beru: 'BERU', pierburg: 'PIERBURG',
+    hengst: 'HENGST', knecht: 'KNECHT', purflux: 'PURFLUX',
+    'mann-filter': 'MANN-FILTER', 'k&n': 'K&N', behr: 'BEHR',
+    nissens: 'NISSENS', nrf: 'NRF', gkn: 'GKN',
+    skf: 'SKF', snr: 'SNR', koyo: 'KOYO',
+    borg: 'BORGWARNER', borgwarner: 'BORGWARNER',
+    garrett: 'GARRETT', holset: 'HOLSET',
+    sachs: 'SACHS', zf: 'ZF',
+    corteco: 'CORTECO', elring: 'ELRING', victor: 'VICTOR REINZ',
+    reinz: 'VICTOR REINZ', 'victor reinz': 'VICTOR REINZ',
+    goetze: 'GOETZE', kolbenschmidt: 'KOLBENSCHMIDT',
+    glyco: 'GLYCO', clevite: 'CLEVITE',
+    textar: 'TEXTAR', jurid: 'JURID', pagid: 'PAGID',
+    mintex: 'MINTEX', ebc: 'EBC', hawk: 'HAWK',
+    kayaba: 'KYB', tokico: 'TOKICO', koni: 'KONI',
+    eibach: 'EIBACH', 'h&r': 'H&R',
+    ngk: 'NGK', 'champion': 'CHAMPION', 'denso': 'DENSO',
+    optibelt: 'OPTIBELT', contitech: 'CONTITECH',
+    delphi: 'DELPHI', lucas: 'LUCAS',
+    schaeffler: 'SCHAEFFLER', fte: 'FTE',
+    'blue print': 'BLUE PRINT', blueprint: 'BLUE PRINT',
+    japanparts: 'JAPANPARTS', herth: 'HERTH+BUSS',
+    'herth buss': 'HERTH+BUSS', 'herth+buss': 'HERTH+BUSS',
+    siemens: 'SIEMENS', hitachi: 'HITACHI', mitsubishi: 'MITSUBISHI ELECTRIC',
+    marelli: 'MAGNETI MARELLI', 'magneti marelli': 'MAGNETI MARELLI',
+    remy: 'REMY', iskra: 'ISKRA',
+    bosal: 'BOSAL', ernst: 'ERNST', klarius: 'KLARIUS',
+    dorman: 'DORMAN', cardone: 'CARDONE', standard: 'STANDARD MOTOR',
+    beck: 'BECK/ARNLEY', 'beck arnley': 'BECK/ARNLEY',
+    'et engineteam': 'ET ENGINETEAM', engineteam: 'ET ENGINETEAM',
+    facet: 'FACET', fae: 'FAE',
+    sasic: 'SASIC', snr: 'SNR',
+    ruville: 'RUVILLE', optimal: 'OPTIMAL',
+    nipparts: 'NIPPARTS', ashika: 'ASHIKA',
+    fenox: 'FENOX', kraft: 'KRAFT',
+    febest: 'FEBEST', masuma: 'MASUMA',
+    gmb: 'GMB', taiho: 'TAIHO',
+    // Tire brands (buyers sometimes search)
+    michelin: 'MICHELIN', bridgestone: 'BRIDGESTONE', goodyear: 'GOODYEAR',
+    pirelli: 'PIRELLI', continental: 'CONTINENTAL', dunlop: 'DUNLOP',
+    hankook: 'HANKOOK', yokohama: 'YOKOHAMA', toyo: 'TOYO',
+    kumho: 'KUMHO', falken: 'FALKEN',
   };
 
   // Check vehicle brands
@@ -461,87 +624,196 @@ function buildLocalParsedIntent(query) {
     }
   }
 
-  // ── Categories ──
+  // ── Categories (comprehensive automotive parts taxonomy) ──
   const categoryMap = {
-    'brake pad': 'brake',
-    'brake disc': 'brake',
-    'brake rotor': 'brake',
-    'brake caliper': 'brake',
-    'brake fluid': 'brake',
-    'brake hose': 'brake',
-    'brake drum': 'brake',
-    'brake shoe': 'brake',
-    'brake line': 'brake',
-    'brake light': 'brake',
-    brake: 'brake',
-    braking: 'brake',
-    'oil filter': 'filter',
-    'air filter': 'filter',
-    'fuel filter': 'filter',
-    'cabin filter': 'filter',
-    filter: 'filter',
-    'engine mount': 'engine',
-    'engine oil': 'engine',
-    engine: 'engine',
-    suspension: 'suspension',
-    'shock absorber': 'suspension',
-    strut: 'suspension',
-    spring: 'suspension',
-    'control arm': 'suspension',
-    bearing: 'bearing',
-    'wheel bearing': 'bearing',
-    'hub bearing': 'bearing',
-    clutch: 'clutch',
-    'clutch kit': 'clutch',
-    'clutch plate': 'clutch',
-    steering: 'steering',
-    'power steering': 'steering',
-    'steering rack': 'steering',
-    exhaust: 'exhaust',
-    muffler: 'exhaust',
-    catalytic: 'exhaust',
-    alternator: 'electrical',
-    starter: 'electrical',
-    battery: 'electrical',
-    'spark plug': 'electrical',
-    ignition: 'electrical',
-    coil: 'electrical',
-    radiator: 'cooling',
-    thermostat: 'cooling',
-    'water pump': 'cooling',
-    coolant: 'cooling',
-    fan: 'cooling',
-    transmission: 'transmission',
-    gearbox: 'transmission',
-    'timing belt': 'belt',
-    'serpentine belt': 'belt',
+    // BRAKES
+    'brake pad': 'brake', 'brake pads': 'brake', 'brake disc': 'brake',
+    'brake rotor': 'brake', 'brake caliper': 'brake', 'brake fluid': 'brake',
+    'brake hose': 'brake', 'brake drum': 'brake', 'brake shoe': 'brake',
+    'brake line': 'brake', 'brake light': 'brake', 'brake sensor': 'brake',
+    'brake master cylinder': 'brake', 'brake booster': 'brake',
+    'brake kit': 'brake', 'abs ring': 'brake', 'abs sensor': 'brake',
+    'parking brake': 'brake', 'handbrake': 'brake', 'brake wear indicator': 'brake',
+    brake: 'brake', braking: 'brake', brakes: 'brake',
+
+    // FILTERS
+    'oil filter': 'filter', 'air filter': 'filter', 'fuel filter': 'filter',
+    'cabin filter': 'filter', 'pollen filter': 'filter', 'hydraulic filter': 'filter',
+    'transmission filter': 'filter', 'particle filter': 'filter', 'dpf': 'filter',
+    'diesel particulate filter': 'filter', 'egr filter': 'filter',
+    filter: 'filter', filters: 'filter', filtration: 'filter',
+
+    // ENGINE
+    'engine mount': 'engine', 'engine oil': 'engine', 'motor oil': 'engine',
+    'engine block': 'engine', 'cylinder head': 'engine', 'crankshaft': 'engine',
+    'camshaft': 'engine', 'connecting rod': 'engine', 'piston ring': 'engine',
+    'piston': 'engine', 'valve cover': 'engine', 'oil pan': 'engine',
+    'oil pump': 'engine', 'oil cooler': 'engine', 'engine bearing': 'engine',
+    'rocker arm': 'engine', 'lifter': 'engine', 'tappet': 'engine',
+    'timing chain': 'engine', 'timing cover': 'engine', 'flywheel': 'engine',
+    'engine sensor': 'engine', 'knock sensor': 'engine', 'crank sensor': 'engine',
+    'cam sensor': 'engine', 'oil pressure sensor': 'engine',
+    engine: 'engine', motor: 'engine',
+
+    // SUSPENSION & STEERING
+    suspension: 'suspension', 'shock absorber': 'suspension', 'shock': 'suspension',
+    strut: 'suspension', spring: 'suspension', 'coil spring': 'suspension',
+    'leaf spring': 'suspension', 'control arm': 'suspension', 'ball joint': 'suspension',
+    'tie rod': 'suspension', 'tie rod end': 'suspension', 'sway bar': 'suspension',
+    'stabilizer bar': 'suspension', 'stabilizer link': 'suspension',
+    'anti roll bar': 'suspension', 'strut mount': 'suspension',
+    'top mount': 'suspension', 'bump stop': 'suspension', 'dust boot': 'suspension',
+    'bush': 'suspension', 'bushing': 'suspension', 'rubber bush': 'suspension',
+    'wishbone': 'suspension', 'trailing arm': 'suspension', 'torsion bar': 'suspension',
+    'air spring': 'suspension', 'air suspension': 'suspension',
+    steering: 'steering', 'power steering': 'steering', 'steering rack': 'steering',
+    'steering pump': 'steering', 'steering column': 'steering',
+    'steering knuckle': 'steering', 'steering link': 'steering',
+    'drag link': 'steering', 'pitman arm': 'steering', 'idler arm': 'steering',
+    'steering box': 'steering', 'rack end': 'steering',
+
+    // BEARINGS
+    bearing: 'bearing', bearings: 'bearing', 'wheel bearing': 'bearing',
+    'hub bearing': 'bearing', 'wheel hub': 'bearing', 'hub assembly': 'bearing',
+    'tapered bearing': 'bearing', 'roller bearing': 'bearing',
+    'thrust bearing': 'bearing', 'pilot bearing': 'bearing',
+    'release bearing': 'bearing', 'clutch bearing': 'bearing',
+
+    // CLUTCH & TRANSMISSION
+    clutch: 'clutch', 'clutch kit': 'clutch', 'clutch plate': 'clutch',
+    'clutch disc': 'clutch', 'pressure plate': 'clutch', 'clutch cover': 'clutch',
+    'clutch master cylinder': 'clutch', 'clutch slave cylinder': 'clutch',
+    'flywheel': 'clutch', 'dual mass flywheel': 'clutch', 'dmf': 'clutch',
+    'clutch cable': 'clutch', 'concentric slave': 'clutch',
+    transmission: 'transmission', gearbox: 'transmission',
+    'automatic transmission': 'transmission', 'manual transmission': 'transmission',
+    'cvt': 'transmission', 'transfer case': 'transmission',
+    'shift cable': 'transmission', 'gear selector': 'transmission',
+    'torque converter': 'transmission', 'transmission mount': 'transmission',
+
+    // EXHAUST
+    exhaust: 'exhaust', muffler: 'exhaust', 'silencer': 'exhaust',
+    catalytic: 'exhaust', 'catalytic converter': 'exhaust', 'cat converter': 'exhaust',
+    'exhaust pipe': 'exhaust', 'exhaust manifold': 'exhaust',
+    'downpipe': 'exhaust', 'flex pipe': 'exhaust', 'resonator': 'exhaust',
+    'exhaust gasket': 'exhaust', 'exhaust clamp': 'exhaust',
+    'lambda sensor': 'exhaust', 'oxygen sensor': 'exhaust', 'o2 sensor': 'exhaust',
+    'egr valve': 'exhaust', 'dpf': 'exhaust',
+
+    // ELECTRICAL
+    alternator: 'electrical', starter: 'electrical', 'starter motor': 'electrical',
+    battery: 'electrical', 'spark plug': 'electrical', 'glow plug': 'electrical',
+    ignition: 'electrical', 'ignition coil': 'electrical', 'coil pack': 'electrical',
+    coil: 'electrical', 'ignition switch': 'electrical', 'ignition lock': 'electrical',
+    'window motor': 'electrical', 'window regulator': 'electrical',
+    'wiper motor': 'electrical', 'blower motor': 'electrical',
+    'horn': 'electrical', 'relay': 'electrical', 'fuse': 'electrical',
+    'fuse box': 'electrical', 'wiring harness': 'electrical',
+    'central locking': 'electrical', 'door lock': 'electrical',
+    'ecu': 'electrical', 'control unit': 'electrical', 'module': 'electrical',
+
+    // COOLING
+    radiator: 'cooling', thermostat: 'cooling', 'water pump': 'cooling',
+    coolant: 'cooling', 'cooling fan': 'cooling', 'fan clutch': 'cooling',
+    'radiator hose': 'cooling', 'expansion tank': 'cooling',
+    'coolant tank': 'cooling', 'overflow tank': 'cooling',
+    'heater core': 'cooling', 'heater matrix': 'cooling',
+    'coolant sensor': 'cooling', 'temperature sensor': 'cooling',
+    'intercooler': 'cooling', 'oil cooler': 'cooling',
+    'radiator cap': 'cooling', 'thermostat housing': 'cooling',
+    'water outlet': 'cooling', 'coolant pipe': 'cooling',
+
+    // BELTS & CHAINS
+    'timing belt': 'belt', 'serpentine belt': 'belt', 'drive belt': 'belt',
+    'v belt': 'belt', 'v-belt': 'belt', 'ribbed belt': 'belt',
+    'timing chain': 'belt', 'chain kit': 'belt', 'timing kit': 'belt',
+    'belt tensioner': 'belt', 'tensioner pulley': 'belt', 'idler pulley': 'belt',
+    'timing belt kit': 'belt', 'accessory belt': 'belt',
     belt: 'belt',
-    gasket: 'gasket',
-    'head gasket': 'gasket',
-    seal: 'seal',
-    sensor: 'sensor',
-    'oxygen sensor': 'sensor',
-    'abs sensor': 'sensor',
-    injector: 'fuel',
-    'fuel pump': 'fuel',
+
+    // GASKETS & SEALS
+    gasket: 'gasket', 'head gasket': 'gasket', 'valve cover gasket': 'gasket',
+    'intake manifold gasket': 'gasket', 'exhaust manifold gasket': 'gasket',
+    'oil pan gasket': 'gasket', 'sump gasket': 'gasket',
+    'gasket set': 'gasket', 'gasket kit': 'gasket',
+    seal: 'seal', 'oil seal': 'seal', 'crankshaft seal': 'seal',
+    'camshaft seal': 'seal', 'valve stem seal': 'seal',
+    'o-ring': 'seal', 'o ring': 'seal',
+
+    // SENSORS
+    sensor: 'sensor', sensors: 'sensor', 'speed sensor': 'sensor',
+    'wheel speed sensor': 'sensor', 'abs sensor': 'sensor',
+    'map sensor': 'sensor', 'maf sensor': 'sensor', 'mass air flow': 'sensor',
+    'throttle position sensor': 'sensor', 'tps': 'sensor',
+    'parking sensor': 'sensor', 'rain sensor': 'sensor',
+    'pressure sensor': 'sensor', 'boost sensor': 'sensor',
+
+    // FUEL SYSTEM
+    injector: 'fuel', 'fuel injector': 'fuel', 'fuel pump': 'fuel',
+    'fuel tank': 'fuel', 'fuel line': 'fuel', 'fuel rail': 'fuel',
+    'fuel pressure regulator': 'fuel', 'fuel sender': 'fuel',
+    'throttle body': 'fuel', 'carburetor': 'fuel',
     fuel: 'fuel',
-    wiper: 'wiper',
-    mirror: 'body',
-    bumper: 'body',
-    fender: 'body',
-    headlight: 'lighting',
-    'tail light': 'lighting',
+
+    // BODY & EXTERIOR
+    bumper: 'body', fender: 'body', 'wing mirror': 'body', mirror: 'body',
+    'door handle': 'body', 'window glass': 'body', 'windshield': 'body',
+    'windscreen': 'body', 'hood': 'body', 'bonnet': 'body',
+    'trunk lid': 'body', 'boot lid': 'body', 'tailgate': 'body',
+    'door panel': 'body', 'quarter panel': 'body', 'rocker panel': 'body',
+    'splash guard': 'body', 'mud flap': 'body', 'trim': 'body',
+    'grille': 'body', 'grill': 'body', 'emblem': 'body', 'badge': 'body',
+
+    // LIGHTING
+    headlight: 'lighting', 'head light': 'lighting', 'headlamp': 'lighting',
+    'tail light': 'lighting', 'taillight': 'lighting', 'rear light': 'lighting',
+    'fog light': 'lighting', 'fog lamp': 'lighting', 'bulb': 'lighting',
+    'led bulb': 'lighting', 'xenon bulb': 'lighting', 'hid bulb': 'lighting',
+    'turn signal': 'lighting', 'indicator': 'lighting', 'side marker': 'lighting',
+    'daytime running light': 'lighting', 'drl': 'lighting',
     lamp: 'lighting',
-    hub: 'hub',
-    axle: 'axle',
-    'cv joint': 'axle',
-    driveshaft: 'axle',
-    pump: 'pump',
-    valve: 'valve',
-    piston: 'engine',
-    turbo: 'turbo',
-    turbocharger: 'turbo',
-    supercharger: 'turbo',
+
+    // WHEELS & TIRES
+    tire: 'wheels', tyre: 'wheels', wheel: 'wheels', 'wheel nut': 'wheels',
+    'wheel bolt': 'wheels', 'wheel stud': 'wheels', 'lug nut': 'wheels',
+    rim: 'wheels', 'alloy wheel': 'wheels', 'hub cap': 'wheels',
+    'wheel spacer': 'wheels', 'wheel adapter': 'wheels',
+    'tire pressure sensor': 'wheels', 'tpms': 'wheels',
+
+    // TURBO
+    turbo: 'turbo', turbocharger: 'turbo', supercharger: 'turbo',
+    'turbo actuator': 'turbo', 'turbo cartridge': 'turbo',
+    'wastegate': 'turbo', 'blow off valve': 'turbo', 'bov': 'turbo',
+    'boost controller': 'turbo', 'intercooler': 'turbo',
+
+    // AXLE & DRIVETRAIN
+    hub: 'hub', axle: 'axle', 'cv joint': 'axle', 'cv boot': 'axle',
+    driveshaft: 'axle', 'drive shaft': 'axle', 'prop shaft': 'axle',
+    'propeller shaft': 'axle', 'universal joint': 'axle', 'u joint': 'axle',
+    'differential': 'axle', 'diff': 'axle', 'half shaft': 'axle',
+
+    // PUMPS & VALVES
+    pump: 'pump', 'vacuum pump': 'pump', 'power steering pump': 'pump',
+    'brake vacuum pump': 'pump', 'windshield washer pump': 'pump',
+    valve: 'valve', 'egr valve': 'valve', 'pcv valve': 'valve',
+    'solenoid valve': 'valve', 'check valve': 'valve',
+    'idle control valve': 'valve', 'iac valve': 'valve',
+
+    // WIPERS
+    wiper: 'wiper', 'wiper blade': 'wiper', 'wiper arm': 'wiper',
+    'wiper linkage': 'wiper', 'washer jet': 'wiper', 'washer pump': 'wiper',
+
+    // AC / HVAC
+    'ac compressor': 'ac', 'air conditioning': 'ac', 'a/c': 'ac',
+    'condenser': 'ac', 'evaporator': 'ac', 'receiver drier': 'ac',
+    'expansion valve': 'ac', 'cabin air filter': 'ac', 'blower': 'ac',
+    'heater valve': 'ac', 'ac hose': 'ac', 'refrigerant': 'ac',
+
+    // INTERIOR
+    'seat cover': 'interior', 'floor mat': 'interior', 'dashboard': 'interior',
+    'steering wheel': 'interior', 'gear knob': 'interior', 'shift knob': 'interior',
+    'pedal': 'interior', 'pedal pad': 'interior', 'door seal': 'interior',
+    'window switch': 'interior', 'clock spring': 'interior',
   };
 
   const sortedCategoryKeys = Object.keys(categoryMap).sort(
@@ -557,95 +829,53 @@ function buildLocalParsedIntent(query) {
 
   // ── Search keywords (for description matching) ──
   const stopWords = new Set([
-    'find',
-    'me',
-    'show',
-    'get',
-    'looking',
-    'for',
-    'need',
-    'want',
-    'the',
-    'a',
-    'an',
-    'some',
-    'with',
-    'from',
-    'i',
-    'am',
-    'please',
-    'can',
-    'you',
-    'under',
-    'below',
-    'above',
-    'over',
-    'price',
-    'priced',
-    'less',
-    'more',
-    'than',
-    'and',
-    'or',
-    'not',
-    'no',
-    'up',
-    'to',
-    'at',
-    'least',
-    'most',
-    'around',
-    'about',
-    'in',
-    'of',
-    'search',
-    'parts',
-    'part',
-    'suppliers',
-    'supplier',
-    'verified',
-    'certified',
-    'available',
-    'stock',
-    'delivery',
-    'fast',
-    'quick',
-    'express',
-    'cheap',
-    'budget',
-    'best',
-    'good',
-    'high',
-    'quality',
-    'premium',
-    'professional',
-    'all',
-    'any',
-    'this',
-    'that',
-    'these',
-    'those',
-    'get',
-    'give',
-    'show',
-    'find',
-    'me',
-    'my',
-    'the',
-    'with',
-    'from',
-    'need',
-    'want',
-    'looking',
-    'please',
-    'can',
-    'you',
-    'options',
-    'option',
-    'results',
-    'result',
-    'choices',
-    'choice',
+    // ── Basic determiners & pronouns ──
+    'find', 'me', 'show', 'get', 'give', 'looking', 'for', 'need', 'want',
+    'the', 'a', 'an', 'some', 'with', 'from', 'i', 'am', 'please', 'can',
+    'you', 'my', 'we', 'our', 'us', 'it', 'is', 'are', 'was', 'were',
+    'be', 'been', 'being', 'has', 'have', 'had', 'do', 'does', 'did',
+    'will', 'would', 'could', 'should', 'shall', 'may', 'might',
+    'this', 'that', 'these', 'those', 'all', 'any', 'each', 'every',
+    // ── Prepositions & conjunctions ──
+    'under', 'below', 'above', 'over', 'less', 'more', 'than', 'and',
+    'or', 'not', 'no', 'up', 'to', 'at', 'least', 'most', 'around',
+    'about', 'in', 'of', 'on', 'by', 'as', 'into', 'between', 'within',
+    // ── Price/commerce words ──
+    'price', 'priced', 'pricing', 'cost', 'costing', 'costs', 'dollar',
+    'dollars', 'usd', 'cheap', 'budget', 'affordable', 'expensive',
+    'economical', 'inexpensive', 'bargain', 'discount',
+    // ── Marketplace/search words ──
+    'search', 'parts', 'part', 'suppliers', 'supplier', 'verified',
+    'certified', 'available', 'availability', 'stock', 'stocked',
+    'delivery', 'fast', 'quick', 'express', 'urgent', 'rush', 'asap',
+    'immediate', 'priority', 'speedy', 'rapid',
+    // ── Quality/brand words ──
+    'best', 'good', 'high', 'quality', 'premium', 'professional',
+    'genuine', 'original', 'oem', 'aftermarket',
+    // ── Sort/order/compare words ──
+    'sort', 'order', 'rank', 'prioritize', 'prefer', 'arrange',
+    'compare', 'comparison', 'versus', 'vs',
+    'alternative', 'alternatives', 'equivalent', 'equivalents',
+    'substitute', 'substitutes', 'replacement',
+    // ── Quantity/bulk words ──
+    'wholesale', 'bulk', 'retail', 'units', 'pieces', 'pcs', 'qty',
+    'quantity', 'minimum', 'maximum',
+    // ── Display/result words ──
+    'options', 'option', 'results', 'result', 'choices', 'choice',
+    'list', 'display', 'recommend', 'recommendation', 'suggest',
+    'suggestion', 'first', 'limit', 'only',
+    // ── Condition/spec words ──
+    'new', 'used', 'refurbished', 'remanufactured', 'condition',
+    'warranty', 'guaranteed',
+    // ── Vehicle context words ──
+    'car', 'vehicle', 'auto', 'automobile', 'automotive', 'truck',
+    'suv', 'van', 'sedan', 'coupe', 'hatchback', 'pickup',
+    'model', 'year', 'make', 'type', 'fit', 'fits', 'compatible',
+    // ── Misc ──
+    'based', 'top', 'bottom', 'here', 'there', 'where', 'how',
+    'what', 'which', 'who', 'when', 'why', 'just', 'also', 'too',
+    'very', 'really', 'much', 'many', 'few', 'several',
+    'such', 'like', 'same', 'other', 'another',
   ]);
 
   const words = q
@@ -662,31 +892,100 @@ function buildLocalParsedIntent(query) {
 
   // Also expand categories to related keywords
   const categoryKeywordMap = {
-    brake: [
-      'brake',
-      'brakes',
-      'braking',
-      'brake pad',
-      'brake disc',
-      'brake fluid',
-      'brake drum',
-      'brake shoe',
-    ],
-    filter: ['filter', 'filters', 'filtration'],
-    engine: ['engine', 'motor'],
-    bearing: ['bearing', 'bearings'],
-    suspension: ['suspension', 'shock', 'strut', 'spring'],
-    steering: ['steering', 'steer'],
-    cooling: ['cooling', 'coolant', 'radiator', 'thermostat'],
-    electrical: ['electrical', 'electric', 'alternator', 'starter', 'battery'],
-    clutch: ['clutch'],
-    exhaust: ['exhaust', 'muffler', 'catalytic'],
-    transmission: ['transmission', 'gearbox'],
-    belt: ['belt', 'timing', 'serpentine'],
-    fuel: ['fuel', 'injector'],
-    sensor: ['sensor', 'sensors'],
-    seal: ['seal', 'sealing', 'o-ring'],
-    gasket: ['gasket', 'gaskets'],
+    brake: ['brake', 'brakes', 'braking', 'brake pad', 'brake disc', 'brake rotor',
+      'brake fluid', 'brake drum', 'brake shoe', 'brake caliper', 'brake hose',
+      'brake line', 'abs', 'handbrake', 'parking brake', 'master cylinder'],
+    filter: ['filter', 'filters', 'filtration', 'air filter', 'oil filter',
+      'fuel filter', 'cabin filter', 'pollen filter', 'transmission filter',
+      'hydraulic filter', 'particle filter', 'dpf'],
+    engine: ['engine', 'motor', 'piston', 'cylinder', 'crankshaft', 'camshaft',
+      'connecting rod', 'valve cover', 'engine block', 'head gasket',
+      'timing cover', 'oil pan', 'flywheel', 'lifter', 'rocker arm'],
+    bearing: ['bearing', 'bearings', 'wheel bearing', 'hub bearing',
+      'crankshaft bearing', 'camshaft bearing', 'pilot bearing', 'thrust bearing'],
+    suspension: ['suspension', 'shock', 'strut', 'spring', 'coil spring',
+      'leaf spring', 'shock absorber', 'damper', 'air suspension',
+      'control arm', 'wishbone', 'sway bar', 'stabilizer', 'bushing',
+      'ball joint', 'trailing arm', 'subframe'],
+    steering: ['steering', 'steer', 'power steering', 'steering rack',
+      'steering pump', 'tie rod', 'tie rod end', 'drag link',
+      'steering column', 'steering gear', 'idler arm', 'pitman arm'],
+    cooling: ['cooling', 'coolant', 'radiator', 'thermostat', 'water pump',
+      'coolant hose', 'expansion tank', 'fan', 'cooling fan', 'intercooler',
+      'heater core', 'radiator cap', 'overflow tank', 'antifreeze'],
+    electrical: ['electrical', 'electric', 'alternator', 'starter', 'battery',
+      'ignition', 'spark plug', 'ignition coil', 'glow plug',
+      'wiring', 'fuse', 'relay', 'switch', 'solenoid', 'voltage regulator',
+      'distributor', 'cdi', 'ecu', 'control module'],
+    clutch: ['clutch', 'clutch kit', 'clutch disc', 'clutch plate',
+      'pressure plate', 'release bearing', 'throwout bearing',
+      'clutch master cylinder', 'slave cylinder', 'flywheel', 'dual mass flywheel'],
+    exhaust: ['exhaust', 'muffler', 'catalytic', 'catalytic converter',
+      'exhaust pipe', 'exhaust manifold', 'downpipe', 'resonator',
+      'exhaust gasket', 'flex pipe', 'silencer', 'tailpipe',
+      'lambda', 'oxygen sensor', 'egr', 'dpf', 'particulate filter'],
+    transmission: ['transmission', 'gearbox', 'gear', 'shift', 'torque converter',
+      'transmission fluid', 'atf', 'differential', 'transfer case',
+      'cv joint', 'cv boot', 'driveshaft', 'propshaft', 'axle shaft'],
+    belt: ['belt', 'timing', 'serpentine', 'timing belt', 'timing chain',
+      'serpentine belt', 'drive belt', 'v-belt', 'ribbed belt',
+      'tensioner', 'idler pulley', 'belt kit', 'timing kit'],
+    fuel: ['fuel', 'injector', 'fuel pump', 'fuel injector', 'fuel line',
+      'fuel rail', 'fuel tank', 'carburetor', 'throttle body',
+      'fuel pressure regulator', 'fuel sender', 'fuel gauge'],
+    sensor: ['sensor', 'sensors', 'abs sensor', 'speed sensor',
+      'oxygen sensor', 'o2 sensor', 'temperature sensor', 'pressure sensor',
+      'map sensor', 'maf sensor', 'mass air flow', 'throttle position',
+      'crankshaft sensor', 'camshaft sensor', 'knock sensor', 'parking sensor'],
+    seal: ['seal', 'sealing', 'o-ring', 'oil seal', 'crankshaft seal',
+      'camshaft seal', 'valve stem seal', 'axle seal', 'hub seal',
+      'lip seal', 'mechanical seal', 'shaft seal'],
+    gasket: ['gasket', 'gaskets', 'head gasket', 'intake gasket',
+      'exhaust gasket', 'valve cover gasket', 'oil pan gasket',
+      'manifold gasket', 'thermostat gasket', 'water pump gasket',
+      'gasket set', 'gasket kit'],
+    ac: ['ac', 'air conditioning', 'a/c', 'hvac', 'compressor',
+      'condenser', 'evaporator', 'expansion valve', 'receiver drier',
+      'ac hose', 'blower motor', 'cabin blower', 'heater valve',
+      'climate control', 'refrigerant'],
+    interior: ['interior', 'seat', 'dashboard', 'dash', 'console',
+      'door panel', 'door handle', 'window regulator', 'window motor',
+      'mirror', 'sun visor', 'glove box', 'carpet', 'headliner',
+      'seat belt', 'airbag', 'steering wheel'],
+    body: ['body', 'bumper', 'fender', 'hood', 'bonnet', 'trunk', 'boot',
+      'door', 'quarter panel', 'rocker panel', 'grille', 'spoiler',
+      'side skirt', 'mud flap', 'splash guard', 'weatherstrip',
+      'windshield', 'windscreen', 'rear window', 'side window'],
+    lighting: ['light', 'lighting', 'headlight', 'headlamp', 'tail light',
+      'taillight', 'brake light', 'fog light', 'turn signal', 'indicator',
+      'led', 'xenon', 'hid', 'bulb', 'lamp', 'drl', 'daytime running',
+      'reverse light', 'interior light', 'dome light'],
+    wheel: ['wheel', 'wheels', 'rim', 'rims', 'tire', 'tyre', 'tires',
+      'tyres', 'wheel nut', 'lug nut', 'wheel bolt', 'wheel cap',
+      'center cap', 'hubcap', 'tpms', 'valve stem'],
+    hub: ['hub', 'hubs', 'wheel hub', 'hub assembly', 'hub bearing',
+      'hub cap', 'front hub', 'rear hub'],
+    axle: ['axle', 'axles', 'drive shaft', 'half shaft', 'cv axle',
+      'axle shaft', 'rear axle', 'front axle', 'axle nut', 'stub axle'],
+    wiper: ['wiper', 'wipers', 'wiper blade', 'wiper arm', 'wiper motor',
+      'wiper linkage', 'washer', 'washer pump', 'washer fluid',
+      'windshield wiper', 'rear wiper'],
+    turbo: ['turbo', 'turbocharger', 'supercharger', 'wastegate',
+      'boost controller', 'turbo hose', 'turbo gasket', 'turbo bearing',
+      'intercooler', 'charge pipe', 'blow off valve', 'bov', 'diverter valve'],
+    pump: ['pump', 'pumps', 'water pump', 'oil pump', 'fuel pump',
+      'power steering pump', 'vacuum pump', 'hydraulic pump',
+      'washer pump', 'coolant pump', 'transmission pump'],
+    valve: ['valve', 'valves', 'intake valve', 'exhaust valve',
+      'egr valve', 'pcv valve', 'check valve', 'solenoid valve',
+      'idle air control', 'iac', 'throttle valve', 'expansion valve',
+      'pressure relief valve'],
+    hose: ['hose', 'hoses', 'coolant hose', 'radiator hose', 'heater hose',
+      'turbo hose', 'brake hose', 'fuel hose', 'vacuum hose',
+      'power steering hose', 'ac hose', 'silicone hose'],
+    ignition: ['ignition', 'spark plug', 'ignition coil', 'coil pack',
+      'distributor', 'rotor', 'cap', 'ignition wire', 'plug wire',
+      'ht lead', 'glow plug', 'ignition switch', 'ignition lock'],
   };
 
   const expandedKeywords = new Set(words);
@@ -704,94 +1003,348 @@ function buildLocalParsedIntent(query) {
       /\d/.test(t) && /^[A-Za-z0-9][-A-Za-z0-9_]{3,}$/.test(t) && t.length >= 4,
   );
 
-  // ── Stock requirements ──
-  if (/\b(in\s*stock|available|have\s+it|ready)\b/.test(q))
+  // ── Stock requirements (comprehensive) ──
+  if (/\b(in\s*stock|available|have\s+it|ready|on\s+hand|in\s+warehouse|stocked)\b/.test(q))
     result.requireInStock = true;
   if (
-    /\b(full\s*stock|high\s*stock|plenty|lots|well\s*stocked|large\s*qty|bulk)\b/.test(
-      q,
-    )
+    /\b(full\s*stock|high\s*stock|plenty|lots|well\s*stocked|large\s*qty|bulk|big\s*quantity|massive\s*stock|good\s*stock|enough\s*stock|sufficient|abundant)\b/.test(q)
   ) {
     result.requireHighStock = true;
     result.requireInStock = true;
   }
+  // "availability" / "available" combined with "in stock" context
+  if (/\b(availability|avail)\b/.test(q)) {
+    result.requireInStock = true;
+  }
 
-  // ── Delivery ──
-  if (/\b(fast|express|quick|urgent|rush|asap|immediate)\b/.test(q))
+  // ── Delivery (comprehensive) ──
+  if (/\b(fast|express|quick|urgent|rush|asap|immediate|next\s*day|same\s*day|overnight|priority|speedy|rapid)\b/.test(q))
     result.fastDelivery = true;
-  const deliveryMatch = q.match(/within\s+(\d+)\s*days?/);
+  // "within X days" / "max X days delivery" / "deliver in X days" / "X day delivery"
+  const deliveryMatch = q.match(/(?:within|max|under|less\s+than|deliver(?:y|ed)?\s+in|in)\s+(\d+)\s*days?/);
   if (deliveryMatch) result.maxDeliveryDays = parseInt(deliveryMatch[1]);
+  // "3-day delivery" / "3 day shipping" / "2d delivery"
+  const deliveryMatch2 = q.match(/(\d+)\s*[-]?\s*days?\s*(?:delivery|shipping|ship)/);
+  if (deliveryMatch2 && !result.maxDeliveryDays) result.maxDeliveryDays = parseInt(deliveryMatch2[1]);
+  // "short lead time" / "quick turnaround"
+  if (/\b(short\s*lead\s*time|quick\s*turnaround|no\s*wait|ready\s*to\s*ship)\b/.test(q))
+    result.fastDelivery = true;
 
-  // ── OEM / Certified ──
-  if (/\b(oem|genuine|original)\b/.test(q)) result.oem = true;
-  if (/\b(certified|verified|trusted|authorized)\b/.test(q))
+  // ── OEM / Genuine / Aftermarket / Quality ──
+  if (/\b(oem|genuine|original|factory|authentic)\b/.test(q)) result.oem = true;
+  if (/\b(aftermarket|after\s*market|non[\s-]*oem|replacement|compatible|pattern)\b/.test(q))
+    result.aftermarket = true;
+  if (/\b(certified|verified|trusted|authorized|approved|accredited|iso)\b/.test(q))
     result.certifiedSupplier = true;
+  // Quality markers
+  if (/\b(premium|high[\s-]*quality|top[\s-]*quality|grade\s*a|first[\s-]*class|pro[\s-]*grade|professional)\b/.test(q))
+    result.premiumQuality = true;
+  // Warranty
+  if (/\b(warranty|warrantied|guaranteed|guarantee)\b/.test(q))
+    result.requireWarranty = true;
 
-  // ── Top N results ("best 3", "top 5", "show me 3 options", "get 3 for this") ──
+  // ── Top N results (comprehensive patterns) ──
   const topNMatch = q.match(
-    /(?:best|top|show(?:\s+me)?|get|find|give(?:\s+me)?)\s+(\d+)(?:\s+(?:options?|results?|suppliers?|choices?|for|of))?/,
+    /(?:best|top|show(?:\s+me)?|get|find|give(?:\s+me)?|list|display|compare|recommend)\s+(\d+)(?:\s+(?:options?|results?|suppliers?|choices?|for|of|parts?|items?|offers?|deals?|matches?|listings?))?/,
   );
   if (topNMatch) {
     const n = parseInt(topNMatch[1]);
-    if (n >= 2 && n <= 50) result.topN = n; // Only topN >= 2 ("best 1" = just sort by best)
+    if (n >= 2 && n <= 50) result.topN = n;
+  }
+  // "first 5" / "limit to 3" / "only show 5"
+  const topNMatch2 = q.match(
+    /(?:first|limit(?:\s+to)?|only\s+show|just\s+show|show\s+only)\s+(\d+)/,
+  );
+  if (topNMatch2 && !result.topN) {
+    const n = parseInt(topNMatch2[1]);
+    if (n >= 2 && n <= 50) result.topN = n;
   }
 
-  // ── Quantity (stock needed) ──
+  // ── Quantity (stock needed) — comprehensive ──
   const qtyMatch = q.match(
-    /(?:qty|quantity|need|order)\s*:?\s*(\d+)|x\s*(\d+)\b|(\d+)\s*(?:units?|pcs?|pieces?)/,
+    /(?:qty|quantity|need|order|want|require|minimum)\s*:?\s*(\d+)|x\s*(\d+)\b|(\d+)\s*(?:units?|pcs?|pieces?|items?|nos?|ea|each)/,
   );
   if (qtyMatch)
     result.requestedQuantity = parseInt(
       qtyMatch[1] || qtyMatch[2] || qtyMatch[3],
     );
+  // "bulk order" / "wholesale" 
+  if (/\b(bulk\s*order|wholesale|large\s*order|volume\s*order|bulk\s*buy|bulk\s*purchase)\b/.test(q)) {
+    if (!result.requestedQuantity) result.requestedQuantity = 100; // default bulk
+    result.requireHighStock = true;
+    result.requireInStock = true;
+  }
 
-  // ── Exclusions ──
+  // ── Exclusions (comprehensive) ──
   const excludeBrandMatch = q.match(
-    /(?:not|no|exclude|without|except)\s+(\w+)/g,
+    /(?:not|no|exclude|without|except|avoid|skip|don'?t\s+want|don'?t\s+include)\s+(\w+)/g,
   );
   if (excludeBrandMatch) {
     excludeBrandMatch.forEach((match) => {
       const brand = match
-        .replace(/^(not|no|exclude|without|except)\s+/i, '')
+        .replace(/^(not|no|exclude|without|except|avoid|skip|don'?t\s+want|don'?t\s+include)\s+/i, '')
         .trim();
       if (partsBrandMap[brand]) result.excludeBrands.push(partsBrandMap[brand]);
       if (vehicleBrandMap[brand])
         result.excludeBrands.push(vehicleBrandMap[brand]);
     });
   }
-  if (/\b(no|not|exclude|without)\s*(chinese|china)\b/.test(q))
+  // Origin exclusions
+  if (/\b(no|not|exclude|without|avoid)\s*(chinese|china|cn)\b/.test(q))
     result.excludeOrigins.push('CN');
-  if (/\b(no|not|exclude|without)\s*(indian|india)\b/.test(q))
+  if (/\b(no|not|exclude|without|avoid)\s*(indian|india|in)\b/.test(q))
     result.excludeOrigins.push('IN');
+  if (/\b(no|not|exclude|without|avoid)\s*(turkish|turkey|tr)\b/.test(q))
+    result.excludeOrigins.push('TR');
+  if (/\b(no|not|exclude|without|avoid)\s*(korean|korea|kr)\b/.test(q))
+    result.excludeOrigins.push('KR');
+  if (/\b(no|not|exclude|without|avoid)\s*(taiwanese|taiwan|tw)\b/.test(q))
+    result.excludeOrigins.push('TW');
+  // "only OEM" implies exclude aftermarket
+  if (/\bonly\s+oem\b/.test(q)) result.oem = true;
+  // "only aftermarket" implies exclude OEM
+  if (/\bonly\s+aftermarket\b/.test(q)) result.aftermarket = true;
 
-  // ── Origin preference ──
-  if (/\bgerman\b/.test(q)) result.certifiedSupplier = true; // German = quality
-  if (/\bjapanese\b/.test(q)) result.certifiedSupplier = true;
+  // ── Origin preference (comprehensive) ──
+  if (/\bgerman|germany|made\s+in\s+germany\b/.test(q)) {
+    result.supplierOrigin = 'DE';
+    result.certifiedSupplier = true;
+  }
+  if (/\bjapanese|japan|made\s+in\s+japan\b/.test(q)) {
+    result.supplierOrigin = 'JP';
+    result.certifiedSupplier = true;
+  }
+  if (/\bamerican|usa|us\s+made|made\s+in\s+(usa|us|america)\b/.test(q)) {
+    result.supplierOrigin = 'US';
+  }
+  if (/\bitalian|italy|made\s+in\s+italy\b/.test(q)) {
+    result.supplierOrigin = 'IT';
+  }
+  if (/\bfrench|france|made\s+in\s+france\b/.test(q)) {
+    result.supplierOrigin = 'FR';
+  }
+  if (/\bkorean|korea|made\s+in\s+korea\b/.test(q)) {
+    result.supplierOrigin = 'KR';
+  }
+  if (/\beuropean|europe|eu\s+made\b/.test(q)) {
+    result.supplierOrigin = 'EU';
+    result.certifiedSupplier = true;
+  }
 
-  // ── Sort preference ──
-  if (/\bcheapest|lowest\s+price|best\s+price\b/.test(q))
+  // ── Sort preference (fully comprehensive) ──
+  // Explicit sort words
+  if (/\bcheapest|lowest\s+price|best\s+price|best\s+deal|best\s+value|affordable|low\s+cost|most\s+affordable|economical\b/.test(q))
     result.sortPreference = 'price_asc';
-  if (/\bmost\s+expensive|highest\s+price\b/.test(q))
+  if (/\bmost\s+expensive|highest\s+price|priciest|costliest|premium\s+price\b/.test(q))
     result.sortPreference = 'price_desc';
-  if (/\bmost\s+stock|highest\s+quantity\b/.test(q))
+  if (/\bmost\s+stock|highest\s+quantity|highest\s+qty|most\s+available|largest\s+qty|largest\s+quantity|most\s+qty|biggest\s+stock|maximum\s+stock|max\s+qty\b/.test(q))
     result.sortPreference = 'quantity_desc';
-  if (/\bfastest\s+delivery|quickest\b/.test(q))
+  if (/\bfastest\s+delivery|quickest|soonest|earliest\s+delivery|shortest\s+delivery|fastest\s+shipping|quickest\s+delivery|minimum\s+delivery\b/.test(q))
     result.sortPreference = 'delivery_asc';
+
+  // "based on" patterns — full coverage
+  const basedOnMatch = q.match(
+    /based\s+on\s+(qty|quantity|stock|availab\w*|price|cost|value|delivery|shipping|speed|lead\s*time|weight|brand|quality|rating)/,
+  );
+  if (basedOnMatch) {
+    const criterion = basedOnMatch[1];
+    if (/qty|quantity/.test(criterion)) {
+      result.sortPreference = 'quantity_desc';
+    } else if (/stock|availab/.test(criterion)) {
+      result.sortPreference = 'stock_priority';
+    } else if (/price|cost|value/.test(criterion)) {
+      result.sortPreference = 'price_asc';
+    } else if (/delivery|shipping|speed|lead/.test(criterion)) {
+      result.sortPreference = 'delivery_asc';
+    } else if (/weight/.test(criterion)) {
+      result.sortPreference = 'weight_asc';
+    } else if (/quality|rating|brand/.test(criterion)) {
+      result.sortPreference = 'quality_desc';
+    }
+  }
+
+  // "by QTY", "by price", "by stock", "by delivery" patterns
+  const byMatch = q.match(
+    /\bby\s+(qty|quantity|stock|availab\w*|price|cost|delivery|shipping|lead\s*time|weight|quality)\b/,
+  );
+  if (byMatch && !result.sortPreference) {
+    const criterion = byMatch[1];
+    if (/qty|quantity/.test(criterion)) {
+      result.sortPreference = 'quantity_desc';
+    } else if (/stock|availab/.test(criterion)) {
+      result.sortPreference = 'stock_priority';
+    } else if (/price|cost/.test(criterion)) {
+      result.sortPreference = 'price_asc';
+    } else if (/delivery|shipping|lead/.test(criterion)) {
+      result.sortPreference = 'delivery_asc';
+    } else if (/weight/.test(criterion)) {
+      result.sortPreference = 'weight_asc';
+    } else if (/quality/.test(criterion)) {
+      result.sortPreference = 'quality_desc';
+    }
+  }
+
+  // "sort by" / "order by" / "rank by" / "prioritize" / "prefer" patterns
+  const sortByMatch = q.match(
+    /(?:sort|order|rank|prioritize|prefer|arrange)\s+(?:by|for)\s+(qty|quantity|stock|availab\w*|price|cost|delivery|shipping|lead\s*time|weight|quality|cheapest|fastest)/,
+  );
+  if (sortByMatch && !result.sortPreference) {
+    const criterion = sortByMatch[1];
+    if (/qty|quantity/.test(criterion)) result.sortPreference = 'quantity_desc';
+    else if (/stock|availab/.test(criterion)) result.sortPreference = 'stock_priority';
+    else if (/price|cost|cheapest/.test(criterion)) result.sortPreference = 'price_asc';
+    else if (/delivery|shipping|lead|fastest/.test(criterion)) result.sortPreference = 'delivery_asc';
+    else if (/weight/.test(criterion)) result.sortPreference = 'weight_asc';
+    else if (/quality/.test(criterion)) result.sortPreference = 'quality_desc';
+  }
+
+  // "with most" / "with highest" / "with lowest" / "with best" patterns
+  const withMostMatch = q.match(
+    /with\s+(most|highest|lowest|best|largest|biggest|shortest|fastest|cheapest|maximum|minimum)\s+(qty|quantity|stock|availab\w*|price|cost|delivery|lead\s*time)/,
+  );
+  if (withMostMatch && !result.sortPreference) {
+    const modifier = withMostMatch[1];
+    const criterion = withMostMatch[2];
+    if (/qty|quantity|stock|availab/.test(criterion)) {
+      result.sortPreference = /lowest|minimum|least/.test(modifier) ? 'quantity_asc' : 'quantity_desc';
+    } else if (/price|cost/.test(criterion)) {
+      result.sortPreference = /highest|most|maximum/.test(modifier) ? 'price_desc' : 'price_asc';
+    } else if (/delivery|lead/.test(criterion)) {
+      result.sortPreference = 'delivery_asc';
+    }
+  }
+
+  // Implicit priority from context — "and QTY" / "and availability" / "and stock"
+  if (!result.sortPreference) {
+    if (/\band\s+(qty|quantity)\b/.test(q) && /\b(in\s*stock|available|availability)\b/.test(q)) {
+      result.sortPreference = 'quantity_desc';
+    } else if (/\band\s+(availab\w*|stock)\b/.test(q)) {
+      result.sortPreference = 'stock_priority';
+    }
+  }
+
+  // ── Comparison / Alternatives ──
+  if (/\b(compare|comparison|versus|vs|side\s+by\s+side|head\s+to\s+head)\b/.test(q)) {
+    result.compareMode = true;
+    if (!result.topN) result.topN = 5; // default comparison count
+  }
+  if (/\b(alternative|alternatives|substitute|substitutes|equivalent|equivalents|interchangeable|cross[\s-]*reference|cross[\s-]*ref|replacement|replacements|compatible|compatible\s+with)\b/.test(q)) {
+    result.findAlternatives = true;
+  }
+  if (/\b(similar|like|same\s+as|instead\s+of|swap|interchange)\b/.test(q)) {
+    result.findAlternatives = true;
+  }
+
+  // ── Vehicle year / model detection ──
+  const yearMatch = q.match(/\b(19|20)\d{2}\b/g);
+  if (yearMatch) {
+    const years = yearMatch.map(Number);
+    if (years.length === 1) {
+      result.vehicleYear = years[0];
+    } else if (years.length >= 2) {
+      result.vehicleYearMin = Math.min(...years);
+      result.vehicleYearMax = Math.max(...years);
+    }
+  }
+
+  // ── Condition ──
+  if (/\b(new|brand\s*new|unused|sealed)\b/.test(q)) result.condition = 'new';
+  if (/\b(used|second\s*hand|secondhand|refurbished|reconditioned|remanufactured|reman)\b/.test(q)) result.condition = 'used';
+
+  // ── Minimum order value ──
+  const movMatch = q.match(/\bminimum\s+order\s+(?:value|amount)?\s*\$?\s*(\d+)/);
+  if (movMatch) result.minOrderValue = parseInt(movMatch[1]);
+
+  // ── Weight ──
+  const weightMatch = q.match(/(?:under|less\s+than|max|below)\s+(\d+(?:\.\d+)?)\s*kg/);
+  if (weightMatch) result.maxWeight = parseFloat(weightMatch[1]);
+  if (/\b(lightweight|light\s*weight|light)\b/.test(q) && !result.maxWeight) {
+    result.maxWeight = 5; // default lightweight threshold
+  }
+  if (/\b(heavy\s*duty|heavy|industrial|commercial)\b/.test(q)) {
+    result.heavyDuty = true;
+  }
+
+  // ── Application type ──
+  if (/\b(passenger|sedan|hatchback|suv|crossover|coupe|convertible)\b/.test(q))
+    result.applicationType = 'passenger';
+  if (/\b(truck|pickup|lorry|commercial\s*vehicle|van|cargo)\b/.test(q))
+    result.applicationType = 'commercial';
+  if (/\b(racing|race|sport|performance|motorsport|track)\b/.test(q))
+    result.applicationType = 'performance';
+  if (/\b(diesel)\b/.test(q)) result.fuelType = 'diesel';
+  if (/\b(petrol|gasoline|gas)\b/.test(q)) result.fuelType = 'petrol';
+  if (/\b(hybrid)\b/.test(q)) result.fuelType = 'hybrid';
+  if (/\b(electric|ev)\b/.test(q)) result.fuelType = 'electric';
+
+  // ── Supplier type ──
+  if (/\b(wholesale|wholesaler|bulk\s*supplier|distributor)\b/.test(q))
+    result.supplierType = 'wholesale';
+  if (/\b(manufacturer|direct\s+from\s+factory|factory\s+direct|maker)\b/.test(q))
+    result.supplierType = 'manufacturer';
+  if (/\b(local|nearby|close|domestic)\b/.test(q))
+    result.supplierType = 'local';
 
   // ── Build summary ──
   const summaryParts = [];
   if (result.categories.length > 0)
     summaryParts.push(result.categories.join(', ') + ' parts');
   if (result.vehicleBrand) summaryParts.push(`for ${result.vehicleBrand}`);
+  if (result.vehicleYear) summaryParts.push(`(${result.vehicleYear})`);
+  else if (result.vehicleYearMin && result.vehicleYearMax)
+    summaryParts.push(`(${result.vehicleYearMin}-${result.vehicleYearMax})`);
+  else if (result.vehicleYearMin) summaryParts.push(`(from ${result.vehicleYearMin})`);
   if (result.partsBrands.length > 0)
     summaryParts.push(`by ${result.partsBrands.join(', ')}`);
-  if (result.maxPrice) summaryParts.push(`under $${result.maxPrice}`);
-  if (result.minPrice) summaryParts.push(`over $${result.minPrice}`);
+  if (result.maxPrice && result.minPrice)
+    summaryParts.push(`$${result.minPrice}-$${result.maxPrice}`);
+  else if (result.maxPrice) summaryParts.push(`under $${result.maxPrice}`);
+  else if (result.minPrice) summaryParts.push(`over $${result.minPrice}`);
+  if (result.priceCurrency && result.priceCurrency !== 'USD')
+    summaryParts.push(`(${result.priceCurrency})`);
   if (result.requireInStock) summaryParts.push('in stock');
   if (result.requireHighStock) summaryParts.push('with high availability');
   if (result.fastDelivery) summaryParts.push('with fast delivery');
+  if (result.maxDeliveryDays) summaryParts.push(`within ${result.maxDeliveryDays} days`);
   if (result.oem) summaryParts.push('OEM/genuine');
+  if (result.aftermarket) summaryParts.push('aftermarket');
+  if (result.premiumQuality) summaryParts.push('premium quality');
+  if (result.requireWarranty) summaryParts.push('with warranty');
   if (result.certifiedSupplier) summaryParts.push('from certified suppliers');
+  if (result.condition && result.condition !== 'new')
+    summaryParts.push(`(${result.condition})`);
+  if (result.supplierOrigin) summaryParts.push(`${result.supplierOrigin} origin`);
+  if (result.fuelType) summaryParts.push(`for ${result.fuelType}`);
+  if (result.applicationType) summaryParts.push(`(${result.applicationType})`);
+  if (result.heavyDuty) summaryParts.push('heavy duty');
+  if (result.supplierType) summaryParts.push(`from ${result.supplierType} supplier`);
+  if (result.compareMode) summaryParts.push('(comparison mode)');
+  if (result.findAlternatives) summaryParts.push('(finding alternatives)');
+  if (result.freeShipping) summaryParts.push('with free shipping');
+  if (result.requestedQuantity)
+    summaryParts.push(`qty ${result.requestedQuantity}`);
+  if (result.excludeBrands.length > 0)
+    summaryParts.push(`excl. ${result.excludeBrands.join(', ')}`);
+  if (result.excludeOrigins.length > 0)
+    summaryParts.push(`excl. ${result.excludeOrigins.join(', ')} origin`);
+
+  // Add sort/priority context to summary
+  const sortLabels = {
+    'price_asc': 'prioritizing lowest price',
+    'price_desc': 'prioritizing premium/highest price',
+    'quantity_desc': 'prioritizing highest quantity and availability',
+    'stock_priority': 'prioritizing stock availability',
+    'delivery_asc': 'prioritizing fastest delivery',
+    'weight_asc': 'prioritizing lightest weight',
+    'quality_desc': 'prioritizing highest quality',
+  };
+  if (result.sortPreference && sortLabels[result.sortPreference]) {
+    summaryParts.push(sortLabels[result.sortPreference]);
+  }
+  if (result.topN) {
+    summaryParts.unshift(`best ${result.topN} options for`);
+  }
+
   result.summary =
     summaryParts.length > 0
       ? `Find ${summaryParts.join(' ')}`

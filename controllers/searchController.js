@@ -1016,19 +1016,61 @@ async function aiSearch(req, res) {
     const maxDelivery = Math.max(...deliveries);
 
     // Score each result on multiple factors (0-100 scale each)
+    // Weights are dynamic based on the user's sort/priority preference
+    const sortPref = parsedIntent.sortPreference || null;
+
+    // Dynamic weight calculation
+    let wPrice = 0.35, wDelivery = 0.30, wQty = 0.20, wStock = 0.15;
+
+    if (sortPref === 'quantity_desc') {
+      // User prioritizes quantity/stock availability
+      wQty = 0.50; wStock = 0.25; wPrice = 0.15; wDelivery = 0.10;
+    } else if (sortPref === 'stock_priority') {
+      // User prioritizes in-stock / availability
+      wStock = 0.40; wQty = 0.30; wPrice = 0.15; wDelivery = 0.15;
+    } else if (sortPref === 'price_asc') {
+      // User prioritizes lowest price
+      wPrice = 0.55; wDelivery = 0.20; wQty = 0.15; wStock = 0.10;
+    } else if (sortPref === 'price_desc') {
+      // User wants highest price (premium)
+      wPrice = 0.55; wDelivery = 0.20; wQty = 0.15; wStock = 0.10;
+    } else if (sortPref === 'delivery_asc') {
+      // User prioritizes fastest delivery
+      wDelivery = 0.50; wPrice = 0.20; wQty = 0.15; wStock = 0.15;
+    } else if (sortPref === 'weight_asc') {
+      // User prioritizes lightest weight — fall back to price-like scoring
+      wPrice = 0.40; wDelivery = 0.25; wQty = 0.20; wStock = 0.15;
+    } else if (sortPref === 'quality_desc') {
+      // User prioritizes quality — favor OEM/premium, in-stock, reasonable price
+      wStock = 0.35; wQty = 0.30; wPrice = 0.20; wDelivery = 0.15;
+    }
+
+    console.log(`📊 Scoring weights: Price=${wPrice}, Delivery=${wDelivery}, Qty=${wQty}, Stock=${wStock} (pref: ${sortPref || 'balanced'})`);
+
     filteredResults.forEach((p) => {
       const price = p.price || 0;
       const qty = p.quantity || 0;
       const delivery = p.deliveryDays || 999;
       const inStock = qty > 0 ? 1 : 0;
 
-      // Price score: lower is better (inverted)
-      const priceScore =
-        price > 0 && maxPrice > minPrice
-          ? ((maxPrice - price) / (maxPrice - minPrice)) * 100
-          : price > 0
-            ? 50
-            : 0;
+      // Price score: lower is better (inverted) — unless price_desc
+      let priceScore;
+      if (sortPref === 'price_desc') {
+        // Higher price = better (premium)
+        priceScore =
+          price > 0 && maxPrice > minPrice
+            ? ((price - minPrice) / (maxPrice - minPrice)) * 100
+            : price > 0
+              ? 50
+              : 0;
+      } else {
+        priceScore =
+          price > 0 && maxPrice > minPrice
+            ? ((maxPrice - price) / (maxPrice - minPrice)) * 100
+            : price > 0
+              ? 50
+              : 0;
+      }
 
       // Quantity score: higher is better
       const qtyScore =
@@ -1049,13 +1091,12 @@ async function aiSearch(req, res) {
       // Stock bonus
       const stockBonus = inStock ? 20 : 0;
 
-      // Weighted composite score
-      // Price: 35%, Delivery: 30%, Quantity: 20%, Stock: 15%
+      // Weighted composite score using dynamic weights
       const compositeScore =
-        priceScore * 0.35 +
-        deliveryScore * 0.3 +
-        qtyScore * 0.2 +
-        stockBonus * 0.15;
+        priceScore * wPrice +
+        deliveryScore * wDelivery +
+        qtyScore * wQty +
+        stockBonus * wStock;
 
       p._aiScore = Math.round(compositeScore * 10) / 10;
       p._aiPriceScore = Math.round(priceScore);
