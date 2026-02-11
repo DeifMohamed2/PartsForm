@@ -13,6 +13,14 @@ const {
   getRequestMarkup,
 } = require('../utils/priceMarkup');
 
+// New modular search pipeline (V2)
+const { 
+  aiSearchV2, 
+  getPipelineMetrics, 
+  createSearchHandler,
+  FEATURE_FLAGS: PIPELINE_FLAGS 
+} = require('./searchPipelineAdapter');
+
 /**
  * Search parts by EXACT part number
  * GET /api/search
@@ -735,6 +743,11 @@ module.exports = {
   recordSearchRefinement,
   recordSearchFeedback,
   getLearningStats,
+  // New V2 pipeline endpoints
+  aiSearchV2,
+  getPipelineMetrics,
+  // Hybrid handler (auto-selects V1 or V2 based on feature flags)
+  aiSearchHybrid: createSearchHandler(aiSearch),
 };
 
 /**
@@ -1021,6 +1034,7 @@ async function aiSearch(req, res) {
 
     // Dynamic weight calculation — when user specifies a preference, that factor
     // gets heavy dominant weight (70%) so it truly drives the ranking
+    // MULTIPLE PRIORITIES: when user wants BOTH (e.g., price AND delivery), both get 40-45% weight
     let wPrice = 0.35, wDelivery = 0.30, wQty = 0.20, wStock = 0.15;
 
     if (sortPref === 'quantity_desc') {
@@ -1037,6 +1051,16 @@ async function aiSearch(req, res) {
       wPrice = 0.40; wDelivery = 0.25; wQty = 0.20; wStock = 0.15;
     } else if (sortPref === 'quality_desc') {
       wStock = 0.40; wQty = 0.30; wPrice = 0.15; wDelivery = 0.15;
+    }
+    // COMBINED PRIORITIES — both factors get high weight (40-45% each)
+    else if (sortPref === 'price_and_delivery') {
+      wPrice = 0.45; wDelivery = 0.45; wQty = 0.05; wStock = 0.05;
+    } else if (sortPref === 'price_and_qty') {
+      wPrice = 0.45; wQty = 0.45; wDelivery = 0.05; wStock = 0.05;
+    } else if (sortPref === 'delivery_and_qty') {
+      wDelivery = 0.45; wQty = 0.45; wPrice = 0.05; wStock = 0.05;
+    } else if (sortPref === 'price_and_stock') {
+      wPrice = 0.45; wStock = 0.45; wQty = 0.05; wDelivery = 0.05;
     }
 
     console.log(`📊 Scoring weights: Price=${wPrice}, Delivery=${wDelivery}, Qty=${wQty}, Stock=${wStock} (pref: ${sortPref || 'balanced'})`);

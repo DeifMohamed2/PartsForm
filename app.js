@@ -35,6 +35,9 @@ const schedulerService = require('./services/schedulerService');
 const socketService = require('./services/socketService');
 const emailInquiryScheduler = require('./services/emailInquiryScheduler');
 
+// Redis cache service (for new search pipeline)
+const { cacheService } = require('./services/search/utils/cacheService');
+
 // Models
 const Integration = require('./models/Integration');
 
@@ -172,6 +175,21 @@ server.listen(PORT, () => {
     console.log(`   ➜ Email:    ✅ Email inquiry processor configured (starting...)`);
   } else {
     console.log(`   ➜ Email:    ⚠️  Email inquiry processor not configured`);
+  }
+  
+  // Redis Status
+  if (process.env.REDIS_URL) {
+    cacheService.checkConnection().then(isConnected => {
+      if (isConnected) {
+        console.log(`   ➜ Redis:    ✅ Redis cache connected (${process.env.REDIS_URL})`);
+      } else {
+        console.log(`   ➜ Redis:    ⚠️  Redis configured but not connected (L1 cache only)`);
+      }
+    }).catch(() => {
+      console.log(`   ➜ Redis:    ⚠️  Redis connection failed (L1 cache only)`);
+    });
+  } else {
+    console.log(`   ➜ Redis:    ⚠️  Not configured (using L1 in-memory cache only)`);
   }
   console.log('');
 });

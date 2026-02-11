@@ -910,6 +910,11 @@
         'delivery_asc': 'Fastest Delivery First',
         'weight_asc': 'Lightest Weight First',
         'quality_desc': 'Highest Quality First',
+        // Multiple priorities
+        'price_and_delivery': 'Best Price & Fastest Delivery',
+        'price_and_qty': 'Best Price & High Quantity',
+        'delivery_and_qty': 'Fast Delivery & High Quantity',
+        'price_and_stock': 'Best Price & Best Availability',
         quantity: 'Highest Stock',
         deliveryDays: 'Fastest Delivery',
         brand: 'Brand Name',

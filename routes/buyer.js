@@ -63,6 +63,10 @@ const {
   recordSearchRefinement,
   recordSearchFeedback,
   getLearningStats,
+  // New V2 Pipeline
+  aiSearchV2,
+  getPipelineMetrics,
+  aiSearchHybrid,
 } = require('../controllers/searchController');
 const { handleProfileImageUpload } = require('../utils/fileUploader');
 
@@ -169,6 +173,12 @@ router.get('/api/parts/by-number/:partNumber', getPartsByNumber);
 router.post('/api/ai-search', aiSearch);
 router.get('/api/ai-suggestions', aiSuggestions);
 router.post('/api/ai-analyze', aiAnalyze);
+
+// AI Search V2 (New Pipeline Architecture)
+router.post('/api/ai-search/v2', aiSearchV2);
+router.get('/api/ai-search/metrics', getPipelineMetrics);
+// Hybrid endpoint - auto-selects V1 or V2 based on feature flags
+router.post('/api/ai-search/hybrid', aiSearchHybrid);
 
 // AI Learning API endpoints - Help AI get smarter over time
 router.post('/api/ai-learn/engagement', recordSearchEngagement);

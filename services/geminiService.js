@@ -1143,18 +1143,19 @@ function buildLocalParsedIntent(query) {
     result.sortPreference = 'delivery_asc';
 
   // "based on" patterns — full coverage (allows filler words like "the", "a", "its", "their")
+  // Added typo tolerance: delveir|delviery|delivry -> delivery, pric -> price, etc.
   const basedOnMatch = q.match(
-    /based\s+on\s+(?:the\s+|a\s+|its\s+|their\s+)?(qty|quantity|quantities|stock|availab\w*|price|prices|cost|costs|value|delivery|delivery\s*time|shipping|shipping\s*time|speed|lead\s*time|weight|brand|quality|rating)/,
+    /based\s+on\s+(?:the\s+|a\s+|its\s+|their\s+|best\s+)?(qty|quantity|quantities|stock|availab\w*|price|prices|pric\w*|cost|costs|value|delivery|delivry|delveir|delivery\s*time|shipping|shipping\s*time|speed|lead\s*time|weight|brand|quality|rating)/i,
   );
   if (basedOnMatch) {
-    const criterion = basedOnMatch[1];
+    const criterion = basedOnMatch[1].toLowerCase();
     if (/qty|quantit/.test(criterion)) {
       result.sortPreference = 'quantity_desc';
     } else if (/stock|availab/.test(criterion)) {
       result.sortPreference = 'stock_priority';
-    } else if (/price|cost|value/.test(criterion)) {
+    } else if (/price|pric|cost|value/.test(criterion)) {
       result.sortPreference = 'price_asc';
-    } else if (/delivery|shipping|speed|lead/.test(criterion)) {
+    } else if (/deliv|delveir|shipping|speed|lead/.test(criterion)) {
       result.sortPreference = 'delivery_asc';
     } else if (/weight/.test(criterion)) {
       result.sortPreference = 'weight_asc';
@@ -1163,19 +1164,53 @@ function buildLocalParsedIntent(query) {
     }
   }
 
-  // "by QTY", "by price", "by stock", "by delivery", "by delivery time" patterns
+  // MULTIPLE PRIORITIES: detect "price and delivery", "price & delivery", "delivery and price"
+  const multiPriorityMatch = q.match(
+    /(price|pric\w*|cost|delivery|deliv\w*|delveir|shipping|speed|qty|quantity|stock)\s+(?:and|&|\+|,)\s+(price|pric\w*|cost|delivery|deliv\w*|delveir|shipping|speed|qty|quantity|stock)/i,
+  );
+  if (multiPriorityMatch) {
+    const crit1 = multiPriorityMatch[1].toLowerCase();
+    const crit2 = multiPriorityMatch[2].toLowerCase();
+    const isPriceCrit1 = /price|pric|cost/.test(crit1);
+    const isPriceCrit2 = /price|pric|cost/.test(crit2);
+    const isDeliveryCrit1 = /deliv|delveir|shipping|speed/.test(crit1);
+    const isDeliveryCrit2 = /deliv|delveir|shipping|speed/.test(crit2);
+    const isQtyCrit1 = /qty|quantity/.test(crit1);
+    const isQtyCrit2 = /qty|quantity/.test(crit2);
+    const isStockCrit1 = /stock/.test(crit1);
+    const isStockCrit2 = /stock/.test(crit2);
+
+    // Price + Delivery combination
+    if ((isPriceCrit1 && isDeliveryCrit2) || (isDeliveryCrit1 && isPriceCrit2)) {
+      result.sortPreference = 'price_and_delivery';
+    }
+    // Price + Qty combination
+    else if ((isPriceCrit1 && isQtyCrit2) || (isQtyCrit1 && isPriceCrit2)) {
+      result.sortPreference = 'price_and_qty';
+    }
+    // Delivery + Qty combination
+    else if ((isDeliveryCrit1 && isQtyCrit2) || (isQtyCrit1 && isDeliveryCrit2)) {
+      result.sortPreference = 'delivery_and_qty';
+    }
+    // Price + Stock combination
+    else if ((isPriceCrit1 && isStockCrit2) || (isStockCrit1 && isPriceCrit2)) {
+      result.sortPreference = 'price_and_stock';
+    }
+  }
+
+  // "by QTY", "by price", "by stock", "by delivery", "by delivery time" patterns with typo tolerance
   const byMatch = q.match(
-    /\bby\s+(?:the\s+|a\s+)?(qty|quantity|stock|availab\w*|price|cost|delivery|delivery\s*time|shipping|shipping\s*time|lead\s*time|weight|quality)\b/,
+    /\bby\s+(?:the\s+|a\s+)?(qty|quantity|stock|availab\w*|price|pric\w*|cost|delivery|delivry|delveir|delivery\s*time|shipping|shipping\s*time|lead\s*time|weight|quality)\b/i,
   );
   if (byMatch && !result.sortPreference) {
-    const criterion = byMatch[1];
+    const criterion = byMatch[1].toLowerCase();
     if (/qty|quantity/.test(criterion)) {
       result.sortPreference = 'quantity_desc';
     } else if (/stock|availab/.test(criterion)) {
       result.sortPreference = 'stock_priority';
-    } else if (/price|cost/.test(criterion)) {
+    } else if (/price|pric|cost/.test(criterion)) {
       result.sortPreference = 'price_asc';
-    } else if (/delivery|shipping|lead/.test(criterion)) {
+    } else if (/deliv|delveir|shipping|lead/.test(criterion)) {
       result.sortPreference = 'delivery_asc';
     } else if (/weight/.test(criterion)) {
       result.sortPreference = 'weight_asc';
@@ -1184,32 +1219,48 @@ function buildLocalParsedIntent(query) {
     }
   }
 
-  // "sort by" / "order by" / "rank by" / "prioritize" / "prefer" patterns
+  // "sort by" / "sorted by" / "order by" / "rank by" / "prioritize" / "prefer" patterns with typo tolerance
   const sortByMatch = q.match(
-    /(?:sort|order|rank|prioritize|prefer|arrange)\s+(?:by|for)\s+(qty|quantity|stock|availab\w*|price|cost|delivery|shipping|lead\s*time|weight|quality|cheapest|fastest)/,
+    /(?:sort|sorted|sorte|order|ordered|rank|prioritize|prefer|arrange)\\s+(?:by|for)\\s+(qty|quantity|stock|availab\\w*|price|pric\\w*|cost|delivery|delivry|delveir|shipping|lead\\s*time|weight|quality|cheapest|fastest)/i,
   );
   if (sortByMatch && !result.sortPreference) {
-    const criterion = sortByMatch[1];
+    const criterion = sortByMatch[1].toLowerCase();
     if (/qty|quantity/.test(criterion)) result.sortPreference = 'quantity_desc';
     else if (/stock|availab/.test(criterion)) result.sortPreference = 'stock_priority';
-    else if (/price|cost|cheapest/.test(criterion)) result.sortPreference = 'price_asc';
-    else if (/delivery|shipping|lead|fastest/.test(criterion)) result.sortPreference = 'delivery_asc';
+    else if (/price|pric|cost|cheapest/.test(criterion)) result.sortPreference = 'price_asc';
+    else if (/deliv|delveir|shipping|lead|fastest/.test(criterion)) result.sortPreference = 'delivery_asc';
     else if (/weight/.test(criterion)) result.sortPreference = 'weight_asc';
     else if (/quality/.test(criterion)) result.sortPreference = 'quality_desc';
   }
 
-  // "with most" / "with highest" / "with lowest" / "with best" patterns
+  // "fast in delivery" / "cheap in price" / "quick in shipping" patterns (typo: "fast in delveir")
+  const fastInMatch = q.match(
+    /(fast|quick|rapid|slow|cheap|expensive|high|low|best)\\s+(?:in|on|for)\\s+(delivery|delveir|delivry|shipping|price|pric\\w*|cost|stock|qty|quantity)/i,
+  );
+  if (fastInMatch && !result.sortPreference) {
+    const modifier = fastInMatch[1].toLowerCase();
+    const criterion = fastInMatch[2].toLowerCase();
+    if (/deliv|delveir|shipping/.test(criterion)) {
+      result.sortPreference = 'delivery_asc';
+    } else if (/price|pric|cost/.test(criterion)) {
+      result.sortPreference = /cheap|low|best/.test(modifier) ? 'price_asc' : 'price_desc';
+    } else if (/stock|qty|quantity/.test(criterion)) {
+      result.sortPreference = 'quantity_desc';
+    }
+  }
+
+  // "with most" / "with highest" / "with lowest" / "with best" patterns with typo tolerance
   const withMostMatch = q.match(
-    /with\s+(most|highest|lowest|best|largest|biggest|shortest|fastest|cheapest|maximum|minimum)\s+(qty|quantity|stock|availab\w*|price|cost|delivery|lead\s*time)/,
+    /with\\s+(most|highest|lowest|best|largest|biggest|shortest|fastest|cheapest|maximum|minimum)\\s+(qty|quantity|stock|availab\\w*|price|pric\\w*|cost|delivery|deliv\\w*|delveir|lead\\s*time)/i,
   );
   if (withMostMatch && !result.sortPreference) {
-    const modifier = withMostMatch[1];
-    const criterion = withMostMatch[2];
+    const modifier = withMostMatch[1].toLowerCase();
+    const criterion = withMostMatch[2].toLowerCase();
     if (/qty|quantity|stock|availab/.test(criterion)) {
       result.sortPreference = /lowest|minimum|least/.test(modifier) ? 'quantity_asc' : 'quantity_desc';
-    } else if (/price|cost/.test(criterion)) {
+    } else if (/price|pric|cost/.test(criterion)) {
       result.sortPreference = /highest|most|maximum/.test(modifier) ? 'price_desc' : 'price_asc';
-    } else if (/delivery|lead/.test(criterion)) {
+    } else if (/deliv|delveir|lead/.test(criterion)) {
       result.sortPreference = 'delivery_asc';
     }
   }
