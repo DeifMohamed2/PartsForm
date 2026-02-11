@@ -93,35 +93,64 @@ class CacheService {
    * Initialize Redis connection
    */
   async initializeRedis(redisUrl = null) {
+    // Skip if no Redis URL configured
+    const url = redisUrl || process.env.REDIS_URL;
+    if (!url) {
+      this.redisEnabled = false;
+      return false;
+    }
+    
     try {
       const Redis = require('ioredis');
-      const url = redisUrl || process.env.REDIS_URL || 'redis://localhost:6379';
       
       this.redis = new Redis(url, {
-        maxRetriesPerRequest: 3,
-        retryDelayOnFailover: 100,
+        maxRetriesPerRequest: 1,
         enableReadyCheck: true,
-        connectTimeout: 5000,
+        connectTimeout: 3000,
         lazyConnect: true,
+        // Disable auto-retry to prevent error spam
+        retryStrategy: (times) => {
+          if (times > 1) {
+            this.redisEnabled = false;
+            return null; // Stop retrying
+          }
+          return 1000; // Retry once after 1 second
+        },
       });
       
-      await this.redis.connect();
-      this.redisEnabled = true;
-      console.log('✅ Redis cache connected');
-      
-      // Handle reconnection
+      // Attach error handler BEFORE connecting to prevent unhandled errors
       this.redis.on('error', (err) => {
-        console.warn('⚠️ Redis error:', err.message);
+        if (this.redisEnabled) {
+          console.warn('⚠️ Redis error:', err.message);
+          this.redisEnabled = false;
+        }
+        // Silently ignore subsequent errors
       });
       
       this.redis.on('reconnecting', () => {
-        console.log('🔄 Redis reconnecting...');
+        // Silent - don't spam logs
       });
+      
+      this.redis.on('end', () => {
+        this.redisEnabled = false;
+      });
+      
+      await this.redis.connect();
+      
+      // Verify connection with ping
+      await this.redis.ping();
+      this.redisEnabled = true;
+      console.log('✅ Redis cache connected');
       
       return true;
     } catch (err) {
       console.warn('⚠️ Redis not available, using L1 cache only:', err.message);
       this.redisEnabled = false;
+      // Disconnect to stop retry attempts
+      if (this.redis) {
+        try { this.redis.disconnect(); } catch {}
+        this.redis = null;
+      }
       return false;
     }
   }
@@ -130,18 +159,37 @@ class CacheService {
    * Check if Redis is connected (and try to connect if not)
    */
   async checkConnection() {
-    // Already connected
+    // Already connected - verify with ping
     if (this.redisEnabled && this.redis) {
       try {
         await this.redis.ping();
         return true;
       } catch {
         this.redisEnabled = false;
+        this.redis = null;
       }
+    }
+    
+    // Only try to connect if REDIS_URL is configured
+    if (!process.env.REDIS_URL) {
+      return false;
     }
     
     // Try to connect
     return await this.initializeRedis();
+  }
+  
+  /**
+   * Get Redis status for startup display
+   */
+  getStatus() {
+    if (this.redisEnabled && this.redis) {
+      return { connected: true, message: '✅ Redis cache connected' };
+    }
+    if (process.env.REDIS_URL) {
+      return { connected: false, message: '⚠️ Redis configured but not connected (L1 cache only)' };
+    }
+    return { connected: false, message: '⚠️ Not configured (using L1 in-memory cache only)' };
   }
 
   /**

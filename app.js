@@ -177,19 +177,12 @@ server.listen(PORT, () => {
     console.log(`   ➜ Email:    ⚠️  Email inquiry processor not configured`);
   }
   
-  // Redis Status
-  if (process.env.REDIS_URL) {
-    cacheService.checkConnection().then(isConnected => {
-      if (isConnected) {
-        console.log(`   ➜ Redis:    ✅ Redis cache connected (${process.env.REDIS_URL})`);
-      } else {
-        console.log(`   ➜ Redis:    ⚠️  Redis configured but not connected (L1 cache only)`);
-      }
-    }).catch(() => {
-      console.log(`   ➜ Redis:    ⚠️  Redis connection failed (L1 cache only)`);
-    });
-  } else {
-    console.log(`   ➜ Redis:    ⚠️  Not configured (using L1 in-memory cache only)`);
-  }
+  // Redis Status - try to connect then display status
+  cacheService.checkConnection().then(() => {
+    const status = cacheService.getStatus();
+    console.log(`   ➜ Redis:    ${status.message}`);
+  }).catch(() => {
+    console.log(`   ➜ Redis:    ⚠️  Redis connection failed (L1 cache only)`);
+  });
   console.log('');
 });
