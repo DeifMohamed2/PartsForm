@@ -60,6 +60,26 @@ class SchedulerService {
       case 'hourly':
         return `${minute} * * * *`;
 
+      case 'every2hours':
+        return `${minute} */2 * * *`;
+
+      case 'every3hours':
+        return `${minute} */3 * * *`;
+
+      case 'every4hours':
+        return `${minute} */4 * * *`;
+
+      case '6hours':
+      case 'every6hours':
+        return `${minute} */6 * * *`;
+
+      case 'every8hours':
+        return `${minute} */8 * * *`;
+
+      case '12hours':
+      case 'every12hours':
+        return `${minute} */12 * * *`;
+
       case 'daily':
         return `${minute} ${hour} * * *`;
 

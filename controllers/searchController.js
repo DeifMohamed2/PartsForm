@@ -7,6 +7,7 @@ const Part = require('../models/Part');
 const elasticsearchService = require('../services/elasticsearchService');
 const geminiService = require('../services/geminiService');
 const aiLearningService = require('../services/aiLearningService');
+const { applyMarkupToParts, applyMarkupToPart, getRequestMarkup } = require('../utils/priceMarkup');
 
 /**
  * Search parts by EXACT part number
@@ -121,6 +122,12 @@ const searchParts = async (req, res) => {
     }
     if (inStock === 'true') {
       filteredResults = filteredResults.filter((p) => (p.quantity || 0) > 0);
+    }
+
+    // Apply price markup for buyer (transparent - buyer never sees original price)
+    const markupPercentage = await getRequestMarkup(req);
+    if (markupPercentage > 0) {
+      filteredResults = applyMarkupToParts(filteredResults, markupPercentage);
     }
 
     res.json({
@@ -248,6 +255,12 @@ const getPartById = async (req, res) => {
       return res.status(404).json({ success: false, error: 'Part not found' });
     }
 
+    // Apply price markup for buyer
+    const markupPercentage = await getRequestMarkup(req);
+    if (markupPercentage > 0) {
+      applyMarkupToPart(part, markupPercentage);
+    }
+
     res.json({
       success: true,
       part,
@@ -277,11 +290,18 @@ const getPartsByNumber = async (req, res) => {
       .limit(parseInt(limit, 10))
       .lean();
 
+    // Apply price markup for buyer
+    const markupPercentage = await getRequestMarkup(req);
+    let markedUpParts = parts;
+    if (markupPercentage > 0) {
+      markedUpParts = applyMarkupToParts(parts, markupPercentage);
+    }
+
     res.json({
       success: true,
       partNumber,
-      count: parts.length,
-      parts,
+      count: markedUpParts.length,
+      parts: markedUpParts,
     });
   } catch (error) {
     console.error('Get parts by number error:', error);
@@ -454,6 +474,12 @@ const searchMultipleParts = async (req, res) => {
     console.log(
       `Multi-search complete: ${found.length} found, ${notFound.length} not found, ${allResults.length} results in ${searchTime}ms`,
     );
+
+    // Apply price markup for buyer
+    const markupPercentage = await getRequestMarkup(req);
+    if (markupPercentage > 0) {
+      allResults = applyMarkupToParts(allResults, markupPercentage);
+    }
 
     res.json({
       success: true,
@@ -660,6 +686,12 @@ const aiExcelSearch = async (req, res) => {
     console.log(
       `✅ Excel search completed in ${searchTime}ms: ${allResults.length} results for ${found.length} parts`,
     );
+
+    // Apply price markup for buyer
+    const markupPercentage = await getRequestMarkup(req);
+    if (markupPercentage > 0) {
+      allResults = applyMarkupToParts(allResults, markupPercentage);
+    }
 
     res.json({
       success: true,
@@ -923,16 +955,10 @@ async function aiSearch(req, res) {
     }
 
     // ─────────────────────────────────────────────────────────────
-    // STEP 4: SORT & DEDUPLICATE
+    // STEP 4: MULTI-FACTOR AI RANKING, DEDUP & COMPARISON
     // ─────────────────────────────────────────────────────────────
-    filteredResults.sort((a, b) => {
-      const aIn = (a.quantity || 0) > 0 ? 1 : 0;
-      const bIn = (b.quantity || 0) > 0 ? 1 : 0;
-      if (bIn !== aIn) return bIn - aIn;
-      if ((b.quantity || 0) !== (a.quantity || 0)) return (b.quantity || 0) - (a.quantity || 0);
-      return (a.price || Infinity) - (b.price || Infinity);
-    });
 
+    // Deduplicate first
     const seen = new Set();
     filteredResults = filteredResults.filter(p => {
       const key = `${p.partNumber}-${p.supplier}`;
@@ -940,6 +966,133 @@ async function aiSearch(req, res) {
       seen.add(key);
       return true;
     });
+
+    // Calculate min/max for normalization
+    const prices = filteredResults.map(p => p.price || 0).filter(p => p > 0);
+    const quantities = filteredResults.map(p => p.quantity || 0);
+    const deliveries = filteredResults.map(p => p.deliveryDays || 999);
+
+    const minPrice = Math.min(...(prices.length ? prices : [0]));
+    const maxPrice = Math.max(...(prices.length ? prices : [1]));
+    const minQty = Math.min(...quantities);
+    const maxQty = Math.max(...(quantities.length ? quantities : [1]));
+    const minDelivery = Math.min(...deliveries);
+    const maxDelivery = Math.max(...deliveries);
+
+    // Score each result on multiple factors (0-100 scale each)
+    filteredResults.forEach(p => {
+      const price = p.price || 0;
+      const qty = p.quantity || 0;
+      const delivery = p.deliveryDays || 999;
+      const inStock = qty > 0 ? 1 : 0;
+
+      // Price score: lower is better (inverted)
+      const priceScore = price > 0 && maxPrice > minPrice
+        ? ((maxPrice - price) / (maxPrice - minPrice)) * 100
+        : (price > 0 ? 50 : 0);
+
+      // Quantity score: higher is better
+      const qtyScore = maxQty > minQty
+        ? ((qty - minQty) / (maxQty - minQty)) * 100
+        : (qty > 0 ? 50 : 0);
+
+      // Delivery score: fewer days is better (inverted)
+      const deliveryScore = delivery < 999 && maxDelivery > minDelivery
+        ? ((maxDelivery - delivery) / (maxDelivery - minDelivery)) * 100
+        : (delivery < 999 ? 50 : 0);
+
+      // Stock bonus
+      const stockBonus = inStock ? 20 : 0;
+
+      // Weighted composite score
+      // Price: 35%, Delivery: 30%, Quantity: 20%, Stock: 15%
+      const compositeScore = (priceScore * 0.35) + (deliveryScore * 0.30) + (qtyScore * 0.20) + (stockBonus * 0.15);
+
+      p._aiScore = Math.round(compositeScore * 10) / 10;
+      p._aiPriceScore = Math.round(priceScore);
+      p._aiQtyScore = Math.round(qtyScore);
+      p._aiDeliveryScore = Math.round(deliveryScore);
+    });
+
+    // Sort by composite AI score (highest first)
+    filteredResults.sort((a, b) => {
+      // In-stock always first
+      const aIn = (a.quantity || 0) > 0 ? 1 : 0;
+      const bIn = (b.quantity || 0) > 0 ? 1 : 0;
+      if (bIn !== aIn) return bIn - aIn;
+      // Then by AI composite score
+      return (b._aiScore || 0) - (a._aiScore || 0);
+    });
+
+    // Generate comparison insights for top results
+    const aiInsights = [];
+    if (filteredResults.length >= 2) {
+      const top = filteredResults.slice(0, 10);
+      // Find best in each category
+      const cheapest = [...top].sort((a, b) => (a.price || Infinity) - (b.price || Infinity))[0];
+      const fastestDelivery = [...top].sort((a, b) => (a.deliveryDays || 999) - (b.deliveryDays || 999))[0];
+      const highestStock = [...top].sort((a, b) => (b.quantity || 0) - (a.quantity || 0))[0];
+      const bestOverall = top[0]; // Already sorted by composite
+
+      // Assign badges to results
+      filteredResults.forEach(p => {
+        p._aiBadges = [];
+        const pid = p._id?.toString() || `${p.partNumber}-${p.supplier}`;
+        const cheapestId = cheapest._id?.toString() || `${cheapest.partNumber}-${cheapest.supplier}`;
+        const fastestId = fastestDelivery._id?.toString() || `${fastestDelivery.partNumber}-${fastestDelivery.supplier}`;
+        const stockId = highestStock._id?.toString() || `${highestStock.partNumber}-${highestStock.supplier}`;
+        const bestId = bestOverall._id?.toString() || `${bestOverall.partNumber}-${bestOverall.supplier}`;
+
+        if (pid === bestId) p._aiBadges.push('best-overall');
+        if (pid === cheapestId) p._aiBadges.push('lowest-price');
+        if (pid === fastestId && (fastestDelivery.deliveryDays || 999) < 999) p._aiBadges.push('fastest-delivery');
+        if (pid === stockId && (highestStock.quantity || 0) > 0) p._aiBadges.push('highest-stock');
+      });
+
+      // Build tie/comparison explanations
+      const topTwo = top.slice(0, 2);
+      if (topTwo.length === 2) {
+        const [first, second] = topTwo;
+        const scoreDiff = Math.abs((first._aiScore || 0) - (second._aiScore || 0));
+        if (scoreDiff < 5) {
+          // Very close - explain why both are good
+          const firstAdvantages = [];
+          const secondAdvantages = [];
+
+          if ((first.price || Infinity) < (second.price || Infinity)) firstAdvantages.push('lower price');
+          else if ((second.price || Infinity) < (first.price || Infinity)) secondAdvantages.push('lower price');
+
+          if ((first.deliveryDays || 999) < (second.deliveryDays || 999)) firstAdvantages.push('faster delivery');
+          else if ((second.deliveryDays || 999) < (first.deliveryDays || 999)) secondAdvantages.push('faster delivery');
+
+          if ((first.quantity || 0) > (second.quantity || 0)) firstAdvantages.push('more stock');
+          else if ((second.quantity || 0) > (first.quantity || 0)) secondAdvantages.push('more stock');
+
+          aiInsights.push({
+            type: 'tie',
+            message: `Top 2 options are very close in overall score`,
+            first: { supplier: first.supplier || first.brand, advantages: firstAdvantages },
+            second: { supplier: second.supplier || second.brand, advantages: secondAdvantages },
+          });
+        }
+      }
+
+      // Price vs delivery tradeoff insight
+      const cheapestPid = cheapest._id?.toString() || `${cheapest.partNumber}-${cheapest.supplier}`;
+      const fastestPid = fastestDelivery._id?.toString() || `${fastestDelivery.partNumber}-${fastestDelivery.supplier}`;
+      if (cheapestPid !== fastestPid && (cheapest.price || 0) > 0 && (fastestDelivery.deliveryDays || 999) < 999) {
+        const priceDiffPercent = Math.round(Math.abs((cheapest.price || 0) - (fastestDelivery.price || 0)) / (cheapest.price || 1) * 100);
+        const deliveryDiff = (cheapest.deliveryDays || 0) - (fastestDelivery.deliveryDays || 0);
+        if (priceDiffPercent > 5 && deliveryDiff > 0) {
+          aiInsights.push({
+            type: 'tradeoff',
+            message: `Save ~${priceDiffPercent}% choosing the cheapest, or get it ${deliveryDiff} days sooner with faster option`,
+          });
+        }
+      }
+    } else if (filteredResults.length === 1) {
+      filteredResults[0]._aiBadges = ['best-overall', 'only-option'];
+    }
 
     filteredResults = filteredResults.slice(0, 500);
 
@@ -1006,6 +1159,7 @@ async function aiSearch(req, res) {
       source,
       searchTime,
       message,
+      aiInsights: aiInsights || [],
       filterStatus: {
         totalFetched: allResults.length,
         afterFiltering: filteredResults.length,
@@ -1017,6 +1171,12 @@ async function aiSearch(req, res) {
         suggestions: learningSuggestions.length > 0 ? learningSuggestions : undefined,
       },
     };
+
+    // Apply price markup for buyer (transparent)
+    const markupPercentage = await getRequestMarkup(req);
+    if (markupPercentage > 0) {
+      response.results = applyMarkupToParts(response.results, markupPercentage);
+    }
 
     res.json(response);
   } catch (error) {

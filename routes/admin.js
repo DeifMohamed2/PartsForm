@@ -61,6 +61,10 @@ const {
   updateAdmin,
   updateAdminStatus,
   deleteAdmin,
+  // System Settings
+  getSystemSettings,
+  updateSystemSettings,
+  getAdminSettings,
 } = require('../controllers/adminController');
 
 // Import email inquiry controller
@@ -243,6 +247,13 @@ router.delete('/api/admins/:id', deleteAdmin);
 
 // Parts Analytics
 router.get('/parts-analytics', getPartsAnalytics);
+
+// Admin Settings
+router.get('/settings', getAdminSettings);
+
+// System Settings API
+router.get('/api/settings', getSystemSettings);
+router.put('/api/settings', updateSystemSettings);
 
 // ==========================================
 // Email Inquiries Management

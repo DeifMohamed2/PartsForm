@@ -255,6 +255,14 @@
                     </span>
                   </div>
                   <div class="account-row">
+                    <span>Price Markup</span>
+                    <% if (user.markupPercentage !== null && user.markupPercentage !== undefined) { %>
+                    <span class="markup-badge custom"><%= user.markupPercentage %>%</span>
+                    <% } else { %>
+                    <span class="markup-badge default">System Default</span>
+                    <% } %>
+                  </div>
+                  <div class="account-row">
                     <span>Joined</span>
                     <strong><%= new Date(user.joined).toLocaleDateString() %></strong>
                   </div>
@@ -894,6 +902,25 @@
     /* Pending/Rejected status badges */
     .user-status-badge.pending { background: rgba(245, 158, 11, 0.12); color: #d97706; }
     .user-status-badge.rejected { background: rgba(239, 68, 68, 0.12); color: #dc2626; }
+    
+    /* Markup badges */
+    .markup-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.25rem 0.6rem;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .markup-badge.custom {
+      background: rgba(139, 92, 246, 0.12);
+      color: #8b5cf6;
+    }
+    .markup-badge.default {
+      background: var(--admin-bg-tertiary, rgba(100, 116, 139, 0.1));
+      color: var(--admin-text-muted, #64748b);
+    }
     
     /* Avatar image */
     .user-profile-avatar-img { width: 90px; height: 90px; border-radius: 20px; object-fit: cover; }

@@ -534,6 +534,7 @@
       AIFilterState.aiParsedResponse = data.parsed || {};
       AIFilterState.learningRecordId = data.learning?.recordId;
       AIFilterState.learningSuggestions = data.learning?.suggestions || [];
+      AIFilterState.aiInsights = data.aiInsights || [];
 
       // Store broad search info if available
       AIFilterState.isBroadSearch = data.isBroadSearch || false;
@@ -1317,6 +1318,59 @@
       // RIGHT COLUMN - Results Preview
       contentHTML += `
         <div class="ai-results-right-col">
+          ${
+            AIFilterState.aiInsights && AIFilterState.aiInsights.length > 0
+              ? `
+            <div class="ai-section ai-insights-section">
+              <div class="ai-section-header">
+                <div class="ai-section-icon insights-icon">
+                  <i data-lucide="sparkles"></i>
+                </div>
+                <h3 class="ai-section-title">AI Recommendation</h3>
+              </div>
+              <div class="ai-section-content">
+                <div class="ai-insights-list">
+                  ${AIFilterState.aiInsights
+                    .map((insight) => {
+                      if (insight.type === 'tie') {
+                        return `
+                          <div class="ai-insight-card tie-insight">
+                            <div class="insight-header">
+                              <i data-lucide="equal"></i>
+                              <span>${escapeHtml(insight.message)}</span>
+                            </div>
+                            <div class="insight-comparison">
+                              <div class="insight-option">
+                                <span class="option-label">${escapeHtml(insight.first.supplier || 'Option 1')}</span>
+                                ${insight.first.advantages.map(a => `<span class="advantage-tag"><i data-lucide="plus"></i>${escapeHtml(a)}</span>`).join('')}
+                                ${insight.first.advantages.length === 0 ? '<span class="advantage-tag neutral">similar</span>' : ''}
+                              </div>
+                              <div class="insight-vs">VS</div>
+                              <div class="insight-option">
+                                <span class="option-label">${escapeHtml(insight.second.supplier || 'Option 2')}</span>
+                                ${insight.second.advantages.map(a => `<span class="advantage-tag"><i data-lucide="plus"></i>${escapeHtml(a)}</span>`).join('')}
+                                ${insight.second.advantages.length === 0 ? '<span class="advantage-tag neutral">similar</span>' : ''}
+                              </div>
+                            </div>
+                          </div>
+                        `;
+                      } else if (insight.type === 'tradeoff') {
+                        return `
+                          <div class="ai-insight-card tradeoff-insight">
+                            <i data-lucide="scale"></i>
+                            <span>${escapeHtml(insight.message)}</span>
+                          </div>
+                        `;
+                      }
+                      return '';
+                    })
+                    .join('')}
+                </div>
+              </div>
+            </div>
+          `
+              : ''
+          }
           <div class="ai-section ai-results-section">
             <div class="ai-section-header">
               <div class="ai-section-icon results-icon">
@@ -1336,6 +1390,7 @@
                   <table class="ai-results-table">
                     <thead>
                       <tr>
+                        <th class="col-rank">AI</th>
                         <th class="col-brand">Brand</th>
                         <th class="col-part">Part Number</th>
                         <th class="col-desc">Description</th>
@@ -1347,10 +1402,13 @@
                     </thead>
                     <tbody>
                       ${results
-                        .slice(0, 10)
+                        .slice(0, 15)
                         .map(
                           (product, idx) => `
-                        <tr class="result-row" style="animation-delay: ${idx * 0.04}s" data-part-id="${product._id || product.id || ''}">
+                        <tr class="result-row ${product._aiBadges && product._aiBadges.includes('best-overall') ? 'best-row' : ''}" style="animation-delay: ${idx * 0.04}s" data-part-id="${product._id || product.id || ''}">
+                          <td class="col-rank">
+                            ${getAIBadgesHTML(product, idx)}
+                          </td>
                           <td class="col-brand">
                             <span class="brand-tag">${escapeHtml(product.brand || 'N/A')}</span>
                           </td>
@@ -1358,7 +1416,7 @@
                             <span class="part-number-cell">${escapeHtml(product.partNumber || product.vendorCode || 'N/A')}</span>
                           </td>
                           <td class="col-desc">
-                            <span class="description-text" title="${escapeHtml(product.description || '')}">${escapeHtml(truncateText(product.description || 'No description', 30))}</span>
+                            <span class="description-text" title="${escapeHtml(product.description || '')}">${escapeHtml(truncateText(product.description || 'No description', 25))}</span>
                           </td>
                           <td class="col-qty">
                             <span class="qty-display">${product.quantity || product.stock || 0}</span>
@@ -1367,7 +1425,7 @@
                             <span class="price-display">${product.price ? `$${(Number(product.price) / 3.67).toFixed(2)}` : '—'}</span>
                           </td>
                           <td class="col-delivery">
-                            <span class="delivery-badge">${product.deliveryDays ? `${product.deliveryDays}d` : '—'}</span>
+                            <span class="delivery-badge ${getDeliveryClass(product)}">${product.deliveryDays ? `${product.deliveryDays}d` : '—'}</span>
                           </td>
                           <td class="col-stock">
                             <span class="stock-indicator ${getStockStatus(product)}">
@@ -1376,6 +1434,13 @@
                             </span>
                           </td>
                         </tr>
+                        ${product._aiBadges && product._aiBadges.length > 0 ? `
+                        <tr class="ai-reason-row">
+                          <td colspan="8">
+                            <div class="ai-reason-text">${getAIReasonText(product, results)}</div>
+                          </td>
+                        </tr>
+                        ` : ''}
                       `,
                         )
                         .join('')}
@@ -1383,11 +1448,11 @@
                   </table>
                 </div>
                 ${
-                  results.length > 10
+                  results.length > 15
                     ? `
                   <div class="ai-results-more">
                     <i data-lucide="chevrons-down"></i>
-                    <span>+${results.length - 10} more results — Click Apply to see all</span>
+                    <span>+${results.length - 15} more results — Click Apply to see all</span>
                   </div>
                 `
                     : ''
@@ -1548,6 +1613,61 @@
     if (!product.quantity || product.quantity === 0) return 'Out of Stock';
     if (product.quantity <= 10) return 'Low Stock';
     return 'In Stock';
+  }
+
+  function getDeliveryClass(product) {
+    if (!product.deliveryDays) return '';
+    if (product.deliveryDays <= 7) return 'delivery-fast';
+    if (product.deliveryDays <= 30) return 'delivery-medium';
+    return 'delivery-slow';
+  }
+
+  function getAIBadgesHTML(product, idx) {
+    const badges = product._aiBadges || [];
+    if (badges.length === 0) {
+      return `<span class="ai-rank-num">#${idx + 1}</span>`;
+    }
+
+    const badgeMap = {
+      'best-overall': { icon: 'crown', label: 'Best', cls: 'badge-best' },
+      'lowest-price': { icon: 'tag', label: 'Cheapest', cls: 'badge-cheap' },
+      'fastest-delivery': { icon: 'zap', label: 'Fastest', cls: 'badge-fast' },
+      'highest-stock': { icon: 'warehouse', label: 'Top Stock', cls: 'badge-stock' },
+      'only-option': { icon: 'check-circle', label: 'Only Option', cls: 'badge-only' },
+    };
+
+    let html = '';
+    badges.forEach((b) => {
+      const info = badgeMap[b];
+      if (info) {
+        html += `<span class="ai-badge ${info.cls}" title="${info.label}"><i data-lucide="${info.icon}"></i></span>`;
+      }
+    });
+    return html || `<span class="ai-rank-num">#${idx + 1}</span>`;
+  }
+
+  function getAIReasonText(product, allResults) {
+    const badges = product._aiBadges || [];
+    const reasons = [];
+
+    if (badges.includes('best-overall')) {
+      reasons.push('⭐ Best overall value — balanced price, stock & delivery');
+    }
+    if (badges.includes('lowest-price') && !badges.includes('best-overall')) {
+      reasons.push('💰 Lowest price among results');
+    }
+    if (badges.includes('fastest-delivery')) {
+      const days = product.deliveryDays || '?';
+      reasons.push(`⚡ Fastest delivery (${days} days)`);
+    }
+    if (badges.includes('highest-stock')) {
+      reasons.push(`📦 Highest stock availability (${product.quantity || 0} units)`);
+    }
+    if (badges.includes('only-option')) {
+      reasons.push('✅ Only matching option found');
+    }
+
+    return reasons.join(' · ') || '';
   }
 
   function removeAIParsedFilter(index) {

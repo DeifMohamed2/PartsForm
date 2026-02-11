@@ -149,6 +149,15 @@ const buyerSchema = new mongoose.Schema(
       select: false, // Don't include password in queries by default
     },
 
+    // Price Markup (percentage added to part prices for this buyer)
+    // Set by admin per-user. If null, the system default markup is used.
+    markupPercentage: {
+      type: Number,
+      default: null, // null means use system default
+      min: [0, 'Markup percentage cannot be negative'],
+      max: [100, 'Markup percentage cannot exceed 100%'],
+    },
+
     // Preferences
     newsletter: {
       type: Boolean,

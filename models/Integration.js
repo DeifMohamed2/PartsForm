@@ -123,7 +123,7 @@ const integrationSchema = new mongoose.Schema({
     enabled: { type: Boolean, default: true },
     frequency: { 
       type: String, 
-      enum: ['manual', 'hourly', '6hours', '12hours', 'daily', 'weekly', 'monthly', 'custom'],
+      enum: ['manual', 'hourly', 'every2hours', 'every3hours', 'every4hours', '6hours', 'every6hours', 'every8hours', '12hours', 'every12hours', 'daily', 'weekly', 'monthly', 'custom'],
       default: 'daily'
     },
     time: { type: String, default: '08:00' }, // HH:MM format
@@ -227,6 +227,20 @@ integrationSchema.methods.isSyncDue = function() {
   switch (this.syncSchedule.frequency) {
     case 'hourly':
       return hoursSinceLastSync >= 1;
+    case 'every2hours':
+      return hoursSinceLastSync >= 2;
+    case 'every3hours':
+      return hoursSinceLastSync >= 3;
+    case 'every4hours':
+      return hoursSinceLastSync >= 4;
+    case '6hours':
+    case 'every6hours':
+      return hoursSinceLastSync >= 6;
+    case 'every8hours':
+      return hoursSinceLastSync >= 8;
+    case '12hours':
+    case 'every12hours':
+      return hoursSinceLastSync >= 12;
     case 'daily':
       return hoursSinceLastSync >= 24;
     case 'weekly':
@@ -265,8 +279,29 @@ integrationSchema.statics.getEnabledForSync = function() {
   });
 };
 
-// Pre-save middleware to update stats (Mongoose v9+ uses async/await pattern)
+// Frequency normalization map for values that might come from frontend
+const FREQUENCY_NORMALIZE_MAP = {
+  'every1hour': 'hourly',
+  'every1hours': 'hourly',
+  '1hour': 'hourly',
+  '2hours': 'every2hours',
+  '3hours': 'every3hours',
+  '4hours': 'every4hours',
+  '8hours': 'every8hours',
+  'every6hours': 'every6hours',
+  'every12hours': 'every12hours',
+};
+
+// Pre-save middleware to update stats and normalize frequency
 integrationSchema.pre('save', async function() {
+  // Normalize frequency value if needed
+  if (this.syncSchedule && this.syncSchedule.frequency) {
+    const freq = this.syncSchedule.frequency;
+    if (FREQUENCY_NORMALIZE_MAP[freq]) {
+      this.syncSchedule.frequency = FREQUENCY_NORMALIZE_MAP[freq];
+    }
+  }
+
   if (this.isModified('lastSync.status')) {
     this.stats.totalSyncs += 1;
     if (this.lastSync.status === 'success') {

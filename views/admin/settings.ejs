@@ -307,6 +307,10 @@
               <i data-lucide="settings"></i>
               <span>General</span>
             </div>
+            <div class="settings-nav-item" data-tab="pricing">
+              <i data-lucide="percent"></i>
+              <span>Pricing & Markup</span>
+            </div>
             <div class="settings-nav-item" data-tab="notifications">
               <i data-lucide="bell"></i>
               <span>Notifications</span>
@@ -373,6 +377,99 @@
               </div>
               <div class="settings-actions">
                 <button class="admin-btn admin-btn-primary"><i data-lucide="save"></i> Save Changes</button>
+              </div>
+            </div>
+
+            <!-- Pricing & Markup Settings -->
+            <div class="settings-panel" id="panel-pricing">
+              <div class="settings-section">
+                <h3 class="settings-section-title">Price Markup Settings</h3>
+                <p class="settings-section-desc">Configure the default price markup applied to all buyers. Individual buyers can have custom markup percentages set from their profile.</p>
+                
+                <div style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(59, 130, 246, 0.06)); border: 1px solid rgba(139, 92, 246, 0.15); border-radius: 14px; padding: 1.5rem; margin-bottom: 1.5rem;">
+                  <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem;">
+                    <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(139, 92, 246, 0.15); display: flex; align-items: center; justify-content: center;">
+                      <i data-lucide="percent" style="width: 24px; height: 24px; color: #8b5cf6;"></i>
+                    </div>
+                    <div>
+                      <h4 style="font-size: 1rem; font-weight: 700; color: var(--admin-text-primary); margin: 0 0 0.15rem;">Default Markup Percentage</h4>
+                      <p style="font-size: 0.8rem; color: var(--admin-text-muted); margin: 0;">Applied to all buyers who don't have a custom markup set</p>
+                    </div>
+                  </div>
+                  
+                  <div class="settings-form-group" style="margin-bottom: 1rem;">
+                    <label class="settings-label">Default Markup (%)</label>
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                      <div style="position: relative; flex: 1; max-width: 200px;">
+                        <input type="number" class="settings-input" id="defaultMarkupInput" value="<%= typeof systemSettings !== 'undefined' && systemSettings ? systemSettings.defaultMarkupPercentage || 0 : 0 %>" min="0" max="100" step="0.1" style="padding-right: 2.5rem;">
+                        <span style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--admin-text-muted); font-weight: 600; font-size: 1rem;">%</span>
+                      </div>
+                      <button class="admin-btn admin-btn-primary" onclick="saveDefaultMarkup()" id="saveMarkupBtn">
+                        <i data-lucide="save"></i>
+                        Save Markup
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div id="markupSaveStatus" style="display: none; padding: 0.5rem 0.75rem; border-radius: 8px; font-size: 0.8rem; margin-top: 0.5rem;"></div>
+                </div>
+
+                <div style="background: var(--admin-bg-tertiary); border-radius: 12px; padding: 1.25rem; margin-bottom: 1.5rem;">
+                  <h4 style="font-size: 0.9rem; font-weight: 600; color: var(--admin-text-primary); margin: 0 0 0.75rem;">
+                    <i data-lucide="info" style="width: 16px; height: 16px; display: inline; vertical-align: middle; margin-right: 0.25rem;"></i>
+                    How Price Markup Works
+                  </h4>
+                  <ul style="margin: 0; padding-left: 1.25rem; list-style: none;">
+                    <li style="font-size: 0.8rem; color: var(--admin-text-secondary); margin-bottom: 0.5rem; display: flex; align-items: flex-start; gap: 0.5rem;">
+                      <i data-lucide="check" style="width: 14px; height: 14px; color: #10b981; flex-shrink: 0; margin-top: 2px;"></i>
+                      <span>The markup percentage is added to all part prices before they are shown to buyers</span>
+                    </li>
+                    <li style="font-size: 0.8rem; color: var(--admin-text-secondary); margin-bottom: 0.5rem; display: flex; align-items: flex-start; gap: 0.5rem;">
+                      <i data-lucide="check" style="width: 14px; height: 14px; color: #10b981; flex-shrink: 0; margin-top: 2px;"></i>
+                      <span>Buyers see the marked-up price as the normal price — the markup is completely transparent</span>
+                    </li>
+                    <li style="font-size: 0.8rem; color: var(--admin-text-secondary); margin-bottom: 0.5rem; display: flex; align-items: flex-start; gap: 0.5rem;">
+                      <i data-lucide="check" style="width: 14px; height: 14px; color: #10b981; flex-shrink: 0; margin-top: 2px;"></i>
+                      <span>Each buyer can have a custom markup that overrides the default</span>
+                    </li>
+                    <li style="font-size: 0.8rem; color: var(--admin-text-secondary); margin-bottom: 0.5rem; display: flex; align-items: flex-start; gap: 0.5rem;">
+                      <i data-lucide="check" style="width: 14px; height: 14px; color: #10b981; flex-shrink: 0; margin-top: 2px;"></i>
+                      <span>Original supplier prices are preserved in the database — only display prices are adjusted</span>
+                    </li>
+                    <li style="font-size: 0.8rem; color: var(--admin-text-secondary); display: flex; align-items: flex-start; gap: 0.5rem;">
+                      <i data-lucide="check" style="width: 14px; height: 14px; color: #10b981; flex-shrink: 0; margin-top: 2px;"></i>
+                      <span>Set a buyer's custom markup to <strong>0%</strong> to give them original prices, or leave blank to use default</span>
+                    </li>
+                  </ul>
+                </div>
+
+                <div style="background: var(--admin-bg-tertiary); border-radius: 12px; padding: 1.25rem;">
+                  <h4 style="font-size: 0.9rem; font-weight: 600; color: var(--admin-text-primary); margin: 0 0 0.75rem;">
+                    <i data-lucide="calculator" style="width: 16px; height: 16px; display: inline; vertical-align: middle; margin-right: 0.25rem;"></i>
+                    Example
+                  </h4>
+                  <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+                    <div style="text-align: center; padding: 0.75rem; background: var(--admin-bg-primary); border-radius: 10px;">
+                      <div style="font-size: 0.7rem; color: var(--admin-text-muted); margin-bottom: 0.25rem;">Supplier Price</div>
+                      <div style="font-size: 1.1rem; font-weight: 700; color: var(--admin-text-primary);">$100.00</div>
+                    </div>
+                    <div style="text-align: center; padding: 0.75rem; background: var(--admin-bg-primary); border-radius: 10px;">
+                      <div style="font-size: 0.7rem; color: var(--admin-text-muted); margin-bottom: 0.25rem;">Markup (<span id="exampleMarkupPercent"><%= typeof systemSettings !== 'undefined' && systemSettings ? systemSettings.defaultMarkupPercentage || 0 : 0 %></span>%)</div>
+                      <div style="font-size: 1.1rem; font-weight: 700; color: #8b5cf6;">+$<span id="exampleMarkupAmount"><%= typeof systemSettings !== 'undefined' && systemSettings ? (systemSettings.defaultMarkupPercentage || 0).toFixed(2) : '0.00' %></span></div>
+                    </div>
+                    <div style="text-align: center; padding: 0.75rem; background: rgba(16, 185, 129, 0.08); border-radius: 10px; border: 1px solid rgba(16, 185, 129, 0.2);">
+                      <div style="font-size: 0.7rem; color: var(--admin-text-muted); margin-bottom: 0.25rem;">Buyer Sees</div>
+                      <div style="font-size: 1.1rem; font-weight: 700; color: #10b981;">$<span id="exampleBuyerPrice"><%= typeof systemSettings !== 'undefined' && systemSettings ? (100 + (systemSettings.defaultMarkupPercentage || 0)).toFixed(2) : '100.00' %></span></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div style="display: flex; align-items: center; gap: 0.75rem; margin-top: 1rem;">
+                <a href="/admin/users" class="admin-btn admin-btn-secondary">
+                  <i data-lucide="users"></i>
+                  Manage User Markups
+                </a>
               </div>
             </div>
 
@@ -736,6 +833,68 @@
         }
       });
     });
+
+    // ========================
+    // MARKUP SETTINGS
+    // ========================
+    
+    // Live example calculation
+    var markupInput = document.getElementById('defaultMarkupInput');
+    if (markupInput) {
+      markupInput.addEventListener('input', function() {
+        var markup = parseFloat(this.value) || 0;
+        document.getElementById('exampleMarkupPercent').textContent = markup;
+        document.getElementById('exampleMarkupAmount').textContent = markup.toFixed(2);
+        document.getElementById('exampleBuyerPrice').textContent = (100 + markup).toFixed(2);
+      });
+    }
+    
+    // Save default markup
+    function saveDefaultMarkup() {
+      var markup = parseFloat(document.getElementById('defaultMarkupInput').value);
+      var statusEl = document.getElementById('markupSaveStatus');
+      var saveBtn = document.getElementById('saveMarkupBtn');
+      
+      if (isNaN(markup) || markup < 0 || markup > 100) {
+        statusEl.style.display = 'block';
+        statusEl.style.background = 'rgba(239, 68, 68, 0.1)';
+        statusEl.style.color = '#ef4444';
+        statusEl.textContent = '✗ Markup must be between 0% and 100%';
+        return;
+      }
+      
+      saveBtn.disabled = true;
+      saveBtn.innerHTML = '<i data-lucide="loader"></i> Saving...';
+      
+      fetch('/admin/api/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ defaultMarkupPercentage: markup })
+      }).then(function(response) {
+        return response.json();
+      }).then(function(data) {
+        statusEl.style.display = 'block';
+        if (data.success) {
+          statusEl.style.background = 'rgba(16, 185, 129, 0.1)';
+          statusEl.style.color = '#10b981';
+          statusEl.textContent = '✓ Default markup updated successfully to ' + markup + '%';
+          setTimeout(function() { statusEl.style.display = 'none'; }, 3000);
+        } else {
+          statusEl.style.background = 'rgba(239, 68, 68, 0.1)';
+          statusEl.style.color = '#ef4444';
+          statusEl.textContent = '✗ ' + (data.error || 'Failed to update');
+        }
+      }).catch(function(err) {
+        statusEl.style.display = 'block';
+        statusEl.style.background = 'rgba(239, 68, 68, 0.1)';
+        statusEl.style.color = '#ef4444';
+        statusEl.textContent = '✗ Error: ' + err.message;
+      }).finally(function() {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = '<i data-lucide="save"></i> Save Markup';
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      });
+    }
   </script>
 
 <%- include('partials/footer') %>

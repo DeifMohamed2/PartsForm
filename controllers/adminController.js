@@ -8,6 +8,8 @@ const Order = require('../models/Order');
 const Ticket = require('../models/Ticket');
 const Admin = require('../models/Admin');
 const EmailInquiry = require('../models/EmailInquiry');
+const SystemSettings = require('../models/SystemSettings');
+const { clearSettingsCache } = require('../utils/priceMarkup');
 const ftpService = require('../services/ftpService');
 const syncService = require('../services/syncService');
 const schedulerService = require('../services/schedulerService');
@@ -1353,13 +1355,18 @@ const getUsersManagement = async (req, res) => {
         createdAt: buyer.createdAt,
         lastLogin: buyer.lastLogin,
         avatar: buyer.avatar,
+        markupPercentage: buyer.markupPercentage,
       };
     }));
+
+    // Get system default markup for display
+    const systemSettings = await SystemSettings.getSettings();
 
     res.render('admin/users', {
       title: 'Users Management | PARTSFORM',
       activePage: 'users',
-      users: usersWithStats
+      users: usersWithStats,
+      defaultMarkup: systemSettings.defaultMarkupPercentage || 0
     });
   } catch (error) {
     console.error('Error in getUsersManagement:', error);
@@ -1414,6 +1421,7 @@ const getUserDetails = async (req, res) => {
       avatar: buyer.avatar,
       newsletter: buyer.newsletter,
       preferredCurrency: buyer.preferredCurrency,
+      markupPercentage: buyer.markupPercentage,
       // Include recent orders for display
       recentOrders: orders.slice(0, 5).map(order => ({
         id: order.orderNumber || order._id,
@@ -1485,6 +1493,7 @@ const getUserEdit = async (req, res) => {
       joined: buyer.createdAt,
       newsletter: buyer.newsletter,
       preferredCurrency: buyer.preferredCurrency,
+      markupPercentage: buyer.markupPercentage,
     };
 
     res.render('admin/user-edit', {
@@ -1588,7 +1597,8 @@ const createUser = async (req, res) => {
       shippingAddress,
       status,
       industry,
-      position
+      position,
+      markupPercentage
     } = req.body;
 
     // Check if email already exists
@@ -1616,6 +1626,7 @@ const createUser = async (req, res) => {
       password: tempPassword,
       isActive: status === 'active',
       termsAcceptedAt: new Date(),
+      markupPercentage: markupPercentage !== undefined && markupPercentage !== '' ? parseFloat(markupPercentage) : null,
     });
 
     await buyer.save();
@@ -1652,7 +1663,8 @@ const updateUser = async (req, res) => {
       shippingAddress,
       status,
       industry,
-      position
+      position,
+      markupPercentage
     } = req.body;
 
     const buyer = await Buyer.findById(userId);
@@ -1681,6 +1693,15 @@ const updateUser = async (req, res) => {
     // Update status - simple active/inactive
     if (status) {
       buyer.isActive = (status === 'active');
+    }
+
+    // Update markup percentage
+    if (markupPercentage !== undefined) {
+      if (markupPercentage === '' || markupPercentage === null) {
+        buyer.markupPercentage = null; // Use system default
+      } else {
+        buyer.markupPercentage = parseFloat(markupPercentage);
+      }
     }
 
     await buyer.save();
@@ -1862,9 +1883,11 @@ const getPaymentCreate = async (req, res) => {
  */
 const getAdminSettings = async (req, res) => {
   try {
+    const systemSettings = await SystemSettings.getSettings();
     res.render('admin/settings', {
       title: 'Admin Settings | PARTSFORM',
-      activePage: 'settings'
+      activePage: 'settings',
+      systemSettings
     });
   } catch (error) {
     console.error('Error in getAdminSettings:', error);
@@ -2081,39 +2104,102 @@ const updateIntegration = async (req, res) => {
     
     // Handle both nested format (from frontend) and flat format
     const ftpData = data.ftp || {};
+    const apiData = data.api || {};
+    const googleSheetsData = data.googleSheets || {};
     const syncScheduleData = data.syncSchedule || {};
+    const optionsData = data.options || {};
+    
+    // Normalize frequency value
+    const FREQUENCY_NORMALIZE = {
+      'every1hour': 'hourly', 'every1hours': 'hourly', '1hour': 'hourly',
+      '2hours': 'every2hours', '3hours': 'every3hours', '4hours': 'every4hours',
+      '8hours': 'every8hours',
+    };
+    let rawFrequency = syncScheduleData.frequency || data.syncFrequency || integration.syncSchedule.frequency;
+    if (FREQUENCY_NORMALIZE[rawFrequency]) {
+      rawFrequency = FREQUENCY_NORMALIZE[rawFrequency];
+    }
+    
+    // Valid frequency values
+    const validFrequencies = ['manual', 'hourly', 'every2hours', 'every3hours', 'every4hours', '6hours', 'every6hours', 'every8hours', '12hours', 'every12hours', 'daily', 'weekly', 'monthly', 'custom'];
+    if (!validFrequencies.includes(rawFrequency)) {
+      rawFrequency = 'daily'; // Safe fallback
+    }
     
     // Update fields
     integration.name = data.name || integration.name;
     integration.status = data.isEnabled === false ? 'inactive' : (data.isEnabled === true ? 'active' : integration.status);
     
+    // Update type-specific configuration
     if (integration.type === 'ftp') {
       integration.ftp = {
-        ...integration.ftp,
+        ...integration.ftp.toObject ? integration.ftp.toObject() : integration.ftp,
         host: ftpData.host || data.ftpHost || integration.ftp.host,
         port: parseInt(ftpData.port || data.ftpPort) || integration.ftp.port,
         username: ftpData.username || data.ftpUsername || integration.ftp.username,
-        password: ftpData.password || data.ftpPassword || integration.ftp.password,
+        password: (ftpData.password && ftpData.password !== '********') ? ftpData.password : 
+                  (data.ftpPassword && data.ftpPassword !== '********') ? data.ftpPassword : integration.ftp.password,
         secure: ftpData.protocol ? (ftpData.protocol === 'ftps' || ftpData.protocol === 'sftp') : 
                 (data.ftpSecure !== undefined ? (data.ftpSecure === 'true' || data.ftpSecure === true) : integration.ftp.secure),
         remotePath: ftpData.remotePath || data.ftpRemotePath || integration.ftp.remotePath,
         filePattern: ftpData.filePattern || data.ftpFilePattern || integration.ftp.filePattern,
       };
+    } else if (integration.type === 'api') {
+      const existingApi = integration.api ? (integration.api.toObject ? integration.api.toObject() : integration.api) : {};
+      integration.api = {
+        ...existingApi,
+        name: apiData.name || data.apiName || existingApi.name,
+        apiType: apiData.apiType || existingApi.apiType || 'rest',
+        baseUrl: apiData.baseUrl || data.apiBaseUrl || existingApi.baseUrl,
+        authType: apiData.authType || data.apiAuthType || existingApi.authType || 'api-key',
+        authHeader: apiData.authHeader || data.apiAuthHeader || existingApi.authHeader || 'X-API-Key',
+        apiKey: (apiData.apiKey && apiData.apiKey !== '********') ? apiData.apiKey : existingApi.apiKey,
+        token: (apiData.token && apiData.token !== '********') ? apiData.token : existingApi.token,
+        username: apiData.username || existingApi.username,
+        password: (apiData.password && apiData.password !== '********') ? apiData.password : existingApi.password,
+        oauth2: apiData.oauth2 || existingApi.oauth2,
+        endpoints: apiData.endpoints || existingApi.endpoints || [],
+        pagination: apiData.pagination || existingApi.pagination || { paginationType: 'none' },
+        dataPath: apiData.dataPath || existingApi.dataPath,
+        fieldMapping: apiData.fieldMapping || existingApi.fieldMapping,
+        headers: apiData.headers || existingApi.headers || {},
+        rateLimit: parseInt(apiData.rateLimit) || existingApi.rateLimit || 60,
+        timeout: parseInt(apiData.timeout) || existingApi.timeout || 30000,
+        errorHandling: apiData.errorHandling || existingApi.errorHandling || { retryOnError: true, maxRetries: 3, retryDelay: 1000 },
+        graphqlEndpoint: apiData.graphqlEndpoint || existingApi.graphqlEndpoint,
+        graphqlQuery: apiData.graphqlQuery || existingApi.graphqlQuery,
+        graphqlVariables: apiData.graphqlVariables || existingApi.graphqlVariables,
+      };
+    } else if (integration.type === 'google-sheets') {
+      const existingGS = integration.googleSheets ? (integration.googleSheets.toObject ? integration.googleSheets.toObject() : integration.googleSheets) : {};
+      integration.googleSheets = {
+        ...existingGS,
+        spreadsheetId: googleSheetsData.spreadsheetId || data.sheetsSpreadsheetId || existingGS.spreadsheetId,
+        sheetName: googleSheetsData.sheetName || data.sheetsSheetName || existingGS.sheetName || 'Sheet1',
+        range: googleSheetsData.range || data.sheetsRange || existingGS.range || 'A:Z',
+        credentials: googleSheetsData.credentials || existingGS.credentials,
+      };
     }
     
     integration.syncSchedule = {
       enabled: syncScheduleData.enabled !== undefined ? syncScheduleData.enabled : 
-               (data.syncEnabled !== 'false' && data.syncEnabled !== false),
-      frequency: syncScheduleData.frequency || data.syncFrequency || integration.syncSchedule.frequency,
+               (data.syncEnabled !== undefined ? (data.syncEnabled !== 'false' && data.syncEnabled !== false) : integration.syncSchedule.enabled),
+      frequency: rawFrequency,
       time: syncScheduleData.time || data.syncTime || integration.syncSchedule.time,
     };
     
     integration.options = {
-      autoSync: data.autoSync === 'true' || data.autoSync === true,
-      notifyOnComplete: data.notifyOnComplete !== 'false',
-      deltaSync: data.deltaSync === 'true' || data.deltaSync === true,
-      retryOnFail: data.retryOnFail !== 'false',
+      autoSync: optionsData.autoSync !== undefined ? optionsData.autoSync : (data.autoSync === 'true' || data.autoSync === true || integration.options?.autoSync),
+      notifyOnComplete: optionsData.notifyOnComplete !== undefined ? optionsData.notifyOnComplete : (data.notifyOnComplete !== 'false'),
+      deltaSync: optionsData.deltaSync !== undefined ? optionsData.deltaSync : (data.deltaSync === 'true' || data.deltaSync === true),
+      retryOnFail: optionsData.retryOnFail !== undefined ? optionsData.retryOnFail : (data.retryOnFail !== 'false'),
+      maxRetries: optionsData.maxRetries || integration.options?.maxRetries || 3,
     };
+    
+    // Update column mapping if provided
+    if (data.columnMapping) {
+      integration.columnMapping = { ...integration.columnMapping, ...data.columnMapping };
+    }
     
     integration.updatedBy = req.admin?._id;
     await integration.save();
@@ -2992,6 +3078,67 @@ const deleteAdmin = async (req, res) => {
   }
 };
 
+// ====================================
+// SYSTEM SETTINGS API
+// ====================================
+
+/**
+ * Get system settings (API)
+ * GET /admin/api/settings
+ */
+const getSystemSettings = async (req, res) => {
+  try {
+    const settings = await SystemSettings.getSettings();
+    res.json({
+      success: true,
+      data: {
+        defaultMarkupPercentage: settings.defaultMarkupPercentage || 0,
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching system settings:', error);
+    res.status(500).json({ success: false, error: 'Failed to fetch settings' });
+  }
+};
+
+/**
+ * Update system settings (API)
+ * PUT /admin/api/settings
+ */
+const updateSystemSettings = async (req, res) => {
+  try {
+    const { defaultMarkupPercentage } = req.body;
+
+    const updates = {};
+    if (defaultMarkupPercentage !== undefined) {
+      const markup = parseFloat(defaultMarkupPercentage);
+      if (isNaN(markup) || markup < 0 || markup > 100) {
+        return res.status(400).json({
+          success: false,
+          error: 'Default markup must be between 0 and 100'
+        });
+      }
+      updates.defaultMarkupPercentage = markup;
+    }
+
+    const settings = await SystemSettings.updateSettings(updates);
+    
+    // Clear the cached default markup so new value takes effect immediately
+    clearSettingsCache();
+
+    res.json({
+      success: true,
+      message: 'Settings updated successfully',
+      data: {
+        defaultMarkupPercentage: settings.defaultMarkupPercentage,
+      }
+    });
+  } catch (error) {
+    console.error('Error updating system settings:', error);
+    res.status(500).json({ success: false, error: 'Failed to update settings' });
+  }
+};
+
 /**
  * Get Sidebar Notification Counts API
  * Returns counts for new orders and open tickets for real-time updates
@@ -3091,5 +3238,10 @@ module.exports = {
   updateAdmin,
   updateAdminStatus,
   deleteAdmin,
+  // System Settings API
+  getSystemSettings,
+  updateSystemSettings,
+  // Admin Settings page
+  getAdminSettings,
 };
 

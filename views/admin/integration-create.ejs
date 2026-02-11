@@ -15,14 +15,14 @@
           <div class="integrations-breadcrumb">
             <a href="/admin/integrations"><i data-lucide="plug"></i> Integrations</a>
             <i data-lucide="chevron-right"></i>
-            <span>New Connection</span>
+            <span><%= typeof integration !== 'undefined' && integration ? 'Edit Connection' : 'New Connection' %></span>
           </div>
 
           <!-- Page Header -->
           <div class="create-header">
             <div class="create-header-info">
-              <h1>Add New Connection</h1>
-              <p>Configure a new data source for Automotive Parts</p>
+              <h1><%= typeof integration !== 'undefined' && integration ? 'Edit Connection' : 'Add New Connection' %></h1>
+              <p><%= typeof integration !== 'undefined' && integration ? 'Update your data source configuration' : 'Configure a new data source for Automotive Parts' %></p>
             </div>
           </div>
 
@@ -156,10 +156,15 @@
                   <select class="form-input" id="syncFrequency">
                     <option value="manual">Manual only</option>
                     <option value="hourly">Every hour</option>
+                    <option value="every2hours">Every 2 hours</option>
+                    <option value="every3hours">Every 3 hours</option>
+                    <option value="every4hours">Every 4 hours</option>
                     <option value="6hours" selected>Every 6 hours</option>
+                    <option value="every8hours">Every 8 hours</option>
                     <option value="12hours">Every 12 hours</option>
                     <option value="daily">Once daily</option>
                     <option value="weekly">Once weekly</option>
+                    <option value="monthly">Once monthly</option>
                   </select>
                 </div>
                 <div class="form-group">
@@ -619,7 +624,7 @@
             </button>
             <button type="button" class="admin-btn admin-btn-primary" onclick="saveConnection()">
               <i data-lucide="save"></i>
-              Create Connection
+              <%= typeof integration !== 'undefined' && integration ? 'Update Connection' : 'Create Connection' %>
             </button>
           </div>
         </div>
@@ -628,6 +633,11 @@
   </div>
 
   <script>
+    // Edit mode detection
+    const editMode = <%= typeof integration !== 'undefined' && integration ? 'true' : 'false' %>;
+    const editIntegrationId = '<%= typeof integration !== 'undefined' && integration ? integration._id : '' %>';
+    const existingIntegration = <%- typeof integration !== 'undefined' && integration ? JSON.stringify(integration) : 'null' %>;
+
     // Endpoint counter for dynamic endpoint management
     let endpointCount = 1;
 
@@ -1085,8 +1095,11 @@
       if (typeof lucide !== 'undefined') lucide.createIcons();
 
       try {
-        const response = await fetch('/admin/api/integrations', {
-          method: 'POST',
+        const url = editMode ? '/admin/api/integrations/' + editIntegrationId : '/admin/api/integrations';
+        const method = editMode ? 'PUT' : 'POST';
+        
+        const response = await fetch(url, {
+          method: method,
           headers: {
             'Content-Type': 'application/json'
           },
@@ -1096,25 +1109,168 @@
         const result = await response.json();
 
         if (result.success) {
-          const message = result.autoSyncStarted 
-            ? 'Connection created successfully! Auto-sync is starting...'
-            : 'Connection created successfully!';
+          const message = editMode 
+            ? 'Connection updated successfully!'
+            : (result.autoSyncStarted 
+              ? 'Connection created successfully! Auto-sync is starting...'
+              : 'Connection created successfully!');
           showNotification(message, 'success');
-          // Redirect to integrations list after a short delay to show the sync starting
+          // Redirect to integrations list after a short delay
           setTimeout(() => {
-            window.location.href = '/admin/integrations' + (result.autoSyncStarted ? '?syncStarted=' + result.integration._id : '');
+            window.location.href = '/admin/integrations' + (!editMode && result.autoSyncStarted ? '?syncStarted=' + result.integration._id : '');
           }, 2000);
         } else {
-          showNotification('Failed to create connection: ' + (result.error || 'Unknown error'), 'error');
+          showNotification('Failed to save connection: ' + (result.error || 'Unknown error'), 'error');
           saveBtn.innerHTML = originalHTML;
           saveBtn.disabled = false;
           if (typeof lucide !== 'undefined') lucide.createIcons();
         }
       } catch (error) {
-        showNotification('Failed to create connection: ' + error.message, 'error');
+        showNotification('Failed to save connection: ' + error.message, 'error');
         saveBtn.innerHTML = originalHTML;
         saveBtn.disabled = false;
         if (typeof lucide !== 'undefined') lucide.createIcons();
+      }
+    }
+
+    // Pre-populate form data in edit mode
+    function populateEditForm(data) {
+      if (!data) return;
+      
+      // Select connection type
+      const typeRadio = document.querySelector('input[name="connectionType"][value="' + data.type + '"]');
+      if (typeRadio) {
+        typeRadio.checked = true;
+        typeRadio.dispatchEvent(new Event('change'));
+      }
+      
+      // Sync schedule
+      if (data.syncSchedule) {
+        const freqSelect = document.getElementById('syncFrequency');
+        if (freqSelect && data.syncSchedule.frequency) {
+          // Try to set the value; if option doesn't exist, find closest match
+          freqSelect.value = data.syncSchedule.frequency;
+          if (freqSelect.value !== data.syncSchedule.frequency) {
+            // Fallback: add the option dynamically
+            const opt = document.createElement('option');
+            opt.value = data.syncSchedule.frequency;
+            opt.text = data.syncSchedule.frequency;
+            freqSelect.appendChild(opt);
+            freqSelect.value = data.syncSchedule.frequency;
+          }
+        }
+        const syncTime = document.getElementById('syncTime');
+        if (syncTime && data.syncSchedule.time) syncTime.value = data.syncSchedule.time;
+      }
+      
+      // FTP fields
+      if (data.type === 'ftp' && data.ftp) {
+        const ftp = data.ftp;
+        const setVal = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
+        setVal('ftpName', data.name);
+        setVal('ftpHost', ftp.host);
+        setVal('ftpUsername', ftp.username);
+        if (ftp.password && ftp.password !== '********') setVal('ftpPassword', ftp.password);
+        
+        // Protocol
+        const protocolEl = document.getElementById('ftpProtocol');
+        if (protocolEl) {
+          if (ftp.secure === true) protocolEl.value = 'ftps';
+          else protocolEl.value = 'ftp';
+        }
+        
+        // Checkboxes
+        const ftpEnabled = document.getElementById('ftpEnabled');
+        if (ftpEnabled) ftpEnabled.checked = data.status === 'active';
+        const ftpNotif = document.getElementById('ftpNotifications');
+        if (ftpNotif && data.options) ftpNotif.checked = data.options.notifyOnComplete !== false;
+      }
+      
+      // API fields
+      if (data.type === 'api' && data.api) {
+        const api = data.api;
+        const setVal = (id, val) => { const el = document.getElementById(id); if (el && val !== undefined && val !== null) el.value = val; };
+        setVal('apiName', data.name);
+        setVal('apiType', api.apiType || 'rest');
+        setVal('apiBaseUrl', api.baseUrl);
+        setVal('apiAuthType', api.authType || 'apikey');
+        setVal('apiKey', (api.apiKey && api.apiKey !== '********') ? api.apiKey : '');
+        setVal('apiHeaderName', api.authHeader || 'X-API-Key');
+        setVal('apiRateLimit', api.rateLimit || 60);
+        setVal('apiTimeout', api.timeout || 30000);
+        setVal('apiMaxRetries', api.errorHandling?.maxRetries || 3);
+        
+        // Auth type visibility
+        toggleAuthOptions();
+        
+        // Basic auth
+        if (api.authType === 'basic') {
+          setVal('apiUsername', api.username);
+          if (api.password && api.password !== '********') setVal('apiPassword', api.password);
+        }
+        
+        // OAuth2
+        if (api.authType === 'oauth2' && api.oauth2) {
+          setVal('oauth2ClientId', api.oauth2.clientId);
+          setVal('oauth2TokenUrl', api.oauth2.tokenUrl);
+          setVal('oauth2Scope', api.oauth2.scope);
+        }
+        
+        // Endpoints
+        if (api.endpoints && api.endpoints.length > 0) {
+          api.endpoints.forEach(function(ep, idx) {
+            if (idx > 0) addEndpoint();
+            setVal('endpoint' + idx + 'Method', ep.method || 'GET');
+            setVal('endpoint' + idx + 'Path', ep.path || '/');
+            setVal('endpoint' + idx + 'DataPath', ep.dataPath || '');
+          });
+        }
+        
+        // Pagination
+        if (api.pagination) {
+          setVal('apiPaginationType', api.pagination.paginationType || 'none');
+          setVal('apiPageSize', api.pagination.pageSize || 100);
+          setVal('apiPageParam', api.pagination.pageParam || 'page');
+          setVal('apiLimitParam', api.pagination.limitParam || 'limit');
+          setVal('apiMaxPages', api.pagination.maxPages || 100);
+          togglePaginationOptions();
+        }
+        
+        // Field mapping
+        if (api.fieldMapping) {
+          const fm = api.fieldMapping;
+          setVal('mapPartNumber', fm.partNumber);
+          setVal('mapDescription', fm.description);
+          setVal('mapSupplier', fm.supplier);
+          setVal('mapPrice', fm.price);
+          setVal('mapQuantity', fm.quantity);
+          setVal('mapCondition', fm.condition);
+          setVal('mapBrand', fm.brand);
+          setVal('mapCategory', fm.category);
+        }
+        
+        // Checkboxes
+        const apiRetry = document.getElementById('apiRetryOnError');
+        if (apiRetry && api.errorHandling) apiRetry.checked = api.errorHandling.retryOnError !== false;
+        const apiAutoSync = document.getElementById('apiAutoSync');
+        if (apiAutoSync && data.options) apiAutoSync.checked = data.options.autoSync !== false;
+        
+        // GraphQL
+        if (api.apiType === 'graphql') {
+          toggleGraphQLOptions();
+          setVal('graphqlEndpoint', api.graphqlEndpoint);
+          const gqQuery = document.getElementById('graphqlQuery');
+          if (gqQuery && api.graphqlQuery) gqQuery.value = api.graphqlQuery;
+        }
+      }
+      
+      // Google Sheets fields
+      if (data.type === 'google-sheets' && data.googleSheets) {
+        const gs = data.googleSheets;
+        const setVal = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
+        setVal('gsName', data.name);
+        setVal('gsSpreadsheetUrl', gs.spreadsheetId);
+        setVal('gsSheetName', gs.sheetName || 'Sheet1');
       }
     }
 
@@ -1123,6 +1279,12 @@
       toggleAuthOptions();
       togglePaginationOptions();
       toggleGraphQLOptions();
+      
+      // Populate form if in edit mode
+      if (editMode && existingIntegration) {
+        populateEditForm(existingIntegration);
+      }
+      
       if (typeof lucide !== 'undefined') lucide.createIcons();
     });
 
