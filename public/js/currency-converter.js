@@ -145,13 +145,10 @@
       currencySearchInput: document.getElementById('currencySearchInput'),
       currencyList: document.getElementById('currencyList'),
       
-      // Preferred Currency Dropdown
-      preferredCurrencyDropdown: document.getElementById('preferredCurrencyDropdown'),
-      preferredCurrencyBtn: document.getElementById('preferredCurrencyBtn'),
+      // Preferred Currency (inside tools dropdown)
       preferredCurrencyCode: document.getElementById('preferredCurrencyCode'),
-      preferredCurrencyMenu: document.getElementById('preferredCurrencyMenu'),
-      preferredCurrencySearch: document.getElementById('preferredCurrencySearch'),
-      preferredCurrencyList: document.getElementById('preferredCurrencyList')
+      preferredCurrencyList: document.getElementById('preferredCurrencyList'),
+      toolsCurrencySubmenu: document.getElementById('toolsCurrencySubmenu')
     };
   }
 
@@ -203,6 +200,12 @@
   function openModal() {
     elements.modal.classList.add('active');
     document.body.style.overflow = 'hidden';
+    
+    // Close tools dropdown if open
+    const toolsMenu = document.getElementById('toolsDropdownMenu');
+    const toolsBtn = document.getElementById('toolsHamburgerBtn');
+    if (toolsMenu) toolsMenu.classList.remove('show');
+    if (toolsBtn) toolsBtn.setAttribute('aria-expanded', 'false');
     
     // Initialize icons if not already done
     if (typeof lucide !== 'undefined') {
@@ -267,6 +270,10 @@
         state.lastUpdate = new Date(data.timestamp);
         updateRateDisplay();
         convertCurrency();
+        // Silently using cached rates - show subtle warning
+        if (typeof window.showCartAlert === 'function') {
+          window.showCartAlert('warning', 'Currency Rates', 'Using cached exchange rates. Live rates temporarily unavailable.');
+        }
       } else {
         showError('Unable to fetch exchange rates. Please try again later.');
       }
@@ -534,9 +541,12 @@
   }
 
   function showError(message) {
-    // You can implement a toast notification here
     console.error(message);
-    alert(message);
+    if (typeof window.showCartAlert === 'function') {
+      window.showCartAlert('error', 'Currency Error', message);
+    } else {
+      alert(message);
+    }
   }
 
   // ====================================
@@ -590,161 +600,94 @@
       }
     } catch (error) {
       console.error('Error saving preferred currency:', error);
+      if (typeof window.showCartAlert === 'function') {
+        window.showCartAlert('error', 'Currency Error', 'Failed to save your currency preference.');
+      }
       return false;
     }
     return false;
   }
 
   function initPreferredCurrencyDropdown() {
-    if (!elements.preferredCurrencyBtn) return;
-    
-    // Toggle dropdown on button click
-    elements.preferredCurrencyBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      togglePreferredCurrencyDropdown();
-    });
-    
-    // Search functionality
-    if (elements.preferredCurrencySearch) {
-      elements.preferredCurrencySearch.addEventListener('input', debounce(() => {
-        populatePreferredCurrencyList(elements.preferredCurrencySearch.value);
-      }, 200));
-    }
-    
-    // Close dropdown when clicking outside
-    document.addEventListener('click', (e) => {
-      if (elements.preferredCurrencyDropdown && 
-          !elements.preferredCurrencyDropdown.contains(e.target)) {
-        closePreferredCurrencyDropdown();
-      }
-    });
-    
-    // Populate the currency list
+    // Populate the currency grid
     populatePreferredCurrencyList();
   }
 
-  function togglePreferredCurrencyDropdown() {
-    if (!elements.preferredCurrencyMenu) return;
-    
-    const isOpen = elements.preferredCurrencyMenu.classList.contains('active');
-    
-    if (isOpen) {
-      closePreferredCurrencyDropdown();
-    } else {
-      openPreferredCurrencyDropdown();
-    }
-  }
-
-  function openPreferredCurrencyDropdown() {
-    if (!elements.preferredCurrencyMenu) return;
-    
-    elements.preferredCurrencyMenu.classList.add('active');
-    elements.preferredCurrencyBtn.classList.add('active');
-    
-    // Focus search input
-    if (elements.preferredCurrencySearch) {
-      elements.preferredCurrencySearch.value = '';
-      elements.preferredCurrencySearch.focus();
-      populatePreferredCurrencyList();
-    }
-  }
-
   function closePreferredCurrencyDropdown() {
-    if (!elements.preferredCurrencyMenu) return;
-    
-    elements.preferredCurrencyMenu.classList.remove('active');
-    elements.preferredCurrencyBtn.classList.remove('active');
+    // Close the tools currency submenu
+    if (elements.toolsCurrencySubmenu) {
+      elements.toolsCurrencySubmenu.classList.remove('show');
+    }
+    const currencySelect = document.getElementById('toolsPreferredCurrency');
+    if (currencySelect) {
+      currencySelect.classList.remove('expanded');
+    }
   }
 
-  function populatePreferredCurrencyList(filterText = '') {
+  function populatePreferredCurrencyList() {
     if (!elements.preferredCurrencyList) return;
     
-    const list = elements.preferredCurrencyList;
-    list.innerHTML = '';
+    const grid = elements.preferredCurrencyList;
+    grid.innerHTML = '';
     
-    // Filter currencies
-    const filteredCurrencies = Object.entries(CURRENCIES)
-      .filter(([code, data]) => {
-        if (code === 'ORIGINAL') return false; // Handle ORIGINAL separately
-        if (!filterText) return true;
-        const search = filterText.toLowerCase();
-        return (
-          code.toLowerCase().includes(search) ||
-          data.name.toLowerCase().includes(search)
-        );
-      })
-      .sort((a, b) => a[1].name.localeCompare(b[1].name));
+    // Popular currencies to show in grid
+    const popularCurrencies = ['USD', 'EUR', 'GBP', 'AED', 'SAR', 'CAD', 'AUD', 'JPY', 'CNY', 'RUB', 'INR', 'CHF'];
     
-    // Always show ORIGINAL at the top if it matches filter or no filter
+    // Add ORIGINAL option first (full width)
     const originalData = CURRENCIES['ORIGINAL'];
-    if (originalData && (!filterText || 'original'.includes(filterText.toLowerCase()) || 'show original price'.includes(filterText.toLowerCase()))) {
-      const originalBtn = document.createElement('button');
-      originalBtn.className = 'preferred-currency-item original-price';
+    if (originalData) {
+      const originalItem = document.createElement('div');
+      originalItem.className = 'currency-grid-item original-item';
       if ('ORIGINAL' === state.preferredCurrency) {
-        originalBtn.classList.add('active');
+        originalItem.classList.add('active');
       }
-      originalBtn.setAttribute('data-currency', 'ORIGINAL');
-      originalBtn.innerHTML = `
+      originalItem.setAttribute('data-currency', 'ORIGINAL');
+      originalItem.innerHTML = `
         <span class="currency-flag">${originalData.flag}</span>
-        <span class="currency-info">
-          <span class="currency-name">Show Original Price</span>
-          <span class="currency-full">Display prices in database currency</span>
-        </span>
-        ${'ORIGINAL' === state.preferredCurrency ? '<i data-lucide="check" class="check-icon"></i>' : ''}
+        <span class="original-text">Keep Original Price</span>
       `;
       
-      originalBtn.addEventListener('click', async () => {
+      originalItem.addEventListener('click', async () => {
         const saved = await savePreferredCurrencyToServer('ORIGINAL');
         if (saved) {
           updatePreferredCurrencyDisplay();
-          populatePreferredCurrencyList(filterText);
+          populatePreferredCurrencyList();
           closePreferredCurrencyDropdown();
           showCurrencyChangeNotification('ORIGINAL');
         }
       });
       
-      list.appendChild(originalBtn);
+      grid.appendChild(originalItem);
     }
     
-    // Add other currencies
-    filteredCurrencies.forEach(([code, data]) => {
-      const btn = document.createElement('button');
-      btn.className = 'preferred-currency-item';
+    // Add popular currencies in a grid
+    popularCurrencies.forEach((code) => {
+      const data = CURRENCIES[code];
+      if (!data) return;
+      
+      const item = document.createElement('div');
+      item.className = 'currency-grid-item';
       if (code === state.preferredCurrency) {
-        btn.classList.add('active');
+        item.classList.add('active');
       }
-      btn.setAttribute('data-currency', code);
-      btn.innerHTML = `
+      item.setAttribute('data-currency', code);
+      item.innerHTML = `
         <span class="currency-flag">${data.flag}</span>
-        <span class="currency-info">
-          <span class="currency-name">${code}</span>
-          <span class="currency-full">${data.name}</span>
-        </span>
-        ${code === state.preferredCurrency ? '<i data-lucide="check" class="check-icon"></i>' : ''}
+        <span class="currency-code">${code}</span>
       `;
       
-      btn.addEventListener('click', async () => {
+      item.addEventListener('click', async () => {
         const saved = await savePreferredCurrencyToServer(code);
         if (saved) {
           updatePreferredCurrencyDisplay();
-          populatePreferredCurrencyList(filterText);
+          populatePreferredCurrencyList();
           closePreferredCurrencyDropdown();
           showCurrencyChangeNotification(code);
         }
       });
       
-      list.appendChild(btn);
+      grid.appendChild(item);
     });
-    
-    // Reinitialize Lucide icons for check marks
-    if (typeof lucide !== 'undefined') {
-      lucide.createIcons();
-    }
-    
-    // Show "no results" if empty
-    if (filteredCurrencies.length === 0 && !('original'.includes((filterText || '').toLowerCase()))) {
-      list.innerHTML = '<div class="no-currency-results">No currencies found</div>';
-    }
   }
 
   function updatePreferredCurrencyDisplay() {

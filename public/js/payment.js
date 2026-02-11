@@ -137,6 +137,9 @@ function loadData() {
     paymentMethods = [];
     transactions = generateSampleTransactions();
     accountBalance = { available: 0, pending: 0, totalSpent: 0 };
+    if (typeof window.showCartAlert === 'function') {
+      window.showCartAlert('error', 'Payment Error', 'Failed to load payment data. Please refresh the page.');
+    }
   }
 }
 
@@ -145,6 +148,9 @@ function savePaymentMethods() {
     localStorage.setItem(PAYMENT_METHODS_KEY, JSON.stringify(paymentMethods));
   } catch (error) {
     console.error('Error saving payment methods:', error);
+    if (typeof window.showCartAlert === 'function') {
+      window.showCartAlert('error', 'Save Error', 'Failed to save payment methods.');
+    }
   }
 }
 
@@ -153,6 +159,9 @@ function saveTransactions() {
     localStorage.setItem(TRANSACTIONS_KEY, JSON.stringify(transactions));
   } catch (error) {
     console.error('Error saving transactions:', error);
+    if (typeof window.showCartAlert === 'function') {
+      window.showCartAlert('error', 'Save Error', 'Failed to save transaction data.');
+    }
   }
 }
 
@@ -161,6 +170,9 @@ function saveBalance() {
     localStorage.setItem(BALANCE_KEY, JSON.stringify(accountBalance));
   } catch (error) {
     console.error('Error saving balance:', error);
+    if (typeof window.showCartAlert === 'function') {
+      window.showCartAlert('error', 'Save Error', 'Failed to save balance data.');
+    }
   }
 }
 

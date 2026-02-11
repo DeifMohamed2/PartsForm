@@ -9,6 +9,7 @@
 
   function initNavbar() {
     initMobileMenu();
+    initToolsHamburger();
     initLanguageSelector();
     initNavDropdowns();
     initNavbarScroll();
@@ -100,6 +101,137 @@
           closeMenu();
         }
       }, 250);
+    });
+  }
+
+  // ====================================
+  // TOOLS HAMBURGER DROPDOWN
+  // ====================================
+  function initToolsHamburger() {
+    const toolsBtn = document.getElementById('toolsHamburgerBtn');
+    const toolsMenu = document.getElementById('toolsDropdownMenu');
+    const currencySelect = document.getElementById('toolsPreferredCurrency');
+    const currencySubmenu = document.getElementById('toolsCurrencySubmenu');
+    const langOptions = document.querySelectorAll('.tools-lang-option');
+
+    if (!toolsBtn || !toolsMenu) return;
+
+    let isOpen = false;
+
+    function toggleTools() {
+      isOpen = !isOpen;
+      updateToolsState();
+    }
+
+    function closeTools() {
+      isOpen = false;
+      updateToolsState();
+      // Also close currency submenu
+      if (currencySubmenu) currencySubmenu.classList.remove('show');
+      if (currencySelect) currencySelect.classList.remove('expanded');
+    }
+
+    function updateToolsState() {
+      if (isOpen) {
+        toolsBtn.setAttribute('aria-expanded', 'true');
+        toolsMenu.classList.add('show');
+        // Re-render Lucide icons in the dropdown
+        if (typeof lucide !== 'undefined') {
+          lucide.createIcons();
+        }
+      } else {
+        toolsBtn.setAttribute('aria-expanded', 'false');
+        toolsMenu.classList.remove('show');
+      }
+    }
+
+    // Toggle on click
+    toolsBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      toggleTools();
+    });
+
+    // Close when clicking outside
+    document.addEventListener('click', function (e) {
+      if (isOpen && !toolsBtn.contains(e.target) && !toolsMenu.contains(e.target)) {
+        closeTools();
+      }
+    });
+
+    // ESC key closes
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && isOpen) {
+        closeTools();
+      }
+    });
+
+    // Toggle currency submenu
+    if (currencySelect && currencySubmenu) {
+      currencySelect.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const isExpanded = currencySubmenu.classList.contains('show');
+        currencySubmenu.classList.toggle('show');
+        currencySelect.classList.toggle('expanded');
+        
+        // Scroll submenu into view if opened
+        if (!isExpanded) {
+          setTimeout(function () {
+            currencySubmenu.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }, 100);
+        }
+      });
+    }
+
+    // Language selection in tools dropdown
+    langOptions.forEach(function (option) {
+      option.addEventListener('click', function (e) {
+        e.preventDefault();
+        const lang = this.getAttribute('data-lang');
+        const flag = this.getAttribute('data-flag');
+
+        // Update active state
+        langOptions.forEach(function (opt) { opt.classList.remove('active'); });
+        this.classList.add('active');
+
+        // Save to localStorage
+        localStorage.setItem('selectedLanguage', lang);
+        localStorage.setItem('selectedFlag', flag);
+
+        // Close tools dropdown
+        closeTools();
+
+        // Trigger language change via i18n.js if available
+        if (typeof changeLanguage === 'function') {
+          changeLanguage(lang);
+        } else {
+          // Fallback: set cookie and reload
+          document.cookie = 'i18next=' + lang + ';path=/;max-age=31536000';
+          window.location.reload();
+        }
+      });
+    });
+
+    // Mark current language as active
+    const currentLangCookie = document.cookie.split(';').find(function (c) {
+      return c.trim().startsWith('i18next=');
+    });
+    const activeLang = currentLangCookie ? currentLangCookie.split('=')[1].trim() : 'en';
+    langOptions.forEach(function (opt) {
+      if (opt.getAttribute('data-lang') === activeLang) {
+        opt.classList.add('active');
+      }
+    });
+
+    // Keyboard shortcut: Cmd/Ctrl + K opens quick search
+    document.addEventListener('keydown', function (e) {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        const quickSearchBtn = document.getElementById('quick-search-btn');
+        if (quickSearchBtn) quickSearchBtn.click();
+        closeTools();
+      }
     });
   }
 

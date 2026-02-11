@@ -54,8 +54,9 @@ CRITICAL RULES:
 6. DELIVERY: "fast delivery"/"express"/"urgent" → fastDelivery:true. "within 3 days" → maxDeliveryDays:3.
 7. QUALITY: "OEM"/"genuine"/"original" → oem:true. "certified"/"verified" → certifiedSupplier:true.
 8. EXCLUSIONS: "not Bosch"/"exclude Chinese" → exclude relevant items.
-9. QUANTITY: "need 50 units"/"qty 100" → requestedQuantity:50/100.
-10. TYPO TOLERANCE: "bosh"=BOSCH, "toyta"=TOYOTA, "bremb"=BREMBO, "mersedes"=MERCEDES.
+9. QUANTITY: "need 50 units"/"qty 100" → requestedQuantity:50/100. This means STOCK quantity needed.
+10. RESULT LIMIT: "best 3"/"top 5"/"show me 3 options"/"get 3 for this"/"find 5 suppliers" → topN:3/5. This means how many DIFFERENT results/options/suppliers to show. Do NOT confuse with requestedQuantity. If user says "get best 3" or "top 5" or "show 3", that is topN, NOT requestedQuantity. IMPORTANT: "best option"/"best price"/"best" without a number does NOT set topN — it means sort by best. Only set topN when user specifies a NUMBER >= 2.
+11. TYPO TOLERANCE: "bosh"=BOSCH, "toyta"=TOYOTA, "bremb"=BREMBO, "mersedes"=MERCEDES.
 
 OUTPUT FORMAT:
 {
@@ -75,6 +76,7 @@ OUTPUT FORMAT:
   "oem": false,
   "certifiedSupplier": false,
   "requestedQuantity": null,
+  "topN": null,
   "sortPreference": null,
   "excludeBrands": [],
   "excludeOrigins": [],
@@ -232,6 +234,7 @@ function buildLocalParsedIntent(query) {
     oem: false,
     certifiedSupplier: false,
     requestedQuantity: null,
+    topN: null,
     sortPreference: null,
     excludeBrands: [],
     excludeOrigins: [],
@@ -536,6 +539,31 @@ function buildLocalParsedIntent(query) {
     'professional',
     'all',
     'any',
+    'this',
+    'that',
+    'these',
+    'those',
+    'get',
+    'give',
+    'show',
+    'find',
+    'me',
+    'my',
+    'the',
+    'with',
+    'from',
+    'need',
+    'want',
+    'looking',
+    'please',
+    'can',
+    'you',
+    'options',
+    'option',
+    'results',
+    'result',
+    'choices',
+    'choice',
   ]);
 
   const words = q
@@ -617,7 +645,16 @@ function buildLocalParsedIntent(query) {
   if (/\b(certified|verified|trusted|authorized)\b/.test(q))
     result.certifiedSupplier = true;
 
-  // ── Quantity ──
+  // ── Top N results ("best 3", "top 5", "show me 3 options", "get 3 for this") ──
+  const topNMatch = q.match(
+    /(?:best|top|show(?:\s+me)?|get|find|give(?:\s+me)?)\s+(\d+)(?:\s+(?:options?|results?|suppliers?|choices?|for|of))?/,
+  );
+  if (topNMatch) {
+    const n = parseInt(topNMatch[1]);
+    if (n >= 2 && n <= 50) result.topN = n; // Only topN >= 2 ("best 1" = just sort by best)
+  }
+
+  // ── Quantity (stock needed) ──
   const qtyMatch = q.match(
     /(?:qty|quantity|need|order)\s*:?\s*(\d+)|x\s*(\d+)\b|(\d+)\s*(?:units?|pcs?|pieces?)/,
   );
@@ -752,6 +789,14 @@ function mergeIntents(local, gemini) {
   if (!local.requestedQuantity && gemini.requestedQuantity)
     merged.requestedQuantity = gemini.requestedQuantity;
 
+  // Top N (number of results to show) - only meaningful when >= 2
+  if (!local.topN && gemini.topN && gemini.topN >= 2) merged.topN = gemini.topN;
+  // If Gemini put a small number in requestedQuantity but local detected topN, prefer topN
+  if (merged.topN && merged.requestedQuantity && merged.requestedQuantity === merged.topN) {
+    // AI confused topN with requestedQuantity — clear requestedQuantity
+    merged.requestedQuantity = null;
+  }
+
   // Exclusions
   if (gemini.excludeBrands?.length > 0) {
     merged.excludeBrands = [
@@ -797,11 +842,14 @@ function filterDataWithAI(parts, parsedIntent, originalQuery) {
   const filtersApplied = {};
 
   // ── 1. KEYWORD / CATEGORY FILTERING (search descriptions) ──
+  // SKIP keyword filtering when we have specific part numbers - the exact part number
+  // search already found the right parts, keyword filtering only removes valid results
+  const hasPartNumbers = parsedIntent.partNumbers && parsedIntent.partNumbers.length > 0;
   const keywords = parsedIntent.searchKeywords || [];
   const categories = parsedIntent.categories || [];
   const allSearchTerms = [...new Set([...keywords, ...categories])];
 
-  if (allSearchTerms.length > 0) {
+  if (allSearchTerms.length > 0 && !hasPartNumbers) {
     filtered = filtered.filter((p) => {
       const searchText = [
         p.description || '',
@@ -819,6 +867,8 @@ function filterDataWithAI(parts, parsedIntent, originalQuery) {
       );
     });
     filtersApplied.keywords = `Matched: ${allSearchTerms.join(', ')} (${totalBefore} → ${filtered.length})`;
+  } else if (hasPartNumbers) {
+    filtersApplied.keywords = `Skipped keyword filter (exact part number search)`;
   }
 
   // ── 2. VEHICLE BRAND FILTERING ──
@@ -920,13 +970,19 @@ function filterDataWithAI(parts, parsedIntent, originalQuery) {
     filtersApplied.excludeBrands = `Excluded: ${parsedIntent.excludeBrands.join(', ')} (${beforeCount} → ${filtered.length})`;
   }
 
-  // ── 8. QUANTITY REQUIREMENT ──
-  if (parsedIntent.requestedQuantity && parsedIntent.requestedQuantity > 1) {
+  // ── 8. QUANTITY REQUIREMENT (stock minimum, NOT result count) ──
+  if (parsedIntent.requestedQuantity && parsedIntent.requestedQuantity > 1 && !parsedIntent.topN) {
     const beforeCount = filtered.length;
     filtered = filtered.filter(
       (p) => (p.quantity || 0) >= parsedIntent.requestedQuantity,
     );
     filtersApplied.quantity = `≥ ${parsedIntent.requestedQuantity} units (${beforeCount} → ${filtered.length})`;
+  }
+
+  // ── 9. TOP N — limit number of results returned ──
+  if (parsedIntent.topN && parsedIntent.topN > 0) {
+    filtersApplied.topN = `Top ${parsedIntent.topN} results requested`;
+    // Actual slicing is done after sorting in the controller
   }
 
   const filterTime = Date.now() - startTime;
@@ -1190,6 +1246,7 @@ When analyzing spreadsheet data:
    - Usually 4-20 characters long
    - May appear in any column or row
    - IMPORTANT: Do NOT skip numbers just because they lack letters - many OEM part numbers are purely numeric
+   - IMPORTANT: ALWAYS strip leading single quotes ('), backticks (\`), or double quotes (") from part numbers. Excel often prefixes text cells with a single quote (e.g., "'6304NR" should be extracted as "6304NR"). Never include leading quotes in the extracted partNumber.
 
 2. **Identify Quantities**: Look for numeric values that could represent quantities
    - Often near part numbers
@@ -1247,193 +1304,434 @@ Respond ONLY with this exact JSON structure:
  */
 async function analyzeExcelData(rawData, options = {}) {
   try {
-    // Limit data size to prevent token overflow
-    const maxRows = 100;
-    const limitedData = rawData.slice(0, maxRows);
+    // ── Step 1: Smart structure detection from first rows ──
+    const headerRow = rawData[0];
+    const structure = detectSpreadsheetStructure(rawData);
 
-    // Convert to readable format for AI
-    const dataPreview = limitedData
-      .map((row, idx) => {
-        if (Array.isArray(row)) {
-          return `Row ${idx + 1}: ${row.map((cell) => cell ?? '').join(' | ')}`;
-        } else if (typeof row === 'object') {
-          return `Row ${idx + 1}: ${Object.values(row)
-            .map((v) => v ?? '')
-            .join(' | ')}`;
-        }
-        return `Row ${idx + 1}: ${row}`;
-      })
-      .join('\n');
+    // ── Step 2: Use AI on a small sample to understand the format ──
+    const SAMPLE_SIZE = 30; // small sample for fast AI call
+    const sampleData = rawData.slice(0, SAMPLE_SIZE);
+    const dataPreview = formatRowsForPrompt(sampleData);
 
-    const prompt = `${EXCEL_ANALYSIS_INSTRUCTION}
+    const structurePrompt = `${EXCEL_ANALYSIS_INSTRUCTION}
 
-Analyze this spreadsheet data and extract all part numbers with their quantities:
+Analyze this spreadsheet SAMPLE and extract all part numbers with their quantities.
+This is a sample – the full file has ${rawData.length} rows. Extract every part from the sample.
 
 File: ${options.filename || 'Unknown'}
 Sheet: ${options.sheetName || 'Sheet1'}
-Total rows: ${rawData.length}
 
-Data:
+Data (first ${sampleData.length} rows):
 ${dataPreview}
 
 Remember: Respond with ONLY valid JSON, no markdown formatting, no code blocks.`;
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
-      contents: prompt,
-      config: {
-        temperature: 0.1,
-        topP: 0.8,
-        topK: 40,
-        maxOutputTokens: 4096,
-      },
-    });
+    let aiResult = null;
+    let aiPowered = false;
 
-    let text = response.text.trim();
+    try {
+      const response = await ai.models.generateContent({
+        model: 'gemini-2.0-flash',
+        contents: structurePrompt,
+        config: {
+          temperature: 0.1,
+          topP: 0.8,
+          topK: 40,
+          maxOutputTokens: 8192,
+        },
+      });
 
-    // Clean up the response - remove any markdown code blocks
-    text = text
-      .replace(/```json\n?/gi, '')
-      .replace(/```\n?/gi, '')
-      .trim();
-
-    // Try to extract JSON if wrapped in other content
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      text = jsonMatch[0];
+      const parsed = safeParseGeminiJSON(response.text);
+      if (parsed && parsed.parts) {
+        aiResult = parsed;
+        aiPowered = true;
+      }
+    } catch (aiError) {
+      console.warn('Excel AI sample analysis failed, using smart extraction:', aiError.message);
     }
 
-    // Parse the JSON response
-    const parsed = JSON.parse(text);
+    // ── Step 3: If AI gave us column mapping, apply it to ALL rows ──
+    let allParts = [];
+    let dataQuality;
 
-    // Validate and normalize the response
+    if (aiPowered && aiResult) {
+      // AI understood the sample — now extract from all rows using detected columns
+      const detectedCols = aiResult.detectedColumns || {};
+      const aiSampleParts = normalizePartsArray(aiResult.parts);
+
+      if (rawData.length <= SAMPLE_SIZE) {
+        // Small file — AI already processed everything
+        allParts = aiSampleParts;
+      } else {
+        // Large file — apply detected structure to remaining rows
+        const partColIdx = resolveColumnIndex(headerRow, detectedCols.partNumber, structure.partNumberCol);
+        const qtyColIdx = resolveColumnIndex(headerRow, detectedCols.quantity, structure.quantityCol);
+        const brandColIdx = resolveColumnIndex(headerRow, detectedCols.brand, structure.brandCol);
+
+        // Start with AI sample parts
+        allParts = aiSampleParts;
+        const existingPNs = new Set(allParts.map(p => p.partNumber));
+
+        // Process remaining rows using column mapping
+        const startRow = structure.hasHeaders ? 1 : 0;
+        for (let i = Math.max(SAMPLE_SIZE, startRow); i < rawData.length; i++) {
+          const row = rawData[i];
+          const cells = Array.isArray(row) ? row : Object.values(row);
+
+          const partNumber = cleanPartNumber(cells[partColIdx]);
+          if (!partNumber || existingPNs.has(partNumber)) continue;
+
+          const quantity = parseQuantity(cells[qtyColIdx]);
+          const brand = cells[brandColIdx] ? String(cells[brandColIdx]).trim() : null;
+
+          existingPNs.add(partNumber);
+          allParts.push({
+            partNumber,
+            quantity,
+            brand: brand || null,
+            description: null,
+            originalText: cells.slice(0, 5).join(' | ').substring(0, 100),
+            confidence: 'high',
+            selected: true,
+          });
+        }
+      }
+
+      dataQuality = aiResult.dataQuality || buildDataQuality(structure, true);
+    } else {
+      // AI failed — use smart pattern-based extraction
+      allParts = smartExtractParts(rawData, structure);
+      dataQuality = buildDataQuality(structure, false);
+    }
+
+    // Deduplicate: merge quantities for same part number
+    const deduped = deduplicateExtractedParts(allParts);
+
+    const suggestions = aiPowered && aiResult?.suggestions
+      ? aiResult.suggestions
+      : buildSuggestions(structure);
+
     return {
       success: true,
-      summary:
-        parsed.summary ||
-        `Found ${parsed.parts?.length || 0} parts in the spreadsheet`,
-      totalPartsFound: parsed.parts?.length || 0,
-      parts: Array.isArray(parsed.parts)
-        ? parsed.parts.map((part) => ({
-            partNumber: String(part.partNumber || '')
-              .trim()
-              .toUpperCase(),
-            quantity: parseInt(part.quantity, 10) || 1,
-            brand: part.brand || null,
-            description: part.description || null,
-            originalText: part.originalText || null,
-            confidence: part.confidence || 'medium',
-            selected: true, // Default to selected for search
-          }))
-        : [],
-      dataQuality: parsed.dataQuality || {
-        hasHeaders: false,
-        hasPartNumberColumn: false,
-        hasQuantityColumn: false,
-        hasBrandColumn: false,
-        formatting: 'unknown',
-        issues: [],
-      },
-      suggestions: Array.isArray(parsed.suggestions) ? parsed.suggestions : [],
-      detectedColumns: parsed.detectedColumns || {},
+      summary: aiPowered
+        ? `AI analyzed ${rawData.length} rows and found ${deduped.length} unique parts`
+        : `Smart extraction found ${deduped.length} unique parts from ${rawData.length} rows`,
+      totalPartsFound: deduped.length,
+      parts: deduped,
+      dataQuality,
+      suggestions,
+      detectedColumns: aiResult?.detectedColumns || structure.detectedColumns || {},
       originalRowCount: rawData.length,
-      processedRowCount: limitedData.length,
-      aiPowered: true,
+      processedRowCount: rawData.length,
+      aiPowered,
     };
   } catch (error) {
-    console.error('Excel AI analysis error:', error);
-
-    // Fallback to basic extraction
+    console.error('Excel analysis error:', error);
+    // Final fallback — pure regex
     return fallbackExcelExtraction(rawData, options);
   }
 }
 
-/**
- * Fallback extraction when AI fails
- */
-function fallbackExcelExtraction(rawData, options = {}) {
-  const parts = [];
-  // Pattern to match:
-  // 1. Purely numeric part numbers (4+ digits)
-  // 2. Alphanumeric part numbers (letters + numbers in any combination)
-  const partNumberPattern = /[A-Z0-9][-A-Z0-9_]{3,20}/gi;
-  // Additional pattern for purely numeric part numbers
-  const numericPartPattern = /\b\d{4,15}\b/g;
-
-  for (const row of rawData) {
-    const rowStr = Array.isArray(row)
-      ? row.join(' ')
-      : typeof row === 'object'
-        ? Object.values(row).join(' ')
-        : String(row);
-
-    // First, extract alphanumeric matches
-    const alphanumericMatches = rowStr.match(partNumberPattern) || [];
-    // Then, extract purely numeric matches
-    const numericMatches = rowStr.match(numericPartPattern) || [];
-
-    // Combine all matches
-    const allMatches = [
-      ...new Set([...alphanumericMatches, ...numericMatches]),
-    ];
-
-    for (const match of allMatches) {
-      // Skip common non-part-number patterns
-      if (
-        /^(ROW|COL|SHEET|TABLE|TOTAL|SUM|COUNT|QTY|QUANTITY|PRICE|BRAND|NAME|DESC)/i.test(
-          match,
-        )
-      ) {
-        continue;
+// ── Helper: format rows into a text prompt ──
+function formatRowsForPrompt(rows) {
+  return rows
+    .map((row, idx) => {
+      if (Array.isArray(row)) {
+        return `Row ${idx + 1}: ${row.map((cell) => cell ?? '').join(' | ')}`;
+      } else if (typeof row === 'object') {
+        return `Row ${idx + 1}: ${Object.values(row).map((v) => v ?? '').join(' | ')}`;
       }
+      return `Row ${idx + 1}: ${row}`;
+    })
+    .join('\n');
+}
 
-      // Skip very small numbers that are likely quantities (1-999)
-      if (/^\d+$/.test(match) && parseInt(match, 10) < 1000) {
-        continue;
-      }
+// ── Helper: safely parse Gemini JSON response ──
+function safeParseGeminiJSON(rawText) {
+  if (!rawText) return null;
+  let text = rawText.trim();
 
-      // Accept if: purely numeric (4+ digits) OR has both letters and numbers
-      const isPurelyNumeric = /^\d{4,}$/.test(match);
-      const isAlphanumeric = /[A-Z]/i.test(match) && /[0-9]/.test(match);
+  // Remove markdown code fences
+  text = text.replace(/```json\n?/gi, '').replace(/```\n?/gi, '').trim();
 
-      if (isPurelyNumeric || isAlphanumeric) {
-        parts.push({
-          partNumber: match.toUpperCase(),
-          quantity: 1,
-          brand: null,
-          description: null,
-          originalText: rowStr.substring(0, 100),
-          confidence: isPurelyNumeric ? 'medium' : 'low',
-          selected: true,
-        });
+  // Extract outermost JSON object
+  const jsonMatch = text.match(/\{[\s\S]*\}/);
+  if (jsonMatch) {
+    text = jsonMatch[0];
+  }
+
+  try {
+    return JSON.parse(text);
+  } catch (e) {
+    // Try to fix truncated JSON by closing open structures
+    try {
+      // Remove trailing incomplete entries
+      let fixed = text;
+      // Remove last incomplete object in an array
+      fixed = fixed.replace(/,\s*\{[^}]*$/s, '');
+      // Close any open arrays and objects
+      const openBraces = (fixed.match(/\{/g) || []).length;
+      const closeBraces = (fixed.match(/\}/g) || []).length;
+      const openBrackets = (fixed.match(/\[/g) || []).length;
+      const closeBrackets = (fixed.match(/\]/g) || []).length;
+      fixed += ']'.repeat(Math.max(0, openBrackets - closeBrackets));
+      fixed += '}'.repeat(Math.max(0, openBraces - closeBraces));
+      return JSON.parse(fixed);
+    } catch (e2) {
+      console.warn('Could not fix truncated Gemini JSON:', e2.message);
+      return null;
+    }
+  }
+}
+
+// ── Helper: detect spreadsheet structure from headers and data patterns ──
+function detectSpreadsheetStructure(rawData) {
+  const structure = {
+    hasHeaders: false,
+    partNumberCol: -1,
+    quantityCol: -1,
+    brandCol: -1,
+    descriptionCol: -1,
+    detectedColumns: {},
+  };
+
+  if (!rawData || rawData.length === 0) return structure;
+
+  const firstRow = Array.isArray(rawData[0]) ? rawData[0] : Object.values(rawData[0]);
+  const firstRowStr = firstRow.map(c => String(c || '').toLowerCase().trim());
+
+  // Detect headers
+  const headerPatterns = {
+    partNumber: /^(part\s*#?|part\s*num|part\s*no|p\/n|pn|sku|item\s*#?|item\s*num|item\s*code|article|catalog|reference|ref\s*#?|oem|code|material|product\s*code)/i,
+    quantity: /^(qty|quantity|pcs|pieces|units|count|amount|order\s*qty|needed)/i,
+    brand: /^(brand|make|manufacturer|mfr|vendor|supplier|oem\s*brand)/i,
+    description: /^(desc|description|name|title|product|item\s*desc|part\s*desc|detail)/i,
+  };
+
+  for (let i = 0; i < firstRowStr.length; i++) {
+    const cell = firstRowStr[i];
+    if (!cell) continue;
+
+    for (const [field, pattern] of Object.entries(headerPatterns)) {
+      if (pattern.test(cell)) {
+        structure.hasHeaders = true;
+        if (field === 'partNumber') { structure.partNumberCol = i; structure.detectedColumns.partNumber = firstRow[i]; }
+        if (field === 'quantity') { structure.quantityCol = i; structure.detectedColumns.quantity = firstRow[i]; }
+        if (field === 'brand') { structure.brandCol = i; structure.detectedColumns.brand = firstRow[i]; }
+        if (field === 'description') { structure.descriptionCol = i; structure.detectedColumns.description = firstRow[i]; }
       }
     }
   }
 
-  // Remove duplicates
-  const uniqueParts = parts.filter(
-    (part, index, self) =>
-      index === self.findIndex((p) => p.partNumber === part.partNumber),
-  );
+  // If no headers detected, scan data rows to guess columns
+  if (structure.partNumberCol === -1) {
+    structure.partNumberCol = guessPartNumberColumn(rawData);
+  }
+
+  return structure;
+}
+
+// ── Helper: guess which column contains part numbers ──
+function guessPartNumberColumn(rawData) {
+  const startRow = 0;
+  const sampleRows = rawData.slice(startRow, Math.min(startRow + 20, rawData.length));
+  if (sampleRows.length === 0) return 0;
+
+  const maxCols = Math.max(...sampleRows.map(r => (Array.isArray(r) ? r.length : Object.values(r).length)));
+  const colScores = new Array(maxCols).fill(0);
+  const partLikePattern = /^[A-Z0-9][-A-Z0-9_./]{2,20}$/i;
+
+  for (const row of sampleRows) {
+    const cells = Array.isArray(row) ? row : Object.values(row);
+    for (let c = 0; c < cells.length; c++) {
+      const val = String(cells[c] || '').trim();
+      if (partLikePattern.test(val) && val.length >= 4) {
+        colScores[c]++;
+      }
+    }
+  }
+
+  const bestCol = colScores.indexOf(Math.max(...colScores));
+  return bestCol >= 0 ? bestCol : 0;
+}
+
+// ── Helper: resolve column index from header name or detected index ──
+function resolveColumnIndex(headerRow, detectedName, fallbackIdx) {
+  if (detectedName && headerRow) {
+    const headers = Array.isArray(headerRow) ? headerRow : Object.values(headerRow);
+    for (let i = 0; i < headers.length; i++) {
+      if (String(headers[i] || '').toLowerCase().trim() === String(detectedName).toLowerCase().trim()) {
+        return i;
+      }
+      // Also match by column index string like "0", "1"
+      if (String(detectedName).match(/^\d+$/) && parseInt(detectedName, 10) === i) {
+        return i;
+      }
+    }
+  }
+  return fallbackIdx >= 0 ? fallbackIdx : 0;
+}
+
+// ── Helper: clean and validate a part number string ──
+function cleanPartNumber(value) {
+  if (value === null || value === undefined) return null;
+  // Strip leading single quotes, backticks, double quotes (Excel text-prefix artifacts)
+  let str = String(value).trim().replace(/^['‘’`"]+/, '').trim().toUpperCase();
+  if (str.length < 3 || str.length > 30) return null;
+  // Skip common non-part-number values
+  if (/^(ROW|COL|SHEET|TABLE|TOTAL|SUM|COUNT|QTY|QUANTITY|PRICE|BRAND|NAME|DESC|N\/A|NULL|NONE|UNDEFINED|-|–)$/i.test(str)) return null;
+  // Must contain at least one digit or be alphanumeric
+  if (!/[0-9]/.test(str)) return null;
+  // Skip tiny numbers that are likely row nums or quantities
+  if (/^\d+$/.test(str) && parseInt(str, 10) < 1000) return null;
+  return str;
+}
+
+// ── Helper: parse a quantity value ──
+function parseQuantity(value) {
+  if (value === null || value === undefined) return 1;
+  const num = parseInt(String(value).replace(/[^0-9]/g, ''), 10);
+  return (num > 0 && num <= 99999) ? num : 1;
+}
+
+// ── Helper: normalize parts array from AI response ──
+function normalizePartsArray(parts) {
+  if (!Array.isArray(parts)) return [];
+  return parts
+    .filter(p => p && p.partNumber)
+    .map(part => ({
+      // Strip leading quotes (Excel text-prefix artifacts like 'ST1538)
+      partNumber: String(part.partNumber || '').trim().replace(/^['‘’`"]+/, '').trim().toUpperCase(),
+      quantity: parseInt(part.quantity, 10) || 1,
+      brand: part.brand || null,
+      description: part.description || null,
+      originalText: part.originalText || null,
+      confidence: part.confidence || 'medium',
+      selected: true,
+    }));
+}
+
+// ── Helper: deduplicate parts, merging quantities ──
+function deduplicateExtractedParts(parts) {
+  const map = new Map();
+  for (const part of parts) {
+    if (!part.partNumber) continue;
+    if (map.has(part.partNumber)) {
+      const existing = map.get(part.partNumber);
+      existing.quantity += (part.quantity || 1);
+      // Upgrade confidence level
+      if (part.confidence === 'high') existing.confidence = 'high';
+      else if (part.confidence === 'medium' && existing.confidence === 'low') existing.confidence = 'medium';
+      // Fill in missing brand/description
+      if (!existing.brand && part.brand) existing.brand = part.brand;
+      if (!existing.description && part.description) existing.description = part.description;
+    } else {
+      map.set(part.partNumber, { ...part });
+    }
+  }
+  return Array.from(map.values());
+}
+
+// ── Helper: build data quality summary ──
+function buildDataQuality(structure, aiWorked) {
+  const formatting = structure.hasHeaders ? (structure.partNumberCol >= 0 ? 'good' : 'fair') : 'fair';
+  const issues = [];
+
+  if (!structure.hasHeaders) issues.push('No header row detected — columns identified by patterns');
+  if (structure.quantityCol === -1) issues.push('No quantity column detected — defaulting to 1');
+  if (!aiWorked && structure.partNumberCol === -1) issues.push('Part number column guessed from data patterns');
+
+  return {
+    hasHeaders: structure.hasHeaders,
+    hasPartNumberColumn: structure.partNumberCol >= 0,
+    hasQuantityColumn: structure.quantityCol >= 0,
+    hasBrandColumn: structure.brandCol >= 0,
+    formatting,
+    issues,
+  };
+}
+
+// ── Helper: build suggestions ──
+function buildSuggestions(structure) {
+  const suggestions = [];
+  if (!structure.hasHeaders) {
+    suggestions.push('Add a header row with "Part Number" and "Quantity" labels for better accuracy');
+  }
+  if (structure.quantityCol === -1) {
+    suggestions.push('Include a "Quantity" column so quantities are extracted automatically');
+  }
+  if (structure.brandCol === -1) {
+    suggestions.push('Adding a "Brand" column helps identify exact part matches');
+  }
+  return suggestions;
+}
+
+// ── Smart extraction using detected structure ──
+function smartExtractParts(rawData, structure) {
+  const parts = [];
+  const seenPNs = new Set();
+  const startRow = structure.hasHeaders ? 1 : 0;
+  const partCol = structure.partNumberCol >= 0 ? structure.partNumberCol : -1;
+  const qtyCol = structure.quantityCol;
+  const brandCol = structure.brandCol;
+
+  for (let i = startRow; i < rawData.length; i++) {
+    const row = rawData[i];
+    const cells = Array.isArray(row) ? row : (typeof row === 'object' ? Object.values(row) : [row]);
+
+    // If we know the part number column, use it directly
+    if (partCol >= 0 && cells[partCol] !== undefined) {
+      const pn = cleanPartNumber(cells[partCol]);
+      if (pn && !seenPNs.has(pn)) {
+        seenPNs.add(pn);
+        parts.push({
+          partNumber: pn,
+          quantity: qtyCol >= 0 ? parseQuantity(cells[qtyCol]) : 1,
+          brand: brandCol >= 0 ? (String(cells[brandCol] || '').trim() || null) : null,
+          description: null,
+          originalText: cells.slice(0, 5).join(' | ').substring(0, 100),
+          confidence: structure.hasHeaders ? 'high' : 'medium',
+          selected: true,
+        });
+      }
+    } else {
+      // No column detected — scan every cell
+      for (const cell of cells) {
+        const pn = cleanPartNumber(cell);
+        if (pn && !seenPNs.has(pn)) {
+          seenPNs.add(pn);
+          parts.push({
+            partNumber: pn,
+            quantity: 1,
+            brand: null,
+            description: null,
+            originalText: cells.slice(0, 5).join(' | ').substring(0, 100),
+            confidence: 'medium',
+            selected: true,
+          });
+        }
+      }
+    }
+  }
+
+  return parts;
+}
+
+/**
+ * Fallback extraction when everything else fails
+ */
+function fallbackExcelExtraction(rawData, options = {}) {
+  const structure = detectSpreadsheetStructure(rawData);
+  const parts = smartExtractParts(rawData, structure);
 
   return {
     success: true,
-    summary: `Found ${uniqueParts.length} potential part numbers (basic extraction)`,
-    totalPartsFound: uniqueParts.length,
-    parts: uniqueParts,
-    dataQuality: {
-      hasHeaders: false,
-      hasPartNumberColumn: false,
-      hasQuantityColumn: false,
-      hasBrandColumn: false,
-      formatting: 'unknown',
-      issues: ['AI analysis unavailable, using basic pattern matching'],
-    },
-    suggestions: [
-      'For better results, ensure part numbers are in a dedicated column',
-      'Add a header row with "Part Number" and "Quantity" labels',
-    ],
-    detectedColumns: {},
+    summary: `Found ${parts.length} parts using pattern detection`,
+    totalPartsFound: parts.length,
+    parts,
+    dataQuality: buildDataQuality(structure, false),
+    suggestions: buildSuggestions(structure),
+    detectedColumns: structure.detectedColumns || {},
     originalRowCount: rawData.length,
     processedRowCount: rawData.length,
     aiPowered: false,

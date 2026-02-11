@@ -68,6 +68,8 @@
       qualityIssues: document.getElementById('quality-issues'),
       qualityIssuesText: document.getElementById('quality-issues-text'),
       selectAllParts: document.getElementById('select-all-parts'),
+      selectFirst1000: document.getElementById('select-first-1000'),
+      selectFirst1000Label: document.getElementById('select-first-1000-label'),
       partsCount: document.getElementById('parts-count'),
       partsList: document.getElementById('ai-parts-list'),
       suggestions: document.getElementById('ai-suggestions'),
@@ -118,6 +120,9 @@
 
     // Select all parts
     elements.selectAllParts?.addEventListener('change', handleSelectAll);
+
+    // Select first 1000 parts
+    elements.selectFirst1000?.addEventListener('change', handleSelectFirst1000);
 
     // Filter buttons
     document.querySelectorAll('#excel-step-results .filter-btn').forEach(btn => {
@@ -193,6 +198,14 @@
     }
   }
 
+  // ====================================
+  // UPLOAD LIMITS
+  // ====================================
+  const MAX_FILE_SIZE_MB = 10;
+  const MAX_EXCEL_ROWS = 5000;
+  const MAX_PARTS_PER_SEARCH = 1000;
+  const MAX_PAYLOAD_SIZE_MB = 45;
+
   async function processFile(file) {
     // Validate file type
     const validTypes = [
@@ -204,18 +217,30 @@
 
     const fileExt = file.name.split('.').pop().toLowerCase();
     if (!['xlsx', 'xls', 'csv'].includes(fileExt) && !validTypes.includes(file.type)) {
-      showNotification('error', 'Invalid File', 'Please upload an Excel or CSV file');
+      showNotification('error', 'Invalid File', 'Please upload an Excel (.xlsx, .xls) or CSV file');
       return;
     }
 
-    // Check file size (10MB limit)
-    if (file.size > 10 * 1024 * 1024) {
-      showNotification('error', 'File Too Large', 'Maximum file size is 10MB');
+    // Check file size
+    if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+      const fileSizeMB = (file.size / (1024 * 1024)).toFixed(1);
+      showUploadError(
+        'File Too Large',
+        `Your file "${file.name}" is ${fileSizeMB}MB, which exceeds the maximum of ${MAX_FILE_SIZE_MB}MB.`,
+        [
+          `<strong>Your file:</strong> ${fileSizeMB}MB`,
+          `<strong>Maximum allowed:</strong> ${MAX_FILE_SIZE_MB}MB`,
+          `<strong>Tip:</strong> Remove unnecessary columns or split into smaller files.`
+        ]
+      );
       return;
     }
 
     AIExcelState.fileName = file.name;
     AIExcelState.fileData = file;
+
+    // Hide any previous error
+    hideUploadError();
 
     // Show analyzing step
     showStep('analyzing');
@@ -228,6 +253,22 @@
       
       if (!rawData || rawData.length === 0) {
         throw new Error('No data found in file');
+      }
+
+      // Reject files exceeding the max row limit
+      if (rawData.length > MAX_EXCEL_ROWS) {
+        showUploadError(
+          'Too Many Rows',
+          `Your file "${file.name}" has ${rawData.length.toLocaleString()} rows, which exceeds the maximum of ${MAX_EXCEL_ROWS.toLocaleString()} rows.`,
+          [
+            `<strong>Your file:</strong> ${rawData.length.toLocaleString()} rows`,
+            `<strong>Maximum allowed:</strong> ${MAX_EXCEL_ROWS.toLocaleString()} rows`,
+            `<strong>Over limit by:</strong> ${(rawData.length - MAX_EXCEL_ROWS).toLocaleString()} rows`,
+            `<strong>Tip:</strong> Split your Excel file into batches of ${MAX_EXCEL_ROWS.toLocaleString()} rows or fewer, then upload each batch separately.`
+          ]
+        );
+        resetToUpload();
+        return;
       }
 
       // Send to AI for analysis
@@ -284,6 +325,7 @@
   // ====================================
   // AI ANALYSIS
   // ====================================
+
   async function analyzeWithAI(rawData, filename) {
     try {
       // First, show all the analyzing animation steps
@@ -292,6 +334,22 @@
       
       await showAnalyzingStep('detecting');
       await delay(800);
+
+      // Data is already validated to be within MAX_EXCEL_ROWS in processFile
+      const trimmedData = rawData;
+
+      // Check serialized payload size before sending
+      let payload = JSON.stringify({ data: trimmedData, filename: filename });
+      const payloadSizeMB = new Blob([payload]).size / (1024 * 1024);
+
+      if (payloadSizeMB > MAX_PAYLOAD_SIZE_MB) {
+        // Progressively reduce rows until payload fits
+        let reducedRows = Math.floor(trimmedData.length * (MAX_PAYLOAD_SIZE_MB / payloadSizeMB) * 0.9);
+        const reducedData = rawData.slice(0, Math.max(reducedRows, 100));
+        payload = JSON.stringify({ data: reducedData, filename: filename });
+        showNotification('info', 'Large Data', 
+          `Processing first ${reducedData.length.toLocaleString()} of ${rawData.length.toLocaleString()} rows due to data density`);
+      }
       
       await showAnalyzingStep('extracting');
       
@@ -301,14 +359,16 @@
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          data: rawData,
-          filename: filename,
-        }),
+        body: payload,
       });
 
+      if (response.status === 413) {
+        throw new Error('The file data is too large to process. Please try a smaller file or a file with fewer columns.');
+      }
+
       if (!response.ok) {
-        throw new Error(`Server error: ${response.status}`);
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.message || `Server error: ${response.status}`);
       }
 
       const result = await response.json();
@@ -425,6 +485,19 @@
   }
 
   async function showAnalyzingStep(stepName) {
+    // Complete all previous steps before activating this one
+    const steps = ['reading', 'detecting', 'extracting', 'validating'];
+    const currentIndex = steps.indexOf(stepName);
+    for (let i = 0; i < currentIndex; i++) {
+      const prevStep = document.getElementById(`ai-step-${steps[i]}`);
+      if (prevStep && !prevStep.classList.contains('completed')) {
+        prevStep.classList.remove('active');
+        prevStep.classList.add('completed');
+        const prevStatus = prevStep.querySelector('.ai-step-status');
+        if (prevStatus) prevStatus.innerHTML = '<i data-lucide="check"></i>';
+      }
+    }
+
     const step = document.getElementById(`ai-step-${stepName}`);
     if (step) {
       step.classList.add('active');
@@ -499,8 +572,26 @@
     // Update data quality
     updateDataQuality(result.dataQuality);
 
+    // Auto-select only first MAX_PARTS_PER_SEARCH parts if total exceeds limit
+    const parts = result.parts || [];
+    if (parts.length > MAX_PARTS_PER_SEARCH) {
+      parts.forEach((p, i) => {
+        p.selected = i < MAX_PARTS_PER_SEARCH;
+      });
+      // Show "Select First 1,000" checkbox, uncheck "Select All"
+      if (elements.selectFirst1000Label) elements.selectFirst1000Label.style.display = '';
+      if (elements.selectFirst1000) elements.selectFirst1000.checked = true;
+      if (elements.selectAllParts) {
+        elements.selectAllParts.checked = false;
+      }
+    } else {
+      // Hide "Select First 1,000" checkbox when within limit
+      if (elements.selectFirst1000Label) elements.selectFirst1000Label.style.display = 'none';
+      if (elements.selectAllParts) elements.selectAllParts.checked = true;
+    }
+
     // Render parts list
-    renderPartsList(result.parts || []);
+    renderPartsList(parts);
 
     // Show suggestions
     if (result.suggestions && result.suggestions.length > 0) {
@@ -521,12 +612,12 @@
 
     const qualityMap = {
       'good': { width: '90%', color: 'good', label: 'Excellent' },
-      'fair': { width: '60%', color: 'fair', label: 'Fair' },
+      'fair': { width: '65%', color: 'fair', label: 'Good' },
       'poor': { width: '30%', color: 'poor', label: 'Poor' },
-      'unknown': { width: '50%', color: 'fair', label: 'Unknown' },
+      'unknown': { width: '50%', color: 'fair', label: 'Fair' },
     };
 
-    const setting = qualityMap[quality.formatting] || qualityMap['unknown'];
+    const setting = qualityMap[quality.formatting] || qualityMap['fair'];
 
     if (elements.qualityFill) {
       elements.qualityFill.style.width = setting.width;
@@ -629,19 +720,65 @@
   // ====================================
   function handleSelectAll(e) {
     const isChecked = e.target.checked;
-    
-    AIExcelState.analyzedParts.forEach((part, index) => {
+
+    AIExcelState.analyzedParts.forEach((part) => {
       part.selected = isChecked;
     });
 
-    // Update checkboxes
     elements.partsList?.querySelectorAll('.part-checkbox input').forEach(checkbox => {
       checkbox.checked = isChecked;
       const item = checkbox.closest('.ai-part-item');
-      if (item) {
-        item.classList.toggle('selected', isChecked);
-      }
+      if (item) item.classList.toggle('selected', isChecked);
     });
+
+    // Uncheck "Select First 1000" when Select All is toggled
+    if (elements.selectFirst1000) {
+      elements.selectFirst1000.checked = false;
+    }
+
+    if (!isChecked) {
+      hideModalError();
+    } else if (AIExcelState.analyzedParts.length > MAX_PARTS_PER_SEARCH) {
+      showModalError('Too Many Selected',
+        `You selected all ${AIExcelState.analyzedParts.length.toLocaleString()} parts but maximum is ${MAX_PARTS_PER_SEARCH.toLocaleString()}. Use "Select First 1,000" or deselect some parts before searching.`);
+    }
+
+    updateSelectedParts();
+    updatePartsCount();
+    updateFooterButtons();
+  }
+
+  function handleSelectFirst1000(e) {
+    const isChecked = e.target.checked;
+
+    if (isChecked) {
+      // Select first 1000, deselect the rest
+      AIExcelState.analyzedParts.forEach((part, index) => {
+        part.selected = index < MAX_PARTS_PER_SEARCH;
+      });
+
+      const checkboxes = elements.partsList?.querySelectorAll('.part-checkbox input');
+      checkboxes?.forEach((checkbox, index) => {
+        checkbox.checked = index < MAX_PARTS_PER_SEARCH;
+        const item = checkbox.closest('.ai-part-item');
+        if (item) item.classList.toggle('selected', index < MAX_PARTS_PER_SEARCH);
+      });
+
+      // Uncheck "Select All"
+      if (elements.selectAllParts) {
+        elements.selectAllParts.checked = false;
+      }
+      hideModalError();
+    } else {
+      // Deselect all
+      AIExcelState.analyzedParts.forEach((part) => { part.selected = false; });
+      elements.partsList?.querySelectorAll('.part-checkbox input').forEach(checkbox => {
+        checkbox.checked = false;
+        const item = checkbox.closest('.ai-part-item');
+        if (item) item.classList.remove('selected');
+      });
+      if (elements.selectAllParts) elements.selectAllParts.checked = false;
+    }
 
     updateSelectedParts();
     updatePartsCount();
@@ -723,6 +860,11 @@
     if (elements.partsCount) {
       elements.partsCount.textContent = `${selected} of ${total} parts selected`;
     }
+
+    // Auto-dismiss max-parts error if user deselected enough
+    if (selected <= MAX_PARTS_PER_SEARCH) {
+      hideModalError();
+    }
   }
 
   function updateSelectAllCheckbox() {
@@ -732,7 +874,13 @@
     const selected = AIExcelState.analyzedParts.filter(p => p.selected).length;
 
     elements.selectAllParts.checked = selected === total && total > 0;
-    elements.selectAllParts.indeterminate = selected > 0 && selected < total;
+
+    // Update "Select First 1000" checkbox state
+    if (elements.selectFirst1000 && total > MAX_PARTS_PER_SEARCH) {
+      const first1000Selected = AIExcelState.analyzedParts.slice(0, MAX_PARTS_PER_SEARCH).every(p => p.selected);
+      const restDeselected = AIExcelState.analyzedParts.slice(MAX_PARTS_PER_SEARCH).every(p => !p.selected);
+      elements.selectFirst1000.checked = first1000Selected && restDeselected && selected === MAX_PARTS_PER_SEARCH;
+    }
   }
 
   // ====================================
@@ -746,8 +894,14 @@
       return;
     }
 
-    // Get selected part numbers as comma-separated string
-    const partNumbers = selectedParts.map(p => p.partNumber).join(', ');
+    if (selectedParts.length > MAX_PARTS_PER_SEARCH) {
+      showModalError('Too Many Parts', 
+        `Maximum ${MAX_PARTS_PER_SEARCH.toLocaleString()} parts per search. You selected ${selectedParts.length.toLocaleString()}. Please deselect some parts.`);
+      return;
+    }
+
+    // Get selected part numbers, strip leading quotes (Excel text-prefix artifacts)
+    const partNumbers = selectedParts.map(p => p.partNumber.replace(/^['''\u2018\u2019`"]+/, '').trim()).filter(Boolean).join(', ');
     
     // Store Excel import stats globally for the search banner to use
     window.__excelImportStats = {
@@ -1097,6 +1251,7 @@
 
     // Add to cart
     let addedCount = 0;
+    let failedCount = 0;
     for (const part of selectedOptions) {
       try {
         // Use global addToCart if available
@@ -1121,7 +1276,12 @@
         }
       } catch (error) {
         console.error('Error adding to cart:', error);
+        failedCount++;
       }
+    }
+
+    if (failedCount > 0) {
+      showNotification('warning', 'Cart Warning', `${failedCount} item(s) could not be added to cart`);
     }
 
     if (addedCount > 0) {
@@ -1253,6 +1413,96 @@
     } else {
       console.log(`[${type.toUpperCase()}] ${title}: ${message}`);
     }
+  }
+
+  // Show a prominent error banner inside the upload step
+  function showUploadError(title, message, details) {
+    const banner = document.getElementById('upload-error-banner');
+    const titleEl = document.getElementById('upload-error-title');
+    const messageEl = document.getElementById('upload-error-message');
+    const detailsEl = document.getElementById('upload-error-details');
+    const dismissBtn = document.getElementById('upload-error-dismiss');
+
+    if (!banner) {
+      // Fallback to toast notification
+      showNotification('error', title, message);
+      return;
+    }
+
+    titleEl.textContent = title;
+    messageEl.textContent = message;
+
+    if (details && details.length > 0) {
+      detailsEl.innerHTML = '<ul>' + details.map(d => `<li>${d}</li>`).join('') + '</ul>';
+    } else {
+      detailsEl.innerHTML = '';
+    }
+
+    banner.style.display = 'flex';
+
+    // Dismiss handler
+    if (dismissBtn) {
+      dismissBtn.onclick = () => { banner.style.display = 'none'; };
+    }
+
+    // Also show toast
+    showNotification('error', title, message);
+  }
+
+  function hideUploadError() {
+    const banner = document.getElementById('upload-error-banner');
+    if (banner) banner.style.display = 'none';
+  }
+
+  // Show an error banner inside the results step (for max-parts, etc.)
+  function showModalError(title, message) {
+    let banner = document.getElementById('modal-inline-error');
+    if (!banner) {
+      banner = document.createElement('div');
+      banner.id = 'modal-inline-error';
+      banner.className = 'modal-error-banner';
+      banner.innerHTML = `
+        <div class="modal-error-stripe"></div>
+        <div class="modal-error-body">
+          <div class="modal-error-icon-wrap">
+            <i data-lucide="alert-triangle"></i>
+          </div>
+          <div class="modal-error-text">
+            <h4 class="modal-error-title" id="modal-error-title"></h4>
+            <p class="modal-error-msg" id="modal-error-message"></p>
+          </div>
+          <button class="modal-error-close" id="modal-error-dismiss">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+      `;
+      // Insert at top of results step
+      const resultsStep = document.getElementById('excel-step-results');
+      if (resultsStep) {
+        resultsStep.insertBefore(banner, resultsStep.firstChild);
+      }
+    }
+
+    const titleEl = banner.querySelector('#modal-error-title');
+    const msgEl = banner.querySelector('#modal-error-message');
+    if (titleEl) titleEl.textContent = title;
+    if (msgEl) msgEl.textContent = message;
+
+    banner.style.display = 'block';
+
+    const dismissBtn = banner.querySelector('#modal-error-dismiss');
+    if (dismissBtn) {
+      dismissBtn.onclick = () => { banner.style.display = 'none'; };
+    }
+
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+    }
+  }
+
+  function hideModalError() {
+    const banner = document.getElementById('modal-inline-error');
+    if (banner) banner.style.display = 'none';
   }
 
   // ====================================

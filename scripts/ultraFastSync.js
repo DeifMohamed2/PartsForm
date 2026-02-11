@@ -247,32 +247,7 @@ async function mergeCSVFiles(csvPaths, integration) {
   return { mergedPath, totalRows };
 }
 
-/**
- * PHASE 3: Drop MongoDB indexes for fast import
- */
-async function dropMongoIndexes() {
-  log(`PHASE 3: Dropping MongoDB indexes for fast import...`, 'PROGRESS');
-  
-  const startTime = Date.now();
-  
-  await mongoose.connect(CONFIG.mongoUri);
-  const db = mongoose.connection.db;
-  const collection = db.collection(CONFIG.mongoCollection);
-  
-  // Get current indexes
-  const indexes = await collection.indexes();
-  const indexNames = indexes.map(i => i.name).filter(n => n !== '_id_');
-  
-  if (indexNames.length > 0) {
-    await collection.dropIndexes();
-    log(`Dropped ${indexNames.length} indexes: ${indexNames.join(', ')}`, 'SUCCESS');
-  } else {
-    log(`No indexes to drop (only _id exists)`);
-  }
-  
-  const duration = ((Date.now() - startTime) / 1000).toFixed(1);
-  log(`Index drop completed in ${duration}s`, 'SUCCESS');
-}
+// MongoDB index drop/recreate skipped — search depends entirely on Elasticsearch
 
 /**
  * PHASE 4: Delete old data for this integration
@@ -424,34 +399,7 @@ async function nodeBulkImport(csvPath, totalRows, integration) {
   return totalInserted;
 }
 
-/**
- * PHASE 6: Recreate MongoDB indexes
- */
-async function createMongoIndexes() {
-  log(`PHASE 6: Recreating MongoDB indexes...`, 'PROGRESS');
-  
-  const startTime = Date.now();
-  const db = mongoose.connection.db;
-  const collection = db.collection(CONFIG.mongoCollection);
-  
-  // Create indexes in background
-  const indexes = [
-    { key: { partNumber: 1 }, background: true },
-    { key: { integration: 1 }, background: true },
-    { key: { brand: 1 }, background: true },
-    { key: { supplier: 1 }, background: true },
-    { key: { fileName: 1 }, background: true },
-    { key: { partNumber: 1, supplier: 1 }, background: true },
-    { key: { partNumber: 1, integration: 1 }, background: true },
-  ];
-  
-  for (const idx of indexes) {
-    await collection.createIndex(idx.key, { background: idx.background });
-  }
-  
-  const duration = ((Date.now() - startTime) / 1000).toFixed(1);
-  log(`Created ${indexes.length} indexes in ${duration}s`, 'SUCCESS');
-}
+// MongoDB indexes skipped — search depends entirely on Elasticsearch
 
 /**
  * PHASE 7: Bulk index to Elasticsearch
@@ -649,7 +597,6 @@ async function main() {
     // Run phases
     const csvPaths = await downloadFTPFiles(integration);
     const { mergedPath, totalRows } = await mergeCSVFiles(csvPaths, integration);
-    await dropMongoIndexes();
     await deleteOldData(integration._id.toString());
     
     // Use mongoimport if available, otherwise Node.js bulk import
@@ -659,7 +606,7 @@ async function main() {
       await nodeBulkImport(mergedPath, totalRows, integration);
     }
     
-    await createMongoIndexes();
+    // MongoDB indexes skipped — search depends entirely on Elasticsearch
     await bulkIndexToES(integration._id.toString());
     
     const totalDuration = Date.now() - overallStart;

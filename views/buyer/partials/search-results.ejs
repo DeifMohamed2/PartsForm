@@ -283,6 +283,7 @@
         <div class="results-header-left">
         <p class="results-count">
           Found <strong id="results-count">0</strong> parts matching your search
+          <span class="results-page-info" id="results-page-info" style="display: none;"></span>
         </p>
         <p class="results-subtitle">
           <span id="selection-status">Select items to add to cart</span>
@@ -372,6 +373,11 @@
               <!-- Results will be inserted here -->
             </tbody>
           </table>
+        </div>
+
+        <!-- Pagination Controls -->
+        <div class="results-pagination" id="results-pagination" style="display: none;">
+          <!-- Populated by JS -->
         </div>
 
         <!-- Results Footer -->
@@ -510,6 +516,21 @@
     <div class="modal-body ai-excel-body">
       <!-- Step 1: Upload Area -->
       <div class="ai-excel-step" id="excel-step-upload">
+        <!-- Upload Error Banner -->
+        <div class="ai-upload-error" id="upload-error-banner" style="display: none;">
+          <div class="upload-error-icon">
+            <i data-lucide="alert-triangle"></i>
+          </div>
+          <div class="upload-error-content">
+            <h4 class="upload-error-title" id="upload-error-title">File Too Large</h4>
+            <p class="upload-error-message" id="upload-error-message"></p>
+            <div class="upload-error-details" id="upload-error-details"></div>
+          </div>
+          <button class="upload-error-dismiss" id="upload-error-dismiss">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+
         <div class="upload-area ai-upload-area" id="upload-area">
           <input type="file" id="excel-file-input" accept=".xlsx,.xls,.csv" hidden>
           <div class="ai-upload-visual">
@@ -534,7 +555,7 @@
           
           <p class="upload-hint">
             <i data-lucide="check-circle"></i>
-            Supports .xlsx, .xls, .csv • Max 10MB
+            Supports .xlsx, .xls, .csv • Max 10MB • Max 5,000 rows • Max 1,000 parts per search
           </p>
         </div>
 
@@ -633,6 +654,11 @@
               <input type="checkbox" id="select-all-parts" checked>
               <span class="checkbox-custom"></span>
               <span class="checkbox-label">Select All</span>
+            </label>
+            <label class="select-all-checkbox select-first-option" id="select-first-1000-label" style="display: none;">
+              <input type="checkbox" id="select-first-1000">
+              <span class="checkbox-custom"></span>
+              <span class="checkbox-label">Select First 1,000</span>
             </label>
             <span class="parts-count" id="parts-count">0 parts selected</span>
           </div>

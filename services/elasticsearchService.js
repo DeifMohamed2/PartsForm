@@ -16,7 +16,7 @@ class ElasticsearchService {
     // Cache for document count to avoid checking on every request
     this._cachedDocCount = null;
     this._docCountCacheTime = null;
-    this._docCountCacheTTL = 60000; // 60 seconds cache
+    this._docCountCacheTTL = 30000; // 30 seconds cache (shorter for fast recovery after sync)
     // Production mode - less logging
     this.productionMode = process.env.NODE_ENV === 'production' || process.env.SYNC_PRODUCTION_MODE === 'true';
     this._indexedCount = 0;
@@ -509,36 +509,51 @@ class ElasticsearchService {
 
     try {
       const limitPerPart = options.limitPerPart || 50;
-      const totalLimit = Math.min(partNumbers.length * limitPerPart, 1000);
 
-      // Build terms for all part numbers (with case variations)
-      const allTerms = [];
-      partNumbers.forEach(pn => {
-        const trimmed = pn.trim();
-        allTerms.push(trimmed);
-        allTerms.push(trimmed.toUpperCase());
-        allTerms.push(trimmed.toLowerCase());
-      });
+      // Clean part numbers: strip leading quotes (Excel text-prefix artifacts like 'ST1538)
+      const stripQuotes = (s) => s.trim().replace(/^['"'‘’`]+/, '').trim();
+      const cleanedParts = partNumbers.map(stripQuotes).filter(Boolean);
 
-      // Single query to find all parts at once
-      const response = await this.client.search({
-        index: this.indexName,
-        body: {
-          query: {
-            terms: {
-              partNumber: allTerms,
+      // Batch large requests (ES terms query has practical limits)
+      const BATCH_SIZE = 500;
+      const batches = [];
+      for (let i = 0; i < cleanedParts.length; i += BATCH_SIZE) {
+        batches.push(cleanedParts.slice(i, i + BATCH_SIZE));
+      }
+
+      let results = [];
+
+      for (const batch of batches) {
+        const batchTerms = new Set();
+        batch.forEach(pn => {
+          batchTerms.add(pn);
+          batchTerms.add(pn.toUpperCase());
+          batchTerms.add(pn.toLowerCase());
+        });
+
+        const batchLimit = Math.min(batch.length * limitPerPart, 5000);
+
+        const response = await this.client.search({
+          index: this.indexName,
+          body: {
+            query: {
+              terms: {
+                partNumber: [...batchTerms],
+              },
             },
+            size: batchLimit,
+            track_total_hits: true,
           },
-          size: totalLimit,
-          track_total_hits: true,
-        },
-      });
+        });
 
-      const results = response.hits.hits.map((hit) => ({
-        _id: hit._id,
-        ...hit._source,
-        _score: hit._score,
-      }));
+        const batchResults = response.hits.hits.map((hit) => ({
+          _id: hit._id,
+          ...hit._source,
+          _score: hit._score,
+        }));
+
+        results = results.concat(batchResults);
+      }
 
       // Determine which parts were found
       const foundPartNumbers = new Set();
@@ -550,7 +565,7 @@ class ElasticsearchService {
 
       const found = [];
       const notFound = [];
-      partNumbers.forEach(pn => {
+      cleanedParts.forEach(pn => {
         const upper = pn.trim().toUpperCase();
         if (foundPartNumbers.has(upper)) {
           found.push(pn);
@@ -559,7 +574,7 @@ class ElasticsearchService {
         }
       });
 
-      console.log(`🔍 ES Multi-Part Search: ${partNumbers.length} parts requested, ${found.length} found, ${notFound.length} not found, ${results.length} total results`);
+      console.log(`ES Multi-Part Search: ${cleanedParts.length} parts requested, ${found.length} found, ${notFound.length} not found, ${results.length} total results`);
 
       return {
         results,
@@ -744,10 +759,18 @@ class ElasticsearchService {
         this.client.count({ index: this.indexName }),
       ]);
 
+      // When using aliases, stats are keyed by the real index name, not the alias
+      let indexStats = stats.indices[this.indexName];
+      if (!indexStats) {
+        // Find the actual index behind the alias
+        const realIndex = Object.keys(stats.indices)[0];
+        if (realIndex) indexStats = stats.indices[realIndex];
+      }
+
       return {
         documentCount: count.count,
-        indexSize: stats.indices[this.indexName]?.total?.store?.size_in_bytes || 0,
-        indexSizeHuman: this._formatBytes(stats.indices[this.indexName]?.total?.store?.size_in_bytes || 0),
+        indexSize: indexStats?.total?.store?.size_in_bytes || 0,
+        indexSizeHuman: this._formatBytes(indexStats?.total?.store?.size_in_bytes || 0),
       };
     } catch (error) {
       console.error('Error getting ES stats:', error.message);

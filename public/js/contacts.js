@@ -70,6 +70,9 @@ function saveMessage(message) {
     localStorage.setItem(CONTACTS_STORAGE_KEY, JSON.stringify(messages));
   } catch (error) {
     console.error('Error saving message:', error);
+    if (typeof window.showCartAlert === 'function') {
+      window.showCartAlert('error', 'Save Error', 'Failed to save your message. Please try again.');
+    }
   }
 }
 
@@ -80,6 +83,9 @@ function getMessages() {
     return stored ? JSON.parse(stored) : [];
   } catch (error) {
     console.error('Error loading messages:', error);
+    if (typeof window.showCartAlert === 'function') {
+      window.showCartAlert('error', 'Load Error', 'Failed to load saved messages.');
+    }
     return [];
   }
 }
