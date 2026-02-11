@@ -674,8 +674,8 @@
       exclude: pi.exclusions || f.exclude || null,
       requestedQuantity: pi.requestedQuantity || f.requestedQuantity || null,
       supplierOrigin: pi.supplierOrigin || f.supplierOrigin || null,
-      minPrice: pi.minPrice !== undefined ? pi.minPrice : f.minPrice,
-      maxPrice: pi.maxPrice !== undefined ? pi.maxPrice : f.maxPrice,
+      minPrice: pi.minPrice != null ? pi.minPrice : (f.minPrice != null ? f.minPrice : null),
+      maxPrice: pi.maxPrice != null ? pi.maxPrice : (f.maxPrice != null ? f.maxPrice : null),
       priceCurrency: pi.priceCurrency || f.priceCurrency || 'USD',
       inStock: pi.requireInStock || f.inStock || false,
       requireHighStock: pi.requireHighStock || false,
@@ -799,7 +799,7 @@
     // ═══════════════════════════════════════════════════════════════
     // PRICE FILTERS (with smart range support)
     // ═══════════════════════════════════════════════════════════════
-    if (fv.minPrice !== undefined && fv.maxPrice !== undefined) {
+    if (fv.minPrice != null && fv.maxPrice != null) {
       // Show as range if both present
       filters.push({
         type: 'price',
@@ -810,7 +810,7 @@
         filterValue: { min: fv.minPrice, max: fv.maxPrice },
       });
     } else {
-      if (fv.minPrice !== undefined) {
+      if (fv.minPrice != null) {
         filters.push({
           type: 'price',
           icon: 'dollar-sign',
@@ -820,7 +820,7 @@
           filterValue: fv.minPrice,
         });
       }
-      if (fv.maxPrice !== undefined) {
+      if (fv.maxPrice != null) {
         filters.push({
           type: 'price',
           icon: 'dollar-sign',

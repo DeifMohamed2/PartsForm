@@ -989,10 +989,13 @@ async function aiSearch(req, res) {
     // STEP 4: MULTI-FACTOR AI RANKING, DEDUP & COMPARISON
     // ─────────────────────────────────────────────────────────────
 
-    // Deduplicate first
+    // Deduplicate — use _id (always unique per DB document), or fallback
+    // to a composite key for ES results that might have duplicate entries
     const seen = new Set();
     filteredResults = filteredResults.filter((p) => {
-      const key = `${p.partNumber}-${p.supplier}`;
+      const key = p._id
+        ? p._id.toString()
+        : `${p.partNumber}-${p.supplier || ''}-${p.stockCode || ''}-${p.price || ''}`;
       if (seen.has(key)) return false;
       seen.add(key);
       return true;
@@ -1183,7 +1186,13 @@ async function aiSearch(req, res) {
       filteredResults[0]._aiBadges = ['best-overall', 'only-option'];
     }
 
-    filteredResults = filteredResults.slice(0, 500);
+    // Apply topN limit if user asked for "best 3", "top 5", etc.
+    const topN = parsedIntent.topN || null;
+    if (topN && topN >= 2 && filteredResults.length > topN) {
+      filteredResults = filteredResults.slice(0, topN);
+    } else {
+      filteredResults = filteredResults.slice(0, 500);
+    }
 
     const searchTime = Date.now() - startTime;
     console.log(
@@ -1256,6 +1265,7 @@ async function aiSearch(req, res) {
       searchTime,
       message,
       aiInsights: aiInsights || [],
+      topN: topN || null,
       filterStatus: {
         totalFetched: allResults.length,
         afterFiltering: filteredResults.length,
