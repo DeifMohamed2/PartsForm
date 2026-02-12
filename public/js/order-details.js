@@ -6,11 +6,61 @@
 (function () {
   'use strict';
 
+  // Currency configuration
+  let currentCurrency = 'AED';
+  let exchangeRate = 1;
+
   let currentOrder = null;
   let isLoading = false;
 
+  // Currency helpers
+  function initializeCurrency() {
+    if (typeof window.getPreferredCurrency === 'function') {
+      const preferred = window.getPreferredCurrency();
+      if (preferred && preferred !== 'ORIGINAL') {
+        currentCurrency = preferred;
+        updateExchangeRate();
+      }
+    } else if (window.__USER_DATA__ && window.__USER_DATA__.preferredCurrency) {
+      const preferred = window.__USER_DATA__.preferredCurrency;
+      if (preferred && preferred !== 'ORIGINAL') {
+        currentCurrency = preferred;
+        updateExchangeRate();
+      }
+    }
+    
+    window.addEventListener('preferredCurrencyChanged', function(e) {
+      if (e.detail && e.detail.currency) {
+        currentCurrency = e.detail.currency === 'ORIGINAL' ? 'AED' : e.detail.currency;
+        updateExchangeRate();
+        if (currentOrder) {
+          renderOrderDetails(currentOrder);
+        }
+      }
+    });
+  }
+  
+  function updateExchangeRate() {
+    if (currentCurrency === 'AED') {
+      exchangeRate = 1;
+      return;
+    }
+    if (typeof window.convertPrice === 'function') {
+      const converted = window.convertPrice(1, 'AED', currentCurrency);
+      if (converted && converted > 0) {
+        exchangeRate = converted;
+      }
+    }
+  }
+  
+  function formatAmount(amount) {
+    const converted = parseFloat(amount || 0) * exchangeRate;
+    return `${converted.toFixed(2)} ${currentCurrency}`;
+  }
+
   // Initialize
   function init() {
+    initializeCurrency();
     const orderNumber = getOrderNumberFromURL();
     if (orderNumber) {
       loadOrderDetails(orderNumber);
@@ -162,7 +212,7 @@
         </td>
         <td style="text-align: center;" class="order-item-weight">${(parseFloat(item.weight) || 0).toFixed(3)} kg</td>
         <td style="text-align: center;" class="order-item-stock">${item.stock || 'N/A'}</td>
-        <td style="text-align: right;" class="order-item-price">${price.toFixed(2)} د.إ</td>
+        <td style="text-align: right;" class="order-item-price">${formatAmount(price)}</td>
       `;
       tbody.appendChild(row);
     });
@@ -214,13 +264,13 @@
       ${payment.amountDue > 0 ? `
       <div class="payment-info-item">
         <div class="payment-info-label">Amount Due</div>
-        <div class="payment-info-value">${payment.amountDue.toFixed(2)} د.إ</div>
+        <div class="payment-info-value">${formatAmount(payment.amountDue)}</div>
       </div>
       ` : ''}
       ${payment.amountPaid > 0 ? `
       <div class="payment-info-item">
         <div class="payment-info-label">Amount Paid</div>
-        <div class="payment-info-value">${payment.amountPaid.toFixed(2)} د.إ</div>
+        <div class="payment-info-value">${formatAmount(payment.amountPaid)}</div>
       </div>
       ` : ''}
     `;
@@ -307,35 +357,35 @@
       ` : ''}
       <div class="order-summary-row">
         <span class="order-summary-label">Subtotal</span>
-        <span class="order-summary-value">${subtotal.toFixed(2)} د.إ</span>
+        <span class="order-summary-value">${formatAmount(subtotal)}</span>
       </div>
       ${fee > 0 ? `
       <div class="order-summary-row">
         <span class="order-summary-label">Processing Fee</span>
-        <span class="order-summary-value">${fee.toFixed(2)} د.إ</span>
+        <span class="order-summary-value">${formatAmount(fee)}</span>
       </div>
       ` : ''}
       ${shipping > 0 ? `
       <div class="order-summary-row">
         <span class="order-summary-label">Shipping</span>
-        <span class="order-summary-value">${shipping.toFixed(2)} د.إ</span>
+        <span class="order-summary-value">${formatAmount(shipping)}</span>
       </div>
       ` : ''}
       ${tax > 0 ? `
       <div class="order-summary-row">
         <span class="order-summary-label">Tax</span>
-        <span class="order-summary-value">${tax.toFixed(2)} د.إ</span>
+        <span class="order-summary-value">${formatAmount(tax)}</span>
       </div>
       ` : ''}
       ${discount > 0 ? `
       <div class="order-summary-row discount">
         <span class="order-summary-label">Discount</span>
-        <span class="order-summary-value">-${discount.toFixed(2)} د.إ</span>
+        <span class="order-summary-value">-${formatAmount(discount)}</span>
       </div>
       ` : ''}
       <div class="order-summary-row total">
         <span class="order-summary-label">Total</span>
-        <span class="order-summary-value">${total.toFixed(2)} د.إ</span>
+        <span class="order-summary-value">${formatAmount(total)}</span>
       </div>
       <div class="order-summary-row">
         <span class="order-summary-label">Order Date</span>
@@ -556,24 +606,24 @@
       text += `${item.description || item.partNumber || 'N/A'}\n`;
       text += `  Part Number: ${item.partNumber || 'N/A'}\n`;
       text += `  Brand: ${item.brand || 'N/A'}\n`;
-      text += `  Quantity: ${qty} x ${price.toFixed(2)} = ${(qty * price).toFixed(2)} د.إ\n\n`;
+      text += `  Quantity: ${qty} x ${formatAmount(price)} = ${formatAmount(qty * price)}\n\n`;
     });
     
     text += `${'='.repeat(60)}\n`;
-    text += `Subtotal: ${(pricing.subtotal || 0).toFixed(2)} د.إ\n`;
+    text += `Subtotal: ${formatAmount(pricing.subtotal || 0)}\n`;
     if (pricing.processingFee > 0) {
-      text += `Processing Fee: ${pricing.processingFee.toFixed(2)} د.إ\n`;
+      text += `Processing Fee: ${formatAmount(pricing.processingFee)}\n`;
     }
     if (pricing.shipping > 0) {
-      text += `Shipping: ${pricing.shipping.toFixed(2)} د.إ\n`;
+      text += `Shipping: ${formatAmount(pricing.shipping)}\n`;
     }
     if (pricing.tax > 0) {
-      text += `Tax: ${pricing.tax.toFixed(2)} د.إ\n`;
+      text += `Tax: ${formatAmount(pricing.tax)}\n`;
     }
     if (pricing.discount > 0) {
-      text += `Discount: -${pricing.discount.toFixed(2)} د.إ\n`;
+      text += `Discount: -${formatAmount(pricing.discount)}\n`;
     }
-    text += `TOTAL: ${(pricing.total || 0).toFixed(2)} د.إ\n\n`;
+    text += `TOTAL: ${formatAmount(pricing.total || 0)}\n\n`;
     
     // Payment info
     if (order.payment) {
@@ -581,10 +631,10 @@
       text += `Status: ${order.payment.status || 'N/A'}\n`;
       text += `Method: ${order.payment.method || 'N/A'}\n`;
       if (order.payment.amountPaid > 0) {
-        text += `Amount Paid: ${order.payment.amountPaid.toFixed(2)} د.إ\n`;
+        text += `Amount Paid: ${formatAmount(order.payment.amountPaid)}\n`;
       }
       if (order.payment.amountDue > 0) {
-        text += `Amount Due: ${order.payment.amountDue.toFixed(2)} د.إ\n`;
+        text += `Amount Due: ${formatAmount(order.payment.amountDue)}\n`;
       }
     }
     

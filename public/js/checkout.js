@@ -7,8 +7,11 @@
 (function() {
   'use strict';
 
+  // Currency configuration - dynamic based on user preference
+  let currentCurrency = 'AED';
+  let exchangeRate = 1; // Rate from AED to current currency
+  
   const CONFIG = {
-    CURRENCY: 'د.إ',
     CART_KEY: 'partsform_shopping_cart',
     REDIRECT_DELAY: 3000
   };
@@ -41,7 +44,53 @@
   }
 
   function formatCurrency(amount) {
-    return `${parseFloat(amount || 0).toFixed(2)} ${CONFIG.CURRENCY}`;
+    const convertedAmount = parseFloat(amount || 0) * exchangeRate;
+    return `${convertedAmount.toFixed(2)} ${currentCurrency}`;
+  }
+  
+  // Initialize currency from user preferences
+  function initializeCurrency() {
+    // Get user's preferred currency
+    if (typeof window.getPreferredCurrency === 'function') {
+      const preferred = window.getPreferredCurrency();
+      if (preferred && preferred !== 'ORIGINAL') {
+        currentCurrency = preferred;
+        updateExchangeRate();
+      }
+    } else if (window.__USER_DATA__ && window.__USER_DATA__.preferredCurrency) {
+      const preferred = window.__USER_DATA__.preferredCurrency;
+      if (preferred && preferred !== 'ORIGINAL') {
+        currentCurrency = preferred;
+        updateExchangeRate();
+      }
+    }
+    
+    // Listen for currency changes
+    window.addEventListener('preferredCurrencyChanged', function(e) {
+      if (e.detail && e.detail.currency) {
+        currentCurrency = e.detail.currency === 'ORIGINAL' ? 'AED' : e.detail.currency;
+        updateExchangeRate();
+        renderOrderSummary();
+        updatePaymentAmounts();
+        updateFeeAndTotal();
+      }
+    });
+  }
+  
+  // Update exchange rate from base currency (AED) to current currency
+  function updateExchangeRate() {
+    if (currentCurrency === 'AED') {
+      exchangeRate = 1;
+      return;
+    }
+    
+    if (typeof window.convertPrice === 'function') {
+      // Get rate by converting 1 AED
+      const converted = window.convertPrice(1, 'AED', currentCurrency);
+      if (converted && converted > 0) {
+        exchangeRate = converted;
+      }
+    }
   }
 
   function showToast(message, type = 'error') {
@@ -559,6 +608,9 @@
   // ====================================
   async function init() {
     console.log('[Checkout] Initializing...');
+    
+    // Initialize currency first
+    initializeCurrency();
     
     // Load cart from localStorage (no API call)
     cartItems = loadCartFromStorage();

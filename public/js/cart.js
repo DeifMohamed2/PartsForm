@@ -7,6 +7,12 @@
   'use strict';
 
   // ====================================
+  // CURRENCY CONFIGURATION
+  // ====================================
+  let currentCurrency = 'AED';
+  let exchangeRate = 1; // Rate from AED to current currency
+
+  // ====================================
   // CART STATE MANAGEMENT
   // ====================================
   const CART_STORAGE_KEY = 'partsform_shopping_cart';
@@ -18,6 +24,55 @@
     createdAt: null,
     expiresAt: null,
   };
+
+  // ====================================
+  // CURRENCY HELPERS
+  // ====================================
+  function initializeCurrency() {
+    // Get user's preferred currency
+    if (typeof window.getPreferredCurrency === 'function') {
+      const preferred = window.getPreferredCurrency();
+      if (preferred && preferred !== 'ORIGINAL') {
+        currentCurrency = preferred;
+        updateExchangeRate();
+      }
+    } else if (window.__USER_DATA__ && window.__USER_DATA__.preferredCurrency) {
+      const preferred = window.__USER_DATA__.preferredCurrency;
+      if (preferred && preferred !== 'ORIGINAL') {
+        currentCurrency = preferred;
+        updateExchangeRate();
+      }
+    }
+    
+    // Listen for currency changes
+    window.addEventListener('preferredCurrencyChanged', function(e) {
+      if (e.detail && e.detail.currency) {
+        currentCurrency = e.detail.currency === 'ORIGINAL' ? 'AED' : e.detail.currency;
+        updateExchangeRate();
+        renderCart();
+        updateCartSummary();
+      }
+    });
+  }
+  
+  function updateExchangeRate() {
+    if (currentCurrency === 'AED') {
+      exchangeRate = 1;
+      return;
+    }
+    
+    if (typeof window.convertPrice === 'function') {
+      const converted = window.convertPrice(1, 'AED', currentCurrency);
+      if (converted && converted > 0) {
+        exchangeRate = converted;
+      }
+    }
+  }
+  
+  function formatPrice(amount) {
+    const convertedAmount = parseFloat(amount || 0) * exchangeRate;
+    return `${convertedAmount.toFixed(2)} ${currentCurrency}`;
+  }
 
   // ====================================
   // DOM ELEMENTS
@@ -52,6 +107,7 @@
   // INITIALIZATION
   // ====================================
   function init() {
+    initializeCurrency();
     loadCartFromStorage();
     renderCart();
     updateCartBadge();
@@ -430,13 +486,10 @@
         <span class="qty-display">1</span>
       </td>
       <td class="th-price">
-        <span class="price-display">
-          ${item.price.toFixed(2)}
-          <span class="price-currency">د.إ</span>
-        </span>
+        <span class="price-display">${formatPrice(item.price)}</span>
       </td>
       <td class="th-amount">
-        <span class="amount-display">${amount.toFixed(2)} د.إ</span>
+        <span class="amount-display">${formatPrice(amount)}</span>
       </td>
       <td class="th-actions">
         <button class="btn-remove-item" data-item-id="${
@@ -475,18 +528,25 @@
     }
 
     const totals = calculateTotals();
+    const convertedAmount = totals.totalAmount * exchangeRate;
 
     if (DOM.totalItemsCount)
       DOM.totalItemsCount.textContent = totals.totalItems;
     if (DOM.totalItems) DOM.totalItems.textContent = totals.totalItems;
     if (DOM.totalAmount)
-      DOM.totalAmount.textContent = totals.totalAmount.toFixed(2);
+      DOM.totalAmount.textContent = convertedAmount.toFixed(2);
     if (DOM.totalAmountText)
-      DOM.totalAmountText.textContent = totals.totalAmount.toFixed(2);
+      DOM.totalAmountText.textContent = convertedAmount.toFixed(2);
     if (DOM.totalWeight)
       DOM.totalWeight.textContent = totals.totalWeight.toFixed(3);
     if (DOM.totalWeightText)
       DOM.totalWeightText.textContent = totals.totalWeight.toFixed(3);
+    
+    // Update currency labels
+    const currencyLabels = document.querySelectorAll('.cart-currency-label');
+    currencyLabels.forEach(el => {
+      el.textContent = currentCurrency;
+    });
 
     // Enable/disable checkout button
     if (DOM.checkoutBtn) {
@@ -625,8 +685,8 @@
         'A/C Type',
         'Quantity',
         'Add Packing',
-        'Price (AED)',
-        'Amount (AED)',
+        `Price (${currentCurrency})`,
+        `Amount (${currentCurrency})`,
         'Reference',
         'Date Created',
       ];
@@ -641,8 +701,8 @@
         item.aircraftType,
         item.quantity,
         item.addPacking ? 'Yes' : 'No',
-        item.price.toFixed(2),
-        (item.price * item.quantity).toFixed(2),
+        (item.price * exchangeRate).toFixed(2),
+        (item.price * item.quantity * exchangeRate).toFixed(2),
         item.reference,
         formatDate(item.dateCreated),
       ]);

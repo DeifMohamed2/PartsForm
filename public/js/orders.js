@@ -7,6 +7,10 @@
 (function () {
   'use strict';
 
+  // Currency configuration
+  let currentCurrency = 'AED';
+  let exchangeRate = 1;
+
   // Store orders data
   let originalOrders = [];
   let filteredOrders = [];
@@ -26,8 +30,52 @@
     cancelled: 5
   };
 
+  // Currency helpers
+  function initializeCurrency() {
+    if (typeof window.getPreferredCurrency === 'function') {
+      const preferred = window.getPreferredCurrency();
+      if (preferred && preferred !== 'ORIGINAL') {
+        currentCurrency = preferred;
+        updateExchangeRate();
+      }
+    } else if (window.__USER_DATA__ && window.__USER_DATA__.preferredCurrency) {
+      const preferred = window.__USER_DATA__.preferredCurrency;
+      if (preferred && preferred !== 'ORIGINAL') {
+        currentCurrency = preferred;
+        updateExchangeRate();
+      }
+    }
+    
+    window.addEventListener('preferredCurrencyChanged', function(e) {
+      if (e.detail && e.detail.currency) {
+        currentCurrency = e.detail.currency === 'ORIGINAL' ? 'AED' : e.detail.currency;
+        updateExchangeRate();
+        renderOrders();
+      }
+    });
+  }
+  
+  function updateExchangeRate() {
+    if (currentCurrency === 'AED') {
+      exchangeRate = 1;
+      return;
+    }
+    if (typeof window.convertPrice === 'function') {
+      const converted = window.convertPrice(1, 'AED', currentCurrency);
+      if (converted && converted > 0) {
+        exchangeRate = converted;
+      }
+    }
+  }
+  
+  function formatAmount(amount) {
+    const converted = parseFloat(amount || 0) * exchangeRate;
+    return `${converted.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currentCurrency}`;
+  }
+
   // Initialize
   function init() {
+    initializeCurrency();
     loadOrders();
     initFilters();
     initSorting();
@@ -241,10 +289,7 @@
         </div>
       </td>
       <td data-label="Amount">
-        <span class="order-amount">
-          ${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-          <span class="order-amount-currency">د.إ</span>
-        </span>
+        <span class="order-amount">${formatAmount(amount)}</span>
       </td>
       <td data-label="Actions">
         <div class="order-actions">
