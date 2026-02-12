@@ -1,34 +1,86 @@
 // ====================================
-// CHECKOUT PAGE - PROFESSIONAL FUNCTIONALITY
+// CHECKOUT PAGE - PROFESSIONAL
 // PARTSFORM Buyer Portal
-// Orders are created via backend API - no localStorage for orders
+// Simple and reliable checkout with loaders
 // ====================================
 
-(function () {
+(function() {
   'use strict';
 
-  // Wait for DOM to be ready
-  function initializeCheckout() {
-    // ====================================
-    // DOM ELEMENTS
-    // ====================================
-    const DOM = {
-      // Steps
-      steps: document.querySelectorAll('.step-item'),
+  // ====================================
+  // CONFIGURATION
+  // ====================================
+  const CONFIG = {
+    CURRENCY: 'د.إ',
+    AUTO_REDIRECT_DELAY: 4000,
+    SKELETON_MIN_DISPLAY: 400,
+  };
+
+  // Payment method configurations
+  const PAYMENT_FEES = {
+    card: { type: 'percentage', value: 2.9, fixed: 1.5, name: 'Credit/Debit Card' },
+    'bank-dubai': { type: 'fixed', value: 0, name: 'Bank Transfer (UAE)' },
+    'bank-international': { type: 'fixed', value: 35, name: 'International Bank Transfer' },
+    paypal: { type: 'percentage', value: 3.9, fixed: 1.5, name: 'PayPal' },
+    cod: { type: 'fixed', value: 15, name: 'Cash on Delivery' },
+  };
+
+  // ====================================
+  // STATE MANAGEMENT
+  // ====================================
+  const State = {
+    currentStep: 1,
+    isInitialized: false,
+    isSubmitting: false,
+    
+    addresses: [],
+    cartItems: [],
+    orderTotal: 0,
+    
+    selectedAddress: null,
+    selectedPaymentType: 'full',
+    selectedPaymentMethod: 'card',
+    
+    isLoadingAddresses: true,
+    isLoadingCart: true,
+    
+    errors: {
+      addresses: null,
+      cart: null,
+      order: null,
+    },
+  };
+
+  // ====================================
+  // DOM CACHE
+  // ====================================
+  let DOM = {};
+
+  function cacheDOMElements() {
+    DOM = {
+      checkoutPage: document.querySelector('.checkout-page'),
+      
       step1: document.getElementById('step-1'),
       step2: document.getElementById('step-2'),
       step3: document.getElementById('step-3'),
       step4: document.getElementById('step-4'),
-
-      // Shipping Address Elements
-      addressesLoading: document.getElementById('addresses-loading'),
+      stepIndicators: document.querySelectorAll('.step-item'),
+      
       shippingAddresses: document.getElementById('shipping-addresses'),
       noAddresses: document.getElementById('no-addresses'),
       addAddressSection: document.getElementById('add-address-section'),
-      shippingAddressSummary: document.getElementById('shipping-address-summary'),
-      btnChangeAddress: document.getElementById('btn-change-address'),
-
-      // Buttons
+      addressSkeleton: document.getElementById('address-skeleton'),
+      
+      summaryItems: document.getElementById('summary-items'),
+      summarySkeleton: document.getElementById('summary-skeleton'),
+      summaryContent: document.getElementById('summary-content'),
+      summarySubtotal: document.getElementById('summary-subtotal'),
+      summaryItemsCount: document.getElementById('summary-items-count'),
+      summaryWeight: document.getElementById('summary-weight'),
+      summaryFeeRow: document.getElementById('summary-fee-row'),
+      summaryFee: document.getElementById('summary-fee'),
+      summaryTotal: document.getElementById('summary-total'),
+      
       btnToStep2: document.getElementById('btn-to-step-2'),
       btnToStep1Back: document.getElementById('btn-to-step-1-back'),
       btnToStep3: document.getElementById('btn-to-step-3'),
@@ -36,171 +88,336 @@
       btnToStep4: document.getElementById('btn-to-step-4'),
       btnToStep3Back: document.getElementById('btn-to-step-3-back'),
       btnComplete: document.getElementById('btn-complete-payment'),
-
-      // Payment Type
+      btnChangeAddress: document.getElementById('btn-change-address'),
+      
       paymentTypeCards: document.querySelectorAll('.payment-type-card'),
-      paymentTypeRadios: document.querySelectorAll(
-        'input[name="payment-type"]'
-      ),
+      paymentMethodCards: document.querySelectorAll('.payment-method-card'),
       fullAmountEl: document.getElementById('full-amount'),
       partialNowEl: document.getElementById('partial-now'),
       partialLaterEl: document.getElementById('partial-later'),
       partialAmountEl: document.getElementById('partial-amount'),
-
-      // Payment Method
-      paymentMethodCards: document.querySelectorAll('.payment-method-card'),
-      paymentMethodRadios: document.querySelectorAll(
-        'input[name="payment-method"]'
-      ),
-
-      // Confirmation
+      
       confirmType: document.getElementById('confirm-type'),
       confirmMethod: document.getElementById('confirm-method'),
       confirmFee: document.getElementById('confirm-fee'),
       confirmTotal: document.getElementById('confirm-total'),
+      shippingAddressSummary: document.getElementById('shipping-address-summary'),
       termsCheckbox: document.getElementById('terms-checkbox'),
-
-      // Summary
-      summaryItems: document.getElementById('summary-items'),
-      summarySubtotal: document.getElementById('summary-subtotal'),
-      summaryItemsCount: document.getElementById('summary-items-count'),
-      summaryWeight: document.getElementById('summary-weight'),
-      summaryFeeRow: document.getElementById('summary-fee-row'),
-      summaryFee: document.getElementById('summary-fee'),
-      summaryTotal: document.getElementById('summary-total'),
-
-      // Success Modal
+      
       successModal: document.getElementById('success-modal'),
       orderNumber: document.getElementById('order-number'),
       paymentMethodText: document.getElementById('payment-method-text'),
       amountPaid: document.getElementById('amount-paid'),
+    };
+  }
+
+  // ====================================
+  // UTILITY FUNCTIONS
+  // ====================================
+  const Utils = {
+    escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    },
+
+    formatCurrency(amount) {
+      return `${parseFloat(amount || 0).toFixed(2)} ${CONFIG.CURRENCY}`;
+    },
+
+    scrollToElement(el) {
+      if (!el) return;
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    },
+  };
+
+  // ====================================
+  // LOADER MANAGEMENT
+  // ====================================
+  const Loader = {
+    showAddressSkeleton() {
+      if (DOM.addressSkeleton) DOM.addressSkeleton.style.display = 'block';
+      if (DOM.shippingAddresses) DOM.shippingAddresses.style.display = 'none';
+      if (DOM.noAddresses) DOM.noAddresses.style.display = 'none';
+      if (DOM.addAddressSection) DOM.addAddressSection.style.display = 'none';
+    },
+
+    hideAddressSkeleton() {
+      if (DOM.addressSkeleton) DOM.addressSkeleton.style.display = 'none';
+    },
+
+    showSummarySkeleton() {
+      if (DOM.summarySkeleton) DOM.summarySkeleton.style.display = 'block';
+      if (DOM.summaryContent) DOM.summaryContent.style.display = 'none';
+    },
+
+    hideSummarySkeleton() {
+      if (DOM.summarySkeleton) DOM.summarySkeleton.style.display = 'none';
+      if (DOM.summaryContent) DOM.summaryContent.style.display = 'block';
+    },
+
+    setButtonLoading(button, loading) {
+      if (!button) return;
       
-      // Error display
-      errorContainer: document.getElementById('checkout-error'),
-    };
+      if (loading) {
+        button.disabled = true;
+        button.dataset.originalText = button.innerHTML;
+        button.innerHTML = `
+          <span class="btn-loader">
+            <svg class="spinner" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" opacity="0.25"/>
+              <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <span>Processing...</span>
+        `;
+      } else {
+        button.disabled = false;
+        if (button.dataset.originalText) {
+          button.innerHTML = button.dataset.originalText;
+        }
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      }
+    },
+  };
 
-    // ====================================
-    // STATE
-    // ====================================
-    let currentStep = 1;
-    let cartItems = [];
-    let orderTotal = 0;
-    let selectedPaymentType = 'full';
-    let selectedPaymentMethod = 'card';
-    let isSubmitting = false;
-    
-    // Shipping Address State
-    let addresses = [];
-    let selectedAddress = null;
+  // ====================================
+  // ERROR HANDLING
+  // ====================================
+  const ErrorHandler = {
+    showError(message, duration = 8000) {
+      const existing = document.querySelector('.checkout-toast-error');
+      if (existing) existing.remove();
 
-    // Payment method fees
-    const paymentFees = {
-      card: { type: 'percentage', value: 2.9, fixed: 1.5 },
-      'bank-dubai': { type: 'fixed', value: 0 },
-      'bank-international': { type: 'fixed', value: 35 },
-      paypal: { type: 'percentage', value: 3.9, fixed: 1.5 },
-      cod: { type: 'fixed', value: 15 },
-    };
+      const toast = document.createElement('div');
+      toast.className = 'checkout-toast-error';
+      toast.innerHTML = `
+        <div class="toast-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+        </div>
+        <div class="toast-message">${Utils.escapeHtml(message)}</div>
+        <button class="toast-close" aria-label="Close">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      `;
 
-    const paymentMethodNames = {
-      card: 'Credit/Debit Card',
-      'bank-dubai': 'Bank Transfer (UAE)',
-      'bank-international': 'International Bank Transfer',
-      paypal: 'PayPal',
-      cod: 'Cash on Delivery',
-    };
+      document.body.appendChild(toast);
+      
+      requestAnimationFrame(() => {
+        toast.classList.add('visible');
+      });
 
-    // ====================================
-    // INITIALIZE
-    // ====================================
-    function init() {
-      loadCartData();
-      loadShippingAddresses();
-      renderOrderSummary();
-      updatePaymentAmounts();
-      attachEventListeners();
-    }
+      toast.querySelector('.toast-close').addEventListener('click', () => {
+        toast.classList.remove('visible');
+        setTimeout(() => toast.remove(), 300);
+      });
 
-    // ====================================
-    // LOAD SHIPPING ADDRESSES
-    // ====================================
-    async function loadShippingAddresses() {
+      if (duration > 0) {
+        setTimeout(() => {
+          if (toast.parentElement) {
+            toast.classList.remove('visible');
+            setTimeout(() => toast.remove(), 300);
+          }
+        }, duration);
+      }
+    },
+  };
+
+  // ====================================
+  // DATA LOADING
+  // ====================================
+  const DataLoader = {
+    async loadAddresses() {
+      State.isLoadingAddresses = true;
+      Loader.showAddressSkeleton();
+      
+      const startTime = Date.now();
+      
       try {
-        // Show loading state
-        if (DOM.addressesLoading) DOM.addressesLoading.style.display = 'flex';
-        if (DOM.shippingAddresses) DOM.shippingAddresses.style.display = 'none';
-        if (DOM.noAddresses) DOM.noAddresses.style.display = 'none';
-        if (DOM.addAddressSection) DOM.addAddressSection.style.display = 'none';
-
-        const response = await fetch('/buyer/api/addresses');
+        // Simple fetch without timeout
+        const response = await fetch('/buyer/api/addresses', {
+          method: 'GET',
+          headers: { 'Accept': 'application/json' },
+          credentials: 'same-origin',
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        
         const data = await response.json();
-
-        if (DOM.addressesLoading) DOM.addressesLoading.style.display = 'none';
-
-        if (data.success && data.addresses && data.addresses.length > 0) {
-          addresses = data.addresses;
-          renderShippingAddresses();
+        
+        const elapsed = Date.now() - startTime;
+        if (elapsed < CONFIG.SKELETON_MIN_DISPLAY) {
+          await new Promise(r => setTimeout(r, CONFIG.SKELETON_MIN_DISPLAY - elapsed));
+        }
+        
+        if (data.success && Array.isArray(data.addresses)) {
+          State.addresses = data.addresses;
+          State.errors.addresses = null;
           
-          // Auto-select default address
-          const defaultAddress = addresses.find(a => a.isDefault) || addresses[0];
-          if (defaultAddress) {
-            selectAddress(defaultAddress._id);
+          if (State.addresses.length > 0) {
+            Renderer.renderAddresses();
+            
+            const defaultAddr = State.addresses.find(a => a.isDefault) || State.addresses[0];
+            if (defaultAddr) {
+              Actions.selectAddress(defaultAddr._id);
+            }
+          } else {
+            Renderer.showNoAddresses();
           }
         } else {
-          // No addresses
-          if (DOM.noAddresses) DOM.noAddresses.style.display = 'flex';
+          Renderer.showNoAddresses();
         }
       } catch (error) {
-        console.error('Error loading addresses:', error);
-        if (DOM.addressesLoading) DOM.addressesLoading.style.display = 'none';
-        if (DOM.noAddresses) {
-          DOM.noAddresses.style.display = 'flex';
-          const textEl = DOM.noAddresses.querySelector('.no-addresses-text');
-          if (textEl) textEl.textContent = 'Failed to load addresses. Please try again.';
-        }
-        showError('Failed to load shipping addresses. Please refresh the page.');
+        console.error('[Checkout] Address loading failed:', error);
+        State.errors.addresses = error.message;
+        Renderer.showNoAddresses('Failed to load addresses. Please refresh the page.');
+      } finally {
+        State.isLoadingAddresses = false;
+        Loader.hideAddressSkeleton();
       }
-    }
+    },
 
-    // ====================================
-    // RENDER SHIPPING ADDRESSES
-    // ====================================
-    function renderShippingAddresses() {
+    async loadCart() {
+      State.isLoadingCart = true;
+      Loader.showSummarySkeleton();
+      
+      const startTime = Date.now();
+      
+      try {
+        const cartData = localStorage.getItem('partsform_shopping_cart');
+        
+        if (!cartData) {
+          State.cartItems = [];
+          State.orderTotal = 0;
+          Renderer.renderEmptyCart();
+          return;
+        }
+        
+        const parsed = JSON.parse(cartData);
+        const localItems = parsed.items || [];
+        
+        if (localItems.length === 0) {
+          State.cartItems = [];
+          State.orderTotal = 0;
+          Renderer.renderEmptyCart();
+          return;
+        }
+        
+        State.cartItems = localItems;
+        State.orderTotal = localItems.reduce((sum, item) => sum + (parseFloat(item.price) || 0), 0);
+        
+        // Non-blocking price validation (fire and forget)
+        this.validateCartPrices(localItems).catch(() => {});
+        
+        const elapsed = Date.now() - startTime;
+        if (elapsed < CONFIG.SKELETON_MIN_DISPLAY) {
+          await new Promise(r => setTimeout(r, CONFIG.SKELETON_MIN_DISPLAY - elapsed));
+        }
+        
+        Renderer.renderOrderSummary();
+        Renderer.updatePaymentAmounts();
+        
+      } catch (error) {
+        console.error('[Checkout] Cart loading failed:', error);
+        State.errors.cart = error.message;
+        ErrorHandler.showError('Failed to load cart data. Please try again.');
+      } finally {
+        State.isLoadingCart = false;
+        Loader.hideSummarySkeleton();
+      }
+    },
+
+    async validateCartPrices(items) {
+      try {
+        // Simple fetch for price validation - non-critical
+        const response = await fetch('/buyer/api/cart/validate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          credentials: 'same-origin',
+          body: JSON.stringify({ items }),
+        });
+        
+        if (!response.ok) return;
+        
+        const result = await response.json();
+        
+        if (result.success && result.validatedItems) {
+          State.cartItems = State.cartItems.map(item => {
+            const validated = result.validatedItems.find(vi => vi.id === item.id);
+            return validated?.validated ? { ...item, price: validated.price, validated: true } : item;
+          });
+          
+          State.orderTotal = State.cartItems.reduce((sum, item) => sum + (parseFloat(item.price) || 0), 0);
+          
+          const cartData = JSON.parse(localStorage.getItem('partsform_shopping_cart') || '{}');
+          cartData.items = State.cartItems;
+          localStorage.setItem('partsform_shopping_cart', JSON.stringify(cartData));
+          
+          Renderer.renderOrderSummary();
+          Renderer.updatePaymentAmounts();
+        }
+      } catch (error) {
+        // Silent fail - using local prices
+      }
+    },
+  };
+
+  // ====================================
+  // RENDERER
+  // ====================================
+  const Renderer = {
+    renderAddresses() {
       if (!DOM.shippingAddresses) return;
-
+      
       DOM.shippingAddresses.style.display = 'grid';
       if (DOM.addAddressSection) DOM.addAddressSection.style.display = 'block';
-
-      DOM.shippingAddresses.innerHTML = addresses.map(address => `
-        <div class="shipping-address-card ${address.isDefault ? 'default' : ''}" 
-             data-address-id="${address._id}">
+      if (DOM.noAddresses) DOM.noAddresses.style.display = 'none';
+      
+      DOM.shippingAddresses.innerHTML = State.addresses.map(addr => `
+        <div class="shipping-address-card ${addr.isDefault ? 'default' : ''} ${State.selectedAddress?._id === addr._id ? 'selected' : ''}" 
+             data-address-id="${addr._id}" role="button" tabindex="0">
           <div class="address-radio">
-            <input type="radio" name="shipping-address" id="addr-${address._id}" 
-                   value="${address._id}" ${address.isDefault ? 'checked' : ''}>
-            <label for="addr-${address._id}"></label>
+            <input type="radio" name="shipping-address" id="addr-${addr._id}" 
+                   value="${addr._id}" ${State.selectedAddress?._id === addr._id ? 'checked' : ''}>
+            <label for="addr-${addr._id}">
+              <span class="radio-check"></span>
+            </label>
           </div>
           <div class="address-content">
             <div class="address-header">
-              <span class="address-label">${escapeHtml(address.label)}</span>
-              ${address.isDefault ? '<span class="address-default-badge"><i data-lucide="star"></i> Default</span>' : ''}
+              <span class="address-label">${Utils.escapeHtml(addr.label)}</span>
+              ${addr.isDefault ? '<span class="address-default-badge"><i data-lucide="star"></i> Default</span>' : ''}
             </div>
             <div class="address-details">
-              <div class="address-name">
+              <div class="address-row">
                 <i data-lucide="user"></i>
-                <strong>${escapeHtml(address.fullName)}</strong>
+                <strong>${Utils.escapeHtml(addr.fullName)}</strong>
               </div>
-              <div class="address-phone">
+              <div class="address-row">
                 <i data-lucide="phone"></i>
-                ${escapeHtml(address.phone)}
+                <span>${Utils.escapeHtml(addr.phone)}</span>
               </div>
-              <div class="address-location">
+              <div class="address-row">
                 <i data-lucide="map-pin"></i>
-                ${escapeHtml(address.street)}, ${escapeHtml(address.city)}, ${escapeHtml(address.state)}, ${escapeHtml(address.country)}${address.postalCode ? ' ' + escapeHtml(address.postalCode) : ''}
+                <span>${Utils.escapeHtml(addr.street)}, ${Utils.escapeHtml(addr.city)}, ${Utils.escapeHtml(addr.state)}, ${Utils.escapeHtml(addr.country)}${addr.postalCode ? ' ' + Utils.escapeHtml(addr.postalCode) : ''}</span>
               </div>
-              ${address.notes ? `
-              <div class="address-notes">
+              ${addr.notes ? `
+              <div class="address-row notes">
                 <i data-lucide="info"></i>
-                ${escapeHtml(address.notes)}
+                <span>${Utils.escapeHtml(addr.notes)}</span>
               </div>
               ` : ''}
             </div>
@@ -208,321 +425,320 @@
         </div>
       `).join('');
 
-      // Reinitialize icons
-      if (typeof lucide !== 'undefined') {
-        lucide.createIcons();
-      }
-
-      // Add click handlers
-      document.querySelectorAll('.shipping-address-card').forEach(card => {
-        card.addEventListener('click', () => {
-          const addressId = card.dataset.addressId;
-          selectAddress(addressId);
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+      
+      DOM.shippingAddresses.querySelectorAll('.shipping-address-card').forEach(card => {
+        card.addEventListener('click', () => Actions.selectAddress(card.dataset.addressId));
+        card.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            Actions.selectAddress(card.dataset.addressId);
+          }
         });
       });
-    }
+    },
 
-    // ====================================
-    // SELECT ADDRESS
-    // ====================================
-    function selectAddress(addressId) {
-      selectedAddress = addresses.find(a => a._id === addressId);
+    showNoAddresses(message = null) {
+      Loader.hideAddressSkeleton();
+      if (DOM.shippingAddresses) DOM.shippingAddresses.style.display = 'none';
+      if (DOM.addAddressSection) DOM.addAddressSection.style.display = 'none';
       
-      // Update UI
-      document.querySelectorAll('.shipping-address-card').forEach(card => {
-        card.classList.remove('selected');
-        const radio = card.querySelector('input[type="radio"]');
-        if (radio) radio.checked = false;
-      });
-
-      const selectedCard = document.querySelector(`[data-address-id="${addressId}"]`);
-      if (selectedCard) {
-        selectedCard.classList.add('selected');
-        const radio = selectedCard.querySelector('input[type="radio"]');
-        if (radio) radio.checked = true;
-      }
-
-      // Enable/disable continue button
-      if (DOM.btnToStep2) {
-        DOM.btnToStep2.disabled = !selectedAddress;
-      }
-
-      // Update confirmation summary
-      updateShippingAddressSummary();
-    }
-
-    // ====================================
-    // UPDATE SHIPPING ADDRESS SUMMARY
-    // ====================================
-    function updateShippingAddressSummary() {
-      if (!DOM.shippingAddressSummary || !selectedAddress) return;
-
-      DOM.shippingAddressSummary.innerHTML = `
-        <div class="summary-address-name">
-          <strong>${escapeHtml(selectedAddress.fullName)}</strong>
-          <span class="summary-address-label">${escapeHtml(selectedAddress.label)}</span>
-        </div>
-        <div class="summary-address-line">${escapeHtml(selectedAddress.phone)}</div>
-        <div class="summary-address-line">${escapeHtml(selectedAddress.street)}</div>
-        <div class="summary-address-line">${escapeHtml(selectedAddress.city)}, ${escapeHtml(selectedAddress.state)} ${selectedAddress.postalCode || ''}</div>
-        <div class="summary-address-line">${escapeHtml(selectedAddress.country)}</div>
-      `;
-    }
-
-    // ====================================
-    // ESCAPE HTML
-    // ====================================
-    function escapeHtml(text) {
-      if (!text) return '';
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
-    }
-
-    // ====================================
-    // LOAD CART DATA
-    // ====================================
-    function loadCartData() {
-      try {
-        // Load cart from localStorage
-        const cartData = localStorage.getItem('partsform_shopping_cart');
-        if (cartData) {
-          const parsed = JSON.parse(cartData);
-          cartItems = parsed.items || [];
-
-          // Calculate total - each item is individual (no quantity grouping)
-          orderTotal = cartItems.reduce((sum, item) => {
-            const price = parseFloat(item.price) || 0;
-            return sum + price;
-          }, 0);
+      if (DOM.noAddresses) {
+        DOM.noAddresses.style.display = 'flex';
+        if (message) {
+          const textEl = DOM.noAddresses.querySelector('.no-addresses-text');
+          if (textEl) textEl.textContent = message;
         }
-
-        // Redirect if no items
-        if (cartItems.length === 0) {
-          window.location.href = '/buyer/cart';
-        }
-      } catch (error) {
-        console.error('Error loading cart:', error);
-        showError('Failed to load cart data. Redirecting...');
-        setTimeout(() => { window.location.href = '/buyer/cart'; }, 2000);
       }
-    }
+    },
 
-    // ====================================
-    // RENDER ORDER SUMMARY
-    // ====================================
-    function renderOrderSummary() {
-      // Render items - each item is individual (no quantity grouping)
-      DOM.summaryItems.innerHTML = cartItems
-        .map(
-          (item) => `
+    renderOrderSummary() {
+      if (!DOM.summaryItems) return;
+      
+      if (State.cartItems.length === 0) {
+        this.renderEmptyCart();
+        return;
+      }
+      
+      DOM.summaryItems.innerHTML = State.cartItems.map(item => `
         <div class="summary-item">
           <div class="summary-item-info">
-            <div class="summary-item-title">${item.code || item.partNumber || 'N/A'}</div>
-            <div class="summary-item-desc">${
-              item.description || 'Industrial Part'
-            }</div>
+            <div class="summary-item-title">${Utils.escapeHtml(item.code || item.partNumber || 'N/A')}</div>
+            <div class="summary-item-desc">${Utils.escapeHtml(item.description || 'Industrial Part')}</div>
             <div class="summary-item-brand">
               <i data-lucide="tag"></i>
-              <span>${item.brand || 'N/A'}</span>
+              <span>${Utils.escapeHtml(item.brand || 'N/A')}</span>
             </div>
           </div>
-          <div class="summary-item-price">${parseFloat(item.price).toFixed(2)} د.إ</div>
+          <div class="summary-item-price">${Utils.formatCurrency(item.price)}</div>
         </div>
-      `
-        )
-        .join('');
+      `).join('');
 
-      // Update totals - each item counts as 1 (no quantity field)
-      const totalItems = cartItems.length;
-      const totalWeight = cartItems.reduce(
-        (sum, item) => sum + (parseFloat(item.weight) || 0),
-        0
-      );
+      const totalItems = State.cartItems.length;
+      const totalWeight = State.cartItems.reduce((sum, item) => sum + (parseFloat(item.weight) || 0), 0);
 
-      DOM.summarySubtotal.textContent = `${orderTotal.toFixed(2)} د.إ`;
-      DOM.summaryItemsCount.textContent = `${totalItems} PCS`;
-      DOM.summaryWeight.textContent = `${totalWeight.toFixed(3)} kg`;
-      DOM.summaryTotal.textContent = `${orderTotal.toFixed(2)} د.إ`;
+      if (DOM.summarySubtotal) DOM.summarySubtotal.textContent = Utils.formatCurrency(State.orderTotal);
+      if (DOM.summaryItemsCount) DOM.summaryItemsCount.textContent = `${totalItems} PCS`;
+      if (DOM.summaryWeight) DOM.summaryWeight.textContent = `${totalWeight.toFixed(3)} kg`;
+      
+      this.updateTotalWithFees();
+      
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    },
 
-      // Reinitialize icons
-      if (typeof lucide !== 'undefined') {
-        lucide.createIcons();
+    renderEmptyCart() {
+      Loader.hideSummarySkeleton();
+      if (DOM.summaryItems) {
+        DOM.summaryItems.innerHTML = `
+          <div class="empty-cart-message">
+            <i data-lucide="shopping-cart"></i>
+            <p>Your cart is empty</p>
+            <a href="/buyer/search-automotive" class="btn-continue-shopping-small">Browse Parts</a>
+          </div>
+        `;
       }
-    }
+      
+      if (DOM.summarySubtotal) DOM.summarySubtotal.textContent = Utils.formatCurrency(0);
+      if (DOM.summaryItemsCount) DOM.summaryItemsCount.textContent = '0 PCS';
+      if (DOM.summaryWeight) DOM.summaryWeight.textContent = '0.000 kg';
+      if (DOM.summaryTotal) DOM.summaryTotal.textContent = Utils.formatCurrency(0);
+      
+      if (DOM.btnToStep2) DOM.btnToStep2.disabled = true;
+      
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    },
 
-    // ====================================
-    // UPDATE PAYMENT AMOUNTS
-    // ====================================
-    function updatePaymentAmounts() {
-      const fullAmount = orderTotal;
-      const partialNow = orderTotal * 0.2;
-      const partialLater = orderTotal * 0.8;
+    updatePaymentAmounts() {
+      const fullAmount = State.orderTotal;
+      const partialNow = State.orderTotal * 0.2;
+      const partialLater = State.orderTotal * 0.8;
 
-      DOM.fullAmountEl.textContent = `${fullAmount.toFixed(2)} د.إ`;
-      DOM.partialNowEl.textContent = `${partialNow.toFixed(2)} د.إ`;
-      DOM.partialLaterEl.textContent = `${partialLater.toFixed(2)} د.إ`;
-      DOM.partialAmountEl.textContent = `${partialNow.toFixed(2)} د.إ`;
+      if (DOM.fullAmountEl) DOM.fullAmountEl.textContent = Utils.formatCurrency(fullAmount);
+      if (DOM.partialNowEl) DOM.partialNowEl.textContent = Utils.formatCurrency(partialNow);
+      if (DOM.partialLaterEl) DOM.partialLaterEl.textContent = Utils.formatCurrency(partialLater);
+      if (DOM.partialAmountEl) DOM.partialAmountEl.textContent = Utils.formatCurrency(partialNow);
+      
+      this.updateTotalWithFees();
+    },
 
-      updateTotalWithFees();
-    }
-
-    // ====================================
-    // CALCULATE FEES
-    // ====================================
-    function calculateFee(method, amount) {
-      const feeConfig = paymentFees[method];
-      if (!feeConfig) return 0;
-
-      if (feeConfig.type === 'percentage') {
-        return (amount * feeConfig.value) / 100 + (feeConfig.fixed || 0);
-      } else {
-        return feeConfig.value;
+    updateTotalWithFees() {
+      const baseAmount = State.selectedPaymentType === 'full' ? State.orderTotal : State.orderTotal * 0.2;
+      const feeConfig = PAYMENT_FEES[State.selectedPaymentMethod];
+      
+      let fee = 0;
+      if (feeConfig) {
+        fee = feeConfig.type === 'percentage' 
+          ? (baseAmount * feeConfig.value / 100) + (feeConfig.fixed || 0)
+          : feeConfig.value;
       }
-    }
-
-    // ====================================
-    // UPDATE TOTAL WITH FEES
-    // ====================================
-    function updateTotalWithFees() {
-      const baseAmount =
-        selectedPaymentType === 'full' ? orderTotal : orderTotal * 0.2;
-      const fee = calculateFee(selectedPaymentMethod, baseAmount);
+      
       const total = baseAmount + fee;
 
-      // Update summary
       if (fee > 0) {
-        DOM.summaryFeeRow.style.display = 'flex';
-        DOM.summaryFee.textContent = `${fee.toFixed(2)} د.إ`;
+        if (DOM.summaryFeeRow) DOM.summaryFeeRow.style.display = 'flex';
+        if (DOM.summaryFee) DOM.summaryFee.textContent = Utils.formatCurrency(fee);
       } else {
-        DOM.summaryFeeRow.style.display = 'none';
+        if (DOM.summaryFeeRow) DOM.summaryFeeRow.style.display = 'none';
       }
 
-      DOM.summaryTotal.textContent = `${total.toFixed(2)} د.إ`;
+      if (DOM.summaryTotal) DOM.summaryTotal.textContent = Utils.formatCurrency(total);
+      if (DOM.confirmFee) DOM.confirmFee.textContent = Utils.formatCurrency(fee);
+      if (DOM.confirmTotal) DOM.confirmTotal.textContent = Utils.formatCurrency(total);
+    },
 
-      // Update confirmation
-      DOM.confirmFee.textContent = `${fee.toFixed(2)} د.إ`;
-      DOM.confirmTotal.textContent = `${total.toFixed(2)} د.إ`;
-    }
+    updateConfirmation() {
+      if (DOM.confirmType) {
+        DOM.confirmType.textContent = State.selectedPaymentType === 'full' 
+          ? 'Full Payment' 
+          : 'Minimum Payment (20%)';
+      }
+      
+      if (DOM.confirmMethod) {
+        DOM.confirmMethod.textContent = PAYMENT_FEES[State.selectedPaymentMethod]?.name || State.selectedPaymentMethod;
+      }
+      
+      this.updateShippingAddressSummary();
+      this.updateTotalWithFees();
+    },
 
-    // ====================================
-    // NAVIGATION
-    // ====================================
-    function goToStep(step) {
-      // Hide all steps
-      DOM.step1.style.display = 'none';
-      DOM.step2.style.display = 'none';
-      DOM.step3.style.display = 'none';
-      if (DOM.step4) DOM.step4.style.display = 'none';
+    updateShippingAddressSummary() {
+      if (!DOM.shippingAddressSummary || !State.selectedAddress) return;
 
-      // Update step indicators
-      DOM.steps.forEach((stepEl, index) => {
-        stepEl.classList.remove('active', 'completed');
+      const addr = State.selectedAddress;
+      DOM.shippingAddressSummary.innerHTML = `
+        <div class="summary-address-name">
+          <strong>${Utils.escapeHtml(addr.fullName)}</strong>
+          <span class="summary-address-label">${Utils.escapeHtml(addr.label)}</span>
+        </div>
+        <div class="summary-address-line">${Utils.escapeHtml(addr.phone)}</div>
+        <div class="summary-address-line">${Utils.escapeHtml(addr.street)}</div>
+        <div class="summary-address-line">${Utils.escapeHtml(addr.city)}, ${Utils.escapeHtml(addr.state)} ${addr.postalCode || ''}</div>
+        <div class="summary-address-line">${Utils.escapeHtml(addr.country)}</div>
+      `;
+    },
+
+    showSuccessModal(orderNum, method, amount) {
+      if (DOM.orderNumber) DOM.orderNumber.textContent = orderNum;
+      if (DOM.paymentMethodText) DOM.paymentMethodText.textContent = method;
+      if (DOM.amountPaid) DOM.amountPaid.textContent = Utils.formatCurrency(amount);
+
+      if (DOM.successModal) {
+        DOM.successModal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+      }
+
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+
+      setTimeout(() => {
+        window.location.href = '/buyer/orders';
+      }, CONFIG.AUTO_REDIRECT_DELAY);
+    },
+  };
+
+  // ====================================
+  // ACTIONS
+  // ====================================
+  const Actions = {
+    selectAddress(addressId) {
+      State.selectedAddress = State.addresses.find(a => a._id === addressId);
+      
+      document.querySelectorAll('.shipping-address-card').forEach(card => {
+        const isSelected = card.dataset.addressId === addressId;
+        card.classList.toggle('selected', isSelected);
+        const radio = card.querySelector('input[type="radio"]');
+        if (radio) radio.checked = isSelected;
+      });
+
+      if (DOM.btnToStep2) {
+        DOM.btnToStep2.disabled = !State.selectedAddress || State.cartItems.length === 0;
+      }
+      
+      Renderer.updateShippingAddressSummary();
+    },
+
+    goToStep(step) {
+      if (step === 2 && !State.selectedAddress) {
+        ErrorHandler.showError('Please select a shipping address');
+        return;
+      }
+      
+      if (step === 2 && State.cartItems.length === 0) {
+        ErrorHandler.showError('Your cart is empty');
+        return;
+      }
+
+      [DOM.step1, DOM.step2, DOM.step3, DOM.step4].forEach(stepEl => {
+        if (stepEl) stepEl.style.display = 'none';
+      });
+
+      DOM.stepIndicators.forEach((indicator, index) => {
+        indicator.classList.remove('active', 'completed');
         if (index < step - 1) {
-          stepEl.classList.add('completed');
+          indicator.classList.add('completed');
         } else if (index === step - 1) {
-          stepEl.classList.add('active');
+          indicator.classList.add('active');
         }
       });
 
-      // Show current step
-      currentStep = step;
-      switch (step) {
-        case 1:
-          DOM.step1.style.display = 'block';
-          break;
-        case 2:
-          DOM.step2.style.display = 'block';
-          break;
-        case 3:
-          DOM.step3.style.display = 'block';
-          updateConfirmation();
-          break;
-        case 4:
-          if (DOM.step4) DOM.step4.style.display = 'block';
-          updateConfirmation();
-          updateShippingAddressSummary();
-          break;
+      const targetStep = document.getElementById(`step-${step}`);
+      if (targetStep) {
+        targetStep.style.display = 'block';
+        Utils.scrollToElement(targetStep);
       }
 
-      // Scroll to top
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      State.currentStep = step;
 
-      // Reinitialize icons
-      if (typeof lucide !== 'undefined') {
-        lucide.createIcons();
+      if (step === 4) {
+        Renderer.updateConfirmation();
       }
-    }
 
-    // ====================================
-    // UPDATE CONFIRMATION
-    // ====================================
-    function updateConfirmation() {
-      DOM.confirmType.textContent =
-        selectedPaymentType === 'full'
-          ? 'Full Payment'
-          : 'Minimum Payment (20%)';
-      DOM.confirmMethod.textContent =
-        paymentMethodNames[selectedPaymentMethod] || selectedPaymentMethod;
-      updateTotalWithFees();
-    }
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    },
 
-    // ====================================
-    // COMPLETE PAYMENT - BACKEND API
-    // ====================================
-    async function completePayment() {
-      // Prevent double submission
-      if (isSubmitting) return;
-      isSubmitting = true;
+    selectPaymentType(type) {
+      State.selectedPaymentType = type;
       
-      // Disable button and show loading state
-      if (DOM.btnComplete) {
-        DOM.btnComplete.disabled = true;
-        DOM.btnComplete.innerHTML = '<i data-lucide="loader" class="animate-spin"></i> Processing...';
-        if (typeof lucide !== 'undefined') {
-          lucide.createIcons();
-        }
+      DOM.paymentTypeCards.forEach(card => {
+        const isSelected = card.dataset.type === type;
+        card.classList.toggle('selected', isSelected);
+        const radio = card.querySelector('input[type="radio"]');
+        if (radio) radio.checked = isSelected;
+      });
+      
+      Renderer.updateTotalWithFees();
+    },
+
+    selectPaymentMethod(method) {
+      State.selectedPaymentMethod = method;
+      
+      DOM.paymentMethodCards.forEach(card => {
+        const isSelected = card.dataset.method === method;
+        card.classList.toggle('selected', isSelected);
+        const radio = card.querySelector('input[type="radio"]');
+        if (radio) radio.checked = isSelected;
+      });
+      
+      Renderer.updateTotalWithFees();
+    },
+
+    async completePayment() {
+      if (State.isSubmitting) return;
+      
+      if (!State.selectedAddress) {
+        ErrorHandler.showError('Please select a shipping address');
+        return;
+      }
+      
+      if (State.cartItems.length === 0) {
+        ErrorHandler.showError('Your cart is empty');
+        return;
+      }
+      
+      if (DOM.termsCheckbox && !DOM.termsCheckbox.checked) {
+        ErrorHandler.showError('Please accept the terms and conditions');
+        return;
       }
 
-      const baseAmount =
-        selectedPaymentType === 'full' ? orderTotal : orderTotal * 0.2;
-      const fee = calculateFee(selectedPaymentMethod, baseAmount);
+      State.isSubmitting = true;
+      Loader.setButtonLoading(DOM.btnComplete, true);
+
+      const baseAmount = State.selectedPaymentType === 'full' ? State.orderTotal : State.orderTotal * 0.2;
+      const feeConfig = PAYMENT_FEES[State.selectedPaymentMethod];
+      const fee = feeConfig?.type === 'percentage' 
+        ? (baseAmount * feeConfig.value / 100) + (feeConfig.fixed || 0)
+        : feeConfig?.value || 0;
       const total = baseAmount + fee;
 
       try {
-        // Validate shipping address
-        if (!selectedAddress) {
-          throw new Error('Please select a shipping address');
-        }
-
-        // Prepare order data for backend
         const orderData = {
-          items: cartItems,
-          paymentType: selectedPaymentType,
-          paymentMethod: selectedPaymentMethod,
+          items: State.cartItems,
+          paymentType: State.selectedPaymentType,
+          paymentMethod: State.selectedPaymentMethod,
           fee: fee,
           notes: '',
           shippingAddress: {
-            addressId: selectedAddress._id,
-            label: selectedAddress.label,
-            fullName: selectedAddress.fullName,
-            phone: selectedAddress.phone,
-            street: selectedAddress.street,
-            city: selectedAddress.city,
-            state: selectedAddress.state,
-            country: selectedAddress.country,
-            postalCode: selectedAddress.postalCode || '',
-            notes: selectedAddress.notes || ''
-          }
+            addressId: State.selectedAddress._id,
+            label: State.selectedAddress.label,
+            fullName: State.selectedAddress.fullName,
+            phone: State.selectedAddress.phone,
+            street: State.selectedAddress.street,
+            city: State.selectedAddress.city,
+            state: State.selectedAddress.state,
+            country: State.selectedAddress.country,
+            postalCode: State.selectedAddress.postalCode || '',
+            notes: State.selectedAddress.notes || '',
+          },
         };
 
-        // Call backend API to create order
+        // Simple fetch without timeout - let it complete naturally
         const response = await fetch('/buyer/api/orders/create', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Accept': 'application/json',
           },
-          body: JSON.stringify(orderData)
+          credentials: 'same-origin',
+          body: JSON.stringify(orderData),
         });
 
         const result = await response.json();
@@ -531,234 +747,101 @@
           throw new Error(result.message || 'Failed to create order');
         }
 
-        // Order created successfully - get order number from backend
-        const orderNum = result.order.orderNumber;
-
-        // Clear cart from localStorage after successful order
+        // Clear cart
         localStorage.removeItem('partsform_shopping_cart');
-
+        
         // Update cart badge
-        if (window.PartsFormCart && window.PartsFormCart.updateBadge) {
+        if (window.PartsFormCart?.updateBadge) {
           window.PartsFormCart.updateBadge();
         }
 
-        // Show success modal with real order number
-        showSuccessModal(
-          orderNum,
-          paymentMethodNames[selectedPaymentMethod],
+        // Show success
+        Renderer.showSuccessModal(
+          result.order.orderNumber,
+          PAYMENT_FEES[State.selectedPaymentMethod]?.name || State.selectedPaymentMethod,
           result.order.total || total
         );
 
       } catch (error) {
-        console.error('Error creating order:', error);
+        console.error('[Checkout] Order creation failed:', error);
+        ErrorHandler.showError(error.message || 'Failed to create order. Please try again.');
         
-        // Re-enable button
-        isSubmitting = false;
-        if (DOM.btnComplete) {
-          DOM.btnComplete.disabled = false;
-          DOM.btnComplete.innerHTML = '<i data-lucide="check-circle"></i> Complete Payment';
-          if (typeof lucide !== 'undefined') {
-            lucide.createIcons();
-          }
-        }
-        
-        // Show error message
-        showError(error.message || 'An error occurred while processing your order. Please try again.');
+        State.isSubmitting = false;
+        Loader.setButtonLoading(DOM.btnComplete, false);
       }
+    },
+  };
+
+  // ====================================
+  // EVENT BINDINGS
+  // ====================================
+  function attachEventListeners() {
+    DOM.btnToStep2?.addEventListener('click', () => Actions.goToStep(2));
+    DOM.btnToStep1Back?.addEventListener('click', () => Actions.goToStep(1));
+    DOM.btnToStep3?.addEventListener('click', () => Actions.goToStep(3));
+    DOM.btnToStep2Back?.addEventListener('click', () => Actions.goToStep(2));
+    DOM.btnToStep4?.addEventListener('click', () => Actions.goToStep(4));
+    DOM.btnToStep3Back?.addEventListener('click', () => Actions.goToStep(3));
+    DOM.btnChangeAddress?.addEventListener('click', () => Actions.goToStep(1));
+
+    DOM.paymentTypeCards.forEach(card => {
+      card.addEventListener('click', () => Actions.selectPaymentType(card.dataset.type));
+    });
+
+    DOM.paymentMethodCards.forEach(card => {
+      card.addEventListener('click', () => Actions.selectPaymentMethod(card.dataset.method));
+    });
+
+    DOM.termsCheckbox?.addEventListener('change', (e) => {
+      if (DOM.btnComplete) DOM.btnComplete.disabled = !e.target.checked;
+    });
+
+    DOM.btnComplete?.addEventListener('click', () => Actions.completePayment());
+
+    // Initialize default selections
+    const firstTypeCard = DOM.paymentTypeCards[0];
+    if (firstTypeCard) {
+      firstTypeCard.classList.add('selected');
+      const radio = firstTypeCard.querySelector('input[type="radio"]');
+      if (radio) radio.checked = true;
     }
 
-    // ====================================
-    // SHOW ERROR MESSAGE
-    // ====================================
-    function showError(message) {
-      // Create or update error container
-      let errorEl = document.getElementById('checkout-error');
-      if (!errorEl) {
-        errorEl = document.createElement('div');
-        errorEl.id = 'checkout-error';
-        errorEl.className = 'checkout-error-message';
-        errorEl.style.cssText = `
-          background: #fee2e2;
-          border: 1px solid #ef4444;
-          color: #dc2626;
-          padding: 1rem;
-          border-radius: 8px;
-          margin-bottom: 1rem;
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-        `;
-        const step3 = document.getElementById('step-3');
-        if (step3) {
-          step3.insertBefore(errorEl, step3.firstChild);
-        }
-      }
-      
-      errorEl.innerHTML = `
-        <i data-lucide="alert-circle"></i>
-        <span>${message}</span>
-        <button onclick="this.parentElement.remove()" style="margin-left: auto; background: none; border: none; cursor: pointer;">
-          <i data-lucide="x"></i>
-        </button>
-      `;
-      errorEl.style.display = 'flex';
-      
-      if (typeof lucide !== 'undefined') {
-        lucide.createIcons();
-      }
+    const firstMethodCard = DOM.paymentMethodCards[0];
+    if (firstMethodCard) {
+      firstMethodCard.classList.add('selected');
+      const radio = firstMethodCard.querySelector('input[type="radio"]');
+      if (radio) radio.checked = true;
     }
-
-    // ====================================
-    // SHOW SUCCESS MODAL
-    // ====================================
-    function showSuccessModal(orderNum, method, amount) {
-      DOM.orderNumber.textContent = orderNum;
-      DOM.paymentMethodText.textContent = method;
-      DOM.amountPaid.textContent = `${amount.toFixed(2)} د.إ`;
-
-      DOM.successModal.style.display = 'flex';
-      document.body.style.overflow = 'hidden';
-
-      // Reinitialize icons
-      if (typeof lucide !== 'undefined') {
-        lucide.createIcons();
-      }
-
-      // Redirect to orders page after 3 seconds
-      setTimeout(() => {
-        window.location.href = '/buyer/orders';
-      }, 3000);
-    }
-
-    // ====================================
-    // EVENT LISTENERS
-    // ====================================
-    function attachEventListeners() {
-      // Navigation buttons - Step 1 (Shipping) to Step 2 (Payment Type)
-      if (DOM.btnToStep2) {
-        DOM.btnToStep2.addEventListener('click', () => {
-          if (selectedAddress) {
-            goToStep(2);
-          }
-        });
-      }
-      
-      // Step 2 back to Step 1
-      if (DOM.btnToStep1Back) {
-        DOM.btnToStep1Back.addEventListener('click', () => goToStep(1));
-      }
-      
-      // Step 2 (Payment Type) to Step 3 (Payment Method)
-      if (DOM.btnToStep3) {
-        DOM.btnToStep3.addEventListener('click', () => goToStep(3));
-      }
-      
-      // Step 3 back to Step 2
-      if (DOM.btnToStep2Back) {
-        DOM.btnToStep2Back.addEventListener('click', () => goToStep(2));
-      }
-      
-      // Step 3 (Payment Method) to Step 4 (Confirmation)
-      if (DOM.btnToStep4) {
-        DOM.btnToStep4.addEventListener('click', () => goToStep(4));
-      }
-      
-      // Step 4 back to Step 3
-      if (DOM.btnToStep3Back) {
-        DOM.btnToStep3Back.addEventListener('click', () => goToStep(3));
-      }
-
-      // Change address button in confirmation
-      if (DOM.btnChangeAddress) {
-        DOM.btnChangeAddress.addEventListener('click', () => goToStep(1));
-      }
-
-      // Payment type selection
-      DOM.paymentTypeCards.forEach((card) => {
-        card.addEventListener('click', () => {
-          const radio = card.querySelector('input[type="radio"]');
-          if (radio) {
-            radio.checked = true;
-            selectedPaymentType = radio.value;
-
-            DOM.paymentTypeCards.forEach((c) => c.classList.remove('selected'));
-            card.classList.add('selected');
-
-            updateTotalWithFees();
-          }
-        });
-      });
-
-      DOM.paymentTypeRadios.forEach((radio) => {
-        radio.addEventListener('change', (e) => {
-          selectedPaymentType = e.target.value;
-          updateTotalWithFees();
-        });
-      });
-
-      // Payment method selection
-      DOM.paymentMethodCards.forEach((card) => {
-        card.addEventListener('click', () => {
-          const radio = card.querySelector('input[type="radio"]');
-          if (radio) {
-            radio.checked = true;
-            selectedPaymentMethod = radio.value;
-
-            DOM.paymentMethodCards.forEach((c) =>
-              c.classList.remove('selected')
-            );
-            card.classList.add('selected');
-
-            updateTotalWithFees();
-          }
-        });
-      });
-
-      DOM.paymentMethodRadios.forEach((radio) => {
-        radio.addEventListener('change', (e) => {
-          selectedPaymentMethod = e.target.value;
-          updateTotalWithFees();
-        });
-      });
-
-      // Terms checkbox
-      if (DOM.termsCheckbox) {
-        DOM.termsCheckbox.addEventListener('change', (e) => {
-          DOM.btnComplete.disabled = !e.target.checked;
-        });
-      }
-
-      // Complete payment
-      if (DOM.btnComplete) {
-        DOM.btnComplete.addEventListener('click', () => {
-          if (DOM.termsCheckbox.checked) {
-            completePayment();
-          }
-        });
-      }
-
-      // Initialize first selection
-      const firstTypeCard = DOM.paymentTypeCards[0];
-      if (firstTypeCard) {
-        firstTypeCard.classList.add('selected');
-      }
-
-      const firstMethodCard = DOM.paymentMethodCards[0];
-      if (firstMethodCard) {
-        firstMethodCard.classList.add('selected');
-      }
-    }
-
-    // ====================================
-    // START
-    // ====================================
-    init();
   }
 
-  // Initialize when DOM is ready
+  // ====================================
+  // INITIALIZATION
+  // ====================================
+  async function initialize() {
+    if (State.isInitialized) return;
+    
+    cacheDOMElements();
+    attachEventListeners();
+    
+    // Load data in parallel
+    await Promise.all([
+      DataLoader.loadAddresses(),
+      DataLoader.loadCart(),
+    ]);
+    
+    Renderer.updatePaymentAmounts();
+    
+    State.isInitialized = true;
+  }
+
+  // Start when DOM ready
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeCheckout);
+    document.addEventListener('DOMContentLoaded', initialize);
   } else {
-    initializeCheckout();
+    initialize();
   }
+
+  // Expose for debugging
+  window.Checkout = { State, Actions, Renderer, DataLoader };
+
 })();

@@ -23,6 +23,7 @@ const {
   uploadAvatar,
   updateProfile,
   changePassword,
+  validateCartItems,
   validateCheckout,
   createOrder,
   getOrders,
@@ -191,6 +192,7 @@ router.post('/api/excel/analyze', aiExcelAnalyze);
 router.post('/api/excel/search', aiExcelSearch);
 
 // Order API endpoints (cart is managed in localStorage on client-side)
+router.post('/api/cart/validate', validateCartItems);
 router.post('/api/checkout/validate', validateCheckout);
 router.post('/api/orders/create', createOrder);
 router.get('/api/orders', getOrders);
@@ -224,5 +226,37 @@ router.put('/api/addresses/:addressId/default', setDefaultAddress);
 // Currency Preference API
 router.get('/api/settings/currency', getPreferredCurrency);
 router.put('/api/settings/currency', updatePreferredCurrency);
+
+// Quotation PDF Generation API
+const pdfGenerator = require('../services/pdfGeneratorService');
+
+router.post('/api/quotation/generate-pdf', async (req, res) => {
+  try {
+    const quotationData = req.body;
+    
+    if (!quotationData.items || quotationData.items.length === 0) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'No items provided for quotation' 
+      });
+    }
+
+    const pdfBuffer = await pdfGenerator.generateQuotationPDF(quotationData);
+    
+    const filename = `Quotation_${quotationData.quotationNumber || 'QUOTE'}.pdf`;
+    
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Content-Length', pdfBuffer.length);
+    
+    res.send(pdfBuffer);
+  } catch (error) {
+    console.error('PDF generation error:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Failed to generate PDF' 
+    });
+  }
+});
 
 module.exports = router;

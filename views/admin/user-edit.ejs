@@ -132,18 +132,15 @@
               <h3>Price Markup</h3>
             </div>
             <div class="user-form-card-body">
-              <div style="margin-bottom: 1rem; padding: 0.75rem 1rem; background: rgba(139, 92, 246, 0.06); border-radius: 10px; border: 1px solid rgba(139, 92, 246, 0.15);">
-                <p style="font-size: 0.8rem; color: var(--admin-text-muted); margin: 0;">
-                  <i data-lucide="info" style="width: 14px; height: 14px; display: inline; vertical-align: middle; margin-right: 0.25rem;"></i>
-                  Set a custom markup percentage for this user. Leave empty to use the system default. The markup is applied transparently to all part prices.
-                </p>
-              </div>
               <div class="user-form-grid">
                 <div class="user-form-group">
                   <label>Markup Percentage</label>
-                  <div style="position: relative;">
-                    <input type="number" class="user-form-input" name="markupPercentage" value="<%= user.markupPercentage !== null && user.markupPercentage !== undefined ? user.markupPercentage : '' %>" placeholder="Use system default" min="0" max="100" step="0.1" style="padding-right: 2.5rem;">
-                    <span style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--admin-text-muted); font-weight: 600;">%</span>
+                  <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <div style="position: relative; width: 140px;">
+                      <input type="number" class="user-form-input" name="markupPercentage" value="<%= user.markupPercentage !== null && user.markupPercentage !== undefined ? user.markupPercentage : '' %>" placeholder="Default" min="0" max="100" step="0.1" style="padding-right: 2rem; font-size: 1rem; font-weight: 500;">
+                      <span style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--admin-text-muted); font-weight: 600;">%</span>
+                    </div>
+                    <span style="font-size: 0.75rem; color: var(--admin-text-muted);">Leave empty for system default</span>
                   </div>
                 </div>
               </div>

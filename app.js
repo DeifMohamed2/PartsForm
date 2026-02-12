@@ -81,22 +81,30 @@ connectDB().then(async () => {
     console.log('⚠️  Falling back to MongoDB for search');
   }
   
-  // Initialize scheduler for integration syncs
-  try {
-    await schedulerService.initialize();
-  } catch (error) {
-    console.error('Scheduler initialization failed:', error.message);
+  // Initialize scheduler for integration syncs (skip in development mode)
+  if (process.env.NODE_ENV === 'development') {
+    console.log('⏸️  Skipping sync scheduler (NODE_ENV=development)');
+  } else {
+    try {
+      await schedulerService.initialize();
+    } catch (error) {
+      console.error('Scheduler initialization failed:', error.message);
+    }
   }
   
-  // Initialize email inquiry scheduler for automated email processing
-  try {
-    const emailInitialized = await emailInquiryScheduler.initialize();
-    if (emailInitialized) {
-      emailInquiryScheduler.start();
+  // Initialize email inquiry scheduler for automated email processing (skip in development mode)
+  if (process.env.NODE_ENV === 'development') {
+    console.log('⏸️  Skipping email inquiry scheduler (NODE_ENV=development)');
+  } else {
+    try {
+      const emailInitialized = await emailInquiryScheduler.initialize();
+      if (emailInitialized) {
+        emailInquiryScheduler.start();
+      }
+    } catch (error) {
+      console.error('Email inquiry scheduler initialization failed:', error.message);
+      console.log('⚠️  Email inquiries will need to be manually triggered');
     }
-  } catch (error) {
-    console.error('Email inquiry scheduler initialization failed:', error.message);
-    console.log('⚠️  Email inquiries will need to be manually triggered');
   }
 });
 

@@ -75,12 +75,31 @@
                   <p class="section-subtitle">Select where you'd like your order delivered</p>
                 </div>
 
-                <!-- Loading State -->
-                <div class="addresses-loading" id="addresses-loading">
-                  <div class="loading-spinner">
-                    <div class="spinner"></div>
+                <!-- Skeleton Loading State -->
+                <div class="address-skeleton" id="address-skeleton">
+                  <div class="skeleton-card">
+                    <div class="skeleton-radio"></div>
+                    <div class="skeleton-content">
+                      <div class="skeleton-header">
+                        <div class="skeleton-line skeleton-label"></div>
+                        <div class="skeleton-badge"></div>
+                      </div>
+                      <div class="skeleton-line skeleton-name"></div>
+                      <div class="skeleton-line skeleton-phone"></div>
+                      <div class="skeleton-line skeleton-address"></div>
+                    </div>
                   </div>
-                  <p class="loading-text">Loading your addresses...</p>
+                  <div class="skeleton-card">
+                    <div class="skeleton-radio"></div>
+                    <div class="skeleton-content">
+                      <div class="skeleton-header">
+                        <div class="skeleton-line skeleton-label"></div>
+                      </div>
+                      <div class="skeleton-line skeleton-name"></div>
+                      <div class="skeleton-line skeleton-phone"></div>
+                      <div class="skeleton-line skeleton-address"></div>
+                    </div>
+                  </div>
                 </div>
 
                 <!-- Addresses List -->
@@ -135,7 +154,7 @@
                     </div>
                     <div class="payment-type-content">
                       <div class="payment-type-icon full">
-                        <i data-lucide="circle-check"></i>
+                        <i data-lucide="check-circle"></i>
                       </div>
                       <h3 class="payment-type-title">Full Payment</h3>
                       <p class="payment-type-desc">Pay the complete amount now and receive your order immediately</p>
@@ -423,36 +442,78 @@
                   <span>Order Summary</span>
                 </h3>
 
-                <div class="summary-items" id="summary-items">
-                  <!-- Items will be populated by JavaScript -->
+                <!-- Summary Skeleton Loading -->
+                <div class="summary-skeleton" id="summary-skeleton">
+                  <div class="skeleton-item">
+                    <div class="skeleton-item-info">
+                      <div class="skeleton-line skeleton-item-title"></div>
+                      <div class="skeleton-line skeleton-item-desc"></div>
+                      <div class="skeleton-line skeleton-item-brand"></div>
+                    </div>
+                    <div class="skeleton-line skeleton-item-price"></div>
+                  </div>
+                  <div class="skeleton-item">
+                    <div class="skeleton-item-info">
+                      <div class="skeleton-line skeleton-item-title"></div>
+                      <div class="skeleton-line skeleton-item-desc"></div>
+                      <div class="skeleton-line skeleton-item-brand"></div>
+                    </div>
+                    <div class="skeleton-line skeleton-item-price"></div>
+                  </div>
+                  <div class="skeleton-item">
+                    <div class="skeleton-item-info">
+                      <div class="skeleton-line skeleton-item-title"></div>
+                      <div class="skeleton-line skeleton-item-desc"></div>
+                      <div class="skeleton-line skeleton-item-brand"></div>
+                    </div>
+                    <div class="skeleton-line skeleton-item-price"></div>
+                  </div>
+                  <div class="summary-divider"></div>
+                  <div class="skeleton-totals">
+                    <div class="skeleton-total-row">
+                      <div class="skeleton-line skeleton-total-label"></div>
+                      <div class="skeleton-line skeleton-total-value"></div>
+                    </div>
+                    <div class="skeleton-total-row">
+                      <div class="skeleton-line skeleton-total-label"></div>
+                      <div class="skeleton-line skeleton-total-value"></div>
+                    </div>
+                  </div>
                 </div>
 
-                <div class="summary-divider"></div>
+                <!-- Summary Content (hidden until loaded) -->
+                <div id="summary-content" style="display: none;">
+                  <div class="summary-items" id="summary-items">
+                    <!-- Items will be populated by JavaScript -->
+                  </div>
 
-                <div class="summary-totals">
-                  <div class="summary-row">
-                    <span class="summary-label">Subtotal:</span>
-                    <span class="summary-value" id="summary-subtotal">0.00 د.إ</span>
-                  </div>
-                  <div class="summary-row">
-                    <span class="summary-label">Items:</span>
-                    <span class="summary-value" id="summary-items-count">0 PCS</span>
-                  </div>
-                  <div class="summary-row">
-                    <span class="summary-label">Total Weight:</span>
-                    <span class="summary-value" id="summary-weight">0.000 kg</span>
-                  </div>
-                  <div class="summary-row fee" id="summary-fee-row" style="display: none;">
-                    <span class="summary-label">Processing Fee:</span>
-                    <span class="summary-value" id="summary-fee">0.00 د.إ</span>
-                  </div>
-                </div>
+                  <div class="summary-divider"></div>
 
-                <div class="summary-divider"></div>
+                  <div class="summary-totals">
+                    <div class="summary-row">
+                      <span class="summary-label">Subtotal:</span>
+                      <span class="summary-value" id="summary-subtotal">0.00 د.إ</span>
+                    </div>
+                    <div class="summary-row">
+                      <span class="summary-label">Items:</span>
+                      <span class="summary-value" id="summary-items-count">0 PCS</span>
+                    </div>
+                    <div class="summary-row">
+                      <span class="summary-label">Total Weight:</span>
+                      <span class="summary-value" id="summary-weight">0.000 kg</span>
+                    </div>
+                    <div class="summary-row fee" id="summary-fee-row" style="display: none;">
+                      <span class="summary-label">Processing Fee:</span>
+                      <span class="summary-value" id="summary-fee">0.00 د.إ</span>
+                    </div>
+                  </div>
 
-                <div class="summary-total">
-                  <span class="total-label">Total Amount:</span>
-                  <span class="total-value" id="summary-total">0.00 د.إ</span>
+                  <div class="summary-divider"></div>
+
+                  <div class="summary-total">
+                    <span class="total-label">Total Amount:</span>
+                    <span class="total-value" id="summary-total">0.00 د.إ</span>
+                  </div>
                 </div>
 
                 <div class="summary-security">
@@ -515,7 +576,7 @@
         <script src="/js/quick-search.js"></script>
         <script src="/js/cart.js"></script>
         <script src="/js/cart-badge-updater.js"></script>
-        <script src="/js/checkout.js"></script>
+        <script src="/js/checkout.js?v=<%= Date.now() %>"></script>
         <script>
           lucide.createIcons();
           window.addEventListener('load', () => lucide.createIcons());

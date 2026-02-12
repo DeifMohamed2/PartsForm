@@ -3579,16 +3579,17 @@
     const pageCategory = determineCategory();
 
     // Prepare cart item - map all fields from Part model/Elasticsearch
-    // Get stock quantity (numeric) for status determination
-    const stockQty = parseInt(partData.quantity) || parseInt(partData.qty) || parseInt(partData.stock) || 0;
+    // Use stockCode from part data (e.g., ST1, AD2, etc.) or fallback to N/A
+    const stockValue = partData.stockCode || partData.stockStatus || partData.stock || 'N/A';
     const cartItem = {
+      _id: partData._id || null, // MongoDB ID for reliable server validation
       code: partData.partNumber || partData.vendorCode || partData.code || 'N/A',
       brand: partData.brand || 'N/A',
       description: partData.description || 'N/A',
       supplier: partData.supplier || partData.integrationName || 'N/A',
       terms: partData.deliveryDays ? `${partData.deliveryDays} days` : (partData.terms || 'N/A'),
       weight: parseFloat(partData.weight) || 0,
-      stock: determineStockStatus(stockQty),
+      stock: stockValue,
       aircraftType: partData.aircraftType || partData.category || 'N/A',
       quantity: quantity,
       price: parseFloat(partData.unitPrice || partData.price) || 0,
@@ -3651,16 +3652,17 @@
         const pageCategory = determineCategory();
 
         // Prepare cart item - map all fields from Part model/Elasticsearch
-        // Get stock quantity (numeric) for status determination
-        const stockQty = parseInt(partData.quantity) || parseInt(partData.qty) || parseInt(partData.stock) || 0;
+        // Use stockCode from part data (e.g., ST1, AD2, etc.) or fallback to N/A
+        const stockValue = partData.stockCode || partData.stockStatus || partData.stock || 'N/A';
         const cartItem = {
+          _id: partData._id || null, // MongoDB ID for reliable server validation
           code: partData.partNumber || partData.vendorCode || partData.code || 'N/A',
           brand: partData.brand || 'N/A',
           description: partData.description || 'N/A',
           supplier: partData.supplier || partData.integrationName || 'N/A',
           terms: partData.deliveryDays ? `${partData.deliveryDays} days` : (partData.terms || 'N/A'),
           weight: parseFloat(partData.weight) || 0,
-          stock: determineStockStatus(stockQty),
+          stock: stockValue,
           aircraftType: partData.aircraftType || partData.category || 'N/A',
           quantity: quantity,
           price: parseFloat(partData.unitPrice || partData.price) || 0,

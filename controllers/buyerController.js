@@ -4,8 +4,10 @@
 const Buyer = require('../models/Buyer');
 const Order = require('../models/Order');
 const Ticket = require('../models/Ticket');
+const Part = require('../models/Part');
 const { processProfileImage, deleteOldProfileImage } = require('../utils/fileUploader');
 const socketService = require('../services/socketService');
+const { getEffectiveMarkup, applyMarkupToPrice } = require('../utils/priceMarkup');
 
 /**
  * Get buyer dashboard/main page
@@ -936,6 +938,131 @@ const changePassword = async (req, res) => {
 // ====================================
 
 /**
+ * Validate and refresh cart items with server-calculated prices
+ * POST /buyer/api/cart/validate
+ * Ensures prices are current and markup is applied
+ */
+const validateCartItems = async (req, res) => {
+  try {
+    const buyerId = req.user._id;
+    const { items } = req.body;
+
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      return res.json({
+        success: true,
+        validatedItems: [],
+        totalAmount: 0,
+        markupPercentage: 0
+      });
+    }
+
+    // Get buyer with markup percentage
+    const buyer = await Buyer.findById(buyerId);
+    if (!buyer) {
+      return res.status(404).json({
+        success: false,
+        message: 'Buyer not found'
+      });
+    }
+
+    // Get the buyer's effective markup percentage
+    const markupPercentage = await getEffectiveMarkup(buyer);
+
+    // Validate and calculate prices server-side
+    const validatedItems = [];
+    const invalidItems = [];
+
+    for (const item of items) {
+      const partNumber = (item.code || item.partNumber || '').trim();
+      const supplier = (item.supplier || '').trim();
+      
+      let dbPart = null;
+      
+      // Strategy 1: Try by MongoDB _id if available (most reliable)
+      if (item._id) {
+        try {
+          const mongoose = require('mongoose');
+          if (mongoose.Types.ObjectId.isValid(item._id)) {
+            dbPart = await Part.findById(item._id).lean();
+          }
+        } catch (e) {
+          // Invalid ObjectId, skip
+        }
+      }
+      
+      // Strategy 2: Try exact partNumber + supplier match
+      if (!dbPart && partNumber) {
+        const escapedPartNumber = partNumber.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const partQuery = {
+          partNumber: { $regex: `^${escapedPartNumber}$`, $options: 'i' }
+        };
+        
+        if (supplier) {
+          const escapedSupplier = supplier.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          partQuery.supplier = { $regex: `^${escapedSupplier}$`, $options: 'i' };
+        }
+        
+        dbPart = await Part.findOne(partQuery).lean();
+      }
+      
+      // Strategy 3: Try partNumber only (fallback when supplier doesn't match exactly)
+      if (!dbPart && partNumber) {
+        const escapedPartNumber = partNumber.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        dbPart = await Part.findOne({
+          partNumber: { $regex: `^${escapedPartNumber}$`, $options: 'i' }
+        }).lean();
+      }
+      
+      if (dbPart) {
+        const originalPrice = parseFloat(dbPart.price) || 0;
+        const markedUpPrice = applyMarkupToPrice(originalPrice, markupPercentage);
+        
+        validatedItems.push({
+          ...item,
+          _id: dbPart._id,
+          code: dbPart.partNumber,
+          partNumber: dbPart.partNumber,
+          description: dbPart.description || item.description,
+          brand: dbPart.brand || item.brand,
+          supplier: dbPart.supplier || item.supplier,
+          price: markedUpPrice,
+          originalPrice: originalPrice,
+          currency: item.currency || 'AED',
+          weight: parseFloat(dbPart.weight) || parseFloat(item.weight) || 0,
+          stock: dbPart.stock || item.stock || 'N/A',
+          validated: true
+        });
+      } else {
+        // Part not found - include with warning flag
+        validatedItems.push({
+          ...item,
+          validated: false,
+          warning: 'Part not found in database - price may be outdated'
+        });
+        invalidItems.push(partNumber);
+      }
+    }
+
+    const totalAmount = validatedItems.reduce((sum, item) => sum + (parseFloat(item.price) || 0), 0);
+
+    res.json({
+      success: true,
+      validatedItems,
+      totalAmount,
+      markupPercentage,
+      invalidItems: invalidItems.length > 0 ? invalidItems : undefined
+    });
+  } catch (error) {
+    console.error('Error validating cart items:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to validate cart items',
+      error: error.message
+    });
+  }
+};
+
+/**
  * Validate checkout - check cart items before proceeding
  * POST /buyer/api/checkout/validate
  * Expects cart items in request body
@@ -943,6 +1070,7 @@ const changePassword = async (req, res) => {
  */
 const validateCheckout = async (req, res) => {
   try {
+    const buyerId = req.user._id;
     const { items } = req.body;
 
     // Validate items array
@@ -953,34 +1081,115 @@ const validateCheckout = async (req, res) => {
       });
     }
 
-    // Validate each item has required fields
-    const invalidItems = items.filter(item => {
-      const price = parseFloat(item.price);
-      return !item.code && !item.partNumber || isNaN(price) || price <= 0;
-    });
-
-    if (invalidItems.length > 0) {
-      return res.status(400).json({
+    // Get buyer with markup percentage
+    const buyer = await Buyer.findById(buyerId);
+    if (!buyer) {
+      return res.status(404).json({
         success: false,
-        message: 'Some items in your cart have invalid pricing or missing part numbers',
-        invalidItems: invalidItems.map(item => item.code || item.partNumber || 'Unknown')
+        message: 'Buyer not found'
       });
     }
 
-    // Calculate totals - each item is individual (no quantity field)
-    const totalItems = items.length;
-    const totalAmount = items.reduce((sum, item) => sum + (parseFloat(item.price) || 0), 0);
-    const totalWeight = items.reduce((sum, item) => sum + (parseFloat(item.weight) || 0), 0);
+    // Get the buyer's effective markup percentage
+    const markupPercentage = await getEffectiveMarkup(buyer);
+
+    // SECURITY: Validate and recalculate prices server-side
+    const validatedItems = [];
+    const invalidItems = [];
+
+    for (const item of items) {
+      const partNumber = (item.code || item.partNumber || '').trim();
+      const supplier = (item.supplier || '').trim();
+      
+      let dbPart = null;
+      
+      // Strategy 1: Try by MongoDB _id if available (most reliable)
+      if (item._id) {
+        try {
+          const mongoose = require('mongoose');
+          if (mongoose.Types.ObjectId.isValid(item._id)) {
+            dbPart = await Part.findById(item._id).lean();
+          }
+        } catch (e) {
+          // Invalid ObjectId, skip
+        }
+      }
+      
+      // Strategy 2: Try exact partNumber + supplier match
+      if (!dbPart && partNumber) {
+        const escapedPartNumber = partNumber.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const partQuery = {
+          partNumber: { $regex: `^${escapedPartNumber}$`, $options: 'i' }
+        };
+        
+        if (supplier) {
+          const escapedSupplier = supplier.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          partQuery.supplier = { $regex: `^${escapedSupplier}$`, $options: 'i' };
+        }
+        
+        dbPart = await Part.findOne(partQuery).lean();
+      }
+      
+      // Strategy 3: Try partNumber only (fallback when supplier doesn't match exactly)
+      if (!dbPart && partNumber) {
+        const escapedPartNumber = partNumber.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        dbPart = await Part.findOne({
+          partNumber: { $regex: `^${escapedPartNumber}$`, $options: 'i' }
+        }).lean();
+      }
+      
+      if (dbPart) {
+        const originalPrice = parseFloat(dbPart.price) || 0;
+        const markedUpPrice = applyMarkupToPrice(originalPrice, markupPercentage);
+        
+        validatedItems.push({
+          ...item,
+          _id: dbPart._id,
+          code: dbPart.partNumber,
+          partNumber: dbPart.partNumber,
+          description: dbPart.description || item.description,
+          brand: dbPart.brand || item.brand,
+          supplier: dbPart.supplier || item.supplier,
+          price: markedUpPrice, // Server-calculated price with markup
+          originalPrice: originalPrice,
+          currency: item.currency || 'AED',
+          weight: parseFloat(dbPart.weight) || parseFloat(item.weight) || 0,
+          stock: dbPart.stock || item.stock || 'N/A'
+        });
+      } else {
+        invalidItems.push({
+          partNumber: partNumber,
+          supplier: supplier,
+          reason: 'Part not found in database'
+        });
+      }
+    }
+
+    // If any items were invalid, return error
+    if (invalidItems.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: `${invalidItems.length} item(s) could not be validated`,
+        invalidItems
+      });
+    }
+
+    // Calculate totals with validated prices
+    const totalItems = validatedItems.length;
+    const totalAmount = validatedItems.reduce((sum, item) => sum + (parseFloat(item.price) || 0), 0);
+    const totalWeight = validatedItems.reduce((sum, item) => sum + (parseFloat(item.weight) || 0), 0);
 
     res.json({
       success: true,
       message: 'Cart is valid for checkout',
       cart: {
-        itemsCount: items.length,
+        itemsCount: validatedItems.length,
         totalItems,
         totalAmount,
         totalWeight
-      }
+      },
+      validatedItems, // Return validated items with server-calculated prices
+      markupPercentage
     });
   } catch (error) {
     console.error('Error validating checkout:', error);
@@ -1027,7 +1236,7 @@ const createOrder = async (req, res) => {
       });
     }
 
-    // Get buyer
+    // Get buyer with markup percentage
     const buyer = await Buyer.findById(buyerId);
     if (!buyer) {
       return res.status(404).json({
@@ -1036,7 +1245,107 @@ const createOrder = async (req, res) => {
       });
     }
 
-    // Create order from cart items
+    // Get the buyer's effective markup percentage (from buyer or system default)
+    const markupPercentage = await getEffectiveMarkup(buyer);
+
+    // SECURITY: Validate and recalculate prices server-side
+    // Look up each part's actual price from the database and apply markup
+    const validatedItems = [];
+    const invalidItems = [];
+
+    console.log('[Order] Validating', items.length, 'items');
+
+    for (const item of items) {
+      const partNumber = (item.code || item.partNumber || '').trim();
+      const supplier = (item.supplier || '').trim();
+      
+      let dbPart = null;
+      
+      // Strategy 1: Try by MongoDB _id if available (most reliable)
+      if (item._id) {
+        try {
+          const mongoose = require('mongoose');
+          if (mongoose.Types.ObjectId.isValid(item._id)) {
+            dbPart = await Part.findById(item._id).lean();
+            if (dbPart) {
+              console.log('[Order] Found by _id:', item._id);
+            }
+          }
+        } catch (e) {
+          // Invalid ObjectId, skip
+        }
+      }
+      
+      // Strategy 2: Try exact partNumber + supplier match
+      if (!dbPart && partNumber) {
+        const escapedPartNumber = partNumber.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const partQuery = {
+          partNumber: { $regex: `^${escapedPartNumber}$`, $options: 'i' }
+        };
+        
+        if (supplier) {
+          const escapedSupplier = supplier.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          partQuery.supplier = { $regex: `^${escapedSupplier}$`, $options: 'i' };
+        }
+        
+        dbPart = await Part.findOne(partQuery).lean();
+        if (dbPart) {
+          console.log('[Order] Found by partNumber+supplier:', partNumber, supplier);
+        }
+      }
+      
+      // Strategy 3: Try partNumber only (fallback when supplier doesn't match exactly)
+      if (!dbPart && partNumber) {
+        const escapedPartNumber = partNumber.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        dbPart = await Part.findOne({
+          partNumber: { $regex: `^${escapedPartNumber}$`, $options: 'i' }
+        }).lean();
+        if (dbPart) {
+          console.log('[Order] Found by partNumber only:', partNumber, '(supplier in cart:', supplier, ', in DB:', dbPart.supplier, ')');
+        }
+      }
+      
+      if (dbPart) {
+        // Found in database - use DB price with markup applied
+        const originalPrice = parseFloat(dbPart.price) || 0;
+        const markedUpPrice = applyMarkupToPrice(originalPrice, markupPercentage);
+        
+        validatedItems.push({
+          ...item,
+          _id: dbPart._id, // Keep reference to original part
+          code: dbPart.partNumber,
+          partNumber: dbPart.partNumber,
+          description: dbPart.description || item.description,
+          brand: dbPart.brand || item.brand,
+          supplier: dbPart.supplier || item.supplier,
+          price: markedUpPrice, // Server-calculated price with markup
+          originalPrice: originalPrice, // Store original for reference
+          currency: item.currency || 'AED',
+          weight: parseFloat(dbPart.weight) || parseFloat(item.weight) || 0,
+          stock: dbPart.stock || item.stock || 'N/A',
+          markupApplied: markupPercentage
+        });
+      } else {
+        // Part not found in database - reject for security
+        console.log('[Order] FAILED to find part:', partNumber, 'supplier:', supplier);
+        invalidItems.push({
+          partNumber: partNumber,
+          supplier: supplier,
+          reason: 'Part not found in database'
+        });
+      }
+    }
+
+    // If any items were invalid, return error
+    if (invalidItems.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: `${invalidItems.length} item(s) could not be validated. Please refresh your cart.`,
+        invalidItems
+      });
+    }
+
+    // Create order from validated cart items with server-calculated prices
     const paymentInfo = {
       type: paymentType,
       method: paymentMethod,
@@ -1056,7 +1365,7 @@ const createOrder = async (req, res) => {
       }
     };
 
-    const order = await Order.createFromCartItems(buyer, items, paymentInfo);
+    const order = await Order.createFromCartItems(buyer, validatedItems, paymentInfo);
 
     res.json({
       success: true,
@@ -1382,35 +1691,57 @@ const processPayment = async (req, res) => {
 
 /**
  * Get all addresses for the authenticated buyer
+ * Refactored with robust error handling and logging
  */
 const getAddresses = async (req, res) => {
   try {
-    const buyer = await Buyer.findById(req.user._id);
-    
+    // Verify user is authenticated
+    if (!req.user || !req.user._id) {
+      console.error('[getAddresses] No authenticated user found');
+      return res.status(401).json({
+        success: false,
+        message: 'Authentication required'
+      });
+    }
+
+    // Always fetch fresh from database to avoid stale data
+    const buyer = await Buyer.findById(req.user._id)
+      .select('addresses')
+      .lean()
+      .maxTimeMS(10000); // 10 second timeout
+
     if (!buyer) {
+      console.error('[getAddresses] Buyer not found for ID:', req.user._id);
       return res.status(404).json({
         success: false,
         message: 'Buyer not found'
       });
     }
 
-    // Sort addresses: default first, then by creation date
-    const addresses = buyer.addresses.sort((a, b) => {
+    // Ensure addresses is an array
+    const buyerAddresses = Array.isArray(buyer.addresses) ? buyer.addresses : [];
+
+    // Sort addresses: default first, then by creation date (newest first)
+    const addresses = buyerAddresses.sort((a, b) => {
       if (a.isDefault && !b.isDefault) return -1;
       if (!a.isDefault && b.isDefault) return 1;
-      return new Date(b.createdAt) - new Date(a.createdAt);
+      const dateA = a.createdAt ? new Date(a.createdAt) : new Date(0);
+      const dateB = b.createdAt ? new Date(b.createdAt) : new Date(0);
+      return dateB - dateA;
     });
 
-    res.json({
+    // Return successful response
+    return res.json({
       success: true,
-      addresses: addresses
+      addresses: addresses,
+      count: addresses.length
     });
   } catch (error) {
-    console.error('Error getting addresses:', error);
-    res.status(500).json({
+    console.error('[getAddresses] Error:', error.message, error.stack);
+    return res.status(500).json({
       success: false,
       message: 'Failed to fetch addresses',
-      error: error.message
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
     });
   }
 };
@@ -1667,6 +1998,7 @@ module.exports = {
   changePassword,
 
   // Order Management API
+  validateCartItems,
   validateCheckout,
   createOrder,
   getOrders,

@@ -147,13 +147,15 @@ const register = async (req, res) => {
     }
 
     // Create new buyer
+    // Convert "OTHER" to "XX" (unassigned ISO code) to satisfy 2-character requirement
+    const countryCode = country.trim().toUpperCase();
     const buyer = new Buyer({
       firstName: firstName.trim(),
       lastName: lastName.trim(),
       email: email.toLowerCase().trim(),
       phone: phone.trim(),
       companyName: companyName.trim(),
-      country: country.trim(),
+      country: countryCode === 'OTHER' ? 'XX' : countryCode,
       city: city.trim(),
       shippingAddress: shippingAddress.trim(),
       password,

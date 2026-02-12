@@ -62,6 +62,32 @@
   // ====================================
   // LOCAL STORAGE MANAGEMENT
   // ====================================
+  
+  // Helper to always get fresh cart data from localStorage
+  function getFreshCartData() {
+    try {
+      const savedCart = localStorage.getItem(CART_STORAGE_KEY);
+      if (!savedCart) {
+        return {
+          items: [],
+          selectedItems: [],
+          createdAt: new Date().toISOString(),
+          expiresAt: calculateExpiryDate(),
+        };
+      }
+      const parsed = JSON.parse(savedCart);
+      return {
+        items: Array.isArray(parsed.items) ? parsed.items : [],
+        selectedItems: Array.isArray(parsed.selectedItems) ? parsed.selectedItems : [],
+        createdAt: parsed.createdAt || new Date().toISOString(),
+        expiresAt: parsed.expiresAt || calculateExpiryDate(),
+      };
+    } catch (error) {
+      console.error('Error reading cart:', error);
+      return { items: [], selectedItems: [], createdAt: new Date().toISOString(), expiresAt: calculateExpiryDate() };
+    }
+  }
+
   function loadCartFromStorage() {
     try {
       const savedCart = localStorage.getItem(CART_STORAGE_KEY);
@@ -70,30 +96,30 @@
 
         // Check if cart has expired
         if (parsed.expiresAt && new Date(parsed.expiresAt) < new Date()) {
-          clearCart(false);
-          showAlert(
-            'info',
-            'Cart Expired',
-            'Your cart items have been cleared after 30 days.',
-          );
+          localStorage.removeItem(CART_STORAGE_KEY);
+          cartState = { items: [], selectedItems: new Set(), createdAt: new Date().toISOString(), expiresAt: calculateExpiryDate() };
+          showAlert('info', 'Cart Expired', 'Your cart items have been cleared after 30 days.');
           return;
         }
 
         cartState = {
-          items: parsed.items || [],
-          selectedItems: new Set(parsed.selectedItems || []),
+          items: Array.isArray(parsed.items) ? parsed.items : [],
+          selectedItems: new Set(Array.isArray(parsed.selectedItems) ? parsed.selectedItems : []),
           createdAt: parsed.createdAt || new Date().toISOString(),
           expiresAt: parsed.expiresAt || calculateExpiryDate(),
         };
       } else {
-        // Initialize new cart
-        cartState.createdAt = new Date().toISOString();
-        cartState.expiresAt = calculateExpiryDate();
-        saveCartToStorage();
+        // Initialize empty cart without saving (will save when items are added)
+        cartState = {
+          items: [],
+          selectedItems: new Set(),
+          createdAt: new Date().toISOString(),
+          expiresAt: calculateExpiryDate(),
+        };
       }
     } catch (error) {
       console.error('Error loading cart from storage:', error);
-      showAlert('error', 'Error', 'Failed to load cart data');
+      cartState = { items: [], selectedItems: new Set(), createdAt: new Date().toISOString(), expiresAt: calculateExpiryDate() };
     }
   }
 
@@ -109,9 +135,11 @@
 
       // Update navbar badge
       updateCartBadge();
+      
+      // Dispatch event for other components to sync
+      window.dispatchEvent(new CustomEvent('cartUpdated', { detail: cartData }));
     } catch (error) {
       console.error('Error saving cart to storage:', error);
-      showAlert('error', 'Error', 'Failed to save cart data');
     }
   }
 
@@ -125,9 +153,16 @@
   // CART OPERATIONS
   // ====================================
   function addToCart(item) {
+    // CRITICAL: Always read fresh from localStorage before adding
+    // This prevents stale state issues when cart is cleared from another page
+    const freshData = getFreshCartData();
+    cartState.items = freshData.items;
+    cartState.selectedItems = new Set(freshData.selectedItems);
+    cartState.createdAt = freshData.createdAt;
+    cartState.expiresAt = freshData.expiresAt;
+
     // Each part is added as a separate item - NO grouping by code/brand
-    // If adding multiple quantities, add them as individual items
-    const quantity = item.quantity || 1;
+    const quantity = parseInt(item.quantity) || 1;
 
     // 🧠 Record for AI learning
     if (window.aiLearning) {
@@ -140,6 +175,7 @@
       // Add as new individual item - store all fields from search results
       const cartItem = {
         id: generateItemId(),
+        _id: item._id || null, // MongoDB ID for reliable server validation
         code: item.code || item.partNumber || 'N/A',
         brand: item.brand || 'N/A',
         description: item.description || '',
@@ -192,6 +228,11 @@
   }
 
   function performRemove(itemId) {
+    // Sync with localStorage first to avoid stale data
+    const freshData = getFreshCartData();
+    cartState.items = freshData.items;
+    cartState.selectedItems = new Set(freshData.selectedItems);
+    
     const index = cartState.items.findIndex((i) => i.id === itemId);
     if (index !== -1) {
       const removedItem = cartState.items[index];
@@ -235,9 +276,21 @@
   }
 
   function performClearCart() {
+    // Completely reset cart state
     cartState.items = [];
-    cartState.selectedItems.clear();
-    saveCartToStorage();
+    cartState.selectedItems = new Set();
+    cartState.createdAt = new Date().toISOString();
+    cartState.expiresAt = calculateExpiryDate();
+    
+    // Remove from localStorage entirely to ensure clean slate
+    localStorage.removeItem(CART_STORAGE_KEY);
+    
+    // Update badge
+    updateCartBadge();
+    
+    // Dispatch event for other components
+    window.dispatchEvent(new CustomEvent('cartUpdated', { detail: { items: [], selectedItems: [] } }));
+    
     renderCart();
     showAlert(
       'info',
@@ -350,7 +403,10 @@
 
     // Each item is individual - no quantity grouping
     const amount = item.price;
-    const itemWeight = item.weight;
+    
+    // Get proper stock display - use as-is if valid, otherwise show the raw value
+    const stockDisplay = getStockDisplay(item.stock);
+    const stockClass = getStockClass(item.stock);
 
     tr.innerHTML = `
       <td class="th-checkbox">
@@ -367,29 +423,11 @@
       <td class="th-description">
         <span class="part-description">${escapeHtml(item.description)}</span>
       </td>
-      <td class="th-supplier">
-        <span class="supplier-name">${escapeHtml(item.supplier || 'N/A')}</span>
-      </td>
-      <td class="th-terms">${escapeHtml(item.terms)}</td>
-      <td class="th-weight">${itemWeight.toFixed(3)} kg</td>
       <td class="th-stock">
-        <span class="stock-badge ${getStockClass(item.stock)}">
-          <i data-lucide="${getStockIcon(item.stock)}"></i>
-          ${escapeHtml(item.stock)}
-        </span>
+        <span class="stock-code-badge">${escapeHtml(stockDisplay)}</span>
       </td>
-      <td class="th-aircraft">${escapeHtml(item.aircraftType)}</td>
       <td class="th-qty">
         <span class="qty-display">1</span>
-      </td>
-      <td class="th-packing">
-        <div class="packing-checkbox-group">
-          <input type="checkbox" class="packing-checkbox" 
-                 id="packing-${item.id}" 
-                 data-item-id="${item.id}"
-                 ${item.addPacking ? 'checked' : ''}>
-          <label for="packing-${item.id}" class="packing-label">Add</label>
-        </div>
       </td>
       <td class="th-price">
         <span class="price-display">
@@ -399,15 +437,6 @@
       </td>
       <td class="th-amount">
         <span class="amount-display">${amount.toFixed(2)} د.إ</span>
-      </td>
-      <td class="th-reference">
-        <input type="text" class="reference-input" 
-               placeholder="Add reference" 
-               value="${escapeHtml(item.reference)}"
-               data-item-id="${item.id}">
-      </td>
-      <td class="th-date">
-        <span class="date-display">${formatDate(item.dateCreated)}</span>
       </td>
       <td class="th-actions">
         <button class="btn-remove-item" data-item-id="${
@@ -428,20 +457,6 @@
     // Checkbox
     const checkbox = row.querySelector('.item-checkbox');
     checkbox.addEventListener('change', () => toggleItemSelection(itemId));
-
-    // No quantity buttons - each item is individual
-
-    // Packing checkbox
-    const packingCheckbox = row.querySelector('.packing-checkbox');
-    packingCheckbox.addEventListener('change', (e) => {
-      updateItemPacking(itemId, e.target.checked);
-    });
-
-    // Reference input
-    const referenceInput = row.querySelector('.reference-input');
-    referenceInput.addEventListener('blur', (e) => {
-      updateItemReference(itemId, e.target.value);
-    });
 
     // Remove button
     const removeBtn = row.querySelector('.btn-remove-item');
@@ -698,6 +713,20 @@
     if (DOM.confirmBackdrop) {
       DOM.confirmBackdrop.addEventListener('click', hideConfirmDialog);
     }
+    
+    // Listen for storage changes from other tabs/windows to stay in sync
+    window.addEventListener('storage', (e) => {
+      if (e.key === CART_STORAGE_KEY) {
+        loadCartFromStorage();
+        renderCart();
+        updateCartBadge();
+      }
+    });
+    
+    // Listen for cartUpdated events from same page
+    window.addEventListener('cartUpdated', () => {
+      updateCartBadge();
+    });
   }
 
   // ====================================
@@ -828,14 +857,22 @@
   }
 
   function getStockClass(stock) {
-    const stockLower = stock.toLowerCase();
-    if (stockLower.includes('st1') || stockLower.includes('in-stock')) {
+    if (!stock || stock === 'N/A') return 'in-stock';
+    const stockLower = stock.toString().toLowerCase();
+    if (stockLower.includes('st1') || stockLower.includes('in-stock') || stockLower.includes('in stock')) {
       return 'in-stock';
     } else if (stockLower.includes('st2') || stockLower.includes('low')) {
       return 'low-stock';
-    } else {
+    } else if (stockLower.includes('st3') || stockLower.includes('out')) {
       return 'out-of-stock';
     }
+    return 'in-stock';
+  }
+  
+  // Get display text for stock - use original value as-is
+  function getStockDisplay(stock) {
+    if (!stock || stock === 'N/A' || stock === 'n/a') return 'N/A';
+    return stock;
   }
 
   function getStockIcon(stock) {

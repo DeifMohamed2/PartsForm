@@ -1906,13 +1906,15 @@ const createUser = async (req, res) => {
     const tempPassword = Math.random().toString(36).slice(-8) + 'A1!';
 
     // Create new buyer
+    // Convert "OTHER" to "XX" (unassigned ISO code) to satisfy 2-character requirement
+    const countryCode = country ? country.trim().toUpperCase() : 'US';
     const buyer = new Buyer({
       firstName: firstName.trim(),
       lastName: lastName.trim(),
       email: email.toLowerCase().trim(),
       phone: phone ? phone.trim() : '',
       companyName: companyName ? companyName.trim() : 'N/A',
-      country: country ? country.trim() : 'US',
+      country: countryCode === 'OTHER' ? 'XX' : countryCode,
       city: city ? city.trim() : 'N/A',
       shippingAddress: shippingAddress ? shippingAddress.trim() : 'N/A',
       password: tempPassword,
@@ -1986,7 +1988,11 @@ const updateUser = async (req, res) => {
     }
     if (phone) buyer.phone = phone.trim();
     if (companyName) buyer.companyName = companyName.trim();
-    if (country) buyer.country = country.trim();
+    if (country) {
+      // Convert "OTHER" to "XX" (unassigned ISO code) to satisfy 2-character requirement
+      const countryCode = country.trim().toUpperCase();
+      buyer.country = countryCode === 'OTHER' ? 'XX' : countryCode;
+    }
     if (city) buyer.city = city.trim();
     if (shippingAddress) buyer.shippingAddress = shippingAddress.trim();
 
