@@ -15,6 +15,7 @@ const syncService = require('../services/syncService');
 const schedulerService = require('../services/schedulerService');
 const elasticsearchService = require('../services/elasticsearchService');
 const socketService = require('../services/socketService');
+const { adminHasPermission, PERMISSIONS, ROLE_PERMISSIONS } = require('../middleware/auth');
 
 /**
  * Simple in-memory cache for dashboard data
@@ -23,6 +24,31 @@ const dashboardCache = {
   data: null,
   timestamp: 0,
   TTL: 30000, // 30 seconds cache
+};
+
+/**
+ * Helper to build user permissions object for views
+ * @param {Object} admin - The admin user object
+ * @returns {Object} - Object with permission flags and helper methods
+ */
+const buildUserPermissions = (admin) => {
+  if (!admin) return null;
+  
+  return {
+    role: admin.role,
+    permissions: admin.permissions || [],
+    isSuperAdmin: admin.role === 'super_admin',
+    canRead: adminHasPermission(admin, PERMISSIONS.READ),
+    canWrite: adminHasPermission(admin, PERMISSIONS.WRITE),
+    canDelete: adminHasPermission(admin, PERMISSIONS.DELETE),
+    canManageUsers: adminHasPermission(admin, PERMISSIONS.MANAGE_USERS),
+    canManageAdmins: adminHasPermission(admin, PERMISSIONS.MANAGE_ADMINS),
+    canManageOrders: adminHasPermission(admin, PERMISSIONS.MANAGE_ORDERS),
+    canManageSettings: adminHasPermission(admin, PERMISSIONS.MANAGE_SETTINGS),
+    canManageIntegrations: adminHasPermission(admin, PERMISSIONS.MANAGE_INTEGRATIONS),
+    // Helper for checking any permission
+    has: (permission) => adminHasPermission(admin, permission),
+  };
 };
 
 /**
@@ -97,14 +123,16 @@ const getAdminDashboard = async (req, res) => {
         .lean(),
 
       // Single aggregation for ALL order statistics
+      // NOTE: Revenue is calculated from COMPLETED/DELIVERED orders only (actual revenue)
+      // Order counts include all orders for status tracking
       Order.aggregate([
         {
           $facet: {
-            // Status counts
+            // Status counts - ALL orders for status tracking
             statusCounts: [{ $group: { _id: '$status', count: { $sum: 1 } } }],
-            // Revenue stats
+            // Revenue stats - ONLY completed/delivered orders (actual revenue)
             revenue: [
-              { $match: { status: { $ne: 'cancelled' } } },
+              { $match: { status: { $in: ['completed', 'delivered'] } } },
               {
                 $group: {
                   _id: null,
@@ -135,12 +163,22 @@ const getAdminDashboard = async (req, res) => {
                 },
               },
             ],
-            // Monthly data for chart (simplified)
+            // Potential revenue - All active orders (for dashboard display)
+            potentialRevenue: [
+              { $match: { status: { $nin: ['cancelled'] } } },
+              {
+                $group: {
+                  _id: null,
+                  total: { $sum: '$pricing.total' },
+                },
+              },
+            ],
+            // Monthly data for chart - ONLY completed/delivered orders
             monthly: [
               {
                 $match: {
                   createdAt: { $gte: startOfYear },
-                  status: { $ne: 'cancelled' },
+                  status: { $in: ['completed', 'delivered'] },
                 },
               },
               {
@@ -152,9 +190,25 @@ const getAdminDashboard = async (req, res) => {
               },
               { $sort: { _id: 1 } },
             ],
-            // Top buyers
+            // Monthly order count - ALL orders for chart (to show order activity)
+            monthlyOrders: [
+              {
+                $match: {
+                  createdAt: { $gte: startOfYear },
+                  status: { $ne: 'cancelled' },
+                },
+              },
+              {
+                $group: {
+                  _id: { $month: '$createdAt' },
+                  count: { $sum: 1 },
+                },
+              },
+              { $sort: { _id: 1 } },
+            ],
+            // Top buyers - From completed/delivered orders (actual spending)
             topBuyers: [
-              { $match: { status: { $ne: 'cancelled' } } },
+              { $match: { status: { $in: ['completed', 'delivered'] } } },
               {
                 $group: {
                   _id: '$buyer',
@@ -179,9 +233,36 @@ const getAdminDashboard = async (req, res) => {
                 },
               },
             ],
-            // Orders by country (for Global Reach)
+            // Top buyers by all orders (for display when no completed orders)
+            topBuyersByOrders: [
+              { $match: { status: { $nin: ['cancelled'] } } },
+              {
+                $group: {
+                  _id: '$buyer',
+                  totalSpent: { $sum: '$pricing.total' },
+                  orderCount: { $sum: 1 },
+                },
+              },
+              { $sort: { orderCount: -1, totalSpent: -1 } },
+              { $limit: 5 },
+              {
+                $lookup: {
+                  from: 'buyers',
+                  localField: '_id',
+                  foreignField: '_id',
+                  as: 'buyerInfo',
+                },
+              },
+              {
+                $unwind: {
+                  path: '$buyerInfo',
+                  preserveNullAndEmptyArrays: true,
+                },
+              },
+            ],
+            // Orders by country (for Global Reach) - All non-cancelled orders
             ordersByCountry: [
-              { $match: { status: { $ne: 'cancelled' } } },
+              { $match: { status: { $nin: ['cancelled'] } } },
               {
                 $lookup: {
                   from: 'buyers',
@@ -207,6 +288,21 @@ const getAdminDashboard = async (req, res) => {
               { $sort: { orderCount: -1 } },
               { $limit: 8 },
             ],
+            // Per-buyer fulfillment data for accurate rate calculation
+            buyerFulfillment: [
+              { $match: { status: { $nin: ['cancelled'] } } },
+              {
+                $group: {
+                  _id: '$buyer',
+                  totalOrders: { $sum: 1 },
+                  completedOrders: {
+                    $sum: {
+                      $cond: [{ $in: ['$status', ['completed', 'delivered']] }, 1, 0]
+                    }
+                  }
+                }
+              }
+            ],
           },
         },
       ]),
@@ -219,6 +315,7 @@ const getAdminDashboard = async (req, res) => {
       statusCounts[s._id] = s.count;
     });
 
+    // Revenue from COMPLETED orders only (actual realized revenue)
     const revData = stats_data.revenue?.[0] || {
       total: 0,
       thisMonth: 0,
@@ -226,13 +323,26 @@ const getAdminDashboard = async (req, res) => {
     };
     const totalRevenue = revData.total || 0;
     const thisMonthRevenue = revData.thisMonth || 0;
-    const prevMonthRevenue = revData.lastMonth || 1;
-    const growthPercent =
-      prevMonthRevenue > 0
-        ? Math.round(
-            ((thisMonthRevenue - prevMonthRevenue) / prevMonthRevenue) * 100,
-          )
-        : 0;
+    const prevMonthRevenue = revData.lastMonth || 0;
+    
+    // Potential revenue from ALL active orders (pending + processing + shipped + completed)
+    const potentialRevData = stats_data.potentialRevenue?.[0] || { total: 0 };
+    const potentialRevenue = potentialRevData.total || 0;
+
+    // Calculate growth percentage - only if there's actual completed revenue
+    // If no revenue last month, show 0% (not arbitrary growth from zero base)
+    let growthPercent = 0;
+    if (prevMonthRevenue > 0 && thisMonthRevenue > 0) {
+      growthPercent = Math.round(
+        ((thisMonthRevenue - prevMonthRevenue) / prevMonthRevenue) * 100
+      );
+    } else if (thisMonthRevenue > 0 && prevMonthRevenue === 0) {
+      // New revenue this month with nothing last month - cap at 100% for display
+      growthPercent = 100;
+    } else if (thisMonthRevenue === 0 && prevMonthRevenue > 0) {
+      // Had revenue last month but none this month
+      growthPercent = -100;
+    }
 
     // Chart data
     const monthLabels = [
@@ -251,8 +361,14 @@ const getAdminDashboard = async (req, res) => {
     ];
     const revenueData = new Array(12).fill(0);
     const orderCountData = new Array(12).fill(0);
+    
+    // Revenue chart shows completed order amounts only
     (stats_data.monthly || []).forEach((item) => {
       revenueData[item._id - 1] = item.revenue || 0;
+    });
+    
+    // Order count chart shows all orders (for activity tracking)
+    (stats_data.monthlyOrders || []).forEach((item) => {
       orderCountData[item._id - 1] = item.count || 0;
     });
 
@@ -283,8 +399,34 @@ const getAdminDashboard = async (req, res) => {
     }));
 
     // Format top buyers with real buyer details
-    const topBuyersData = (stats_data.topBuyers || []).map((buyer, index) => {
+    // Use completed orders if available, otherwise show by order count
+    const topBuyersFromCompleted = stats_data.topBuyers || [];
+    const topBuyersFromAll = stats_data.topBuyersByOrders || [];
+    const buyersSource = topBuyersFromCompleted.length > 0 ? topBuyersFromCompleted : topBuyersFromAll;
+    const hasCompletedOrders = topBuyersFromCompleted.length > 0;
+    
+    // Build a fulfillment lookup map from buyerFulfillment facet
+    const fulfillmentMap = {};
+    (stats_data.buyerFulfillment || []).forEach(bf => {
+      if (bf._id) {
+        fulfillmentMap[bf._id.toString()] = {
+          total: bf.totalOrders || 0,
+          completed: bf.completedOrders || 0
+        };
+      }
+    });
+    
+    const topBuyersData = buyersSource.map((buyer, index) => {
       const info = buyer.buyerInfo || {};
+      
+      // Calculate REAL fulfillment rate for this specific buyer
+      const buyerId = buyer._id ? buyer._id.toString() : null;
+      const buyerFulfillment = buyerId ? fulfillmentMap[buyerId] : null;
+      let fulfillmentRate = 0;
+      if (buyerFulfillment && buyerFulfillment.total > 0) {
+        fulfillmentRate = Math.round((buyerFulfillment.completed / buyerFulfillment.total) * 100);
+      }
+      
       return {
         rank: index + 1,
         _id: buyer._id,
@@ -300,7 +442,8 @@ const getAdminDashboard = async (req, res) => {
         email: info.email || '',
         totalSpent: buyer.totalSpent || 0,
         orderCount: buyer.orderCount || 0,
-        fulfillmentRate: 95 + (index % 5),
+        fulfillmentRate: fulfillmentRate,
+        isPending: !hasCompletedOrders && fulfillmentRate === 0, // Flag to show these are from pending orders
       };
     });
 
@@ -353,10 +496,18 @@ const getAdminDashboard = async (req, res) => {
       (t) => t.status === 'open' || t.status === 'in-progress',
     ).length;
 
+    // Calculate actual fulfillment rate
+    const completedOrdersCount = (statusCounts['completed'] || 0) + (statusCounts['delivered'] || 0);
+    const totalActiveOrders = totalOrdersCount - (statusCounts['cancelled'] || 0);
+    const fulfillmentRate = totalActiveOrders > 0 
+      ? Math.round((completedOrdersCount / totalActiveOrders) * 100) 
+      : 0;
+
     // Build stats object
     const stats = {
       totalOrders: totalOrdersCount,
-      totalRevenue,
+      totalRevenue, // Realized revenue from completed orders
+      potentialRevenue, // Total value of all active orders
       activeUsers: totalBuyers,
       totalBuyers,
       pendingTickets: pendingTicketsCount,
@@ -369,6 +520,8 @@ const getAdminDashboard = async (req, res) => {
       ordersDelivered: statusCounts['delivered'] || 0,
       ordersCompleted: statusCounts['completed'] || 0,
       ordersCancelled: statusCounts['cancelled'] || 0,
+      completedOrdersCount, // Total completed + delivered
+      fulfillmentRate, // Real fulfillment rate
       inStock: 0,
       lowStock: 0,
       outOfStock: 0,
@@ -396,9 +549,9 @@ const getAdminDashboard = async (req, res) => {
     };
 
     const performanceMetrics = {
-      fulfillmentRate: 94.2,
+      fulfillmentRate: fulfillmentRate,
       fulfillmentTarget: 95,
-      fulfillmentChange: 2.1,
+      fulfillmentChange: 0, // Would need historical data to calculate
       satisfactionScore: 4.8,
       satisfactionReviews: formattedTickets.length,
       satisfactionChange: 0.3,
@@ -563,7 +716,7 @@ const getOrderDetails = async (req, res) => {
     let order = await Order.findOne({ orderNumber: orderId })
       .populate(
         'buyer',
-        'firstName lastName email companyName phone country city shippingAddress',
+        'firstName lastName email companyName phone country city shippingAddress avatar',
       )
       .lean();
 
@@ -574,7 +727,7 @@ const getOrderDetails = async (req, res) => {
         order = await Order.findById(orderId)
           .populate(
             'buyer',
-            'firstName lastName email companyName phone country city shippingAddress',
+            'firstName lastName email companyName phone country city shippingAddress avatar',
           )
           .lean();
       }
@@ -674,6 +827,7 @@ const getOrderDetails = async (req, res) => {
             phone: order.buyer.phone,
             country: order.buyer.country,
             city: order.buyer.city,
+            avatar: order.buyer.avatar || null,
           }
         : null,
 
@@ -2305,20 +2459,18 @@ const getAdminSettings = async (req, res) => {
  */
 const getIntegrationsManagement = async (req, res) => {
   try {
-    // Get all integrations from database
-    const integrations = await Integration.find({})
-      .sort({ createdAt: -1 })
-      .lean();
+    // Get all integrations and real part count in parallel
+    const [integrations, actualPartCount] = await Promise.all([
+      Integration.find({}).sort({ createdAt: -1 }).lean(),
+      Part.estimatedDocumentCount(), // Fast, actual count from database
+    ]);
 
-    // Get statistics
+    // Get statistics with REAL part count
     const stats = {
       totalConnections: integrations.length,
       activeConnections: integrations.filter((i) => i.status === 'active')
         .length,
-      totalRecords: integrations.reduce(
-        (sum, i) => sum + (i.stats?.totalRecords || 0),
-        0,
-      ),
+      totalRecords: actualPartCount, // Use actual count from database, not stale integration stats
       lastSync: integrations.reduce((latest, i) => {
         if (
           i.lastSync?.date &&
@@ -3356,6 +3508,255 @@ const formatDuration = (seconds) => {
 };
 
 /**
+ * Get sync history for an integration (API)
+ * Returns paginated sync history with full details
+ */
+const getSyncHistory = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { page = 1, limit = 20 } = req.query;
+    
+    const SyncHistory = require('../models/SyncHistory');
+    
+    // Verify integration exists
+    const integration = await Integration.findById(id);
+    if (!integration) {
+      return res.status(404).json({ success: false, error: 'Integration not found' });
+    }
+    
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    
+    // Get total count
+    const total = await SyncHistory.countDocuments({ integration: id });
+    
+    // Get history records
+    const history = await SyncHistory.find({ integration: id })
+      .sort({ startedAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit))
+      .lean();
+    
+    // Format history for frontend
+    const formattedHistory = history.map(record => ({
+      id: record._id,
+      startedAt: record.startedAt,
+      completedAt: record.completedAt,
+      duration: record.duration,
+      durationFormatted: formatDuration((record.duration || 0) / 1000),
+      status: record.status,
+      triggeredBy: record.triggeredBy,
+      phase: record.phase,
+      // File stats
+      filesTotal: record.filesTotal || 0,
+      filesProcessed: record.filesProcessed || 0,
+      files: record.files || [],
+      // Record stats
+      recordsTotal: record.recordsTotal || 0,
+      recordsProcessed: record.recordsProcessed || 0,
+      recordsInserted: record.recordsInserted || 0,
+      recordsUpdated: record.recordsUpdated || 0,
+      recordsSkipped: record.recordsSkipped || 0,
+      recordsFailed: record.recordsFailed || 0,
+      // ES stats
+      esIndexed: record.esIndexed || 0,
+      esIndexingDuration: record.esIndexingDuration || 0,
+      // Errors
+      errorSummary: record.errorSummary,
+      errors: record.errors || [],
+      // Metrics
+      metrics: record.metrics || {},
+    }));
+    
+    // Calculate stats
+    const stats = {
+      total,
+      totalPages: Math.ceil(total / parseInt(limit)),
+      currentPage: parseInt(page),
+      successRate: total > 0 
+        ? Math.round((history.filter(h => h.status === 'completed').length / Math.min(history.length, total)) * 100)
+        : 0,
+      avgDuration: history.length > 0
+        ? Math.round(history.reduce((sum, h) => sum + (h.duration || 0), 0) / history.length)
+        : 0,
+    };
+    
+    res.json({
+      success: true,
+      integration: {
+        id: integration._id,
+        name: integration.name,
+        type: integration.type,
+      },
+      history: formattedHistory,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        totalPages: stats.totalPages,
+        hasMore: parseInt(page) < stats.totalPages,
+      },
+      stats,
+    });
+  } catch (error) {
+    console.error('Error getting sync history:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * Get all sync history across all integrations (API)
+ * For system-wide sync overview
+ */
+const getAllSyncHistory = async (req, res) => {
+  try {
+    const { 
+      page = 1, 
+      limit = 50, 
+      status, 
+      integrationId,
+      startDate,
+      endDate,
+    } = req.query;
+    
+    const SyncHistory = require('../models/SyncHistory');
+    
+    // Build query
+    const query = {};
+    
+    if (status) {
+      query.status = status;
+    }
+    
+    if (integrationId) {
+      query.integration = integrationId;
+    }
+    
+    if (startDate || endDate) {
+      query.startedAt = {};
+      if (startDate) query.startedAt.$gte = new Date(startDate);
+      if (endDate) query.startedAt.$lte = new Date(endDate);
+    }
+    
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    
+    // Get total count
+    const total = await SyncHistory.countDocuments(query);
+    
+    // Get history with integration details
+    const history = await SyncHistory.find(query)
+      .sort({ startedAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit))
+      .populate('integration', 'name type status')
+      .lean();
+    
+    // Format history
+    const formattedHistory = history.map(record => ({
+      id: record._id,
+      integrationId: record.integration?._id || record.integration,
+      integrationName: record.integration?.name || record.integrationName,
+      integrationType: record.integration?.type || record.integrationType,
+      startedAt: record.startedAt,
+      completedAt: record.completedAt,
+      duration: record.duration,
+      durationFormatted: formatDuration((record.duration || 0) / 1000),
+      status: record.status,
+      triggeredBy: record.triggeredBy,
+      recordsProcessed: record.recordsProcessed || 0,
+      recordsInserted: record.recordsInserted || 0,
+      filesProcessed: record.filesProcessed || 0,
+      errorSummary: record.errorSummary,
+    }));
+    
+    // Get summary stats
+    const summaryPipeline = [
+      { $match: query },
+      {
+        $group: {
+          _id: '$status',
+          count: { $sum: 1 },
+          avgDuration: { $avg: '$duration' },
+          totalRecords: { $sum: '$recordsProcessed' },
+        },
+      },
+    ];
+    
+    const summary = await SyncHistory.aggregate(summaryPipeline);
+    
+    const stats = {
+      total,
+      completed: summary.find(s => s._id === 'completed')?.count || 0,
+      failed: summary.find(s => s._id === 'failed')?.count || 0,
+      interrupted: summary.find(s => s._id === 'interrupted')?.count || 0,
+      running: summary.find(s => s._id === 'running')?.count || 0,
+      pending: summary.find(s => s._id === 'pending')?.count || 0,
+      avgDuration: summary.reduce((sum, s) => sum + (s.avgDuration || 0), 0) / (summary.length || 1),
+      totalRecords: summary.reduce((sum, s) => sum + (s.totalRecords || 0), 0),
+    };
+    
+    res.json({
+      success: true,
+      history: formattedHistory,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        totalPages: Math.ceil(total / parseInt(limit)),
+        hasMore: parseInt(page) < Math.ceil(total / parseInt(limit)),
+      },
+      stats,
+    });
+  } catch (error) {
+    console.error('Error getting all sync history:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * Delete sync history records (API)
+ * Useful for cleaning up old history
+ */
+const deleteSyncHistory = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { olderThan } = req.query; // Days ago
+    
+    const SyncHistory = require('../models/SyncHistory');
+    
+    let result;
+    
+    if (id === 'all' && olderThan) {
+      // Delete all history older than specified days
+      const cutoffDate = new Date(Date.now() - parseInt(olderThan) * 24 * 60 * 60 * 1000);
+      result = await SyncHistory.deleteMany({ startedAt: { $lt: cutoffDate } });
+    } else if (id === 'all') {
+      // Safety: require olderThan parameter to delete all
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Must specify olderThan parameter (days) to delete all history' 
+      });
+    } else {
+      // Delete specific record
+      result = await SyncHistory.findByIdAndDelete(id);
+      if (!result) {
+        return res.status(404).json({ success: false, error: 'History record not found' });
+      }
+    }
+    
+    res.json({
+      success: true,
+      message: id === 'all' 
+        ? `Deleted ${result.deletedCount} history records`
+        : 'History record deleted',
+      deletedCount: result.deletedCount || 1,
+    });
+  } catch (error) {
+    console.error('Error deleting sync history:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
  * Get Parts Analytics page
  */
 const getPartsAnalytics = async (req, res) => {
@@ -3640,7 +4041,11 @@ const getAdminsManagement = async (req, res) => {
       title: 'Administrators | PARTSFORM',
       activePage: 'admins',
       admins,
-      sidebarCounts: { newOrders: 0, openTickets: 0 },
+      currentAdmin: req.user,
+      userPermissions: buildUserPermissions(req.user),
+      PERMISSIONS,
+      ROLE_PERMISSIONS,
+      sidebarCounts: res.locals.sidebarCounts || { newOrders: 0, openTickets: 0 },
     });
   } catch (error) {
     console.error('Error fetching admins:', error);
@@ -3657,6 +4062,23 @@ const createAdmin = async (req, res) => {
   try {
     const { firstName, lastName, email, phone, password, role, permissions } =
       req.body;
+
+    // Only super admin can create super admin accounts
+    if (role === 'super_admin' && req.user.role !== 'super_admin') {
+      return res.status(403).json({
+        success: false,
+        message: 'Only Super Admins can create Super Admin accounts',
+      });
+    }
+
+    // Check if manage_admins permission exists for non-super-admin creators
+    if (req.user.role !== 'super_admin' && permissions && 
+        (permissions.includes('manage_admins') || permissions.includes('manage_settings'))) {
+      return res.status(403).json({
+        success: false,
+        message: 'You cannot grant manage_admins or manage_settings permission',
+      });
+    }
 
     // Check if email already exists
     const existingAdmin = await Admin.findOne({ email: email.toLowerCase() });
@@ -3720,6 +4142,52 @@ const updateAdmin = async (req, res) => {
         .json({ success: false, message: 'Administrator not found' });
     }
 
+    // Prevent non-super-admin from modifying super admin accounts
+    if (admin.role === 'super_admin' && req.user.role !== 'super_admin') {
+      return res.status(403).json({
+        success: false,
+        message: 'Only Super Admins can modify Super Admin accounts',
+      });
+    }
+
+    // Only super admin can promote to super admin
+    if (role === 'super_admin' && req.user.role !== 'super_admin') {
+      return res.status(403).json({
+        success: false,
+        message: 'Only Super Admins can promote users to Super Admin',
+      });
+    }
+
+    // Prevent demoting the last super admin
+    if (admin.role === 'super_admin' && role && role !== 'super_admin') {
+      const superAdminCount = await Admin.countDocuments({ role: 'super_admin' });
+      if (superAdminCount <= 1) {
+        return res.status(400).json({
+          success: false,
+          message: 'Cannot demote the last Super Admin',
+        });
+      }
+    }
+
+    // Non-super-admins cannot grant elevated permissions
+    if (req.user.role !== 'super_admin' && permissions && 
+        (permissions.includes('manage_admins') || permissions.includes('manage_settings'))) {
+      return res.status(403).json({
+        success: false,
+        message: 'You cannot grant manage_admins or manage_settings permission',
+      });
+    }
+
+    // Prevent admins from modifying their own role or removing their own permissions
+    if (admin._id.toString() === req.user._id.toString()) {
+      if (role && role !== admin.role) {
+        return res.status(400).json({
+          success: false,
+          message: 'You cannot modify your own role',
+        });
+      }
+    }
+
     // Check if email is being changed and if it's already in use
     if (email && email.toLowerCase() !== admin.email) {
       const existingAdmin = await Admin.findOne({ email: email.toLowerCase() });
@@ -3737,7 +4205,7 @@ const updateAdmin = async (req, res) => {
     if (firstName) admin.firstName = firstName;
     if (lastName) admin.lastName = lastName;
     if (phone !== undefined) admin.phone = phone;
-    if (role) admin.role = role;
+    if (role && admin._id.toString() !== req.user._id.toString()) admin.role = role;
     if (permissions) admin.permissions = permissions;
     if (password) admin.password = password; // Will be hashed by pre-save hook
 
@@ -3778,6 +4246,22 @@ const updateAdminStatus = async (req, res) => {
       return res
         .status(404)
         .json({ success: false, message: 'Administrator not found' });
+    }
+
+    // Prevent non-super-admin from modifying super admin accounts
+    if (admin.role === 'super_admin' && req.user.role !== 'super_admin') {
+      return res.status(403).json({
+        success: false,
+        message: 'Only Super Admins can modify Super Admin account status',
+      });
+    }
+
+    // Prevent admin from deactivating themselves
+    if (admin._id.toString() === req.user._id.toString()) {
+      return res.status(400).json({
+        success: false,
+        message: 'You cannot modify your own account status',
+      });
     }
 
     // Prevent deactivating the last super admin
@@ -3826,6 +4310,22 @@ const deleteAdmin = async (req, res) => {
       return res
         .status(404)
         .json({ success: false, message: 'Administrator not found' });
+    }
+
+    // Prevent non-super-admin from deleting super admin accounts
+    if (admin.role === 'super_admin' && req.user.role !== 'super_admin') {
+      return res.status(403).json({
+        success: false,
+        message: 'Only Super Admins can delete Super Admin accounts',
+      });
+    }
+
+    // Prevent admin from deleting themselves
+    if (admin._id.toString() === req.user._id.toString()) {
+      return res.status(400).json({
+        success: false,
+        message: 'You cannot delete your own account',
+      });
     }
 
     // Prevent deleting the last super admin
@@ -4009,6 +4509,10 @@ module.exports = {
   getSyncDetails,
   getIntegrations,
   getIntegration,
+  // Sync History API functions
+  getSyncHistory,
+  getAllSyncHistory,
+  deleteSyncHistory,
   // File upload
   uploadPartsFromFile,
   // Sidebar counts API

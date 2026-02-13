@@ -462,36 +462,58 @@
   }
 
   /* Permissions Grid */
+  .permissions-section {
+    margin-top: 1rem;
+  }
+  .permissions-section-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--admin-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .permissions-section-title i {
+    width: 14px;
+    height: 14px;
+  }
   .permissions-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 0.75rem;
+    gap: 0.5rem;
     margin-top: 0.5rem;
   }
   .permission-item {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.75rem;
+    padding: 0.6rem 0.75rem;
     background: var(--admin-bg-secondary);
     border: 1px solid var(--admin-border);
     border-radius: var(--admin-radius-md);
     cursor: pointer;
     transition: var(--admin-transition-fast);
   }
-  .permission-item:hover {
+  .permission-item:hover:not(.disabled) {
     border-color: var(--module-primary, #3b82f6);
   }
   .permission-item.selected {
     border-color: var(--module-primary, #3b82f6);
     background: rgba(59, 130, 246, 0.1);
   }
+  .permission-item.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
   .permission-item input {
     display: none;
   }
   .permission-checkbox {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
     border: 2px solid var(--admin-border);
     border-radius: 4px;
     display: flex;
@@ -505,8 +527,8 @@
     border-color: var(--module-primary, #3b82f6);
   }
   .permission-checkbox i {
-    width: 12px;
-    height: 12px;
+    width: 10px;
+    height: 10px;
     color: white;
     opacity: 0;
     transition: var(--admin-transition-fast);
@@ -514,10 +536,59 @@
   .permission-item.selected .permission-checkbox i {
     opacity: 1;
   }
+  .permission-content {
+    flex: 1;
+    min-width: 0;
+  }
   .permission-label {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     color: var(--admin-text-primary);
     font-weight: 500;
+  }
+  .permission-desc {
+    font-size: 0.7rem;
+    color: var(--admin-text-muted);
+    margin-top: 0.1rem;
+  }
+  .permission-warning {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background: rgba(249, 115, 22, 0.1);
+    border: 1px solid rgba(249, 115, 22, 0.3);
+    border-radius: var(--admin-radius-md);
+    margin-top: 0.75rem;
+  }
+  .permission-warning i {
+    width: 16px;
+    height: 16px;
+    color: #f97316;
+    flex-shrink: 0;
+  }
+  .permission-warning span {
+    font-size: 0.75rem;
+    color: var(--admin-text-secondary);
+  }
+  .role-preset-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background: rgba(59, 130, 246, 0.08);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: var(--admin-radius-md);
+    margin-top: 0.5rem;
+  }
+  .role-preset-info i {
+    width: 14px;
+    height: 14px;
+    color: #3b82f6;
+    flex-shrink: 0;
+  }
+  .role-preset-info span {
+    font-size: 0.75rem;
+    color: var(--admin-text-secondary);
   }
 
   /* Button Styles */
@@ -667,10 +738,12 @@
               <i data-lucide="search" class="search-icon"></i>
               <input type="text" id="adminsSearch" placeholder="Search administrators..." autocomplete="off">
             </div>
+            <% if (userPermissions.canWrite) { %>
             <button class="btn btn-primary" onclick="openCreateModal()">
               <i data-lucide="user-plus"></i>
               Add Admin
             </button>
+            <% } %>
           </div>
         </div>
 
@@ -722,10 +795,12 @@
           </div>
           <h3>No Administrators Found</h3>
           <p>Create your first administrator to get started.</p>
+          <% if (userPermissions.canWrite) { %>
           <button class="btn btn-primary" onclick="openCreateModal()">
             <i data-lucide="user-plus"></i>
             Create Administrator
           </button>
+          <% } %>
         </div>
         <% } else { %>
         <div class="admins-table-card">
@@ -787,9 +862,19 @@
                 <td><%= new Date(admin.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></td>
                 <td>
                   <div class="admin-actions">
+                    <% 
+                      const isSelf = admin._id.toString() === currentAdmin._id.toString();
+                      const isTargetSuperAdmin = admin.role === 'super_admin';
+                      const canModify = userPermissions.isSuperAdmin || !isTargetSuperAdmin;
+                      const canDeleteThis = userPermissions.canDelete && canModify && !isSelf;
+                      const moreThanOneSuperAdmin = admins.filter(a => a.role === 'super_admin').length > 1;
+                    %>
+                    <% if (userPermissions.canWrite && canModify) { %>
                     <button class="admin-action-btn" title="Edit Admin" onclick="openEditModal('<%= admin._id %>')">
                       <i data-lucide="edit-2"></i>
                     </button>
+                    <% } %>
+                    <% if (userPermissions.canWrite && canModify && !isSelf) { %>
                     <button class="admin-action-btn" title="<%= admin.isActive ? 'Deactivate' : 'Activate' %>" onclick="toggleAdminStatus('<%= admin._id %>', <%= admin.isActive %>)">
                       <% if (admin.isActive) { %>
                         <i data-lucide="user-x"></i>
@@ -797,7 +882,8 @@
                         <i data-lucide="user-check"></i>
                       <% } %>
                     </button>
-                    <% if (admin.role !== 'super_admin' || admins.filter(a => a.role === 'super_admin').length > 1) { %>
+                    <% } %>
+                    <% if (canDeleteThis && (!isTargetSuperAdmin || moreThanOneSuperAdmin)) { %>
                     <button class="admin-action-btn delete" title="Delete Admin" onclick="confirmDelete('<%= admin._id %>', '<%= admin.firstName %> <%= admin.lastName %>')">
                       <i data-lucide="trash-2"></i>
                     </button>
@@ -867,38 +953,126 @@
 
           <div class="form-group">
             <label class="form-label">Role <span class="required">*</span></label>
-            <select class="form-select" id="role" name="role" required>
-              <option value="admin">Admin</option>
+            <select class="form-select" id="role" name="role" required onchange="handleRoleChange(this.value)">
               <option value="moderator">Moderator</option>
+              <option value="admin" selected>Admin</option>
+              <% if (userPermissions.isSuperAdmin) { %>
               <option value="super_admin">Super Admin</option>
+              <% } %>
             </select>
-            <div class="form-hint">Super Admins have full access to all features</div>
+            <div class="role-preset-info" id="roleInfo">
+              <i data-lucide="info"></i>
+              <span id="roleInfoText">Admins can manage most features with customizable permissions</span>
+            </div>
           </div>
 
-          <div class="form-group">
+          <div class="form-group" id="permissionsGroup">
             <label class="form-label">Permissions</label>
-            <div class="permissions-grid">
-              <label class="permission-item" onclick="togglePermission(this)">
-                <input type="checkbox" name="permissions" value="read" checked>
-                <div class="permission-checkbox"><i data-lucide="check"></i></div>
-                <span class="permission-label">Read</span>
-              </label>
-              <label class="permission-item selected" onclick="togglePermission(this)">
-                <input type="checkbox" name="permissions" value="write" checked>
-                <div class="permission-checkbox"><i data-lucide="check"></i></div>
-                <span class="permission-label">Write</span>
-              </label>
-              <label class="permission-item" onclick="togglePermission(this)">
-                <input type="checkbox" name="permissions" value="delete">
-                <div class="permission-checkbox"><i data-lucide="check"></i></div>
-                <span class="permission-label">Delete</span>
-              </label>
-              <label class="permission-item" onclick="togglePermission(this)">
-                <input type="checkbox" name="permissions" value="manage_users">
-                <div class="permission-checkbox"><i data-lucide="check"></i></div>
-                <span class="permission-label">Manage Users</span>
-              </label>
+            
+            <!-- Basic Permissions -->
+            <div class="permissions-section">
+              <div class="permissions-section-title">
+                <i data-lucide="key"></i>
+                Basic Access
+              </div>
+              <div class="permissions-grid">
+                <label class="permission-item selected" onclick="togglePermission(this)">
+                  <input type="checkbox" name="permissions" value="read" checked>
+                  <div class="permission-checkbox"><i data-lucide="check"></i></div>
+                  <div class="permission-content">
+                    <div class="permission-label">Read</div>
+                    <div class="permission-desc">View data and reports</div>
+                  </div>
+                </label>
+                <label class="permission-item" onclick="togglePermission(this)">
+                  <input type="checkbox" name="permissions" value="write">
+                  <div class="permission-checkbox"><i data-lucide="check"></i></div>
+                  <div class="permission-content">
+                    <div class="permission-label">Write</div>
+                    <div class="permission-desc">Create and update records</div>
+                  </div>
+                </label>
+                <label class="permission-item" onclick="togglePermission(this)">
+                  <input type="checkbox" name="permissions" value="delete">
+                  <div class="permission-checkbox"><i data-lucide="check"></i></div>
+                  <div class="permission-content">
+                    <div class="permission-label">Delete</div>
+                    <div class="permission-desc">Remove records permanently</div>
+                  </div>
+                </label>
+              </div>
             </div>
+
+            <!-- Management Permissions -->
+            <div class="permissions-section">
+              <div class="permissions-section-title">
+                <i data-lucide="settings-2"></i>
+                Management
+              </div>
+              <div class="permissions-grid">
+                <label class="permission-item" onclick="togglePermission(this)">
+                  <input type="checkbox" name="permissions" value="manage_orders">
+                  <div class="permission-checkbox"><i data-lucide="check"></i></div>
+                  <div class="permission-content">
+                    <div class="permission-label">Manage Orders</div>
+                    <div class="permission-desc">Full order control</div>
+                  </div>
+                </label>
+                <label class="permission-item" onclick="togglePermission(this)">
+                  <input type="checkbox" name="permissions" value="manage_users">
+                  <div class="permission-checkbox"><i data-lucide="check"></i></div>
+                  <div class="permission-content">
+                    <div class="permission-label">Manage Users</div>
+                    <div class="permission-desc">Buyer account control</div>
+                  </div>
+                </label>
+                <label class="permission-item" onclick="togglePermission(this)">
+                  <input type="checkbox" name="permissions" value="manage_integrations">
+                  <div class="permission-checkbox"><i data-lucide="check"></i></div>
+                  <div class="permission-content">
+                    <div class="permission-label">Manage Integrations</div>
+                    <div class="permission-desc">FTP and data sources</div>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <!-- Admin Permissions (Super Admin only) -->
+            <% if (userPermissions.isSuperAdmin) { %>
+            <div class="permissions-section">
+              <div class="permissions-section-title">
+                <i data-lucide="shield-alert"></i>
+                Admin Level (Restricted)
+              </div>
+              <div class="permissions-grid">
+                <label class="permission-item" onclick="togglePermission(this)">
+                  <input type="checkbox" name="permissions" value="manage_admins">
+                  <div class="permission-checkbox"><i data-lucide="check"></i></div>
+                  <div class="permission-content">
+                    <div class="permission-label">Manage Admins</div>
+                    <div class="permission-desc">Administrator accounts</div>
+                  </div>
+                </label>
+                <label class="permission-item" onclick="togglePermission(this)">
+                  <input type="checkbox" name="permissions" value="manage_settings">
+                  <div class="permission-checkbox"><i data-lucide="check"></i></div>
+                  <div class="permission-content">
+                    <div class="permission-label">Manage Settings</div>
+                    <div class="permission-desc">System configuration</div>
+                  </div>
+                </label>
+              </div>
+              <div class="permission-warning">
+                <i data-lucide="alert-triangle"></i>
+                <span>These permissions grant elevated system access. Assign carefully.</span>
+              </div>
+            </div>
+            <% } else { %>
+            <div class="permission-warning" style="margin-top: 0.75rem;">
+              <i data-lucide="lock"></i>
+              <span>Admin management permissions can only be granted by Super Admins.</span>
+            </div>
+            <% } %>
           </div>
         </div>
         <div class="modal-footer">
@@ -950,9 +1124,27 @@
     // Initialize Lucide icons
     lucide.createIcons();
 
-    // Store admins data for client-side operations
+    // Store admins data and current user permissions for client-side operations
     const adminsData = <%- JSON.stringify(admins) %>;
+    const currentAdminId = '<%= currentAdmin._id %>';
+    const userPermissions = <%- JSON.stringify(userPermissions) %>;
     let isEditMode = false;
+
+    // Role presets for permission defaults
+    const ROLE_PRESETS = {
+      super_admin: {
+        info: 'Super Admins have unrestricted access to all features and settings',
+        permissions: ['read', 'write', 'delete', 'manage_users', 'manage_admins', 'manage_orders', 'manage_settings', 'manage_integrations']
+      },
+      admin: {
+        info: 'Admins can manage most features with customizable permissions',
+        permissions: ['read', 'write', 'delete', 'manage_users', 'manage_orders']
+      },
+      moderator: {
+        info: 'Moderators have limited access for viewing and basic updates',
+        permissions: ['read', 'write']
+      }
+    };
 
     // Search functionality
     document.getElementById('adminsSearch').addEventListener('input', function(e) {
@@ -967,6 +1159,40 @@
       });
     });
 
+    // Handle role change to update permission presets
+    function handleRoleChange(role) {
+      const permissionsGroup = document.getElementById('permissionsGroup');
+      const roleInfoText = document.getElementById('roleInfoText');
+      
+      // Update role info text
+      if (ROLE_PRESETS[role]) {
+        roleInfoText.textContent = ROLE_PRESETS[role].info;
+      }
+      
+      // Super admin gets all permissions automatically, hide the permissions section
+      if (role === 'super_admin') {
+        permissionsGroup.style.display = 'none';
+        // Select all permissions
+        document.querySelectorAll('.permission-item').forEach(item => {
+          const input = item.querySelector('input');
+          input.checked = true;
+          item.classList.add('selected');
+        });
+      } else {
+        permissionsGroup.style.display = '';
+        // Set default permissions for the role
+        const defaultPerms = ROLE_PRESETS[role]?.permissions || ['read'];
+        document.querySelectorAll('.permission-item').forEach(item => {
+          const input = item.querySelector('input');
+          const shouldSelect = defaultPerms.includes(input.value);
+          input.checked = shouldSelect;
+          item.classList.toggle('selected', shouldSelect);
+        });
+      }
+      
+      lucide.createIcons();
+    }
+
     // Modal functions
     function openCreateModal() {
       isEditMode = false;
@@ -978,18 +1204,11 @@
       document.getElementById('confirmPassword').required = true;
       document.getElementById('passwordRequired').style.display = '';
       document.getElementById('confirmRequired').style.display = '';
+      document.getElementById('permissionsGroup').style.display = '';
       
-      // Reset permissions
-      document.querySelectorAll('.permission-item').forEach(item => {
-        const input = item.querySelector('input');
-        if (input.value === 'read' || input.value === 'write') {
-          input.checked = true;
-          item.classList.add('selected');
-        } else {
-          input.checked = false;
-          item.classList.remove('selected');
-        }
-      });
+      // Set default role to admin and trigger change
+      document.getElementById('role').value = 'admin';
+      handleRoleChange('admin');
       
       document.getElementById('adminModal').classList.add('active');
       lucide.createIcons();
@@ -999,6 +1218,12 @@
       isEditMode = true;
       const admin = adminsData.find(a => a._id === adminId);
       if (!admin) return;
+
+      // Check if current user can edit this admin
+      if (admin.role === 'super_admin' && !userPermissions.isSuperAdmin) {
+        showToast('Only Super Admins can edit Super Admin accounts', 'error');
+        return;
+      }
 
       document.getElementById('modalTitle').textContent = 'Edit Administrator';
       document.getElementById('submitBtnText').textContent = 'Update Admin';
@@ -1015,7 +1240,38 @@
       document.getElementById('passwordRequired').style.display = 'none';
       document.getElementById('confirmRequired').style.display = 'none';
 
+      // Handle role-specific display
+      if (admin.role === 'super_admin') {
+        document.getElementById('permissionsGroup').style.display = 'none';
+      } else {
+        document.getElementById('permissionsGroup').style.display = '';
+      }
+
       // Set permissions
+      document.querySelectorAll('.permission-item').forEach(item => {
+        const input = item.querySelector('input');
+        if (admin.permissions && admin.permissions.includes(input.value)) {
+          input.checked = true;
+          item.classList.add('selected');
+        } else {
+          input.checked = false;
+          item.classList.remove('selected');
+        }
+      });
+
+      // Disable role dropdown if editing self
+      const roleSelect = document.getElementById('role');
+      if (adminId === currentAdminId) {
+        roleSelect.disabled = true;
+        roleSelect.title = 'You cannot change your own role';
+      } else {
+        roleSelect.disabled = false;
+        roleSelect.title = '';
+      }
+
+      // Update role info
+      handleRoleChange(admin.role);
+      // Restore the actual permissions after handleRoleChange
       document.querySelectorAll('.permission-item').forEach(item => {
         const input = item.querySelector('input');
         if (admin.permissions && admin.permissions.includes(input.value)) {
@@ -1035,9 +1291,12 @@
       document.getElementById('adminModal').classList.remove('active');
       document.getElementById('emailError').style.display = 'none';
       document.getElementById('passwordError').style.display = 'none';
+      // Re-enable role if it was disabled
+      document.getElementById('role').disabled = false;
     }
 
     function togglePermission(element) {
+      if (element.classList.contains('disabled')) return;
       const input = element.querySelector('input');
       input.checked = !input.checked;
       element.classList.toggle('selected', input.checked);
@@ -1057,18 +1316,24 @@
       }
       document.getElementById('passwordError').style.display = 'none';
 
-      // Collect permissions
-      const permissions = [];
-      document.querySelectorAll('.permission-item input:checked').forEach(input => {
-        permissions.push(input.value);
-      });
+      const role = document.getElementById('role').value;
+      
+      // Collect permissions (super admin gets all)
+      let permissions = [];
+      if (role === 'super_admin') {
+        permissions = ROLE_PRESETS.super_admin.permissions;
+      } else {
+        document.querySelectorAll('.permission-item input:checked').forEach(input => {
+          permissions.push(input.value);
+        });
+      }
 
       const formData = {
         firstName: document.getElementById('firstName').value,
         lastName: document.getElementById('lastName').value,
         email: document.getElementById('email').value,
         phone: document.getElementById('phone').value,
-        role: document.getElementById('role').value,
+        role: role,
         permissions: permissions
       };
 
@@ -1111,6 +1376,19 @@
 
     // Toggle admin status
     async function toggleAdminStatus(adminId, currentStatus) {
+      // Check if trying to modify self
+      if (adminId === currentAdminId) {
+        showToast('You cannot modify your own account status', 'error');
+        return;
+      }
+
+      // Check if trying to modify super admin without permission
+      const admin = adminsData.find(a => a._id === adminId);
+      if (admin && admin.role === 'super_admin' && !userPermissions.isSuperAdmin) {
+        showToast('Only Super Admins can modify Super Admin accounts', 'error');
+        return;
+      }
+
       try {
         const response = await fetch(`/admin/api/admins/${adminId}/status`, {
           method: 'PUT',
@@ -1118,11 +1396,12 @@
           body: JSON.stringify({ isActive: !currentStatus })
         });
 
+        const data = await response.json();
+
         if (response.ok) {
           showToast(`Administrator ${currentStatus ? 'deactivated' : 'activated'} successfully!`, 'success');
           setTimeout(() => location.reload(), 1000);
         } else {
-          const data = await response.json();
           showToast(data.message || 'Failed to update status', 'error');
         }
       } catch (error) {
@@ -1132,6 +1411,19 @@
 
     // Delete confirmation
     function confirmDelete(adminId, adminName) {
+      // Check if trying to delete self
+      if (adminId === currentAdminId) {
+        showToast('You cannot delete your own account', 'error');
+        return;
+      }
+
+      // Check if trying to delete super admin without permission
+      const admin = adminsData.find(a => a._id === adminId);
+      if (admin && admin.role === 'super_admin' && !userPermissions.isSuperAdmin) {
+        showToast('Only Super Admins can delete Super Admin accounts', 'error');
+        return;
+      }
+
       document.getElementById('deleteAdminId').value = adminId;
       document.getElementById('deleteAdminName').textContent = adminName;
       document.getElementById('deleteModal').classList.add('active');
@@ -1150,12 +1442,13 @@
           method: 'DELETE'
         });
 
+        const data = await response.json();
+
         if (response.ok) {
           showToast('Administrator deleted successfully!', 'success');
           closeDeleteModal();
           setTimeout(() => location.reload(), 1000);
         } else {
-          const data = await response.json();
           showToast(data.message || 'Failed to delete administrator', 'error');
         }
       } catch (error) {

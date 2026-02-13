@@ -205,6 +205,23 @@ const requireAdminAuth = async (req, res, next) => {
     res.locals.user = admin;
     res.locals.userRole = 'admin';
     res.locals.adminRole = admin.role;
+    
+    // Build user permissions object for views
+    res.locals.userPermissions = {
+      role: admin.role,
+      permissions: admin.permissions || [],
+      isSuperAdmin: admin.role === 'super_admin',
+      canRead: adminHasPermission(admin, PERMISSIONS.READ),
+      canWrite: adminHasPermission(admin, PERMISSIONS.WRITE),
+      canDelete: adminHasPermission(admin, PERMISSIONS.DELETE),
+      canManageUsers: adminHasPermission(admin, PERMISSIONS.MANAGE_USERS),
+      canManageAdmins: adminHasPermission(admin, PERMISSIONS.MANAGE_ADMINS),
+      canManageOrders: adminHasPermission(admin, PERMISSIONS.MANAGE_ORDERS),
+      canManageSettings: adminHasPermission(admin, PERMISSIONS.MANAGE_SETTINGS),
+      canManageIntegrations: adminHasPermission(admin, PERMISSIONS.MANAGE_INTEGRATIONS),
+    };
+    res.locals.currentAdmin = admin;
+    res.locals.PERMISSIONS = PERMISSIONS;
 
     // Fetch sidebar notification counts for orders and tickets
     // Only fetch for non-API requests to avoid slowing down API calls
@@ -293,6 +310,123 @@ const requireAdminRole = (...roles) => {
         });
       }
       return res.redirect('/admin');
+    }
+
+    next();
+  };
+};
+
+/**
+ * Permission constants - defines all available permissions
+ */
+const PERMISSIONS = {
+  READ: 'read',
+  WRITE: 'write',
+  DELETE: 'delete',
+  MANAGE_USERS: 'manage_users',
+  MANAGE_ADMINS: 'manage_admins',
+  MANAGE_ORDERS: 'manage_orders',
+  MANAGE_SETTINGS: 'manage_settings',
+  MANAGE_INTEGRATIONS: 'manage_integrations',
+};
+
+/**
+ * Default permissions for each role
+ */
+const ROLE_PERMISSIONS = {
+  super_admin: Object.values(PERMISSIONS), // All permissions
+  admin: [PERMISSIONS.READ, PERMISSIONS.WRITE, PERMISSIONS.DELETE, PERMISSIONS.MANAGE_USERS, PERMISSIONS.MANAGE_ORDERS],
+  moderator: [PERMISSIONS.READ, PERMISSIONS.WRITE],
+};
+
+/**
+ * Helper function to check if admin has permission
+ * Super admins always have all permissions
+ */
+const adminHasPermission = (admin, permission) => {
+  if (!admin) return false;
+  if (admin.role === 'super_admin') return true;
+  return admin.permissions && admin.permissions.includes(permission);
+};
+
+/**
+ * Middleware to require specific permission(s)
+ * Usage: requirePermission('delete') or requirePermission('manage_users', 'manage_admins')
+ * At least one of the specified permissions must be present
+ */
+const requirePermission = (...requiredPermissions) => {
+  return (req, res, next) => {
+    if (!req.user) {
+      if (req.xhr || req.headers.accept?.includes('application/json')) {
+        return res.status(401).json({
+          success: false,
+          message: 'Authentication required.',
+        });
+      }
+      return res.redirect('/?login=true');
+    }
+
+    // Super admin has all permissions
+    if (req.adminRole === 'super_admin') {
+      return next();
+    }
+
+    // Check if user has at least one of the required permissions
+    const hasPermission = requiredPermissions.some(permission => 
+      adminHasPermission(req.user, permission)
+    );
+
+    if (!hasPermission) {
+      if (req.xhr || req.headers.accept?.includes('application/json')) {
+        return res.status(403).json({
+          success: false,
+          message: `Access denied. Required permission: ${requiredPermissions.join(' or ')}.`,
+          requiredPermission: requiredPermissions,
+        });
+      }
+      return res.redirect('/admin?error=permission_denied');
+    }
+
+    next();
+  };
+};
+
+/**
+ * Middleware to require ALL specified permissions
+ * Usage: requireAllPermissions('write', 'manage_users')
+ * All specified permissions must be present
+ */
+const requireAllPermissions = (...requiredPermissions) => {
+  return (req, res, next) => {
+    if (!req.user) {
+      if (req.xhr || req.headers.accept?.includes('application/json')) {
+        return res.status(401).json({
+          success: false,
+          message: 'Authentication required.',
+        });
+      }
+      return res.redirect('/?login=true');
+    }
+
+    // Super admin has all permissions
+    if (req.adminRole === 'super_admin') {
+      return next();
+    }
+
+    // Check if user has ALL required permissions
+    const missingPermissions = requiredPermissions.filter(permission => 
+      !adminHasPermission(req.user, permission)
+    );
+
+    if (missingPermissions.length > 0) {
+      if (req.xhr || req.headers.accept?.includes('application/json')) {
+        return res.status(403).json({
+          success: false,
+          message: `Access denied. Missing permissions: ${missingPermissions.join(', ')}.`,
+          missingPermissions,
+        });
+      }
+      return res.redirect('/admin?error=permission_denied');
     }
 
     next();
@@ -405,6 +539,11 @@ module.exports = {
   requireAuth,
   requireAdminAuth,
   requireAdminRole,
+  requirePermission,
+  requireAllPermissions,
   redirectIfAuthenticated,
   attachUser,
+  adminHasPermission,
+  PERMISSIONS,
+  ROLE_PERMISSIONS,
 };

@@ -56,10 +56,12 @@
         <span class="sidebar-nav-badge" id="sidebarTicketsBadge"><%= sidebarCounts.openTickets %></span>
         <% } %>
       </a>
+      <% if (typeof userPermissions === 'undefined' || userPermissions.canManageUsers || userPermissions.isSuperAdmin) { %>
       <a href="/admin/users" class="sidebar-nav-item <%= typeof activePage !== 'undefined' && activePage === 'users' ? 'active' : '' %>">
         <i data-lucide="users"></i>
         <span>Users</span>
       </a>
+      <% } %>
       <a href="/admin/payments" class="sidebar-nav-item <%= typeof activePage !== 'undefined' && activePage === 'payments' ? 'active' : '' %>">
         <i data-lucide="credit-card"></i>
         <span>Payments</span>
@@ -69,14 +71,24 @@
     <!-- System Section -->
     <div class="sidebar-nav-section">
       <div class="sidebar-nav-title">System</div>
+      <% if (typeof userPermissions === 'undefined' || userPermissions.canManageIntegrations || userPermissions.isSuperAdmin) { %>
       <a href="/admin/integrations" class="sidebar-nav-item <%= typeof activePage !== 'undefined' && activePage === 'integrations' ? 'active' : '' %>">
         <i data-lucide="plug"></i>
         <span>Integrations</span>
       </a>
+      <% } %>
+      <% if (typeof userPermissions === 'undefined' || userPermissions.canManageAdmins || userPermissions.isSuperAdmin) { %>
       <a href="/admin/admins" class="sidebar-nav-item <%= typeof activePage !== 'undefined' && activePage === 'admins' ? 'active' : '' %>">
         <i data-lucide="shield"></i>
         <span>Administrators</span>
       </a>
+      <% } %>
+      <% if (typeof userPermissions === 'undefined' || userPermissions.canManageSettings || userPermissions.isSuperAdmin) { %>
+      <a href="/admin/settings" class="sidebar-nav-item <%= typeof activePage !== 'undefined' && activePage === 'settings' ? 'active' : '' %>">
+        <i data-lucide="settings"></i>
+        <span>Settings</span>
+      </a>
+      <% } %>
     </div>
   </nav>
 
@@ -85,11 +97,11 @@
     <div class="sidebar-user-wrapper" id="sidebarUserWrapper">
       <div class="sidebar-user" id="sidebarUserBtn">
         <div class="sidebar-user-avatar">
-          <span>A</span>
+          <span><%= typeof currentAdmin !== 'undefined' && currentAdmin.firstName ? currentAdmin.firstName.charAt(0).toUpperCase() : 'A' %></span>
         </div>
         <div class="sidebar-user-info">
-          <div class="sidebar-user-name">Admin User</div>
-          <div class="sidebar-user-role">Administrator</div>
+          <div class="sidebar-user-name"><%= typeof currentAdmin !== 'undefined' ? (currentAdmin.firstName + ' ' + currentAdmin.lastName) : 'Admin User' %></div>
+          <div class="sidebar-user-role"><%= typeof currentAdmin !== 'undefined' ? currentAdmin.role.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Administrator' %></div>
         </div>
         <i data-lucide="chevron-up" class="sidebar-user-chevron" style="width: 18px; height: 18px; color: var(--admin-text-muted); transition: transform 0.2s;"></i>
       </div>
@@ -100,10 +112,12 @@
           <i data-lucide="user"></i>
           <span>My Profile</span>
         </a>
+        <% if (typeof userPermissions === 'undefined' || userPermissions.canManageAdmins || userPermissions.isSuperAdmin) { %>
         <a href="/admin/admins" class="sidebar-user-menu-item">
           <i data-lucide="shield"></i>
           <span>Administrators</span>
         </a>
+        <% } %>
         <a href="/admin/activity" class="sidebar-user-menu-item">
           <i data-lucide="activity"></i>
           <span>Activity Log</span>

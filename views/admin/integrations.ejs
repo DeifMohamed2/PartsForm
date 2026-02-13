@@ -1,5 +1,6 @@
 <%- include('partials/header') %>
 <link rel="stylesheet" href="/css/adminCSS/admin-dashboard.css">
+<link rel="stylesheet" href="/css/adminCSS/admin-integrations.css">
 <style>
   /* ========== INTEGRATIONS PAGE STYLES ========== */
 
@@ -1364,31 +1365,69 @@
                   <div class="sync-tab-content" id="history-tab-<%= conn._id %>" style="display: none;">
                     <div class="sync-history">
                       <div class="history-header">
-                        <i data-lucide="history"></i>
-                        Sync History
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                          <i data-lucide="history"></i>
+                          Sync History
+                        </div>
+                        <button class="btn-refresh-history" onclick="loadSyncHistory('<%= conn._id %>')" title="Refresh History">
+                          <i data-lucide="refresh-cw"></i>
+                        </button>
                       </div>
-                      <div class="history-list" id="history-list-<%= conn._id %>">
-                        <% if (conn.lastSync && conn.lastSync.date) { %>
-                        <div class="history-item">
-                          <div class="history-info">
-                            <div class="history-status <%= conn.lastSync.status === 'success' ? 'success' : conn.lastSync.status === 'error' ? 'error' : 'warning' %>"></div>
-                            <div class="history-details">
-                              <h6><%= new Date(conn.lastSync.date).toLocaleDateString() %> at <%= new Date(conn.lastSync.date).toLocaleTimeString() %></h6>
-                              <span><%= conn.lastSync.status === 'success' ? 'Completed successfully' : conn.lastSync.error || 'Completed with issues' %></span>
-                            </div>
-                          </div>
-                          <div class="history-stats">
-                            <span><%= conn.lastSync.files ? conn.lastSync.files.length : 0 %> files</span>
-                            <span><%= conn.lastSync.recordsProcessed || 0 %> records</span>
-                            <span><%= conn.lastSync.duration ? Math.ceil(conn.lastSync.duration / 1000) + 's' : '-' %></span>
-                          </div>
+                      
+                      <!-- History Stats Summary -->
+                      <div class="history-stats-summary" id="history-stats-<%= conn._id %>" style="display: none;">
+                        <div class="stat-item">
+                          <span class="stat-value" id="stat-total-<%= conn._id %>">0</span>
+                          <span class="stat-label">Total Syncs</span>
                         </div>
-                        <% } else { %>
-                        <div style="padding: 2rem; text-align: center; color: var(--admin-text-muted);">
-                          <i data-lucide="inbox" style="width: 32px; height: 32px; margin-bottom: 0.5rem; opacity: 0.5;"></i>
-                          <p style="margin: 0;">No sync history yet</p>
+                        <div class="stat-item success">
+                          <span class="stat-value" id="stat-completed-<%= conn._id %>">0</span>
+                          <span class="stat-label">Completed</span>
                         </div>
-                        <% } %>
+                        <div class="stat-item error">
+                          <span class="stat-value" id="stat-failed-<%= conn._id %>">0</span>
+                          <span class="stat-label">Failed</span>
+                        </div>
+                        <div class="stat-item">
+                          <span class="stat-value" id="stat-avg-duration-<%= conn._id %>">-</span>
+                          <span class="stat-label">Avg Duration</span>
+                        </div>
+                      </div>
+                      
+                      <!-- History Table -->
+                      <div class="history-table-container" id="history-table-container-<%= conn._id %>">
+                        <table class="sync-history-table">
+                          <thead>
+                            <tr>
+                              <th>Date & Time</th>
+                              <th>Status</th>
+                              <th>Triggered By</th>
+                              <th>Files</th>
+                              <th>Records</th>
+                              <th>Duration</th>
+                              <th>Details</th>
+                            </tr>
+                          </thead>
+                          <tbody id="history-tbody-<%= conn._id %>">
+                            <tr class="loading-row">
+                              <td colspan="7" style="text-align: center; padding: 2rem;">
+                                <i data-lucide="loader-2" class="spin" style="width: 24px; height: 24px;"></i>
+                                <p style="margin: 0.5rem 0 0;">Loading sync history...</p>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                      
+                      <!-- Pagination -->
+                      <div class="history-pagination" id="history-pagination-<%= conn._id %>" style="display: none;">
+                        <button class="pagination-btn" id="prev-page-<%= conn._id %>" onclick="loadSyncHistoryPage('<%= conn._id %>', 'prev')" disabled>
+                          <i data-lucide="chevron-left"></i> Previous
+                        </button>
+                        <span class="pagination-info" id="page-info-<%= conn._id %>">Page 1 of 1</span>
+                        <button class="pagination-btn" id="next-page-<%= conn._id %>" onclick="loadSyncHistoryPage('<%= conn._id %>', 'next')" disabled>
+                          Next <i data-lucide="chevron-right"></i>
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -1922,6 +1961,214 @@
     const style = document.createElement('style');
     style.textContent = '.spin { animation: spin 1s linear infinite; }';
     document.head.appendChild(style);
+
+    // ======================
+    // SYNC HISTORY FUNCTIONS
+    // ======================
+    
+    // Store pagination state for each integration
+    const historyPagination = new Map();
+    
+    // Load sync history for an integration
+    async function loadSyncHistory(integrationId, page = 1) {
+      const tbody = document.getElementById('history-tbody-' + integrationId);
+      const statsContainer = document.getElementById('history-stats-' + integrationId);
+      const paginationContainer = document.getElementById('history-pagination-' + integrationId);
+      
+      if (!tbody) return;
+      
+      // Show loading
+      tbody.innerHTML = `
+        <tr class="loading-row">
+          <td colspan="7" style="text-align: center; padding: 2rem;">
+            <i data-lucide="loader-2" class="spin" style="width: 24px; height: 24px;"></i>
+            <p style="margin: 0.5rem 0 0;">Loading sync history...</p>
+          </td>
+        </tr>
+      `;
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+      
+      try {
+        const response = await fetch(`/admin/api/integrations/${integrationId}/sync-history?page=${page}&limit=10`);
+        const data = await response.json();
+        
+        if (!data.success) {
+          throw new Error(data.error || 'Failed to load history');
+        }
+        
+        // Store pagination state
+        historyPagination.set(integrationId, data.pagination);
+        
+        // Update stats
+        if (statsContainer && data.stats) {
+          statsContainer.style.display = 'flex';
+          document.getElementById('stat-total-' + integrationId).textContent = data.pagination.total;
+          document.getElementById('stat-completed-' + integrationId).textContent = data.history.filter(h => h.status === 'completed').length;
+          document.getElementById('stat-failed-' + integrationId).textContent = data.history.filter(h => h.status === 'failed' || h.status === 'interrupted').length;
+          document.getElementById('stat-avg-duration-' + integrationId).textContent = formatHistoryDuration(data.stats.avgDuration);
+        }
+        
+        // Render history table
+        if (data.history.length === 0) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="7" style="text-align: center; padding: 2rem; color: var(--admin-text-muted);">
+                <i data-lucide="inbox" style="width: 32px; height: 32px; margin-bottom: 0.5rem; opacity: 0.5;"></i>
+                <p style="margin: 0;">No sync history yet</p>
+              </td>
+            </tr>
+          `;
+        } else {
+          tbody.innerHTML = data.history.map(record => createHistoryRow(record)).join('');
+        }
+        
+        // Update pagination
+        if (paginationContainer && data.pagination.totalPages > 1) {
+          paginationContainer.style.display = 'flex';
+          document.getElementById('page-info-' + integrationId).textContent = `Page ${data.pagination.page} of ${data.pagination.totalPages}`;
+          document.getElementById('prev-page-' + integrationId).disabled = data.pagination.page <= 1;
+          document.getElementById('next-page-' + integrationId).disabled = !data.pagination.hasMore;
+        } else if (paginationContainer) {
+          paginationContainer.style.display = 'none';
+        }
+        
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+        
+      } catch (error) {
+        console.error('Error loading sync history:', error);
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" style="text-align: center; padding: 2rem; color: var(--admin-danger);">
+              <i data-lucide="alert-circle" style="width: 24px; height: 24px; margin-bottom: 0.5rem;"></i>
+              <p style="margin: 0;">Failed to load history: ${error.message}</p>
+            </td>
+          </tr>
+        `;
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      }
+    }
+    
+    // Navigate pagination
+    function loadSyncHistoryPage(integrationId, direction) {
+      const state = historyPagination.get(integrationId);
+      if (!state) return;
+      
+      const newPage = direction === 'next' ? state.page + 1 : state.page - 1;
+      if (newPage < 1 || newPage > state.totalPages) return;
+      
+      loadSyncHistory(integrationId, newPage);
+    }
+    
+    // Create a history table row
+    function createHistoryRow(record) {
+      const statusClass = getStatusClass(record.status);
+      const statusIcon = getStatusIcon(record.status);
+      const startDate = new Date(record.startedAt);
+      const triggerBadge = getTriggerBadge(record.triggeredBy);
+      
+      return `
+        <tr>
+          <td>
+            <div class="history-date">
+              <span class="date">${startDate.toLocaleDateString()}</span>
+              <span class="time">${startDate.toLocaleTimeString()}</span>
+            </div>
+          </td>
+          <td>
+            <span class="status-badge-sm ${statusClass}">
+              <i data-lucide="${statusIcon}"></i>
+              ${capitalizeFirst(record.status)}
+            </span>
+          </td>
+          <td>${triggerBadge}</td>
+          <td>${record.filesProcessed || 0}</td>
+          <td>
+            <span class="records-info">
+              <span class="inserted">${(record.recordsInserted || 0).toLocaleString()}</span>
+              ${record.recordsUpdated > 0 ? `<span class="updated">+${record.recordsUpdated.toLocaleString()} updated</span>` : ''}
+            </span>
+          </td>
+          <td>${record.durationFormatted || '-'}</td>
+          <td>
+            ${record.errorSummary ? 
+              `<span class="error-summary" title="${escapeHtml(record.errorSummary)}">
+                <i data-lucide="alert-circle"></i>
+              </span>` : 
+              `<span class="success-check">
+                <i data-lucide="check"></i>
+              </span>`
+            }
+          </td>
+        </tr>
+      `;
+    }
+    
+    // Helper functions
+    function getStatusClass(status) {
+      const classes = {
+        completed: 'success',
+        failed: 'error',
+        interrupted: 'warning',
+        running: 'syncing',
+        pending: 'pending',
+        cancelled: 'muted'
+      };
+      return classes[status] || 'muted';
+    }
+    
+    function getStatusIcon(status) {
+      const icons = {
+        completed: 'check-circle',
+        failed: 'x-circle',
+        interrupted: 'alert-triangle',
+        running: 'loader-2',
+        pending: 'clock',
+        cancelled: 'x'
+      };
+      return icons[status] || 'circle';
+    }
+    
+    function getTriggerBadge(triggeredBy) {
+      const badges = {
+        scheduler: '<span class="trigger-badge scheduler"><i data-lucide="clock"></i> Scheduled</span>',
+        manual: '<span class="trigger-badge manual"><i data-lucide="hand"></i> Manual</span>',
+        api: '<span class="trigger-badge api"><i data-lucide="code"></i> API</span>',
+        'startup-recovery': '<span class="trigger-badge recovery"><i data-lucide="refresh-cw"></i> Recovery</span>',
+        system: '<span class="trigger-badge system"><i data-lucide="settings"></i> System</span>'
+      };
+      return badges[triggeredBy] || `<span class="trigger-badge">${triggeredBy || 'Unknown'}</span>`;
+    }
+    
+    function formatHistoryDuration(ms) {
+      if (!ms || ms <= 0) return '-';
+      const seconds = Math.floor(ms / 1000);
+      if (seconds < 60) return seconds + 's';
+      const minutes = Math.floor(seconds / 60);
+      if (minutes < 60) return minutes + 'm';
+      const hours = Math.floor(minutes / 60);
+      return hours + 'h ' + (minutes % 60) + 'm';
+    }
+    
+    function capitalizeFirst(str) {
+      return str ? str.charAt(0).toUpperCase() + str.slice(1) : '';
+    }
+    
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+    
+    // Override showSyncTab to load history when switching to history tab
+    const originalShowSyncTab = showSyncTab;
+    showSyncTab = function(connectionId, tab) {
+      originalShowSyncTab(connectionId, tab);
+      
+      // Load history when switching to history tab
+      if (tab === 'history') {
+        loadSyncHistory(connectionId);
+      }
+    };
   </script>
 
   <%- include('partials/footer') %>

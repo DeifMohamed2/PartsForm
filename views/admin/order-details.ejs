@@ -2,33 +2,55 @@
 <link rel="stylesheet" href="/css/adminCSS/admin-dashboard.css">
 <link rel="stylesheet" href="/css/adminCSS/admin-orders.css">
 <style>
-  /* Professional Order Details Styles */
+  /* Override - All icons with colored backgrounds should be white */
+  .status-badge i,
+  .status-badge svg,
+  .priority-badge i,
+  .priority-badge svg,
+  .timeline-step.active .timeline-icon i,
+  .timeline-step.active .timeline-icon svg,
+  .timeline-step.completed .timeline-icon i,
+  .timeline-step.completed .timeline-icon svg,
+  .timeline-step.cancelled .timeline-icon i,
+  .timeline-step.cancelled .timeline-icon svg,
+  .activity-icon i,
+  .activity-icon svg,
+  .meta-icon i,
+  .meta-icon svg,
+  .item-image i,
+  .item-image svg,
+  .customer-avatar i,
+  .customer-avatar svg {
+    color: #fff !important;
+    stroke: #fff !important;
+  }
+  
+  /* Status badges with solid backgrounds */
+  .status-badge.pending { background: #f59e0b; color: #fff; }
+  .status-badge.processing { background: #3b82f6; color: #fff; }
+  .status-badge.shipped { background: #8b5cf6; color: #fff; }
+  .status-badge.delivered { background: #10b981; color: #fff; }
+  .status-badge.completed { background: #10b981; color: #fff; }
+  .status-badge.cancelled { background: #ef4444; color: #fff; }
+  
+  /* Priority badges with solid backgrounds */
+  .priority-badge.urgent { background: #ef4444; color: #fff; }
+  .priority-badge.high { background: #f59e0b; color: #fff; }
+  
+  /* Professional Order Details Styles - Clean Design */
   .order-details-page {
     max-width: 1400px;
     margin: 0 auto;
   }
   
-  /* Order Hero Header */
+  /* Order Hero Header - Clean, No Gradient */
   .order-hero {
-    background: linear-gradient(135deg, var(--admin-bg-secondary) 0%, var(--admin-bg-tertiary) 100%);
-    border: 1px solid var(--admin-border);
-    border-radius: 20px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
     padding: 2rem;
-    margin-bottom: 2rem;
-    position: relative;
-    overflow: hidden;
-  }
-  
-  .order-hero::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 300px;
-    height: 300px;
-    background: radial-gradient(circle, var(--module-primary, #3b82f6) 0%, transparent 70%);
-    opacity: 0.05;
-    pointer-events: none;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
   }
   
   .order-hero-content {
@@ -37,8 +59,6 @@
     align-items: flex-start;
     flex-wrap: wrap;
     gap: 1.5rem;
-    position: relative;
-    z-index: 1;
   }
   
   .order-hero-main {
@@ -50,15 +70,16 @@
     display: flex;
     align-items: center;
     gap: 1rem;
-    margin-bottom: 1rem;
+    margin-bottom: 1.25rem;
   }
   
   .order-number h1 {
     font-size: 1.75rem;
     font-weight: 700;
-    color: var(--admin-text-primary);
+    color: #1e293b;
     margin: 0;
-    font-family: 'SF Mono', 'Monaco', monospace;
+    font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+    letter-spacing: -0.5px;
   }
   
   .order-badges {
@@ -69,32 +90,36 @@
   
   .order-meta-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1.25rem;
     margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #f1f5f9;
   }
   
   .meta-item {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 0.875rem;
   }
   
   .meta-icon {
-    width: 40px;
-    height: 40px;
+    width: 42px;
+    height: 42px;
     border-radius: 10px;
-    background: var(--admin-bg-primary);
+    background: #3b82f6;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
   }
   
-  .meta-icon i {
+  .meta-icon i,
+  .meta-icon svg {
     width: 18px;
     height: 18px;
-    color: var(--module-primary, var(--admin-primary));
+    color: #fff;
+    stroke: #fff;
   }
   
   .meta-content {
@@ -106,42 +131,44 @@
     font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    color: var(--admin-text-muted);
-    margin-bottom: 0.15rem;
+    color: #94a3b8;
+    margin-bottom: 0.2rem;
+    font-weight: 500;
   }
   
   .meta-value {
     font-weight: 600;
-    color: var(--admin-text-primary);
+    color: #1e293b;
     font-size: 0.95rem;
   }
   
   .order-hero-actions {
     display: flex;
-    gap: 0.75rem;
+    gap: 0.5rem;
     flex-wrap: wrap;
   }
   
-  /* Status Timeline */
+  /* Status Timeline - Clean Design */
   .timeline-card {
-    background: var(--admin-bg-secondary);
-    border: 1px solid var(--admin-border);
+    background: #fff;
+    border: 1px solid #e2e8f0;
     border-radius: 16px;
     padding: 1.5rem 2rem;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
   }
   
   .timeline-card-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.75rem;
   }
   
   .timeline-card-header h3 {
     font-size: 1rem;
     font-weight: 600;
-    color: var(--admin-text-primary);
+    color: #1e293b;
     margin: 0;
     display: flex;
     align-items: center;
@@ -151,25 +178,26 @@
   .timeline-card-header h3 i {
     width: 18px;
     height: 18px;
-    color: var(--module-primary, var(--admin-primary));
+    color: #3b82f6;
   }
   
   .order-timeline {
     display: flex;
     justify-content: space-between;
     position: relative;
-    padding: 0 1rem;
+    padding: 0 1.5rem;
   }
   
   .order-timeline::before {
     content: '';
     position: absolute;
-    top: 22px;
-    left: 3rem;
-    right: 3rem;
+    top: 24px;
+    left: 4rem;
+    right: 4rem;
     height: 3px;
-    background: var(--admin-border);
+    background: #e2e8f0;
     z-index: 0;
+    border-radius: 2px;
   }
   
   .timeline-step {
@@ -183,14 +211,14 @@
   }
   
   .timeline-icon {
-    width: 44px;
-    height: 44px;
+    width: 48px;
+    height: 48px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--admin-bg-primary);
-    border: 3px solid var(--admin-border);
+    background: #f8fafc;
+    border: 3px solid #e2e8f0;
     margin-bottom: 0.75rem;
     transition: all 0.3s ease;
   }
@@ -198,7 +226,7 @@
   .timeline-icon i {
     width: 20px;
     height: 20px;
-    color: var(--admin-text-muted);
+    color: #94a3b8;
   }
   
   .timeline-step.completed .timeline-icon {
@@ -207,18 +235,17 @@
   }
   
   .timeline-step.completed .timeline-icon i {
-    color: white;
+    color: #fff;
   }
   
   .timeline-step.active .timeline-icon {
-    background: var(--module-primary, #3b82f6);
-    border-color: var(--module-primary, #3b82f6);
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
-    animation: pulse 2s infinite;
+    background: #3b82f6;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
   }
   
   .timeline-step.active .timeline-icon i {
-    color: white;
+    color: #fff;
   }
   
   .timeline-step.cancelled .timeline-icon {
@@ -227,47 +254,43 @@
   }
   
   .timeline-step.cancelled .timeline-icon i {
-    color: white;
-  }
-  
-  @keyframes pulse {
-    0%, 100% { box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2); }
-    50% { box-shadow: 0 0 0 8px rgba(59, 130, 246, 0.1); }
+    color: #fff;
   }
   
   .timeline-label {
     font-size: 0.8rem;
     font-weight: 600;
-    color: var(--admin-text-muted);
+    color: #94a3b8;
     text-transform: uppercase;
     letter-spacing: 0.5px;
   }
   
   .timeline-step.completed .timeline-label,
   .timeline-step.active .timeline-label {
-    color: var(--admin-text-primary);
+    color: #1e293b;
   }
   
   .timeline-date {
     font-size: 0.75rem;
-    color: var(--admin-text-muted);
+    color: #94a3b8;
     margin-top: 0.25rem;
   }
   
   /* Main Content Grid */
   .order-content-grid {
     display: grid;
-    grid-template-columns: 1fr 380px;
+    grid-template-columns: 1fr 360px;
     gap: 1.5rem;
   }
   
-  /* Cards */
+  /* Cards - Clean Design */
   .details-card {
-    background: var(--admin-bg-secondary);
-    border: 1px solid var(--admin-border);
+    background: #fff;
+    border: 1px solid #e2e8f0;
     border-radius: 16px;
     overflow: hidden;
     margin-bottom: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
   }
   
   .details-card:last-child {
@@ -276,27 +299,44 @@
   
   .details-card-header {
     padding: 1rem 1.5rem;
-    border-bottom: 1px solid var(--admin-border);
-    background: var(--admin-bg-tertiary);
+    border-bottom: 1px solid #f1f5f9;
+    background: #f8fafc;
     display: flex;
     justify-content: space-between;
     align-items: center;
   }
   
   .details-card-header h3 {
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     font-weight: 600;
-    color: var(--admin-text-primary);
+    color: #1e293b;
     margin: 0;
     display: flex;
     align-items: center;
     gap: 0.5rem;
   }
   
-  .details-card-header h3 i {
-    width: 18px;
-    height: 18px;
-    color: var(--module-primary, var(--admin-primary));
+  .card-header-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: #3b82f6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  
+  .card-header-icon i {
+    width: 16px;
+    height: 16px;
+    color: #fff;
+  }
+  
+  .details-card-header h3 i:not(.card-header-icon i) {
+    width: 16px;
+    height: 16px;
+    color: #3b82f6;
   }
   
   .details-card-body {
@@ -321,9 +361,9 @@
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    color: var(--admin-text-muted);
-    background: var(--admin-bg-tertiary);
-    border-bottom: 1px solid var(--admin-border);
+    color: #64748b;
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
   }
   
   .order-items-table th:first-child {
@@ -337,7 +377,7 @@
   
   .order-items-table td {
     padding: 1.25rem 1rem;
-    border-bottom: 1px solid var(--admin-border);
+    border-bottom: 1px solid #f1f5f9;
     vertical-align: middle;
   }
   
@@ -355,7 +395,7 @@
   }
   
   .order-items-table tbody tr:hover {
-    background: var(--admin-bg-tertiary);
+    background: #f8fafc;
   }
   
   .item-info {
@@ -365,59 +405,99 @@
   }
   
   .item-image {
-    width: 50px;
-    height: 50px;
-    background: linear-gradient(135deg, var(--admin-bg-tertiary) 0%, var(--admin-bg-primary) 100%);
+    width: 48px;
+    height: 48px;
+    background: #3b82f6;
     border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    border: 1px solid var(--admin-border);
   }
   
   .item-image i {
-    width: 22px;
-    height: 22px;
-    color: var(--module-primary, var(--admin-primary));
+    width: 20px;
+    height: 20px;
+    color: #fff;
   }
   
   .item-details {
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    gap: 0.35rem;
   }
   
   .item-name {
     font-weight: 600;
-    color: var(--admin-text-primary);
+    color: #1e293b;
     font-size: 0.9rem;
+  }
+  
+  .item-part-number {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #3b82f6;
+    background: #eff6ff;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    width: fit-content;
+  }
+  
+  .item-part-number i {
+    width: 12px;
+    height: 12px;
   }
   
   .item-meta {
     display: flex;
     gap: 0.75rem;
     font-size: 0.8rem;
-    color: var(--admin-text-muted);
+    color: #64748b;
   }
   
   .item-meta span {
     display: flex;
     align-items: center;
-    gap: 0.25rem;
+    gap: 0.3rem;
+  }
+  
+  .item-meta i {
+    width: 12px;
+    height: 12px;
+    opacity: 0.7;
   }
   
   .item-price {
     font-weight: 600;
-    color: var(--admin-text-primary);
+    color: #1e293b;
     font-size: 0.95rem;
   }
+  
+  /* Stock Badges */
+  .stock-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.3rem 0.6rem;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  .stock-badge.in-stock { background: #dcfce7; color: #16a34a; }
+  .stock-badge.low-stock { background: #fef3c7; color: #d97706; }
+  .stock-badge.out-stock { background: #fee2e2; color: #dc2626; }
+  .stock-badge i { width: 11px; height: 11px; }
   
   /* Order Summary */
   .order-summary {
     padding: 1.25rem 1.5rem;
-    background: var(--admin-bg-tertiary);
-    border-top: 1px solid var(--admin-border);
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
   }
   
   .summary-row {
@@ -428,61 +508,76 @@
   }
   
   .summary-label {
-    color: var(--admin-text-muted);
+    color: #64748b;
   }
   
   .summary-value {
     font-weight: 600;
-    color: var(--admin-text-primary);
+    color: #1e293b;
   }
   
   .summary-row.total {
-    border-top: 2px solid var(--admin-border);
+    border-top: 2px solid #e2e8f0;
     margin-top: 0.75rem;
     padding-top: 1rem;
   }
   
   .summary-row.total .summary-label,
   .summary-row.total .summary-value {
-    font-size: 1.15rem;
+    font-size: 1.1rem;
     font-weight: 700;
-    color: var(--admin-text-primary);
+    color: #1e293b;
   }
   
-  /* Customer Card */
+  /* Customer Card - Clean Design */
   .customer-header {
     display: flex;
     align-items: center;
     gap: 1rem;
     margin-bottom: 1.25rem;
     padding-bottom: 1.25rem;
-    border-bottom: 1px solid var(--admin-border);
+    border-bottom: 1px solid #f1f5f9;
   }
   
   .customer-avatar {
     width: 56px;
     height: 56px;
-    border-radius: 14px;
-    background: linear-gradient(135deg, var(--module-primary, #3b82f6) 0%, #8b5cf6 100%);
+    border-radius: 12px;
+    background: #3b82f6;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
+    color: #fff;
     font-weight: 700;
     font-size: 1.25rem;
     flex-shrink: 0;
+    overflow: hidden;
+  }
+  
+  .customer-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .customer-avatar .avatar-fallback {
+    display: none;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
   }
   
   .customer-info h4 {
     font-size: 1rem;
     font-weight: 600;
-    color: var(--admin-text-primary);
+    color: #1e293b;
     margin: 0 0 0.25rem;
   }
   
   .customer-info p {
     font-size: 0.85rem;
-    color: var(--admin-text-muted);
+    color: #64748b;
     margin: 0;
   }
   
@@ -490,15 +585,15 @@
   .info-list {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 0;
   }
   
   .info-list-item {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid var(--admin-border);
+    align-items: center;
+    padding: 0.875rem 0;
+    border-bottom: 1px solid #f1f5f9;
   }
   
   .info-list-item:last-child {
@@ -506,22 +601,27 @@
     padding-bottom: 0;
   }
   
+  .info-list-item:first-child {
+    padding-top: 0;
+  }
+  
   .info-list-label {
-    font-size: 0.8rem;
-    color: var(--admin-text-muted);
+    font-size: 0.85rem;
+    color: #64748b;
     display: flex;
     align-items: center;
     gap: 0.5rem;
   }
   
   .info-list-label i {
-    width: 14px;
-    height: 14px;
+    width: 16px;
+    height: 16px;
+    color: #94a3b8;
   }
   
   .info-list-value {
     font-weight: 600;
-    color: var(--admin-text-primary);
+    color: #1e293b;
     text-align: right;
     font-size: 0.9rem;
   }
@@ -531,31 +631,31 @@
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
-    padding: 0.35rem 0.75rem;
-    border-radius: 20px;
+    padding: 0.4rem 0.75rem;
+    border-radius: 8px;
     font-size: 0.75rem;
     font-weight: 600;
     text-transform: uppercase;
   }
   
   .payment-status.paid {
-    background: rgba(16, 185, 129, 0.12);
-    color: #10b981;
+    background: #dcfce7;
+    color: #16a34a;
   }
   
   .payment-status.pending {
-    background: rgba(245, 158, 11, 0.12);
-    color: #f59e0b;
+    background: #fef3c7;
+    color: #d97706;
   }
   
   .payment-status.partial {
-    background: rgba(59, 130, 246, 0.12);
-    color: #3b82f6;
+    background: #dbeafe;
+    color: #2563eb;
   }
   
   .payment-status.failed {
-    background: rgba(239, 68, 68, 0.12);
-    color: #ef4444;
+    background: #fee2e2;
+    color: #dc2626;
   }
   
   .payment-status i {
@@ -565,8 +665,8 @@
   
   /* Shipping Address */
   .shipping-address {
-    color: var(--admin-text-primary);
-    line-height: 1.7;
+    color: #475569;
+    line-height: 1.8;
     font-size: 0.9rem;
   }
   
@@ -574,85 +674,87 @@
     display: block;
     margin-bottom: 0.5rem;
     font-size: 0.95rem;
+    color: #1e293b;
   }
   
-  /* Activity Log */
+  /* Activity Log - Enhanced Design */
   .activity-log {
-    max-height: 400px;
+    max-height: 450px;
     overflow-y: auto;
   }
   
   .activity-item {
     display: flex;
     gap: 1rem;
-    padding: 1rem 0;
-    border-bottom: 1px solid var(--admin-border);
+    padding: 1rem 1.25rem;
     position: relative;
+    background: #f8fafc;
+    border-radius: 12px;
+    margin-bottom: 0.75rem;
   }
   
   .activity-item:last-child {
-    border-bottom: none;
+    margin-bottom: 0;
   }
   
   .activity-icon-wrapper {
     position: relative;
-  }
-  
-  .activity-icon-wrapper::after {
-    content: '';
-    position: absolute;
-    left: 50%;
-    top: 40px;
-    bottom: -1rem;
-    width: 2px;
-    background: var(--admin-border);
-    transform: translateX(-50%);
-  }
-  
-  .activity-item:last-child .activity-icon-wrapper::after {
-    display: none;
+    flex-shrink: 0;
   }
   
   .activity-icon {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    position: relative;
-    z-index: 1;
   }
   
   .activity-icon i {
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
   }
+  
+  /* Activity Icon with solid background and white icons */
+  .activity-icon.pending { background: #f59e0b; }
+  .activity-icon.pending i { color: #fff; }
+  .activity-icon.processing { background: #8b5cf6; }
+  .activity-icon.processing i { color: #fff; }
+  .activity-icon.shipped { background: #3b82f6; }
+  .activity-icon.shipped i { color: #fff; }
+  .activity-icon.delivered { background: #10b981; }
+  .activity-icon.delivered i { color: #fff; }
+  .activity-icon.cancelled { background: #ef4444; }
+  .activity-icon.cancelled i { color: #fff; }
+  .activity-icon.default { background: #64748b; }
+  .activity-icon.default i { color: #fff; }
   
   .activity-content {
     flex: 1;
-    padding-top: 0.25rem;
+    padding-top: 0.1rem;
   }
   
   .activity-text {
-    color: var(--admin-text-primary);
+    color: #1e293b;
     font-size: 0.9rem;
     line-height: 1.5;
-    margin-bottom: 0.35rem;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
   }
   
   .activity-meta {
     display: flex;
     gap: 1rem;
     font-size: 0.75rem;
-    color: var(--admin-text-muted);
+    color: #94a3b8;
   }
   
   .activity-meta span {
     display: flex;
     align-items: center;
-    gap: 0.25rem;
+    gap: 0.3rem;
   }
   
   .activity-meta i {
@@ -662,9 +764,9 @@
   
   /* Notes Card */
   .notes-content {
-    color: var(--admin-text-secondary);
+    color: #475569;
     font-size: 0.9rem;
-    line-height: 1.7;
+    line-height: 1.8;
   }
   
   /* Status Modal */
@@ -1002,18 +1104,20 @@
                             <i data-lucide="box"></i>
                           </div>
                           <div class="item-details">
-                            <div class="item-name"><%= item.description || item.partNumber %></div>
-                            <div class="item-meta">
-                              <span><i data-lucide="hash"></i> <%= item.partNumber %></span>
-                              <% if (item.brand && item.brand !== 'N/A') { %>
-                              <span><i data-lucide="tag"></i> <%= item.brand %></span>
-                              <% } %>
+                            <div class="item-part-number">
+                              <i data-lucide="hash"></i> <%= item.partNumber %>
                             </div>
+                            <div class="item-name"><%= item.description || 'Part' %></div>
+                            <% if (item.brand && item.brand !== 'N/A') { %>
+                            <div class="item-meta">
+                              <span><i data-lucide="tag"></i> <%= item.brand %></span>
+                            </div>
+                            <% } %>
                           </div>
                         </div>
                       </td>
                       <td>
-                        <span style="color: var(--admin-text-secondary);"><%= item.supplier || 'N/A' %></span>
+                        <span style="color: #475569;"><%= item.supplier || 'N/A' %></span>
                       </td>
                       <td>
                         <span class="status-badge <%= item.stock === 'In Stock' ? 'delivered' : (item.stock === 'Low Stock' ? 'pending' : 'processing') %>" style="font-size: 0.7rem; padding: 0.25rem 0.5rem;">
@@ -1083,14 +1187,7 @@
                     <% order.timeline.slice().reverse().forEach((event, index) => { %>
                     <div class="activity-item">
                       <div class="activity-icon-wrapper">
-                        <div class="activity-icon" style="background: <%= 
-                          event.status === 'pending' ? 'rgba(245, 158, 11, 0.12)' :
-                          event.status === 'processing' ? 'rgba(139, 92, 246, 0.12)' :
-                          event.status === 'shipped' ? 'rgba(59, 130, 246, 0.12)' :
-                          event.status === 'delivered' ? 'rgba(16, 185, 129, 0.12)' :
-                          event.status === 'cancelled' ? 'rgba(239, 68, 68, 0.12)' :
-                          'rgba(100, 116, 139, 0.12)'
-                        %>;">
+                        <div class="activity-icon <%= event.status || 'default' %>">
                           <i data-lucide="<%= 
                             event.status === 'pending' ? 'clock' :
                             event.status === 'processing' ? 'settings' :
@@ -1098,14 +1195,7 @@
                             event.status === 'delivered' ? 'check-circle' :
                             event.status === 'cancelled' ? 'x-circle' :
                             'info'
-                          %>" style="color: <%= 
-                            event.status === 'pending' ? '#f59e0b' :
-                            event.status === 'processing' ? '#8b5cf6' :
-                            event.status === 'shipped' ? '#3b82f6' :
-                            event.status === 'delivered' ? '#10b981' :
-                            event.status === 'cancelled' ? '#ef4444' :
-                            '#64748b'
-                          %>;"></i>
+                          %>"></i>
                         </div>
                       </div>
                       <div class="activity-content">
@@ -1121,8 +1211,8 @@
                   <% } else { %>
                     <div class="activity-item">
                       <div class="activity-icon-wrapper">
-                        <div class="activity-icon" style="background: rgba(16, 185, 129, 0.12);">
-                          <i data-lucide="plus" style="color: #10b981;"></i>
+                        <div class="activity-icon delivered">
+                          <i data-lucide="plus"></i>
                         </div>
                       </div>
                       <div class="activity-content">
@@ -1168,7 +1258,16 @@
               <div class="details-card-body">
                 <div class="customer-header">
                   <div class="customer-avatar">
-                    <%= order.customer ? order.customer.charAt(0).toUpperCase() : '?' %>
+                    <% 
+                      const customerInitial = order.customer ? order.customer.charAt(0).toUpperCase() : '?';
+                      const profilePic = order.buyer && (order.buyer.avatar || order.buyer.profileImage || order.buyer.companyLogo);
+                    %>
+                    <% if (profilePic) { %>
+                      <img src="<%= profilePic %>" alt="<%= order.customer %>" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                      <span class="avatar-fallback"><%= customerInitial %></span>
+                    <% } else { %>
+                      <%= customerInitial %>
+                    <% } %>
                   </div>
                   <div class="customer-info">
                     <h4><%= order.customer || 'Unknown' %></h4>

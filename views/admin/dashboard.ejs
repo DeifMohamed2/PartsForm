@@ -247,16 +247,17 @@
                 <div style="font-size: 0.75rem; opacity: 0.8;">Total Orders</div>
               </div>
               <div style="text-align: center; padding: 1rem 1.5rem; background: rgba(255,255,255,0.1); border-radius: var(--admin-radius-lg); backdrop-filter: blur(10px);">
-                <div style="font-size: 1.75rem; font-weight: 800;"><%= stats.totalRevenue >= 1000000 ? '$' + (stats.totalRevenue / 1000000).toFixed(2) + 'M' : '$' + (stats.totalRevenue / 1000).toFixed(1) + 'K' %></div>
-                <div style="font-size: 0.75rem; opacity: 0.8;">Total Revenue</div>
+                <% var displayRevenue = stats.totalRevenue > 0 ? stats.totalRevenue : stats.potentialRevenue; %>
+                <div style="font-size: 1.75rem; font-weight: 800;"><%= displayRevenue >= 1000000 ? '$' + (displayRevenue / 1000000).toFixed(2) + 'M' : '$' + (displayRevenue / 1000).toFixed(1) + 'K' %></div>
+                <div style="font-size: 0.75rem; opacity: 0.8;"><%= stats.totalRevenue > 0 ? 'Revenue' : 'Pipeline' %></div>
               </div>
               <div style="text-align: center; padding: 1rem 1.5rem; background: rgba(255,255,255,0.1); border-radius: var(--admin-radius-lg); backdrop-filter: blur(10px);">
                 <div style="font-size: 1.75rem; font-weight: 800;"><%= stats.totalBuyers || 0 %></div>
                 <div style="font-size: 0.75rem; opacity: 0.8;">Customers</div>
               </div>
               <div style="text-align: center; padding: 1rem 1.5rem; background: rgba(255,255,255,0.1); border-radius: var(--admin-radius-lg); backdrop-filter: blur(10px);">
-                <div style="font-size: 1.75rem; font-weight: 800;"><%= stats.totalBuyers || 0 %></div>
-                <div style="font-size: 0.75rem; opacity: 0.8;">Customers</div>
+                <div style="font-size: 1.75rem; font-weight: 800;"><%= stats.fulfillmentRate %>%</div>
+                <div style="font-size: 0.75rem; opacity: 0.8;">Fulfillment</div>
               </div>
             </div>
           </div>
@@ -271,12 +272,18 @@
             <div style="font-size: 1.75rem; font-weight: 800; color: #0ea5e9;"><%= stats.totalOrders.toLocaleString() %></div>
             <div style="font-size: 0.85rem; color: #64748b;">Total Orders</div>
           </div>
-          <div style="background: linear-gradient(135deg, rgba(14, 165, 233, 0.08) 0%, white 100%); border: 2px solid rgba(14, 165, 233, 0.2); border-radius: var(--admin-radius-xl); padding: 1.5rem; text-align: center;">
-            <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #0ea5e9, #0369a1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; margin: 0 auto 1rem;">
+          <div style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, white 100%); border: 2px solid rgba(16, 185, 129, 0.2); border-radius: var(--admin-radius-xl); padding: 1.5rem; text-align: center;">
+            <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #10b981, #059669); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; margin: 0 auto 1rem;">
               <i data-lucide="dollar-sign" style="width: 24px; height: 24px;"></i>
             </div>
-            <div style="font-size: 1.75rem; font-weight: 800; color: #0ea5e9;"><%= stats.totalRevenue >= 1000000 ? '$' + (stats.totalRevenue / 1000000).toFixed(2) + 'M' : '$' + (stats.totalRevenue / 1000).toFixed(1) + 'K' %></div>
-            <div style="font-size: 0.85rem; color: #64748b;">Total Revenue</div>
+            <% if (stats.totalRevenue > 0) { %>
+              <div style="font-size: 1.75rem; font-weight: 800; color: #10b981;"><%= stats.totalRevenue >= 1000000 ? '$' + (stats.totalRevenue / 1000000).toFixed(2) + 'M' : '$' + (stats.totalRevenue / 1000).toFixed(1) + 'K' %></div>
+              <div style="font-size: 0.85rem; color: #64748b;">Realized Revenue</div>
+            <% } else { %>
+              <div style="font-size: 1.75rem; font-weight: 800; color: #f59e0b;"><%= stats.potentialRevenue >= 1000000 ? '$' + (stats.potentialRevenue / 1000000).toFixed(2) + 'M' : '$' + (stats.potentialRevenue / 1000).toFixed(1) + 'K' %></div>
+              <div style="font-size: 0.85rem; color: #64748b;">Pipeline Value</div>
+              <div style="font-size: 0.65rem; color: #f59e0b; margin-top: 0.25rem;">Pending Orders</div>
+            <% } %>
           </div>
           <div style="background: linear-gradient(135deg, rgba(14, 165, 233, 0.08) 0%, white 100%); border: 2px solid rgba(14, 165, 233, 0.2); border-radius: var(--admin-radius-xl); padding: 1.5rem; text-align: center;">
             <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #0ea5e9, #0369a1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; margin: 0 auto 1rem;">
@@ -285,12 +292,15 @@
             <div style="font-size: 1.75rem; font-weight: 800; color: #0ea5e9;"><%= stats.totalBuyers || 0 %></div>
             <div style="font-size: 0.85rem; color: #64748b;">Customers</div>
           </div>
-          <div style="background: linear-gradient(135deg, <%= stats.growth >= 0 ? 'rgba(16, 185, 129, 0.08)' : 'rgba(239, 68, 68, 0.08)' %> 0%, white 100%); border: 2px solid <%= stats.growth >= 0 ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)' %>; border-radius: var(--admin-radius-xl); padding: 1.5rem; text-align: center;">
-            <div style="width: 50px; height: 50px; background: linear-gradient(135deg, <%= stats.growth >= 0 ? '#10b981, #059669' : '#ef4444, #dc2626' %>); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; margin: 0 auto 1rem;">
-              <i data-lucide="<%= stats.growth >= 0 ? 'trending-up' : 'trending-down' %>" style="width: 24px; height: 24px;"></i>
+          <div style="background: linear-gradient(135deg, <%= stats.fulfillmentRate >= 50 ? 'rgba(16, 185, 129, 0.08)' : 'rgba(245, 158, 11, 0.08)' %> 0%, white 100%); border: 2px solid <%= stats.fulfillmentRate >= 50 ? 'rgba(16, 185, 129, 0.2)' : 'rgba(245, 158, 11, 0.2)' %>; border-radius: var(--admin-radius-xl); padding: 1.5rem; text-align: center;">
+            <div style="width: 50px; height: 50px; background: linear-gradient(135deg, <%= stats.fulfillmentRate >= 50 ? '#10b981, #059669' : '#f59e0b, #d97706' %>); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; margin: 0 auto 1rem;">
+              <i data-lucide="<%= stats.fulfillmentRate >= 50 ? 'check-circle' : 'clock' %>" style="width: 24px; height: 24px;"></i>
             </div>
-            <div style="font-size: 1.75rem; font-weight: 800; color: <%= stats.growth >= 0 ? '#10b981' : '#ef4444' %>;"><%= stats.growth >= 0 ? '+' : '' %><%= stats.growth %>%</div>
-            <div style="font-size: 0.85rem; color: #64748b;">Monthly Growth</div>
+            <div style="font-size: 1.75rem; font-weight: 800; color: <%= stats.fulfillmentRate >= 50 ? '#10b981' : '#f59e0b' %>;"><%= stats.fulfillmentRate %>%</div>
+            <div style="font-size: 0.85rem; color: #64748b;">Fulfillment Rate</div>
+            <% if (stats.fulfillmentRate === 0 && stats.ordersPending > 0) { %>
+              <div style="font-size: 0.65rem; color: #f59e0b; margin-top: 0.25rem;"><%= stats.ordersPending %> orders pending</div>
+            <% } %>
           </div>
         </div>
 
@@ -373,7 +383,7 @@
               <h4 style="font-size: 0.95rem; font-weight: 600; margin-bottom: 1rem; opacity: 0.9;">📊 Platform Health</h4>
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                 <div style="text-align: center;">
-                  <div style="font-size: 1.5rem; font-weight: 800;"><%= stats.totalOrders > 0 ? Math.round((stats.ordersDelivered + stats.ordersCompleted) / stats.totalOrders * 100) : 0 %>%</div>
+                  <div style="font-size: 1.5rem; font-weight: 800;"><%= stats.fulfillmentRate %>%</div>
                   <div style="font-size: 0.7rem; opacity: 0.7;">Fulfillment</div>
                 </div>
                 <div style="text-align: center;">
@@ -513,7 +523,8 @@
                   <i data-lucide="trophy" style="width: 18px; height: 18px; color: #f59e0b;"></i>
                   Top Buyers by Revenue
                 </div>
-                <div class="chart-subtitle">Highest performing customers</div>
+                <% var hasCompletedBuyers = typeof topBuyers !== 'undefined' && topBuyers.length > 0 && !topBuyers[0].isPending; %>
+                <div class="chart-subtitle"><%= hasCompletedBuyers ? 'From completed orders' : 'From all orders (pending)' %></div>
               </div>
               <a href="/admin/users" class="admin-btn admin-btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">View All</a>
             </div>
@@ -563,7 +574,7 @@
                         <%= buyer.companyName %>
                       </div>
                       <div style="font-size: 0.7rem; color: #64748b; margin-top: 2px; display: flex; align-items: center; gap: 0.5rem;">
-                        <span style="background: rgba(16, 185, 129, 0.1); color: #059669; padding: 0.1rem 0.35rem; border-radius: 8px; font-weight: 600;"><%= buyer.orderCount %> orders</span>
+                        <span style="background: <%= buyer.isPending ? 'rgba(245, 158, 11, 0.1)' : 'rgba(16, 185, 129, 0.1)' %>; color: <%= buyer.isPending ? '#d97706' : '#059669' %>; padding: 0.1rem 0.35rem; border-radius: 8px; font-weight: 600;"><%= buyer.orderCount %> orders</span>
                         <% if (buyer.country && buyer.country !== 'N/A') { %>
                           <span>📍 <%= buyer.country %></span>
                         <% } %>
@@ -572,8 +583,8 @@
                     
                     <!-- Revenue -->
                     <div style="text-align: right; flex-shrink: 0;">
-                      <div style="font-weight: 800; color: #10b981; font-size: 1rem;">$<%= buyer.totalSpent.toLocaleString() %></div>
-                      <div style="font-size: 0.65rem; color: #64748b;"><%= buyer.fulfillmentRate %>% fulfilled</div>
+                      <div style="font-weight: 800; color: <%= buyer.isPending ? '#f59e0b' : '#10b981' %>; font-size: 1rem;">$<%= buyer.totalSpent.toLocaleString() %></div>
+                      <div style="font-size: 0.65rem; color: #64748b;"><%= buyer.isPending ? 'Pending' : buyer.fulfillmentRate + '% fulfilled' %></div>
                     </div>
                   </div>
                 <% }); %>
@@ -677,16 +688,34 @@
             </div>
             <div style="padding: 0.75rem 1rem 1rem;">
               <% 
-                const countries = typeof ordersByCountry !== 'undefined' ? ordersByCountry : [];
-                const maxOrders = countries.length > 0 ? Math.max(...countries.map(c => c.orderCount)) : 1;
+                // Country flags by both code and full name
                 const countryFlags = {
-                  'US': '🇺🇸', 'GB': '🇬🇧', 'DE': '🇩🇪', 'FR': '🇫🇷', 'CA': '🇨🇦', 'AU': '🇦🇺',
-                  'JP': '🇯🇵', 'CN': '🇨🇳', 'IN': '🇮🇳', 'BR': '🇧🇷', 'MX': '🇲🇽', 'RU': '🇷🇺',
-                  'AE': '🇦🇪', 'SA': '🇸🇦', 'KR': '🇰🇷', 'IT': '🇮🇹', 'ES': '🇪🇸', 'NL': '🇳🇱',
-                  'SE': '🇸🇪', 'CH': '🇨🇭', 'PL': '🇵🇱', 'TR': '🇹🇷', 'EG': '🇪🇬', 'ZA': '🇿🇦',
-                  'NG': '🇳🇬', 'UA': '🇺🇦', 'PK': '🇵🇰', 'ID': '🇮🇩', 'TH': '🇹🇭', 'MY': '🇲🇾',
-                  'SG': '🇸🇬', 'PH': '🇵🇭', 'VN': '🇻🇳'
+                  'US': '🇺🇸', 'United States': '🇺🇸', 'GB': '🇬🇧', 'United Kingdom': '🇬🇧', 
+                  'DE': '🇩🇪', 'Germany': '🇩🇪', 'FR': '🇫🇷', 'France': '🇫🇷', 
+                  'CA': '🇨🇦', 'Canada': '🇨🇦', 'AU': '🇦🇺', 'Australia': '🇦🇺',
+                  'JP': '🇯🇵', 'Japan': '🇯🇵', 'CN': '🇨🇳', 'China': '🇨🇳', 
+                  'IN': '🇮🇳', 'India': '🇮🇳', 'BR': '🇧🇷', 'Brazil': '🇧🇷', 
+                  'MX': '🇲🇽', 'Mexico': '🇲🇽', 'RU': '🇷🇺', 'Russia': '🇷🇺',
+                  'AE': '🇦🇪', 'United Arab Emirates': '🇦🇪', 'UAE': '🇦🇪',
+                  'SA': '🇸🇦', 'Saudi Arabia': '🇸🇦', 'KR': '🇰🇷', 'South Korea': '🇰🇷', 
+                  'IT': '🇮🇹', 'Italy': '🇮🇹', 'ES': '🇪🇸', 'Spain': '🇪🇸', 'NL': '🇳🇱', 'Netherlands': '🇳🇱',
+                  'SE': '🇸🇪', 'Sweden': '🇸🇪', 'CH': '🇨🇭', 'Switzerland': '🇨🇭', 
+                  'PL': '🇵🇱', 'Poland': '🇵🇱', 'TR': '🇹🇷', 'Turkey': '🇹🇷',
+                  'EG': '🇪🇬', 'Egypt': '🇪🇬', 'ZA': '🇿🇦', 'South Africa': '🇿🇦',
+                  'NG': '🇳🇬', 'Nigeria': '🇳🇬', 'UA': '🇺🇦', 'Ukraine': '🇺🇦', 
+                  'PK': '🇵🇰', 'Pakistan': '🇵🇰', 'ID': '🇮🇩', 'Indonesia': '🇮🇩', 
+                  'TH': '🇹🇭', 'Thailand': '🇹🇭', 'MY': '🇲🇾', 'Malaysia': '🇲🇾',
+                  'SG': '🇸🇬', 'Singapore': '🇸🇬', 'PH': '🇵🇭', 'Philippines': '🇵🇭', 
+                  'VN': '🇻🇳', 'Vietnam': '🇻🇳', 'KW': '🇰🇼', 'Kuwait': '🇰🇼',
+                  'QA': '🇶🇦', 'Qatar': '🇶🇦', 'BH': '🇧🇭', 'Bahrain': '🇧🇭',
+                  'OM': '🇴🇲', 'Oman': '🇴🇲', 'JO': '🇯🇴', 'Jordan': '🇯🇴',
+                  'LB': '🇱🇧', 'Lebanon': '🇱🇧', 'IQ': '🇮🇶', 'Iraq': '🇮🇶'
                 };
+                
+                // Filter valid countries - accept both 2-letter codes and full names
+                const rawCountries = typeof ordersByCountry !== 'undefined' ? ordersByCountry : [];
+                const countries = rawCountries.filter(c => c.code && c.code !== 'XX' && c.code !== 'NA' && c.code !== 'N/A' && c.code.trim().length > 0);
+                const maxOrders = countries.length > 0 ? Math.max(...countries.map(c => c.orderCount)) : 1;
                 const barColors = ['#0ea5e9', '#10b981', '#8b5cf6', '#f59e0b', '#ec4899', '#06b6d4', '#84cc16', '#f97316'];
               %>
               <% if (countries.length > 0) { %>
@@ -710,7 +739,8 @@
               <% } else { %>
                 <div style="padding: 1.5rem; text-align: center; color: #64748b;">
                   <i data-lucide="globe" style="width: 40px; height: 40px; opacity: 0.3; margin-bottom: 0.75rem;"></i>
-                  <div style="font-size: 0.85rem;">No country data yet</div>
+                  <div style="font-size: 0.85rem;">No country data available</div>
+                  <div style="font-size: 0.7rem; color: #94a3b8; margin-top: 0.25rem;">Country info will appear when customers set their location</div>
                 </div>
               <% } %>
             </div>

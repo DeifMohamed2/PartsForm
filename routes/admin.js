@@ -3,7 +3,13 @@ const router = express.Router();
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-const { requireAdminAuth, requireAdminRole } = require('../middleware/auth');
+const { 
+  requireAdminAuth, 
+  requireAdminRole, 
+  requirePermission, 
+  requireAllPermissions,
+  PERMISSIONS 
+} = require('../middleware/auth');
 const {
   getAdminDashboard,
   getOrdersManagement,
@@ -51,6 +57,10 @@ const {
   getSyncDetails,
   getIntegrations,
   getIntegration,
+  // Sync History API functions
+  getSyncHistory,
+  getAllSyncHistory,
+  deleteSyncHistory,
   // File upload
   uploadPartsFromFile,
   // Sidebar counts
@@ -183,40 +193,42 @@ router.get('/', getAdminDashboard);
 // Sidebar counts API (for real-time updates)
 router.get('/api/sidebar-counts', getSidebarCounts);
 
-// Orders management - Pages
+// Orders management - Pages (read permission by default via auth)
 router.get('/orders', getOrdersManagement);
-router.get('/orders/create', getOrderCreate);
+router.get('/orders/create', requirePermission(PERMISSIONS.WRITE, PERMISSIONS.MANAGE_ORDERS), getOrderCreate);
 router.get('/orders/:id', getOrderDetails);
-router.get('/orders/:id/edit', getOrderEdit);
+router.get('/orders/:id/edit', requirePermission(PERMISSIONS.WRITE, PERMISSIONS.MANAGE_ORDERS), getOrderEdit);
 
 // Orders management - API endpoints
 router.get('/api/orders/stats', getOrderStats);
-router.post('/api/orders', createOrder);
+router.post('/api/orders', requirePermission(PERMISSIONS.WRITE, PERMISSIONS.MANAGE_ORDERS), createOrder);
 router.post(
   '/api/orders/upload-parts',
+  requirePermission(PERMISSIONS.WRITE, PERMISSIONS.MANAGE_ORDERS),
   upload.single('file'),
   uploadPartsFromFile,
 );
-router.put('/api/orders/:id', updateOrder);
-router.put('/api/orders/:id/status', updateOrderStatus);
-router.delete('/api/orders/:id', deleteOrder);
+router.put('/api/orders/:id', requirePermission(PERMISSIONS.WRITE, PERMISSIONS.MANAGE_ORDERS), updateOrder);
+router.put('/api/orders/:id/status', requirePermission(PERMISSIONS.WRITE, PERMISSIONS.MANAGE_ORDERS), updateOrderStatus);
+router.delete('/api/orders/:id', requirePermission(PERMISSIONS.DELETE, PERMISSIONS.MANAGE_ORDERS), deleteOrder);
 
 // Parts search API for order creation
 router.get('/api/search', searchParts);
 router.get('/api/search/autocomplete', autocomplete);
 
 // Legacy delete route for compatibility
-router.delete('/orders/:id', deleteOrder);
+router.delete('/orders/:id', requirePermission(PERMISSIONS.DELETE, PERMISSIONS.MANAGE_ORDERS), deleteOrder);
 
-// Tickets management
+// Tickets management (read by default, write for replies)
 router.get('/tickets', getTicketsManagement);
 router.get('/tickets/:id', getTicketDetails);
 router.post(
   '/tickets/:id/reply',
+  requirePermission(PERMISSIONS.WRITE),
   ticketUpload.array('attachments', 5),
   postTicketReply,
 );
-router.put('/tickets/:id/status', updateTicketStatus);
+router.put('/tickets/:id/status', requirePermission(PERMISSIONS.WRITE), updateTicketStatus);
 
 // Tickets API endpoints
 router.get('/api/tickets', getTicketsApi);
@@ -224,63 +236,68 @@ router.put('/api/tickets/:id/read', markTicketAsReadAdmin);
 
 // Users management - Pages
 router.get('/users', getUsersManagement);
-router.get('/users/create', getUserCreate);
+router.get('/users/create', requirePermission(PERMISSIONS.MANAGE_USERS), getUserCreate);
 router.get('/users/:id', getUserDetails);
-router.get('/users/:id/edit', getUserEdit);
+router.get('/users/:id/edit', requirePermission(PERMISSIONS.MANAGE_USERS), getUserEdit);
 
 // Users management - API endpoints (bulk routes must come BEFORE :id routes)
-router.put('/api/users/bulk', bulkUpdateUsers);
-router.post('/api/users', createUser);
-router.put('/api/users/:id', updateUser);
-router.put('/api/users/:id/status', updateUserStatus);
-router.put('/api/users/:id/approve', approveUser);
-router.put('/api/users/:id/reject', rejectUser);
-router.put('/api/users/:id/suspend', suspendUser);
-router.delete('/api/users/:id', deleteUser);
+router.put('/api/users/bulk', requirePermission(PERMISSIONS.MANAGE_USERS), bulkUpdateUsers);
+router.post('/api/users', requirePermission(PERMISSIONS.MANAGE_USERS), createUser);
+router.put('/api/users/:id', requirePermission(PERMISSIONS.MANAGE_USERS), updateUser);
+router.put('/api/users/:id/status', requirePermission(PERMISSIONS.MANAGE_USERS), updateUserStatus);
+router.put('/api/users/:id/approve', requirePermission(PERMISSIONS.MANAGE_USERS), approveUser);
+router.put('/api/users/:id/reject', requirePermission(PERMISSIONS.MANAGE_USERS), rejectUser);
+router.put('/api/users/:id/suspend', requirePermission(PERMISSIONS.MANAGE_USERS), suspendUser);
+router.delete('/api/users/:id', requireAllPermissions(PERMISSIONS.DELETE, PERMISSIONS.MANAGE_USERS), deleteUser);
 
 // Legacy routes for compatibility (bulk routes must come BEFORE :id routes)
-router.put('/users/bulk', bulkUpdateUsers);
-router.put('/users/:id/status', updateUserStatus);
-router.delete('/users/:id', deleteUser);
+router.put('/users/bulk', requirePermission(PERMISSIONS.MANAGE_USERS), bulkUpdateUsers);
+router.put('/users/:id/status', requirePermission(PERMISSIONS.MANAGE_USERS), updateUserStatus);
+router.delete('/users/:id', requireAllPermissions(PERMISSIONS.DELETE, PERMISSIONS.MANAGE_USERS), deleteUser);
 
 // Payments management
-router.get('/payments/create', getPaymentCreate);
+router.get('/payments/create', requirePermission(PERMISSIONS.WRITE), getPaymentCreate);
 router.get('/payments/:id', getPaymentDetails);
 router.get('/payments', getPaymentsManagement);
 
 // Integrations management - Pages
 router.get('/integrations', getIntegrationsManagement);
-router.get('/integrations/create', getIntegrationCreate);
-router.get('/integrations/:id/edit', getIntegrationEdit);
+router.get('/integrations/create', requirePermission(PERMISSIONS.MANAGE_INTEGRATIONS), getIntegrationCreate);
+router.get('/integrations/:id/edit', requirePermission(PERMISSIONS.MANAGE_INTEGRATIONS), getIntegrationEdit);
 
 // Integrations API endpoints
 router.get('/api/integrations', getIntegrations);
 router.get('/api/integrations/:id', getIntegration);
-router.post('/api/integrations', createIntegration);
-router.put('/api/integrations/:id', updateIntegration);
-router.delete('/api/integrations/:id', deleteIntegration);
-router.post('/api/integrations/test', testIntegrationConnection);
-router.post('/api/integrations/:id/sync', syncIntegration);
+router.post('/api/integrations', requirePermission(PERMISSIONS.MANAGE_INTEGRATIONS), createIntegration);
+router.put('/api/integrations/:id', requirePermission(PERMISSIONS.MANAGE_INTEGRATIONS), updateIntegration);
+router.delete('/api/integrations/:id', requireAllPermissions(PERMISSIONS.DELETE, PERMISSIONS.MANAGE_INTEGRATIONS), deleteIntegration);
+router.post('/api/integrations/test', requirePermission(PERMISSIONS.MANAGE_INTEGRATIONS), testIntegrationConnection);
+router.post('/api/integrations/:id/sync', requirePermission(PERMISSIONS.MANAGE_INTEGRATIONS), syncIntegration);
 router.get('/api/integrations/:id/status', getSyncStatus);
 router.get('/api/integrations/:id/progress', getSyncProgress);
 router.get('/api/integrations/:id/sync-details', getSyncDetails);
+router.get('/api/integrations/:id/sync-history', getSyncHistory);
 
-// Administrators management
-router.get('/admins', getAdminsManagement);
-router.post('/api/admins', createAdmin);
-router.put('/api/admins/:id', updateAdmin);
-router.put('/api/admins/:id/status', updateAdminStatus);
-router.delete('/api/admins/:id', deleteAdmin);
+// Sync History API endpoints (system-wide)
+router.get('/api/sync-history', getAllSyncHistory);
+router.delete('/api/sync-history/:id', requirePermission(PERMISSIONS.DELETE), deleteSyncHistory);
+
+// Administrators management - Require manage_admins permission
+router.get('/admins', requirePermission(PERMISSIONS.MANAGE_ADMINS), getAdminsManagement);
+router.post('/api/admins', requirePermission(PERMISSIONS.MANAGE_ADMINS), createAdmin);
+router.put('/api/admins/:id', requirePermission(PERMISSIONS.MANAGE_ADMINS), updateAdmin);
+router.put('/api/admins/:id/status', requirePermission(PERMISSIONS.MANAGE_ADMINS), updateAdminStatus);
+router.delete('/api/admins/:id', requireAllPermissions(PERMISSIONS.DELETE, PERMISSIONS.MANAGE_ADMINS), deleteAdmin);
 
 // Parts Analytics
 router.get('/parts-analytics', getPartsAnalytics);
 
-// Admin Settings
+// Admin Settings - Require manage_settings permission for updates
 router.get('/settings', getAdminSettings);
 
 // System Settings API
 router.get('/api/settings', getSystemSettings);
-router.put('/api/settings', updateSystemSettings);
+router.put('/api/settings', requirePermission(PERMISSIONS.MANAGE_SETTINGS), updateSystemSettings);
 
 // ==========================================
 // Email Inquiries Management
@@ -292,18 +309,19 @@ router.get('/email-inquiries/:id', getEmailInquiryDetails);
 // API endpoints
 router.get('/api/email-inquiries', getInquiriesApi);
 router.get('/api/email-inquiries/stats', getInquiryStats);
-router.post('/api/email-inquiries/check-now', triggerEmailCheck);
-router.post('/api/email-inquiries/test-config', testEmailConfig);
-router.post('/api/email-inquiries/scheduler/toggle', toggleScheduler);
-router.post('/api/email-inquiries/:id/retry', retryInquiry);
-router.post('/api/email-inquiries/:id/resend-quotation', resendQuotation);
+router.post('/api/email-inquiries/check-now', requirePermission(PERMISSIONS.WRITE), triggerEmailCheck);
+router.post('/api/email-inquiries/test-config', requirePermission(PERMISSIONS.MANAGE_SETTINGS), testEmailConfig);
+router.post('/api/email-inquiries/scheduler/toggle', requirePermission(PERMISSIONS.MANAGE_SETTINGS), toggleScheduler);
+router.post('/api/email-inquiries/:id/retry', requirePermission(PERMISSIONS.WRITE), retryInquiry);
+router.post('/api/email-inquiries/:id/resend-quotation', requirePermission(PERMISSIONS.WRITE), resendQuotation);
 router.post(
   '/api/email-inquiries/:id/regenerate-quotation',
+  requirePermission(PERMISSIONS.WRITE),
   regenerateQuotation,
 );
-router.post('/api/email-inquiries/:id/notes', addNote);
-router.patch('/api/email-inquiries/:id/status', updateInquiryStatus);
+router.post('/api/email-inquiries/:id/notes', requirePermission(PERMISSIONS.WRITE), addNote);
+router.patch('/api/email-inquiries/:id/status', requirePermission(PERMISSIONS.WRITE), updateInquiryStatus);
 router.patch('/api/email-inquiries/:id/read', markAsRead);
-router.delete('/api/email-inquiries/:id', deleteInquiry);
+router.delete('/api/email-inquiries/:id', requirePermission(PERMISSIONS.DELETE), deleteInquiry);
 
 module.exports = router;

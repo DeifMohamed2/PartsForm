@@ -1,6 +1,132 @@
 <%- include('partials/header') %>
 <link rel="stylesheet" href="/css/adminCSS/admin-dashboard.css">
 <link rel="stylesheet" href="/css/adminCSS/admin-orders.css">
+<style>
+  /* Order Pipeline Flow Styles */
+  .order-pipeline {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: white;
+    border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius-xl);
+    padding: 1.5rem 2rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .order-pipeline::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 10%;
+    width: 80%;
+    height: 3px;
+    background: linear-gradient(90deg, #f59e0b, #3b82f6, #8b5cf6, #10b981);
+    opacity: 0.15;
+    transform: translateY(-50%);
+    z-index: 0;
+  }
+  .pipeline-stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    z-index: 1;
+    position: relative;
+    flex: 1;
+  }
+  .pipeline-stage-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.75rem;
+    transition: all 0.3s ease;
+    position: relative;
+  }
+  .pipeline-stage-icon i { width: 24px; height: 24px; }
+  .pipeline-stage-icon::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+  }
+  .pipeline-stage.pending .pipeline-stage-icon { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+  .pipeline-stage.pending .pipeline-stage-icon::after { border-color: rgba(245, 158, 11, 0.3); }
+  .pipeline-stage.processing .pipeline-stage-icon { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
+  .pipeline-stage.processing .pipeline-stage-icon::after { border-color: rgba(59, 130, 246, 0.3); }
+  .pipeline-stage.shipped .pipeline-stage-icon { background: rgba(139, 92, 246, 0.15); color: #8b5cf6; }
+  .pipeline-stage.shipped .pipeline-stage-icon::after { border-color: rgba(139, 92, 246, 0.3); }
+  .pipeline-stage.delivered .pipeline-stage-icon { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+  .pipeline-stage.delivered .pipeline-stage-icon::after { border-color: rgba(16, 185, 129, 0.3); }
+  .pipeline-stage-count {
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-bottom: 0.25rem;
+  }
+  .pipeline-stage.pending .pipeline-stage-count { color: #f59e0b; }
+  .pipeline-stage.processing .pipeline-stage-count { color: #3b82f6; }
+  .pipeline-stage.shipped .pipeline-stage-count { color: #8b5cf6; }
+  .pipeline-stage.delivered .pipeline-stage-count { color: #10b981; }
+  .pipeline-stage-label {
+    font-size: 0.8rem;
+    color: var(--admin-text-muted);
+    font-weight: 500;
+  }
+  .pipeline-arrow {
+    display: flex;
+    align-items: center;
+    color: var(--admin-text-light);
+    z-index: 1;
+    margin: 0 -0.5rem;
+  }
+  .pipeline-arrow i { width: 20px; height: 20px; }
+  
+  /* Order Summary Stats */
+  .orders-summary-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .summary-stat {
+    background: white;
+    border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius-lg);
+    padding: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .summary-stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--admin-radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .summary-stat-icon i { width: 24px; height: 24px; }
+  .summary-stat-icon.total { background: rgba(14, 165, 233, 0.12); color: #0ea5e9; }
+  .summary-stat-icon.value { background: rgba(16, 185, 129, 0.12); color: #10b981; }
+  .summary-stat-icon.avg { background: rgba(139, 92, 246, 0.12); color: #8b5cf6; }
+  .summary-stat-icon.rate { background: rgba(245, 158, 11, 0.12); color: #f59e0b; }
+  .summary-stat-content h4 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--admin-text-primary);
+    margin: 0;
+  }
+  .summary-stat-content p {
+    font-size: 0.8rem;
+    color: var(--admin-text-muted);
+    margin: 0.25rem 0 0;
+  }
+</style>
 </head>
 <body>
   <div class="admin-wrapper">
@@ -26,51 +152,101 @@
           </div>
         </div>
 
-        <!-- Stats Bar -->
-        <div class="orders-stats-bar">
-          <% 
-            var pendingCount = 0, processingCount = 0, shippedCount = 0, deliveredCount = 0;
-            orders.forEach(function(o) {
-              if (o.status === 'pending') pendingCount++;
-              else if (o.status === 'processing') processingCount++;
-              else if (o.status === 'shipped') shippedCount++;
-              else if (o.status === 'delivered') deliveredCount++;
-            });
-          %>
-          <div class="orders-stat-card">
-            <div class="orders-stat-icon pending">
-              <i data-lucide="clock"></i>
+        <% 
+          // Calculate order statistics
+          var pendingCount = 0, processingCount = 0, shippedCount = 0, deliveredCount = 0, cancelledCount = 0;
+          var totalOrderValue = 0;
+          orders.forEach(function(o) {
+            if (o.status === 'pending') pendingCount++;
+            else if (o.status === 'processing') processingCount++;
+            else if (o.status === 'shipped') shippedCount++;
+            else if (o.status === 'delivered') deliveredCount++;
+            else if (o.status === 'cancelled') cancelledCount++;
+            totalOrderValue += o.amount || 0;
+          });
+          var completedOrders = deliveredCount;
+          var activeOrders = orders.length - cancelledCount;
+          var avgOrderValue = activeOrders > 0 ? Math.round(totalOrderValue / activeOrders) : 0;
+          var fulfillmentRate = activeOrders > 0 ? Math.round((completedOrders / activeOrders) * 100) : 0;
+        %>
+
+        <!-- Order Pipeline Flow -->
+        <div class="order-pipeline">
+          <div class="pipeline-stage pending">
+            <div class="pipeline-stage-icon">
+              <i data-lucide="inbox"></i>
             </div>
-            <div class="orders-stat-content">
-              <div class="orders-stat-value"><%= pendingCount %></div>
-              <div class="orders-stat-label">Pending</div>
-            </div>
+            <div class="pipeline-stage-count"><%= pendingCount %></div>
+            <div class="pipeline-stage-label">New Orders</div>
           </div>
-          <div class="orders-stat-card">
-            <div class="orders-stat-icon processing">
-              <i data-lucide="loader"></i>
-            </div>
-            <div class="orders-stat-content">
-              <div class="orders-stat-value"><%= processingCount %></div>
-              <div class="orders-stat-label">Processing</div>
-            </div>
+          <div class="pipeline-arrow">
+            <i data-lucide="chevron-right"></i>
           </div>
-          <div class="orders-stat-card">
-            <div class="orders-stat-icon shipped">
+          <div class="pipeline-stage processing">
+            <div class="pipeline-stage-icon">
+              <i data-lucide="package"></i>
+            </div>
+            <div class="pipeline-stage-count"><%= processingCount %></div>
+            <div class="pipeline-stage-label">Processing</div>
+          </div>
+          <div class="pipeline-arrow">
+            <i data-lucide="chevron-right"></i>
+          </div>
+          <div class="pipeline-stage shipped">
+            <div class="pipeline-stage-icon">
               <i data-lucide="truck"></i>
             </div>
-            <div class="orders-stat-content">
-              <div class="orders-stat-value"><%= shippedCount %></div>
-              <div class="orders-stat-label">Shipped</div>
-            </div>
+            <div class="pipeline-stage-count"><%= shippedCount %></div>
+            <div class="pipeline-stage-label">In Transit</div>
           </div>
-          <div class="orders-stat-card">
-            <div class="orders-stat-icon delivered">
+          <div class="pipeline-arrow">
+            <i data-lucide="chevron-right"></i>
+          </div>
+          <div class="pipeline-stage delivered">
+            <div class="pipeline-stage-icon">
               <i data-lucide="check-circle"></i>
             </div>
-            <div class="orders-stat-content">
-              <div class="orders-stat-value"><%= deliveredCount %></div>
-              <div class="orders-stat-label">Delivered</div>
+            <div class="pipeline-stage-count"><%= deliveredCount %></div>
+            <div class="pipeline-stage-label">Delivered</div>
+          </div>
+        </div>
+
+        <!-- Order Summary Stats -->
+        <div class="orders-summary-row">
+          <div class="summary-stat">
+            <div class="summary-stat-icon total">
+              <i data-lucide="shopping-bag"></i>
+            </div>
+            <div class="summary-stat-content">
+              <h4><%= orders.length %></h4>
+              <p>Total Orders</p>
+            </div>
+          </div>
+          <div class="summary-stat">
+            <div class="summary-stat-icon value">
+              <i data-lucide="dollar-sign"></i>
+            </div>
+            <div class="summary-stat-content">
+              <h4>$<%= totalOrderValue.toLocaleString() %></h4>
+              <p>Total Order Value</p>
+            </div>
+          </div>
+          <div class="summary-stat">
+            <div class="summary-stat-icon avg">
+              <i data-lucide="trending-up"></i>
+            </div>
+            <div class="summary-stat-content">
+              <h4>$<%= avgOrderValue.toLocaleString() %></h4>
+              <p>Avg Order Value</p>
+            </div>
+          </div>
+          <div class="summary-stat">
+            <div class="summary-stat-icon rate">
+              <i data-lucide="target"></i>
+            </div>
+            <div class="summary-stat-content">
+              <h4><%= fulfillmentRate %>%</h4>
+              <p>Fulfillment Rate</p>
             </div>
           </div>
         </div>

@@ -49,8 +49,20 @@ const adminSchema = new mongoose.Schema(
       enum: ['super_admin', 'admin', 'moderator'],
       default: 'admin',
     },
+    /**
+     * Available permissions:
+     * - read: View data and reports
+     * - write: Create and update records
+     * - delete: Remove records permanently
+     * - manage_users: Manage buyer accounts
+     * - manage_admins: Manage administrator accounts
+     * - manage_orders: Full order control
+     * - manage_settings: System configuration
+     * - manage_integrations: FTP and data source management
+     */
     permissions: {
       type: [String],
+      enum: ['read', 'write', 'delete', 'manage_users', 'manage_admins', 'manage_orders', 'manage_settings', 'manage_integrations'],
       default: ['read', 'write'],
     },
 
