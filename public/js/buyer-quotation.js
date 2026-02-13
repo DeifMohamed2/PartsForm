@@ -24,6 +24,10 @@
     items: [],
   };
 
+  // Cropper state
+  let cropperInstance = null;
+  let originalImageUrl = null;
+
   // Local storage key for saved company info
   const COMPANY_INFO_KEY = 'partsform_buyer_company_info';
 
@@ -107,6 +111,14 @@
       previewBackBtn: document.getElementById('preview-back-btn'),
       previewDownloadBtn: document.getElementById('preview-download-btn'),
       previewFrame: document.getElementById('quotation-preview-frame'),
+      
+      // Logo cropper modal
+      cropperModal: document.getElementById('logo-cropper-modal'),
+      cropperBackdrop: document.getElementById('cropper-backdrop'),
+      cropperCloseBtn: document.getElementById('cropper-close-btn'),
+      cropperCancelBtn: document.getElementById('cropper-cancel-btn'),
+      cropperApplyBtn: document.getElementById('cropper-apply-btn'),
+      cropperImage: document.getElementById('cropper-image'),
     };
   }
 
@@ -117,6 +129,12 @@
     // Open modal
     if (DOM.createQuotationBtn) {
       DOM.createQuotationBtn.addEventListener('click', openQuotationModal);
+    }
+
+    // Quick download button (from cart action bar)
+    const quickDownloadBtn = document.getElementById('download-quotation-quick-btn');
+    if (quickDownloadBtn) {
+      quickDownloadBtn.addEventListener('click', quickDownloadQuotation);
     }
 
     // Close modal
@@ -132,7 +150,13 @@
 
     // Logo upload
     if (DOM.logoUploadArea) {
-      DOM.logoUploadArea.addEventListener('click', () => DOM.logoInput.click());
+      DOM.logoUploadArea.addEventListener('click', (e) => {
+        // Don't trigger if clicking on remove button or crop button
+        if (e.target.closest('.remove-logo-btn') || e.target.closest('.crop-logo-btn')) {
+          return;
+        }
+        DOM.logoInput.click();
+      });
     }
     if (DOM.logoInput) {
       DOM.logoInput.addEventListener('change', handleLogoUpload);
@@ -183,6 +207,37 @@
     if (DOM.previewDownloadBtn) {
       DOM.previewDownloadBtn.addEventListener('click', downloadQuotationPDF);
     }
+
+    // Logo cropper modal events
+    if (DOM.cropperCloseBtn) {
+      DOM.cropperCloseBtn.addEventListener('click', closeCropperModal);
+    }
+    if (DOM.cropperCancelBtn) {
+      DOM.cropperCancelBtn.addEventListener('click', closeCropperModal);
+    }
+    if (DOM.cropperBackdrop) {
+      DOM.cropperBackdrop.addEventListener('click', closeCropperModal);
+    }
+    if (DOM.cropperApplyBtn) {
+      DOM.cropperApplyBtn.addEventListener('click', applyCrop);
+    }
+
+    // Cropper preset ratio buttons
+    document.querySelectorAll('.preset-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        
+        const ratio = e.target.dataset.ratio;
+        if (cropperInstance) {
+          if (ratio === 'free') {
+            cropperInstance.setAspectRatio(NaN);
+          } else {
+            cropperInstance.setAspectRatio(parseFloat(ratio));
+          }
+        }
+      });
+    });
   }
 
   // ====================================
@@ -240,22 +295,142 @@
 
     const reader = new FileReader();
     reader.onload = (event) => {
+      originalImageUrl = event.target.result;
       quotationState.logo = file;
-      quotationState.logoUrl = event.target.result;
       
-      DOM.logoPreviewImg.src = event.target.result;
+      // Open cropper modal
+      openCropperModal(event.target.result);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function openCropperModal(imageUrl) {
+    if (!DOM.cropperModal || !DOM.cropperImage) return;
+
+    DOM.cropperImage.src = imageUrl;
+    DOM.cropperModal.style.display = 'flex';
+    
+    // Destroy existing cropper if any
+    if (cropperInstance) {
+      cropperInstance.destroy();
+      cropperInstance = null;
+    }
+
+    // Wait for image to load before initializing cropper
+    DOM.cropperImage.onload = () => {
+      // Check if Cropper is available
+      if (typeof Cropper === 'undefined') {
+        console.error('Cropper.js not loaded');
+        showAlert('error', 'Error', 'Image cropper failed to load. Using original image.');
+        applyOriginalImage();
+        closeCropperModal();
+        return;
+      }
+
+      cropperInstance = new Cropper(DOM.cropperImage, {
+        aspectRatio: 3, // Default to 3:1 wide ratio
+        viewMode: 2,
+        dragMode: 'move',
+        autoCropArea: 0.9,
+        restore: false,
+        guides: true,
+        center: true,
+        highlight: true,
+        cropBoxMovable: true,
+        cropBoxResizable: true,
+        toggleDragModeOnDblclick: false,
+        minContainerWidth: 300,
+        minContainerHeight: 200,
+      });
+
+      // Reset preset buttons
+      document.querySelectorAll('.preset-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.ratio === '3') {
+          btn.classList.add('active');
+        }
+      });
+    };
+
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+    }
+  }
+
+  function closeCropperModal() {
+    if (DOM.cropperModal) {
+      DOM.cropperModal.style.display = 'none';
+    }
+    
+    if (cropperInstance) {
+      cropperInstance.destroy();
+      cropperInstance = null;
+    }
+
+    // Clear file input so same file can be re-selected
+    if (DOM.logoInput) {
+      DOM.logoInput.value = '';
+    }
+  }
+
+  function applyCrop() {
+    if (!cropperInstance) {
+      applyOriginalImage();
+      closeCropperModal();
+      return;
+    }
+
+    try {
+      // Get cropped canvas
+      const canvas = cropperInstance.getCroppedCanvas({
+        maxWidth: 600,
+        maxHeight: 200,
+        imageSmoothingEnabled: true,
+        imageSmoothingQuality: 'high',
+      });
+
+      if (!canvas) {
+        showAlert('error', 'Error', 'Failed to crop image. Using original.');
+        applyOriginalImage();
+        closeCropperModal();
+        return;
+      }
+
+      // Convert to base64
+      const croppedImageUrl = canvas.toDataURL('image/png', 0.9);
+      
+      // Apply to preview
+      quotationState.logoUrl = croppedImageUrl;
+      DOM.logoPreviewImg.src = croppedImageUrl;
       DOM.logoPreview.style.display = 'block';
       DOM.logoPlaceholder.style.display = 'none';
       
       // Save to local storage
       saveCompanyInfo();
-    };
-    reader.readAsDataURL(file);
+
+      showAlert('success', 'Logo Updated', 'Your logo has been cropped and saved');
+      closeCropperModal();
+    } catch (error) {
+      console.error('Error applying crop:', error);
+      showAlert('error', 'Error', 'Failed to crop image');
+      closeCropperModal();
+    }
+  }
+
+  function applyOriginalImage() {
+    if (originalImageUrl) {
+      quotationState.logoUrl = originalImageUrl;
+      DOM.logoPreviewImg.src = originalImageUrl;
+      DOM.logoPreview.style.display = 'block';
+      DOM.logoPlaceholder.style.display = 'none';
+      saveCompanyInfo();
+    }
   }
 
   function removeLogo() {
     quotationState.logo = null;
     quotationState.logoUrl = null;
+    originalImageUrl = null;
     
     DOM.logoPreviewImg.src = '';
     DOM.logoPreview.style.display = 'none';

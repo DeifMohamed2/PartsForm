@@ -1,6 +1,9 @@
 <%- include('partials/header') %>
   <link rel="stylesheet" href="/css/buyerCSS/buyer-main.css">
   <link rel="stylesheet" href="/css/buyerCSS/cart.css">
+  
+  <!-- Cropper.js for logo cropping -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
 
   <%- include('partials/navbar') %>
 
@@ -359,6 +362,47 @@
           </div>
         </div>
       </div>
+
+      <!-- Logo Cropper Modal -->
+      <div class="modal" id="logo-cropper-modal" style="display: none;">
+        <div class="modal-backdrop" id="cropper-backdrop"></div>
+        <div class="modal-content modal-cropper">
+          <div class="modal-header">
+            <div class="modal-header-content">
+              <i data-lucide="crop"></i>
+              <h2>Crop Your Logo</h2>
+            </div>
+            <button class="modal-close-btn" id="cropper-close-btn">
+              <i data-lucide="x"></i>
+            </button>
+          </div>
+          <div class="modal-body cropper-body">
+            <div class="cropper-info">
+              <p><i data-lucide="info"></i> Adjust the crop area to fit your logo. Recommended aspect ratio is 3:1 (landscape) for best results on quotations.</p>
+            </div>
+            <div class="cropper-container">
+              <img id="cropper-image" src="" alt="Crop preview">
+            </div>
+            <div class="cropper-presets">
+              <span class="preset-label">Preset Ratios:</span>
+              <button class="preset-btn active" data-ratio="3">3:1 (Wide)</button>
+              <button class="preset-btn" data-ratio="2">2:1 (Standard)</button>
+              <button class="preset-btn" data-ratio="1">1:1 (Square)</button>
+              <button class="preset-btn" data-ratio="free">Free</button>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn-cancel" id="cropper-cancel-btn">Cancel</button>
+            <button class="btn-primary" id="cropper-apply-btn">
+              <i data-lucide="check"></i>
+              <span>Apply Crop</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cropper.js Script -->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
 
       <script src="/js/animations.js"></script>
       <script src="/js/main.js"></script>

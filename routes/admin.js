@@ -37,6 +37,7 @@ const {
   createUser,
   updateUser,
   approveUser,
+  bulkApproveUsers,
   rejectUser,
   suspendUser,
   getPaymentsManagement,
@@ -242,6 +243,7 @@ router.get('/users/:id/edit', requirePermission(PERMISSIONS.MANAGE_USERS), getUs
 
 // Users management - API endpoints (bulk routes must come BEFORE :id routes)
 router.put('/api/users/bulk', requirePermission(PERMISSIONS.MANAGE_USERS), bulkUpdateUsers);
+router.put('/api/users/bulk-approve', requirePermission(PERMISSIONS.MANAGE_USERS), bulkApproveUsers);
 router.post('/api/users', requirePermission(PERMISSIONS.MANAGE_USERS), createUser);
 router.put('/api/users/:id', requirePermission(PERMISSIONS.MANAGE_USERS), updateUser);
 router.put('/api/users/:id/status', requirePermission(PERMISSIONS.MANAGE_USERS), updateUserStatus);

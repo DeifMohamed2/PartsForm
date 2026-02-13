@@ -1961,17 +1961,17 @@ const updateUserStatus = async (req, res) => {
     const userId = req.params.id;
     const { status } = req.body;
 
-    // Find and update buyer in database
-    const buyer = await Buyer.findById(userId);
+    // Use findByIdAndUpdate to bypass full document validation
+    // This avoids issues with legacy data that may not pass current schema validation
+    const buyer = await Buyer.findByIdAndUpdate(
+      userId,
+      { isActive: status === 'active' },
+      { new: true, runValidators: false }
+    );
 
     if (!buyer) {
       return res.status(404).json({ success: false, error: 'User not found' });
     }
-
-    // Update isActive based on status
-    buyer.isActive = status === 'active';
-
-    await buyer.save();
 
     res.json({ success: true, message: `User status updated to ${status}` });
   } catch (error) {
@@ -2182,29 +2182,102 @@ const updateUser = async (req, res) => {
 };
 
 /**
- * Activate user account
+ * Activate user account with optional markup percentage
  */
 const approveUser = async (req, res) => {
   try {
     const userId = req.params.id;
+    const { markupPercentage } = req.body;
 
-    const buyer = await Buyer.findById(userId);
+    // Build update object
+    const updateData = { isActive: true };
+
+    // Set markup percentage if provided (null means use system default)
+    if (markupPercentage !== undefined) {
+      if (markupPercentage === null) {
+        updateData.markupPercentage = null; // Use system default
+      } else {
+        const markup = parseFloat(markupPercentage);
+        if (!isNaN(markup) && markup >= 0 && markup <= 100) {
+          updateData.markupPercentage = markup;
+        }
+      }
+    }
+
+    // Use findByIdAndUpdate to bypass full document validation
+    // This avoids issues with legacy data that may not pass current schema validation
+    const buyer = await Buyer.findByIdAndUpdate(
+      userId,
+      { $set: updateData },
+      { new: true, runValidators: false }
+    );
 
     if (!buyer) {
       return res.status(404).json({ success: false, error: 'User not found' });
     }
 
-    buyer.isActive = true;
-
-    await buyer.save();
-
     res.json({
       success: true,
       message: 'User account activated successfully',
+      user: {
+        id: buyer._id,
+        name: `${buyer.firstName} ${buyer.lastName}`,
+        markupPercentage: buyer.markupPercentage,
+      },
     });
   } catch (error) {
     console.error('Error in approveUser:', error);
     res.status(500).json({ success: false, error: 'Failed to activate user' });
+  }
+};
+
+/**
+ * Bulk approve users with optional markup percentage
+ */
+const bulkApproveUsers = async (req, res) => {
+  try {
+    const { userIds, markupPercentage } = req.body;
+
+    if (!userIds || !Array.isArray(userIds) || userIds.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'Please provide an array of user IDs',
+      });
+    }
+
+    // Prepare the update object
+    const updateData = { isActive: true };
+
+    // Set markup percentage if provided
+    if (markupPercentage !== undefined) {
+      if (markupPercentage === null) {
+        updateData.markupPercentage = null; // Use system default
+      } else {
+        const markup = parseFloat(markupPercentage);
+        if (!isNaN(markup) && markup >= 0 && markup <= 100) {
+          updateData.markupPercentage = markup;
+        }
+      }
+    }
+
+    // Update all users in the list
+    const result = await Buyer.updateMany(
+      { _id: { $in: userIds } },
+      { $set: updateData }
+    );
+
+    res.json({
+      success: true,
+      message: `Successfully approved ${result.modifiedCount} user(s)`,
+      modifiedCount: result.modifiedCount,
+      markupApplied: markupPercentage !== undefined ? (markupPercentage === null ? 'default' : markupPercentage + '%') : 'unchanged',
+    });
+  } catch (error) {
+    console.error('Error in bulkApproveUsers:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to approve users',
+    });
   }
 };
 
@@ -2215,15 +2288,16 @@ const rejectUser = async (req, res) => {
   try {
     const userId = req.params.id;
 
-    const buyer = await Buyer.findById(userId);
+    // Use findByIdAndUpdate to bypass full document validation
+    const buyer = await Buyer.findByIdAndUpdate(
+      userId,
+      { isActive: false },
+      { new: true, runValidators: false }
+    );
 
     if (!buyer) {
       return res.status(404).json({ success: false, error: 'User not found' });
     }
-
-    buyer.isActive = false;
-
-    await buyer.save();
 
     res.json({
       success: true,
@@ -2244,15 +2318,16 @@ const suspendUser = async (req, res) => {
   try {
     const userId = req.params.id;
 
-    const buyer = await Buyer.findById(userId);
+    // Use findByIdAndUpdate to bypass full document validation
+    const buyer = await Buyer.findByIdAndUpdate(
+      userId,
+      { isActive: false },
+      { new: true, runValidators: false }
+    );
 
     if (!buyer) {
       return res.status(404).json({ success: false, error: 'User not found' });
     }
-
-    buyer.isActive = false;
-
-    await buyer.save();
 
     res.json({
       success: true,
@@ -4489,6 +4564,7 @@ module.exports = {
   createUser,
   updateUser,
   approveUser,
+  bulkApproveUsers,
   rejectUser,
   suspendUser,
   getPaymentsManagement,

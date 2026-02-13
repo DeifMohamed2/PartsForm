@@ -124,11 +124,15 @@
             <span id="selectedCount">0</span> users selected
           </span>
           <div class="bulk-actions">
-            <button class="bulk-action-btn" onclick="bulkUpdateStatus('active')">
+            <button class="bulk-action-btn success" onclick="openBulkApproveModal()">
               <i data-lucide="user-check"></i>
+              Approve & Set Markup
+            </button>
+            <button class="bulk-action-btn" onclick="bulkUpdateStatus('active', event)">
+              <i data-lucide="toggle-right"></i>
               Activate
             </button>
-            <button class="bulk-action-btn danger" onclick="bulkUpdateStatus('inactive')">
+            <button class="bulk-action-btn danger" onclick="bulkUpdateStatus('inactive', event)">
               <i data-lucide="user-x"></i>
               Deactivate
             </button>
@@ -215,11 +219,11 @@
                       <i data-lucide="edit-2"></i>
                     </a>
                     <% if (user.status === 'active') { %>
-                    <button class="user-action-btn deactivate" title="Deactivate User" onclick="toggleUserStatus('<%= user.id %>', '<%= user.status %>')">
+                    <button class="user-action-btn deactivate" title="Deactivate User" onclick="toggleUserStatus('<%= user.id %>', '<%= user.status %>', event)">
                       <i data-lucide="user-x"></i>
                     </button>
                     <% } else { %>
-                    <button class="user-action-btn activate" title="Activate User" onclick="toggleUserStatus('<%= user.id %>', '<%= user.status %>')">
+                    <button class="user-action-btn approve" title="Approve & Set Markup" onclick="approveUser('<%= user.id %>')">
                       <i data-lucide="user-check"></i>
                     </button>
                     <% } %>
@@ -331,8 +335,19 @@
     }
 
     // Bulk update status
-    function bulkUpdateStatus(newStatus) {
+    function bulkUpdateStatus(newStatus, event) {
       if (selectedUsers.length === 0) return;
+
+      // Find the button that was clicked and show loading
+      var btn = event ? event.target.closest('.bulk-action-btn') : null;
+      var originalContent = '';
+      
+      if (btn) {
+        originalContent = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i data-lucide="loader-2" class="spin"></i> Processing...';
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      }
 
       fetch('/admin/api/users/bulk', {
         method: 'PUT',
@@ -346,15 +361,35 @@
       }).then(function(response) {
         if (response.ok) {
           location.reload();
+        } else {
+          throw new Error('Failed to update');
         }
       }).catch(function(err) {
         console.error('Error updating users:', err);
+        alert('Failed to update users');
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = originalContent;
+          if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
       });
     }
 
     // Toggle single user status
-    function toggleUserStatus(userId, currentStatus) {
+    function toggleUserStatus(userId, currentStatus, event) {
       var newStatus = currentStatus === 'active' ? 'inactive' : 'active';
+      
+      // Find the button that was clicked
+      var btn = event ? event.target.closest('.user-action-btn') : null;
+      var originalContent = '';
+      
+      if (btn) {
+        originalContent = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i data-lucide="loader-2" class="spin"></i>';
+        btn.style.pointerEvents = 'none';
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      }
 
       fetch('/admin/api/users/' + userId + '/status', {
         method: 'PUT',
@@ -367,9 +402,19 @@
       }).then(function(response) {
         if (response.ok) {
           location.reload();
+        } else {
+          throw new Error('Failed to update status');
         }
       }).catch(function(err) {
         console.error('Error updating user:', err);
+        alert('Failed to update user status');
+        // Restore button on error
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = originalContent;
+          btn.style.pointerEvents = '';
+          if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
       });
     }
 
@@ -523,6 +568,784 @@
     .user-action-btn.deactivate:hover {
       background: #ef4444;
       color: white;
+    }
+
+    /* Bulk action success button */
+    .bulk-action-btn.success {
+      background: rgba(16, 185, 129, 0.1);
+      color: #10b981;
+    }
+
+    .bulk-action-btn.success:hover {
+      background: #10b981;
+      color: white;
+    }
+  </style>
+
+  <!-- Approve User Modal with Markup Settings -->
+  <div class="approve-modal-overlay" id="approveModalOverlay" onclick="closeApproveModal()">
+    <div class="approve-modal" onclick="event.stopPropagation()">
+      <div class="approve-modal-header">
+        <div class="approve-modal-icon">
+          <i data-lucide="user-check"></i>
+        </div>
+        <div>
+          <h3 id="approveModalTitle">Approve User</h3>
+          <p id="approveModalSubtitle" style="color: var(--admin-text-muted); font-size: 0.85rem;">Set pricing markup for this user</p>
+        </div>
+        <button class="approve-modal-close" onclick="closeApproveModal()">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      
+      <div class="approve-modal-body">
+        <!-- User info preview (for single user) -->
+        <div class="approve-user-preview" id="approveUserPreview">
+          <div class="preview-avatar" id="previewAvatar">M</div>
+          <div class="preview-info">
+            <h4 id="previewName">User Name</h4>
+            <p id="previewEmail">user@email.com</p>
+          </div>
+        </div>
+        
+        <!-- Bulk users info (for multiple users) -->
+        <div class="approve-bulk-preview" id="approveBulkPreview" style="display: none;">
+          <div class="bulk-preview-icon">
+            <i data-lucide="users"></i>
+          </div>
+          <div class="bulk-preview-info">
+            <h4><span id="bulkUserCount">0</span> users selected</h4>
+            <p>The markup will be applied to all selected inactive users</p>
+          </div>
+        </div>
+        
+        <!-- Markup Settings -->
+        <div class="markup-settings">
+          <label class="markup-setting-label">
+            <i data-lucide="percent"></i>
+            Price Markup Configuration
+          </label>
+          
+          <div class="markup-options">
+            <label class="markup-option" id="markupOptionDefault">
+              <input type="radio" name="markupType" value="default" checked onchange="handleMarkupTypeChange()">
+              <div class="markup-option-content">
+                <div class="markup-option-header">
+                  <span class="markup-option-title">Use Default Markup</span>
+                  <span class="markup-option-value" id="defaultMarkupDisplay"><%= typeof defaultMarkup !== 'undefined' ? defaultMarkup : 0 %>%</span>
+                </div>
+                <p class="markup-option-desc">Apply the system default markup percentage</p>
+              </div>
+            </label>
+            
+            <label class="markup-option" id="markupOptionCustom">
+              <input type="radio" name="markupType" value="custom" onchange="handleMarkupTypeChange()">
+              <div class="markup-option-content">
+                <div class="markup-option-header">
+                  <span class="markup-option-title">Set Custom Markup</span>
+                </div>
+                <p class="markup-option-desc">Define a specific markup for this user</p>
+              </div>
+            </label>
+          </div>
+          
+          <!-- Custom markup input -->
+          <div class="custom-markup-input" id="customMarkupInput" style="display: none;">
+            <div class="custom-markup-wrapper">
+              <input type="number" id="customMarkupValue" min="0" max="100" step="0.5" value="15" placeholder="Enter markup %">
+              <span class="markup-suffix">%</span>
+            </div>
+            <div class="markup-input-hint">
+              <i data-lucide="info"></i>
+              Enter a value between 0% and 100%
+            </div>
+          </div>
+        </div>
+        
+        <!-- Preview calculation -->
+        <div class="markup-preview-calc">
+          <div class="calc-header">
+            <i data-lucide="calculator"></i>
+            Price Preview
+          </div>
+          <div class="calc-content">
+            <div class="calc-row">
+              <span>Base Price</span>
+              <span>$100.00</span>
+            </div>
+            <div class="calc-row markup-row">
+              <span>Markup (<span id="calcMarkupPercent"><%= typeof defaultMarkup !== 'undefined' ? defaultMarkup : 0 %></span>%)</span>
+              <span id="calcMarkupAmount">+$<%= typeof defaultMarkup !== 'undefined' ? defaultMarkup : 0 %>.00</span>
+            </div>
+            <div class="calc-row total-row">
+              <span>Final Price</span>
+              <span id="calcFinalPrice">$<%= typeof defaultMarkup !== 'undefined' ? (100 + defaultMarkup) : 100 %>.00</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="approve-modal-footer">
+        <button class="admin-btn admin-btn-secondary" onclick="closeApproveModal()">Cancel</button>
+        <button class="admin-btn admin-btn-success" id="approveConfirmBtn" onclick="confirmApprove()">
+          <i data-lucide="check"></i>
+          <span id="approveConfirmText">Approve User</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    /* Approve Modal Styles */
+    .approve-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.25s ease;
+    }
+
+    .approve-modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .approve-modal {
+      background: var(--admin-bg-primary, #fff);
+      border-radius: 20px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+      transform: scale(0.9) translateY(20px);
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .approve-modal-overlay.active .approve-modal {
+      transform: scale(1) translateY(0);
+    }
+
+    .approve-modal-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--admin-border, #e2e8f0);
+    }
+
+    .approve-modal-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: rgba(16, 185, 129, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #10b981;
+    }
+
+    .approve-modal-icon i {
+      width: 24px;
+      height: 24px;
+    }
+
+    .approve-modal-header h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--admin-text-primary, #1e293b);
+      margin: 0;
+    }
+
+    .approve-modal-close {
+      margin-left: auto;
+      width: 36px;
+      height: 36px;
+      border: none;
+      background: var(--admin-bg-secondary, #f8fafc);
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--admin-text-muted, #64748b);
+      transition: all 0.2s;
+    }
+
+    .approve-modal-close:hover {
+      background: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+    }
+
+    .approve-modal-close i {
+      width: 18px;
+      height: 18px;
+    }
+
+    .approve-modal-body {
+      padding: 1.5rem;
+    }
+
+    /* User Preview */
+    .approve-user-preview {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem;
+      background: var(--admin-bg-secondary, #f8fafc);
+      border-radius: 12px;
+      margin-bottom: 1.25rem;
+    }
+
+    .preview-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      color: white;
+      font-weight: 700;
+      font-size: 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .preview-info h4 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--admin-text-primary, #1e293b);
+      margin: 0 0 0.25rem;
+    }
+
+    .preview-info p {
+      font-size: 0.8rem;
+      color: var(--admin-text-muted, #64748b);
+      margin: 0;
+    }
+
+    /* Bulk Preview */
+    .approve-bulk-preview {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem;
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.08), rgba(59, 130, 246, 0.08));
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      border-radius: 12px;
+      margin-bottom: 1.25rem;
+    }
+
+    .bulk-preview-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: rgba(139, 92, 246, 0.15);
+      color: #8b5cf6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .bulk-preview-icon i {
+      width: 24px;
+      height: 24px;
+    }
+
+    .bulk-preview-info h4 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--admin-text-primary, #1e293b);
+      margin: 0 0 0.25rem;
+    }
+
+    .bulk-preview-info p {
+      font-size: 0.8rem;
+      color: var(--admin-text-muted, #64748b);
+      margin: 0;
+    }
+
+    /* Markup Settings */
+    .markup-settings {
+      margin-bottom: 1rem;
+    }
+
+    .markup-setting-label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--admin-text-primary, #1e293b);
+      margin-bottom: 0.75rem;
+    }
+
+    .markup-setting-label i {
+      width: 16px;
+      height: 16px;
+      color: #8b5cf6;
+    }
+
+    .markup-options {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .markup-option {
+      display: flex;
+      cursor: pointer;
+      border: 2px solid var(--admin-border, #e2e8f0);
+      border-radius: 12px;
+      padding: 0.875rem;
+      transition: all 0.2s;
+    }
+
+    .markup-option:hover {
+      border-color: rgba(139, 92, 246, 0.3);
+      background: rgba(139, 92, 246, 0.02);
+    }
+
+    .markup-option.selected {
+      border-color: #8b5cf6;
+      background: rgba(139, 92, 246, 0.05);
+    }
+
+    .markup-option input[type="radio"] {
+      margin-right: 0.75rem;
+      accent-color: #8b5cf6;
+      width: 18px;
+      height: 18px;
+    }
+
+    .markup-option-content {
+      flex: 1;
+    }
+
+    .markup-option-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.25rem;
+    }
+
+    .markup-option-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--admin-text-primary, #1e293b);
+    }
+
+    .markup-option-value {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #8b5cf6;
+      background: rgba(139, 92, 246, 0.1);
+      padding: 0.2rem 0.6rem;
+      border-radius: 6px;
+    }
+
+    .markup-option-desc {
+      font-size: 0.8rem;
+      color: var(--admin-text-muted, #64748b);
+      margin: 0;
+    }
+
+    /* Custom Markup Input */
+    .custom-markup-input {
+      margin-top: 0.75rem;
+      padding: 1rem;
+      background: var(--admin-bg-secondary, #f8fafc);
+      border-radius: 10px;
+      animation: slideDown 0.2s ease;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .custom-markup-wrapper {
+      display: flex;
+      align-items: center;
+      background: var(--admin-bg-primary, #fff);
+      border: 2px solid var(--admin-border, #e2e8f0);
+      border-radius: 10px;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+
+    .custom-markup-wrapper:focus-within {
+      border-color: #8b5cf6;
+    }
+
+    .custom-markup-wrapper input {
+      flex: 1;
+      border: none;
+      padding: 0.75rem 1rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+      background: transparent;
+      color: var(--admin-text-primary, #1e293b);
+      outline: none;
+    }
+
+    .markup-suffix {
+      padding: 0.75rem 1rem;
+      background: var(--admin-bg-secondary, #f8fafc);
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--admin-text-muted, #64748b);
+      border-left: 1px solid var(--admin-border, #e2e8f0);
+    }
+
+    .markup-input-hint {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+      font-size: 0.75rem;
+      color: var(--admin-text-muted, #64748b);
+    }
+
+    .markup-input-hint i {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* Markup Preview Calculation */
+    .markup-preview-calc {
+      background: var(--admin-bg-secondary, #f8fafc);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .calc-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      background: var(--admin-bg-tertiary, #f1f5f9);
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--admin-text-muted, #64748b);
+    }
+
+    .calc-header i {
+      width: 14px;
+      height: 14px;
+    }
+
+    .calc-content {
+      padding: 0.75rem 1rem;
+    }
+
+    .calc-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.4rem 0;
+      font-size: 0.85rem;
+      color: var(--admin-text-secondary, #475569);
+    }
+
+    .calc-row.markup-row {
+      color: #8b5cf6;
+    }
+
+    .calc-row.total-row {
+      border-top: 1px dashed var(--admin-border, #e2e8f0);
+      margin-top: 0.25rem;
+      padding-top: 0.5rem;
+      font-weight: 600;
+      color: var(--admin-text-primary, #1e293b);
+    }
+
+    /* Modal Footer */
+    .approve-modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      padding: 1rem 1.5rem;
+      background: var(--admin-bg-secondary, #f8fafc);
+      border-top: 1px solid var(--admin-border, #e2e8f0);
+      border-radius: 0 0 20px 20px;
+    }
+
+    .admin-btn-success {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+      border: none;
+    }
+
+    .admin-btn-success:hover {
+      background: linear-gradient(135deg, #059669, #047857);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .admin-btn-success:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+  </style>
+
+  <script>
+    // Approve modal state
+    var approveModalState = {
+      mode: 'single', // 'single' or 'bulk'
+      userId: null,
+      userName: '',
+      userEmail: '',
+      userIds: [],
+      defaultMarkup: <%= typeof defaultMarkup !== 'undefined' ? defaultMarkup : 0 %>
+    };
+
+    // Open approve modal for single user
+    function openApproveModal(userId, userName, userEmail) {
+      approveModalState.mode = 'single';
+      approveModalState.userId = userId;
+      approveModalState.userName = userName || 'User';
+      approveModalState.userEmail = userEmail || '';
+      approveModalState.userIds = [];
+
+      // Update modal UI for single user
+      document.getElementById('approveModalTitle').textContent = 'Approve User';
+      document.getElementById('approveModalSubtitle').textContent = 'Set pricing markup for this user';
+      document.getElementById('approveUserPreview').style.display = 'flex';
+      document.getElementById('approveBulkPreview').style.display = 'none';
+      document.getElementById('previewAvatar').textContent = userName ? userName.charAt(0).toUpperCase() : 'U';
+      document.getElementById('previewName').textContent = userName || 'User';
+      document.getElementById('previewEmail').textContent = userEmail || '';
+      document.getElementById('approveConfirmText').textContent = 'Approve User';
+
+      // Reset to default markup
+      document.querySelector('input[name="markupType"][value="default"]').checked = true;
+      handleMarkupTypeChange();
+
+      // Show modal
+      document.getElementById('approveModalOverlay').classList.add('active');
+      
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+    }
+
+    // Open approve modal for bulk users
+    function openBulkApproveModal() {
+      if (selectedUsers.length === 0) {
+        alert('Please select users to approve');
+        return;
+      }
+
+      // Filter only inactive users
+      var inactiveUsers = selectedUsers.filter(function(userId) {
+        var row = document.querySelector('tr[data-user-id="' + userId + '"]');
+        return row && row.dataset.status !== 'active';
+      });
+
+      if (inactiveUsers.length === 0) {
+        alert('All selected users are already active');
+        return;
+      }
+
+      approveModalState.mode = 'bulk';
+      approveModalState.userId = null;
+      approveModalState.userIds = inactiveUsers;
+
+      // Update modal UI for bulk
+      document.getElementById('approveModalTitle').textContent = 'Bulk Approve Users';
+      document.getElementById('approveModalSubtitle').textContent = 'Set markup for selected users';
+      document.getElementById('approveUserPreview').style.display = 'none';
+      document.getElementById('approveBulkPreview').style.display = 'flex';
+      document.getElementById('bulkUserCount').textContent = inactiveUsers.length;
+      document.getElementById('approveConfirmText').textContent = 'Approve ' + inactiveUsers.length + ' Users';
+
+      // Reset to default markup
+      document.querySelector('input[name="markupType"][value="default"]').checked = true;
+      handleMarkupTypeChange();
+
+      // Show modal
+      document.getElementById('approveModalOverlay').classList.add('active');
+      
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+    }
+
+    // Close approve modal
+    function closeApproveModal() {
+      document.getElementById('approveModalOverlay').classList.remove('active');
+    }
+
+    // Handle markup type change
+    function handleMarkupTypeChange() {
+      var markupType = document.querySelector('input[name="markupType"]:checked').value;
+      var customInput = document.getElementById('customMarkupInput');
+      var defaultOption = document.getElementById('markupOptionDefault');
+      var customOption = document.getElementById('markupOptionCustom');
+
+      if (markupType === 'custom') {
+        customInput.style.display = 'block';
+        defaultOption.classList.remove('selected');
+        customOption.classList.add('selected');
+        updateMarkupPreview(parseFloat(document.getElementById('customMarkupValue').value) || 0);
+      } else {
+        customInput.style.display = 'none';
+        defaultOption.classList.add('selected');
+        customOption.classList.remove('selected');
+        updateMarkupPreview(approveModalState.defaultMarkup);
+      }
+    }
+
+    // Update markup preview calculation
+    function updateMarkupPreview(percentage) {
+      var basePrice = 100;
+      var markupAmount = basePrice * (percentage / 100);
+      var finalPrice = basePrice + markupAmount;
+
+      document.getElementById('calcMarkupPercent').textContent = percentage;
+      document.getElementById('calcMarkupAmount').textContent = '+$' + markupAmount.toFixed(2);
+      document.getElementById('calcFinalPrice').textContent = '$' + finalPrice.toFixed(2);
+    }
+
+    // Listen for custom markup input changes
+    document.getElementById('customMarkupValue').addEventListener('input', function(e) {
+      var value = parseFloat(e.target.value) || 0;
+      if (value < 0) value = 0;
+      if (value > 100) value = 100;
+      updateMarkupPreview(value);
+    });
+
+    // Confirm approve
+    function confirmApprove() {
+      var markupType = document.querySelector('input[name="markupType"]:checked').value;
+      var markupPercentage = null; // null means use default
+
+      if (markupType === 'custom') {
+        markupPercentage = parseFloat(document.getElementById('customMarkupValue').value);
+        if (isNaN(markupPercentage) || markupPercentage < 0 || markupPercentage > 100) {
+          alert('Please enter a valid markup percentage between 0 and 100');
+          return;
+        }
+      }
+
+      var btn = document.getElementById('approveConfirmBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<i data-lucide="loader-2" class="spin"></i> Processing...';
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+
+      if (approveModalState.mode === 'single') {
+        // Single user approve
+        fetch('/admin/api/users/' + approveModalState.userId + '/approve', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            markupPercentage: markupPercentage
+          })
+        }).then(function(response) {
+          return response.json();
+        }).then(function(data) {
+          if (data.success) {
+            closeApproveModal();
+            location.reload();
+          } else {
+            alert(data.error || 'Failed to approve user');
+            btn.disabled = false;
+            btn.innerHTML = '<i data-lucide="check"></i> <span>Approve User</span>';
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+          }
+        }).catch(function(err) {
+          console.error('Error approving user:', err);
+          alert('Failed to approve user');
+          btn.disabled = false;
+          btn.innerHTML = '<i data-lucide="check"></i> <span>Approve User</span>';
+          if (typeof lucide !== 'undefined') lucide.createIcons();
+        });
+      } else {
+        // Bulk approve
+        fetch('/admin/api/users/bulk-approve', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            userIds: approveModalState.userIds,
+            markupPercentage: markupPercentage
+          })
+        }).then(function(response) {
+          return response.json();
+        }).then(function(data) {
+          if (data.success) {
+            closeApproveModal();
+            clearSelection();
+            location.reload();
+          } else {
+            alert(data.error || 'Failed to approve users');
+            btn.disabled = false;
+            btn.innerHTML = '<i data-lucide="check"></i> <span>Approve Users</span>';
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+          }
+        }).catch(function(err) {
+          console.error('Error approving users:', err);
+          alert('Failed to approve users');
+          btn.disabled = false;
+          btn.innerHTML = '<i data-lucide="check"></i> <span>Approve Users</span>';
+          if (typeof lucide !== 'undefined') lucide.createIcons();
+        });
+      }
+    }
+
+    // Override the old approveUser function
+    function approveUser(userId) {
+      // Get user info from the row
+      var row = document.querySelector('tr[data-user-id="' + userId + '"]');
+      var userName = '', userEmail = '';
+      if (row) {
+        var nameEl = row.querySelector('.user-info h4');
+        var emailEl = row.querySelector('.user-info p');
+        if (nameEl) userName = nameEl.textContent.trim();
+        if (emailEl) userEmail = emailEl.textContent.trim();
+      }
+      openApproveModal(userId, userName, userEmail);
+    }
+
+    // Close modal with Escape key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closeApproveModal();
+      }
+    });
+
+    // Initialize markup option selection state
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('markupOptionDefault').classList.add('selected');
+    });
+  </script>
+
+  <style>
+    /* Spin animation for loading */
+    .spin {
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
     }
   </style>
 

@@ -236,6 +236,20 @@ const buyerSchema = new mongoose.Schema(
       type: Date,
       select: false,
     },
+    // Password Reset Rate Limiting
+    passwordResetAttempts: {
+      type: Number,
+      default: 0,
+      select: false,
+    },
+    passwordResetLastAttempt: {
+      type: Date,
+      select: false,
+    },
+    passwordResetBlockedUntil: {
+      type: Date,
+      select: false,
+    },
 
     // Login Tracking
     lastLogin: {
