@@ -26,6 +26,8 @@ const {
   validateCartItems,
   validateCheckout,
   createOrder,
+  validateReferralCode,
+  getReferralStatus,
   getOrders,
   getOrderDetails,
   cancelOrder,
@@ -199,6 +201,10 @@ router.get('/api/orders', getOrders);
 router.get('/api/orders/:orderNumber', getOrderDetails);
 router.put('/api/orders/:orderNumber/cancel', cancelOrder);
 router.post('/api/orders/:orderNumber/payment', processPayment);
+
+// Referral API
+router.get('/api/referral/status', getReferralStatus); // Get buyer's linked referral (from registration)
+router.post('/api/referral/validate', validateReferralCode); // Deprecated - codes now applied at registration
 
 // Support Tickets routes
 router.get('/tickets', getTicketsPage);

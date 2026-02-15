@@ -2,6 +2,8 @@
 // This file contains all landing page-related controller functions
 
 const ExcelJS = require('exceljs');
+const ReferralPartner = require('../models/ReferralPartner');
+const validator = require('validator');
 
 /**
  * Get landing page
@@ -356,6 +358,126 @@ const downloadSampleExcel = async (req, res) => {
   }
 };
 
+/**
+ * Get "Become a Partner" page
+ */
+const getBecomePartnerPage = async (req, res) => {
+  try {
+    res.render('Landing/become-partner', {
+      title: 'Become a Referral Partner | PARTSFORM',
+    });
+  } catch (error) {
+    console.error('Error in getBecomePartnerPage:', error);
+    res.status(500).render('error', {
+      title: 'Error | PARTSFORM',
+      error: 'Failed to load page',
+    });
+  }
+};
+
+/**
+ * Submit partner application
+ * POST /api/partner/apply
+ * Note: No password required - admin will create account upon approval
+ */
+const submitPartnerApplication = async (req, res) => {
+  try {
+    const {
+      firstName,
+      lastName,
+      email,
+      phone,
+      companyName,
+      website,
+      marketingChannels,
+      motivation,
+    } = req.body;
+
+    // Validation
+    const errors = {};
+
+    if (!firstName || firstName.trim().length < 2) {
+      errors.firstName = 'First name must be at least 2 characters';
+    }
+
+    if (!lastName || lastName.trim().length < 2) {
+      errors.lastName = 'Last name must be at least 2 characters';
+    }
+
+    if (!email || !validator.isEmail(email)) {
+      errors.email = 'Please provide a valid email address';
+    }
+
+    if (!phone || phone.trim().length < 5) {
+      errors.phone = 'Please provide a valid phone number';
+    }
+
+    if (!marketingChannels || marketingChannels.length === 0) {
+      errors.marketingChannels = 'Please select at least one marketing channel';
+    }
+
+    if (Object.keys(errors).length > 0) {
+      return res.status(400).json({
+        success: false,
+        errors,
+      });
+    }
+
+    // Check if email already exists
+    const existingPartner = await ReferralPartner.findOne({
+      email: email.toLowerCase(),
+    });
+
+    if (existingPartner) {
+      return res.status(400).json({
+        success: false,
+        message: 'An application with this email already exists.',
+      });
+    }
+
+    // Create partner application with pending status (no password yet)
+    // Referral code will be created when application is approved
+    const partner = new ReferralPartner({
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      email: email.toLowerCase().trim(),
+      phone: phone.trim(),
+      status: 'pending',
+      commissionRate: 5, // Default commission rate
+      buyerDiscountRate: 3, // Default buyer discount
+      applicationDetails: {
+        companyName: companyName?.trim() || '',
+        website: website?.trim() || '',
+        marketingChannels,
+        motivation: motivation?.trim() || '',
+        submittedAt: new Date(),
+      },
+    });
+
+    await partner.save();
+
+    res.json({
+      success: true,
+      message: 'Application submitted successfully! We will review your application and send your login credentials via email within 2-3 business days.',
+    });
+  } catch (error) {
+    console.error('Error in submitPartnerApplication:', error);
+    
+    // Handle duplicate key error
+    if (error.code === 11000) {
+      return res.status(400).json({
+        success: false,
+        message: 'An application with this email already exists.',
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      message: 'Something went wrong. Please try again later.',
+    });
+  }
+};
+
 // Export controller functions
 module.exports = {
   getLandingPage,
@@ -366,4 +488,6 @@ module.exports = {
   searchParts,
   getSectors,
   downloadSampleExcel,
+  getBecomePartnerPage,
+  submitPartnerApplication,
 };

@@ -1,0 +1,448 @@
+<%- include('../partials/header') %>
+<link rel="stylesheet" href="/css/adminCSS/admin-referrals.css">
+</head>
+<body>
+  <div class="admin-wrapper">
+    <%- include('../partials/sidebar', { activePage: 'referrals' }) %>
+    <main class="admin-main">
+      <%- include('../partials/topbar', { pageTitle: 'Payouts' }) %>
+      <div class="admin-content">
+        <div class="referrals-page-header">
+          <div>
+            <h2>Monthly Payouts</h2>
+            <p class="page-subtitle">Manage partner commission payouts</p>
+          </div>
+        </div>
+
+        <!-- Period Selector Card -->
+        <div class="referrals-period-card">
+          <div class="referrals-period-card-header">
+            <i data-lucide="calendar"></i>
+            <span>Select Period</span>
+          </div>
+          <div class="referrals-period-card-body">
+            <div class="referrals-period-selector">
+              <div class="referrals-period-group">
+                <label>Month</label>
+                <select id="monthSelect" class="referrals-select">
+                  <% for(let m = 1; m <= 12; m++) { %>
+                  <option value="<%= m %>" <%= m === new Date().getMonth() + 1 ? 'selected' : '' %>><%= new Date(0, m-1).toLocaleString('en', { month: 'long' }) %></option>
+                  <% } %>
+                </select>
+              </div>
+              <div class="referrals-period-group">
+                <label>Year</label>
+                <select id="yearSelect" class="referrals-select">
+                  <% const currentYear = new Date().getFullYear(); for(let y = currentYear; y >= currentYear - 2; y--) { %>
+                  <option value="<%= y %>"><%= y %></option>
+                  <% } %>
+                </select>
+              </div>
+              <button class="referrals-btn referrals-btn-primary" onclick="loadAll()">
+                <i data-lucide="refresh-cw"></i>
+                Load Data
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Advanced Filters -->
+        <div class="referrals-advanced-filters">
+          <div class="referrals-filters-header">
+            <div class="referrals-filters-title">
+              <i data-lucide="filter"></i>
+              <span>Filters</span>
+            </div>
+            <button class="referrals-filters-toggle" id="toggleFilters">
+              <i data-lucide="chevron-down"></i>
+              <span>More Filters</span>
+            </button>
+          </div>
+          
+          <!-- Primary Filters -->
+          <div class="referrals-filters-primary">
+            <div class="referrals-filter-item">
+              <label>Status</label>
+              <select id="filterStatus" class="referrals-filter-select">
+                <option value="">All Status</option>
+                <option value="pending">Pending</option>
+                <option value="paid">Paid</option>
+              </select>
+            </div>
+            <div class="referrals-filter-item">
+              <label>Partner</label>
+              <select id="filterPartner" class="referrals-filter-select">
+                <option value="">All Partners</option>
+                <% if (typeof partners !== 'undefined') { %>
+                  <% partners.forEach(p => { %>
+                  <option value="<%= p._id %>"><%= p.firstName %> <%= p.lastName %></option>
+                  <% }) %>
+                <% } %>
+              </select>
+            </div>
+            <div class="referrals-filter-item">
+              <label>Sort By</label>
+              <select id="sortBy" class="referrals-filter-select">
+                <option value="createdAt">Most Recent</option>
+                <option value="amount">Highest Amount</option>
+                <option value="commissionsCount">Most Commissions</option>
+              </select>
+            </div>
+            <button class="referrals-filter-apply-btn" onclick="loadPayouts()">
+              <i data-lucide="search"></i>
+              Apply
+            </button>
+          </div>
+          
+          <!-- Secondary Filters -->
+          <div class="referrals-filters-secondary" id="secondaryFilters">
+            <div class="referrals-filter-item">
+              <label>Min Amount (AED)</label>
+              <input type="number" id="filterMinAmount" class="referrals-filter-input" placeholder="0" min="0" step="0.01">
+            </div>
+            <div class="referrals-filter-item">
+              <label>Max Amount (AED)</label>
+              <input type="number" id="filterMaxAmount" class="referrals-filter-input" placeholder="No limit" min="0" step="0.01">
+            </div>
+          </div>
+          
+          <!-- Filter Actions -->
+          <div class="referrals-filters-actions">
+            <span class="referrals-active-filters" id="activeFiltersCount">0 filters active</span>
+            <button class="referrals-filter-clear-btn" onclick="clearFilters()">
+              <i data-lucide="x-circle"></i>
+              Clear All
+            </button>
+            <button class="referrals-filter-export-btn" onclick="exportPayouts()">
+              <i data-lucide="download"></i>
+              Export CSV
+            </button>
+          </div>
+        </div>
+
+        <!-- Ready for Payout Section -->
+        <div class="referrals-section-card">
+          <div class="referrals-section-card-header">
+            <div class="referrals-section-title">
+              <i data-lucide="clock"></i>
+              <h3>Ready for Payout</h3>
+            </div>
+            <span class="referrals-section-badge" id="readyCount">0 partners</span>
+          </div>
+          <div class="referrals-section-card-body" id="readyContainer">
+            <div class="referrals-loading">
+              <div class="loading-spinner"></div>
+              <span>Loading...</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Payout History Section -->
+        <div class="referrals-section-card">
+          <div class="referrals-section-card-header">
+            <div class="referrals-section-title">
+              <i data-lucide="history"></i>
+              <h3>Payout History</h3>
+            </div>
+          </div>
+          <div class="referrals-section-card-body">
+            <div class="referrals-table-wrapper" style="margin: 0; border: none; border-radius: 0;">
+              <table class="referrals-table" id="payoutsTable" style="display:none;">
+                <thead>
+                  <tr>
+                    <th>Payout #</th>
+                    <th>Partner</th>
+                    <th>Period</th>
+                    <th>Commissions</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Paid Date</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="payoutsBody"></tbody>
+              </table>
+              <div class="referrals-empty-state" id="emptyPayouts" style="display:none;">
+                <div class="referrals-empty-icon">
+                  <i data-lucide="wallet"></i>
+                </div>
+                <h3>No payouts yet</h3>
+                <p>Payouts will appear here once you process partner commissions</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="referrals-modal" id="processModal">
+    <div class="referrals-modal-content">
+      <div class="referrals-modal-header">
+        <h3>Process Payout</h3>
+        <button class="referrals-modal-close" onclick="closeModal()">&times;</button>
+      </div>
+      <div class="referrals-modal-body">
+        <div class="referrals-form-group">
+          <label class="referrals-form-label">Payment Reference</label>
+          <input type="text" id="paymentRef" class="referrals-form-input" placeholder="Transaction ID or reference">
+        </div>
+        <div class="referrals-form-group">
+          <label class="referrals-form-label">Notes</label>
+          <textarea id="paymentNotes" class="referrals-form-input" rows="3" placeholder="Optional notes"></textarea>
+        </div>
+      </div>
+      <div class="referrals-modal-footer">
+        <button class="referrals-btn referrals-btn-secondary" onclick="closeModal()">Cancel</button>
+        <button class="referrals-btn referrals-btn-primary" onclick="submitProcess()">Mark as Paid</button>
+      </div>
+    </div>
+  </div>
+
+  <%- include('../partials/footer') %>
+  <script>
+    let currentPayoutId = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      loadAll();
+      document.getElementById('filterStatus').addEventListener('change', () => loadPayouts());
+      document.getElementById('filterPartner').addEventListener('change', () => loadPayouts());
+      document.getElementById('sortBy').addEventListener('change', () => loadPayouts());
+      document.getElementById('toggleFilters').addEventListener('click', toggleFiltersPanel);
+    });
+
+    async function loadAll() {
+      await Promise.all([loadReady(), loadPayouts()]);
+    }
+
+    async function loadReady() {
+      const month = document.getElementById('monthSelect').value;
+      const year = document.getElementById('yearSelect').value;
+      const container = document.getElementById('readyContainer');
+      try {
+        const res = await fetch(`/admin/api/referrals/payouts/ready?month=${month}&year=${year}`);
+        const data = await res.json();
+        document.getElementById('readyCount').textContent = data.partners?.length > 0 ? `${data.partners.length} partner${data.partners.length > 1 ? 's' : ''}` : '0 partners';
+        if (data.success && data.partners.length > 0) {
+          container.innerHTML = `<div class="referrals-ready-grid">${data.partners.map(p => `
+            <div class="referrals-ready-card">
+              <div class="referrals-ready-card-info">
+                <div class="referrals-partner-avatar">${p.partner.firstName.charAt(0)}${p.partner.lastName.charAt(0)}</div>
+                <div class="referrals-ready-card-details">
+                  <h4>${p.partner.firstName} ${p.partner.lastName}</h4>
+                  <p>${p.partner.email}</p>
+                </div>
+              </div>
+              <div class="referrals-ready-card-amount">
+                <div class="amount">${p.totalCommission.toFixed(2)} AED</div>
+                <div class="count">${p.commissionsCount} commission(s)</div>
+              </div>
+              <button class="referrals-btn referrals-btn-primary" onclick="createPayout('${p._id}')">
+                <i data-lucide="plus-circle"></i>
+                Create Payout
+              </button>
+            </div>
+          `).join('')}</div>`;
+        } else {
+          container.innerHTML = '<div class="referrals-empty-state" style="padding: 2rem 0;"><div class="referrals-empty-icon"><i data-lucide="check-circle-2"></i></div><h3>No partners ready</h3><p>No partners ready for payout this period.</p></div>';
+        }
+        lucide.createIcons();
+      } catch (e) {
+        container.innerHTML = '<p style="color:#ef4444;font-size:0.9rem;text-align:center;padding:1rem;">Failed to load payout data.</p>';
+      }
+    }
+
+    async function loadPayouts() {
+      const month = document.getElementById('monthSelect').value;
+      const year = document.getElementById('yearSelect').value;
+      const status = document.getElementById('filterStatus').value;
+      const partner = document.getElementById('filterPartner').value;
+      const sortBy = document.getElementById('sortBy').value;
+      const minAmount = document.getElementById('filterMinAmount').value;
+      const maxAmount = document.getElementById('filterMaxAmount').value;
+      
+      const params = new URLSearchParams({ month, year, sortBy, sortOrder: 'desc' });
+      if (status) params.append('status', status);
+      if (partner) params.append('partner', partner);
+      if (minAmount) params.append('minAmount', minAmount);
+      if (maxAmount) params.append('maxAmount', maxAmount);
+      
+      updateActiveFiltersCount();
+      
+      try {
+        const res = await fetch(`/admin/api/referrals/payouts?${params}`);
+        const data = await res.json();
+        if (data.success && data.payouts.length > 0) {
+          document.getElementById('payoutsTable').style.display = 'table';
+          document.getElementById('emptyPayouts').style.display = 'none';
+          document.getElementById('payoutsBody').innerHTML = data.payouts.map(p => `
+            <tr>
+              <td><strong>${p.payoutNumber}</strong></td>
+              <td>${p.referralPartner ? p.referralPartner.firstName + ' ' + p.referralPartner.lastName : '-'}</td>
+              <td>${new Date(0, p.periodMonth - 1).toLocaleString('en', { month: 'short' })} ${p.periodYear}</td>
+              <td>${p.commissionsCount}</td>
+              <td><strong>${p.payoutAmount.toFixed(2)} ${p.currency}</strong></td>
+              <td><span class="referrals-payout-status ${p.status}">${p.status}</span></td>
+              <td>${p.paymentDate ? new Date(p.paymentDate).toLocaleDateString() : '-'}</td>
+              <td>
+                ${p.status === 'pending' ? `<button class="referrals-btn referrals-btn-sm referrals-btn-primary" onclick="openProcessModal('${p._id}')"><i data-lucide="check-circle"></i> Process</button>` : '-'}
+              </td>
+            </tr>
+          `).join('');
+        } else {
+          document.getElementById('payoutsTable').style.display = 'none';
+          document.getElementById('emptyPayouts').style.display = 'flex';
+        }
+      } catch (e) { console.error(e); }
+      lucide.createIcons();
+    }
+
+    async function createPayout(partnerId) {
+      if (!confirm('Create payout batch for this partner?')) return;
+      const month = document.getElementById('monthSelect').value;
+      const year = document.getElementById('yearSelect').value;
+      try {
+        const res = await fetch('/admin/api/referrals/payouts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ partnerId, month: parseInt(month), year: parseInt(year) })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast('Payout created: ' + data.payout.payoutNumber, 'success');
+          loadAll();
+        } else {
+          showToast(data.message, 'error');
+        }
+      } catch (e) { showToast('Error creating payout', 'error'); }
+    }
+
+    function openProcessModal(id) {
+      currentPayoutId = id;
+      document.getElementById('paymentRef').value = '';
+      document.getElementById('paymentNotes').value = '';
+      document.getElementById('processModal').classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('processModal').classList.remove('active');
+      currentPayoutId = null;
+    }
+
+    async function submitProcess() {
+      if (!currentPayoutId) return;
+      const paymentReference = document.getElementById('paymentRef').value;
+      const paymentNotes = document.getElementById('paymentNotes').value;
+      try {
+        const res = await fetch(`/admin/api/referrals/payouts/${currentPayoutId}/process`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ paymentReference, paymentNotes })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast('Payout processed successfully', 'success');
+          closeModal();
+          loadAll();
+        } else {
+          showToast(data.message, 'error');
+        }
+      } catch (e) { showToast('Error processing payout', 'error'); }
+    }
+
+    function showToast(msg, type) {
+      const t = document.createElement('div');
+      t.style.cssText = `position:fixed;top:20px;right:20px;z-index:10000;padding:12px 16px;border-radius:8px;background:${type==='error'?'#fee2e2':'#dcfce7'};color:${type==='error'?'#dc2626':'#16a34a'};font-weight:500;box-shadow:0 4px 12px rgba(0,0,0,0.15);`;
+      t.textContent = msg;
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 4000);
+    }
+    
+    function toggleFiltersPanel() {
+      const secondary = document.getElementById('secondaryFilters');
+      const toggle = document.getElementById('toggleFilters');
+      secondary.classList.toggle('show');
+      toggle.classList.toggle('active');
+      
+      const icon = toggle.querySelector('i');
+      const text = toggle.querySelector('span');
+      if (secondary.classList.contains('show')) {
+        icon.setAttribute('data-lucide', 'chevron-up');
+        text.textContent = 'Less Filters';
+      } else {
+        icon.setAttribute('data-lucide', 'chevron-down');
+        text.textContent = 'More Filters';
+      }
+      lucide.createIcons();
+    }
+    
+    function updateActiveFiltersCount() {
+      let count = 0;
+      if (document.getElementById('filterStatus').value) count++;
+      if (document.getElementById('filterPartner').value) count++;
+      if (document.getElementById('filterMinAmount').value) count++;
+      if (document.getElementById('filterMaxAmount').value) count++;
+      
+      document.getElementById('activeFiltersCount').textContent = `${count} filter${count !== 1 ? 's' : ''} active`;
+    }
+    
+    function clearFilters() {
+      document.getElementById('filterStatus').value = '';
+      document.getElementById('filterPartner').value = '';
+      document.getElementById('sortBy').value = 'createdAt';
+      document.getElementById('filterMinAmount').value = '';
+      document.getElementById('filterMaxAmount').value = '';
+      updateActiveFiltersCount();
+      loadPayouts();
+    }
+    
+    async function exportPayouts() {
+      try {
+        const month = document.getElementById('monthSelect').value;
+        const year = document.getElementById('yearSelect').value;
+        const status = document.getElementById('filterStatus').value;
+        const params = new URLSearchParams({ month, year, limit: 1000 });
+        if (status) params.append('status', status);
+        
+        const res = await fetch(`/admin/api/referrals/payouts?${params}`);
+        const data = await res.json();
+        
+        if (data.success && data.payouts.length > 0) {
+          const csv = generateCSV(data.payouts);
+          downloadCSV(csv, `payouts-${month}-${year}.csv`);
+          showToast('Export completed successfully', 'success');
+        } else {
+          showToast('No data to export', 'error');
+        }
+      } catch (e) {
+        showToast('Failed to export data', 'error');
+      }
+    }
+    
+    function generateCSV(data) {
+      const headers = ['Payout #', 'Partner', 'Period', 'Commissions Count', 'Amount', 'Currency', 'Status', 'Paid Date'];
+      const rows = data.map(p => [
+        p.payoutNumber,
+        p.referralPartner ? `${p.referralPartner.firstName} ${p.referralPartner.lastName}` : '-',
+        `${new Date(0, p.periodMonth - 1).toLocaleString('en', { month: 'short' })} ${p.periodYear}`,
+        p.commissionsCount,
+        p.payoutAmount.toFixed(2),
+        p.currency,
+        p.status,
+        p.paymentDate ? new Date(p.paymentDate).toLocaleDateString() : '-'
+      ]);
+      
+      return [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\\n');
+    }
+    
+    function downloadCSV(csv, filename) {
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      link.click();
+    }
+  </script>
+</body>
+</html>

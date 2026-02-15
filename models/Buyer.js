@@ -268,6 +268,51 @@ const buyerSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
+
+    // Referral Used at Registration
+    // When a buyer signs up with a referral code, they are permanently linked to that partner
+    // All future orders from this buyer will generate commissions for the linked partner
+    registrationReferral: {
+      // The referral code used at registration
+      code: {
+        type: String,
+        uppercase: true,
+        trim: true,
+        index: true
+      },
+      // Reference to the ReferralCode document
+      codeId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'ReferralCode'
+      },
+      // Reference to the ReferralPartner
+      partnerId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'ReferralPartner',
+        index: true
+      },
+      // Partner name at time of registration (denormalized for display)
+      partnerName: {
+        type: String,
+        trim: true
+      },
+      // Discount rate locked at time of registration
+      discountRate: {
+        type: Number,
+        default: 0,
+        min: 0
+      },
+      // Commission rate for the partner (locked at registration)
+      commissionRate: {
+        type: Number,
+        default: 0,
+        min: 0
+      },
+      // When the referral was applied
+      registeredAt: {
+        type: Date
+      }
+    }
   },
   {
     timestamps: true, // Adds createdAt and updatedAt

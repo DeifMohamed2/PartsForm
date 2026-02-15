@@ -1,0 +1,234 @@
+<%- include('../partials/header') %>
+<link rel="stylesheet" href="/css/adminCSS/admin-referrals.css">
+</head>
+<body>
+  <div class="admin-wrapper">
+    <%- include('../partials/sidebar', { activePage: 'referrals' }) %>
+
+    <main class="admin-main">
+      <%- include('../partials/topbar', { pageTitle: 'Edit Referral Code' }) %>
+
+      <div class="admin-content">
+        <div class="referrals-page-header">
+          <div class="referrals-header-left">
+            <a href="/admin/referrals/partners/<%= partner._id %>" class="referrals-btn referrals-btn-secondary">
+              <i data-lucide="arrow-left"></i>
+              Back
+            </a>
+            <div class="referrals-header-title">
+              <h2>Edit Referral Code</h2>
+              <div class="referrals-header-badges">
+                <span class="referrals-code-badge"><%= code.code %></span>
+                <span class="referrals-partner-badge">
+                  <i data-lucide="user"></i>
+                  <%= partner.firstName %> <%= partner.lastName %>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="alertContainer"></div>
+
+        <!-- Code Statistics -->
+        <div class="referrals-details-stats">
+          <div class="referrals-details-stat-card">
+            <div class="stat-label">Total Uses</div>
+            <div class="stat-value"><%= code.stats?.usageCount || 0 %></div>
+          </div>
+          <div class="referrals-details-stat-card">
+            <div class="stat-label">Total Revenue</div>
+            <div class="stat-value"><%= (code.stats?.totalOrderValue || 0).toFixed(2) %> AED</div>
+          </div>
+          <div class="referrals-details-stat-card">
+            <div class="stat-label">Commission Earned</div>
+            <div class="stat-value success"><%= (code.stats?.totalCommission || 0).toFixed(2) %> AED</div>
+          </div>
+          <div class="referrals-details-stat-card">
+            <div class="stat-label">Last Used</div>
+            <div class="stat-value" style="font-size: 0.9rem;">
+              <%= code.stats?.lastUsedAt ? new Date(code.stats.lastUsedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Never' %>
+            </div>
+          </div>
+        </div>
+
+        <div class="referrals-form-container">
+          <form id="codeForm">
+            <div class="referrals-form-section">
+              <div class="referrals-form-section-header">
+                <i data-lucide="tag"></i>
+                <h3>Code Details</h3>
+              </div>
+              <div class="referrals-form-grid three-cols">
+                <div class="referrals-form-group">
+                  <label class="referrals-form-label">Referral Code</label>
+                  <input type="text" value="<%= code.code %>" class="referrals-form-input" disabled>
+                  <span class="referrals-form-hint">Code cannot be changed after creation</span>
+                </div>
+                <div class="referrals-form-group">
+                  <label class="referrals-form-label">Code Name</label>
+                  <input type="text" name="name" class="referrals-form-input" value="<%= code.name || '' %>" placeholder="e.g., Summer Campaign 2024">
+                  <span class="referrals-form-hint">Internal name to identify this code</span>
+                </div>
+                <div class="referrals-form-group">
+                  <label class="referrals-form-label">Status</label>
+                  <select name="status" class="referrals-form-input">
+                    <option value="active" <%= code.status === 'active' ? 'selected' : '' %>>Active</option>
+                    <option value="inactive" <%= code.status === 'inactive' ? 'selected' : '' %>>Inactive</option>
+                    <option value="expired" <%= code.status === 'expired' ? 'selected' : '' %>>Expired</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="referrals-form-section">
+              <div class="referrals-form-section-header">
+                <i data-lucide="percent"></i>
+                <h3>Commission & Discount Rates</h3>
+              </div>
+              <div class="referrals-form-grid">
+                <div class="referrals-form-group">
+                  <label class="referrals-form-label">Partner Commission Rate (%) *</label>
+                  <input type="number" name="commissionRate" class="referrals-form-input" value="<%= code.commissionRate %>" min="0" max="100" step="0.5" required>
+                  <span class="referrals-form-hint">Commission earned by partner on each sale</span>
+                </div>
+                <div class="referrals-form-group">
+                  <label class="referrals-form-label">Buyer Discount Rate (%) *</label>
+                  <input type="number" name="buyerDiscountRate" class="referrals-form-input" value="<%= code.buyerDiscountRate %>" min="0" max="100" step="0.5" required>
+                  <span class="referrals-form-hint">Discount given to buyers using this code</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="referrals-form-section">
+              <div class="referrals-form-section-header">
+                <i data-lucide="calendar-clock"></i>
+                <h3>Validity Period</h3>
+              </div>
+              <div class="referrals-form-grid">
+                <div class="referrals-form-group">
+                  <label class="referrals-form-label">Valid From *</label>
+                  <input type="datetime-local" name="validFrom" class="referrals-form-input" value="<%= code.validFrom ? new Date(code.validFrom).toISOString().slice(0, 16) : '' %>" required>
+                  <span class="referrals-form-hint">When the code becomes active</span>
+                </div>
+                <div class="referrals-form-group">
+                  <label class="referrals-form-label">Valid Until</label>
+                  <input type="datetime-local" name="validUntil" class="referrals-form-input" value="<%= code.validUntil ? new Date(code.validUntil).toISOString().slice(0, 16) : '' %>">
+                  <span class="referrals-form-hint">Leave empty for no expiration</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="referrals-form-section">
+              <div class="referrals-form-section-header">
+                <i data-lucide="settings-2"></i>
+                <h3>Usage Limits</h3>
+              </div>
+              <div class="referrals-form-grid three-cols">
+                <div class="referrals-form-group">
+                  <label class="referrals-form-label">Maximum Total Uses</label>
+                  <input type="number" name="maxUses" class="referrals-form-input" value="<%= code.maxUses || 0 %>" min="0" placeholder="0 = Unlimited">
+                  <span class="referrals-form-hint">Set to 0 for unlimited uses. Current: <%= code.stats?.usageCount || 0 %> uses</span>
+                </div>
+                <div class="referrals-form-group">
+                  <label class="referrals-form-label">Maximum Uses Per Buyer</label>
+                  <input type="number" name="maxUsesPerBuyer" class="referrals-form-input" value="<%= code.maxUsesPerBuyer || 0 %>" min="0" placeholder="0 = Unlimited">
+                  <span class="referrals-form-hint">Limit how many times each buyer can use this code</span>
+                </div>
+                <div class="referrals-form-group">
+                  <label class="referrals-form-label">Minimum Order Amount (AED)</label>
+                  <input type="number" name="minimumOrderAmount" class="referrals-form-input" value="<%= code.minimumOrderAmount || 0 %>" min="0" step="0.01" placeholder="0 = No minimum">
+                  <span class="referrals-form-hint">Minimum order value required to use this code</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="referrals-form-section">
+              <div class="referrals-form-section-header">
+                <i data-lucide="file-text"></i>
+                <h3>Notes</h3>
+              </div>
+              <div class="referrals-form-group full-width">
+                <textarea name="notes" class="referrals-form-input" rows="3" placeholder="Internal notes about this code (optional)"><%= code.notes || '' %></textarea>
+              </div>
+            </div>
+
+            <div class="referrals-form-actions">
+              <a href="/admin/referrals/partners/<%= partner._id %>" class="referrals-btn referrals-btn-secondary">Cancel</a>
+              <button type="submit" class="referrals-btn referrals-btn-primary" id="submitBtn">
+                <i data-lucide="save"></i>
+                Save Changes
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <%- include('../partials/footer') %>
+  <script>
+    lucide.createIcons();
+
+    document.getElementById('codeForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i data-lucide="loader-2" class="spin-icon" style="width: 16px; height: 16px;"></i> Saving...';
+      lucide.createIcons();
+      
+      const formData = new FormData(e.target);
+      const data = Object.fromEntries(formData);
+      
+      // Convert numbers
+      data.commissionRate = parseFloat(data.commissionRate);
+      data.buyerDiscountRate = parseFloat(data.buyerDiscountRate);
+      data.maxUses = parseInt(data.maxUses) || 0;
+      data.maxUsesPerBuyer = parseInt(data.maxUsesPerBuyer) || 0;
+      data.minimumOrderAmount = parseFloat(data.minimumOrderAmount) || 0;
+
+      try {
+        const response = await fetch('/admin/api/referrals/codes/<%= code._id %>', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data),
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          showAlert('success', 'Code updated successfully!');
+          setTimeout(() => {
+            window.location.href = '/admin/referrals/partners/<%= partner._id %>';
+          }, 1500);
+        } else {
+          showAlert('error', result.message || 'Failed to update code');
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i data-lucide="save" style="width: 16px; height: 16px;"></i> Save Changes';
+          lucide.createIcons();
+        }
+      } catch (error) {
+        console.error('Error updating code:', error);
+        showAlert('error', 'An error occurred while updating the code');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i data-lucide="save" style="width: 16px; height: 16px;"></i> Save Changes';
+        lucide.createIcons();
+      }
+    });
+
+    function showAlert(type, message) {
+      const alertContainer = document.getElementById('alertContainer');
+      alertContainer.innerHTML = `
+        <div class="referrals-alert referrals-alert-${type}">
+          <i data-lucide="${type === 'success' ? 'check-circle' : 'alert-circle'}"></i>
+          ${message}
+        </div>
+      `;
+      lucide.createIcons();
+    }
+  </script>
+</body>
+</html>

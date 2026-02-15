@@ -1,0 +1,111 @@
+<%- include('partials/header-public') %>
+
+<link rel="stylesheet" href="/css/partnerCSS/partner-login.css">
+
+<%- include('partials/navbar-public', { activePage: 'login' }) %>
+
+<div class="partner-login-page-wrapper">
+  <section class="partner-login-section">
+    <div class="partner-login-container">
+      <div class="partner-login-card">
+        <!-- Header -->
+        <div class="partner-login-header">
+          <div class="partner-login-icon">
+            <i data-lucide="handshake"></i>
+          </div>
+          <h1>Partner Portal</h1>
+          <p>Access your referral dashboard and earnings</p>
+        </div>
+
+        <!-- Error Message -->
+        <% if (typeof error !== 'undefined' && error) { %>
+        <div class="partner-login-error">
+          <i data-lucide="alert-circle"></i>
+          <span>
+            <% if (error === 'inactive') { %>
+              Your account is not active. Please contact support.
+            <% } else { %>
+              <%= error %>
+            <% } %>
+          </span>
+        </div>
+        <% } %>
+
+        <!-- Login Form -->
+        <form class="partner-login-form" action="/partner/login" method="POST">
+          <div class="partner-login-form-group">
+            <label for="email">Email Address</label>
+            <div class="partner-login-input-wrapper">
+              <i data-lucide="mail" class="partner-login-input-icon"></i>
+              <input 
+                type="email" 
+                id="email" 
+                name="email" 
+                class="partner-login-input" 
+                placeholder="Enter your email"
+                required
+                autocomplete="email"
+              >
+            </div>
+          </div>
+
+          <div class="partner-login-form-group">
+            <label for="password">Password</label>
+            <div class="partner-login-input-wrapper">
+              <i data-lucide="lock" class="partner-login-input-icon"></i>
+              <input 
+                type="password" 
+                id="password" 
+                name="password" 
+                class="partner-login-input" 
+                placeholder="Enter your password"
+                required
+                autocomplete="current-password"
+              >
+              <button type="button" class="partner-login-password-toggle" onclick="togglePassword()">
+                <i data-lucide="eye" id="passwordToggleIcon"></i>
+              </button>
+            </div>
+          </div>
+
+          <button type="submit" class="partner-login-submit">
+            <i data-lucide="log-in"></i>
+            Sign In
+          </button>
+        </form>
+
+        <!-- Footer -->
+        <div class="partner-login-footer">
+          Not a partner yet? <a href="/become-partner">Apply to become a partner</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <%- include('partials/footer-public') %>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  if (typeof lucide !== 'undefined') {
+    lucide.createIcons();
+  }
+});
+
+function togglePassword() {
+  const passwordInput = document.getElementById('password');
+  const toggleIcon = document.getElementById('passwordToggleIcon');
+  
+  if (passwordInput.type === 'password') {
+    passwordInput.type = 'text';
+    toggleIcon.setAttribute('data-lucide', 'eye-off');
+  } else {
+    passwordInput.type = 'password';
+    toggleIcon.setAttribute('data-lucide', 'eye');
+  }
+  
+  if (typeof lucide !== 'undefined') {
+    lucide.createIcons();
+  }
+}
+</script>

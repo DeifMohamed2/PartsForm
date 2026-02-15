@@ -1,0 +1,850 @@
+<%- include('../partials/header') %>
+<link rel="stylesheet" href="/css/adminCSS/admin-referrals.css">
+<link rel="stylesheet" href="/css/adminCSS/code-create-enhanced.css">
+</head>
+<body>
+  <div class="admin-wrapper">
+    <%- include('../partials/sidebar', { activePage: 'referrals' }) %>
+
+    <main class="admin-main">
+      <%- include('../partials/topbar', { pageTitle: 'Create Referral Code' }) %>
+
+      <div class="admin-content">
+        <!-- Enhanced Header -->
+        <div class="code-create-header">
+          <div class="code-create-header-left">
+            <a href="/admin/referrals/partners/<%= partner._id %>" class="code-create-back-btn">
+              <i data-lucide="arrow-left"></i>
+              <span>Back</span>
+            </a>
+            <div class="code-create-title-section">
+              <div class="code-create-title-row">
+                <h1>Create Referral Code</h1>
+                <span class="code-create-partner-chip">
+                  <div class="partner-avatar">
+                    <%= partner.firstName.charAt(0) %><%= partner.lastName.charAt(0) %>
+                  </div>
+                  <span><%= partner.firstName %> <%= partner.lastName %></span>
+                </span>
+              </div>
+              <p class="code-create-subtitle">Create a unique referral code for your partner to share with potential buyers</p>
+            </div>
+          </div>
+        </div>
+
+        <div id="alertContainer"></div>
+
+        <!-- Quick Templates Section -->
+        <div class="code-templates-section">
+          <div class="code-templates-header">
+            <div class="code-templates-title">
+              <i data-lucide="zap"></i>
+              <span>Quick Templates</span>
+            </div>
+            <p>Choose a preset to get started quickly</p>
+          </div>
+          <div class="code-templates-grid">
+            <button type="button" class="code-template-card" data-template="standard">
+              <div class="template-icon blue">
+                <i data-lucide="star"></i>
+              </div>
+              <div class="template-content">
+                <h4>Standard</h4>
+                <p>5% commission, 5% discount</p>
+              </div>
+              <i data-lucide="check" class="template-check"></i>
+            </button>
+            <button type="button" class="code-template-card" data-template="premium">
+              <div class="template-icon purple">
+                <i data-lucide="crown"></i>
+              </div>
+              <div class="template-content">
+                <h4>Premium Partner</h4>
+                <p>10% commission, 8% discount</p>
+              </div>
+              <i data-lucide="check" class="template-check"></i>
+            </button>
+            <button type="button" class="code-template-card" data-template="campaign">
+              <div class="template-icon orange">
+                <i data-lucide="megaphone"></i>
+              </div>
+              <div class="template-content">
+                <h4>Campaign Promo</h4>
+                <p>7% commission, 15% discount</p>
+              </div>
+              <i data-lucide="check" class="template-check"></i>
+            </button>
+            <button type="button" class="code-template-card" data-template="vip">
+              <div class="template-icon green">
+                <i data-lucide="award"></i>
+              </div>
+              <div class="template-content">
+                <h4>VIP Exclusive</h4>
+                <p>12% commission, 20% discount</p>
+              </div>
+              <i data-lucide="check" class="template-check"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="code-create-layout">
+          <!-- Form Column -->
+          <div class="code-create-form-column">
+            <form id="codeForm">
+              <!-- Code Details Section -->
+              <div class="code-form-card">
+                <div class="code-form-card-header">
+                  <div class="card-header-icon blue">
+                    <i data-lucide="hash"></i>
+                  </div>
+                  <div class="card-header-text">
+                    <h3>Code Details</h3>
+                    <p>Set up your unique referral code</p>
+                  </div>
+                </div>
+                <div class="code-form-card-body">
+                  <div class="form-row">
+                    <div class="form-field">
+                      <label class="form-label">
+                        <span>Referral Code</span>
+                        <span class="required-badge">Required</span>
+                      </label>
+                      <div class="code-input-wrapper">
+                        <div class="code-input-prefix">
+                          <i data-lucide="ticket"></i>
+                        </div>
+                        <input type="text" name="code" id="codeInput" class="code-input-main" placeholder="AUTO-GENERATED" maxlength="20" autocomplete="off" spellcheck="false">
+                        <button type="button" class="code-generate-btn" id="generateBtn" onclick="generateCode()">
+                          <i data-lucide="wand-2"></i>
+                          <span>Generate</span>
+                        </button>
+                      </div>
+                      <div class="code-strength-indicator" id="codeStrength">
+                        <div class="strength-bar"><div class="strength-fill"></div></div>
+                        <span class="strength-label">Enter a code or generate one</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-field">
+                      <label class="form-label">Code Name</label>
+                      <div class="input-with-icon">
+                        <i data-lucide="file-signature"></i>
+                        <input type="text" name="name" id="codeName" class="form-input" placeholder="e.g., Summer Campaign 2024">
+                      </div>
+                      <span class="form-hint">
+                        <i data-lucide="info"></i>
+                        Internal name for easy identification
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Commission & Discount Section -->
+              <div class="code-form-card">
+                <div class="code-form-card-header">
+                  <div class="card-header-icon green">
+                    <i data-lucide="percent"></i>
+                  </div>
+                  <div class="card-header-text">
+                    <h3>Commission & Discount Rates</h3>
+                    <p>Define earnings and savings percentages</p>
+                  </div>
+                </div>
+                <div class="code-form-card-body">
+                  <div class="rates-grid">
+                    <div class="rate-card commission">
+                      <div class="rate-card-header">
+                        <div class="rate-icon">
+                          <i data-lucide="wallet"></i>
+                        </div>
+                        <div class="rate-info">
+                          <span class="rate-title">Partner Commission</span>
+                          <span class="rate-subtitle">Earned on each sale</span>
+                        </div>
+                      </div>
+                      <div class="rate-slider-section">
+                        <div class="rate-value-display">
+                          <span id="commissionValue"><%= partner.commissionRate || 5 %></span>
+                          <span class="rate-unit">%</span>
+                        </div>
+                        <input type="range" name="commissionRateSlider" id="commissionSlider" class="rate-slider commission" value="<%= partner.commissionRate || 5 %>" min="0" max="25" step="0.5">
+                        <input type="hidden" name="commissionRate" id="commissionInput" value="<%= partner.commissionRate || 5 %>">
+                        <div class="slider-labels">
+                          <span>0%</span>
+                          <span>25%</span>
+                        </div>
+                      </div>
+                      <div class="rate-preview">
+                        <span>On AED 1,000 sale:</span>
+                        <strong id="commissionPreview">AED <%= (partner.commissionRate || 5) * 10 %></strong>
+                      </div>
+                    </div>
+                    <div class="rate-card discount">
+                      <div class="rate-card-header">
+                        <div class="rate-icon">
+                          <i data-lucide="badge-percent"></i>
+                        </div>
+                        <div class="rate-info">
+                          <span class="rate-title">Buyer Discount</span>
+                          <span class="rate-subtitle">Savings for customers</span>
+                        </div>
+                      </div>
+                      <div class="rate-slider-section">
+                        <div class="rate-value-display">
+                          <span id="discountValue"><%= partner.buyerDiscountRate || 5 %></span>
+                          <span class="rate-unit">%</span>
+                        </div>
+                        <input type="range" name="buyerDiscountRateSlider" id="discountSlider" class="rate-slider discount" value="<%= partner.buyerDiscountRate || 5 %>" min="0" max="30" step="0.5">
+                        <input type="hidden" name="buyerDiscountRate" id="discountInput" value="<%= partner.buyerDiscountRate || 5 %>">
+                        <div class="slider-labels">
+                          <span>0%</span>
+                          <span>30%</span>
+                        </div>
+                      </div>
+                      <div class="rate-preview">
+                        <span>On AED 1,000 order:</span>
+                        <strong id="discountPreview">AED <%= (partner.buyerDiscountRate || 5) * 10 %> saved</strong>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Validity Period Section -->
+              <div class="code-form-card">
+                <div class="code-form-card-header">
+                  <div class="card-header-icon orange">
+                    <i data-lucide="calendar-range"></i>
+                  </div>
+                  <div class="card-header-text">
+                    <h3>Validity Period</h3>
+                    <p>When this code can be used</p>
+                  </div>
+                </div>
+                <div class="code-form-card-body">
+                  <div class="validity-timeline">
+                    <div class="timeline-dot start"></div>
+                    <div class="timeline-line"></div>
+                    <div class="timeline-dot end"></div>
+                  </div>
+                  <div class="validity-grid">
+                    <div class="validity-field">
+                      <label class="form-label">
+                        <i data-lucide="play-circle"></i>
+                        <span>Valid From</span>
+                        <span class="required-badge">Required</span>
+                      </label>
+                      <input type="datetime-local" name="validFrom" id="validFrom" class="form-input datetime-input" required>
+                      <span class="form-hint">When the code becomes active</span>
+                    </div>
+                    <div class="validity-field">
+                      <label class="form-label">
+                        <i data-lucide="stop-circle"></i>
+                        <span>Valid Until</span>
+                        <span class="optional-badge">Optional</span>
+                      </label>
+                      <input type="datetime-local" name="validUntil" id="validUntil" class="form-input datetime-input">
+                      <span class="form-hint">Leave empty for no expiration</span>
+                    </div>
+                  </div>
+                  <div class="validity-status" id="validityStatus">
+                    <i data-lucide="check-circle"></i>
+                    <span>Code will be active immediately and never expire</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Usage Limits Section -->
+              <div class="code-form-card">
+                <div class="code-form-card-header">
+                  <div class="card-header-icon purple">
+                    <i data-lucide="shield-check"></i>
+                  </div>
+                  <div class="card-header-text">
+                    <h3>Usage Limits</h3>
+                    <p>Optional restrictions for this code</p>
+                  </div>
+                </div>
+                <div class="code-form-card-body">
+                  <div class="limits-grid">
+                    <div class="limit-item">
+                      <div class="limit-icon">
+                        <i data-lucide="users"></i>
+                      </div>
+                      <div class="limit-content">
+                        <label class="form-label">Total Uses</label>
+                        <div class="limit-input-wrapper">
+                          <input type="number" name="maxUses" id="maxUses" class="form-input limit-input" value="0" min="0">
+                          <span class="limit-badge" id="maxUsesLabel">Unlimited</span>
+                        </div>
+                        <span class="form-hint">0 = unlimited registrations (codes are used when buyers sign up)</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="limit-info-box">
+                    <i data-lucide="info"></i>
+                    <p>Referral codes are used when buyers create accounts, not at checkout. Each code can only be used once per buyer at registration.</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Notes Section -->
+              <div class="code-form-card">
+                <div class="code-form-card-header">
+                  <div class="card-header-icon gray">
+                    <i data-lucide="sticky-note"></i>
+                  </div>
+                  <div class="card-header-text">
+                    <h3>Internal Notes</h3>
+                    <p>Add any additional information</p>
+                  </div>
+                </div>
+                <div class="code-form-card-body">
+                  <div class="notes-wrapper">
+                    <textarea name="notes" id="notesInput" class="notes-textarea" rows="4" placeholder="Add any internal notes about this code...&#10;&#10;Examples:&#10;• Campaign details&#10;• Special conditions&#10;• Target audience"></textarea>
+                    <div class="notes-footer">
+                      <span class="char-count" id="charCount">0 / 500</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Form Actions -->
+              <div class="code-form-actions">
+                <a href="/admin/referrals/partners/<%= partner._id %>" class="action-btn secondary">
+                  <i data-lucide="x"></i>
+                  <span>Cancel</span>
+                </a>
+                <button type="button" class="action-btn outline" id="resetBtn">
+                  <i data-lucide="rotate-ccw"></i>
+                  <span>Reset Form</span>
+                </button>
+                <button type="submit" class="action-btn primary" id="submitBtn">
+                  <i data-lucide="plus-circle"></i>
+                  <span>Create Code</span>
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Preview Column -->
+          <div class="code-create-preview-column">
+            <div class="preview-sticky">
+              <!-- Live Preview Card -->
+              <div class="code-preview-card">
+                <div class="preview-card-header">
+                  <h4>
+                    <i data-lucide="eye"></i>
+                    Live Preview
+                  </h4>
+                  <span class="preview-badge">Real-time</span>
+                </div>
+                <div class="preview-card-body">
+                  <div class="preview-code-display">
+                    <div class="preview-code-label">Referral Code</div>
+                    <div class="preview-code-value" id="previewCode">
+                      <span class="code-text">GENERATED</span>
+                      <button type="button" class="copy-code-btn" id="copyCodeBtn" title="Copy code">
+                        <i data-lucide="copy"></i>
+                      </button>
+                    </div>
+                    <div class="preview-code-name" id="previewName">No name set</div>
+                  </div>
+                  
+                  <div class="preview-divider"></div>
+                  
+                  <div class="preview-rates">
+                    <div class="preview-rate commission">
+                      <div class="preview-rate-icon">
+                        <i data-lucide="trending-up"></i>
+                      </div>
+                      <div class="preview-rate-info">
+                        <span class="preview-rate-value" id="previewCommission"><%= partner.commissionRate || 5 %>%</span>
+                        <span class="preview-rate-label">Partner Earns</span>
+                      </div>
+                    </div>
+                    <div class="preview-rate discount">
+                      <div class="preview-rate-icon">
+                        <i data-lucide="tag"></i>
+                      </div>
+                      <div class="preview-rate-info">
+                        <span class="preview-rate-value" id="previewDiscount"><%= partner.buyerDiscountRate || 5 %>%</span>
+                        <span class="preview-rate-label">Buyer Saves</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="preview-divider"></div>
+
+                  <div class="preview-validity">
+                    <div class="preview-validity-header">
+                      <i data-lucide="calendar"></i>
+                      <span>Validity</span>
+                    </div>
+                    <div class="preview-validity-content" id="previewValidity">
+                      <span class="validity-tag active">
+                        <i data-lucide="infinity"></i>
+                        No expiration
+                      </span>
+                    </div>
+                  </div>
+
+                  <div class="preview-divider"></div>
+
+                  <div class="preview-limits">
+                    <div class="preview-limits-header">
+                      <i data-lucide="shield"></i>
+                      <span>Limits</span>
+                    </div>
+                    <div class="preview-limits-list" id="previewLimits">
+                      <div class="limit-tag">
+                        <i data-lucide="check"></i>
+                        Unlimited uses
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="preview-card-footer">
+                  <div class="preview-partner">
+                    <span>Assigned to:</span>
+                    <div class="preview-partner-info">
+                      <div class="partner-mini-avatar">
+                        <%= partner.firstName.charAt(0) %><%= partner.lastName.charAt(0) %>
+                      </div>
+                      <span><%= partner.firstName %> <%= partner.lastName %></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Quick Tips Card -->
+              <div class="tips-card">
+                <div class="tips-header">
+                  <i data-lucide="lightbulb"></i>
+                  <h4>Quick Tips</h4>
+                </div>
+                <div class="tips-list">
+                  <div class="tip-item">
+                    <i data-lucide="check-circle-2"></i>
+                    <p>Use memorable codes like partner names or campaign themes</p>
+                  </div>
+                  <div class="tip-item">
+                    <i data-lucide="check-circle-2"></i>
+                    <p>Balance commission and discount to maximize profit margins</p>
+                  </div>
+                  <div class="tip-item">
+                    <i data-lucide="check-circle-2"></i>
+                    <p>Set expiration dates for time-limited promotions</p>
+                  </div>
+                  <div class="tip-item">
+                    <i data-lucide="check-circle-2"></i>
+                    <p>Use minimum order amounts to protect profit margins</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <%- include('../partials/footer') %>
+  <script>
+    lucide.createIcons();
+
+    // Initialize variables
+    const partnerId = '<%= partner._id %>';
+    const partnerPrefix = '<%= partner.firstName.substring(0, 3).toUpperCase() %>';
+    let selectedTemplate = null;
+
+    // Set default validFrom to now
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    document.getElementById('validFrom').value = now.toISOString().slice(0, 16);
+
+    // Template configurations
+    const templates = {
+      standard: { commission: 5, discount: 5 },
+      premium: { commission: 10, discount: 8 },
+      campaign: { commission: 7, discount: 15 },
+      vip: { commission: 12, discount: 20 }
+    };
+
+    // Template selection handler
+    document.querySelectorAll('.code-template-card').forEach(card => {
+      card.addEventListener('click', function() {
+        const template = this.dataset.template;
+        const config = templates[template];
+        
+        // Remove previous selection
+        document.querySelectorAll('.code-template-card').forEach(c => c.classList.remove('selected'));
+        this.classList.add('selected');
+        selectedTemplate = template;
+        
+        // Apply template values
+        document.getElementById('commissionSlider').value = config.commission;
+        document.getElementById('commissionInput').value = config.commission;
+        document.getElementById('commissionValue').textContent = config.commission;
+        
+        document.getElementById('discountSlider').value = config.discount;
+        document.getElementById('discountInput').value = config.discount;
+        document.getElementById('discountValue').textContent = config.discount;
+        
+        updateRatePreviews();
+        updateLivePreview();
+        
+        // Animation feedback
+        this.style.transform = 'scale(0.95)';
+        setTimeout(() => { this.style.transform = ''; }, 100);
+      });
+    });
+
+    // Rate sliders
+    document.getElementById('commissionSlider').addEventListener('input', function() {
+      const value = parseFloat(this.value);
+      document.getElementById('commissionValue').textContent = value;
+      document.getElementById('commissionInput').value = value;
+      updateRatePreviews();
+      updateLivePreview();
+      clearTemplateSelection();
+    });
+
+    document.getElementById('discountSlider').addEventListener('input', function() {
+      const value = parseFloat(this.value);
+      document.getElementById('discountValue').textContent = value;
+      document.getElementById('discountInput').value = value;
+      updateRatePreviews();
+      updateLivePreview();
+      clearTemplateSelection();
+    });
+
+    function updateRatePreviews() {
+      const commission = parseFloat(document.getElementById('commissionInput').value);
+      const discount = parseFloat(document.getElementById('discountInput').value);
+      document.getElementById('commissionPreview').textContent = 'AED ' + (commission * 10).toFixed(0);
+      document.getElementById('discountPreview').textContent = 'AED ' + (discount * 10).toFixed(0) + ' saved';
+    }
+
+    function clearTemplateSelection() {
+      document.querySelectorAll('.code-template-card').forEach(c => c.classList.remove('selected'));
+      selectedTemplate = null;
+    }
+
+    // Code input handler
+    document.getElementById('codeInput').addEventListener('input', function() {
+      this.value = this.value.toUpperCase().replace(/[^A-Z0-9-]/g, '');
+      updateCodeStrength(this.value);
+      updateLivePreview();
+    });
+
+    // Code name handler
+    document.getElementById('codeName').addEventListener('input', function() {
+      updateLivePreview();
+    });
+
+    function updateCodeStrength(code) {
+      const strengthBar = document.querySelector('.strength-fill');
+      const strengthLabel = document.querySelector('.strength-label');
+      const indicator = document.getElementById('codeStrength');
+      
+      if (!code) {
+        strengthBar.style.width = '0%';
+        strengthBar.className = 'strength-fill';
+        strengthLabel.textContent = 'Enter a code or generate one';
+        indicator.className = 'code-strength-indicator';
+        return;
+      }
+      
+      let strength = 0;
+      if (code.length >= 6) strength += 25;
+      if (code.length >= 10) strength += 25;
+      if (/[0-9]/.test(code)) strength += 25;
+      if (/[-]/.test(code)) strength += 25;
+      
+      strengthBar.style.width = strength + '%';
+      
+      if (strength <= 25) {
+        indicator.className = 'code-strength-indicator weak';
+        strengthLabel.textContent = 'Weak - Add more characters';
+      } else if (strength <= 50) {
+        indicator.className = 'code-strength-indicator fair';
+        strengthLabel.textContent = 'Fair - Consider adding numbers';
+      } else if (strength <= 75) {
+        indicator.className = 'code-strength-indicator good';
+        strengthLabel.textContent = 'Good - Almost perfect!';
+      } else {
+        indicator.className = 'code-strength-indicator strong';
+        strengthLabel.textContent = 'Strong - Great code!';
+      }
+    }
+
+    // Generate code function
+    async function generateCode() {
+      const btn = document.getElementById('generateBtn');
+      btn.classList.add('generating');
+      btn.innerHTML = '<i data-lucide="loader-2" class="spin-icon"></i><span>Generating...</span>';
+      lucide.createIcons();
+      
+      try {
+        const response = await fetch(`/admin/api/referrals/codes/generate?prefix=${partnerPrefix}`);
+        const data = await response.json();
+        if (data.success) {
+          document.getElementById('codeInput').value = data.code;
+          updateCodeStrength(data.code);
+          updateLivePreview();
+        }
+      } catch (error) {
+        console.error('Error generating code:', error);
+      }
+      
+      btn.classList.remove('generating');
+      btn.innerHTML = '<i data-lucide="wand-2"></i><span>Generate</span>';
+      lucide.createIcons();
+    }
+
+    // Validity date handlers
+    document.getElementById('validFrom').addEventListener('change', updateValidityStatus);
+    document.getElementById('validUntil').addEventListener('change', updateValidityStatus);
+
+    function updateValidityStatus() {
+      const validFrom = document.getElementById('validFrom').value;
+      const validUntil = document.getElementById('validUntil').value;
+      const statusEl = document.getElementById('validityStatus');
+      
+      let statusText = '';
+      let statusClass = '';
+      let icon = 'check-circle';
+      
+      const now = new Date();
+      const fromDate = validFrom ? new Date(validFrom) : null;
+      const untilDate = validUntil ? new Date(validUntil) : null;
+      
+      if (fromDate && fromDate > now) {
+        icon = 'clock';
+        statusClass = 'pending';
+        statusText = 'Code will activate on ' + formatDate(fromDate);
+      } else if (untilDate && untilDate < now) {
+        icon = 'x-circle';
+        statusClass = 'expired';
+        statusText = 'Warning: End date is in the past';
+      } else if (untilDate) {
+        icon = 'calendar-check';
+        statusClass = 'limited';
+        statusText = 'Code expires on ' + formatDate(untilDate);
+      } else {
+        icon = 'check-circle';
+        statusClass = 'active';
+        statusText = 'Code will be active immediately and never expire';
+      }
+      
+      statusEl.className = 'validity-status ' + statusClass;
+      statusEl.innerHTML = `<i data-lucide="${icon}"></i><span>${statusText}</span>`;
+      lucide.createIcons();
+      updateLivePreview();
+    }
+
+    function formatDate(date) {
+      return date.toLocaleDateString('en-US', { 
+        month: 'short', 
+        day: 'numeric', 
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+
+    // Limit input handlers
+    document.getElementById('maxUses').addEventListener('input', function() {
+      const label = document.getElementById('maxUsesLabel');
+      label.textContent = parseInt(this.value) === 0 ? 'Unlimited' : this.value + ' registrations';
+      label.className = 'limit-badge' + (parseInt(this.value) > 0 ? ' limited' : '');
+      updateLivePreview();
+    });
+
+    // Notes character count
+    document.getElementById('notesInput').addEventListener('input', function() {
+      const count = this.value.length;
+      document.getElementById('charCount').textContent = count + ' / 500';
+      if (count > 450) {
+        document.getElementById('charCount').classList.add('warning');
+      } else {
+        document.getElementById('charCount').classList.remove('warning');
+      }
+    });
+
+    // Live preview updater
+    function updateLivePreview() {
+      const code = document.getElementById('codeInput').value || 'GENERATED';
+      const name = document.getElementById('codeName').value || 'No name set';
+      const commission = document.getElementById('commissionInput').value;
+      const discount = document.getElementById('discountInput').value;
+      const validUntil = document.getElementById('validUntil').value;
+      const maxUses = parseInt(document.getElementById('maxUses').value) || 0;
+      
+      // Update code display
+      document.querySelector('#previewCode .code-text').textContent = code;
+      document.getElementById('previewName').textContent = name;
+      document.getElementById('previewName').className = 'preview-code-name' + (name === 'No name set' ? ' empty' : '');
+      
+      // Update rates
+      document.getElementById('previewCommission').textContent = commission + '%';
+      document.getElementById('previewDiscount').textContent = discount + '%';
+      
+      // Update validity
+      const validityContent = document.getElementById('previewValidity');
+      if (validUntil) {
+        const endDate = new Date(validUntil);
+        validityContent.innerHTML = `<span class="validity-tag limited"><i data-lucide="calendar"></i>Expires ${formatDate(endDate)}</span>`;
+      } else {
+        validityContent.innerHTML = '<span class="validity-tag active"><i data-lucide="infinity"></i>No expiration</span>';
+      }
+      
+      // Update limits
+      const limitsContent = document.getElementById('previewLimits');
+      let limitsHtml = '';
+      
+      if (maxUses > 0) {
+        limitsHtml += `<div class="limit-tag limited"><i data-lucide="hash"></i>${maxUses} total registrations</div>`;
+      }
+      if (!limitsHtml) {
+        limitsHtml = '<div class="limit-tag"><i data-lucide="check"></i>Unlimited registrations</div>';
+      }
+      
+      limitsContent.innerHTML = limitsHtml;
+      lucide.createIcons();
+    }
+
+    // Copy code button
+    document.getElementById('copyCodeBtn').addEventListener('click', async function() {
+      const code = document.querySelector('#previewCode .code-text').textContent;
+      if (code && code !== 'GENERATED') {
+        await navigator.clipboard.writeText(code);
+        this.innerHTML = '<i data-lucide="check"></i>';
+        lucide.createIcons();
+        setTimeout(() => {
+          this.innerHTML = '<i data-lucide="copy"></i>';
+          lucide.createIcons();
+        }, 2000);
+      }
+    });
+
+    // Reset form
+    document.getElementById('resetBtn').addEventListener('click', function() {
+      if (confirm('Are you sure you want to reset the form? All entered data will be lost.')) {
+        document.getElementById('codeForm').reset();
+        document.getElementById('codeInput').value = '';
+        document.getElementById('commissionSlider').value = <%= partner.commissionRate || 5 %>;
+        document.getElementById('discountSlider').value = <%= partner.buyerDiscountRate || 5 %>;
+        document.getElementById('commissionValue').textContent = '<%= partner.commissionRate || 5 %>';
+        document.getElementById('discountValue').textContent = '<%= partner.buyerDiscountRate || 5 %>';
+        document.getElementById('commissionInput').value = <%= partner.commissionRate || 5 %>;
+        document.getElementById('discountInput').value = <%= partner.buyerDiscountRate || 5 %>;
+        
+        // Reset date
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        document.getElementById('validFrom').value = now.toISOString().slice(0, 16);
+        document.getElementById('validUntil').value = '';
+        
+        // Reset labels
+        document.getElementById('maxUsesLabel').textContent = 'Unlimited';
+        document.getElementById('perBuyerLabel').textContent = 'Unlimited';
+        document.getElementById('minOrderLabel').textContent = 'No minimum';
+        document.getElementById('charCount').textContent = '0 / 500';
+        
+        clearTemplateSelection();
+        updateCodeStrength('');
+        updateRatePreviews();
+        updateValidityStatus();
+        updateLivePreview();
+      }
+    });
+
+    // Form submission
+    document.getElementById('codeForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i data-lucide="loader-2" class="spin-icon"></i><span>Creating...</span>';
+      lucide.createIcons();
+      
+      const formData = new FormData(e.target);
+      const data = Object.fromEntries(formData);
+      
+      // Convert numbers
+      data.commissionRate = parseFloat(data.commissionRate);
+      data.buyerDiscountRate = parseFloat(data.buyerDiscountRate);
+      data.maxUses = parseInt(data.maxUses) || 0;
+      
+      // Remove slider values
+      delete data.commissionRateSlider;
+      delete data.buyerDiscountRateSlider;
+
+      try {
+        const response = await fetch(`/admin/api/referrals/partners/${partnerId}/codes`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data),
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          showAlert('success', `Code "${result.code.code}" created successfully!`);
+          setTimeout(() => {
+            window.location.href = `/admin/referrals/partners/${partnerId}`;
+          }, 1500);
+        } else {
+          showAlert('error', result.message || 'Failed to create code');
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i data-lucide="plus-circle"></i><span>Create Code</span>';
+          lucide.createIcons();
+        }
+      } catch (error) {
+        console.error('Error creating code:', error);
+        showAlert('error', 'An error occurred while creating the code');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i data-lucide="plus-circle"></i><span>Create Code</span>';
+        lucide.createIcons();
+      }
+    });
+
+    function showAlert(type, message) {
+      const alertContainer = document.getElementById('alertContainer');
+      const icon = type === 'success' ? 'check-circle' : 'alert-circle';
+      alertContainer.innerHTML = `
+        <div class="code-alert code-alert-${type}">
+          <div class="alert-icon">
+            <i data-lucide="${icon}"></i>
+          </div>
+          <div class="alert-content">
+            <span class="alert-title">${type === 'success' ? 'Success!' : 'Error'}</span>
+            <span class="alert-message">${message}</span>
+          </div>
+          <button type="button" class="alert-close" onclick="this.parentElement.remove()">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+      `;
+      lucide.createIcons();
+      
+      // Auto dismiss success
+      if (type === 'success') {
+        setTimeout(() => alertContainer.innerHTML = '', 5000);
+      }
+    }
+
+    // Initialize
+    updateRatePreviews();
+    updateValidityStatus();
+    updateLivePreview();
+  </script>
+</body>
+</html>

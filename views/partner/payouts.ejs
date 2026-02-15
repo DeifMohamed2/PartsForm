@@ -1,0 +1,220 @@
+<%- include('partials/header') %>
+<% activePage = 'payouts'; %>
+<%- include('partials/navbar') %>
+
+<div class="partner-page-wrapper">
+  <!-- Main Content -->
+  <main class="partner-main">
+    <div class="partner-container">
+      <!-- Page Header -->
+      <div class="partner-page-header">
+        <div class="partner-page-title">
+          <i data-lucide="banknote"></i>
+          <h1>My Payouts</h1>
+        </div>
+      </div>
+
+      <!-- Payout Info Box -->
+      <div class="partner-info-box" style="margin-bottom: 2rem;">
+        <i data-lucide="info"></i>
+        <div class="partner-info-box-content">
+          <h4>How Payouts Work</h4>
+          <p>
+            Payouts are processed monthly for approved commissions. Once your approved balance reaches 
+            <strong>100 AED</strong>, you'll be eligible for a payout. Payments are typically processed 
+            within 5-7 business days.
+          </p>
+        </div>
+      </div>
+
+      <!-- Summary Stats -->
+      <div class="partner-stats-grid partner-stats-2-col" style="margin-bottom: 2rem;">
+        <div class="partner-stat-card partner-stat-card-lg">
+          <div class="partner-stat-icon partner-stat-icon-success">
+            <i data-lucide="wallet"></i>
+          </div>
+          <div class="partner-stat-content">
+            <div class="partner-stat-value"><%= (stats?.availableBalance || 0).toFixed(2) %> AED</div>
+            <div class="partner-stat-label">Available Balance</div>
+          </div>
+        </div>
+        <div class="partner-stat-card partner-stat-card-lg">
+          <div class="partner-stat-icon partner-stat-icon-info">
+            <i data-lucide="credit-card"></i>
+          </div>
+          <div class="partner-stat-content">
+            <div class="partner-stat-value"><%= (stats?.totalPaid || 0).toFixed(2) %> AED</div>
+            <div class="partner-stat-label">Total Paid Out</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Payouts Table -->
+      <div class="partner-card">
+        <div class="partner-card-header">
+          <div class="partner-card-title">
+            <i data-lucide="history"></i>
+            <span>Payout History</span>
+          </div>
+        </div>
+        <div class="partner-table-wrapper">
+          <% if (payouts && payouts.length > 0) { %>
+          <table class="partner-table">
+            <thead>
+              <tr>
+                <th>Payout ID</th>
+                <th>Date</th>
+                <th>Period</th>
+                <th>Amount</th>
+                <th>Method</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% payouts.forEach(function(payout) { %>
+              <tr>
+                <td>
+                  <span class="partner-order-number">#<%= payout.payoutNumber || payout._id.toString().slice(-8).toUpperCase() %></span>
+                </td>
+                <td>
+                  <div class="partner-date-cell">
+                    <span class="partner-date-day"><%= new Date(payout.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) %></span>
+                    <span class="partner-date-year"><%= new Date(payout.createdAt).getFullYear() %></span>
+                  </div>
+                </td>
+                <td>
+                  <span><%= payout.periodMonth %>/<%= payout.periodYear %></span>
+                </td>
+                <td>
+                  <span class="partner-amount partner-text-success"><%= (payout.amount || 0).toFixed(2) %> AED</span>
+                </td>
+                <td>
+                  <span class="partner-payment-method">
+                    <% if (payout.paymentMethod === 'bank_transfer') { %>
+                      <i data-lucide="building"></i> Bank Transfer
+                    <% } else if (payout.paymentMethod === 'paypal') { %>
+                      <i data-lucide="credit-card"></i> PayPal
+                    <% } else if (payout.paymentMethod === 'wise') { %>
+                      <i data-lucide="globe"></i> Wise
+                    <% } else { %>
+                      <i data-lucide="circle"></i> <%= payout.paymentMethod || 'N/A' %>
+                    <% } %>
+                  </span>
+                </td>
+                <td>
+                  <span class="partner-badge partner-badge-<%= 
+                    payout.status === 'completed' ? 'success' : 
+                    (payout.status === 'processing' ? 'info' : 
+                    (payout.status === 'pending' ? 'warning' : 'danger')) 
+                  %>">
+                    <%= payout.status.charAt(0).toUpperCase() + payout.status.slice(1) %>
+                  </span>
+                </td>
+              </tr>
+              <% }); %>
+            </tbody>
+          </table>
+          <% } else { %>
+          <div class="partner-empty-state">
+            <i data-lucide="wallet"></i>
+            <h3>No Payouts Yet</h3>
+            <p>Once your approved commission balance reaches 100 AED, your first payout will be processed.</p>
+          </div>
+          <% } %>
+        </div>
+
+        <!-- Pagination -->
+        <% if (pagination && pagination.totalPages > 1) { %>
+        <div class="partner-pagination">
+          <% if (pagination.currentPage > 1) { %>
+          <a href="?page=<%= pagination.currentPage - 1 %>" class="partner-pagination-btn">
+            <i data-lucide="chevron-left"></i>
+          </a>
+          <% } else { %>
+          <span class="partner-pagination-btn disabled"><i data-lucide="chevron-left"></i></span>
+          <% } %>
+
+          <% for (let i = 1; i <= pagination.totalPages; i++) { %>
+            <% if (i === pagination.currentPage) { %>
+            <span class="partner-pagination-btn active"><%= i %></span>
+            <% } else if (Math.abs(i - pagination.currentPage) < 3 || i === 1 || i === pagination.totalPages) { %>
+            <a href="?page=<%= i %>" class="partner-pagination-btn"><%= i %></a>
+            <% } else if (Math.abs(i - pagination.currentPage) === 3) { %>
+            <span class="partner-pagination-dots">...</span>
+            <% } %>
+          <% } %>
+
+          <% if (pagination.currentPage < pagination.totalPages) { %>
+          <a href="?page=<%= pagination.currentPage + 1 %>" class="partner-pagination-btn">
+            <i data-lucide="chevron-right"></i>
+          </a>
+          <% } else { %>
+          <span class="partner-pagination-btn disabled"><i data-lucide="chevron-right"></i></span>
+          <% } %>
+        </div>
+        <% } %>
+      </div>
+
+      <!-- Payment Details Card -->
+      <div class="partner-card" style="margin-top: 2rem;">
+        <div class="partner-card-header">
+          <div class="partner-card-title">
+            <i data-lucide="credit-card"></i>
+            <span>Payment Details</span>
+          </div>
+          <a href="/partner/profile" class="partner-btn partner-btn-sm partner-btn-outline">
+            <i data-lucide="edit"></i>
+            Edit
+          </a>
+        </div>
+        <div class="partner-card-body">
+          <% if (partner.paymentDetails && partner.paymentDetails.method) { %>
+          <div class="partner-info-grid">
+            <div class="partner-info-item">
+              <span class="partner-info-label">Payment Method</span>
+              <span class="partner-info-value">
+                <% if (partner.paymentDetails.method === 'bank_transfer') { %>
+                  Bank Transfer
+                <% } else if (partner.paymentDetails.method === 'paypal') { %>
+                  PayPal
+                <% } else if (partner.paymentDetails.method === 'wise') { %>
+                  Wise
+                <% } else { %>
+                  <%= partner.paymentDetails.method %>
+                <% } %>
+              </span>
+            </div>
+            <% if (partner.paymentDetails.method === 'bank_transfer') { %>
+            <div class="partner-info-item">
+              <span class="partner-info-label">Bank</span>
+              <span class="partner-info-value"><%= partner.paymentDetails.bankName || 'Not set' %></span>
+            </div>
+            <div class="partner-info-item">
+              <span class="partner-info-label">Account</span>
+              <span class="partner-info-value"><%= partner.paymentDetails.accountNumber ? '****' + partner.paymentDetails.accountNumber.slice(-4) : 'Not set' %></span>
+            </div>
+            <% } else if (partner.paymentDetails.method === 'paypal') { %>
+            <div class="partner-info-item">
+              <span class="partner-info-label">PayPal Email</span>
+              <span class="partner-info-value"><%= partner.paymentDetails.paypalEmail || 'Not set' %></span>
+            </div>
+            <% } else if (partner.paymentDetails.method === 'wise') { %>
+            <div class="partner-info-item">
+              <span class="partner-info-label">Wise Email</span>
+              <span class="partner-info-value"><%= partner.paymentDetails.wiseEmail || 'Not set' %></span>
+            </div>
+            <% } %>
+          </div>
+          <% } else { %>
+          <div class="partner-empty-inline">
+            <i data-lucide="alert-circle"></i>
+            <p>No payment details configured. <a href="/partner/profile">Add your payment details</a> to receive payouts.</p>
+          </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <%- include('partials/footer') %>
+</div>

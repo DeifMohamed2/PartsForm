@@ -1,0 +1,287 @@
+<%- include('partials/header') %>
+<% activePage = 'dashboard'; %>
+<%- include('partials/navbar') %>
+
+<div class="partner-page-wrapper">
+  <!-- Main Content -->
+  <main class="partner-main">
+    <!-- Welcome Banner -->
+    <div class="partner-welcome-banner">
+      <div class="partner-welcome-text">
+        <h1>Welcome back, <%= partner.firstName %>!</h1>
+        <p>Here's your referral performance at a glance for <%= currentMonth %></p>
+      </div>
+      <% if (partnerCodes && partnerCodes.filter(c => c.status === 'active').length > 0) { %>
+      <div class="partner-referral-box">
+        <div class="partner-referral-label">Active Referral Code</div>
+        <div class="partner-referral-code">
+          <%= partnerCodes.filter(c => c.status === 'active')[0].code %>
+          <button class="partner-btn-copy" onclick="copyCodeValue('<%= partnerCodes.filter(c => c.status === 'active')[0].code %>')" title="Copy code">
+            <i data-lucide="copy"></i>
+          </button>
+        </div>
+      </div>
+      <% } else { %>
+      <div class="partner-referral-box">
+        <div class="partner-referral-label">Referral Code</div>
+        <div class="partner-referral-code no-code">
+          No active code
+          <span class="partner-referral-hint">Contact admin for a new code</span>
+        </div>
+      </div>
+      <% } %>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="partner-stats-grid">
+      <div class="partner-stat-card">
+        <div class="partner-stat-header">
+          <div class="partner-stat-icon blue">
+            <i data-lucide="shopping-cart"></i>
+          </div>
+          <span class="partner-stat-change neutral">This month</span>
+        </div>
+        <div class="partner-stat-value"><%= monthlyStats?.totalOrders || 0 %></div>
+        <div class="partner-stat-label">Total Referrals</div>
+      </div>
+
+      <div class="partner-stat-card">
+        <div class="partner-stat-header">
+          <div class="partner-stat-icon yellow">
+            <i data-lucide="clock"></i>
+          </div>
+          <span class="partner-stat-change neutral">Pending</span>
+        </div>
+        <div class="partner-stat-value"><%= (allTime.pendingEarnings || 0).toFixed(2) %> <small>AED</small></div>
+        <div class="partner-stat-label">Pending Commission</div>
+      </div>
+
+      <div class="partner-stat-card">
+        <div class="partner-stat-header">
+          <div class="partner-stat-icon green">
+            <i data-lucide="check-circle"></i>
+          </div>
+          <span class="partner-stat-change positive">Ready</span>
+        </div>
+        <div class="partner-stat-value"><%= (allTime.approvedEarnings || 0).toFixed(2) %> <small>AED</small></div>
+        <div class="partner-stat-label">Approved Commission</div>
+      </div>
+
+      <div class="partner-stat-card">
+        <div class="partner-stat-header">
+          <div class="partner-stat-icon purple">
+            <i data-lucide="wallet"></i>
+          </div>
+        </div>
+        <div class="partner-stat-value"><%= (allTime.paidEarnings || 0).toFixed(2) %> <small>AED</small></div>
+        <div class="partner-stat-label">Total Paid Out</div>
+      </div>
+    </div>
+
+    <!-- Content Grid -->
+    <div class="partner-content-grid">
+      <!-- Recent Commissions -->
+      <div class="partner-card">
+        <div class="partner-card-header">
+          <h2 class="partner-card-title">
+            <i data-lucide="history"></i>
+            Recent Commissions
+          </h2>
+          <a href="/partner/commissions" class="partner-btn partner-btn-sm partner-btn-outline">
+            View All
+            <i data-lucide="chevron-right"></i>
+          </a>
+        </div>
+        <div class="partner-card-body no-padding">
+          <% if (recentCommissions && recentCommissions.length > 0) { %>
+          <table class="partner-table">
+            <thead>
+              <tr>
+                <th>Order</th>
+                <th>Order Total</th>
+                <th>Commission</th>
+                <th>Status</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% recentCommissions.forEach(commission => { %>
+              <tr>
+                <td><strong><%= commission.order?.orderNumber || 'N/A' %></strong></td>
+                <td><%= (commission.orderTotal || 0).toFixed(2) %> AED</td>
+                <td><strong style="color: var(--partner-success);"><%= (commission.commissionAmount || 0).toFixed(2) %> AED</strong></td>
+                <td>
+                  <span class="partner-badge <%= commission.status %>">
+                    <%= commission.status.charAt(0).toUpperCase() + commission.status.slice(1) %>
+                  </span>
+                </td>
+                <td><%= new Date(commission.createdAt).toLocaleDateString() %></td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+          <% } else { %>
+          <div class="partner-empty-state">
+            <div class="partner-empty-state-icon">
+              <i data-lucide="inbox"></i>
+            </div>
+            <h3>No Commissions Yet</h3>
+            <p>Share your referral code to start earning commissions!</p>
+          </div>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div>
+        <!-- Commission Rates Card -->
+        <div class="partner-card" style="margin-bottom: 1.5rem;">
+          <div class="partner-card-header">
+            <h2 class="partner-card-title">
+              <i data-lucide="percent"></i>
+              Your Rates
+            </h2>
+          </div>
+          <div class="partner-card-body">
+            <div class="partner-rate-cards">
+              <div class="partner-rate-card" style="background: linear-gradient(135deg, var(--partner-primary-light) 0%, #e0effa 100%);">
+                <div class="partner-rate-card-title">Commission Rate</div>
+                <div class="partner-rate-card-value"><%= partner.commissionRate %>% <span>per sale</span></div>
+              </div>
+              <div class="partner-rate-card">
+                <div class="partner-rate-card-title">Buyer Discount</div>
+                <div class="partner-rate-card-value"><%= partner.buyerDiscountRate %>% <span>for buyers</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Stats Card -->
+        <div class="partner-card">
+          <div class="partner-card-header">
+            <h2 class="partner-card-title">
+              <i data-lucide="bar-chart-3"></i>
+              All-Time Stats
+            </h2>
+          </div>
+          <div class="partner-card-body">
+            <div class="partner-info-row">
+              <span class="partner-info-label">Total Orders</span>
+              <span class="partner-info-value"><%= allTime.totalOrders || 0 %></span>
+            </div>
+            <div class="partner-info-row">
+              <span class="partner-info-label">Total Earnings</span>
+              <span class="partner-info-value"><%= (allTime.totalEarnings || 0).toFixed(2) %> AED</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Referral Codes Section -->
+    <% if (partnerCodes && partnerCodes.length > 0) { %>
+    <div id="codesSection" class="partner-card" style="margin-top: 1.5rem;">
+      <div class="partner-card-header">
+        <h2 class="partner-card-title">
+          <i data-lucide="tag"></i>
+          Your Referral Codes
+        </h2>
+      </div>
+      <div class="partner-card-body no-padding">
+        <table class="partner-table">
+          <thead>
+            <tr>
+              <th>Code</th>
+              <th>Name</th>
+              <th>Commission</th>
+              <th>Discount</th>
+              <th>Valid Until</th>
+              <th>Uses</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% partnerCodes.forEach(code => { 
+              const isExpired = code.validUntil && new Date(code.validUntil) < new Date();
+            %>
+            <tr>
+              <td><strong style="font-family: 'SF Mono', monospace; letter-spacing: 0.05em;"><%= code.code %></strong></td>
+              <td><%= code.name || '-' %></td>
+              <td><strong><%= code.commissionRate %>%</strong></td>
+              <td><%= code.buyerDiscountRate %>%</td>
+              <td>
+                <% if (code.validUntil) { %>
+                  <span style="color: <%= isExpired ? 'var(--partner-danger)' : 'var(--partner-text-secondary)' %>;">
+                    <%= new Date(code.validUntil).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %>
+                  </span>
+                <% } else { %>
+                  <span style="color: var(--partner-text-muted); font-style: italic;">No Expiry</span>
+                <% } %>
+              </td>
+              <td><%= code.stats?.usageCount || 0 %><% if (code.maxUses > 0) { %>/<%= code.maxUses %><% } %></td>
+              <td>
+                <span class="partner-badge <%= code.status === 'active' ? 'active' : (code.status === 'expired' ? 'expired' : 'inactive') %>">
+                  <%= code.status === 'active' ? 'Active' : (code.status === 'expired' ? 'Expired' : 'Inactive') %>
+                </span>
+              </td>
+              <td>
+                <button class="partner-btn partner-btn-sm partner-btn-secondary" onclick="copyCodeValue('<%= code.code %>')" title="Copy code">
+                  <i data-lucide="copy"></i>
+                </button>
+              </td>
+            </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <% } %>
+  </main>
+
+  <%- include('partials/footer') %>
+</div>
+
+<script>
+  function copyCodeValue(code) {
+    navigator.clipboard.writeText(code).then(() => {
+      showToast(`Code "${code}" copied to clipboard!`);
+    }).catch(err => {
+      console.error('Failed to copy:', err);
+    });
+  }
+
+  function showToast(message) {
+    const existingToast = document.querySelector('.toast-notification');
+    if (existingToast) existingToast.remove();
+
+    const toast = document.createElement('div');
+    toast.className = 'toast-notification partner-fade-in';
+    toast.innerHTML = `<i data-lucide="check-circle"></i><span>${message}</span>`;
+    toast.style.cssText = `
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--partner-primary);
+      color: white;
+      padding: 0.875rem 1.25rem;
+      border-radius: var(--partner-radius-md);
+      font-size: 0.875rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      z-index: 1000;
+      box-shadow: var(--partner-shadow-lg);
+    `;
+    document.body.appendChild(toast);
+    lucide.createIcons();
+
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateX(-50%) translateY(10px)';
+      toast.style.transition = 'all 0.3s ease';
+      setTimeout(() => toast.remove(), 300);
+    }, 2500);
+  }
+</script>

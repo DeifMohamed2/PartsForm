@@ -8,6 +8,7 @@ const Part = require('../models/Part');
 const { processProfileImage, deleteOldProfileImage } = require('../utils/fileUploader');
 const socketService = require('../services/socketService');
 const { getEffectiveMarkup, applyMarkupToPrice } = require('../utils/priceMarkup');
+const referralService = require('../services/referralService');
 
 /**
  * Get buyer dashboard/main page
@@ -1377,7 +1378,46 @@ const createOrder = async (req, res) => {
       }
     };
 
+    // Handle referral - use buyer's linked referral from registration
+    let referralData = null;
+    const orderSubtotal = validatedItems.reduce((sum, item) => sum + parseFloat(item.price || 0), 0);
+    
+    // Check if buyer has a referral linked from registration
+    if (buyer.registrationReferral && buyer.registrationReferral.code && buyer.registrationReferral.partnerId) {
+      // Verify partner is still active
+      const ReferralPartner = require('../models/ReferralPartner');
+      const partner = await ReferralPartner.findById(buyer.registrationReferral.partnerId);
+      
+      if (partner && partner.status === 'active') {
+        const discountRate = buyer.registrationReferral.discountRate || 0;
+        const discountAmount = orderSubtotal * (discountRate / 100);
+        
+        referralData = {
+          code: buyer.registrationReferral.code,
+          codeId: buyer.registrationReferral.codeId,
+          partnerId: buyer.registrationReferral.partnerId,
+          discountRate: discountRate,
+          discountAmount: Math.round(discountAmount * 100) / 100,
+          commissionRate: buyer.registrationReferral.commissionRate || 5
+        };
+        paymentInfo.referral = referralData;
+        console.log('[Order] Buyer registration referral applied:', referralData.code, 'discount:', referralData.discountAmount);
+      } else {
+        console.log('[Order] Buyer has referral but partner is inactive');
+      }
+    }
+
     const order = await Order.createFromCartItems(buyer, validatedItems, paymentInfo);
+
+    // Process referral commission if referral was applied
+    if (referralData && order) {
+      try {
+        await referralService.processOrderReferral(order, referralData, buyer);
+      } catch (refErr) {
+        console.error('[Order] Error processing referral commission:', refErr);
+        // Don't fail the order, just log the error
+      }
+    }
 
     res.json({
       success: true,
@@ -1403,6 +1443,99 @@ const createOrder = async (req, res) => {
       success: false,
       message: 'Failed to create order',
       error: error.message
+    });
+  }
+};
+
+/**
+ * Get buyer's registration referral
+ * GET /buyer/api/referral/status
+ * Returns the referral data linked to buyer at registration time (if any)
+ */
+const getReferralStatus = async (req, res) => {
+  try {
+    const buyerId = req.user._id;
+    const buyer = await Buyer.findById(buyerId).select('registrationReferral');
+    
+    if (!buyer) {
+      return res.status(404).json({
+        success: false,
+        message: 'Buyer not found'
+      });
+    }
+
+    // Check if buyer has a linked referral
+    if (buyer.registrationReferral && buyer.registrationReferral.code) {
+      // Verify partner is still active
+      const ReferralPartner = require('../models/ReferralPartner');
+      const partner = await ReferralPartner.findById(buyer.registrationReferral.partnerId);
+      
+      const isPartnerActive = partner && partner.status === 'active';
+      
+      return res.json({
+        success: true,
+        hasReferral: true,
+        referral: {
+          code: buyer.registrationReferral.code,
+          partnerName: buyer.registrationReferral.partnerName,
+          partnerId: buyer.registrationReferral.partnerId,
+          discountRate: buyer.registrationReferral.discountRate || 0,
+          commissionRate: buyer.registrationReferral.commissionRate || 0,
+          registeredAt: buyer.registrationReferral.registeredAt,
+          isActive: isPartnerActive // Partner must be active for commission to apply
+        }
+      });
+    }
+
+    // No referral linked
+    return res.json({
+      success: true,
+      hasReferral: false,
+      referral: null
+    });
+  } catch (error) {
+    console.error('Error getting referral status:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error getting referral status'
+    });
+  }
+};
+
+/**
+ * Validate a referral code
+ * POST /buyer/api/referral/validate
+ * Expects { code, orderTotal } in request body
+ * Now returns codeId for codes with validity periods
+ * @deprecated Use registration flow instead - codes are applied at signup, not checkout
+ */
+const validateReferralCode = async (req, res) => {
+  try {
+    const { code, orderTotal } = req.body;
+    const buyerId = req.user?._id || null;
+    
+    if (!code) {
+      return res.json({
+        success: true,
+        valid: false,
+        message: 'Please enter a referral code'
+      });
+    }
+    
+    const result = await referralService.validateReferralCode(code, orderTotal || 0, buyerId);
+    
+    res.json({
+      success: true,
+      valid: result.valid,
+      message: result.message,
+      referral: result.referral
+    });
+  } catch (error) {
+    console.error('Error validating referral code:', error);
+    res.status(500).json({
+      success: false,
+      valid: false,
+      message: 'Error validating referral code'
     });
   }
 };
@@ -2013,6 +2146,8 @@ module.exports = {
   validateCartItems,
   validateCheckout,
   createOrder,
+  validateReferralCode,
+  getReferralStatus,
   getOrders,
   getOrderDetails,
   cancelOrder,

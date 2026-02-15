@@ -2353,3 +2353,177 @@
   font-style: italic;
   color: #64748b;
 }
+
+/* ====================================
+   REFERRAL CODE SECTION
+   ==================================== */
+
+.referral-code-section {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px dashed #e2e8f0;
+}
+
+.referral-code-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 0.75rem;
+}
+
+.referral-code-header i {
+  width: 16px;
+  height: 16px;
+  color: #f59e0b;
+}
+
+.referral-code-input-wrapper {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.referral-code-input {
+  flex: 1;
+  padding: 0.625rem 0.875rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  transition: all 0.2s ease;
+}
+
+.referral-code-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.referral-code-input::placeholder {
+  text-transform: none;
+  color: #94a3b8;
+}
+
+.btn-apply-referral {
+  padding: 0.625rem 1rem;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-apply-referral:hover {
+  background: #2563eb;
+}
+
+.btn-apply-referral:disabled {
+  background: #94a3b8;
+  cursor: not-allowed;
+}
+
+.btn-apply-referral.loading {
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+.referral-code-status {
+  margin-top: 0.75rem;
+}
+
+.referral-success {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+  border: 1px solid #86efac;
+  border-radius: 8px;
+}
+
+.referral-success > i {
+  width: 20px;
+  height: 20px;
+  color: #16a34a;
+  flex-shrink: 0;
+}
+
+.referral-success-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.referral-partner-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #15803d;
+}
+
+.referral-discount-text {
+  font-size: 0.8rem;
+  color: #16a34a;
+}
+
+.btn-remove-referral {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.6);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-remove-referral:hover {
+  background: white;
+}
+
+.btn-remove-referral i {
+  width: 14px;
+  height: 14px;
+  color: #475569;
+}
+
+.referral-error {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #dc2626;
+  font-size: 0.85rem;
+}
+
+.referral-error i {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+/* Referral Discount Row in Summary */
+.summary-row.discount {
+  color: #16a34a;
+}
+
+.discount-value {
+  color: #16a34a !important;
+  font-weight: 600;
+}
+
+/* Referral section hidden when applied */
+.referral-code-input-wrapper.hidden {
+  display: none;
+}

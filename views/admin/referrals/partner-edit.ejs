@@ -1,0 +1,395 @@
+<%- include('../partials/header') %>
+<link rel="stylesheet" href="/css/adminCSS/admin-referrals.css">
+</head>
+<body>
+  <div class="admin-wrapper">
+    <%- include('../partials/sidebar', { activePage: 'referrals' }) %>
+    <main class="admin-main">
+      <%- include('../partials/topbar', { pageTitle: 'Edit Partner' }) %>
+      <div class="admin-content">
+        <div class="referrals-form-container">
+          <form id="partnerForm">
+            <div class="referrals-form-section">
+              <div class="referrals-form-section-header">
+                <i data-lucide="user"></i>
+                <h3>Personal Information</h3>
+              </div>
+              <div class="referrals-form-section-body">
+                <div class="referrals-form-grid">
+                  <div class="referrals-form-group">
+                    <label>First Name <span class="required">*</span></label>
+                    <input type="text" class="referrals-form-input" name="firstName" required value="<%= partner.firstName %>">
+                  </div>
+                  <div class="referrals-form-group">
+                    <label>Last Name <span class="required">*</span></label>
+                    <input type="text" class="referrals-form-input" name="lastName" required value="<%= partner.lastName %>">
+                  </div>
+                  <div class="referrals-form-group">
+                    <label>Email Address</label>
+                    <input type="email" class="referrals-form-input" value="<%= partner.email %>" disabled>
+                    <span class="referrals-form-hint">Email cannot be changed</span>
+                  </div>
+                  <div class="referrals-form-group">
+                    <label>Phone Number <span class="required">*</span></label>
+                    <input type="tel" class="referrals-form-input" name="phone" required value="<%= partner.phone %>">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="referrals-form-section">
+              <div class="referrals-form-section-header">
+                <i data-lucide="hash"></i>
+                <h3>Referral Codes</h3>
+              </div>
+              <div class="referrals-form-section-body">
+                <div class="referrals-form-group">
+                  <label>Manage Codes</label>
+                  <div class="referrals-code-manage-info">
+                    <p class="referrals-form-hint">Referral codes are managed separately. You can view and create codes on the partner details page.</p>
+                    <a href="/admin/referrals/partners/<%= partner._id %>#codes" class="referrals-btn referrals-btn-secondary" style="margin-top: 12px;">
+                      <i data-lucide="ticket"></i>
+                      View Codes
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="referrals-form-section">
+              <div class="referrals-form-section-header">
+                <i data-lucide="percent"></i>
+                <h3>Commission Settings</h3>
+              </div>
+              <div class="referrals-form-section-body">
+                <div class="referrals-form-grid">
+                  <div class="referrals-form-group">
+                    <label>Commission Rate <span class="required">*</span></label>
+                    <div class="referrals-rate-input-wrapper">
+                      <input type="number" class="referrals-form-input" name="commissionRate" required min="0" max="50" step="0.1" value="<%= partner.commissionRate %>">
+                      <span class="referrals-rate-suffix">%</span>
+                    </div>
+                  </div>
+                  <div class="referrals-form-group">
+                    <label>Buyer Discount Rate <span class="required">*</span></label>
+                    <div class="referrals-rate-input-wrapper">
+                      <input type="number" class="referrals-form-input" name="buyerDiscountRate" required min="0" max="30" step="0.1" value="<%= partner.buyerDiscountRate %>">
+                      <span class="referrals-rate-suffix">%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="referrals-form-section">
+              <div class="referrals-form-section-header">
+                <i data-lucide="lock"></i>
+                <h3>Password Management</h3>
+              </div>
+              <div class="referrals-form-section-body">
+                <div class="referrals-form-grid">
+                  <div class="referrals-form-group full-width">
+                    <label>New Password</label>
+                    <div class="referrals-password-input-wrapper">
+                      <input type="password" class="referrals-form-input" name="newPassword" id="newPassword" placeholder="Leave blank to keep current password" minlength="8">
+                      <button type="button" class="referrals-password-toggle" onclick="toggleNewPassword()">
+                        <i data-lucide="eye" id="newPasswordToggleIcon"></i>
+                      </button>
+                    </div>
+                    <span class="referrals-form-hint">Enter a new password to change. Minimum 8 characters.</span>
+                  </div>
+                  <div class="referrals-form-group">
+                    <button type="button" class="referrals-generate-password-btn" onclick="generatePassword()">
+                      <i data-lucide="shuffle"></i>
+                      Generate Password
+                    </button>
+                  </div>
+                  <div class="referrals-form-group">
+                    <label class="referrals-checkbox-label">
+                      <input type="checkbox" name="sendPasswordEmail" id="sendPasswordEmail">
+                      <span>Send password via email to partner</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="referrals-form-section">
+              <div class="referrals-form-section-header">
+                <i data-lucide="wallet"></i>
+                <h3>Payment Details</h3>
+              </div>
+              <div class="referrals-form-section-body">
+                <div class="referrals-form-grid">
+                  <div class="referrals-form-group full-width">
+                    <label>Preferred Payment Method</label>
+                    <select class="referrals-form-select" name="paymentMethod">
+                      <option value="bank" <%= partner.paymentDetails?.preferredMethod === 'bank' ? 'selected' : '' %>>Bank Transfer</option>
+                      <option value="paypal" <%= partner.paymentDetails?.preferredMethod === 'paypal' ? 'selected' : '' %>>PayPal</option>
+                      <option value="other" <%= partner.paymentDetails?.preferredMethod === 'other' ? 'selected' : '' %>>Other</option>
+                    </select>
+                  </div>
+                </div>
+                <div id="bankDetails" style="<%= partner.paymentDetails?.preferredMethod !== 'bank' && partner.paymentDetails?.preferredMethod ? 'display:none;' : '' %>">
+                  <div class="referrals-form-grid">
+                    <div class="referrals-form-group">
+                      <label>Bank Name</label>
+                      <input type="text" class="referrals-form-input" name="bankName" value="<%= partner.paymentDetails?.bankName || '' %>">
+                    </div>
+                    <div class="referrals-form-group">
+                      <label>Account Holder Name</label>
+                      <input type="text" class="referrals-form-input" name="accountName" value="<%= partner.paymentDetails?.accountName || '' %>">
+                    </div>
+                    <div class="referrals-form-group">
+                      <label>IBAN</label>
+                      <input type="text" class="referrals-form-input" name="iban" value="<%= partner.paymentDetails?.iban || '' %>">
+                    </div>
+                    <div class="referrals-form-group">
+                      <label>SWIFT Code</label>
+                      <input type="text" class="referrals-form-input" name="swiftCode" value="<%= partner.paymentDetails?.swiftCode || '' %>">
+                    </div>
+                  </div>
+                </div>
+                <div id="paypalDetails" style="<%= partner.paymentDetails?.preferredMethod === 'paypal' ? '' : 'display:none;' %>">
+                  <div class="referrals-form-grid">
+                    <div class="referrals-form-group full-width">
+                      <label>PayPal Email</label>
+                      <input type="email" class="referrals-form-input" name="paypalEmail" value="<%= partner.paymentDetails?.paypalEmail || '' %>">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="referrals-form-section">
+              <div class="referrals-form-section-header">
+                <i data-lucide="file-text"></i>
+                <h3>Admin Notes</h3>
+              </div>
+              <div class="referrals-form-section-body">
+                <div class="referrals-form-group">
+                  <textarea class="referrals-form-textarea" name="adminNotes" rows="3"><%= partner.adminNotes || '' %></textarea>
+                </div>
+              </div>
+            </div>
+
+            <div class="referrals-form-actions">
+              <a href="/admin/referrals/partners/<%= partner._id %>" class="referrals-btn referrals-btn-secondary">Cancel</a>
+              <button type="submit" class="referrals-btn referrals-btn-primary">
+                <i data-lucide="save"></i>
+                Save Changes
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+  <%- include('../partials/footer') %>
+  <script>
+    const partnerId = '<%= partner._id %>';
+    const partnerEmail = '<%= partner.email %>';
+    
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      document.querySelector('[name="paymentMethod"]').addEventListener('change', (e) => {
+        document.getElementById('bankDetails').style.display = e.target.value === 'bank' ? 'block' : 'none';
+        document.getElementById('paypalDetails').style.display = e.target.value === 'paypal' ? 'block' : 'none';
+      });
+      document.getElementById('partnerForm').addEventListener('submit', handleSubmit);
+    });
+
+    async function regenerateCode() {
+      if (!confirm('Regenerate referral code? The old code will stop working.')) return;
+      try {
+        const response = await fetch(`/admin/api/referrals/partners/${partnerId}/regenerate-code`, { method: 'POST' });
+        const data = await response.json();
+        if (data.success) {
+          document.getElementById('currentCode').textContent = data.referralCode;
+          showToast('Code regenerated: ' + data.referralCode, 'success');
+        } else {
+          showToast(data.message || 'Failed to regenerate code', 'error');
+        }
+      } catch (error) {
+        showToast('Failed to regenerate code', 'error');
+      }
+    }
+
+    function toggleNewPassword() {
+      const input = document.getElementById('newPassword');
+      const icon = document.getElementById('newPasswordToggleIcon');
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.setAttribute('data-lucide', 'eye-off');
+      } else {
+        input.type = 'password';
+        icon.setAttribute('data-lucide', 'eye');
+      }
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function generatePassword() {
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+      const specials = '!@#$%&*';
+      let password = '';
+      for (let i = 0; i < 10; i++) {
+        password += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      password += specials.charAt(Math.floor(Math.random() * specials.length));
+      password += Math.floor(Math.random() * 10);
+      const input = document.getElementById('newPassword');
+      input.value = password;
+      input.type = 'text';
+      document.getElementById('newPasswordToggleIcon').setAttribute('data-lucide', 'eye-off');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+      showToast('Password generated! Don\'t forget to save.', 'success');
+    }
+
+    async function handleSubmit(e) {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const newPassword = formData.get('newPassword')?.trim();
+      const sendPasswordEmail = document.getElementById('sendPasswordEmail')?.checked || false;
+
+      // Validate password if provided
+      if (newPassword && newPassword.length < 8) {
+        showToast('Password must be at least 8 characters', 'error');
+        return;
+      }
+
+      const payload = {
+        firstName: formData.get('firstName'),
+        lastName: formData.get('lastName'),
+        phone: formData.get('phone'),
+        commissionRate: parseFloat(formData.get('commissionRate')),
+        buyerDiscountRate: parseFloat(formData.get('buyerDiscountRate')),
+        paymentDetails: {
+          preferredMethod: formData.get('paymentMethod'),
+          bankName: formData.get('bankName'),
+          accountName: formData.get('accountName'),
+          iban: formData.get('iban'),
+          swiftCode: formData.get('swiftCode'),
+          paypalEmail: formData.get('paypalEmail'),
+        },
+        adminNotes: formData.get('adminNotes'),
+      };
+
+      // Add password if provided
+      if (newPassword) {
+        payload.newPassword = newPassword;
+        payload.sendPasswordEmail = sendPasswordEmail;
+      }
+
+      try {
+        const response = await fetch(`/admin/api/referrals/partners/${partnerId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const data = await response.json();
+        if (data.success) {
+          let message = 'Partner updated successfully';
+          if (data.passwordChanged) {
+            message += '. Password has been changed';
+            if (data.emailSent) {
+              message += ' and emailed to partner';
+            }
+          }
+          showToast(message, 'success');
+          setTimeout(() => { window.location.href = `/admin/referrals/partners/${partnerId}`; }, 2000);
+        } else {
+          showToast(data.message || 'Failed to update partner', 'error');
+        }
+      } catch (error) {
+        showToast('Failed to update partner', 'error');
+      }
+    }
+
+    function showToast(message, type) {
+      const toast = document.createElement('div');
+      toast.style.cssText = `position:fixed;top:20px;right:20px;z-index:10000;padding:12px 16px;border-radius:8px;background:${type==='error'?'#fee2e2':'#dcfce7'};color:${type==='error'?'#dc2626':'#16a34a'};font-weight:500;box-shadow:0 4px 12px rgba(0,0,0,0.15);max-width:350px;`;
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 4000);
+    }
+  </script>
+
+  <style>
+    .referrals-password-input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .referrals-password-input-wrapper input {
+      padding-right: 48px;
+    }
+
+    .referrals-password-toggle {
+      position: absolute;
+      right: 8px;
+      width: 36px;
+      height: 36px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #64748b;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+
+    .referrals-password-toggle:hover {
+      background: #f1f5f9;
+      color: #1e293b;
+    }
+
+    .referrals-password-toggle i {
+      width: 18px;
+      height: 18px;
+    }
+
+    .referrals-generate-password-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.625rem 1rem;
+      background: #f1f5f9;
+      color: #374151;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .referrals-generate-password-btn:hover {
+      background: #e2e8f0;
+      border-color: #cbd5e1;
+    }
+
+    .referrals-generate-password-btn i {
+      width: 16px;
+      height: 16px;
+    }
+
+    .referrals-checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 0.625rem;
+      font-size: 0.9rem;
+      color: #374151;
+      cursor: pointer;
+    }
+
+    .referrals-checkbox-label input {
+      width: 18px;
+      height: 18px;
+      accent-color: #3b82f6;
+    }
+  </style>
+</body>
+</html>

@@ -32,6 +32,9 @@
   let selectedPaymentType = 'full';
   let selectedPaymentMethod = 'card';
   let isSubmitting = false;
+  
+  // Referral state
+  let appliedReferral = null; // { code, partnerName, discountRate, discountAmount }
 
   // ====================================
   // UTILITY FUNCTIONS
@@ -259,7 +262,15 @@
   }
 
   function updateFeeAndTotal() {
-    const baseAmount = selectedPaymentType === 'full' ? orderTotal : orderTotal * 0.2;
+    // Calculate base amount considering referral discount
+    const subtotalAfterDiscount = appliedReferral 
+      ? orderTotal - appliedReferral.discountAmount 
+      : orderTotal;
+    
+    const baseAmount = selectedPaymentType === 'full' 
+      ? subtotalAfterDiscount 
+      : subtotalAfterDiscount * 0.2;
+    
     const feeConfig = PAYMENT_FEES[selectedPaymentMethod];
     
     let fee = 0;
@@ -275,6 +286,18 @@
     const feeRow = document.getElementById('summary-fee-row');
     const feeEl = document.getElementById('summary-fee');
     const totalEl = document.getElementById('summary-total');
+    const referralRow = document.getElementById('summary-referral-row');
+    const referralDiscount = document.getElementById('summary-referral-discount');
+
+    // Show/hide referral discount row
+    if (appliedReferral && referralRow) {
+      referralRow.style.display = 'flex';
+      if (referralDiscount) {
+        referralDiscount.textContent = `-${formatCurrency(appliedReferral.discountAmount)}`;
+      }
+    } else if (referralRow) {
+      referralRow.style.display = 'none';
+    }
 
     if (fee > 0) {
       if (feeRow) feeRow.style.display = 'flex';
@@ -291,16 +314,135 @@
     if (confirmTotal) confirmTotal.textContent = formatCurrency(total);
   }
 
+  // ====================================
+  // REFERRAL CODE HANDLING
+  // ====================================
+  async function applyReferralCode() {
+    const input = document.getElementById('referral-code-input');
+    const btn = document.getElementById('btn-apply-referral');
+    const status = document.getElementById('referral-status');
+    const successDiv = document.getElementById('referral-success');
+    const errorDiv = document.getElementById('referral-error');
+    const errorText = document.getElementById('referral-error-text');
+    
+    if (!input) return;
+    
+    const code = input.value.trim().toUpperCase();
+    if (!code) {
+      showToast('Please enter a referral code', 'warning');
+      return;
+    }
+    
+    // Show loading state
+    btn.classList.add('loading');
+    btn.textContent = '...';
+    
+    try {
+      const response = await fetch('/buyer/api/referral/validate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        credentials: 'same-origin',
+        body: JSON.stringify({ code, orderTotal })
+      });
+      
+      const result = await response.json();
+      
+      if (result.success && result.valid) {
+        // Apply referral
+        appliedReferral = {
+          code: result.referral.code,
+          codeId: result.referral.codeId, // ReferralCode document ID for validity tracking
+          partnerId: result.referral.partnerId,
+          partnerName: result.referral.partnerName,
+          discountRate: result.referral.discountRate,
+          discountAmount: result.referral.discountAmount,
+          commissionRate: result.referral.commissionRate,
+          validUntil: result.referral.validUntil, // Code expiry info
+          remainingDays: result.referral.remainingDays
+        };
+        
+        // Update UI
+        if (status) status.style.display = 'block';
+        if (successDiv) {
+          successDiv.style.display = 'flex';
+          const nameEl = document.getElementById('referral-partner-name');
+          const discountEl = document.getElementById('referral-discount-text');
+          if (nameEl) nameEl.textContent = `Referred by ${appliedReferral.partnerName}`;
+          if (discountEl) discountEl.textContent = `${appliedReferral.discountRate}% discount applied!`;
+        }
+        if (errorDiv) errorDiv.style.display = 'none';
+        
+        // Hide input
+        const wrapper = document.querySelector('.referral-code-input-wrapper');
+        if (wrapper) wrapper.classList.add('hidden');
+        
+        // Update totals
+        updatePaymentAmounts();
+        updateFeeAndTotal();
+        
+        showToast(`Referral code applied! You save ${formatCurrency(appliedReferral.discountAmount)}`, 'success');
+        
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      } else {
+        // Invalid code
+        if (status) status.style.display = 'block';
+        if (successDiv) successDiv.style.display = 'none';
+        if (errorDiv) errorDiv.style.display = 'flex';
+        if (errorText) errorText.textContent = result.message || 'Invalid referral code';
+        
+        setTimeout(() => {
+          if (errorDiv) errorDiv.style.display = 'none';
+          if (status) status.style.display = 'none';
+        }, 3000);
+      }
+    } catch (error) {
+      console.error('[Checkout] Referral validation error:', error);
+      showToast('Failed to validate referral code', 'error');
+    } finally {
+      btn.classList.remove('loading');
+      btn.textContent = 'Apply';
+    }
+  }
+  
+  function removeReferralCode() {
+    appliedReferral = null;
+    
+    // Reset UI
+    const input = document.getElementById('referral-code-input');
+    const status = document.getElementById('referral-status');
+    const successDiv = document.getElementById('referral-success');
+    const wrapper = document.querySelector('.referral-code-input-wrapper');
+    
+    if (input) input.value = '';
+    if (status) status.style.display = 'none';
+    if (successDiv) successDiv.style.display = 'none';
+    if (wrapper) wrapper.classList.remove('hidden');
+    
+    // Update totals
+    updatePaymentAmounts();
+    updateFeeAndTotal();
+    
+    showToast('Referral code removed', 'warning');
+  }
+
   function updatePaymentAmounts() {
+    // Calculate amounts considering referral discount
+    const subtotalAfterDiscount = appliedReferral 
+      ? orderTotal - appliedReferral.discountAmount 
+      : orderTotal;
+    
     const fullEl = document.getElementById('full-amount');
     const partialNowEl = document.getElementById('partial-now');
     const partialLaterEl = document.getElementById('partial-later');
     const partialAmountEl = document.getElementById('partial-amount');
 
-    if (fullEl) fullEl.textContent = formatCurrency(orderTotal);
-    if (partialNowEl) partialNowEl.textContent = formatCurrency(orderTotal * 0.2);
-    if (partialLaterEl) partialLaterEl.textContent = formatCurrency(orderTotal * 0.8);
-    if (partialAmountEl) partialAmountEl.textContent = formatCurrency(orderTotal * 0.2);
+    if (fullEl) fullEl.textContent = formatCurrency(subtotalAfterDiscount);
+    if (partialNowEl) partialNowEl.textContent = formatCurrency(subtotalAfterDiscount * 0.2);
+    if (partialLaterEl) partialLaterEl.textContent = formatCurrency(subtotalAfterDiscount * 0.8);
+    if (partialAmountEl) partialAmountEl.textContent = formatCurrency(subtotalAfterDiscount * 0.2);
   }
 
   function updateConfirmation() {
@@ -437,8 +579,12 @@
       `;
     }
 
-    // Calculate fee
-    const baseAmount = selectedPaymentType === 'full' ? orderTotal : orderTotal * 0.2;
+    // Calculate amounts with referral discount
+    const subtotalAfterDiscount = appliedReferral 
+      ? orderTotal - appliedReferral.discountAmount 
+      : orderTotal;
+    
+    const baseAmount = selectedPaymentType === 'full' ? subtotalAfterDiscount : subtotalAfterDiscount * 0.2;
     const feeConfig = PAYMENT_FEES[selectedPaymentMethod];
     const fee = feeConfig?.type === 'percentage' 
       ? (baseAmount * feeConfig.value / 100) + (feeConfig.fixed || 0)
@@ -476,7 +622,10 @@
         }
       };
 
-      console.log('[Checkout] Creating order with', cartItems.length, 'items');
+      // Note: Referral is now applied automatically on the server from buyer's registration data
+      // No need to send referral data in the request
+
+      console.log('[Checkout] Creating order with', cartItems.length, 'items', appliedReferral ? '(referral will be applied from account)' : '');
 
       const response = await fetch('/buyer/api/orders/create', {
         method: 'POST',
@@ -587,6 +736,9 @@
     // Complete payment button
     btnComplete?.addEventListener('click', completePayment);
 
+    // Note: Referral codes are now applied at registration, not checkout
+    // The referral section is read-only and auto-populated from buyer's registration data
+
     // Initialize default selections
     const firstTypeCard = document.querySelector('.payment-type-card');
     if (firstTypeCard) {
@@ -627,8 +779,87 @@
 
     // Load addresses from API
     await loadAddresses();
+    
+    // Load buyer's referral status (registered at signup)
+    await loadBuyerReferral();
 
     console.log('[Checkout] Ready');
+  }
+  
+  // Load buyer's registration referral if any
+  async function loadBuyerReferral() {
+    try {
+      const response = await fetch('/buyer/api/referral/status', {
+        credentials: 'same-origin',
+        headers: { 'Accept': 'application/json' }
+      });
+      
+      if (!response.ok) return;
+      
+      const data = await response.json();
+      
+      if (data.success && data.hasReferral && data.referral && data.referral.isActive) {
+        // Buyer has an active referral linked from registration
+        const discountAmount = orderTotal * (data.referral.discountRate / 100);
+        
+        appliedReferral = {
+          code: data.referral.code,
+          partnerId: data.referral.partnerId,
+          partnerName: data.referral.partnerName,
+          discountRate: data.referral.discountRate,
+          discountAmount: Math.round(discountAmount * 100) / 100,
+          commissionRate: data.referral.commissionRate,
+          fromRegistration: true // Flag to indicate this is auto-applied from registration
+        };
+        
+        // Update UI to show the referral (read-only)
+        displayLinkedReferral();
+        
+        // Update totals with discount
+        updatePaymentAmounts();
+        updateFeeAndTotal();
+        
+        console.log('[Checkout] Buyer referral loaded:', appliedReferral.code, 'discount:', appliedReferral.discountRate + '%');
+      } else {
+        // Hide referral section since no referral is linked
+        hideReferralSection();
+      }
+    } catch (error) {
+      console.error('[Checkout] Error loading buyer referral:', error);
+      hideReferralSection();
+    }
+  }
+  
+  // Display the buyer's linked referral (from registration) - read-only
+  function displayLinkedReferral() {
+    const section = document.getElementById('referral-section');
+    const status = document.getElementById('referral-status');
+    const successDiv = document.getElementById('referral-success');
+    const nameEl = document.getElementById('referral-partner-name');
+    const discountEl = document.getElementById('referral-discount-text');
+    const discountRow = document.getElementById('summary-referral-row');
+    const discountValue = document.getElementById('summary-referral-discount');
+    
+    // Show the referral section
+    if (section) section.style.display = 'block';
+    if (status) status.style.display = 'block';
+    if (successDiv) successDiv.style.display = 'flex';
+    
+    // Set referral info
+    if (nameEl) nameEl.textContent = `Referred by ${appliedReferral.partnerName}`;
+    if (discountEl) discountEl.textContent = `${appliedReferral.discountRate}% discount on all orders`;
+    
+    // Show discount row in summary
+    if (discountRow) discountRow.style.display = 'flex';
+    if (discountValue) discountValue.textContent = '-' + formatCurrency(appliedReferral.discountAmount);
+    
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+  
+  // Hide referral section entirely (buyer has no linked referral)
+  function hideReferralSection() {
+    const section = document.getElementById('referral-section');
+    if (section) section.style.display = 'none';
   }
 
   // Start

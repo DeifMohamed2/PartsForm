@@ -1369,9 +1369,14 @@
                           <i data-lucide="history"></i>
                           Sync History
                         </div>
-                        <button class="btn-refresh-history" onclick="loadSyncHistory('<%= conn._id %>')" title="Refresh History">
-                          <i data-lucide="refresh-cw"></i>
-                        </button>
+                        <div style="display: flex; gap: 0.5rem;">
+                          <button class="btn-refresh-history" onclick="cleanupSyncHistory('<%= conn._id %>')" title="Clean up stale/failed records with no data">
+                            <i data-lucide="trash-2"></i>
+                          </button>
+                          <button class="btn-refresh-history" onclick="loadSyncHistory('<%= conn._id %>')" title="Refresh History">
+                            <i data-lucide="refresh-cw"></i>
+                          </button>
+                        </div>
                       </div>
                       
                       <!-- History Stats Summary -->
@@ -1387,6 +1392,10 @@
                         <div class="stat-item error">
                           <span class="stat-value" id="stat-failed-<%= conn._id %>">0</span>
                           <span class="stat-label">Failed</span>
+                        </div>
+                        <div class="stat-item warning" id="stat-pending-container-<%= conn._id %>" style="display: none;">
+                          <span class="stat-value" id="stat-pending-<%= conn._id %>">0</span>
+                          <span class="stat-label">Pending</span>
                         </div>
                         <div class="stat-item">
                           <span class="stat-value" id="stat-avg-duration-<%= conn._id %>">-</span>
@@ -1999,13 +2008,25 @@
         // Store pagination state
         historyPagination.set(integrationId, data.pagination);
         
-        // Update stats
+        // Update stats from aggregated values (not filtered from current page)
         if (statsContainer && data.stats) {
           statsContainer.style.display = 'flex';
-          document.getElementById('stat-total-' + integrationId).textContent = data.pagination.total;
-          document.getElementById('stat-completed-' + integrationId).textContent = data.history.filter(h => h.status === 'completed').length;
-          document.getElementById('stat-failed-' + integrationId).textContent = data.history.filter(h => h.status === 'failed' || h.status === 'interrupted').length;
+          document.getElementById('stat-total-' + integrationId).textContent = data.stats.total || 0;
+          document.getElementById('stat-completed-' + integrationId).textContent = data.stats.completed || 0;
+          document.getElementById('stat-failed-' + integrationId).textContent = (data.stats.failed || 0) + (data.stats.interrupted || 0);
           document.getElementById('stat-avg-duration-' + integrationId).textContent = formatHistoryDuration(data.stats.avgDuration);
+          
+          // Show pending count if there are pending syncs
+          const pendingCount = data.stats.pending || 0;
+          const pendingContainer = document.getElementById('stat-pending-container-' + integrationId);
+          if (pendingContainer) {
+            if (pendingCount > 0) {
+              pendingContainer.style.display = 'flex';
+              document.getElementById('stat-pending-' + integrationId).textContent = pendingCount;
+            } else {
+              pendingContainer.style.display = 'none';
+            }
+          }
         }
         
         // Render history table
@@ -2057,6 +2078,39 @@
       if (newPage < 1 || newPage > state.totalPages) return;
       
       loadSyncHistory(integrationId, newPage);
+    }
+    
+    // Cleanup stale/invalid sync history records
+    async function cleanupSyncHistory(integrationId) {
+      if (!confirm('This will delete all stale sync records (pending/interrupted with no data) older than 1 hour. Continue?')) {
+        return;
+      }
+      
+      try {
+        const response = await fetch(`/admin/api/sync-history/${integrationId}/cleanup`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          if (data.deletedCount > 0) {
+            alert(`Cleaned up ${data.deletedCount} stale record(s)`);
+          } else {
+            alert('No stale records found to clean up');
+          }
+          // Reload history
+          loadSyncHistory(integrationId);
+        } else {
+          alert('Cleanup failed: ' + (data.error || 'Unknown error'));
+        }
+      } catch (error) {
+        console.error('Cleanup error:', error);
+        alert('Cleanup failed: ' + error.message);
+      }
     }
     
     // Create a history table row

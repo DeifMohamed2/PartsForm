@@ -1,0 +1,174 @@
+<%- include('../partials/header') %>
+<link rel="stylesheet" href="/css/adminCSS/admin-referrals.css">
+</head>
+
+<body>
+  <div class="admin-wrapper">
+    <%- include('../partials/sidebar', { activePage: 'referrals' }) %>
+
+    <main class="admin-main">
+      <%- include('../partials/topbar', { pageTitle: 'Referrals' }) %>
+
+      <div class="admin-content">
+        <!-- Page Header -->
+        <div class="referrals-page-header">
+          <div>
+            <h2>Referral Management</h2>
+            <p class="page-subtitle">Manage referral partners, track commissions, and process payouts</p>
+          </div>
+        </div>
+
+        <!-- Info Banner -->
+        <div class="referrals-info-banner">
+          <div class="info-icon">
+            <i data-lucide="info"></i>
+          </div>
+          <div class="info-content">
+            <h4>Monthly Commission Review</h4>
+            <p>Commissions are reviewed and processed at the end of each month. All referrals are verified before payout to prevent fraudulent activity. Current period: 
+              <strong><%= new Date(0, currentMonth - 1).toLocaleString('en', { month: 'long' }) %> <%= currentYear %></strong>
+            </p>
+          </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="referrals-stats-grid">
+          <div class="referrals-stat-card">
+            <div class="referrals-stat-icon blue">
+              <i data-lucide="users"></i>
+            </div>
+            <div class="referrals-stat-content">
+              <div class="referrals-stat-value"><%= stats.totalPartners %></div>
+              <div class="referrals-stat-label">Total Partners</div>
+            </div>
+          </div>
+
+          <div class="referrals-stat-card">
+            <div class="referrals-stat-icon green">
+              <i data-lucide="user-check"></i>
+            </div>
+            <div class="referrals-stat-content">
+              <div class="referrals-stat-value"><%= stats.activePartners %></div>
+              <div class="referrals-stat-label">Active Partners</div>
+            </div>
+          </div>
+
+          <div class="referrals-stat-card">
+            <div class="referrals-stat-icon orange">
+              <i data-lucide="clock"></i>
+            </div>
+            <div class="referrals-stat-content">
+              <div class="referrals-stat-value"><%= stats.pendingCommissions %></div>
+              <div class="referrals-stat-label">Pending Commissions</div>
+            </div>
+          </div>
+
+          <div class="referrals-stat-card">
+            <div class="referrals-stat-icon purple">
+              <i data-lucide="trending-up"></i>
+            </div>
+            <div class="referrals-stat-content">
+              <div class="referrals-stat-value"><%= stats.monthlyReferralCount %></div>
+              <div class="referrals-stat-label">This Month Referrals</div>
+            </div>
+          </div>
+
+          <div class="referrals-stat-card">
+            <div class="referrals-stat-icon teal">
+              <i data-lucide="coins"></i>
+            </div>
+            <div class="referrals-stat-content">
+              <div class="referrals-stat-value"><%= stats.monthlyCommissionTotal.toFixed(2) %> <small>AED</small></div>
+              <div class="referrals-stat-label">Monthly Commission</div>
+            </div>
+          </div>
+
+          <% if (stats.pendingApplications > 0) { %>
+          <div class="referrals-stat-card highlight">
+            <div class="referrals-stat-icon amber">
+              <i data-lucide="user-plus"></i>
+            </div>
+            <div class="referrals-stat-content">
+              <div class="referrals-stat-value"><%= stats.pendingApplications %></div>
+              <div class="referrals-stat-label">Pending Applications</div>
+            </div>
+            <a href="/admin/referrals/applications" class="stat-action-link">Review →</a>
+          </div>
+          <% } %>
+        </div>
+
+        <!-- Quick Actions Section -->
+        <div class="referrals-section-header">
+          <h3>Quick Actions</h3>
+        </div>
+
+        <div class="referrals-quick-actions">
+          <% if (stats.pendingApplications > 0) { %>
+          <a href="/admin/referrals/applications" class="referrals-quick-action-card highlight-card">
+            <div class="referrals-quick-action-icon amber">
+              <i data-lucide="user-plus"></i>
+            </div>
+            <div class="referrals-quick-action-content">
+              <h4>Review Applications <span class="badge"><%= stats.pendingApplications %></span></h4>
+              <p>New partner applications waiting for review</p>
+            </div>
+            <i data-lucide="chevron-right" class="referrals-quick-action-arrow"></i>
+          </a>
+          <% } %>
+
+          <a href="/admin/referrals/partners" class="referrals-quick-action-card">
+            <div class="referrals-quick-action-icon blue">
+              <i data-lucide="users"></i>
+            </div>
+            <div class="referrals-quick-action-content">
+              <h4>Manage Partners</h4>
+              <p>View, create, and manage referral partner accounts</p>
+            </div>
+            <i data-lucide="chevron-right" class="referrals-quick-action-arrow"></i>
+          </a>
+
+          <a href="/admin/referrals/partners/create" class="referrals-quick-action-card">
+            <div class="referrals-quick-action-icon green">
+              <i data-lucide="user-plus"></i>
+            </div>
+            <div class="referrals-quick-action-content">
+              <h4>Add New Partner</h4>
+              <p>Create a new referral partner account with unique code</p>
+            </div>
+            <i data-lucide="chevron-right" class="referrals-quick-action-arrow"></i>
+          </a>
+
+          <a href="/admin/referrals/commissions" class="referrals-quick-action-card">
+            <div class="referrals-quick-action-icon orange">
+              <i data-lucide="receipt"></i>
+            </div>
+            <div class="referrals-quick-action-content">
+              <h4>Review Commissions</h4>
+              <p>Review and approve pending commission requests</p>
+            </div>
+            <i data-lucide="chevron-right" class="referrals-quick-action-arrow"></i>
+          </a>
+
+          <a href="/admin/referrals/payouts" class="referrals-quick-action-card">
+            <div class="referrals-quick-action-icon purple">
+              <i data-lucide="wallet"></i>
+            </div>
+            <div class="referrals-quick-action-content">
+              <h4>Process Payouts</h4>
+              <p>Create and process monthly payout batches</p>
+            </div>
+            <i data-lucide="chevron-right" class="referrals-quick-action-arrow"></i>
+          </a>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <%- include('../partials/footer') %>
+  <script>
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+    }
+  </script>
+</body>
+</html>

@@ -62,6 +62,7 @@ const {
   getSyncHistory,
   getAllSyncHistory,
   deleteSyncHistory,
+  cleanupSyncHistory,
   // File upload
   uploadPartsFromFile,
   // Sidebar counts
@@ -101,6 +102,48 @@ const {
   searchParts,
   autocomplete,
 } = require('../controllers/searchController');
+
+// Import referral controller for referral management
+const {
+  getReferralDashboard,
+  getReferralPartners,
+  getReferralPartnerCreate,
+  getReferralPartnerDetails,
+  getReferralPartnerEdit,
+  getPartnersApi,
+  createPartner,
+  updatePartner,
+  updatePartnerStatus,
+  deletePartner,
+  regenerateReferralCode,
+  getCommissions,
+  getCommissionsApi,
+  reviewCommission,
+  bulkReviewCommissions,
+  getCommissionStats,
+  getPayouts,
+  getPayoutsApi,
+  createPayout,
+  processPayout,
+  getPartnersReadyForPayout,
+  // Code Management with validity periods
+  getCodeCreatePage,
+  getCodeEditPage,
+  getPartnerCodesApi,
+  createReferralCode,
+  updateReferralCode,
+  deleteReferralCode,
+  getExpiringCodesApi,
+  updateExpiredCodesApi,
+  generateCodeApi,
+  // Partner Applications
+  getPartnerApplications,
+  getApplicationsApi,
+  getApplicationDetails,
+  approveApplication,
+  rejectApplication,
+  getPendingApplicationsCount,
+} = require('../controllers/referralController');
 
 // Configure multer for file uploads (memory storage for parts)
 const upload = multer({
@@ -283,6 +326,7 @@ router.get('/api/integrations/:id/sync-history', getSyncHistory);
 // Sync History API endpoints (system-wide)
 router.get('/api/sync-history', getAllSyncHistory);
 router.delete('/api/sync-history/:id', requirePermission(PERMISSIONS.DELETE), deleteSyncHistory);
+router.post('/api/sync-history/:integrationId/cleanup', requirePermission(PERMISSIONS.MANAGE_INTEGRATIONS), cleanupSyncHistory);
 
 // Administrators management - Require manage_admins permission
 router.get('/admins', requirePermission(PERMISSIONS.MANAGE_ADMINS), getAdminsManagement);
@@ -325,5 +369,66 @@ router.post('/api/email-inquiries/:id/notes', requirePermission(PERMISSIONS.WRIT
 router.patch('/api/email-inquiries/:id/status', requirePermission(PERMISSIONS.WRITE), updateInquiryStatus);
 router.patch('/api/email-inquiries/:id/read', markAsRead);
 router.delete('/api/email-inquiries/:id', requirePermission(PERMISSIONS.DELETE), deleteInquiry);
+
+// ==========================================
+// Referral Partners Management
+// ==========================================
+// Dashboard
+router.get('/referrals', getReferralDashboard);
+
+// Partner Pages
+router.get('/referrals/partners', getReferralPartners);
+router.get('/referrals/partners/create', requirePermission(PERMISSIONS.MANAGE_USERS), getReferralPartnerCreate);
+router.get('/referrals/partners/:id', getReferralPartnerDetails);
+router.get('/referrals/partners/:id/edit', requirePermission(PERMISSIONS.MANAGE_USERS), getReferralPartnerEdit);
+
+// Commissions Page
+router.get('/referrals/commissions', getCommissions);
+
+// Payouts Page
+router.get('/referrals/payouts', getPayouts);
+
+// Partner Applications Page
+router.get('/referrals/applications', getPartnerApplications);
+
+// Partner API endpoints
+router.get('/api/referrals/partners', getPartnersApi);
+router.post('/api/referrals/partners', requirePermission(PERMISSIONS.MANAGE_USERS), createPartner);
+router.put('/api/referrals/partners/:id', requirePermission(PERMISSIONS.MANAGE_USERS), updatePartner);
+router.put('/api/referrals/partners/:id/status', requirePermission(PERMISSIONS.MANAGE_USERS), updatePartnerStatus);
+router.post('/api/referrals/partners/:id/regenerate-code', requirePermission(PERMISSIONS.MANAGE_USERS), regenerateReferralCode);
+router.delete('/api/referrals/partners/:id', requireAllPermissions(PERMISSIONS.DELETE, PERMISSIONS.MANAGE_USERS), deletePartner);
+
+// Referral Code Management Pages (multiple codes per partner with validity periods)
+router.get('/referrals/partners/:partnerId/codes/create', requirePermission(PERMISSIONS.MANAGE_USERS), getCodeCreatePage);
+router.get('/referrals/codes/:codeId/edit', requirePermission(PERMISSIONS.MANAGE_USERS), getCodeEditPage);
+
+// Referral Code API endpoints
+router.get('/api/referrals/partners/:partnerId/codes', getPartnerCodesApi);
+router.post('/api/referrals/partners/:partnerId/codes', requirePermission(PERMISSIONS.MANAGE_USERS), createReferralCode);
+router.put('/api/referrals/codes/:codeId', requirePermission(PERMISSIONS.MANAGE_USERS), updateReferralCode);
+router.delete('/api/referrals/codes/:codeId', requirePermission(PERMISSIONS.MANAGE_USERS), deleteReferralCode);
+router.get('/api/referrals/codes/expiring', getExpiringCodesApi);
+router.post('/api/referrals/codes/update-expired', requirePermission(PERMISSIONS.WRITE), updateExpiredCodesApi);
+router.get('/api/referrals/codes/generate', generateCodeApi);
+
+// Commission API endpoints
+router.get('/api/referrals/commissions', getCommissionsApi);
+router.get('/api/referrals/commissions/stats', getCommissionStats);
+router.put('/api/referrals/commissions/:id/review', requirePermission(PERMISSIONS.WRITE), reviewCommission);
+router.post('/api/referrals/commissions/bulk-review', requirePermission(PERMISSIONS.WRITE), bulkReviewCommissions);
+
+// Payout API endpoints
+router.get('/api/referrals/payouts', getPayoutsApi);
+router.get('/api/referrals/payouts/ready', getPartnersReadyForPayout);
+router.post('/api/referrals/payouts', requirePermission(PERMISSIONS.WRITE), createPayout);
+router.put('/api/referrals/payouts/:id/process', requirePermission(PERMISSIONS.WRITE), processPayout);
+
+// Partner Applications API endpoints
+router.get('/api/referrals/applications', getApplicationsApi);
+router.get('/api/referrals/applications/count', getPendingApplicationsCount);
+router.get('/api/referrals/applications/:id', getApplicationDetails);
+router.post('/api/referrals/applications/:id/approve', requirePermission(PERMISSIONS.MANAGE_USERS), approveApplication);
+router.post('/api/referrals/applications/:id/reject', requirePermission(PERMISSIONS.MANAGE_USERS), rejectApplication);
 
 module.exports = router;

@@ -1,0 +1,407 @@
+<%- include('../partials/header') %>
+<link rel="stylesheet" href="/css/adminCSS/admin-referrals.css">
+</head>
+
+<body>
+  <div class="admin-wrapper">
+    <%- include('../partials/sidebar', { activePage: 'referrals' }) %>
+
+    <main class="admin-main">
+      <%- include('../partials/topbar', { pageTitle: 'Create Referral Partner' }) %>
+
+      <div class="admin-content">
+        <div class="referrals-form-container">
+          <form id="partnerForm">
+            <!-- Personal Information -->
+            <div class="referrals-form-section">
+              <div class="referrals-form-section-header">
+                <i data-lucide="user"></i>
+                <h3>Personal Information</h3>
+              </div>
+              <div class="referrals-form-section-body">
+                <div class="referrals-form-grid">
+                  <div class="referrals-form-group">
+                    <label>First Name <span class="required">*</span></label>
+                    <input type="text" class="referrals-form-input" name="firstName" required placeholder="Enter first name">
+                  </div>
+                  <div class="referrals-form-group">
+                    <label>Last Name <span class="required">*</span></label>
+                    <input type="text" class="referrals-form-input" name="lastName" required placeholder="Enter last name">
+                  </div>
+                  <div class="referrals-form-group">
+                    <label>Email Address <span class="required">*</span></label>
+                    <input type="email" class="referrals-form-input" name="email" required placeholder="partner@example.com">
+                  </div>
+                  <div class="referrals-form-group">
+                    <label>Phone Number <span class="required">*</span></label>
+                    <input type="tel" class="referrals-form-input" name="phone" required placeholder="+971 50 123 4567">
+                  </div>
+                  <div class="referrals-form-group full-width">
+                    <label>Password <span class="required">*</span></label>
+                    <div class="referrals-password-wrapper">
+                      <input type="password" class="referrals-form-input" name="password" id="passwordInput" required minlength="8" placeholder="Minimum 8 characters">
+                      <button type="button" class="referrals-password-toggle" onclick="togglePassword(this)">
+                        <i data-lucide="eye"></i>
+                      </button>
+                      <button type="button" class="referrals-generate-btn" onclick="generatePassword()">
+                        <i data-lucide="wand-2"></i>
+                        Generate
+                      </button>
+                    </div>
+                    <span class="referrals-form-hint">Click "Generate" to create a secure random password</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Commission Settings -->
+            <div class="referrals-form-section">
+              <div class="referrals-form-section-header">
+                <i data-lucide="percent"></i>
+                <h3>Commission Settings</h3>
+              </div>
+              <div class="referrals-form-section-body">
+                <div class="referrals-form-grid">
+                  <div class="referrals-form-group">
+                    <label>Commission Rate <span class="required">*</span></label>
+                    <div class="referrals-rate-input-wrapper">
+                      <input type="number" class="referrals-form-input" name="commissionRate" required min="0" max="50" step="0.1" value="5" placeholder="5">
+                      <span class="referrals-rate-suffix">%</span>
+                    </div>
+                    <span class="referrals-form-hint">Percentage earned by partner on each successful referral (max 50%)</span>
+                  </div>
+                  <div class="referrals-form-group">
+                    <label>Buyer Discount Rate <span class="required">*</span></label>
+                    <div class="referrals-rate-input-wrapper">
+                      <input type="number" class="referrals-form-input" name="buyerDiscountRate" required min="0" max="30" step="0.1" value="3" placeholder="3">
+                      <span class="referrals-rate-suffix">%</span>
+                    </div>
+                    <span class="referrals-form-hint">Discount given to buyers using this referral code (max 30%)</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Payment Details -->
+            <div class="referrals-form-section">
+              <div class="referrals-form-section-header">
+                <i data-lucide="wallet"></i>
+                <h3>Payment Details <span class="optional-label">(Optional)</span></h3>
+              </div>
+              <div class="referrals-form-section-body">
+                <p class="referrals-section-description">Payment details can be added later by the partner from their profile.</p>
+                <div class="referrals-form-grid">
+                  <div class="referrals-form-group full-width">
+                    <label>Preferred Payment Method</label>
+                    <select class="referrals-form-select" name="paymentMethod">
+                      <option value="bank">Bank Transfer</option>
+                      <option value="paypal">PayPal</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                </div>
+                <div id="bankDetails">
+                  <div class="referrals-form-grid">
+                    <div class="referrals-form-group">
+                      <label>Bank Name</label>
+                      <input type="text" class="referrals-form-input" name="bankName" placeholder="e.g., Emirates NBD">
+                    </div>
+                    <div class="referrals-form-group">
+                      <label>Account Holder Name</label>
+                      <input type="text" class="referrals-form-input" name="accountName" placeholder="Full name on account">
+                    </div>
+                    <div class="referrals-form-group">
+                      <label>Account Number</label>
+                      <input type="text" class="referrals-form-input" name="accountNumber" placeholder="Account number">
+                    </div>
+                    <div class="referrals-form-group">
+                      <label>IBAN</label>
+                      <input type="text" class="referrals-form-input" name="iban" placeholder="AE12 3456 7890 1234 5678 901">
+                    </div>
+                    <div class="referrals-form-group">
+                      <label>SWIFT/BIC Code</label>
+                      <input type="text" class="referrals-form-input" name="swiftCode" placeholder="EBILAEADXXX">
+                    </div>
+                  </div>
+                </div>
+                <div id="paypalDetails" style="display: none;">
+                  <div class="referrals-form-grid">
+                    <div class="referrals-form-group full-width">
+                      <label>PayPal Email</label>
+                      <input type="email" class="referrals-form-input" name="paypalEmail" placeholder="paypal@example.com">
+                    </div>
+                  </div>
+                </div>
+                <div id="otherDetails" style="display: none;">
+                  <div class="referrals-form-grid">
+                    <div class="referrals-form-group full-width">
+                      <label>Payment Instructions</label>
+                      <textarea class="referrals-form-textarea" name="otherDetails" rows="3" placeholder="Enter payment instructions"></textarea>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Address (Optional) -->
+            <div class="referrals-form-section">
+              <div class="referrals-form-section-header">
+                <i data-lucide="map-pin"></i>
+                <h3>Address (Optional)</h3>
+              </div>
+              <div class="referrals-form-section-body">
+                <div class="referrals-form-grid">
+                  <div class="referrals-form-group full-width">
+                    <label>Street Address</label>
+                    <input type="text" class="referrals-form-input" name="street" placeholder="Street address">
+                  </div>
+                  <div class="referrals-form-group">
+                    <label>City</label>
+                    <input type="text" class="referrals-form-input" name="city" placeholder="City">
+                  </div>
+                  <div class="referrals-form-group">
+                    <label>State/Province</label>
+                    <input type="text" class="referrals-form-input" name="state" placeholder="State">
+                  </div>
+                  <div class="referrals-form-group">
+                    <label>Country</label>
+                    <input type="text" class="referrals-form-input" name="country" placeholder="Country">
+                  </div>
+                  <div class="referrals-form-group">
+                    <label>Postal Code</label>
+                    <input type="text" class="referrals-form-input" name="postalCode" placeholder="Postal code">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Admin Notes -->
+            <div class="referrals-form-section">
+              <div class="referrals-form-section-header">
+                <i data-lucide="file-text"></i>
+                <h3>Admin Notes <span class="optional-label">(Optional)</span></h3>
+              </div>
+              <div class="referrals-form-section-body">
+                <div class="referrals-form-group">
+                  <label>Internal Notes (not visible to partner)</label>
+                  <textarea class="referrals-form-textarea" name="adminNotes" rows="3" placeholder="Any internal notes about this partner..."></textarea>
+                </div>
+              </div>
+            </div>
+
+            <!-- Email Notification -->
+            <div class="referrals-form-section referrals-notification-section">
+              <div class="referrals-form-section-header">
+                <i data-lucide="mail"></i>
+                <h3>Email Notification</h3>
+              </div>
+              <div class="referrals-form-section-body">
+                <div class="referrals-checkbox-group">
+                  <label class="referrals-checkbox-label">
+                    <input type="checkbox" name="sendWelcomeEmail" checked>
+                    <span class="referrals-checkbox-custom"></span>
+                    <span class="referrals-checkbox-text">
+                      <strong>Send Welcome Email</strong>
+                      <small>Send login credentials, referral code, and dashboard link to the partner</small>
+                    </span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="referrals-form-actions">
+              <a href="/admin/referrals/partners" class="referrals-btn referrals-btn-secondary">
+                <i data-lucide="x"></i>
+                Cancel
+              </a>
+              <button type="submit" class="referrals-btn referrals-btn-primary">
+                <i data-lucide="save"></i>
+                Create Partner
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <%- include('../partials/footer') %>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      
+      // Payment method toggle
+      document.querySelector('[name="paymentMethod"]').addEventListener('change', (e) => {
+        document.getElementById('bankDetails').style.display = e.target.value === 'bank' ? 'block' : 'none';
+        document.getElementById('paypalDetails').style.display = e.target.value === 'paypal' ? 'block' : 'none';
+        document.getElementById('otherDetails').style.display = e.target.value === 'other' ? 'block' : 'none';
+      });
+
+      // Form submission
+      document.getElementById('partnerForm').addEventListener('submit', handleSubmit);
+    });
+
+    function generatePassword() {
+      const length = 12;
+      const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
+      let password = '';
+      
+      // Ensure at least one of each type
+      password += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[Math.floor(Math.random() * 26)];
+      password += 'abcdefghijklmnopqrstuvwxyz'[Math.floor(Math.random() * 26)];
+      password += '0123456789'[Math.floor(Math.random() * 10)];
+      password += '!@#$%^&*'[Math.floor(Math.random() * 8)];
+      
+      // Fill the rest
+      for (let i = password.length; i < length; i++) {
+        password += charset[Math.floor(Math.random() * charset.length)];
+      }
+      
+      // Shuffle the password
+      password = password.split('').sort(() => Math.random() - 0.5).join('');
+      
+      const input = document.getElementById('passwordInput');
+      input.value = password;
+      input.type = 'text'; // Show the generated password
+      
+      // Update the eye icon
+      const toggleBtn = input.nextElementSibling;
+      if (toggleBtn) {
+        const icon = toggleBtn.querySelector('i');
+        if (icon) {
+          icon.setAttribute('data-lucide', 'eye-off');
+          lucide.createIcons();
+        }
+      }
+      
+      showToast('Password generated! Make sure to copy it.', 'success');
+    }
+
+    function togglePassword(btn) {
+      const input = btn.previousElementSibling;
+      const icon = btn.querySelector('i');
+      
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.setAttribute('data-lucide', 'eye-off');
+      } else {
+        input.type = 'password';
+        icon.setAttribute('data-lucide', 'eye');
+      }
+      lucide.createIcons();
+    }
+
+    async function handleSubmit(e) {
+      e.preventDefault();
+      
+      const form = e.target;
+      const formData = new FormData(form);
+      const submitBtn = form.querySelector('button[type="submit"]');
+      
+      // Build payload
+      const payload = {
+        firstName: formData.get('firstName'),
+        lastName: formData.get('lastName'),
+        email: formData.get('email'),
+        phone: formData.get('phone'),
+        password: formData.get('password'),
+        commissionRate: parseFloat(formData.get('commissionRate')),
+        buyerDiscountRate: parseFloat(formData.get('buyerDiscountRate')),
+        sendWelcomeEmail: formData.get('sendWelcomeEmail') === 'on',
+        paymentDetails: {
+          preferredMethod: formData.get('paymentMethod'),
+          bankName: formData.get('bankName'),
+          accountName: formData.get('accountName'),
+          accountNumber: formData.get('accountNumber'),
+          iban: formData.get('iban'),
+          swiftCode: formData.get('swiftCode'),
+          paypalEmail: formData.get('paypalEmail'),
+          otherDetails: formData.get('otherDetails'),
+        },
+        address: {
+          street: formData.get('street'),
+          city: formData.get('city'),
+          state: formData.get('state'),
+          country: formData.get('country'),
+          postalCode: formData.get('postalCode'),
+        },
+        adminNotes: formData.get('adminNotes'),
+      };
+
+      // Basic validation
+      if (!payload.firstName || !payload.lastName || !payload.email || !payload.phone || !payload.password) {
+        showToast('Please fill in all required fields', 'error');
+        return;
+      }
+
+      if (payload.password.length < 8) {
+        showToast('Password must be at least 8 characters', 'error');
+        return;
+      }
+
+      // Disable submit button
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i data-lucide="loader-2" class="spin"></i> Creating...';
+      lucide.createIcons();
+
+      try {
+        const response = await fetch('/admin/api/referrals/partners', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          const message = payload.sendWelcomeEmail 
+            ? (data.emailSent 
+                ? `Partner created! Welcome email sent to ${payload.email}. Code: ${data.partner.referralCode}`
+                : `Partner created! Code: ${data.partner.referralCode} (Email failed to send)`)
+            : `Partner created! Referral code: ${data.partner.referralCode}`;
+          
+          showToast(message, 'success');
+          setTimeout(() => {
+            window.location.href = '/admin/referrals/partners/' + data.partner._id;
+          }, 2500);
+        } else {
+          showToast(data.message || 'Failed to create partner', 'error');
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i data-lucide="save"></i> Create Partner';
+          lucide.createIcons();
+        }
+      } catch (error) {
+        console.error('Error creating partner:', error);
+        showToast('Failed to create partner', 'error');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i data-lucide="save"></i> Create Partner';
+        lucide.createIcons();
+      }
+    }
+
+    function showToast(message, type = 'info') {
+      const existing = document.querySelector('.toast');
+      if (existing) existing.remove();
+      
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      toast.innerHTML = `
+        <span>${message}</span>
+        <button onclick="this.parentElement.remove()">&times;</button>
+      `;
+      toast.style.cssText = `
+        position: fixed; top: 20px; right: 20px; z-index: 10000;
+        padding: 12px 16px; border-radius: 8px; display: flex; align-items: center; gap: 12px;
+        background: ${type === 'error' ? '#fee2e2' : type === 'success' ? '#dcfce7' : '#e0f2fe'};
+        color: ${type === 'error' ? '#dc2626' : type === 'success' ? '#16a34a' : '#0284c7'};
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-weight: 500; max-width: 400px;
+      `;
+      toast.querySelector('button').style.cssText = 'background:none;border:none;font-size:18px;cursor:pointer;color:inherit;';
+      
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 5000);
+    }
+  </script>
+</body>
+</html>

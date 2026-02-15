@@ -1,0 +1,358 @@
+<%- include('../partials/header') %>
+<link rel="stylesheet" href="/css/adminCSS/admin-referrals.css">
+</head>
+
+<body>
+  <div class="admin-wrapper">
+    <%- include('../partials/sidebar', { activePage: 'referrals' }) %>
+
+    <main class="admin-main">
+      <%- include('../partials/topbar', { pageTitle: 'Partner Details' }) %>
+
+      <div class="admin-content">
+        <!-- Partner Header -->
+        <div class="referrals-partner-header">
+          <div class="referrals-partner-header-avatar">
+            <%= partner.firstName.charAt(0) %><%= partner.lastName.charAt(0) %>
+          </div>
+          <div class="referrals-partner-header-info">
+            <h2><%= partner.firstName %> <%= partner.lastName %></h2>
+            <div class="referrals-partner-meta">
+              <div class="referrals-partner-meta-item">
+                <i data-lucide="mail"></i>
+                <%= partner.email %>
+              </div>
+              <div class="referrals-partner-meta-item">
+                <i data-lucide="phone"></i>
+                <%= partner.phone %>
+              </div>
+              <div class="referrals-partner-meta-item">
+                <i data-lucide="calendar"></i>
+                Joined <%= new Date(partner.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) %>
+              </div>
+            </div>
+            <div class="referrals-partner-badges">
+              <span class="referrals-status-badge <%= partner.status %>"><%= partner.status %></span>
+            </div>
+          </div>
+          <div class="referrals-partner-header-actions">
+            <a href="/admin/referrals/partners/<%= partner._id %>/edit" class="referrals-btn referrals-btn-secondary">
+              <i data-lucide="edit-2"></i>
+              Edit
+            </a>
+          </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="referrals-details-stats">
+          <div class="referrals-details-stat-card">
+            <div class="stat-label">Total Referrals</div>
+            <div class="stat-value"><%= partner.stats?.totalReferrals || 0 %></div>
+          </div>
+          <div class="referrals-details-stat-card">
+            <div class="stat-label">Successful Referrals</div>
+            <div class="stat-value success"><%= partner.stats?.successfulReferrals || 0 %></div>
+          </div>
+          <div class="referrals-details-stat-card">
+            <div class="stat-label">Pending Commission</div>
+            <div class="stat-value warning"><%= (partner.stats?.pendingCommission || 0).toFixed(2) %> AED</div>
+          </div>
+          <div class="referrals-details-stat-card">
+            <div class="stat-label">Paid Commission</div>
+            <div class="stat-value primary"><%= (partner.stats?.paidCommission || 0).toFixed(2) %> AED</div>
+          </div>
+          <div class="referrals-details-stat-card">
+            <div class="stat-label">Total Order Value</div>
+            <div class="stat-value"><%= (partner.stats?.totalOrderValue || 0).toFixed(2) %> AED</div>
+          </div>
+        </div>
+
+        <!-- Detail Cards -->
+        <div class="referrals-detail-cards">
+          <div class="referrals-detail-card">
+            <div class="referrals-detail-card-header">
+              <i data-lucide="percent"></i>
+              <h3>Commission Settings</h3>
+            </div>
+            <div class="referrals-detail-card-body">
+              <div class="referrals-detail-row">
+                <span class="label">Commission Rate</span>
+                <span class="value"><%= partner.commissionRate %>%</span>
+              </div>
+              <div class="referrals-detail-row">
+                <span class="label">Buyer Discount Rate</span>
+                <span class="value"><%= partner.buyerDiscountRate %>%</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="referrals-detail-card">
+            <div class="referrals-detail-card-header">
+              <i data-lucide="wallet"></i>
+              <h3>Payment Details</h3>
+            </div>
+            <div class="referrals-detail-card-body">
+              <div class="referrals-detail-row">
+                <span class="label">Preferred Method</span>
+                <span class="value" style="text-transform: capitalize;"><%= partner.paymentDetails?.preferredMethod || 'Bank Transfer' %></span>
+              </div>
+              <% if (partner.paymentDetails?.bankName) { %>
+              <div class="referrals-detail-row">
+                <span class="label">Bank</span>
+                <span class="value"><%= partner.paymentDetails.bankName %></span>
+              </div>
+              <% } %>
+              <% if (partner.paymentDetails?.iban) { %>
+              <div class="referrals-detail-row">
+                <span class="label">IBAN</span>
+                <span class="value"><%= partner.paymentDetails.iban %></span>
+              </div>
+              <% } %>
+              <% if (partner.paymentDetails?.paypalEmail) { %>
+              <div class="referrals-detail-row">
+                <span class="label">PayPal</span>
+                <span class="value"><%= partner.paymentDetails.paypalEmail %></span>
+              </div>
+              <% } %>
+            </div>
+          </div>
+
+          <% if (partner.address?.city || partner.address?.country) { %>
+          <div class="referrals-detail-card">
+            <div class="referrals-detail-card-header">
+              <i data-lucide="map-pin"></i>
+              <h3>Address</h3>
+            </div>
+            <div class="referrals-detail-card-body">
+              <% if (partner.address.street) { %>
+              <div class="referrals-detail-row">
+                <span class="label">Street</span>
+                <span class="value"><%= partner.address.street %></span>
+              </div>
+              <% } %>
+              <% if (partner.address.city) { %>
+              <div class="referrals-detail-row">
+                <span class="label">City</span>
+                <span class="value"><%= partner.address.city %></span>
+              </div>
+              <% } %>
+              <% if (partner.address.country) { %>
+              <div class="referrals-detail-row">
+                <span class="label">Country</span>
+                <span class="value"><%= partner.address.country %></span>
+              </div>
+              <% } %>
+            </div>
+          </div>
+          <% } %>
+
+          <% if (partner.adminNotes) { %>
+          <div class="referrals-detail-card">
+            <div class="referrals-detail-card-header">
+              <i data-lucide="file-text"></i>
+              <h3>Admin Notes</h3>
+            </div>
+            <div class="referrals-detail-card-body">
+              <p style="font-size: 0.85rem; color: var(--admin-text-muted); margin: 0; line-height: 1.6;"><%= partner.adminNotes %></p>
+            </div>
+          </div>
+          <% } %>
+        </div>
+
+        <!-- Referral Codes Section -->
+        <div class="referrals-section-header">
+          <h3>Referral Codes</h3>
+          <a href="/admin/referrals/partners/<%= partner._id %>/codes/create" class="referrals-btn referrals-btn-primary">
+            <i data-lucide="plus"></i>
+            Add Code
+          </a>
+        </div>
+
+        <div id="codesContainer">
+          <div class="referrals-loading">
+            <div class="loading-spinner"></div>
+            <span>Loading codes...</span>
+          </div>
+        </div>
+
+        <!-- Recent Commissions -->
+        <div class="referrals-section-header">
+          <h3>Recent Commissions</h3>
+          <a href="/admin/referrals/commissions?partnerId=<%= partner._id %>" class="referrals-btn referrals-btn-secondary">
+            <i data-lucide="list"></i>
+            View All
+          </a>
+        </div>
+
+        <% if (recentCommissions && recentCommissions.length > 0) { %>
+        <div class="referrals-table-wrapper">
+          <table class="referrals-table">
+            <thead>
+              <tr>
+                <th>Order</th>
+                <th>Buyer</th>
+                <th>Order Value</th>
+                <th>Commission</th>
+                <th>Status</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% recentCommissions.forEach(commission => { %>
+              <tr>
+                <td><%= commission.orderNumber %></td>
+                <td><%= commission.buyer ? `${commission.buyer.firstName} ${commission.buyer.lastName}` : commission.buyerName %></td>
+                <td><%= commission.orderTotal.toFixed(2) %> <%= commission.currency %></td>
+                <td><%= commission.commissionAmount.toFixed(2) %> <%= commission.currency %></td>
+                <td><span class="referrals-commission-status <%= commission.status %>"><%= commission.status %></span></td>
+                <td><%= new Date(commission.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></td>
+              </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+        <% } else { %>
+        <div class="referrals-table-wrapper">
+          <div class="referrals-empty-state">
+            <div class="referrals-empty-icon">
+              <i data-lucide="inbox"></i>
+            </div>
+            <h3>No commissions yet</h3>
+            <p>Commissions will appear here when buyers use this partner's referral code</p>
+          </div>
+        </div>
+        <% } %>
+      </div>
+    </main>
+  </div>
+
+  <%- include('../partials/footer') %>
+  <script>
+    lucide.createIcons();
+    
+    // Load partner codes
+    async function loadCodes() {
+      const container = document.getElementById('codesContainer');
+      try {
+        const response = await fetch('/admin/api/referrals/partners/<%= partner._id %>/codes');
+        const data = await response.json();
+        
+        if (data.success && data.codes.length > 0) {
+          container.innerHTML = `
+            <div class="referrals-table-wrapper">
+              <table class="referrals-table">
+                <thead>
+                  <tr>
+                    <th>Code</th>
+                    <th>Name</th>
+                    <th>Commission</th>
+                    <th>Discount</th>
+                    <th>Valid From</th>
+                    <th>Valid Until</th>
+                    <th>Status</th>
+                    <th>Uses</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${data.codes.map(code => `
+                    <tr>
+                      <td>
+                        <span class="referrals-code-badge">${code.code}</span>
+                        ${code.isDefault ? '<span class="referrals-default-badge">Default</span>' : ''}
+                      </td>
+                      <td>${code.name || '-'}</td>
+                      <td>${code.commissionRate}%</td>
+                      <td>${code.buyerDiscountRate}%</td>
+                      <td>${code.validFrom ? new Date(code.validFrom).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '-'}</td>
+                      <td>${code.validUntil ? new Date(code.validUntil).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '<span class="referrals-no-expiry">No Expiry</span>'}</td>
+                      <td>
+                        <span class="referrals-status-badge ${code.status}">${code.status}</span>
+                        ${getValidityBadge(code)}
+                      </td>
+                      <td>${code.currentUses}${code.maxUses > 0 ? '/' + code.maxUses : ''}</td>
+                      <td>
+                        <div class="referrals-actions">
+                          <a href="/admin/referrals/codes/${code.id}/edit" class="referrals-btn referrals-btn-sm referrals-btn-secondary" title="Edit">
+                            <i data-lucide="edit-2"></i>
+                          </a>
+                          <button onclick="deleteCode('${code.id}', '${code.code}')" class="referrals-btn referrals-btn-sm referrals-btn-danger" title="Delete">
+                            <i data-lucide="trash-2"></i>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          `;
+        } else {
+          container.innerHTML = `
+            <div class="referrals-table-wrapper">
+              <div class="referrals-empty-state">
+                <div class="referrals-empty-icon">
+                  <i data-lucide="tag"></i>
+                </div>
+                <h3>No referral codes created yet</h3>
+                <p>Create custom codes with different commission rates and validity periods</p>
+              </div>
+            </div>
+          `;
+        }
+        lucide.createIcons();
+      } catch (error) {
+        container.innerHTML = '<div class="referrals-table-wrapper"><p style="color: #ef4444; text-align: center; padding: 2rem;">Failed to load codes</p></div>';
+        console.error('Error loading codes:', error);
+      }
+    }
+    
+    function getValidityBadge(code) {
+      if (code.validityStatus === 'expired') {
+        return '<span class="referrals-validity-badge expired">Expired</span>';
+      } else if (code.validityStatus === 'upcoming') {
+        return '<span class="referrals-validity-badge upcoming">Not Started</span>';
+      } else if (code.validUntil && code.remainingDays !== null && code.remainingDays <= 7) {
+        return `<span class="referrals-validity-badge expiring-soon">${code.remainingDays} days left</span>`;
+      }
+      return '';
+    }
+    
+    function getValidityLabel(code) {
+      if (code.validityStatus === 'expiring-soon') {
+        return code.remainingDays + ' days left';
+      } else if (code.validityStatus === 'expired') {
+        return 'Expired';
+      } else if (code.validityStatus === 'not-started') {
+        return 'Not Started';
+      }
+      return '';
+    }
+    
+    async function deleteCode(codeId, codeName) {
+      if (!confirm(`Are you sure you want to delete the code "${codeName}"? This action cannot be undone.`)) {
+        return;
+      }
+      
+      try {
+        const response = await fetch(`/admin/api/referrals/codes/${codeId}`, {
+          method: 'DELETE',
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+          loadCodes(); // Reload the list
+        } else {
+          alert('Failed to delete code: ' + data.message);
+        }
+      } catch (error) {
+        console.error('Error deleting code:', error);
+        alert('Failed to delete code');
+      }
+    }
+    
+    // Load codes on page load
+    loadCodes();
+  </script>
+</body>
+</html>

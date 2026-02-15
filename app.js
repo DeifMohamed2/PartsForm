@@ -150,12 +150,14 @@ const landingRoutes = require('./routes/landing');
 const buyerRoutes = require('./routes/buyer');
 const adminRoutes = require('./routes/admin');
 const authRoutes = require('./routes/auth');
+const partnerRoutes = require('./routes/partner');
 
 // Use routes
 app.use('/', landingRoutes);
 app.use('/', authRoutes); // Auth routes at root level (/login, /register, /logout)
 app.use('/buyer', buyerRoutes);
 app.use('/admin', adminRoutes);
+app.use('/partner', partnerRoutes);
 
 // Start server with Socket.io
 server.listen(PORT, () => {

@@ -309,6 +309,45 @@ const orderSchema = new mongoose.Schema({
         reason: String,
         cancelledAt: Date,
         cancelledBy: String
+    },
+
+    // Referral Information
+    referral: {
+        referralCode: {
+            type: String,
+            uppercase: true,
+            trim: true,
+            index: true
+        },
+        referralPartner: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'ReferralPartner'
+        },
+        discountRate: {
+            type: Number,
+            default: 0,
+            min: 0
+        },
+        discountAmount: {
+            type: Number,
+            default: 0,
+            min: 0
+        },
+        commissionRate: {
+            type: Number,
+            default: 0,
+            min: 0
+        },
+        commissionAmount: {
+            type: Number,
+            default: 0,
+            min: 0
+        },
+        commissionStatus: {
+            type: String,
+            enum: ['pending', 'approved', 'rejected', 'paid', 'cancelled'],
+            default: 'pending'
+        }
     }
 }, {
     timestamps: true
@@ -379,6 +418,19 @@ orderSchema.methods.cancelOrder = async function (reason, cancelledBy = 'Buyer')
         cancelledBy
     };
     this.addTimelineEvent('cancelled', `Order cancelled: ${reason}`, cancelledBy);
+    
+    // Update referral commission status if applicable
+    if (this.referral && this.referral.referralPartner) {
+        this.referral.commissionStatus = 'cancelled';
+        // Also update the ReferralCommission record
+        try {
+            const ReferralCommission = mongoose.model('ReferralCommission');
+            await ReferralCommission.updateOrderStatus(this._id, 'cancelled');
+        } catch (err) {
+            console.error('Error updating referral commission status:', err);
+        }
+    }
+    
     await this.save();
 };
 
@@ -443,8 +495,24 @@ orderSchema.statics.createFromCartItems = async function (buyer, cartItems, paym
     const subtotal = orderItems.reduce((sum, item) => sum + (parseFloat(item.price) || 0), 0);
     const totalWeight = orderItems.reduce((sum, item) => sum + (parseFloat(item.weight) || 0), 0);
     
+    // Calculate referral discount if applied
+    let referralDiscount = 0;
+    let referralData = null;
+    if (paymentInfo.referral && paymentInfo.referral.code) {
+        referralDiscount = parseFloat(paymentInfo.referral.discountAmount) || 0;
+        referralData = {
+            referralCode: paymentInfo.referral.code,
+            referralPartner: paymentInfo.referral.partnerId,
+            discountRate: paymentInfo.referral.discountRate || 0,
+            discountAmount: referralDiscount,
+            commissionRate: paymentInfo.referral.commissionRate || 5,
+            commissionAmount: subtotal * ((paymentInfo.referral.commissionRate || 5) / 100),
+            commissionStatus: 'pending'
+        };
+    }
+    
     const processingFee = parseFloat(paymentInfo.fee) || 0;
-    const total = subtotal + processingFee;
+    const total = subtotal - referralDiscount + processingFee;
 
     // Order defaults
     const orderType = 'regular';
@@ -481,7 +549,7 @@ orderSchema.statics.createFromCartItems = async function (buyer, cartItems, paym
     };
 
     // Create order
-    const order = await this.create({
+    const orderData = {
         orderNumber,
         buyer: buyer._id,
         items: orderItems,
@@ -490,7 +558,7 @@ orderSchema.statics.createFromCartItems = async function (buyer, cartItems, paym
             tax: 0,
             shipping: 0,
             processingFee,
-            discount: 0,
+            discount: referralDiscount,
             total,
             currency: 'AED'
         },
@@ -515,7 +583,14 @@ orderSchema.statics.createFromCartItems = async function (buyer, cartItems, paym
         totalItems,
         totalWeight,
         notes: paymentInfo.notes || ''
-    });
+    };
+
+    // Add referral data if present
+    if (referralData) {
+        orderData.referral = referralData;
+    }
+
+    const order = await this.create(orderData);
 
     return order;
 };

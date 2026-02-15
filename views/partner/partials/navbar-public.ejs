@@ -1,0 +1,33 @@
+<!-- ====================================
+     PARTNER PORTAL PUBLIC NAVIGATION BAR
+     (For non-authenticated pages like login)
+     ==================================== -->
+<nav class="partner-public-navbar">
+  <div class="partner-public-navbar-inner">
+    <!-- Brand -->
+    <a href="/" class="partner-public-nav-brand">
+      <img src="/images/PARTSFORM-LOGO.webp" alt="PartsForm">
+      <div class="partner-public-nav-divider"></div>
+      <span class="partner-public-nav-badge">
+        <i data-lucide="handshake"></i>
+        Partner Portal
+      </span>
+    </a>
+
+    <!-- Navigation Links -->
+    <div class="partner-public-nav-links">
+      <a href="/" class="partner-public-nav-link">
+        <i data-lucide="home"></i>
+        <span>Home</span>
+      </a>
+      <a href="/become-partner" class="partner-public-nav-link <%= typeof activePage !== 'undefined' && activePage === 'apply' ? 'active' : '' %>">
+        <i data-lucide="user-plus"></i>
+        <span>Become a Partner</span>
+      </a>
+      <a href="/partner/login" class="partner-public-nav-link <%= typeof activePage === 'undefined' || activePage === 'login' ? 'active' : '' %>">
+        <i data-lucide="log-in"></i>
+        <span>Partner Login</span>
+      </a>
+    </div>
+  </div>
+</nav>

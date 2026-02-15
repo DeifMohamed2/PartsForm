@@ -1,0 +1,461 @@
+/* ====================================
+   PARTNER LOGIN PAGE - Matching Register Design
+   PARTSFORM Professional Design - Blue Theme
+   ==================================== */
+
+/* Login Section */
+.partner-login-section {
+  min-height: 100vh;
+  background: #f8fafc;
+  padding: 7rem 0 3rem;
+  position: relative;
+}
+
+/* Container */
+.partner-login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 12rem);
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+/* Login Card */
+.partner-login-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 2.5rem;
+  width: 100%;
+  max-width: 440px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5e7eb;
+}
+
+/* Card Header */
+.partner-login-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.partner-login-icon {
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, #e0effa 0%, #dbeafe 100%);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.25rem;
+}
+
+.partner-login-icon i {
+  width: 32px;
+  height: 32px;
+  color: #2b5278;
+}
+
+.partner-login-header h1 {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 0.5rem;
+}
+
+.partner-login-header p {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* Error Message */
+.partner-login-error {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: #fee2e2;
+  color: #991b1b;
+  border-radius: 10px;
+  margin-bottom: 1.5rem;
+  font-size: 0.875rem;
+  border: 1px solid #fecaca;
+}
+
+.partner-login-error i {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+/* Form */
+.partner-login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.partner-login-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.partner-login-form-group label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #1a2b3d;
+}
+
+.partner-login-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.partner-login-input-icon {
+  position: absolute;
+  left: 1rem;
+  width: 18px;
+  height: 18px;
+  color: #94a3b8;
+  pointer-events: none;
+}
+
+.partner-login-input {
+  width: 100%;
+  padding: 0.875rem 1rem 0.875rem 2.75rem;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 0.9375rem;
+  transition: all 0.2s;
+  background: #f9fafb;
+}
+
+.partner-login-input:hover {
+  border-color: #d1d5db;
+}
+
+.partner-login-input:focus {
+  outline: none;
+  border-color: #2b5278;
+  box-shadow: 0 0 0 3px rgba(43, 82, 120, 0.1);
+  background: white;
+}
+
+.partner-login-input::placeholder {
+  color: #9ca3af;
+}
+
+/* Password Toggle */
+.partner-login-password-toggle {
+  position: absolute;
+  right: 1rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #9ca3af;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.partner-login-password-toggle:hover {
+  color: #6b7280;
+}
+
+.partner-login-password-toggle i {
+  width: 18px;
+  height: 18px;
+}
+
+/* Submit Button */
+.partner-login-submit {
+  width: 100%;
+  padding: 1rem;
+  background: linear-gradient(135deg, #2b5278 0%, #1e3a54 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(43, 82, 120, 0.25);
+  margin-top: 0.5rem;
+}
+
+.partner-login-submit:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(43, 82, 120, 0.35);
+}
+
+.partner-login-submit:active {
+  transform: translateY(0);
+}
+
+.partner-login-submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.partner-login-submit i {
+  width: 18px;
+  height: 18px;
+}
+
+/* Footer Link */
+.partner-login-footer {
+  text-align: center;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #f1f5f9;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.partner-login-footer a {
+  color: #2b5278;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.partner-login-footer a:hover {
+  text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .partner-login-section {
+    padding: 5rem 1rem 2rem;
+  }
+
+  .partner-login-card {
+    padding: 2rem 1.5rem;
+  }
+
+  .partner-login-header h1 {
+    font-size: 1.25rem;
+  }
+}
+
+/* ====================================
+   PUBLIC NAVBAR (Non-authenticated)
+   ==================================== */
+.partner-public-navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(43, 82, 120, 0.08);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+}
+
+.partner-public-navbar-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 70px;
+}
+
+.partner-public-nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  text-decoration: none;
+}
+
+.partner-public-nav-brand img {
+  height: 40px;
+  width: auto;
+}
+
+.partner-public-nav-divider {
+  width: 1px;
+  height: 24px;
+  background: rgba(43, 82, 120, 0.15);
+}
+
+.partner-public-nav-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #2b5278;
+}
+
+.partner-public-nav-badge i {
+  width: 18px;
+  height: 18px;
+}
+
+.partner-public-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.partner-public-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #475569;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.partner-public-nav-link:hover {
+  background: rgba(43, 82, 120, 0.06);
+  color: #2b5278;
+}
+
+.partner-public-nav-link.active {
+  background: #2b5278;
+  color: white;
+}
+
+.partner-public-nav-link i {
+  width: 18px;
+  height: 18px;
+}
+
+/* ====================================
+   PUBLIC FOOTER
+   ==================================== */
+.partner-public-footer {
+  background: white;
+  border-top: 1px solid rgba(43, 82, 120, 0.08);
+  padding: 1.5rem 2rem;
+}
+
+.partner-public-footer-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.partner-public-footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.partner-public-footer-logo {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #2b5278;
+}
+
+.partner-public-footer-logo span {
+  color: #3b82f6;
+}
+
+.partner-public-footer-divider {
+  color: rgba(43, 82, 120, 0.2);
+}
+
+.partner-public-footer-portal {
+  font-size: 0.875rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.partner-public-footer-links {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.partner-public-footer-links a {
+  font-size: 0.875rem;
+  color: #475569;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.partner-public-footer-links a:hover {
+  color: #2b5278;
+}
+
+.partner-public-footer-copyright {
+  font-size: 0.8125rem;
+  color: #64748b;
+}
+
+/* Page Wrapper */
+.partner-login-page-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.partner-login-page-wrapper .partner-login-section {
+  flex: 1;
+}
+
+/* Responsive Public Navbar */
+@media (max-width: 768px) {
+  .partner-public-navbar-inner {
+    padding: 0 1rem;
+    height: 60px;
+  }
+
+  .partner-public-nav-brand img {
+    height: 32px;
+  }
+
+  .partner-public-nav-badge {
+    display: none;
+  }
+
+  .partner-public-nav-links {
+    gap: 0.25rem;
+  }
+
+  .partner-public-nav-link span {
+    display: none;
+  }
+
+  .partner-public-nav-link {
+    padding: 0.625rem;
+  }
+
+  .partner-public-footer-inner {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .partner-public-footer-links {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+  }
+}
+}

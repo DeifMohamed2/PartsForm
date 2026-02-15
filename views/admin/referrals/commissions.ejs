@@ -1,0 +1,447 @@
+<%- include('../partials/header') %>
+<link rel="stylesheet" href="/css/adminCSS/admin-referrals.css">
+</head>
+<body>
+  <div class="admin-wrapper">
+    <%- include('../partials/sidebar', { activePage: 'referrals' }) %>
+    <main class="admin-main">
+      <%- include('../partials/topbar', { pageTitle: 'Commissions' }) %>
+      <div class="admin-content">
+        <div class="referrals-page-header">
+          <h2>Referral Commissions</h2>
+          <div class="referrals-header-actions">
+            <div class="referrals-search-container">
+              <i data-lucide="search" class="search-icon"></i>
+              <input type="text" id="searchInput" class="referrals-search-input" placeholder="Search orders..." autocomplete="off">
+            </div>
+          </div>
+        </div>
+
+        <div class="referrals-period-selector">
+          <label>Period:</label>
+          <select id="monthSelect" class="referrals-select">
+            <% for(let m = 1; m <= 12; m++) { %>
+            <option value="<%= m %>" <%= m === new Date().getMonth() + 1 ? 'selected' : '' %>><%= new Date(0, m-1).toLocaleString('en', { month: 'long' }) %></option>
+            <% } %>
+          </select>
+          <select id="yearSelect" class="referrals-select">
+            <% const currentYear = new Date().getFullYear(); for(let y = currentYear; y >= currentYear - 2; y--) { %>
+            <option value="<%= y %>"><%= y %></option>
+            <% } %>
+          </select>
+          <button class="referrals-btn referrals-btn-primary" onclick="loadData()">
+            <i data-lucide="refresh-cw"></i>
+            Load
+          </button>
+        </div>
+
+        <div class="referrals-mini-stats" id="statsRow">
+          <div class="referrals-mini-stat pending"><div class="stat-value" id="statPending">0</div><div class="stat-label">Pending</div></div>
+          <div class="referrals-mini-stat approved"><div class="stat-value" id="statApproved">0</div><div class="stat-label">Approved</div></div>
+          <div class="referrals-mini-stat paid"><div class="stat-value" id="statPaid">0</div><div class="stat-label">Paid</div></div>
+          <div class="referrals-mini-stat rejected"><div class="stat-value" id="statRejected">0</div><div class="stat-label">Rejected</div></div>
+        </div>
+
+        <!-- Advanced Filters -->
+        <div class="referrals-advanced-filters">
+          <div class="referrals-filters-header">
+            <div class="referrals-filters-title">
+              <i data-lucide="filter"></i>
+              <span>Filters</span>
+            </div>
+            <button class="referrals-filters-toggle" id="toggleFilters">
+              <i data-lucide="chevron-down"></i>
+              <span>More Filters</span>
+            </button>
+          </div>
+          
+          <!-- Primary Filters -->
+          <div class="referrals-filters-primary">
+            <div class="referrals-filter-item">
+              <label>Status</label>
+              <select id="filterStatus" class="referrals-filter-select">
+                <option value="">All Status</option>
+                <option value="pending">Pending</option>
+                <option value="approved">Approved</option>
+                <option value="paid">Paid</option>
+                <option value="rejected">Rejected</option>
+              </select>
+            </div>
+            <div class="referrals-filter-item">
+              <label>Partner</label>
+              <select id="filterPartner" class="referrals-filter-select">
+                <option value="">All Partners</option>
+                <% if (typeof partners !== 'undefined') { %>
+                  <% partners.forEach(p => { %>
+                  <option value="<%= p._id %>"><%= p.firstName %> <%= p.lastName %></option>
+                  <% }) %>
+                <% } %>
+              </select>
+            </div>
+            <div class="referrals-filter-item">
+              <label>Sort By</label>
+              <select id="sortBy" class="referrals-filter-select">
+                <option value="createdAt">Most Recent</option>
+                <option value="orderValue">Highest Order</option>
+                <option value="amount">Highest Commission</option>
+              </select>
+            </div>
+            <button class="referrals-filter-apply-btn" onclick="loadCommissions()">
+              <i data-lucide="search"></i>
+              Apply
+            </button>
+          </div>
+          
+          <!-- Secondary Filters -->
+          <div class="referrals-filters-secondary" id="secondaryFilters">
+            <div class="referrals-filter-item">
+              <label>Min Amount (AED)</label>
+              <input type="number" id="filterMinAmount" class="referrals-filter-input" placeholder="0" min="0" step="0.01">
+            </div>
+            <div class="referrals-filter-item">
+              <label>Max Amount (AED)</label>
+              <input type="number" id="filterMaxAmount" class="referrals-filter-input" placeholder="No limit" min="0" step="0.01">
+            </div>
+            <div class="referrals-filter-item">
+              <label>Order Value Min (AED)</label>
+              <input type="number" id="filterMinOrder" class="referrals-filter-input" placeholder="0" min="0" step="0.01">
+            </div>
+            <div class="referrals-filter-item">
+              <label>Order Value Max (AED)</label>
+              <input type="number" id="filterMaxOrder" class="referrals-filter-input" placeholder="No limit" min="0" step="0.01">
+            </div>
+          </div>
+          
+          <!-- Filter Actions -->
+          <div class="referrals-filters-actions">
+            <span class="referrals-active-filters" id="activeFiltersCount">0 filters active</span>
+            <button class="referrals-filter-clear-btn" onclick="clearFilters()">
+              <i data-lucide="x-circle"></i>
+              Clear All
+            </button>
+            <button class="referrals-filter-export-btn" onclick="exportCommissions()">
+              <i data-lucide="download"></i>
+              Export CSV
+            </button>
+          </div>
+        </div>
+
+        <div class="referrals-bulk-bar" id="bulkBar">
+          <div class="referrals-bulk-info"><i data-lucide="check-square"></i> <span id="selectedCount">0</span> selected</div>
+          <div class="referrals-bulk-actions">
+            <button class="referrals-bulk-btn approve" onclick="bulkAction('approve')"><i data-lucide="check"></i> Approve</button>
+            <button class="referrals-bulk-btn reject" onclick="bulkAction('reject')"><i data-lucide="x"></i> Reject</button>
+            <button class="referrals-bulk-btn cancel" onclick="clearSelection()">Cancel</button>
+          </div>
+        </div>
+
+        <div class="referrals-table-wrapper">
+          <div class="referrals-loading" id="loading"><div class="loading-spinner"></div></div>
+          <table class="referrals-table" id="dataTable" style="display:none;">
+            <thead>
+              <tr>
+                <th><input type="checkbox" id="selectAll" onchange="toggleSelectAll()"></th>
+                <th>Order</th>
+                <th>Partner</th>
+                <th>Buyer</th>
+                <th>Order Value</th>
+                <th>Commission</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+          <div class="referrals-empty-state" id="emptyState" style="display:none;"><div class="referrals-empty-icon"><i data-lucide="inbox"></i></div><h3>No commissions found</h3></div>
+        </div>
+
+        <div class="referrals-pagination" id="pagination" style="display:none;">
+          <div class="pagination-info">Showing <span id="showFrom">0</span>-<span id="showTo">0</span> of <span id="total">0</span></div>
+          <div class="pagination-controls">
+            <button class="referrals-pagination-btn" id="prevBtn" onclick="changePage(-1)"><i data-lucide="chevron-left"></i></button>
+            <span class="pagination-current">Page <span id="currentPage">1</span></span>
+            <button class="referrals-pagination-btn" id="nextBtn" onclick="changePage(1)"><i data-lucide="chevron-right"></i></button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <%- include('../partials/footer') %>
+  <script>
+    let commissions = [], page = 1, totalPages = 1, selected = new Set();
+
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      loadData();
+      document.getElementById('filterStatus').addEventListener('change', () => { page = 1; loadCommissions(); });
+      document.getElementById('filterPartner').addEventListener('change', () => { page = 1; loadCommissions(); });
+      document.getElementById('sortBy').addEventListener('change', () => { page = 1; loadCommissions(); });
+      document.getElementById('toggleFilters').addEventListener('click', toggleFiltersPanel);
+      let searchTimeout;
+      document.getElementById('searchInput').addEventListener('input', () => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => { page = 1; loadCommissions(); }, 300);
+      });
+    });
+
+    async function loadData() {
+      await Promise.all([loadStats(), loadCommissions()]);
+    }
+
+    async function loadStats() {
+      const month = document.getElementById('monthSelect').value;
+      const year = document.getElementById('yearSelect').value;
+      try {
+        const res = await fetch(`/admin/api/referrals/commissions/stats?month=${month}&year=${year}`);
+        const data = await res.json();
+        if (data.success) {
+          document.getElementById('statPending').textContent = data.stats.pending.count;
+          document.getElementById('statApproved').textContent = data.stats.approved.count;
+          document.getElementById('statPaid').textContent = data.stats.paid.count;
+          document.getElementById('statRejected').textContent = data.stats.rejected.count;
+        }
+      } catch (e) { console.error(e); }
+    }
+
+    async function loadCommissions() {
+      const month = document.getElementById('monthSelect').value;
+      const year = document.getElementById('yearSelect').value;
+      const status = document.getElementById('filterStatus').value;
+      const partner = document.getElementById('filterPartner').value;
+      const sortBy = document.getElementById('sortBy').value;
+      const search = document.getElementById('searchInput').value;
+      const minAmount = document.getElementById('filterMinAmount').value;
+      const maxAmount = document.getElementById('filterMaxAmount').value;
+      const minOrder = document.getElementById('filterMinOrder').value;
+      const maxOrder = document.getElementById('filterMaxOrder').value;
+      
+      const params = new URLSearchParams({ page, limit: 20, month, year, sortBy, sortOrder: 'desc' });
+      if (status) params.append('status', status);
+      if (partner) params.append('partner', partner);
+      if (search) params.append('search', search);
+      if (minAmount) params.append('minAmount', minAmount);
+      if (maxAmount) params.append('maxAmount', maxAmount);
+      if (minOrder) params.append('minOrder', minOrder);
+      if (maxOrder) params.append('maxOrder', maxOrder);
+      
+      updateActiveFiltersCount();
+
+      document.getElementById('loading').style.display = 'flex';
+      document.getElementById('dataTable').style.display = 'none';
+      document.getElementById('emptyState').style.display = 'none';
+
+      try {
+        const res = await fetch(`/admin/api/referrals/commissions?${params}`);
+        const data = await res.json();
+        if (data.success) {
+          commissions = data.commissions;
+          totalPages = data.pagination.pages;
+          renderTable();
+          updatePagination(data.pagination);
+        }
+      } catch (e) { console.error(e); }
+      document.getElementById('loading').style.display = 'none';
+    }
+
+    function renderTable() {
+      if (commissions.length === 0) {
+        document.getElementById('emptyState').style.display = 'flex';
+        document.getElementById('dataTable').style.display = 'none';
+        return;
+      }
+      document.getElementById('dataTable').style.display = 'table';
+      const tbody = document.getElementById('tableBody');
+      tbody.innerHTML = commissions.map(c => `
+        <tr>
+          <td><input type="checkbox" class="row-check" value="${c._id}" onchange="updateSelection()" ${c.status !== 'pending' ? 'disabled' : ''}></td>
+          <td>${c.orderNumber}</td>
+          <td>${c.referralPartner ? c.referralPartner.firstName + ' ' + c.referralPartner.lastName : '-'}</td>
+          <td>${c.buyer ? c.buyer.firstName + ' ' + c.buyer.lastName : c.buyerName || '-'}</td>
+          <td>${c.orderTotal.toFixed(2)} ${c.currency}</td>
+          <td>${c.commissionAmount.toFixed(2)} ${c.currency}</td>
+          <td><span class="referrals-commission-status ${c.status}">${c.status}</span></td>
+          <td>${new Date(c.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</td>
+          <td>
+            ${c.status === 'pending' ? `
+              <div class="referrals-actions">
+                <button class="referrals-action-btn approve" onclick="reviewSingle('${c._id}', 'approve')"><i data-lucide="check"></i></button>
+                <button class="referrals-action-btn reject" onclick="reviewSingle('${c._id}', 'reject')"><i data-lucide="x"></i></button>
+              </div>
+            ` : '-'}
+          </td>
+        </tr>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    function updatePagination(p) {
+      document.getElementById('showFrom').textContent = (p.page - 1) * p.limit + 1;
+      document.getElementById('showTo').textContent = Math.min(p.page * p.limit, p.total);
+      document.getElementById('total').textContent = p.total;
+      document.getElementById('currentPage').textContent = p.page;
+      document.getElementById('prevBtn').disabled = p.page <= 1;
+      document.getElementById('nextBtn').disabled = p.page >= p.pages;
+      document.getElementById('pagination').style.display = p.total > 0 ? 'flex' : 'none';
+    }
+
+    function changePage(delta) { page += delta; loadCommissions(); }
+
+    function toggleSelectAll() {
+      const checked = document.getElementById('selectAll').checked;
+      document.querySelectorAll('.row-check:not(:disabled)').forEach(cb => { cb.checked = checked; });
+      updateSelection();
+    }
+
+    function updateSelection() {
+      selected.clear();
+      document.querySelectorAll('.row-check:checked').forEach(cb => selected.add(cb.value));
+      document.getElementById('selectedCount').textContent = selected.size;
+      document.getElementById('bulkBar').classList.toggle('show', selected.size > 0);
+    }
+
+    function clearSelection() {
+      document.querySelectorAll('.row-check').forEach(cb => { cb.checked = false; });
+      document.getElementById('selectAll').checked = false;
+      updateSelection();
+    }
+
+    async function reviewSingle(id, action) {
+      if (!confirm(`${action === 'approve' ? 'Approve' : 'Reject'} this commission?`)) return;
+      try {
+        const res = await fetch(`/admin/api/referrals/commissions/${id}/review`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action, rejectionReason: action === 'reject' ? 'other' : undefined })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(`Commission ${action}d`, 'success');
+          loadData();
+        } else {
+          showToast(data.message, 'error');
+        }
+      } catch (e) { showToast('Error', 'error'); }
+    }
+
+    async function bulkAction(action) {
+      if (selected.size === 0) return;
+      if (!confirm(`${action === 'approve' ? 'Approve' : 'Reject'} ${selected.size} commission(s)?`)) return;
+      try {
+        const res = await fetch('/admin/api/referrals/commissions/bulk-review', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ commissionIds: [...selected], action, rejectionReason: action === 'reject' ? 'other' : undefined })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(`${data.modifiedCount} commission(s) ${action}d`, 'success');
+          clearSelection();
+          loadData();
+        } else {
+          showToast(data.message, 'error');
+        }
+      } catch (e) { showToast('Error', 'error'); }
+    }
+
+    function showToast(msg, type) {
+      const t = document.createElement('div');
+      t.style.cssText = `position:fixed;top:20px;right:20px;z-index:10000;padding:12px 16px;border-radius:8px;background:${type==='error'?'#fee2e2':'#dcfce7'};color:${type==='error'?'#dc2626':'#16a34a'};font-weight:500;box-shadow:0 4px 12px rgba(0,0,0,0.15);`;
+      t.textContent = msg;
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 4000);
+    }
+    
+    function toggleFiltersPanel() {
+      const secondary = document.getElementById('secondaryFilters');
+      const toggle = document.getElementById('toggleFilters');
+      secondary.classList.toggle('show');
+      toggle.classList.toggle('active');
+      
+      const icon = toggle.querySelector('i');
+      const text = toggle.querySelector('span');
+      if (secondary.classList.contains('show')) {
+        icon.setAttribute('data-lucide', 'chevron-up');
+        text.textContent = 'Less Filters';
+      } else {
+        icon.setAttribute('data-lucide', 'chevron-down');
+        text.textContent = 'More Filters';
+      }
+      lucide.createIcons();
+    }
+    
+    function updateActiveFiltersCount() {
+      let count = 0;
+      if (document.getElementById('filterStatus').value) count++;
+      if (document.getElementById('filterPartner').value) count++;
+      if (document.getElementById('filterMinAmount').value) count++;
+      if (document.getElementById('filterMaxAmount').value) count++;
+      if (document.getElementById('filterMinOrder').value) count++;
+      if (document.getElementById('filterMaxOrder').value) count++;
+      if (document.getElementById('searchInput').value) count++;
+      
+      document.getElementById('activeFiltersCount').textContent = `${count} filter${count !== 1 ? 's' : ''} active`;
+    }
+    
+    function clearFilters() {
+      document.getElementById('filterStatus').value = '';
+      document.getElementById('filterPartner').value = '';
+      document.getElementById('sortBy').value = 'createdAt';
+      document.getElementById('filterMinAmount').value = '';
+      document.getElementById('filterMaxAmount').value = '';
+      document.getElementById('filterMinOrder').value = '';
+      document.getElementById('filterMaxOrder').value = '';
+      document.getElementById('searchInput').value = '';
+      page = 1;
+      updateActiveFiltersCount();
+      loadCommissions();
+    }
+    
+    async function exportCommissions() {
+      try {
+        const month = document.getElementById('monthSelect').value;
+        const year = document.getElementById('yearSelect').value;
+        const status = document.getElementById('filterStatus').value;
+        const params = new URLSearchParams({ month, year, limit: 1000 });
+        if (status) params.append('status', status);
+        
+        const res = await fetch(`/admin/api/referrals/commissions?${params}`);
+        const data = await res.json();
+        
+        if (data.success && data.commissions.length > 0) {
+          const csv = generateCSV(data.commissions);
+          downloadCSV(csv, `commissions-${month}-${year}.csv`);
+          showToast('Export completed successfully', 'success');
+        } else {
+          showToast('No data to export', 'error');
+        }
+      } catch (e) {
+        showToast('Failed to export data', 'error');
+      }
+    }
+    
+    function generateCSV(data) {
+      const headers = ['Order Number', 'Partner', 'Buyer', 'Order Value', 'Commission', 'Status', 'Date'];
+      const rows = data.map(c => [
+        c.orderNumber,
+        c.referralPartner ? `${c.referralPartner.firstName} ${c.referralPartner.lastName}` : '-',
+        c.buyer ? `${c.buyer.firstName} ${c.buyer.lastName}` : c.buyerName || '-',
+        `${c.orderTotal.toFixed(2)} ${c.currency}`,
+        `${c.commissionAmount.toFixed(2)} ${c.currency}`,
+        c.status,
+        new Date(c.createdAt).toLocaleDateString()
+      ]);
+      
+      return [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\\n');
+    }
+    
+    function downloadCSV(csv, filename) {
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      link.click();
+    }
+  </script>
+</body>
+</html>

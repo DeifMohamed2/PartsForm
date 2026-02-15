@@ -3592,6 +3592,7 @@ const getSyncHistory = async (req, res) => {
     const { page = 1, limit = 20 } = req.query;
     
     const SyncHistory = require('../models/SyncHistory');
+    const mongoose = require('mongoose');
     
     // Verify integration exists
     const integration = await Integration.findById(id);
@@ -3642,17 +3643,52 @@ const getSyncHistory = async (req, res) => {
       metrics: record.metrics || {},
     }));
     
-    // Calculate stats
+    // Calculate aggregated stats from ALL records (not just current page)
+    const aggregatedStats = await SyncHistory.aggregate([
+      { $match: { integration: new mongoose.Types.ObjectId(id) } },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: 1 },
+          completed: { $sum: { $cond: [{ $eq: ['$status', 'completed'] }, 1, 0] } },
+          failed: { $sum: { $cond: [{ $eq: ['$status', 'failed'] }, 1, 0] } },
+          interrupted: { $sum: { $cond: [{ $eq: ['$status', 'interrupted'] }, 1, 0] } },
+          pending: { $sum: { $cond: [{ $eq: ['$status', 'pending'] }, 1, 0] } },
+          cancelled: { $sum: { $cond: [{ $eq: ['$status', 'cancelled'] }, 1, 0] } },
+          totalDuration: { $sum: { $cond: [{ $gt: ['$duration', 0] }, '$duration', 0] } },
+          completedWithDuration: { $sum: { $cond: [{ $and: [{ $eq: ['$status', 'completed'] }, { $gt: ['$duration', 0] }] }, 1, 0] } },
+          totalRecordsProcessed: { $sum: '$recordsProcessed' },
+          totalRecordsInserted: { $sum: '$recordsInserted' },
+          totalFilesProcessed: { $sum: '$filesProcessed' },
+        }
+      }
+    ]);
+    
+    const aggStats = aggregatedStats[0] || {
+      total: 0, completed: 0, failed: 0, interrupted: 0, pending: 0, cancelled: 0,
+      totalDuration: 0, completedWithDuration: 0, totalRecordsProcessed: 0, totalRecordsInserted: 0, totalFilesProcessed: 0
+    };
+    
     const stats = {
       total,
       totalPages: Math.ceil(total / parseInt(limit)),
       currentPage: parseInt(page),
-      successRate: total > 0 
-        ? Math.round((history.filter(h => h.status === 'completed').length / Math.min(history.length, total)) * 100)
+      // Real aggregated counts
+      completed: aggStats.completed,
+      failed: aggStats.failed,
+      interrupted: aggStats.interrupted,
+      pending: aggStats.pending,
+      cancelled: aggStats.cancelled,
+      // Calculated values
+      successRate: aggStats.total > 0 
+        ? Math.round((aggStats.completed / aggStats.total) * 100)
         : 0,
-      avgDuration: history.length > 0
-        ? Math.round(history.reduce((sum, h) => sum + (h.duration || 0), 0) / history.length)
+      avgDuration: aggStats.completedWithDuration > 0
+        ? Math.round(aggStats.totalDuration / aggStats.completedWithDuration)
         : 0,
+      totalRecordsProcessed: aggStats.totalRecordsProcessed,
+      totalRecordsInserted: aggStats.totalRecordsInserted,
+      totalFilesProcessed: aggStats.totalFilesProcessed,
     };
     
     res.json({
@@ -3827,6 +3863,54 @@ const deleteSyncHistory = async (req, res) => {
     });
   } catch (error) {
     console.error('Error deleting sync history:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * Cleanup stale/invalid sync history records (API)
+ * Removes pending/interrupted records with no processed data
+ */
+const cleanupSyncHistory = async (req, res) => {
+  try {
+    const { integrationId } = req.params;
+    const SyncHistory = require('../models/SyncHistory');
+    const mongoose = require('mongoose');
+    
+    const query = {
+      status: { $in: ['pending', 'interrupted', 'cancelled'] },
+      recordsProcessed: { $lte: 0 },
+      filesProcessed: { $lte: 0 },
+      // Only clean records older than 1 hour to avoid affecting current syncs
+      startedAt: { $lt: new Date(Date.now() - 60 * 60 * 1000) },
+    };
+    
+    // If specific integration, filter by it
+    if (integrationId && integrationId !== 'all') {
+      query.integration = new mongoose.Types.ObjectId(integrationId);
+    }
+    
+    // Get count before deletion for reporting
+    const count = await SyncHistory.countDocuments(query);
+    
+    if (count === 0) {
+      return res.json({
+        success: true,
+        message: 'No stale sync history records found',
+        deletedCount: 0,
+      });
+    }
+    
+    // Delete the stale records
+    const result = await SyncHistory.deleteMany(query);
+    
+    res.json({
+      success: true,
+      message: `Cleaned up ${result.deletedCount} stale sync history records`,
+      deletedCount: result.deletedCount,
+    });
+  } catch (error) {
+    console.error('Error cleaning up sync history:', error);
     res.status(500).json({ success: false, error: error.message });
   }
 };
@@ -4589,6 +4673,7 @@ module.exports = {
   getSyncHistory,
   getAllSyncHistory,
   deleteSyncHistory,
+  cleanupSyncHistory,
   // File upload
   uploadPartsFromFile,
   // Sidebar counts API

@@ -8,8 +8,8 @@ module.exports = {
       script: 'app.js',
       instances: 1,
       exec_mode: 'fork',
-      max_memory_restart: '4G',  // Website only - doesn't need much
-      node_args: '--max-old-space-size=4096',
+      max_memory_restart: '2G',   // Website only - doesn't need much
+      node_args: '--max-old-space-size=2048',
       env: {
         NODE_ENV: 'production',
         SYNC_USE_WORKER: 'true',  // Delegate sync to worker process
@@ -31,8 +31,8 @@ module.exports = {
       script: 'services/syncWorker.js',
       instances: 1,
       exec_mode: 'fork',
-      max_memory_restart: '40G',  // 40GB limit (you have 96GB)
-      node_args: '--max-old-space-size=40960 --expose-gc --gc-interval=100',
+      max_memory_restart: '16G',  // 16GB limit - leaves room for MongoDB (4GB) + Elasticsearch
+      node_args: '--max-old-space-size=16384 --expose-gc --gc-interval=100',
       autorestart: true,
       watch: false,
       kill_timeout: 60000,        // 60s to gracefully shutdown

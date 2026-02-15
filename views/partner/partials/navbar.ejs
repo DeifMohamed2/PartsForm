@@ -1,0 +1,72 @@
+<!-- ====================================
+     PARTNER PORTAL NAVIGATION BAR
+     ==================================== -->
+<nav class="partner-navbar">
+  <div class="partner-navbar-inner">
+    <!-- Brand -->
+    <a href="/" class="partner-nav-brand">
+      <img src="/images/PARTSFORM-LOGO.webp" alt="PartsForm">
+      <div class="partner-nav-brand-divider"></div>
+      <span class="partner-nav-brand-text">
+        <i data-lucide="handshake"></i>
+        Partner Portal
+      </span>
+    </a>
+
+    <!-- Mobile Menu Toggle -->
+    <button class="partner-mobile-menu-btn" id="partnerMobileMenuBtn" aria-label="Toggle menu">
+      <span class="partner-menu-icon">
+        <span></span>
+        <span></span>
+        <span></span>
+      </span>
+    </button>
+
+    <!-- Navigation Links -->
+    <div class="partner-nav-links" id="partnerNavLinks">
+      <a href="/partner/dashboard" class="partner-nav-link <%= typeof activePage !== 'undefined' && activePage === 'dashboard' ? 'active' : '' %>">
+        <i data-lucide="layout-dashboard"></i>
+        <span>Dashboard</span>
+      </a>
+      <a href="/partner/commissions" class="partner-nav-link <%= typeof activePage !== 'undefined' && activePage === 'commissions' ? 'active' : '' %>">
+        <i data-lucide="coins"></i>
+        <span>Commissions</span>
+      </a>
+      <a href="/partner/payouts" class="partner-nav-link <%= typeof activePage !== 'undefined' && activePage === 'payouts' ? 'active' : '' %>">
+        <i data-lucide="banknote"></i>
+        <span>Payouts</span>
+      </a>
+      <a href="/partner/profile" class="partner-nav-link <%= typeof activePage !== 'undefined' && activePage === 'profile' ? 'active' : '' %>">
+        <i data-lucide="user-circle"></i>
+        <span>Profile</span>
+      </a>
+    </div>
+
+    <!-- User Info -->
+    <div class="partner-nav-user">
+      <div class="partner-nav-user-info">
+        <div class="partner-nav-user-name"><%= partner.firstName %> <%= partner.lastName %></div>
+        <div class="partner-nav-user-email"><%= partner.email %></div>
+      </div>
+      <a href="/partner/logout" class="partner-btn-logout">
+        <i data-lucide="log-out"></i>
+        <span>Logout</span>
+      </a>
+    </div>
+  </div>
+</nav>
+
+<script>
+// Mobile menu toggle
+document.addEventListener('DOMContentLoaded', function() {
+  const mobileMenuBtn = document.getElementById('partnerMobileMenuBtn');
+  const navLinks = document.getElementById('partnerNavLinks');
+  
+  if (mobileMenuBtn && navLinks) {
+    mobileMenuBtn.addEventListener('click', function() {
+      navLinks.classList.toggle('show');
+      mobileMenuBtn.classList.toggle('active');
+    });
+  }
+});
+</script>

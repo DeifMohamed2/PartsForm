@@ -512,6 +512,19 @@ const attachUser = async (req, res, next) => {
         res.locals.user = null;
         res.locals.userRole = null;
       }
+    } else if (decoded.role === 'referral_partner') {
+      const ReferralPartner = require('../models/ReferralPartner');
+      const partner = await ReferralPartner.findById(decoded.id);
+      if (partner && partner.status === 'active') {
+        req.user = partner;
+        req.userRole = 'referral_partner';
+        res.locals.user = partner;
+        res.locals.userRole = 'referral_partner';
+      } else {
+        req.user = null;
+        res.locals.user = null;
+        res.locals.userRole = null;
+      }
     } else {
       const buyer = await Buyer.findById(decoded.id);
       if (buyer && buyer.isActive) {
@@ -535,6 +548,105 @@ const attachUser = async (req, res, next) => {
   }
 };
 
+/**
+ * Middleware to protect referral partner routes
+ */
+const requireReferralPartnerAuth = async (req, res, next) => {
+  try {
+    const ReferralPartner = require('../models/ReferralPartner');
+    
+    // Get token from cookie or Authorization header
+    let token = req.cookies?.partner_token;
+
+    if (!token && req.headers.authorization) {
+      const authHeader = req.headers.authorization;
+      if (authHeader.startsWith('Bearer ')) {
+        token = authHeader.substring(7);
+      }
+    }
+
+    if (!token) {
+      if (req.xhr || req.headers.accept?.includes('application/json')) {
+        return res.status(401).json({
+          success: false,
+          message: 'Authentication required. Please login.',
+          redirectUrl: '/partner/login',
+        });
+      }
+      return res.redirect('/partner/login');
+    }
+
+    // Verify token
+    const decoded = jwt.verify(token, JWT_SECRET);
+
+    // Check if this is a referral partner token
+    if (!decoded.role || decoded.role !== 'referral_partner') {
+      if (req.xhr || req.headers.accept?.includes('application/json')) {
+        return res.status(403).json({
+          success: false,
+          message: 'Access denied. Referral partner account required.',
+          redirectUrl: '/partner/login',
+        });
+      }
+      return res.redirect('/partner/login');
+    }
+
+    // Find partner
+    const partner = await ReferralPartner.findById(decoded.id);
+
+    if (!partner) {
+      res.cookie('partner_token', '', { expires: new Date(0), httpOnly: true });
+
+      if (req.xhr || req.headers.accept?.includes('application/json')) {
+        return res.status(401).json({
+          success: false,
+          message: 'Partner not found. Please login again.',
+          redirectUrl: '/partner/login',
+        });
+      }
+      return res.redirect('/partner/login');
+    }
+
+    // Check if account is active
+    if (partner.status !== 'active') {
+      res.cookie('partner_token', '', { expires: new Date(0), httpOnly: true });
+
+      if (req.xhr || req.headers.accept?.includes('application/json')) {
+        return res.status(403).json({
+          success: false,
+          message: 'Your partner account is not active. Please contact support.',
+        });
+      }
+      return res.redirect('/partner/login?error=inactive');
+    }
+
+    // Attach partner to request
+    req.user = partner;
+    req.userRole = 'referral_partner';
+    res.locals.user = partner;
+    res.locals.userRole = 'referral_partner';
+
+    next();
+  } catch (error) {
+    // Clear invalid cookie
+    res.cookie('partner_token', '', { 
+      expires: new Date(0), 
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax'
+    });
+
+    if (req.xhr || req.headers.accept?.includes('application/json')) {
+      return res.status(401).json({
+        success: false,
+        message: 'Session expired. Please login again.',
+        redirectUrl: '/partner/login',
+      });
+    }
+    return res.redirect('/partner/login');
+  }
+};
+
 module.exports = {
   requireAuth,
   requireAdminAuth,
@@ -544,6 +656,7 @@ module.exports = {
   redirectIfAuthenticated,
   attachUser,
   adminHasPermission,
+  requireReferralPartnerAuth,
   PERMISSIONS,
   ROLE_PERMISSIONS,
 };

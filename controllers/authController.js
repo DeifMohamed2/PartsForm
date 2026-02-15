@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const Buyer = require('../models/Buyer');
 const Admin = require('../models/Admin');
+const referralService = require('../services/referralService');
 
 // JWT Configuration - MUST be set via environment variables
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -79,6 +80,7 @@ const register = async (req, res) => {
       confirmPassword,
       agreeTerms,
       newsletter,
+      referralCode, // Optional referral code from partner
     } = req.body;
 
     // Validate required fields
@@ -146,10 +148,32 @@ const register = async (req, res) => {
       });
     }
 
+    // Validate referral code if provided
+    let referralData = null;
+    if (referralCode && referralCode.trim()) {
+      const referralValidation = await referralService.validateReferralCodeForRegistration(referralCode);
+      
+      if (referralValidation.valid) {
+        referralData = {
+          code: referralValidation.referral.code,
+          codeId: referralValidation.referral.codeId,
+          partnerId: referralValidation.referral.partnerId,
+          partnerName: referralValidation.referral.partnerName,
+          discountRate: referralValidation.referral.discountRate,
+          commissionRate: referralValidation.referral.commissionRate,
+          registeredAt: new Date()
+        };
+      } else {
+        // Referral code is invalid, but we still allow registration
+        // Just log it and continue
+        console.log('[Registration] Invalid referral code provided:', referralCode, '-', referralValidation.message);
+      }
+    }
+
     // Create new buyer
     // Convert "OTHER" to "XX" (unassigned ISO code) to satisfy 2-character requirement
     const countryCode = country.trim().toUpperCase();
-    const buyer = new Buyer({
+    const buyerData = {
       firstName: firstName.trim(),
       lastName: lastName.trim(),
       email: email.toLowerCase().trim(),
@@ -162,9 +186,21 @@ const register = async (req, res) => {
       newsletter: newsletter === 'on' || newsletter === true,
       termsAcceptedAt: new Date(),
       isActive: true, // Account is active by default
-    });
+    };
+
+    // Add referral data if valid code was provided
+    if (referralData) {
+      buyerData.registrationReferral = referralData;
+    }
+
+    const buyer = new Buyer(buyerData);
 
     await buyer.save();
+
+    // Update referral code usage stats if buyer was referred
+    if (referralData && referralData.codeId) {
+      await referralService.recordCodeUsageOnRegistration(referralData.codeId);
+    }
 
     // Generate JWT token
     const token = jwt.sign({ id: buyer._id }, process.env.JWT_SECRET, {
@@ -180,19 +216,32 @@ const register = async (req, res) => {
     });
 
     // Return success response
+    const responseData = {
+      user: {
+        id: buyer._id,
+        firstName: buyer.firstName,
+        lastName: buyer.lastName,
+        email: buyer.email,
+        companyName: buyer.companyName,
+      },
+      redirectUrl: '/buyer/dashboard',
+    };
+
+    // Add referral info to response if applied
+    if (referralData) {
+      responseData.referral = {
+        applied: true,
+        partnerName: referralData.partnerName,
+        discountRate: referralData.discountRate
+      };
+    }
+
     res.status(201).json({
       success: true,
-      message: 'Account created successfully!',
-      data: {
-        user: {
-          id: buyer._id,
-          firstName: buyer.firstName,
-          lastName: buyer.lastName,
-          email: buyer.email,
-          companyName: buyer.companyName,
-        },
-        redirectUrl: '/buyer/dashboard',
-      },
+      message: referralData 
+        ? `Account created successfully! You'll get ${referralData.discountRate}% discount on all orders.`
+        : 'Account created successfully!',
+      data: responseData,
     });
   } catch (error) {
     console.error('Registration error:', error);
@@ -463,12 +512,48 @@ const getRegisterPage = (req, res) => {
   });
 };
 
+/**
+ * Validate referral code for registration
+ * POST /api/referral/validate-registration
+ * Used to check if a referral code is valid before submitting registration form
+ */
+const validateReferralCodeForRegistration = async (req, res) => {
+  try {
+    const { code } = req.body;
+    
+    if (!code || typeof code !== 'string') {
+      return res.status(400).json({
+        success: false,
+        valid: false,
+        message: 'Please enter a referral code'
+      });
+    }
+
+    const result = await referralService.validateReferralCodeForRegistration(code);
+    
+    res.json({
+      success: true,
+      valid: result.valid,
+      message: result.message,
+      referral: result.valid ? result.referral : null
+    });
+  } catch (error) {
+    console.error('Error validating referral code:', error);
+    res.status(500).json({
+      success: false,
+      valid: false,
+      message: 'Error validating referral code'
+    });
+  }
+};
+
 module.exports = {
   register,
   login,
   logout,
   getCurrentUser,
   getRegisterPage,
+  validateReferralCodeForRegistration,
   generateToken,
   JWT_SECRET,
 };

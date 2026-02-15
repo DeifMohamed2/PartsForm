@@ -208,6 +208,41 @@
             </div>
           </div>
 
+          <!-- Referral Code Section (Optional) -->
+          <div class="form-section referral-section">
+            <div class="form-section-title">
+              <i data-lucide="gift"></i>
+              <span>Referral Code <small style="font-weight: 400; color: #64748b;">(Optional)</small></span>
+            </div>
+            
+            <div class="form-group full-width">
+              <label for="referralCode">Have a referral code?</label>
+              <div class="input-wrapper referral-code-wrapper">
+                <i data-lucide="ticket" class="input-icon"></i>
+                <input type="text" 
+                       id="referralCode" 
+                       name="referralCode" 
+                       placeholder="Enter referral code for special discount"
+                       style="text-transform: uppercase;">
+                <button type="button" class="validate-code-btn" id="validateCodeBtn" onclick="validateReferralCode()">
+                  <i data-lucide="check-circle"></i>
+                  <span>Verify</span>
+                </button>
+              </div>
+              <div class="referral-code-status" id="referralCodeStatus" style="display: none;">
+                <div class="referral-valid" id="referralValid" style="display: none;">
+                  <i data-lucide="check-circle"></i>
+                  <span id="referralMessage">Valid code! You'll get discount on all orders.</span>
+                </div>
+                <div class="referral-invalid" id="referralInvalid" style="display: none;">
+                  <i data-lucide="x-circle"></i>
+                  <span id="referralErrorMessage">Invalid code</span>
+                </div>
+              </div>
+              <span class="form-hint">If a referral partner gave you a code, enter it here to get exclusive discounts on all your orders.</span>
+            </div>
+          </div>
+
           <!-- Terms & Agreement -->
           <div class="form-section terms-section">
             <div class="form-checkbox">
@@ -250,6 +285,73 @@
 
 <!-- Registration Page Scripts -->
 <script>
+// Validate referral code function
+let validatedReferralCode = null;
+
+async function validateReferralCode() {
+  const input = document.getElementById('referralCode');
+  const btn = document.getElementById('validateCodeBtn');
+  const status = document.getElementById('referralCodeStatus');
+  const validDiv = document.getElementById('referralValid');
+  const invalidDiv = document.getElementById('referralInvalid');
+  const validMessage = document.getElementById('referralMessage');
+  const errorMessage = document.getElementById('referralErrorMessage');
+  
+  const code = input.value.trim().toUpperCase();
+  if (!code) {
+    status.style.display = 'none';
+    validatedReferralCode = null;
+    return;
+  }
+  
+  // Show loading state
+  btn.classList.add('loading');
+  btn.innerHTML = '<span>...</span>';
+  
+  try {
+    const response = await fetch('/api/referral/validate-registration', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({ code })
+    });
+    
+    const result = await response.json();
+    
+    status.style.display = 'block';
+    
+    if (result.success && result.valid) {
+      // Valid code
+      validatedReferralCode = code;
+      validDiv.style.display = 'flex';
+      invalidDiv.style.display = 'none';
+      validMessage.textContent = `Valid! You'll get ${result.referral.discountRate}% discount on all orders (referred by ${result.referral.partnerName})`;
+      input.classList.add('valid');
+      input.classList.remove('invalid');
+    } else {
+      // Invalid code
+      validatedReferralCode = null;
+      validDiv.style.display = 'none';
+      invalidDiv.style.display = 'flex';
+      errorMessage.textContent = result.message || 'Invalid or expired referral code';
+      input.classList.add('invalid');
+      input.classList.remove('valid');
+    }
+  } catch (error) {
+    console.error('Error validating code:', error);
+    status.style.display = 'block';
+    validDiv.style.display = 'none';
+    invalidDiv.style.display = 'flex';
+    errorMessage.textContent = 'Error validating code. Please try again.';
+  } finally {
+    btn.classList.remove('loading');
+    btn.innerHTML = '<i data-lucide="check-circle"></i><span>Verify</span>';
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+}
+
 // Open login modal from link
 document.addEventListener('DOMContentLoaded', function() {
   const openLoginLink = document.getElementById('open-login-modal');

@@ -1,0 +1,589 @@
+<%- include('../partials/header') %>
+<link rel="stylesheet" href="/css/adminCSS/admin-referrals.css">
+</head>
+
+<body>
+  <div class="admin-wrapper">
+    <%- include('../partials/sidebar', { activePage: 'referrals' }) %>
+
+    <main class="admin-main">
+      <%- include('../partials/topbar', { pageTitle: 'Referral Partners' }) %>
+
+      <div class="admin-content">
+        <!-- Page Header -->
+        <div class="referrals-page-header">
+          <h2>Referral Partners</h2>
+          <div class="referrals-header-actions">
+            <div class="referrals-search-container">
+              <i data-lucide="search" class="search-icon"></i>
+              <input type="text" id="partnersSearch" placeholder="Search partners..." autocomplete="off">
+            </div>
+            <a href="/admin/referrals/partners/create" class="referrals-btn referrals-btn-primary">
+              <i data-lucide="user-plus"></i>
+              Add Partner
+            </a>
+          </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="referrals-advanced-filters">
+          <div class="referrals-filters-header">
+            <div class="referrals-filters-title">
+              <i data-lucide="filter"></i>
+              <span>Filters</span>
+            </div>
+            <button class="referrals-filters-toggle" id="toggleFilters">
+              <i data-lucide="chevron-down"></i>
+              <span>More Filters</span>
+            </button>
+          </div>
+          
+          <!-- Primary Filters (Always Visible) -->
+          <div class="referrals-filters-primary">
+            <div class="referrals-filter-item">
+              <label>Status</label>
+              <select id="filterStatus" class="referrals-filter-select">
+                <option value="">All Status</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+                <option value="suspended">Suspended</option>
+              </select>
+            </div>
+            <div class="referrals-filter-item">
+              <label>Sort By</label>
+              <select id="sortBy" class="referrals-filter-select">
+                <option value="createdAt">Most Recent</option>
+                <option value="stats.totalReferrals">Most Referrals</option>
+                <option value="stats.paidCommission">Highest Earnings</option>
+                <option value="firstName">Name A-Z</option>
+              </select>
+            </div>
+            <div class="referrals-filter-item">
+              <label>Commission Rate</label>
+              <select id="filterCommission" class="referrals-filter-select">
+                <option value="">Any Rate</option>
+                <option value="0-5">0% - 5%</option>
+                <option value="5-10">5% - 10%</option>
+                <option value="10-15">10% - 15%</option>
+                <option value="15-100">15%+</option>
+              </select>
+            </div>
+            <button class="referrals-filter-apply-btn" onclick="loadPartners()">
+              <i data-lucide="search"></i>
+              Apply
+            </button>
+          </div>
+          
+          <!-- Secondary Filters (Expandable) -->
+          <div class="referrals-filters-secondary" id="secondaryFilters">
+            <div class="referrals-filter-item">
+              <label>Min Referrals</label>
+              <input type="number" id="filterMinReferrals" class="referrals-filter-input" placeholder="0" min="0">
+            </div>
+            <div class="referrals-filter-item">
+              <label>Min Earnings (AED)</label>
+              <input type="number" id="filterMinEarnings" class="referrals-filter-input" placeholder="0" min="0" step="0.01">
+            </div>
+            <div class="referrals-filter-item">
+              <label>Joined From</label>
+              <input type="date" id="filterDateFrom" class="referrals-filter-input">
+            </div>
+            <div class="referrals-filter-item">
+              <label>Joined To</label>
+              <input type="date" id="filterDateTo" class="referrals-filter-input">
+            </div>
+          </div>
+          
+          <!-- Filter Actions -->
+          <div class="referrals-filters-actions">
+            <span class="referrals-active-filters" id="activeFiltersCount">0 filters active</span>
+            <button class="referrals-filter-clear-btn" onclick="clearFilters()">
+              <i data-lucide="x-circle"></i>
+              Clear All
+            </button>
+            <button class="referrals-filter-export-btn" onclick="exportPartners()">
+              <i data-lucide="download"></i>
+              Export CSV
+            </button>
+          </div>
+        </div>
+
+        <!-- Partners Table -->
+        <div class="referrals-table-wrapper" id="partnersTableWrapper">
+          <div class="referrals-loading" id="loadingIndicator">
+            <div class="loading-spinner"></div>
+            <span>Loading partners...</span>
+          </div>
+          <table class="referrals-table" id="partnersTable" style="display: none;">
+            <thead>
+              <tr>
+                <th>Partner</th>
+                <th>Codes</th>
+                <th>Rates</th>
+                <th>Statistics</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="partnersTableBody">
+              <!-- Populated dynamically -->
+            </tbody>
+          </table>
+          <div class="referrals-empty-state" id="emptyState" style="display: none;">
+            <div class="referrals-empty-icon">
+              <i data-lucide="users"></i>
+            </div>
+            <h3>No referral partners found</h3>
+            <p>Get started by creating your first referral partner</p>
+            <a href="/admin/referrals/partners/create" class="referrals-btn referrals-btn-primary">
+              <i data-lucide="user-plus"></i>
+              Add Partner
+            </a>
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="referrals-pagination" id="pagination" style="display: none;">
+          <div class="referrals-pagination-info">
+            Showing <span id="showingFrom">0</span>-<span id="showingTo">0</span> of <span id="totalCount">0</span> partners
+          </div>
+          <div class="referrals-pagination-controls">
+            <button class="referrals-pagination-btn" id="prevPage" disabled>
+              <i data-lucide="chevron-left"></i>
+            </button>
+            <span class="referrals-pagination-current">Page <span id="currentPage">1</span></span>
+            <button class="referrals-pagination-btn" id="nextPage" disabled>
+              <i data-lucide="chevron-right"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner"></div>
+  </div>
+
+  <%- include('../partials/footer') %>
+  <script>
+    // State
+    let partners = [];
+    let currentPage = 1;
+    let totalPages = 1;
+    let searchTimeout = null;
+
+    // Load partners on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      loadPartners();
+      setupEventListeners();
+      lucide.createIcons();
+    });
+
+    function setupEventListeners() {
+      // Search input with debounce
+      document.getElementById('partnersSearch').addEventListener('input', (e) => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+          currentPage = 1;
+          loadPartners();
+        }, 300);
+      });
+
+      // Status filter
+      document.getElementById('filterStatus').addEventListener('change', () => {
+        currentPage = 1;
+        loadPartners();
+      });
+      
+      // Commission filter
+      document.getElementById('filterCommission').addEventListener('change', () => {
+        currentPage = 1;
+        loadPartners();
+      });
+      
+      // Toggle filters panel
+      document.getElementById('toggleFilters').addEventListener('click', toggleFiltersPanel);
+
+      // Sort filter
+      document.getElementById('sortBy').addEventListener('change', () => {
+        currentPage = 1;
+        loadPartners();
+      });
+
+      // Pagination
+      document.getElementById('prevPage').addEventListener('click', () => {
+        if (currentPage > 1) {
+          currentPage--;
+          loadPartners();
+        }
+      });
+
+      document.getElementById('nextPage').addEventListener('click', () => {
+        if (currentPage < totalPages) {
+          currentPage++;
+          loadPartners();
+        }
+      });
+
+      // Close dropdowns when clicking outside
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.action-dropdown')) {
+          document.querySelectorAll('.action-dropdown-menu.show').forEach(menu => {
+            menu.classList.remove('show');
+          });
+        }
+      });
+    }
+
+    async function loadPartners() {
+      const search = document.getElementById('partnersSearch').value;
+      const status = document.getElementById('filterStatus').value;
+      const sortBy = document.getElementById('sortBy').value;
+      const commission = document.getElementById('filterCommission').value;
+      const minReferrals = document.getElementById('filterMinReferrals').value;
+      const minEarnings = document.getElementById('filterMinEarnings').value;
+      const dateFrom = document.getElementById('filterDateFrom').value;
+      const dateTo = document.getElementById('filterDateTo').value;
+
+      const params = new URLSearchParams({
+        page: currentPage,
+        limit: 20,
+        sortBy: sortBy,
+        sortOrder: 'desc'
+      });
+
+      if (search) params.append('search', search);
+      if (status) params.append('status', status);
+      if (commission) params.append('commissionRange', commission);
+      if (minReferrals) params.append('minReferrals', minReferrals);
+      if (minEarnings) params.append('minEarnings', minEarnings);
+      if (dateFrom) params.append('dateFrom', dateFrom);
+      if (dateTo) params.append('dateTo', dateTo);
+      
+      updateActiveFiltersCount();
+
+      document.getElementById('loadingIndicator').style.display = 'flex';
+      document.getElementById('partnersTable').style.display = 'none';
+      document.getElementById('emptyState').style.display = 'none';
+
+      try {
+        const response = await fetch(`/admin/api/referrals/partners?${params}`);
+        const data = await response.json();
+
+        if (data.success) {
+          partners = data.partners;
+          totalPages = data.pagination.pages;
+          renderPartners();
+          updatePagination(data.pagination);
+        } else {
+          showToast('Failed to load partners', 'error');
+        }
+      } catch (error) {
+        console.error('Error loading partners:', error);
+        showToast('Failed to load partners', 'error');
+      }
+
+      document.getElementById('loadingIndicator').style.display = 'none';
+    }
+
+    function renderPartners() {
+      const tbody = document.getElementById('partnersTableBody');
+      
+      if (partners.length === 0) {
+        document.getElementById('emptyState').style.display = 'flex';
+        document.getElementById('partnersTable').style.display = 'none';
+        document.getElementById('pagination').style.display = 'none';
+        return;
+      }
+
+      document.getElementById('partnersTable').style.display = 'table';
+      document.getElementById('emptyState').style.display = 'none';
+
+      tbody.innerHTML = partners.map(partner => `
+        <tr>
+          <td>
+            <div class="referrals-partner-cell">
+              <div class="referrals-partner-avatar">
+                ${partner.firstName.charAt(0)}${partner.lastName.charAt(0)}
+              </div>
+              <div class="referrals-partner-info">
+                <h4><a href="/admin/referrals/partners/${partner._id}">${partner.firstName} ${partner.lastName}</a></h4>
+                <p>${partner.email}</p>
+              </div>
+            </div>
+          </td>
+          <td>
+            <a href="/admin/referrals/partners/${partner._id}#codes" class="referrals-codes-link" title="View codes">
+              <i data-lucide="ticket"></i>
+              View Codes
+            </a>
+          </td>
+          <td>
+            <div class="referrals-rates">
+              <span class="referrals-rate-item commission">
+                <i data-lucide="trending-up"></i>
+                ${partner.commissionRate}% commission
+              </span>
+              <span class="referrals-rate-item discount">
+                <i data-lucide="tag"></i>
+                ${partner.buyerDiscountRate}% buyer discount
+              </span>
+            </div>
+          </td>
+          <td>
+            <div class="referrals-stats-cell">
+              <div class="stat-row">
+                <span class="stat-number">${partner.stats?.totalReferrals || 0}</span>
+                <span class="stat-text">referrals</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-number">${(partner.stats?.paidCommission || 0).toFixed(2)}</span>
+                <span class="stat-text">AED paid</span>
+              </div>
+            </div>
+          </td>
+          <td>
+            <span class="referrals-status-badge ${partner.status}">${partner.status}</span>
+          </td>
+          <td>
+            <div class="referrals-actions">
+              <button class="referrals-action-btn view" onclick="viewPartner('${partner._id}')" title="View Details">
+                <i data-lucide="eye"></i>
+              </button>
+              <button class="referrals-action-btn edit" onclick="editPartner('${partner._id}')" title="Edit">
+                <i data-lucide="edit-2"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+
+      lucide.createIcons();
+    }
+
+    function updatePagination(pagination) {
+      document.getElementById('showingFrom').textContent = ((pagination.page - 1) * pagination.limit) + 1;
+      document.getElementById('showingTo').textContent = Math.min(pagination.page * pagination.limit, pagination.total);
+      document.getElementById('totalCount').textContent = pagination.total;
+      document.getElementById('currentPage').textContent = pagination.page;
+      
+      document.getElementById('prevPage').disabled = pagination.page <= 1;
+      document.getElementById('nextPage').disabled = pagination.page >= pagination.pages;
+      
+      document.getElementById('pagination').style.display = pagination.total > 0 ? 'flex' : 'none';
+    }
+
+    function toggleDropdown(btn) {
+      const menu = btn.nextElementSibling;
+      document.querySelectorAll('.action-dropdown-menu.show').forEach(m => {
+        if (m !== menu) m.classList.remove('show');
+      });
+      menu.classList.toggle('show');
+    }
+
+    function viewPartner(id) {
+      window.location.href = `/admin/referrals/partners/${id}`;
+    }
+
+    function editPartner(id) {
+      window.location.href = `/admin/referrals/partners/${id}/edit`;
+    }
+
+    async function regenerateCode(id) {
+      if (!confirm('Are you sure you want to regenerate this referral code? The old code will no longer work.')) return;
+      
+      showLoading();
+      try {
+        const response = await fetch(`/admin/api/referrals/partners/${id}/regenerate-code`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+          showToast(`New referral code: ${data.referralCode}`, 'success');
+          loadPartners();
+        } else {
+          showToast(data.message || 'Failed to regenerate code', 'error');
+        }
+      } catch (error) {
+        showToast('Failed to regenerate code', 'error');
+      }
+      hideLoading();
+    }
+
+    async function updateStatus(id, status) {
+      const action = status === 'active' ? 'activate' : 'suspend';
+      if (!confirm(`Are you sure you want to ${action} this partner?`)) return;
+      
+      showLoading();
+      try {
+        const response = await fetch(`/admin/api/referrals/partners/${id}/status`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status })
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+          showToast(`Partner ${action}d successfully`, 'success');
+          loadPartners();
+        } else {
+          showToast(data.message || `Failed to ${action} partner`, 'error');
+        }
+      } catch (error) {
+        showToast(`Failed to ${action} partner`, 'error');
+      }
+      hideLoading();
+    }
+
+    async function deletePartner(id, name) {
+      if (!confirm(`Are you sure you want to delete ${name}? This cannot be undone.`)) return;
+      
+      showLoading();
+      try {
+        const response = await fetch(`/admin/api/referrals/partners/${id}`, {
+          method: 'DELETE'
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+          showToast('Partner deleted successfully', 'success');
+          loadPartners();
+        } else {
+          showToast(data.message || 'Failed to delete partner', 'error');
+        }
+      } catch (error) {
+        showToast('Failed to delete partner', 'error');
+      }
+      hideLoading();
+    }
+
+    function clearFilters() {
+      document.getElementById('partnersSearch').value = '';
+      document.getElementById('filterStatus').value = '';
+      document.getElementById('sortBy').value = 'createdAt';
+      document.getElementById('filterCommission').value = '';
+      document.getElementById('filterMinReferrals').value = '';
+      document.getElementById('filterMinEarnings').value = '';
+      document.getElementById('filterDateFrom').value = '';
+      document.getElementById('filterDateTo').value = '';
+      currentPage = 1;
+      updateActiveFiltersCount();
+      loadPartners();
+    }
+    
+    function toggleFiltersPanel() {
+      const secondary = document.getElementById('secondaryFilters');
+      const toggle = document.getElementById('toggleFilters');
+      secondary.classList.toggle('show');
+      toggle.classList.toggle('active');
+      
+      const icon = toggle.querySelector('i');
+      const text = toggle.querySelector('span');
+      if (secondary.classList.contains('show')) {
+        icon.setAttribute('data-lucide', 'chevron-up');
+        text.textContent = 'Less Filters';
+      } else {
+        icon.setAttribute('data-lucide', 'chevron-down');
+        text.textContent = 'More Filters';
+      }
+      lucide.createIcons();
+    }
+    
+    function updateActiveFiltersCount() {
+      let count = 0;
+      if (document.getElementById('filterStatus').value) count++;
+      if (document.getElementById('filterCommission').value) count++;
+      if (document.getElementById('filterMinReferrals').value) count++;
+      if (document.getElementById('filterMinEarnings').value) count++;
+      if (document.getElementById('filterDateFrom').value) count++;
+      if (document.getElementById('filterDateTo').value) count++;
+      if (document.getElementById('partnersSearch').value) count++;
+      
+      document.getElementById('activeFiltersCount').textContent = `${count} filter${count !== 1 ? 's' : ''} active`;
+    }
+    
+    async function exportPartners() {
+      showLoading();
+      try {
+        const params = new URLSearchParams();
+        const status = document.getElementById('filterStatus').value;
+        if (status) params.append('status', status);
+        
+        const response = await fetch(`/admin/api/referrals/partners?${params}&limit=1000`);
+        const data = await response.json();
+        
+        if (data.success && data.partners.length > 0) {
+          const csv = generateCSV(data.partners);
+          downloadCSV(csv, 'referral-partners.csv');
+          showToast('Export completed successfully', 'success');
+        } else {
+          showToast('No data to export', 'error');
+        }
+      } catch (error) {
+        showToast('Failed to export data', 'error');
+      }
+      hideLoading();
+    }
+    
+    function generateCSV(data) {
+      const headers = ['Name', 'Email', 'Referral Code', 'Commission Rate', 'Buyer Discount', 'Total Referrals', 'Paid Commission', 'Status', 'Joined Date'];
+      const rows = data.map(p => [
+        `${p.firstName} ${p.lastName}`,
+        p.email,
+        p.referralCode,
+        `${p.commissionRate}%`,
+        `${p.buyerDiscountRate}%`,
+        p.stats?.totalReferrals || 0,
+        `AED ${(p.stats?.paidCommission || 0).toFixed(2)}`,
+        p.status,
+        new Date(p.createdAt).toLocaleDateString()
+      ]);
+      
+      return [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\\n');
+    }
+    
+    function downloadCSV(csv, filename) {
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      link.click();
+    }
+
+    function showLoading() {
+      document.getElementById('loadingOverlay').classList.add('show');
+    }
+
+    function hideLoading() {
+      document.getElementById('loadingOverlay').classList.remove('show');
+    }
+
+    function showToast(message, type = 'info') {
+      const existing = document.querySelector('.toast');
+      if (existing) existing.remove();
+      
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      toast.innerHTML = `
+        <span>${message}</span>
+        <button onclick="this.parentElement.remove()">&times;</button>
+      `;
+      toast.style.cssText = `
+        position: fixed; top: 20px; right: 20px; z-index: 10000;
+        padding: 12px 16px; border-radius: 8px; display: flex; align-items: center; gap: 12px;
+        background: ${type === 'error' ? '#fee2e2' : type === 'success' ? '#dcfce7' : '#e0f2fe'};
+        color: ${type === 'error' ? '#dc2626' : type === 'success' ? '#16a34a' : '#0284c7'};
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-weight: 500;
+      `;
+      toast.querySelector('button').style.cssText = 'background:none;border:none;font-size:18px;cursor:pointer;color:inherit;';
+      
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 5000);
+    }
+  </script>
+</body>
+</html>

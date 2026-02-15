@@ -1,0 +1,433 @@
+<%- include('partials/header') %>
+<% activePage = 'profile'; %>
+<%- include('partials/navbar') %>
+
+<div class="partner-page-wrapper">
+  <!-- Main Content -->
+  <main class="partner-main">
+    <div class="partner-container" style="max-width: 800px;">
+      <!-- Page Header -->
+      <div class="partner-page-header">
+        <div class="partner-page-title">
+          <i data-lucide="user-circle"></i>
+          <h1>My Profile</h1>
+        </div>
+      </div>
+
+      <!-- Success/Error Messages -->
+      <div class="partner-alert partner-alert-success" id="successAlert" style="display: none;">
+        <i data-lucide="check-circle"></i>
+        <span id="successMessage">Profile updated successfully!</span>
+      </div>
+      <div class="partner-alert partner-alert-error" id="errorAlert" style="display: none;">
+        <i data-lucide="alert-circle"></i>
+        <span id="errorMessage"></span>
+      </div>
+
+      <!-- Referral Codes Card -->
+      <div class="partner-card">
+        <div class="partner-card-header">
+          <div class="partner-card-title">
+            <i data-lucide="link"></i>
+            <span>Your Referral Codes</span>
+          </div>
+        </div>
+        <div class="partner-card-body">
+          <% if (partnerCodes && partnerCodes.filter(c => c.status === 'active').length > 0) { %>
+            <% const activeCode = partnerCodes.filter(c => c.status === 'active')[0]; %>
+            <div class="partner-referral-code-display">
+              <div class="partner-referral-code-text"><%= activeCode.code %></div>
+              <button type="button" class="partner-btn-copy" onclick="copyReferralCode()">
+                <i data-lucide="copy"></i>
+                <span>Copy</span>
+              </button>
+            </div>
+            <p style="margin-top: 1rem; font-size: 0.875rem; color: var(--partner-text-secondary);">
+              Share this code with your referrals to earn commissions on their orders.
+            </p>
+          <% } else { %>
+            <div class="partner-referral-code-display no-code">
+              <div class="partner-referral-code-text">No active code</div>
+            </div>
+            <p style="margin-top: 1rem; font-size: 0.875rem; color: var(--partner-text-secondary);">
+              Contact admin to request a new referral code.
+            </p>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- Commission Rates Card -->
+      <div class="partner-card">
+        <div class="partner-card-header">
+          <div class="partner-card-title">
+            <i data-lucide="percent"></i>
+            <span>Commission Rates</span>
+          </div>
+        </div>
+        <div class="partner-card-body">
+          <div class="partner-info-grid">
+            <div class="partner-info-item">
+              <span class="partner-info-label">Your Commission Rate</span>
+              <span class="partner-info-value partner-text-success"><%= partner.commissionRate %>%</span>
+            </div>
+            <div class="partner-info-item">
+              <span class="partner-info-label">Buyer Discount Rate</span>
+              <span class="partner-info-value partner-text-primary"><%= partner.buyerDiscountRate %>%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Personal Information Card -->
+      <div class="partner-card">
+        <div class="partner-card-header">
+          <div class="partner-card-title">
+            <i data-lucide="user"></i>
+            <span>Personal Information</span>
+          </div>
+        </div>
+        <div class="partner-card-body">
+          <form id="profileForm">
+            <div class="partner-form-grid">
+              <div class="partner-form-group">
+                <label class="partner-form-label">
+                  <i data-lucide="user"></i>
+                  First Name
+                </label>
+                <input type="text" class="partner-form-input" id="firstName" name="firstName" value="<%= partner.firstName %>" required>
+              </div>
+              
+              <div class="partner-form-group">
+                <label class="partner-form-label">
+                  <i data-lucide="user"></i>
+                  Last Name
+                </label>
+                <input type="text" class="partner-form-input" id="lastName" name="lastName" value="<%= partner.lastName %>" required>
+              </div>
+              
+              <div class="partner-form-group">
+                <label class="partner-form-label">
+                  <i data-lucide="mail"></i>
+                  Email Address
+                </label>
+                <input type="email" class="partner-form-input" id="email" value="<%= partner.email %>" disabled>
+              </div>
+              
+              <div class="partner-form-group">
+                <label class="partner-form-label">
+                  <i data-lucide="phone"></i>
+                  Phone Number
+                </label>
+                <input type="tel" class="partner-form-input" id="phone" name="phone" value="<%= partner.phone || '' %>">
+              </div>
+            </div>
+            
+            <div class="partner-form-actions">
+              <button type="submit" class="partner-btn partner-btn-primary" id="saveProfileBtn">
+                <i data-lucide="save"></i>
+                <span>Save Changes</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Payment Information Card -->
+      <div class="partner-card">
+        <div class="partner-card-header">
+          <div class="partner-card-title">
+            <i data-lucide="wallet"></i>
+            <span>Payment Information</span>
+          </div>
+        </div>
+        <div class="partner-card-body">
+          <form id="paymentForm">
+            <div class="partner-form-group">
+              <label class="partner-form-label">
+                <i data-lucide="banknote"></i>
+                Preferred Payment Method
+              </label>
+              <select class="partner-form-input partner-form-select" id="paymentMethod" name="paymentMethod">
+                <option value="bank_transfer" <%= partner.paymentDetails?.method === 'bank_transfer' ? 'selected' : '' %>>Bank Transfer</option>
+                <option value="paypal" <%= partner.paymentDetails?.method === 'paypal' ? 'selected' : '' %>>PayPal</option>
+                <option value="wise" <%= partner.paymentDetails?.method === 'wise' ? 'selected' : '' %>>Wise</option>
+              </select>
+            </div>
+            
+            <div id="bankFields" class="partner-form-grid" style="<%= partner.paymentDetails?.method !== 'bank_transfer' && partner.paymentDetails?.method ? 'display: none;' : '' %>">
+              <div class="partner-form-group">
+                <label class="partner-form-label">Bank Name</label>
+                <input type="text" class="partner-form-input" id="bankName" name="bankName" value="<%= partner.paymentDetails?.bankName || '' %>" placeholder="Enter bank name">
+              </div>
+              <div class="partner-form-group">
+                <label class="partner-form-label">Account Number / IBAN</label>
+                <input type="text" class="partner-form-input" id="accountNumber" name="accountNumber" value="<%= partner.paymentDetails?.accountNumber || '' %>" placeholder="Enter account number">
+              </div>
+              <div class="partner-form-group full-width">
+                <label class="partner-form-label">Account Holder Name</label>
+                <input type="text" class="partner-form-input" id="accountHolder" name="accountHolder" value="<%= partner.paymentDetails?.accountHolder || '' %>" placeholder="Enter account holder name">
+              </div>
+            </div>
+            
+            <div id="paypalFields" class="partner-form-group" style="<%= partner.paymentDetails?.method !== 'paypal' ? 'display: none;' : '' %>">
+              <label class="partner-form-label">PayPal Email</label>
+              <input type="email" class="partner-form-input" id="paypalEmail" name="paypalEmail" value="<%= partner.paymentDetails?.paypalEmail || '' %>" placeholder="your-email@paypal.com">
+            </div>
+            
+            <div id="wiseFields" class="partner-form-group" style="<%= partner.paymentDetails?.method !== 'wise' ? 'display: none;' : '' %>">
+              <label class="partner-form-label">Wise Email</label>
+              <input type="email" class="partner-form-input" id="wiseEmail" name="wiseEmail" value="<%= partner.paymentDetails?.wiseEmail || '' %>" placeholder="your-email@wise.com">
+            </div>
+            
+            <div class="partner-form-actions">
+              <button type="submit" class="partner-btn partner-btn-primary" id="savePaymentBtn">
+                <i data-lucide="save"></i>
+                <span>Save Payment Info</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Change Password Card -->
+      <div class="partner-card">
+        <div class="partner-card-header">
+          <div class="partner-card-title">
+            <i data-lucide="lock"></i>
+            <span>Change Password</span>
+          </div>
+        </div>
+        <div class="partner-card-body">
+          <form id="passwordForm">
+            <div class="partner-form-grid">
+              <div class="partner-form-group">
+                <label class="partner-form-label">Current Password</label>
+                <input type="password" class="partner-form-input" id="currentPassword" name="currentPassword" required>
+              </div>
+              <div class="partner-form-group">
+                <label class="partner-form-label">New Password</label>
+                <input type="password" class="partner-form-input" id="newPassword" name="newPassword" required minlength="8">
+              </div>
+              <div class="partner-form-group full-width">
+                <label class="partner-form-label">Confirm New Password</label>
+                <input type="password" class="partner-form-input" id="confirmPassword" name="confirmPassword" required>
+              </div>
+            </div>
+            
+            <div class="partner-form-actions">
+              <button type="submit" class="partner-btn partner-btn-secondary" id="changePasswordBtn">
+                <i data-lucide="key"></i>
+                <span>Update Password</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Account Status Card -->
+      <div class="partner-card">
+        <div class="partner-card-header">
+          <div class="partner-card-title">
+            <i data-lucide="shield"></i>
+            <span>Account Status</span>
+          </div>
+        </div>
+        <div class="partner-card-body">
+          <div class="partner-info-grid">
+            <div class="partner-info-item">
+              <span class="partner-info-label">Status</span>
+              <span class="partner-badge partner-badge-<%= partner.status === 'active' ? 'success' : (partner.status === 'pending' ? 'warning' : 'danger') %>">
+                <%= partner.status.charAt(0).toUpperCase() + partner.status.slice(1) %>
+              </span>
+            </div>
+            <div class="partner-info-item">
+              <span class="partner-info-label">Member Since</span>
+              <span class="partner-info-value"><%= new Date(partner.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <%- include('partials/footer') %>
+</div>
+
+<!-- Toast Notification -->
+<div class="partner-toast" id="toast">
+  <i data-lucide="check-circle"></i>
+  <span id="toastMessage">Copied to clipboard!</span>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Payment method toggle
+  const paymentMethod = document.getElementById('paymentMethod');
+  const bankFields = document.getElementById('bankFields');
+  const paypalFields = document.getElementById('paypalFields');
+  const wiseFields = document.getElementById('wiseFields');
+
+  paymentMethod.addEventListener('change', function() {
+    bankFields.style.display = 'none';
+    paypalFields.style.display = 'none';
+    wiseFields.style.display = 'none';
+
+    switch(this.value) {
+      case 'bank_transfer':
+        bankFields.style.display = 'grid';
+        break;
+      case 'paypal':
+        paypalFields.style.display = 'block';
+        break;
+      case 'wise':
+        wiseFields.style.display = 'block';
+        break;
+    }
+  });
+
+  // Profile form submission
+  document.getElementById('profileForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const btn = document.getElementById('saveProfileBtn');
+    btn.disabled = true;
+
+    try {
+      const response = await fetch('/partner/api/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          firstName: document.getElementById('firstName').value,
+          lastName: document.getElementById('lastName').value,
+          phone: document.getElementById('phone').value
+        })
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        showAlert('success', 'Profile updated successfully!');
+      } else {
+        showAlert('error', data.message || 'Failed to update profile');
+      }
+    } catch (error) {
+      showAlert('error', 'Network error. Please try again.');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  // Payment form submission
+  document.getElementById('paymentForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const btn = document.getElementById('savePaymentBtn');
+    btn.disabled = true;
+
+    const method = document.getElementById('paymentMethod').value;
+    const paymentData = { method };
+
+    if (method === 'bank_transfer') {
+      paymentData.bankName = document.getElementById('bankName').value;
+      paymentData.accountNumber = document.getElementById('accountNumber').value;
+      paymentData.accountHolder = document.getElementById('accountHolder').value;
+    } else if (method === 'paypal') {
+      paymentData.paypalEmail = document.getElementById('paypalEmail').value;
+    } else if (method === 'wise') {
+      paymentData.wiseEmail = document.getElementById('wiseEmail').value;
+    }
+
+    try {
+      const response = await fetch('/partner/api/payment-details', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(paymentData)
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        showAlert('success', 'Payment information updated successfully!');
+      } else {
+        showAlert('error', data.message || 'Failed to update payment info');
+      }
+    } catch (error) {
+      showAlert('error', 'Network error. Please try again.');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  // Password form submission
+  document.getElementById('passwordForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const btn = document.getElementById('changePasswordBtn');
+    
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+
+    if (newPassword !== confirmPassword) {
+      showAlert('error', 'New passwords do not match');
+      return;
+    }
+
+    btn.disabled = true;
+
+    try {
+      const response = await fetch('/partner/api/change-password', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          currentPassword: document.getElementById('currentPassword').value,
+          newPassword: newPassword
+        })
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        showAlert('success', 'Password changed successfully!');
+        document.getElementById('passwordForm').reset();
+      } else {
+        showAlert('error', data.message || 'Failed to change password');
+      }
+    } catch (error) {
+      showAlert('error', 'Network error. Please try again.');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+});
+
+function copyReferralCode() {
+  <% if (partnerCodes && partnerCodes.filter(c => c.status === 'active').length > 0) { %>
+  const code = '<%= partnerCodes.filter(c => c.status === "active")[0].code %>';
+  navigator.clipboard.writeText(code).then(() => {
+    showToast('Referral code copied!');
+  });
+  <% } else { %>
+  showToast('No active code to copy');
+  <% } %>
+}
+
+function showToast(message) {
+  const toast = document.getElementById('toast');
+  document.getElementById('toastMessage').textContent = message;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+function showAlert(type, message) {
+  const successAlert = document.getElementById('successAlert');
+  const errorAlert = document.getElementById('errorAlert');
+  
+  successAlert.style.display = 'none';
+  errorAlert.style.display = 'none';
+
+  if (type === 'success') {
+    document.getElementById('successMessage').textContent = message;
+    successAlert.style.display = 'flex';
+  } else {
+    document.getElementById('errorMessage').textContent = message;
+    errorAlert.style.display = 'flex';
+  }
+
+  // Scroll to top to show alert
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>

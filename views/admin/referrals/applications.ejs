@@ -1,0 +1,1406 @@
+<%- include('../partials/header') %>
+<link rel="stylesheet" href="/css/adminCSS/admin-referrals.css">
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+
+<body>
+  <div class="admin-wrapper">
+    <%- include('../partials/sidebar', { activePage: 'referrals' }) %>
+
+    <main class="admin-main">
+      <%- include('../partials/topbar', { pageTitle: 'Partner Applications' }) %>
+
+      <div class="admin-content">
+        <!-- Page Header -->
+        <div class="referrals-page-header">
+          <div>
+            <h2>Partner Applications</h2>
+            <p class="page-subtitle">Review and manage incoming referral partner applications</p>
+          </div>
+          <a href="/admin/referrals" class="referrals-btn referrals-btn-secondary">
+            <i data-lucide="arrow-left"></i>
+            Back to Dashboard
+          </a>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="applications-stats" id="applicationStats">
+          <div class="app-stat-card pending">
+            <div class="app-stat-icon">
+              <i data-lucide="clock"></i>
+            </div>
+            <div class="app-stat-content">
+              <span class="app-stat-value" id="pendingCount">0</span>
+              <span class="app-stat-label">Pending Review</span>
+            </div>
+          </div>
+          <div class="app-stat-card approved">
+            <div class="app-stat-icon">
+              <i data-lucide="check-circle"></i>
+            </div>
+            <div class="app-stat-content">
+              <span class="app-stat-value" id="approvedCount">0</span>
+              <span class="app-stat-label">Approved (Active)</span>
+            </div>
+          </div>
+          <div class="app-stat-card rejected">
+            <div class="app-stat-icon">
+              <i data-lucide="x-circle"></i>
+            </div>
+            <div class="app-stat-content">
+              <span class="app-stat-value" id="rejectedCount">0</span>
+              <span class="app-stat-label">Rejected</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="referrals-advanced-filters">
+          <div class="referrals-filters-primary">
+            <div class="referrals-filter-item">
+              <label>Status</label>
+              <select id="filterStatus" class="referrals-filter-select">
+                <option value="pending" selected>Pending</option>
+                <option value="active">Approved</option>
+                <option value="inactive">Rejected</option>
+              </select>
+            </div>
+            <div class="referrals-filter-item">
+              <label>Search</label>
+              <input type="text" id="searchInput" class="referrals-filter-input" placeholder="Search by name, email...">
+            </div>
+            <button class="referrals-filter-apply-btn" onclick="loadApplications()">
+              <i data-lucide="search"></i>
+              Search
+            </button>
+          </div>
+        </div>
+
+        <!-- Applications Table -->
+        <div class="referrals-table-wrapper" id="applicationsTableWrapper">
+          <div class="referrals-loading" id="loadingIndicator">
+            <div class="loading-spinner"></div>
+            <span>Loading applications...</span>
+          </div>
+          <table class="referrals-table" id="applicationsTable" style="display: none;">
+            <thead>
+              <tr>
+                <th>Applicant</th>
+                <th>Business Info</th>
+                <th>Marketing Channels</th>
+                <th>Submitted</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="applicationsTableBody">
+              <!-- Populated dynamically -->
+            </tbody>
+          </table>
+          <div class="referrals-empty-state" id="emptyState" style="display: none;">
+            <div class="referrals-empty-icon">
+              <i data-lucide="inbox"></i>
+            </div>
+            <h3>No applications found</h3>
+            <p>There are no applications matching your criteria</p>
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="referrals-pagination" id="pagination" style="display: none;">
+          <div class="referrals-pagination-info">
+            Showing <span id="showingFrom">0</span>-<span id="showingTo">0</span> of <span id="totalCount">0</span> applications
+          </div>
+          <div class="referrals-pagination-controls">
+            <button class="referrals-pagination-btn" id="prevBtn" onclick="changePage(-1)" disabled>
+              <i data-lucide="chevron-left"></i>
+            </button>
+            <span class="referrals-pagination-current">Page <span id="currentPage">1</span></span>
+            <button class="referrals-pagination-btn" id="nextBtn" onclick="changePage(1)">
+              <i data-lucide="chevron-right"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Application Details Modal -->
+  <div class="modal-overlay" id="applicationModal" style="display: none;">
+    <div class="modal-container application-modal">
+      <div class="modal-header">
+        <h3>Application Details</h3>
+        <button class="modal-close" onclick="closeModal()">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="modal-body" id="modalBody">
+        <!-- Populated dynamically -->
+      </div>
+      <div class="modal-footer" id="modalFooter">
+        <!-- Populated dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Approve Modal -->
+  <div class="modal-overlay" id="approveModal" style="display: none;">
+    <div class="modal-container approve-modal">
+      <div class="modal-header approve-header">
+        <div class="modal-header-icon">
+          <i data-lucide="check-circle"></i>
+        </div>
+        <h3>Approve Application</h3>
+        <button class="modal-close" onclick="closeApproveModal()">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- Applicant Info -->
+        <div class="approve-applicant-info" id="approveApplicantInfo"></div>
+
+        <!-- Password Section -->
+        <div class="approve-section">
+          <h4><i data-lucide="lock"></i> Set Login Password <span class="required">*</span></h4>
+          <div class="form-group">
+            <label>Password</label>
+            <div class="password-input-wrapper">
+              <input type="password" id="partnerPassword" minlength="8" placeholder="Enter password (min 8 characters)" required>
+              <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility()">
+                <i data-lucide="eye" id="passwordToggleIcon"></i>
+              </button>
+            </div>
+            <small>The partner will use this password to log in to their portal</small>
+          </div>
+          <div class="form-group">
+            <button type="button" class="generate-password-btn" onclick="generateRandomPassword()">
+              <i data-lucide="shuffle"></i>
+              Generate Strong Password
+            </button>
+          </div>
+        </div>
+
+        <!-- Commission Rates -->
+        <div class="approve-section">
+          <h4><i data-lucide="percent"></i> Commission Settings</h4>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Commission Rate (%)</label>
+              <input type="number" id="commissionRate" value="5" min="0" max="50" step="0.5">
+              <small>Partner earns this percentage on each referral order</small>
+            </div>
+            <div class="form-group">
+              <label>Buyer Discount Rate (%)</label>
+              <input type="number" id="buyerDiscountRate" value="3" min="0" max="30" step="0.5">
+              <small>Discount offered to referred buyers</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Email Notification -->
+        <div class="approve-email-notice">
+          <i data-lucide="mail"></i>
+          <span>An approval email with login credentials will be sent to the partner</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="referrals-btn referrals-btn-secondary" onclick="closeApproveModal()">Cancel</button>
+        <button class="referrals-btn referrals-btn-success" id="confirmApproveBtn" onclick="confirmApprove()">
+          <i data-lucide="check"></i>
+          Approve & Send Credentials
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reject Modal -->
+  <div class="modal-overlay" id="rejectModal" style="display: none;">
+    <div class="modal-container reject-modal">
+      <div class="modal-header reject-header">
+        <div class="modal-header-icon">
+          <i data-lucide="x-circle"></i>
+        </div>
+        <h3>Reject Application</h3>
+        <button class="modal-close" onclick="closeRejectModal()">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>Please provide a reason for rejecting this application:</p>
+        <div class="form-group">
+          <label>Rejection Reason</label>
+          <textarea id="rejectionReason" rows="3" placeholder="Enter the reason for rejection..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="referrals-btn referrals-btn-secondary" onclick="closeRejectModal()">Cancel</button>
+        <button class="referrals-btn referrals-btn-danger" id="confirmRejectBtn" onclick="confirmReject()">
+          <i data-lucide="x"></i>
+          Reject Application
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <%- include('../partials/footer') %>
+
+  <style>
+    /* Applications Stats */
+    .applications-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .app-stat-card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      border: 1px solid #e2e8f0;
+    }
+
+    .app-stat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .app-stat-card.pending .app-stat-icon {
+      background: #fef3c7;
+      color: #d97706;
+    }
+
+    .app-stat-card.approved .app-stat-icon {
+      background: #d1fae5;
+      color: #059669;
+    }
+
+    .app-stat-card.rejected .app-stat-icon {
+      background: #fee2e2;
+      color: #dc2626;
+    }
+
+    .app-stat-icon i {
+      width: 24px;
+      height: 24px;
+    }
+
+    .app-stat-content {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .app-stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #1e293b;
+    }
+
+    .app-stat-label {
+      font-size: 0.85rem;
+      color: #64748b;
+    }
+
+    /* Application Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 2rem;
+    }
+
+    .modal-container {
+      background: white;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 700px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    }
+
+    .application-modal {
+      max-width: 800px;
+    }
+
+    .approve-modal, .reject-modal {
+      max-width: 500px;
+    }
+
+    .modal-header {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-header h3 {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: #1e293b;
+      margin: 0;
+    }
+
+    .modal-header-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 0.75rem;
+    }
+
+    .approve-header {
+      background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    }
+
+    .approve-header .modal-header-icon {
+      background: #22c55e;
+      color: white;
+    }
+
+    .reject-header {
+      background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+    }
+
+    .reject-header .modal-header-icon {
+      background: #ef4444;
+      color: white;
+    }
+
+    .modal-close {
+      width: 36px;
+      height: 36px;
+      border: none;
+      background: #f1f5f9;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #64748b;
+      transition: all 0.2s;
+    }
+
+    .modal-close:hover {
+      background: #e2e8f0;
+      color: #1e293b;
+    }
+
+    .modal-body {
+      padding: 1.5rem;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .modal-footer {
+      padding: 1rem 1.5rem;
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+    }
+
+    /* Application Detail Sections */
+    .app-detail-section {
+      margin-bottom: 1.5rem;
+    }
+
+    .app-detail-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .app-detail-section h4 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .app-detail-section h4 i {
+      width: 16px;
+      height: 16px;
+    }
+
+    .app-detail-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+
+    .app-detail-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .app-detail-item label {
+      font-size: 0.8rem;
+      color: #94a3b8;
+    }
+
+    .app-detail-item span {
+      font-size: 0.95rem;
+      color: #1e293b;
+      font-weight: 500;
+    }
+
+    .app-channels {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .app-channel-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      padding: 0.375rem 0.75rem;
+      background: #eff6ff;
+      color: #3b82f6;
+      border-radius: 100px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    .app-channel-tag i {
+      width: 14px;
+      height: 14px;
+    }
+
+    .app-motivation-text {
+      background: #f8fafc;
+      border-radius: 8px;
+      padding: 1rem;
+      font-size: 0.9rem;
+      color: #475569;
+      line-height: 1.6;
+      border: 1px solid #e2e8f0;
+    }
+
+    /* Status Badges */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      padding: 0.375rem 0.75rem;
+      border-radius: 100px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    .status-badge.pending {
+      background: #fef3c7;
+      color: #b45309;
+    }
+
+    .status-badge.active {
+      background: #d1fae5;
+      color: #047857;
+    }
+
+    .status-badge.inactive {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
+    /* Business Type Badge */
+    .business-type-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      padding: 0.25rem 0.625rem;
+      background: #f1f5f9;
+      color: #475569;
+      border-radius: 6px;
+      font-size: 0.8rem;
+    }
+
+    /* Audience Size */
+    .audience-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      padding: 0.25rem 0.625rem;
+      background: #e0e7ff;
+      color: #4338ca;
+      border-radius: 6px;
+      font-size: 0.8rem;
+    }
+
+    /* Action Buttons in Table */
+    .app-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .app-action-btn {
+      width: 36px;
+      height: 36px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .app-action-btn i {
+      width: 18px;
+      height: 18px;
+    }
+
+    .app-action-btn.view {
+      background: #f1f5f9;
+      color: #64748b;
+    }
+
+    .app-action-btn.view:hover {
+      background: #e2e8f0;
+      color: #1e293b;
+    }
+
+    .app-action-btn.approve {
+      background: #d1fae5;
+      color: #059669;
+    }
+
+    .app-action-btn.approve:hover {
+      background: #a7f3d0;
+    }
+
+    .app-action-btn.reject {
+      background: #fee2e2;
+      color: #dc2626;
+    }
+
+    .app-action-btn.reject:hover {
+      background: #fecaca;
+    }
+
+    /* Form in Modal */
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #374151;
+      margin-bottom: 0.5rem;
+    }
+
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 0.75rem;
+      font-size: 0.9rem;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+      border-color: #3b82f6;
+    }
+
+    .form-group small {
+      display: block;
+      font-size: 0.8rem;
+      color: #94a3b8;
+      margin-top: 0.375rem;
+    }
+
+    /* Button styles */
+    .referrals-btn-success {
+      background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+      color: white;
+    }
+
+    .referrals-btn-success:hover {
+      background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+    }
+
+    .referrals-btn-danger {
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      color: white;
+    }
+
+    .referrals-btn-danger:hover {
+      background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    }
+
+    @media (max-width: 768px) {
+      .applications-stats {
+        grid-template-columns: 1fr;
+      }
+
+      .app-detail-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Approve Modal Enhancements */
+    .approve-modal {
+      max-width: 560px;
+    }
+
+    .approve-applicant-info {
+      margin-bottom: 1.5rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .applicant-preview {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem;
+      background: #f8fafc;
+      border-radius: 12px;
+    }
+
+    .applicant-avatar {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      color: white;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 1rem;
+    }
+
+    .applicant-details {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .applicant-details strong {
+      font-size: 1rem;
+      color: #1e293b;
+    }
+
+    .applicant-details span {
+      font-size: 0.875rem;
+      color: #64748b;
+    }
+
+    .approve-section {
+      margin-bottom: 1.5rem;
+    }
+
+    .approve-section h4 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .approve-section h4 i {
+      width: 18px;
+      height: 18px;
+      color: #64748b;
+    }
+
+    .approve-section h4 .required {
+      color: #ef4444;
+    }
+
+    .password-input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .password-input-wrapper input {
+      padding-right: 48px;
+    }
+
+    .password-toggle-btn {
+      position: absolute;
+      right: 8px;
+      width: 36px;
+      height: 36px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #64748b;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+
+    .password-toggle-btn:hover {
+      background: #f1f5f9;
+      color: #1e293b;
+    }
+
+    .password-toggle-btn i {
+      width: 18px;
+      height: 18px;
+    }
+
+    .generate-password-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.625rem 1rem;
+      background: #f1f5f9;
+      color: #374151;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .generate-password-btn:hover {
+      background: #e2e8f0;
+      border-color: #cbd5e1;
+    }
+
+    .generate-password-btn i {
+      width: 16px;
+      height: 16px;
+    }
+
+    .approve-email-notice {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1rem;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 10px;
+      color: #1e40af;
+      font-size: 0.875rem;
+    }
+
+    .approve-email-notice i {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+  </style>
+
+  <script>
+    // State
+    let currentPage = 1;
+    let totalPages = 1;
+    let currentApplicationId = null;
+
+    // Channel labels
+    const channelLabels = {
+      website: { label: 'Website/Blog', icon: 'globe' },
+      social_media: { label: 'Social Media', icon: 'share-2' },
+      email: { label: 'Email Marketing', icon: 'mail' },
+      content: { label: 'Content Marketing', icon: 'file-text' },
+      ppc: { label: 'PPC/Paid Ads', icon: 'mouse-pointer-click' },
+      offline: { label: 'Offline', icon: 'store' },
+      other: { label: 'Other', icon: 'more-horizontal' }
+    };
+
+    // Business type labels
+    const businessTypeLabels = {
+      individual: 'Individual/Freelancer',
+      company: 'Company',
+      agency: 'Marketing Agency',
+      influencer: 'Influencer/Creator',
+      other: 'Other'
+    };
+
+    // Audience size labels
+    const audienceSizeLabels = {
+      small: '1 - 1,000',
+      medium: '1,000 - 10,000',
+      large: '10,000 - 100,000',
+      enterprise: '100,000+'
+    };
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+      loadApplications();
+      loadStats();
+
+      // Search on enter
+      document.getElementById('searchInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          loadApplications();
+        }
+      });
+    });
+
+    // Load stats
+    async function loadStats() {
+      try {
+        const [pendingRes, activeRes, inactiveRes] = await Promise.all([
+          fetch('/admin/api/referrals/applications?status=pending&limit=1'),
+          fetch('/admin/api/referrals/applications?status=active&limit=1'),
+          fetch('/admin/api/referrals/applications?status=inactive&limit=1')
+        ]);
+
+        const pending = await pendingRes.json();
+        const active = await activeRes.json();
+        const inactive = await inactiveRes.json();
+
+        document.getElementById('pendingCount').textContent = pending.pagination?.total || 0;
+        document.getElementById('approvedCount').textContent = active.pagination?.total || 0;
+        document.getElementById('rejectedCount').textContent = inactive.pagination?.total || 0;
+      } catch (error) {
+        console.error('Error loading stats:', error);
+      }
+    }
+
+    // Load applications
+    async function loadApplications() {
+      const status = document.getElementById('filterStatus').value;
+      const search = document.getElementById('searchInput').value;
+
+      document.getElementById('loadingIndicator').style.display = 'flex';
+      document.getElementById('applicationsTable').style.display = 'none';
+      document.getElementById('emptyState').style.display = 'none';
+      document.getElementById('pagination').style.display = 'none';
+
+      try {
+        const response = await fetch(`/admin/api/referrals/applications?status=${status}&search=${encodeURIComponent(search)}&page=${currentPage}&limit=20`);
+        const data = await response.json();
+
+        document.getElementById('loadingIndicator').style.display = 'none';
+
+        if (data.applications && data.applications.length > 0) {
+          renderApplications(data.applications);
+          document.getElementById('applicationsTable').style.display = 'table';
+          
+          // Update pagination
+          totalPages = data.pagination.pages;
+          document.getElementById('totalCount').textContent = data.pagination.total;
+          document.getElementById('showingFrom').textContent = ((currentPage - 1) * 20) + 1;
+          document.getElementById('showingTo').textContent = Math.min(currentPage * 20, data.pagination.total);
+          document.getElementById('currentPage').textContent = currentPage;
+          document.getElementById('prevBtn').disabled = currentPage === 1;
+          document.getElementById('nextBtn').disabled = currentPage >= totalPages;
+          document.getElementById('pagination').style.display = 'flex';
+        } else {
+          document.getElementById('emptyState').style.display = 'flex';
+        }
+
+        if (typeof lucide !== 'undefined') {
+          lucide.createIcons();
+        }
+      } catch (error) {
+        console.error('Error loading applications:', error);
+        document.getElementById('loadingIndicator').style.display = 'none';
+        document.getElementById('emptyState').style.display = 'flex';
+      }
+    }
+
+    // Render applications
+    function renderApplications(applications) {
+      const tbody = document.getElementById('applicationsTableBody');
+      tbody.innerHTML = '';
+
+      applications.forEach(app => {
+        const row = document.createElement('tr');
+        const channels = app.applicationDetails?.marketingChannels || [];
+        const channelsTruncated = channels.slice(0, 2).map(ch => channelLabels[ch]?.label || ch).join(', ');
+        const moreChannels = channels.length > 2 ? ` +${channels.length - 2}` : '';
+        
+        const submittedDate = app.applicationDetails?.submittedAt 
+          ? new Date(app.applicationDetails.submittedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+          : 'N/A';
+
+        row.innerHTML = `
+          <td>
+            <div class="partner-info">
+              <div class="partner-avatar">
+                ${app.firstName?.charAt(0) || ''}${app.lastName?.charAt(0) || ''}
+              </div>
+              <div class="partner-details">
+                <strong>${app.firstName} ${app.lastName}</strong>
+                <span>${app.email}</span>
+                <small>${app.phone || ''}</small>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div style="display: flex; flex-direction: column; gap: 0.375rem;">
+              ${app.applicationDetails?.companyName ? `<span class="business-type-badge"><i data-lucide="building-2" style="width:12px;height:12px"></i> ${app.applicationDetails.companyName}</span>` : ''}
+              <span class="business-type-badge">${businessTypeLabels[app.applicationDetails?.businessType] || 'N/A'}</span>
+              <span class="audience-badge"><i data-lucide="users" style="width:12px;height:12px"></i> ${audienceSizeLabels[app.applicationDetails?.audienceSize] || 'N/A'}</span>
+            </div>
+          </td>
+          <td>
+            <span class="text-truncate" style="max-width: 200px; display: block;">
+              ${channelsTruncated}${moreChannels}
+            </span>
+          </td>
+          <td>
+            <span>${submittedDate}</span>
+          </td>
+          <td>
+            <div class="app-actions">
+              <button class="app-action-btn view" onclick="viewApplication('${app._id}')" title="View Details">
+                <i data-lucide="eye"></i>
+              </button>
+              ${app.status === 'pending' ? `
+                <button class="app-action-btn approve" onclick="openApproveModal('${app._id}')" title="Approve">
+                  <i data-lucide="check"></i>
+                </button>
+                <button class="app-action-btn reject" onclick="openRejectModal('${app._id}')" title="Reject">
+                  <i data-lucide="x"></i>
+                </button>
+              ` : `
+                <span class="status-badge ${app.status}">${app.status === 'active' ? 'Approved' : 'Rejected'}</span>
+              `}
+            </div>
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    // View application details
+    async function viewApplication(id) {
+      try {
+        const response = await fetch(`/admin/api/referrals/applications/${id}`);
+        const data = await response.json();
+
+        if (!data.success) {
+          alert('Failed to load application details');
+          return;
+        }
+
+        const app = data.application;
+        const details = app.applicationDetails || {};
+        
+        const channelTags = (details.marketingChannels || []).map(ch => {
+          const channel = channelLabels[ch] || { label: ch, icon: 'tag' };
+          return `<span class="app-channel-tag"><i data-lucide="${channel.icon}"></i>${channel.label}</span>`;
+        }).join('');
+
+        const submittedDate = details.submittedAt 
+          ? new Date(details.submittedAt).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })
+          : 'N/A';
+
+        document.getElementById('modalBody').innerHTML = `
+          <div class="app-detail-section">
+            <h4><i data-lucide="user"></i> Personal Information</h4>
+            <div class="app-detail-grid">
+              <div class="app-detail-item">
+                <label>Full Name</label>
+                <span>${app.firstName} ${app.lastName}</span>
+              </div>
+              <div class="app-detail-item">
+                <label>Email</label>
+                <span>${app.email}</span>
+              </div>
+              <div class="app-detail-item">
+                <label>Phone</label>
+                <span>${app.phone || 'N/A'}</span>
+              </div>
+              <div class="app-detail-item">
+                <label>Status</label>
+                <span class="status-badge ${app.status}">${app.status}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="app-detail-section">
+            <h4><i data-lucide="briefcase"></i> Business Information</h4>
+            <div class="app-detail-grid">
+              <div class="app-detail-item">
+                <label>Company Name</label>
+                <span>${details.companyName || 'N/A'}</span>
+              </div>
+              <div class="app-detail-item">
+                <label>Website</label>
+                <span>${details.website ? `<a href="${details.website}" target="_blank">${details.website}</a>` : 'N/A'}</span>
+              </div>
+              <div class="app-detail-item">
+                <label>Business Type</label>
+                <span>${businessTypeLabels[details.businessType] || 'N/A'}</span>
+              </div>
+              <div class="app-detail-item">
+                <label>Audience Size</label>
+                <span>${audienceSizeLabels[details.audienceSize] || 'N/A'}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="app-detail-section">
+            <h4><i data-lucide="megaphone"></i> Marketing Channels</h4>
+            <div class="app-channels">
+              ${channelTags || '<span style="color: #94a3b8;">No channels specified</span>'}
+            </div>
+          </div>
+
+          ${details.experience ? `
+          <div class="app-detail-section">
+            <h4><i data-lucide="award"></i> Experience</h4>
+            <div class="app-motivation-text">${details.experience}</div>
+          </div>
+          ` : ''}
+
+          <div class="app-detail-section">
+            <h4><i data-lucide="target"></i> Motivation</h4>
+            <div class="app-motivation-text">${details.motivation || 'N/A'}</div>
+          </div>
+
+          <div class="app-detail-section">
+            <h4><i data-lucide="calendar"></i> Application Info</h4>
+            <div class="app-detail-grid">
+              <div class="app-detail-item">
+                <label>Submitted</label>
+                <span>${submittedDate}</span>
+              </div>
+              <div class="app-detail-item">
+                <label>Referral Code</label>
+                <span style="font-family: monospace; background: #f1f5f9; padding: 0.25rem 0.5rem; border-radius: 4px;">${app.referralCode}</span>
+              </div>
+            </div>
+          </div>
+        `;
+
+        // Update footer based on status
+        if (app.status === 'pending') {
+          document.getElementById('modalFooter').innerHTML = `
+            <button class="referrals-btn referrals-btn-secondary" onclick="closeModal()">Close</button>
+            <button class="referrals-btn referrals-btn-danger" onclick="closeModal(); openRejectModal('${app._id}')">
+              <i data-lucide="x"></i> Reject
+            </button>
+            <button class="referrals-btn referrals-btn-success" onclick="closeModal(); openApproveModal('${app._id}')">
+              <i data-lucide="check"></i> Approve
+            </button>
+          `;
+        } else {
+          document.getElementById('modalFooter').innerHTML = `
+            <button class="referrals-btn referrals-btn-secondary" onclick="closeModal()">Close</button>
+          `;
+        }
+
+        document.getElementById('applicationModal').style.display = 'flex';
+        if (typeof lucide !== 'undefined') {
+          lucide.createIcons();
+        }
+      } catch (error) {
+        console.error('Error loading application:', error);
+        alert('Failed to load application details');
+      }
+    }
+
+    // Modal functions
+    function closeModal() {
+      document.getElementById('applicationModal').style.display = 'none';
+    }
+
+    async function openApproveModal(id) {
+      currentApplicationId = id;
+      document.getElementById('partnerPassword').value = '';
+      document.getElementById('commissionRate').value = 5;
+      document.getElementById('buyerDiscountRate').value = 3;
+      
+      // Load applicant info
+      try {
+        const response = await fetch(`/admin/api/referrals/applications/${id}`);
+        const data = await response.json();
+        if (data.success) {
+          const app = data.application;
+          document.getElementById('approveApplicantInfo').innerHTML = `
+            <div class="applicant-preview">
+              <div class="applicant-avatar">${app.firstName.charAt(0)}${app.lastName.charAt(0)}</div>
+              <div class="applicant-details">
+                <strong>${app.firstName} ${app.lastName}</strong>
+                <span>${app.email}</span>
+              </div>
+            </div>
+          `;
+        }
+      } catch (error) {
+        console.error('Error loading applicant info:', error);
+      }
+      
+      document.getElementById('approveModal').style.display = 'flex';
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+    }
+
+    function togglePasswordVisibility() {
+      const input = document.getElementById('partnerPassword');
+      const icon = document.getElementById('passwordToggleIcon');
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.setAttribute('data-lucide', 'eye-off');
+      } else {
+        input.type = 'password';
+        icon.setAttribute('data-lucide', 'eye');
+      }
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function generateRandomPassword() {
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+      const specials = '!@#$%&*';
+      let password = '';
+      for (let i = 0; i < 10; i++) {
+        password += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      password += specials.charAt(Math.floor(Math.random() * specials.length));
+      password += Math.floor(Math.random() * 10);
+      document.getElementById('partnerPassword').value = password;
+      document.getElementById('partnerPassword').type = 'text';
+      document.getElementById('passwordToggleIcon').setAttribute('data-lucide', 'eye-off');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function closeApproveModal() {
+      document.getElementById('approveModal').style.display = 'none';
+      currentApplicationId = null;
+    }
+
+    function openRejectModal(id) {
+      currentApplicationId = id;
+      document.getElementById('rejectionReason').value = '';
+      document.getElementById('rejectModal').style.display = 'flex';
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+    }
+
+    function closeRejectModal() {
+      document.getElementById('rejectModal').style.display = 'none';
+      currentApplicationId = null;
+    }
+
+    // Approve application
+    async function confirmApprove() {
+      if (!currentApplicationId) return;
+
+      const password = document.getElementById('partnerPassword').value.trim();
+      const commissionRate = parseFloat(document.getElementById('commissionRate').value) || 5;
+      const buyerDiscountRate = parseFloat(document.getElementById('buyerDiscountRate').value) || 3;
+
+      // Validate password
+      if (!password || password.length < 8) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Password Required',
+          text: 'Please enter a password with at least 8 characters',
+          confirmButtonColor: '#f59e0b',
+          confirmButtonText: 'Got it'
+        });
+        document.getElementById('partnerPassword').focus();
+        return;
+      }
+
+      // Confirmation before approval
+      const result = await Swal.fire({
+        title: 'Confirm Approval',
+        html: `<p style="margin-bottom: 0.5rem;">This will:</p>
+               <ul style="text-align: left; margin-left: 1rem;">
+                 <li>Activate the partner account</li>
+                 <li>Send login credentials via email</li>
+               </ul>`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#10b981',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: 'Yes, Approve',
+        cancelButtonText: 'Cancel'
+      });
+
+      if (!result.isConfirmed) return;
+
+      const btn = document.getElementById('confirmApproveBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<i data-lucide="loader-2" class="spin"></i> Approving & Sending Email...';
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+
+      try {
+        const response = await fetch(`/admin/api/referrals/applications/${currentApplicationId}/approve`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password, commissionRate, buyerDiscountRate })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          closeApproveModal();
+          loadApplications();
+          loadStats();
+          Swal.fire({
+            icon: 'success',
+            title: 'Partner Approved!',
+            html: `<div style="text-align: center;">
+                     <p style="font-size: 1rem; color: #374151; margin-bottom: 1rem;">
+                       <strong>${data.partner.fullName}</strong> is now an active partner.
+                     </p>
+                     <div style="background: #f0fdf4; border-radius: 8px; padding: 1rem; border: 1px solid #bbf7d0;">
+                       <p style="font-size: 0.875rem; color: #166534; margin: 0;">
+                         <strong>✉️ Email Sent!</strong><br>
+                         Login credentials have been sent to<br>
+                         <span style="font-weight: 600;">${data.partner.email}</span>
+                       </p>
+                     </div>
+                   </div>`,
+            confirmButtonColor: '#10b981',
+            confirmButtonText: 'Great!'
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Approval Failed',
+            text: data.message || 'Failed to approve application',
+            confirmButtonColor: '#ef4444'
+          });
+        }
+      } catch (error) {
+        console.error('Error approving application:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Failed to approve application. Please try again.',
+          confirmButtonColor: '#ef4444'
+        });
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i data-lucide="check"></i> Approve & Send Credentials';
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      }
+    }
+
+    // Reject application
+    async function confirmReject() {
+      if (!currentApplicationId) return;
+
+      const reason = document.getElementById('rejectionReason').value.trim();
+
+      // Confirmation before rejection
+      const result = await Swal.fire({
+        title: 'Confirm Rejection',
+        text: 'Are you sure you want to reject this application?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: 'Yes, Reject',
+        cancelButtonText: 'Cancel'
+      });
+
+      if (!result.isConfirmed) return;
+
+      const btn = document.getElementById('confirmRejectBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<i data-lucide="loader-2" class="spin"></i> Rejecting...';
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+
+      try {
+        const response = await fetch(`/admin/api/referrals/applications/${currentApplicationId}/reject`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reason })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          closeRejectModal();
+          loadApplications();
+          loadStats();
+          Swal.fire({
+            icon: 'success',
+            title: 'Application Rejected',
+            text: 'The partner application has been rejected.',
+            confirmButtonColor: '#64748b',
+            timer: 2000,
+            timerProgressBar: true
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Rejection Failed',
+            text: data.message || 'Failed to reject application',
+            confirmButtonColor: '#ef4444'
+          });
+        }
+      } catch (error) {
+        console.error('Error rejecting application:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Failed to reject application. Please try again.',
+          confirmButtonColor: '#ef4444'
+        });
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i data-lucide="x"></i> Reject Application';
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      }
+    }
+
+    // Pagination
+    function changePage(delta) {
+      currentPage += delta;
+      if (currentPage < 1) currentPage = 1;
+      if (currentPage > totalPages) currentPage = totalPages;
+      loadApplications();
+    }
+
+    // Close modal on overlay click
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+      overlay.addEventListener('click', function(e) {
+        if (e.target === this) {
+          this.style.display = 'none';
+          currentApplicationId = null;
+        }
+      });
+    });
+  </script>
+</body>
+</html>

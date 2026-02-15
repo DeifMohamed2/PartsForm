@@ -76,16 +76,41 @@ class SyncService extends EventEmitter {
 
   /**
    * Sync a single integration with real-time progress
+   * @param {string} integrationId - Integration ID
+   * @param {Object} options - Options including syncHistoryId
    */
-  async syncIntegration(integrationId) {
+  async syncIntegration(integrationId, options = {}) {
+    const { syncHistoryId } = options;
+    let syncHistoryRecord = null;
+    
+    // Load sync history record if provided
+    if (syncHistoryId) {
+      const SyncHistory = require('../models/SyncHistory');
+      syncHistoryRecord = await SyncHistory.findById(syncHistoryId);
+    }
+    
     // Prevent concurrent syncs
     if (this.syncingIntegrations.get(integrationId)) {
       console.log(`⏭️  Sync already in progress for ${integrationId}`);
+      if (syncHistoryRecord) {
+        syncHistoryRecord.status = 'cancelled';
+        syncHistoryRecord.errorSummary = 'Sync already in progress';
+        syncHistoryRecord.completedAt = new Date();
+        await syncHistoryRecord.save();
+      }
       return { success: false, error: 'Sync already in progress' };
     }
 
     this.syncingIntegrations.set(integrationId, true);
     const startTime = Date.now();
+
+    // Mark sync history as running
+    if (syncHistoryRecord) {
+      syncHistoryRecord.status = 'running';
+      syncHistoryRecord.phase = 'connecting';
+      syncHistoryRecord.startedAt = new Date(startTime);
+      await syncHistoryRecord.save();
+    }
 
     // Initialize progress
     this._updateProgress(integrationId, {
@@ -194,6 +219,29 @@ class SyncService extends EventEmitter {
 
       this.log(`✅ Sync completed for ${integration.name} in ${duration}ms`);
 
+      // Update sync history record with results
+      if (syncHistoryRecord) {
+        syncHistoryRecord.status = 'completed';
+        syncHistoryRecord.phase = 'done';
+        syncHistoryRecord.completedAt = new Date();
+        syncHistoryRecord.duration = duration;
+        syncHistoryRecord.filesTotal = result.filesTotal || 0;
+        syncHistoryRecord.filesProcessed = result.filesProcessed || 0;
+        syncHistoryRecord.recordsTotal = result.recordsTotal || result.recordsProcessed || 0;
+        syncHistoryRecord.recordsProcessed = result.recordsProcessed || 0;
+        syncHistoryRecord.recordsInserted = result.inserted || 0;
+        syncHistoryRecord.recordsUpdated = result.updated || 0;
+        syncHistoryRecord.recordsSkipped = result.skipped || 0;
+        syncHistoryRecord.recordsFailed = result.failed || 0;
+        syncHistoryRecord.files = result.files || [];
+        if (duration > 0 && (result.recordsProcessed || 0) > 0) {
+          syncHistoryRecord.metrics = {
+            avgRecordsPerSecond: Math.round(((result.recordsProcessed || 0) / duration) * 1000),
+          };
+        }
+        await syncHistoryRecord.save();
+      }
+
       // Final progress update
       this._updateProgress(integrationId, {
         status: 'completed',
@@ -215,6 +263,21 @@ class SyncService extends EventEmitter {
       console.error(`❌ Sync failed for ${integrationId}:`, error.message);
 
       const duration = Date.now() - startTime;
+
+      // Update sync history with failure
+      if (syncHistoryRecord) {
+        syncHistoryRecord.status = 'failed';
+        syncHistoryRecord.phase = 'failed';
+        syncHistoryRecord.completedAt = new Date();
+        syncHistoryRecord.duration = duration;
+        syncHistoryRecord.errorSummary = error.message;
+        syncHistoryRecord.errors.push({
+          message: error.message,
+          code: error.code,
+          timestamp: new Date(),
+        });
+        await syncHistoryRecord.save();
+      }
 
       // Update progress with error
       this._updateProgress(integrationId, {

@@ -1,0 +1,302 @@
+<%- include('../partner/partials/header-public') %>
+
+<link rel="stylesheet" href="/css/partnerCSS/partner-login.css">
+<link rel="stylesheet" href="/css/partnerCSS/partner-application.css">
+
+<%- include('../partner/partials/navbar-public', { activePage: 'apply' }) %>
+
+<div class="partner-login-page-wrapper">
+<section class="partner-apply-section">
+  <div class="partner-apply-container">
+    <!-- Header -->
+    <div class="partner-apply-header">
+      <div class="partner-apply-badge">
+        <i data-lucide="handshake"></i>
+        <span>Partner Program</span>
+      </div>
+      <h1>Become a Referral Partner</h1>
+      <p>Join our partner network and earn commissions by referring customers to PARTSFORM.</p>
+    </div>
+
+    <!-- Application Card -->
+    <div class="partner-apply-card">
+      <!-- Success Message -->
+      <div class="partner-apply-message success" id="formSuccess" style="display: none;">
+        <i data-lucide="check-circle"></i>
+        <div>
+          <strong>Application Submitted Successfully!</strong>
+          <span>We'll review your application and get back to you within 2-3 business days. You'll receive your login credentials via email once approved.</span>
+        </div>
+      </div>
+
+      <!-- Error Message -->
+      <div class="partner-apply-message error" id="formError" style="display: none;">
+        <i data-lucide="alert-circle"></i>
+        <span id="errorMessage"></span>
+      </div>
+
+      <form class="partner-apply-form" id="partnerApplicationForm">
+        <!-- Personal Information Section -->
+        <div class="partner-apply-form-section">
+          <div class="partner-apply-section-header">
+            <i data-lucide="user"></i>
+            <span>Personal Information</span>
+          </div>
+
+          <div class="partner-apply-form-grid">
+            <div class="partner-apply-form-group">
+              <label>
+                <i data-lucide="user"></i>
+                First Name <span class="required">*</span>
+              </label>
+              <input type="text" class="partner-apply-input" id="firstName" name="firstName" placeholder="John" required>
+              <span class="partner-apply-field-error" id="firstNameError"></span>
+            </div>
+
+            <div class="partner-apply-form-group">
+              <label>
+                <i data-lucide="user"></i>
+                Last Name <span class="required">*</span>
+              </label>
+              <input type="text" class="partner-apply-input" id="lastName" name="lastName" placeholder="Doe" required>
+              <span class="partner-apply-field-error" id="lastNameError"></span>
+            </div>
+
+            <div class="partner-apply-form-group">
+              <label>
+                <i data-lucide="mail"></i>
+                Email Address <span class="required">*</span>
+              </label>
+              <input type="email" class="partner-apply-input" id="email" name="email" placeholder="john@example.com" required>
+              <span class="partner-apply-field-error" id="emailError"></span>
+            </div>
+
+            <div class="partner-apply-form-group">
+              <label>
+                <i data-lucide="phone"></i>
+                Phone Number <span class="required">*</span>
+              </label>
+              <input type="tel" class="partner-apply-input" id="phone" name="phone" placeholder="+1 (555) 000-0000" required>
+              <span class="partner-apply-field-error" id="phoneError"></span>
+            </div>
+
+            <div class="partner-apply-form-group">
+              <label>
+                <i data-lucide="building-2"></i>
+                Company <span class="optional">(optional)</span>
+              </label>
+              <input type="text" class="partner-apply-input" id="companyName" name="companyName" placeholder="Your company name">
+            </div>
+
+            <div class="partner-apply-form-group">
+              <label>
+                <i data-lucide="globe"></i>
+                Website <span class="optional">(optional)</span>
+              </label>
+              <input type="url" class="partner-apply-input" id="website" name="website" placeholder="https://yoursite.com">
+            </div>
+          </div>
+        </div>
+
+        <!-- Marketing Channels Section -->
+        <div class="partner-apply-form-section">
+          <div class="partner-apply-section-header">
+            <i data-lucide="megaphone"></i>
+            <span>Marketing Channels</span>
+          </div>
+
+          <div class="partner-apply-form-group">
+            <label style="margin-bottom: 1rem; display: block;">
+              How will you promote PARTSFORM? <span class="required">*</span>
+            </label>
+            <div class="partner-apply-channels-grid">
+              <div class="partner-apply-channel-item">
+                <input type="checkbox" name="marketingChannels" value="website" id="channel_website">
+                <label for="channel_website" class="partner-apply-channel-label">
+                  <i data-lucide="globe"></i>
+                  <span>Website</span>
+                </label>
+              </div>
+              <div class="partner-apply-channel-item">
+                <input type="checkbox" name="marketingChannels" value="social_media" id="channel_social">
+                <label for="channel_social" class="partner-apply-channel-label">
+                  <i data-lucide="share-2"></i>
+                  <span>Social Media</span>
+                </label>
+              </div>
+              <div class="partner-apply-channel-item">
+                <input type="checkbox" name="marketingChannels" value="email" id="channel_email">
+                <label for="channel_email" class="partner-apply-channel-label">
+                  <i data-lucide="mail"></i>
+                  <span>Email</span>
+                </label>
+              </div>
+              <div class="partner-apply-channel-item">
+                <input type="checkbox" name="marketingChannels" value="content" id="channel_content">
+                <label for="channel_content" class="partner-apply-channel-label">
+                  <i data-lucide="file-text"></i>
+                  <span>Content</span>
+                </label>
+              </div>
+              <div class="partner-apply-channel-item">
+                <input type="checkbox" name="marketingChannels" value="ppc" id="channel_ppc">
+                <label for="channel_ppc" class="partner-apply-channel-label">
+                  <i data-lucide="mouse-pointer-click"></i>
+                  <span>Paid Ads</span>
+                </label>
+              </div>
+              <div class="partner-apply-channel-item">
+                <input type="checkbox" name="marketingChannels" value="offline" id="channel_offline">
+                <label for="channel_offline" class="partner-apply-channel-label">
+                  <i data-lucide="store"></i>
+                  <span>Offline</span>
+                </label>
+              </div>
+            </div>
+            <span class="partner-apply-field-error" id="marketingChannelsError"></span>
+          </div>
+
+          <div class="partner-apply-form-group" style="margin-top: 1.5rem;">
+            <label style="margin-bottom: 0.625rem; display: block;">
+              <i data-lucide="message-square"></i>
+              Tell us about yourself <span class="optional">(optional)</span>
+            </label>
+            <textarea class="partner-apply-input partner-apply-textarea" id="motivation" name="motivation" 
+              placeholder="Share your experience or how you plan to promote PARTSFORM..." rows="4"></textarea>
+          </div>
+        </div>
+
+        <!-- Terms -->
+        <div class="partner-apply-terms">
+          <input type="checkbox" id="agreeTerms" name="agreeTerms" required>
+          <span class="partner-apply-terms-text">
+            I agree to the <a href="/privacy#terms" target="_blank">Terms of Service</a> and 
+            <a href="/privacy" target="_blank">Privacy Policy</a>
+          </span>
+        </div>
+        <span class="partner-apply-field-error" id="agreeTermsError" style="margin-left: 1rem;"></span>
+      </form>
+
+      <!-- Submit Button -->
+      <div class="partner-apply-submit-wrapper">
+        <button type="submit" form="partnerApplicationForm" class="partner-apply-submit-btn" id="submitBtn">
+          <span class="default">
+            <i data-lucide="send"></i>
+            Submit Application
+          </span>
+          <span class="loading">
+            <svg class="partner-apply-spinner" width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" opacity="0.25"/>
+              <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+            Submitting...
+          </span>
+        </button>
+      </div>
+
+      <!-- Login Prompt -->
+      <div class="partner-apply-login-prompt">
+        Already a partner? <a href="/partner/login">Sign in to your dashboard</a>
+      </div>
+    </div>
+
+    <!-- Quick Benefits -->
+    <div class="partner-apply-benefits">
+      <div class="partner-apply-benefit">
+        <i data-lucide="check-circle"></i>
+        Up to 15% commission
+      </div>
+      <div class="partner-apply-benefit">
+        <i data-lucide="check-circle"></i>
+        Monthly payouts
+      </div>
+      <div class="partner-apply-benefit">
+        <i data-lucide="check-circle"></i>
+        Real-time dashboard
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  if (typeof lucide !== 'undefined') {
+    lucide.createIcons();
+  }
+
+  const form = document.getElementById('partnerApplicationForm');
+  const submitBtn = document.getElementById('submitBtn');
+  const formError = document.getElementById('formError');
+  const formSuccess = document.getElementById('formSuccess');
+
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    // Clear previous errors
+    document.querySelectorAll('.partner-apply-field-error').forEach(el => el.textContent = '');
+    formError.style.display = 'none';
+    formSuccess.style.display = 'none';
+
+    // Validate at least one marketing channel selected
+    const marketingChannels = document.querySelectorAll('input[name="marketingChannels"]:checked');
+    if (marketingChannels.length === 0) {
+      document.getElementById('marketingChannelsError').textContent = 'Please select at least one channel';
+      return;
+    }
+
+    // Show loading state
+    submitBtn.disabled = true;
+    submitBtn.classList.add('is-loading');
+
+    // Collect form data
+    const formData = {
+      firstName: document.getElementById('firstName').value.trim(),
+      lastName: document.getElementById('lastName').value.trim(),
+      email: document.getElementById('email').value.trim(),
+      phone: document.getElementById('phone').value.trim(),
+      companyName: document.getElementById('companyName').value.trim(),
+      website: document.getElementById('website').value.trim(),
+      marketingChannels: Array.from(marketingChannels).map(cb => cb.value),
+      motivation: document.getElementById('motivation').value.trim()
+    };
+
+    try {
+      const response = await fetch('/api/partner/apply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        formSuccess.style.display = 'flex';
+        form.reset();
+        form.style.display = 'none';
+        document.querySelector('.partner-apply-submit-wrapper').style.display = 'none';
+        formSuccess.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else {
+        if (data.errors) {
+          Object.keys(data.errors).forEach(field => {
+            const errorEl = document.getElementById(field + 'Error');
+            if (errorEl) errorEl.textContent = data.errors[field];
+          });
+        } else {
+          document.getElementById('errorMessage').textContent = data.message || 'Something went wrong. Please try again.';
+          formError.style.display = 'flex';
+        }
+      }
+    } catch (error) {
+      console.error('Application error:', error);
+      document.getElementById('errorMessage').textContent = 'Network error. Please check your connection.';
+      formError.style.display = 'flex';
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.classList.remove('is-loading');
+    }
+  });
+});
+</script>
+
+<%- include('../partner/partials/footer-public') %>
+</div>

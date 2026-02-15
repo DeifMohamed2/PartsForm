@@ -7,6 +7,8 @@ const {
   searchParts,
   getSectors,
   downloadSampleExcel,
+  getBecomePartnerPage,
+  submitPartnerApplication,
 } = require('../controllers/landingController');
 const { attachUser } = require('../middleware/auth');
 
@@ -15,6 +17,9 @@ router.use(attachUser);
 
 // Landing page routes
 router.get('/', getLandingPage);
+
+// Become a Partner page
+router.get('/become-partner', getBecomePartnerPage);
 
 // Note: Registration routes are now handled by /routes/auth.js
 
@@ -26,5 +31,8 @@ router.get('/search2', getSearch2Page);
 router.post('/api/search', searchParts);
 router.get('/api/sectors', getSectors);
 router.get('/api/download-sample-excel', downloadSampleExcel);
+
+// Partner application API
+router.post('/api/partner/apply', submitPartnerApplication);
 
 module.exports = router;
