@@ -17,6 +17,12 @@
  * │  FTP Server │ ──▶ │ Transform    │ ──▶ │ mongoimport │ ──▶ │  ES Bulk    │
  * │  (parallel) │     │ (NDJSON)     │     │ (16 workers)│     │  (parallel) │
  * └─────────────┘     └──────────────┘     └─────────────┘     └─────────────┘
+ * 
+ * OOM Prevention:
+ * - Circuit breakers for MongoDB/ES (fail fast when unavailable)
+ * - Log throttling (prevent log spam during outages)
+ * - Memory watchdog (stop before OOM)
+ * - Exponential backoff on failures
  */
 
 require('dotenv').config();
@@ -25,15 +31,32 @@ const EventEmitter = require('events');
 const Integration = require('../models/Integration');
 const { runTurboSync, CONFIG: TURBO_CONFIG } = require('./turboSyncEngine');
 
+// OOM Prevention utilities
+const { 
+  circuitBreakers, 
+  logThrottle, 
+  memoryWatchdog, 
+  ExponentialBackoff,
+  isConnectionError 
+} = require('../utils/oomPrevention');
+
 // Increase event listener limit
 EventEmitter.defaultMaxListeners = 100;
 
 // Use TURBO mode by default for maximum speed
 const USE_TURBO_ENGINE = process.env.SYNC_ENGINE !== 'legacy';
 
+// Backoff for connection retries
+const connectionBackoff = new ExponentialBackoff({
+  baseDelayMs: 5000,
+  maxDelayMs: 60000,
+  maxRetries: 10,
+});
+
 // Legacy config (only used if turbo disabled)
 const CONFIG = {
   POLL_INTERVAL: 1000,          // Check for requests every 1s
+  POLL_INTERVAL_BACKOFF: 30000, // Backoff interval when services unavailable
 };
 
 class SyncWorker {
@@ -50,12 +73,33 @@ class SyncWorker {
   }
 
   /**
-   * Connect to MongoDB
+   * Connect to MongoDB with retry
    */
   async connect() {
     const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/partsform';
-    await mongoose.connect(mongoUri);
+    
+    // Retry connection with exponential backoff
+    await connectionBackoff.execute(
+      async (attempt) => {
+        if (attempt > 0) {
+          this.log(`Retrying MongoDB connection (attempt ${attempt + 1})...`);
+        }
+        await mongoose.connect(mongoUri, {
+          serverSelectionTimeoutMS: 10000,
+          connectTimeoutMS: 10000,
+        });
+      },
+      {
+        onRetry: (error, attempt, delay) => {
+          this.log(`MongoDB connection failed: ${error.message}. Retry in ${delay/1000}s...`, 'ERROR');
+          circuitBreakers.mongodb.recordFailure(error);
+        },
+        shouldRetry: (error) => isConnectionError(error),
+      }
+    );
+    
     this.log('Connected to MongoDB');
+    circuitBreakers.mongodb.recordSuccess();
     
     // Ensure sync_requests collection exists
     const db = mongoose.connection.db;
@@ -64,6 +108,17 @@ class SyncWorker {
       await db.createCollection('sync_requests');
       this.log('Created sync_requests collection');
     }
+    
+    // Set up disconnect handler
+    mongoose.connection.on('disconnected', () => {
+      logThrottle.log('mongo-disconnect', '⚠️ MongoDB disconnected');
+      circuitBreakers.mongodb.recordFailure(new Error('disconnected'));
+    });
+    
+    mongoose.connection.on('reconnected', () => {
+      this.log('MongoDB reconnected');
+      circuitBreakers.mongodb.recordSuccess();
+    });
   }
 
   /**
@@ -355,8 +410,28 @@ class SyncWorker {
   async watchForRequests() {
     this.log('Watching for sync requests...');
     
+    let consecutiveErrors = 0;
+    const maxConsecutiveErrors = 10;
+    
     while (!this.shouldStop) {
       try {
+        // Check if MongoDB is available (circuit breaker)
+        if (!circuitBreakers.mongodb.isAvailable()) {
+          logThrottle.log('sync-worker-mongo-unavail', '⏸️  MongoDB circuit open - skipping sync check');
+          await new Promise(resolve => setTimeout(resolve, CONFIG.POLL_INTERVAL_BACKOFF));
+          continue;
+        }
+        
+        // Memory guard - don't start sync if memory is too high
+        const memStatus = memoryWatchdog.checkMemory();
+        if (!memStatus.safe) {
+          logThrottle.log('sync-worker-memory', `⏸️  Memory too high (${memStatus.usage.rss}MB) - skipping sync`);
+          // Try to force GC if available
+          memoryWatchdog.forceGC();
+          await new Promise(resolve => setTimeout(resolve, CONFIG.POLL_INTERVAL_BACKOFF));
+          continue;
+        }
+        
         if (!this.isProcessing) {
           const db = mongoose.connection.db;
           
@@ -382,13 +457,32 @@ class SyncWorker {
             this.isProcessing = false;
             this.currentSync = null;
           }
+          
+          // Reset error counter on success
+          consecutiveErrors = 0;
+          circuitBreakers.mongodb.recordSuccess();
         }
       } catch (error) {
-        this.log(`Watch error: ${error.message}`, 'ERROR');
+        consecutiveErrors++;
+        
+        if (isConnectionError(error)) {
+          circuitBreakers.mongodb.recordFailure(error);
+          logThrottle.error('sync-worker-conn-error', `Watch error (connection): ${error.message}`);
+        } else {
+          logThrottle.error('sync-worker-error', `Watch error: ${error.message}`);
+        }
+        
+        // Exponential backoff on consecutive errors
+        if (consecutiveErrors >= maxConsecutiveErrors) {
+          const backoffDelay = CONFIG.POLL_INTERVAL_BACKOFF * Math.min(consecutiveErrors / maxConsecutiveErrors, 3);
+          this.log(`Too many errors (${consecutiveErrors}), backing off for ${backoffDelay/1000}s...`);
+          await new Promise(resolve => setTimeout(resolve, backoffDelay));
+        }
       }
 
-      // Wait before checking again
-      await new Promise(resolve => setTimeout(resolve, CONFIG.POLL_INTERVAL));
+      // Wait before checking again (use normal interval if no errors)
+      const pollInterval = consecutiveErrors > 0 ? CONFIG.POLL_INTERVAL_BACKOFF : CONFIG.POLL_INTERVAL;
+      await new Promise(resolve => setTimeout(resolve, pollInterval));
     }
   }
 

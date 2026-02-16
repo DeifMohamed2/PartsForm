@@ -2,11 +2,18 @@
  * Email Inquiry Scheduler Service
  * Background service that periodically checks for new emails
  * and processes them through the AI pipeline
+ * 
+ * OOM Prevention:
+ * - Log throttling to prevent spam during MongoDB outages
+ * - Circuit breaker for MongoDB operations
  */
 const cron = require('node-cron');
 const emailService = require('./emailService');
 const emailInquiryProcessor = require('./emailInquiryProcessor');
 const EmailInquiry = require('../models/EmailInquiry');
+
+// OOM Prevention utilities
+const { circuitBreakers, logThrottle, isConnectionError } = require('../utils/oomPrevention');
 
 class EmailInquiryScheduler {
   constructor() {
@@ -247,6 +254,12 @@ class EmailInquiryScheduler {
    */
   async retryFailedInquiries() {
     try {
+      // Check circuit breaker before hitting MongoDB
+      if (!circuitBreakers.mongodb.isAvailable()) {
+        logThrottle.log('email-retry-circuit', '⏸️  Skipping failed inquiry retry - MongoDB circuit open');
+        return;
+      }
+      
       const failedInquiries = await EmailInquiry.find({
         status: 'failed',
         'error.retryCount': { $lt: 3 }, // Max 3 retries
@@ -254,6 +267,9 @@ class EmailInquiryScheduler {
           $lt: new Date(Date.now() - 30 * 60 * 1000), // At least 30 min old
         },
       }).limit(5);
+
+      // Record success for MongoDB circuit
+      circuitBreakers.mongodb.recordSuccess();
 
       if (failedInquiries.length === 0) {
         return;
@@ -269,7 +285,12 @@ class EmailInquiryScheduler {
         }
       }
     } catch (error) {
-      console.error('Failed inquiry retry error:', error.message);
+      if (isConnectionError(error)) {
+        circuitBreakers.mongodb.recordFailure(error);
+        logThrottle.error('email-retry-conn', `Failed inquiry retry (MongoDB unavailable): ${error.message}`);
+      } else {
+        logThrottle.error('email-retry-error', `Failed inquiry retry error: ${error.message}`);
+      }
     }
   }
 

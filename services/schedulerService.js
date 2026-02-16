@@ -8,12 +8,21 @@
  * - Server restart recovery: Resumes syncs after server restart
  * - Health monitoring: Periodic checks for stuck syncs
  * - SyncHistory integration: Full sync history tracking
+ * - OOM Prevention: Circuit breakers, log throttling, backoff
  */
 const cron = require('node-cron');
 const mongoose = require('mongoose');
 const Integration = require('../models/Integration');
 const SyncHistory = require('../models/SyncHistory');
 const syncService = require('./syncService');
+
+// OOM Prevention utilities
+const { 
+  circuitBreakers, 
+  logThrottle, 
+  ExponentialBackoff,
+  isConnectionError 
+} = require('../utils/oomPrevention');
 
 class SchedulerService {
   constructor() {
@@ -22,6 +31,17 @@ class SchedulerService {
     this.useWorker = process.env.SYNC_USE_WORKER === 'true';
     this.healthCheckInterval = null;
     this.dueSyncCheckInterval = null;
+    
+    // Backoff for retries
+    this.backoff = new ExponentialBackoff({
+      baseDelayMs: 5000,
+      maxDelayMs: 60000,
+      maxRetries: 3,
+    });
+    
+    // Track consecutive failures for health check cooldown
+    this.healthCheckFailures = 0;
+    this.maxHealthCheckFailures = 5;
     
     // Configuration
     this.config = {
@@ -33,6 +53,8 @@ class SchedulerService {
       healthCheckIntervalMs: 5 * 60 * 1000,
       // Delay before triggering due syncs after startup (30 seconds)
       startupDelay: 30 * 1000,
+      // Skip health check when circuit is open
+      skipHealthCheckWhenCircuitOpen: true,
     };
   }
 
@@ -352,9 +374,34 @@ class SchedulerService {
     
     this.healthCheckInterval = setInterval(async () => {
       try {
+        // Skip health check if MongoDB circuit is open (prevents log spam and retry storms)
+        if (this.config.skipHealthCheckWhenCircuitOpen && !circuitBreakers.mongodb.isAvailable()) {
+          logThrottle.log('healthcheck-circuit-open', '⏸️  Skipping health check - MongoDB circuit open');
+          return;
+        }
+        
+        // Skip if too many consecutive failures (exponential backoff)
+        if (this.healthCheckFailures >= this.maxHealthCheckFailures) {
+          logThrottle.log('healthcheck-backoff', `⏸️  Health check in backoff (${this.healthCheckFailures} failures)`);
+          // Slowly reduce failure count to eventually retry
+          this.healthCheckFailures = Math.max(0, this.healthCheckFailures - 1);
+          return;
+        }
+        
         await this._performHealthCheck();
+        
+        // Reset failure count on success
+        this.healthCheckFailures = 0;
+        circuitBreakers.mongodb.recordSuccess();
       } catch (error) {
-        console.error('Health check error:', error.message);
+        this.healthCheckFailures++;
+        
+        if (isConnectionError(error)) {
+          circuitBreakers.mongodb.recordFailure(error);
+          logThrottle.error('healthcheck-connection', `Health check error (MongoDB unavailable): ${error.message}`);
+        } else {
+          logThrottle.error('healthcheck-error', `Health check error: ${error.message}`);
+        }
       }
     }, this.config.healthCheckIntervalMs);
     

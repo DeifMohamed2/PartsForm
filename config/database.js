@@ -1,5 +1,8 @@
 const mongoose = require('mongoose');
 
+// OOM Prevention utilities
+const { circuitBreakers, logThrottle } = require('../utils/oomPrevention');
+
 // MongoDB connection configuration - optimized for bulk operations
 const connectDB = async () => {
   try {
@@ -24,16 +27,22 @@ const connectDB = async () => {
 
     console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
     
-    // Handle connection events
+    // Update circuit breaker on successful connection
+    circuitBreakers.mongodb.recordSuccess();
+    
+    // Handle connection events with log throttling
     mongoose.connection.on('error', (err) => {
-      console.error(`❌ MongoDB connection error: ${err}`);
+      circuitBreakers.mongodb.recordFailure(err);
+      logThrottle.error('mongo-conn-error', `❌ MongoDB connection error: ${err.message}`);
     });
 
     mongoose.connection.on('disconnected', () => {
-      console.warn('⚠️ MongoDB disconnected');
+      circuitBreakers.mongodb.recordFailure(new Error('disconnected'));
+      logThrottle.log('mongo-disconnected', '⚠️ MongoDB disconnected');
     });
 
     mongoose.connection.on('reconnected', () => {
+      circuitBreakers.mongodb.recordSuccess();
       console.log('✅ MongoDB reconnected');
     });
 
