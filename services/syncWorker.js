@@ -251,6 +251,16 @@ class SyncWorker {
       );
 
       this.log(`Sync completed: ${(result.inserted || 0).toLocaleString()} records in ${(duration/1000/60).toFixed(1)} minutes`, 'SUCCESS');
+      
+      // Log memory usage after sync
+      const memUsage = process.memoryUsage();
+      this.log(`Memory: ${Math.round(memUsage.heapUsed / 1024 / 1024)}MB heap, ${Math.round(memUsage.rss / 1024 / 1024)}MB RSS`);
+      
+      // Force garbage collection if available
+      if (global.gc) {
+        global.gc();
+        this.log('Garbage collection triggered');
+      }
 
     } catch (error) {
       this.log(`Sync failed: ${error.message}`, 'ERROR');

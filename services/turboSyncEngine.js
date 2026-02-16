@@ -969,7 +969,7 @@ async function swapESAlias(esClient, aliasName, newIndexName) {
     await esClient.indices.updateAliases({ body: { actions } });
     log(`Alias "${aliasName}" now points to ${newIndexName}`, 'SUCCESS');
 
-    // Delete old indices
+    // Delete old indices that were pointed to by the alias
     for (const oldIdx of oldIndices) {
       if (oldIdx !== newIndexName) {
         try {
@@ -980,9 +980,81 @@ async function swapESAlias(esClient, aliasName, newIndexName) {
         }
       }
     }
+    
+    // COMPREHENSIVE CLEANUP: Delete ALL orphan automotive_parts_* indices
+    // This catches any leftover indices from failed syncs or old runs
+    await cleanupOrphanESIndices(esClient, newIndexName);
+    
   } catch (e) {
     log(`ES alias swap failed: ${e.message}`, 'ERROR');
     log('The new index still exists with data — manual alias swap may be needed', 'ERROR');
+  }
+}
+
+/**
+ * Clean up ALL old/orphan ES indices except the current one
+ * This ensures no disk/memory waste from old sync runs
+ */
+async function cleanupOrphanESIndices(esClient, currentIndexName) {
+  try {
+    log('Checking for orphan ES indices to clean up...', 'PROGRESS');
+    
+    // Get all automotive_parts_* indices
+    const allIndices = await esClient.cat.indices({ 
+      index: 'automotive_parts_*', 
+      format: 'json',
+      h: 'index,docs.count,store.size'
+    });
+    
+    if (!allIndices || allIndices.length <= 1) {
+      log('No orphan indices to clean up');
+      return;
+    }
+    
+    let deletedCount = 0;
+    let freedSpace = 0;
+    
+    for (const idx of allIndices) {
+      const indexName = idx.index;
+      
+      // Skip the current index
+      if (indexName === currentIndexName) {
+        continue;
+      }
+      
+      // Skip if it's the alias name itself (shouldn't happen but safety check)
+      if (indexName === 'automotive_parts') {
+        continue;
+      }
+      
+      try {
+        // Parse size (e.g., "9.6gb" -> 9.6)
+        const sizeStr = idx['store.size'] || '0b';
+        const sizeMatch = sizeStr.match(/^([\d.]+)(\w+)$/);
+        if (sizeMatch) {
+          const value = parseFloat(sizeMatch[1]);
+          const unit = sizeMatch[2].toLowerCase();
+          if (unit === 'gb') freedSpace += value;
+          else if (unit === 'mb') freedSpace += value / 1024;
+          else if (unit === 'kb') freedSpace += value / 1024 / 1024;
+        }
+        
+        await esClient.indices.delete({ index: indexName });
+        deletedCount++;
+        log(`🗑️  Deleted orphan index: ${indexName} (${idx['docs.count']} docs, ${sizeStr})`);
+      } catch (e) {
+        log(`Warning: Failed to delete ${indexName}: ${e.message}`, 'ERROR');
+      }
+    }
+    
+    if (deletedCount > 0) {
+      log(`✅ Cleaned up ${deletedCount} orphan indices, freed ~${freedSpace.toFixed(1)}GB`, 'SUCCESS');
+    } else {
+      log('No orphan indices found');
+    }
+  } catch (e) {
+    // Non-fatal - just log warning
+    log(`Warning: Orphan index cleanup failed: ${e.message}`, 'ERROR');
   }
 }
 
