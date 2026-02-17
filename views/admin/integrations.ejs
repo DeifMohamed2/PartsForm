@@ -2120,6 +2120,27 @@
       const startDate = new Date(record.startedAt);
       const triggerBadge = getTriggerBadge(record.triggeredBy);
       
+      // Prepare details button - clickable to show info
+      let detailsCell = '';
+      if (record.errorSummary) {
+        const escapedError = escapeHtml(record.errorSummary).replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        detailsCell = `
+          <span class="error-summary clickable" onclick="showSyncDetails('Error', '${escapedError}')" title="Click for details">
+            <i data-lucide="alert-circle"></i>
+          </span>`;
+      } else if (record.status === 'completed') {
+        const successMsg = `Sync completed successfully\\nRecords inserted: ${(record.recordsInserted || 0).toLocaleString()}\\nFiles processed: ${record.filesProcessed || 0}\\nDuration: ${record.durationFormatted || '-'}`;
+        detailsCell = `
+          <span class="success-check clickable" onclick="showSyncDetails('Success', '${successMsg}')" title="Click for details">
+            <i data-lucide="check"></i>
+          </span>`;
+      } else {
+        detailsCell = `
+          <span class="status-info">
+            <i data-lucide="info"></i>
+          </span>`;
+      }
+      
       return `
         <tr>
           <td>
@@ -2143,18 +2164,16 @@
             </span>
           </td>
           <td>${record.durationFormatted || '-'}</td>
-          <td>
-            ${record.errorSummary ? 
-              `<span class="error-summary" title="${escapeHtml(record.errorSummary)}">
-                <i data-lucide="alert-circle"></i>
-              </span>` : 
-              `<span class="success-check">
-                <i data-lucide="check"></i>
-              </span>`
-            }
-          </td>
+          <td>${detailsCell}</td>
         </tr>
       `;
+    }
+    
+    // Show sync details in a modal/alert
+    function showSyncDetails(title, message) {
+      // Replace escaped newlines
+      const formattedMsg = message.replace(/\\n/g, '\n');
+      alert(title + '\n\n' + formattedMsg);
     }
     
     // Helper functions

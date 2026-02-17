@@ -2071,6 +2071,8 @@
 /* History Table Container */
 .history-table-container {
     overflow-x: auto;
+    overflow-y: auto;
+    max-height: 400px;
     padding: 0;
 }
 
@@ -2273,6 +2275,11 @@
     transition: all 0.2s ease;
 }
 
+.error-summary.clickable,
+.success-check.clickable {
+    cursor: pointer;
+}
+
 .error-summary:hover {
     transform: scale(1.1);
     box-shadow: 0 2px 8px rgba(239, 68, 68, 0.25);
@@ -2293,6 +2300,12 @@
     background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
     color: #16a34a;
     border: 1px solid rgba(34, 197, 94, 0.2);
+    transition: all 0.2s ease;
+}
+
+.success-check:hover {
+    transform: scale(1.1);
+    box-shadow: 0 2px 8px rgba(34, 197, 94, 0.25);
 }
 
 .success-check i {

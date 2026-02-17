@@ -29,6 +29,7 @@ require('dotenv').config();
 const mongoose = require('mongoose');
 const EventEmitter = require('events');
 const Integration = require('../models/Integration');
+const SyncHistory = require('../models/SyncHistory');
 const { runTurboSync, CONFIG: TURBO_CONFIG } = require('./turboSyncEngine');
 
 // OOM Prevention utilities
@@ -250,6 +251,23 @@ class SyncWorker {
         }
       );
 
+      // Update SyncHistory record if it exists
+      if (request.syncHistoryId) {
+        try {
+          const syncHistory = await SyncHistory.findById(request.syncHistoryId);
+          if (syncHistory) {
+            await syncHistory.markCompleted({
+              filesProcessed: request.progress?.filesProcessed || 0,
+              recordsProcessed: result.recordsProcessed || 0,
+              recordsInserted: result.inserted || 0,
+            });
+            this.log(`Updated sync history record: ${syncHistory._id}`);
+          }
+        } catch (historyError) {
+          this.log(`Warning: Could not update sync history: ${historyError.message}`, 'ERROR');
+        }
+      }
+
       this.log(`Sync completed: ${(result.inserted || 0).toLocaleString()} records in ${(duration/1000/60).toFixed(1)} minutes`, 'SUCCESS');
       
       // Log memory usage after sync
@@ -277,6 +295,19 @@ class SyncWorker {
           }
         }
       );
+
+      // Update SyncHistory record if it exists
+      if (request.syncHistoryId) {
+        try {
+          const syncHistory = await SyncHistory.findById(request.syncHistoryId);
+          if (syncHistory) {
+            await syncHistory.markFailed(error.message);
+            this.log(`Updated sync history record as failed: ${syncHistory._id}`);
+          }
+        } catch (historyError) {
+          this.log(`Warning: Could not update sync history: ${historyError.message}`, 'ERROR');
+        }
+      }
 
       // Update integration status
       try {
