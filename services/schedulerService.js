@@ -297,7 +297,23 @@ class SchedulerService {
         console.log(`🔧 Found ${stuckSyncing.length} integrations stuck in syncing state`);
         
         for (const integration of stuckSyncing) {
-          // Create interrupted history record
+          // Check if there's already a recent completed/interrupted sync record (within last 5 minutes)
+          // to avoid creating duplicate "interrupted" records during restart race conditions
+          const recentRecord = await SyncHistory.findOne({
+            integration: integration._id,
+            status: { $in: ['completed', 'interrupted'] },
+            completedAt: { $gt: new Date(Date.now() - 5 * 60 * 1000) }
+          });
+          
+          if (recentRecord) {
+            console.log(`  ⏭️  Skipping ${integration.name} - recent sync record exists (${recentRecord.status})`);
+            // Just reset the integration status without creating a duplicate history
+            integration.status = 'active';
+            await integration.save();
+            continue;
+          }
+          
+          // Create interrupted history record only if no recent record exists
           try {
             const historyRecord = await SyncHistory.createSyncRecord(integration, 'system');
             historyRecord.status = 'interrupted';
@@ -423,15 +439,27 @@ class SchedulerService {
     for (const integration of stuckIntegrations) {
       console.log(`⚠️  Detected stuck sync: ${integration.name} - resetting...`);
       
-      // Create interrupted history
-      try {
-        const historyRecord = await SyncHistory.createSyncRecord(integration, 'system');
-        historyRecord.status = 'interrupted';
-        historyRecord.errorSummary = 'Sync detected as stuck and reset by health check';
-        historyRecord.completedAt = new Date();
-        await historyRecord.save();
-      } catch (err) {
-        console.error('Error creating history for stuck sync:', err.message);
+      // Check if there's already a recent completed/interrupted sync record
+      // to avoid creating duplicate "interrupted" records
+      const recentRecord = await SyncHistory.findOne({
+        integration: integration._id,
+        status: { $in: ['completed', 'interrupted'] },
+        completedAt: { $gt: new Date(Date.now() - 5 * 60 * 1000) }
+      });
+      
+      if (recentRecord) {
+        console.log(`  ⏭️  Skipping history for ${integration.name} - recent record exists`);
+      } else {
+        // Create interrupted history
+        try {
+          const historyRecord = await SyncHistory.createSyncRecord(integration, 'system');
+          historyRecord.status = 'interrupted';
+          historyRecord.errorSummary = 'Sync detected as stuck and reset by health check';
+          historyRecord.completedAt = new Date();
+          await historyRecord.save();
+        } catch (err) {
+          console.error('Error creating history for stuck sync:', err.message);
+        }
       }
       
       // Reset integration
