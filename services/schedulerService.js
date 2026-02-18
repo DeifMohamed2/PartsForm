@@ -292,11 +292,29 @@ class SchedulerService {
       }
       
       // Step 2: Cleanup any stuck "syncing" status from previous server instance
+      // IMPORTANT: Only mark as interrupted if no active worker is processing the sync
       const stuckSyncing = await Integration.find({ status: 'syncing' });
       if (stuckSyncing.length > 0) {
-        console.log(`🔧 Found ${stuckSyncing.length} integrations stuck in syncing state`);
+        console.log(`🔧 Found ${stuckSyncing.length} integrations in syncing state`);
+        
+        const db = mongoose.connection.db;
         
         for (const integration of stuckSyncing) {
+          // Check if there's an active sync_request being processed by the worker
+          // If worker is still running the sync, don't create an interrupted record
+          const activeRequest = await db.collection('sync_requests').findOne({
+            integrationId: integration._id.toString(),
+            status: 'processing',
+            // Only consider requests started in the last 2 hours as "active"
+            createdAt: { $gt: new Date(Date.now() - 2 * 60 * 60 * 1000) }
+          });
+          
+          if (activeRequest) {
+            console.log(`  ⏭️  Skipping ${integration.name} - sync-worker still processing (request: ${activeRequest._id})`);
+            // Don't touch integration status or create history - worker is still working
+            continue;
+          }
+          
           // Check if there's already a recent completed/interrupted sync record (within last 5 minutes)
           // to avoid creating duplicate "interrupted" records during restart race conditions
           const recentRecord = await SyncHistory.findOne({
@@ -313,13 +331,15 @@ class SchedulerService {
             continue;
           }
           
-          // Create interrupted history record only if no recent record exists
+          // No active worker, no recent completion - this sync is truly stuck/abandoned
+          // Create interrupted history record
           try {
             const historyRecord = await SyncHistory.createSyncRecord(integration, 'system');
             historyRecord.status = 'interrupted';
             historyRecord.errorSummary = 'Sync interrupted by server restart';
             historyRecord.completedAt = new Date();
             await historyRecord.save();
+            console.log(`  ⚠️  Created interrupted record for ${integration.name}`);
           } catch (err) {
             console.error('Error creating interrupted history:', err.message);
           }
@@ -436,8 +456,24 @@ class SchedulerService {
       'lastSync.date': { $lt: new Date(now - this.config.stuckSyncThreshold) },
     });
     
+    const db = mongoose.connection.db;
+    
     for (const integration of stuckIntegrations) {
-      console.log(`⚠️  Detected stuck sync: ${integration.name} - resetting...`);
+      console.log(`⚠️  Detected potentially stuck sync: ${integration.name}`);
+      
+      // Check if worker is still actively processing this sync
+      const activeRequest = await db.collection('sync_requests').findOne({
+        integrationId: integration._id.toString(),
+        status: 'processing',
+        createdAt: { $gt: new Date(Date.now() - 2 * 60 * 60 * 1000) }
+      });
+      
+      if (activeRequest) {
+        console.log(`  ⏭️  Worker still processing ${integration.name} - not marking as stuck`);
+        continue;
+      }
+      
+      console.log(`  🔧 Resetting stuck sync: ${integration.name}`);
       
       // Check if there's already a recent completed/interrupted sync record
       // to avoid creating duplicate "interrupted" records
