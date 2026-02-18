@@ -131,9 +131,11 @@ referralCodeSchema.methods.isValid = function() {
 
 /**
  * Check if code has reached usage limit
+ * Note: null or 0 means unlimited uses
  */
 referralCodeSchema.methods.hasReachedLimit = function() {
-  if (this.maxUses === null) return false;
+  // null or 0 means unlimited
+  if (this.maxUses === null || this.maxUses === 0) return false;
   return this.stats.totalUses >= this.maxUses;
 };
 

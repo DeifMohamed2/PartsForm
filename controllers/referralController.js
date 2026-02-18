@@ -311,7 +311,7 @@ const createPartner = async (req, res) => {
       validFrom: now,
       validUntil: oneMonthLater,
       status: 'active',
-      maxUses: 0, // Unlimited registrations
+      maxUses: null, // null = unlimited registrations
       notes: 'Auto-generated default code',
       createdBy: req.user._id,
     });
@@ -1589,6 +1589,7 @@ const createReferralCode = async (req, res) => {
     }
 
     // Create the code
+    // Note: maxUses of 0 or null means unlimited
     const newCode = new ReferralCode({
       referralPartner: partnerId,
       code: finalCode.toUpperCase(),
@@ -1597,7 +1598,7 @@ const createReferralCode = async (req, res) => {
       buyerDiscountRate: buyerDiscountRate || partner.buyerDiscountRate || 5,
       validFrom: validFrom ? new Date(validFrom) : new Date(),
       validUntil: validUntil ? new Date(validUntil) : null,
-      maxUses: maxUses || 0,
+      maxUses: maxUses === undefined || maxUses === '' ? null : parseInt(maxUses) || 0,
       notes,
       createdBy: req.user._id,
       status: 'active',
@@ -1978,8 +1979,8 @@ const approveApplication = async (req, res) => {
         validFrom: now,
         validUntil: oneMonthLater,
         status: 'active',
-        maxUses: 0, // Unlimited
-        maxUsesPerBuyer: 0, // Unlimited
+        maxUses: null, // null = unlimited
+        maxUsesPerBuyer: null, // null = unlimited
         minimumOrderAmount: 0,
         notes: 'Auto-generated default code on approval',
         createdBy: req.user._id,
