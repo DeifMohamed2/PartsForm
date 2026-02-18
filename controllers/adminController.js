@@ -661,10 +661,18 @@ const formatOrderTime = (date) => {
  */
 const getOrdersManagement = async (req, res) => {
   try {
-    // Get real orders from database with buyer info
+    // Get real orders from database with buyer info and referral partner
     const dbOrders = await Order.find({})
       .populate('buyer', 'firstName lastName email companyName phone')
+      .populate('referral.referralPartner', 'firstName lastName email')
       .sort({ createdAt: -1 })
+      .lean();
+
+    // Get all active referral partners for filtering
+    const ReferralPartner = require('../models/ReferralPartner');
+    const referralPartners = await ReferralPartner.find({ status: 'active' })
+      .select('firstName lastName _id')
+      .sort({ firstName: 1 })
       .lean();
 
     // Transform database orders to view format
@@ -679,6 +687,8 @@ const getOrdersManagement = async (req, res) => {
       email: order.buyer?.email || 'N/A',
       phone: order.buyer?.phone || 'N/A',
       amount: order.pricing?.total || 0,
+      subtotal: order.pricing?.subtotal || 0,
+      discount: order.pricing?.discount || 0,
       currency: order.pricing?.currency || 'AED',
       status: order.status || 'pending',
       industry: 'automotive',
@@ -690,12 +700,36 @@ const getOrdersManagement = async (req, res) => {
       paymentMethod: order.payment?.method || 'N/A',
       createdAt: order.createdAt,
       updatedAt: order.updatedAt,
+      // Referral information
+      hasReferral: !!(order.referral && order.referral.referralCode),
+      referral: order.referral ? {
+        code: order.referral.referralCode,
+        partnerId: order.referral.referralPartner?._id || order.referral.referralPartner,
+        partnerName: order.referral.referralPartner?.firstName 
+          ? `${order.referral.referralPartner.firstName} ${order.referral.referralPartner.lastName}`
+          : null,
+        discountRate: order.referral.discountRate || 0,
+        discountAmount: order.referral.discountAmount || 0,
+        commissionRate: order.referral.commissionRate || 0,
+        commissionAmount: order.referral.commissionAmount || 0,
+        commissionStatus: order.referral.commissionStatus || 'pending'
+      } : null
     }));
+
+    // Calculate referral stats for the page
+    const referralOrders = orders.filter(o => o.hasReferral);
+    const referralStats = {
+      totalReferralOrders: referralOrders.length,
+      totalDiscountGiven: referralOrders.reduce((sum, o) => sum + (o.referral?.discountAmount || 0), 0),
+      totalCommissions: referralOrders.reduce((sum, o) => sum + (o.referral?.commissionAmount || 0), 0)
+    };
 
     res.render('admin/orders', {
       title: 'Orders Management | PARTSFORM',
       activePage: 'orders',
       orders,
+      referralPartners,
+      referralStats
     });
   } catch (error) {
     console.error('Error in getOrdersManagement:', error);

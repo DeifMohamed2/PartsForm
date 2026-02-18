@@ -26,12 +26,14 @@ const getReferralDashboard = async (req, res) => {
     const currentMonth = now.getMonth() + 1;
     const currentYear = now.getFullYear();
 
+    // Basic stats
     const [
       totalPartners,
       activePartners,
       pendingCommissions,
       pendingApplications,
       monthCommissions,
+      allTimeCommissions,
     ] = await Promise.all([
       ReferralPartner.countDocuments({ status: { $ne: 'pending' } }),
       ReferralPartner.countDocuments({ status: 'active' }),
@@ -49,12 +51,115 @@ const getReferralDashboard = async (req, res) => {
             _id: null,
             total: { $sum: '$commissionAmount' },
             count: { $sum: 1 },
+            totalOrderValue: { $sum: '$orderSubtotal' },
+            totalDiscount: { $sum: '$buyerDiscountAmount' },
+          },
+        },
+      ]),
+      ReferralCommission.aggregate([
+        {
+          $group: {
+            _id: null,
+            total: { $sum: '$commissionAmount' },
+            count: { $sum: 1 },
+            totalOrderValue: { $sum: '$orderSubtotal' },
+            totalDiscount: { $sum: '$buyerDiscountAmount' },
+            paidTotal: {
+              $sum: {
+                $cond: [{ $eq: ['$status', 'paid'] }, '$commissionAmount', 0]
+              }
+            },
+            approvedTotal: {
+              $sum: {
+                $cond: [{ $eq: ['$status', 'approved'] }, '$commissionAmount', 0]
+              }
+            },
           },
         },
       ]),
     ]);
 
-    const monthlyStats = monthCommissions[0] || { total: 0, count: 0 };
+    // Top performing partners by commission
+    const topPartners = await ReferralCommission.aggregate([
+      {
+        $group: {
+          _id: '$referralPartner',
+          totalCommission: { $sum: '$commissionAmount' },
+          totalOrders: { $sum: 1 },
+          totalOrderValue: { $sum: '$orderSubtotal' },
+          avgOrderValue: { $avg: '$orderSubtotal' },
+        },
+      },
+      { $sort: { totalCommission: -1 } },
+      { $limit: 5 },
+      {
+        $lookup: {
+          from: 'referralpartners',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'partner',
+        },
+      },
+      { $unwind: '$partner' },
+      {
+        $project: {
+          _id: 1,
+          totalCommission: 1,
+          totalOrders: 1,
+          totalOrderValue: 1,
+          avgOrderValue: 1,
+          partnerName: { $concat: ['$partner.firstName', ' ', '$partner.lastName'] },
+          partnerEmail: '$partner.email',
+          partnerStatus: '$partner.status',
+        },
+      },
+    ]);
+
+    // Monthly trend data (last 6 months)
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);
+    
+    const monthlyTrend = await ReferralCommission.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: sixMonthsAgo }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            month: '$periodMonth',
+            year: '$periodYear',
+          },
+          totalCommission: { $sum: '$commissionAmount' },
+          totalOrders: { $sum: 1 },
+          totalOrderValue: { $sum: '$orderSubtotal' },
+        },
+      },
+      { $sort: { '_id.year': 1, '_id.month': 1 } },
+    ]);
+
+    // Commission status breakdown
+    const commissionStatusBreakdown = await ReferralCommission.aggregate([
+      {
+        $group: {
+          _id: '$status',
+          count: { $sum: 1 },
+          totalAmount: { $sum: '$commissionAmount' },
+        },
+      },
+    ]);
+
+    // Recent orders with referral
+    const recentReferralOrders = await ReferralCommission.find({})
+      .sort({ createdAt: -1 })
+      .limit(10)
+      .populate('referralPartner', 'firstName lastName')
+      .populate('buyer', 'firstName lastName companyName')
+      .lean();
+
+    const monthlyStats = monthCommissions[0] || { total: 0, count: 0, totalOrderValue: 0, totalDiscount: 0 };
+    const allTimeStats = allTimeCommissions[0] || { total: 0, count: 0, totalOrderValue: 0, totalDiscount: 0, paidTotal: 0, approvedTotal: 0 };
 
     res.render('admin/referrals/dashboard', {
       title: 'Referral Management',
@@ -67,7 +172,20 @@ const getReferralDashboard = async (req, res) => {
         pendingApplications,
         monthlyCommissionTotal: monthlyStats.total,
         monthlyReferralCount: monthlyStats.count,
+        monthlyOrderValue: monthlyStats.totalOrderValue,
+        monthlyDiscount: monthlyStats.totalDiscount,
+        allTimeCommission: allTimeStats.total,
+        allTimeReferrals: allTimeStats.count,
+        allTimeOrderValue: allTimeStats.totalOrderValue,
+        allTimeDiscount: allTimeStats.totalDiscount,
+        paidCommission: allTimeStats.paidTotal,
+        approvedCommission: allTimeStats.approvedTotal,
+        pendingCommissionAmount: allTimeStats.total - allTimeStats.paidTotal - allTimeStats.approvedTotal,
       },
+      topPartners,
+      monthlyTrend,
+      commissionStatusBreakdown,
+      recentReferralOrders,
       currentMonth,
       currentYear,
     });

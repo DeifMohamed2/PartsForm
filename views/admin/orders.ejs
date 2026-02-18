@@ -126,6 +126,70 @@
     color: var(--admin-text-muted);
     margin: 0.25rem 0 0;
   }
+
+  /* Referral Badge Styles */
+  .referral-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(168, 85, 247, 0.1));
+    color: #8b5cf6;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    border: 1px solid rgba(139, 92, 246, 0.2);
+  }
+  .referral-badge i { width: 12px; height: 12px; }
+  .referral-badge .discount-amount {
+    background: rgba(255,255,255,0.8);
+    padding: 1px 5px;
+    border-radius: 6px;
+    font-weight: 700;
+    color: #7c3aed;
+  }
+  
+  /* Referral Stats Row */
+  .referral-stats-row {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding: 1rem 1.5rem;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.08), rgba(168, 85, 247, 0.04));
+    border: 1px solid rgba(139, 92, 246, 0.15);
+    border-radius: var(--admin-radius-lg);
+  }
+  .referral-stat-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding-right: 1.5rem;
+    border-right: 1px solid rgba(139, 92, 246, 0.15);
+  }
+  .referral-stat-item:last-child { border-right: none; padding-right: 0; }
+  .referral-stat-item i { width: 18px; height: 18px; color: #8b5cf6; }
+  .referral-stat-item .stat-value { font-weight: 700; color: #7c3aed; }
+  .referral-stat-item .stat-label { font-size: 0.8rem; color: var(--admin-text-muted); }
+  
+  /* Amount cell with discount */
+  .amount-with-discount {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .amount-with-discount .original-amount {
+    text-decoration: line-through;
+    color: var(--admin-text-muted);
+    font-size: 0.75rem;
+  }
+  .amount-with-discount .final-amount {
+    font-weight: 600;
+    color: var(--admin-text-primary);
+  }
+  .amount-with-discount .discount-info {
+    font-size: 0.7rem;
+    color: #10b981;
+  }
 </style>
 </head>
 <body>
@@ -251,6 +315,27 @@
           </div>
         </div>
 
+        <!-- Referral Orders Stats -->
+        <% if (referralStats && referralStats.totalReferralOrders > 0) { %>
+        <div class="referral-stats-row">
+          <div class="referral-stat-item">
+            <i data-lucide="gift"></i>
+            <span class="stat-value"><%= referralStats.totalReferralOrders %></span>
+            <span class="stat-label">Referral Orders</span>
+          </div>
+          <div class="referral-stat-item">
+            <i data-lucide="percent"></i>
+            <span class="stat-value"><%= referralStats.totalDiscountGiven.toFixed(2) %> AED</span>
+            <span class="stat-label">Total Discounts Given</span>
+          </div>
+          <div class="referral-stat-item">
+            <i data-lucide="coins"></i>
+            <span class="stat-value"><%= referralStats.totalCommissions.toFixed(2) %> AED</span>
+            <span class="stat-label">Total Commissions</span>
+          </div>
+        </div>
+        <% } %>
+
         <!-- Filters -->
         <div class="orders-filters">
           <div class="filter-group">
@@ -273,6 +358,27 @@
               <option value="critical">Critical</option>
             </select>
           </div>
+          <div class="filter-divider"></div>
+          <div class="filter-group">
+            <span class="filter-label">Referral:</span>
+            <select id="filterReferral" class="filter-select">
+              <option value="">All Orders</option>
+              <option value="yes">With Referral</option>
+              <option value="no">Without Referral</option>
+            </select>
+          </div>
+          <% if (referralPartners && referralPartners.length > 0) { %>
+          <div class="filter-divider"></div>
+          <div class="filter-group">
+            <span class="filter-label">Partner:</span>
+            <select id="filterPartner" class="filter-select">
+              <option value="">All Partners</option>
+              <% referralPartners.forEach(function(partner) { %>
+              <option value="<%= partner._id %>"><%= partner.firstName %> <%= partner.lastName %></option>
+              <% }); %>
+            </select>
+          </div>
+          <% } %>
           <div class="filter-divider"></div>
           <div class="filter-group">
             <span class="filter-label">Date:</span>
@@ -329,7 +435,7 @@
                 <th>Date</th>
                 <th>Items</th>
                 <th>Amount</th>
-
+                <th>Referral</th>
                 <th>Priority</th>
                 <th>Status</th>
                 <th>Actions</th>
@@ -337,7 +443,7 @@
             </thead>
             <tbody id="ordersTableBody">
               <% orders.forEach(function(order) { %>
-              <tr data-order-id="<%= order.id %>" data-status="<%= order.status %>" data-industry="<%= order.industry %>" data-priority="<%= order.priority || 'normal' %>">
+              <tr data-order-id="<%= order.id %>" data-status="<%= order.status %>" data-industry="<%= order.industry %>" data-priority="<%= order.priority || 'normal' %>" data-has-referral="<%= order.hasReferral ? 'yes' : 'no' %>" data-partner-id="<%= order.referral?.partnerId || '' %>">
                 <td class="order-id-cell">
                   <a href="/admin/orders/<%= order.id %>"><%= order.id %></a>
                 </td>
@@ -355,8 +461,30 @@
                     <%= order.items %> parts
                   </span>
                 </td>
-                <td class="amount-cell">$<%= order.amount.toLocaleString() %></td>
-
+                <td class="amount-cell">
+                  <% if (order.hasReferral && order.referral && order.referral.discountAmount > 0) { %>
+                  <div class="amount-with-discount">
+                    <span class="original-amount"><%= order.currency %> <%= (order.subtotal || order.amount + (order.referral?.discountAmount || 0)).toLocaleString() %></span>
+                    <span class="final-amount"><%= order.currency %> <%= order.amount.toLocaleString() %></span>
+                    <span class="discount-info">-<%= order.referral.discountRate %>% referral</span>
+                  </div>
+                  <% } else { %>
+                  <%= order.currency %> <%= order.amount.toLocaleString() %>
+                  <% } %>
+                </td>
+                <td class="referral-cell">
+                  <% if (order.hasReferral && order.referral) { %>
+                  <div class="referral-badge" title="Partner: <%= order.referral.partnerName || 'Unknown' %>&#10;Code: <%= order.referral.code %>&#10;Discount: <%= order.referral.discountRate || 0 %>%&#10;Commission: <%= (order.referral.commissionAmount || 0).toFixed(2) %> AED">
+                    <i data-lucide="gift"></i>
+                    <span><%= order.referral.code %></span>
+                    <% if (order.referral.discountAmount && order.referral.discountAmount > 0) { %>
+                    <span class="discount-amount">-<%= order.referral.discountAmount.toFixed(0) %></span>
+                    <% } %>
+                  </div>
+                  <% } else { %>
+                  <span style="color: var(--admin-text-muted); font-size: 0.8rem;">—</span>
+                  <% } %>
+                </td>
                 <td>
                   <% var priority = order.priority || 'normal'; %>
                   <span class="priority-badge <%= priority %>">
@@ -456,29 +584,60 @@
     function applyFilters() {
       var status = document.getElementById('filterStatus').value;
       var priority = document.getElementById('filterPriority').value;
+      var referral = document.getElementById('filterReferral')?.value || '';
+      var partner = document.getElementById('filterPartner')?.value || '';
       var rows = document.querySelectorAll('#ordersTableBody tr');
       
       rows.forEach(function(row) {
         var rowStatus = row.dataset.status;
         var rowPriority = row.dataset.priority;
+        var rowHasReferral = row.dataset.hasReferral;
+        var rowPartnerId = row.dataset.partnerId;
         
         var statusMatch = !status || rowStatus === status;
         var priorityMatch = !priority || rowPriority === priority;
+        var referralMatch = !referral || rowHasReferral === referral;
+        var partnerMatch = !partner || rowPartnerId === partner;
         
-        row.style.display = (statusMatch && priorityMatch) ? '' : 'none';
+        row.style.display = (statusMatch && priorityMatch && referralMatch && partnerMatch) ? '' : 'none';
       });
+      
+      // Update visible count
+      updateVisibleCount();
+    }
+    
+    function updateVisibleCount() {
+      var visibleRows = document.querySelectorAll('#ordersTableBody tr:not([style*="display: none"])');
+      var totalRows = document.querySelectorAll('#ordersTableBody tr');
+      var countSpan = document.querySelector('.orders-count');
+      if (countSpan) {
+        countSpan.textContent = visibleRows.length + ' of ' + totalRows.length;
+      }
     }
 
     document.getElementById('filterStatus').addEventListener('change', applyFilters);
     document.getElementById('filterPriority').addEventListener('change', applyFilters);
+    if (document.getElementById('filterReferral')) {
+      document.getElementById('filterReferral').addEventListener('change', applyFilters);
+    }
+    if (document.getElementById('filterPartner')) {
+      document.getElementById('filterPartner').addEventListener('change', applyFilters);
+    }
 
     function clearFilters() {
       document.getElementById('filterStatus').value = '';
       document.getElementById('filterPriority').value = '';
       document.getElementById('filterDate').value = '';
       document.getElementById('ordersSearch').value = '';
+      if (document.getElementById('filterReferral')) {
+        document.getElementById('filterReferral').value = '';
+      }
+      if (document.getElementById('filterPartner')) {
+        document.getElementById('filterPartner').value = '';
+      }
       var rows = document.querySelectorAll('#ordersTableBody tr');
       rows.forEach(function(row) { row.style.display = ''; });
+      updateVisibleCount();
     }
 
     // Delete modal

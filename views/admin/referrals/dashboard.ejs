@@ -1,5 +1,313 @@
 <%- include('../partials/header') %>
 <link rel="stylesheet" href="/css/adminCSS/admin-referrals.css">
+<style>
+  /* Enhanced Dashboard Styles */
+  .referrals-dashboard-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  @media (max-width: 1200px) {
+    .referrals-dashboard-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* Analytics Card */
+  .analytics-card {
+    background: white;
+    border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius-xl);
+    overflow: hidden;
+  }
+  .analytics-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--admin-border);
+  }
+  .analytics-card-header h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--admin-text-primary);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .analytics-card-header h3 i { width: 18px; height: 18px; color: #8b5cf6; }
+  .analytics-card-body { padding: 1.5rem; }
+
+  /* Summary Stats Row */
+  .summary-stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  @media (max-width: 992px) {
+    .summary-stats-row { grid-template-columns: repeat(2, 1fr); }
+  }
+  .summary-stat-card {
+    background: white;
+    border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius-lg);
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .summary-stat-card.highlight {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.08), rgba(168, 85, 247, 0.04));
+    border-color: rgba(139, 92, 246, 0.2);
+  }
+  .summary-stat-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .summary-stat-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .summary-stat-icon i { width: 20px; height: 20px; }
+  .summary-stat-icon.purple { background: rgba(139, 92, 246, 0.12); color: #8b5cf6; }
+  .summary-stat-icon.green { background: rgba(16, 185, 129, 0.12); color: #10b981; }
+  .summary-stat-icon.blue { background: rgba(59, 130, 246, 0.12); color: #3b82f6; }
+  .summary-stat-icon.orange { background: rgba(245, 158, 11, 0.12); color: #f59e0b; }
+  .summary-stat-icon.teal { background: rgba(20, 184, 166, 0.12); color: #14b8a6; }
+  .summary-stat-value {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--admin-text-primary);
+    line-height: 1;
+  }
+  .summary-stat-value small { font-size: 0.9rem; font-weight: 600; color: var(--admin-text-muted); }
+  .summary-stat-label {
+    font-size: 0.8rem;
+    color: var(--admin-text-muted);
+  }
+
+  /* Top Partners Table */
+  .top-partners-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .top-partners-table th {
+    text-align: left;
+    padding: 0.75rem 1rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--admin-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--admin-border);
+  }
+  .top-partners-table td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--admin-border);
+  }
+  .top-partners-table tr:last-child td { border-bottom: none; }
+  .partner-rank {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.8rem;
+  }
+  .partner-rank.gold { background: linear-gradient(135deg, #fbbf24, #f59e0b); color: white; }
+  .partner-rank.silver { background: linear-gradient(135deg, #94a3b8, #64748b); color: white; }
+  .partner-rank.bronze { background: linear-gradient(135deg, #d97706, #b45309); color: white; }
+  .partner-rank.default { background: #f1f5f9; color: #64748b; }
+  .partner-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .partner-info .name { font-weight: 600; color: var(--admin-text-primary); }
+  .partner-info .email { font-size: 0.75rem; color: var(--admin-text-muted); }
+  .partner-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    text-align: right;
+  }
+  .partner-stats .value { font-weight: 700; color: var(--admin-text-primary); }
+  .partner-stats .label { font-size: 0.7rem; color: var(--admin-text-muted); }
+
+  /* Commission Breakdown */
+  .commission-breakdown {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .breakdown-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .breakdown-bar-container {
+    flex: 1;
+    height: 8px;
+    background: #f1f5f9;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .breakdown-bar {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.5s ease;
+  }
+  .breakdown-bar.paid { background: linear-gradient(90deg, #10b981, #059669); }
+  .breakdown-bar.approved { background: linear-gradient(90deg, #3b82f6, #2563eb); }
+  .breakdown-bar.pending { background: linear-gradient(90deg, #f59e0b, #d97706); }
+  .breakdown-bar.rejected { background: linear-gradient(90deg, #ef4444, #dc2626); }
+  .breakdown-label {
+    width: 80px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .breakdown-label .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+  .breakdown-label .dot.paid { background: #10b981; }
+  .breakdown-label .dot.approved { background: #3b82f6; }
+  .breakdown-label .dot.pending { background: #f59e0b; }
+  .breakdown-label .dot.rejected { background: #ef4444; }
+  .breakdown-value {
+    width: 100px;
+    text-align: right;
+    font-weight: 600;
+    font-size: 0.85rem;
+  }
+
+  /* Recent Orders */
+  .recent-orders-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .recent-order-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+    background: #f8fafc;
+    border-radius: 10px;
+    transition: all 0.2s ease;
+  }
+  .recent-order-item:hover { background: #f1f5f9; }
+  .recent-order-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #8b5cf6, #a855f7);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+  }
+  .recent-order-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .recent-order-info .order-number { font-weight: 600; color: var(--admin-text-primary); font-size: 0.85rem; }
+  .recent-order-info .customer-name { font-size: 0.75rem; color: var(--admin-text-muted); }
+  .recent-order-amount {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .recent-order-amount .amount { font-weight: 700; color: var(--admin-text-primary); }
+  .recent-order-amount .commission { font-size: 0.7rem; color: #10b981; }
+
+  /* Monthly Trend Chart */
+  .trend-chart-container {
+    height: 200px;
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    padding: 1rem 0;
+  }
+  .trend-bar-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .trend-bar {
+    width: 100%;
+    max-width: 40px;
+    background: linear-gradient(180deg, #8b5cf6, #a855f7);
+    border-radius: 6px 6px 0 0;
+    min-height: 20px;
+    transition: height 0.5s ease;
+  }
+  .trend-bar-label {
+    font-size: 0.7rem;
+    color: var(--admin-text-muted);
+    font-weight: 500;
+  }
+  .trend-bar-value {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--admin-text-primary);
+  }
+
+  /* All-Time Stats */
+  .all-time-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+  .all-time-stat {
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 10px;
+    text-align: center;
+  }
+  .all-time-stat .value {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--admin-text-primary);
+  }
+  .all-time-stat .value small { font-size: 0.75rem; color: var(--admin-text-muted); }
+  .all-time-stat .label {
+    font-size: 0.75rem;
+    color: var(--admin-text-muted);
+    margin-top: 4px;
+  }
+
+  /* Empty State */
+  .analytics-empty {
+    text-align: center;
+    padding: 2rem;
+    color: var(--admin-text-muted);
+  }
+  .analytics-empty i { width: 48px; height: 48px; margin-bottom: 1rem; opacity: 0.5; }
+  .analytics-empty p { font-size: 0.9rem; }
+</style>
 </head>
 
 <body>
@@ -13,88 +321,262 @@
         <!-- Page Header -->
         <div class="referrals-page-header">
           <div>
-            <h2>Referral Management</h2>
-            <p class="page-subtitle">Manage referral partners, track commissions, and process payouts</p>
+            <h2>Referral Analytics Dashboard</h2>
+            <p class="page-subtitle">Track partner performance, commissions, and revenue impact</p>
           </div>
         </div>
 
-        <!-- Info Banner -->
-        <div class="referrals-info-banner">
-          <div class="info-icon">
-            <i data-lucide="info"></i>
+        <!-- Summary Stats Row -->
+        <div class="summary-stats-row">
+          <div class="summary-stat-card highlight">
+            <div class="summary-stat-header">
+              <div class="summary-stat-icon purple">
+                <i data-lucide="trending-up"></i>
+              </div>
+            </div>
+            <div class="summary-stat-value"><%= (stats.monthlyCommissionTotal || 0).toFixed(2) %> <small>AED</small></div>
+            <div class="summary-stat-label">This Month's Commission</div>
           </div>
-          <div class="info-content">
-            <h4>Monthly Commission Review</h4>
-            <p>Commissions are reviewed and processed at the end of each month. All referrals are verified before payout to prevent fraudulent activity. Current period: 
-              <strong><%= new Date(0, currentMonth - 1).toLocaleString('en', { month: 'long' }) %> <%= currentYear %></strong>
-            </p>
+          <div class="summary-stat-card">
+            <div class="summary-stat-header">
+              <div class="summary-stat-icon green">
+                <i data-lucide="shopping-bag"></i>
+              </div>
+            </div>
+            <div class="summary-stat-value"><%= stats.monthlyReferralCount %></div>
+            <div class="summary-stat-label">Referral Orders This Month</div>
+          </div>
+          <div class="summary-stat-card">
+            <div class="summary-stat-header">
+              <div class="summary-stat-icon blue">
+                <i data-lucide="users"></i>
+              </div>
+            </div>
+            <div class="summary-stat-value"><%= stats.activePartners %> <small>/ <%= stats.totalPartners %></small></div>
+            <div class="summary-stat-label">Active Partners</div>
+          </div>
+          <div class="summary-stat-card">
+            <div class="summary-stat-header">
+              <div class="summary-stat-icon orange">
+                <i data-lucide="clock"></i>
+              </div>
+            </div>
+            <div class="summary-stat-value"><%= stats.pendingCommissions %></div>
+            <div class="summary-stat-label">Pending Review</div>
           </div>
         </div>
 
-        <!-- Stats Grid -->
-        <div class="referrals-stats-grid">
-          <div class="referrals-stat-card">
-            <div class="referrals-stat-icon blue">
-              <i data-lucide="users"></i>
+        <!-- Main Dashboard Grid -->
+        <div class="referrals-dashboard-grid">
+          <!-- Left Column -->
+          <div class="dashboard-left">
+            <!-- Top Performing Partners -->
+            <div class="analytics-card" style="margin-bottom: 1.5rem;">
+              <div class="analytics-card-header">
+                <h3><i data-lucide="trophy"></i> Top Performing Partners</h3>
+                <a href="/admin/referrals/partners" class="referrals-link-btn">View All</a>
+              </div>
+              <div class="analytics-card-body" style="padding: 0;">
+                <% if (topPartners && topPartners.length > 0) { %>
+                <table class="top-partners-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 50px;">#</th>
+                      <th>Partner</th>
+                      <th style="text-align: right;">Orders</th>
+                      <th style="text-align: right;">Order Value</th>
+                      <th style="text-align: right;">Commission</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% topPartners.forEach(function(partner, index) { %>
+                    <tr>
+                      <td>
+                        <div class="partner-rank <%= index === 0 ? 'gold' : index === 1 ? 'silver' : index === 2 ? 'bronze' : 'default' %>">
+                          <%= index + 1 %>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="partner-info">
+                          <span class="name"><%= partner.partnerName %></span>
+                          <span class="email"><%= partner.partnerEmail %></span>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="partner-stats">
+                          <span class="value"><%= partner.totalOrders %></span>
+                          <span class="label">orders</span>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="partner-stats">
+                          <span class="value"><%= (partner.totalOrderValue || 0).toFixed(0) %></span>
+                          <span class="label">AED</span>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="partner-stats">
+                          <span class="value" style="color: #10b981;"><%= (partner.totalCommission || 0).toFixed(2) %></span>
+                          <span class="label">AED</span>
+                        </div>
+                      </td>
+                    </tr>
+                    <% }); %>
+                  </tbody>
+                </table>
+                <% } else { %>
+                <div class="analytics-empty">
+                  <i data-lucide="users"></i>
+                  <p>No partner data yet. Create partners and wait for referral orders.</p>
+                </div>
+                <% } %>
+              </div>
             </div>
-            <div class="referrals-stat-content">
-              <div class="referrals-stat-value"><%= stats.totalPartners %></div>
-              <div class="referrals-stat-label">Total Partners</div>
+
+            <!-- Monthly Trend -->
+            <div class="analytics-card">
+              <div class="analytics-card-header">
+                <h3><i data-lucide="bar-chart-3"></i> Commission Trend (Last 6 Months)</h3>
+              </div>
+              <div class="analytics-card-body">
+                <% if (monthlyTrend && monthlyTrend.length > 0) { %>
+                <% 
+                  var maxCommission = Math.max(...monthlyTrend.map(m => m.totalCommission || 0), 1);
+                  var monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                %>
+                <div class="trend-chart-container">
+                  <% monthlyTrend.forEach(function(month) { %>
+                  <div class="trend-bar-wrapper">
+                    <div class="trend-bar-value"><%= (month.totalCommission || 0).toFixed(0) %></div>
+                    <div class="trend-bar" style="height: <%= Math.max((month.totalCommission / maxCommission) * 150, 20) %>px;"></div>
+                    <div class="trend-bar-label"><%= monthNames[month._id.month - 1] %></div>
+                  </div>
+                  <% }); %>
+                </div>
+                <% } else { %>
+                <div class="analytics-empty">
+                  <i data-lucide="bar-chart-3"></i>
+                  <p>No trend data available yet.</p>
+                </div>
+                <% } %>
+              </div>
             </div>
           </div>
 
-          <div class="referrals-stat-card">
-            <div class="referrals-stat-icon green">
-              <i data-lucide="user-check"></i>
+          <!-- Right Column -->
+          <div class="dashboard-right">
+            <!-- Commission Status Breakdown -->
+            <div class="analytics-card" style="margin-bottom: 1.5rem;">
+              <div class="analytics-card-header">
+                <h3><i data-lucide="pie-chart"></i> Commission Status</h3>
+              </div>
+              <div class="analytics-card-body">
+                <% 
+                  var statusMap = {};
+                  if (commissionStatusBreakdown) {
+                    commissionStatusBreakdown.forEach(function(s) {
+                      statusMap[s._id] = s;
+                    });
+                  }
+                  var totalAmount = (statusMap.paid?.totalAmount || 0) + (statusMap.approved?.totalAmount || 0) + (statusMap.pending?.totalAmount || 0) + (statusMap.rejected?.totalAmount || 0);
+                  totalAmount = totalAmount || 1;
+                %>
+                <div class="commission-breakdown">
+                  <div class="breakdown-item">
+                    <div class="breakdown-label"><span class="dot paid"></span> Paid</div>
+                    <div class="breakdown-bar-container">
+                      <div class="breakdown-bar paid" style="width: <%= ((statusMap.paid?.totalAmount || 0) / totalAmount * 100).toFixed(1) %>%;"></div>
+                    </div>
+                    <div class="breakdown-value"><%= (statusMap.paid?.totalAmount || 0).toFixed(2) %> AED</div>
+                  </div>
+                  <div class="breakdown-item">
+                    <div class="breakdown-label"><span class="dot approved"></span> Approved</div>
+                    <div class="breakdown-bar-container">
+                      <div class="breakdown-bar approved" style="width: <%= ((statusMap.approved?.totalAmount || 0) / totalAmount * 100).toFixed(1) %>%;"></div>
+                    </div>
+                    <div class="breakdown-value"><%= (statusMap.approved?.totalAmount || 0).toFixed(2) %> AED</div>
+                  </div>
+                  <div class="breakdown-item">
+                    <div class="breakdown-label"><span class="dot pending"></span> Pending</div>
+                    <div class="breakdown-bar-container">
+                      <div class="breakdown-bar pending" style="width: <%= ((statusMap.pending?.totalAmount || 0) / totalAmount * 100).toFixed(1) %>%;"></div>
+                    </div>
+                    <div class="breakdown-value"><%= (statusMap.pending?.totalAmount || 0).toFixed(2) %> AED</div>
+                  </div>
+                  <div class="breakdown-item">
+                    <div class="breakdown-label"><span class="dot rejected"></span> Rejected</div>
+                    <div class="breakdown-bar-container">
+                      <div class="breakdown-bar rejected" style="width: <%= ((statusMap.rejected?.totalAmount || 0) / totalAmount * 100).toFixed(1) %>%;"></div>
+                    </div>
+                    <div class="breakdown-value"><%= (statusMap.rejected?.totalAmount || 0).toFixed(2) %> AED</div>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div class="referrals-stat-content">
-              <div class="referrals-stat-value"><%= stats.activePartners %></div>
-              <div class="referrals-stat-label">Active Partners</div>
-            </div>
-          </div>
 
-          <div class="referrals-stat-card">
-            <div class="referrals-stat-icon orange">
-              <i data-lucide="clock"></i>
+            <!-- All-Time Stats -->
+            <div class="analytics-card" style="margin-bottom: 1.5rem;">
+              <div class="analytics-card-header">
+                <h3><i data-lucide="infinity"></i> All-Time Statistics</h3>
+              </div>
+              <div class="analytics-card-body">
+                <div class="all-time-stats">
+                  <div class="all-time-stat">
+                    <div class="value"><%= stats.allTimeReferrals || 0 %></div>
+                    <div class="label">Total Referral Orders</div>
+                  </div>
+                  <div class="all-time-stat">
+                    <div class="value"><%= (stats.allTimeOrderValue || 0).toFixed(0) %> <small>AED</small></div>
+                    <div class="label">Total Order Value</div>
+                  </div>
+                  <div class="all-time-stat">
+                    <div class="value"><%= (stats.allTimeCommission || 0).toFixed(2) %> <small>AED</small></div>
+                    <div class="label">Total Commission</div>
+                  </div>
+                  <div class="all-time-stat">
+                    <div class="value"><%= (stats.allTimeDiscount || 0).toFixed(2) %> <small>AED</small></div>
+                    <div class="label">Total Discounts Given</div>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div class="referrals-stat-content">
-              <div class="referrals-stat-value"><%= stats.pendingCommissions %></div>
-              <div class="referrals-stat-label">Pending Commissions</div>
-            </div>
-          </div>
 
-          <div class="referrals-stat-card">
-            <div class="referrals-stat-icon purple">
-              <i data-lucide="trending-up"></i>
-            </div>
-            <div class="referrals-stat-content">
-              <div class="referrals-stat-value"><%= stats.monthlyReferralCount %></div>
-              <div class="referrals-stat-label">This Month Referrals</div>
+            <!-- Recent Referral Orders -->
+            <div class="analytics-card">
+              <div class="analytics-card-header">
+                <h3><i data-lucide="clock"></i> Recent Referral Orders</h3>
+                <a href="/admin/referrals/commissions" class="referrals-link-btn">View All</a>
+              </div>
+              <div class="analytics-card-body">
+                <% if (recentReferralOrders && recentReferralOrders.length > 0) { %>
+                <div class="recent-orders-list">
+                  <% recentReferralOrders.slice(0, 5).forEach(function(order) { %>
+                  <div class="recent-order-item">
+                    <div class="recent-order-avatar">
+                      <%= order.referralPartner ? (order.referralPartner.firstName?.charAt(0) || '?') + (order.referralPartner.lastName?.charAt(0) || '') : '?' %>
+                    </div>
+                    <div class="recent-order-info">
+                      <span class="order-number"><%= order.orderNumber %></span>
+                      <span class="customer-name">
+                        <%= order.buyer ? (order.buyer.companyName || order.buyer.firstName + ' ' + order.buyer.lastName) : order.buyerName %>
+                      </span>
+                    </div>
+                    <div class="recent-order-amount">
+                      <span class="amount"><%= (order.orderSubtotal || 0).toFixed(0) %> AED</span>
+                      <span class="commission">+<%= (order.commissionAmount || 0).toFixed(2) %> commission</span>
+                    </div>
+                  </div>
+                  <% }); %>
+                </div>
+                <% } else { %>
+                <div class="analytics-empty">
+                  <i data-lucide="shopping-bag"></i>
+                  <p>No referral orders yet.</p>
+                </div>
+                <% } %>
+              </div>
             </div>
           </div>
-
-          <div class="referrals-stat-card">
-            <div class="referrals-stat-icon teal">
-              <i data-lucide="coins"></i>
-            </div>
-            <div class="referrals-stat-content">
-              <div class="referrals-stat-value"><%= stats.monthlyCommissionTotal.toFixed(2) %> <small>AED</small></div>
-              <div class="referrals-stat-label">Monthly Commission</div>
-            </div>
-          </div>
-
-          <% if (stats.pendingApplications > 0) { %>
-          <div class="referrals-stat-card highlight">
-            <div class="referrals-stat-icon amber">
-              <i data-lucide="user-plus"></i>
-            </div>
-            <div class="referrals-stat-content">
-              <div class="referrals-stat-value"><%= stats.pendingApplications %></div>
-              <div class="referrals-stat-label">Pending Applications</div>
-            </div>
-            <a href="/admin/referrals/applications" class="stat-action-link">Review →</a>
-          </div>
-          <% } %>
         </div>
 
         <!-- Quick Actions Section -->
