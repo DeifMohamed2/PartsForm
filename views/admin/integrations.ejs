@@ -2082,9 +2082,13 @@
     
     // Cleanup stale/invalid sync history records
     async function cleanupSyncHistory(integrationId) {
-      if (!confirm('This will delete all stale sync records (pending/interrupted with no data) older than 1 hour. Continue?')) {
-        return;
-      }
+      const confirmed = await showConfirm('This will delete all stale sync records (pending/interrupted with no data) older than 1 hour. Continue?', {
+        title: 'Cleanup Sync Records',
+        type: 'warning',
+        confirmText: 'Cleanup',
+        confirmClass: 'danger'
+      });
+      if (!confirmed) return;
       
       try {
         const response = await fetch(`/admin/api/sync-history/${integrationId}/cleanup`, {
@@ -2098,18 +2102,18 @@
         
         if (data.success) {
           if (data.deletedCount > 0) {
-            alert(`Cleaned up ${data.deletedCount} stale record(s)`);
+            showToast(`Cleaned up ${data.deletedCount} stale record(s)`, 'success');
           } else {
-            alert('No stale records found to clean up');
+            showToast('No stale records found to clean up', 'info');
           }
           // Reload history
           loadSyncHistory(integrationId);
         } else {
-          alert('Cleanup failed: ' + (data.error || 'Unknown error'));
+          showAlert('Cleanup failed: ' + (data.error || 'Unknown error'), 'error');
         }
       } catch (error) {
         console.error('Cleanup error:', error);
-        alert('Cleanup failed: ' + error.message);
+        showAlert('Cleanup failed: ' + error.message, 'error');
       }
     }
     
@@ -2173,7 +2177,7 @@
     function showSyncDetails(title, message) {
       // Replace escaped newlines
       const formattedMsg = message.replace(/\\n/g, '\n');
-      alert(title + '\n\n' + formattedMsg);
+      showAlert(formattedMsg, 'info', title);
     }
     
     // Helper functions

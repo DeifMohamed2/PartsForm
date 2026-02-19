@@ -330,9 +330,8 @@
     }
     
     async function deleteCode(codeId, codeName) {
-      if (!confirm(`Are you sure you want to delete the code "${codeName}"? This action cannot be undone.`)) {
-        return;
-      }
+      const confirmed = await showDeleteConfirm(`the code "${codeName}"`);
+      if (!confirmed) return;
       
       try {
         const response = await fetch(`/admin/api/referrals/codes/${codeId}`, {
@@ -343,11 +342,11 @@
         if (data.success) {
           loadCodes(); // Reload the list
         } else {
-          alert('Failed to delete code: ' + data.message);
+          showAlert('Failed to delete code: ' + data.message, 'error');
         }
       } catch (error) {
         console.error('Error deleting code:', error);
-        alert('Failed to delete code');
+        showAlert('Failed to delete code', 'error');
       }
     }
     

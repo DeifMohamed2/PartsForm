@@ -308,11 +308,11 @@
         if (response.ok) {
           window.location.href = '/admin/users';
         } else {
-          alert('Failed to delete user');
+          showAlert('Failed to delete user', 'error');
         }
       }).catch(function(err) {
         console.error('Error deleting user:', err);
-        alert('Failed to delete user');
+        showAlert('Failed to delete user', 'error');
       });
     }
 
@@ -336,12 +336,12 @@
           window.location.href = '/admin/users/' + userId;
         } else {
           return response.json().then(function(data) {
-            alert(data.error || 'Failed to update user');
+            showAlert(data.error || 'Failed to update user', 'error');
           });
         }
       }).catch(function(err) {
         console.error('Error updating user:', err);
-        alert('Failed to update user');
+        showAlert('Failed to update user', 'error');
       });
     });
 

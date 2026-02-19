@@ -20,6 +20,7 @@ const {
   createOrder,
   updateOrder,
   updateOrderStatus,
+  addTimelineNote,
   getOrderStats,
   getTicketsManagement,
   getTicketDetails,
@@ -143,6 +144,8 @@ const {
   approveApplication,
   rejectApplication,
   getPendingApplicationsCount,
+  // Utility
+  resyncAllPartnerStats,
 } = require('../controllers/referralController');
 
 // Configure multer for file uploads (memory storage for parts)
@@ -254,6 +257,7 @@ router.post(
 );
 router.put('/api/orders/:id', requirePermission(PERMISSIONS.WRITE, PERMISSIONS.MANAGE_ORDERS), updateOrder);
 router.put('/api/orders/:id/status', requirePermission(PERMISSIONS.WRITE, PERMISSIONS.MANAGE_ORDERS), updateOrderStatus);
+router.post('/api/orders/:id/timeline', requirePermission(PERMISSIONS.WRITE, PERMISSIONS.MANAGE_ORDERS), addTimelineNote);
 router.delete('/api/orders/:id', requirePermission(PERMISSIONS.DELETE, PERMISSIONS.MANAGE_ORDERS), deleteOrder);
 
 // Parts search API for order creation
@@ -430,5 +434,8 @@ router.get('/api/referrals/applications/count', getPendingApplicationsCount);
 router.get('/api/referrals/applications/:id', getApplicationDetails);
 router.post('/api/referrals/applications/:id/approve', requirePermission(PERMISSIONS.MANAGE_USERS), approveApplication);
 router.post('/api/referrals/applications/:id/reject', requirePermission(PERMISSIONS.MANAGE_USERS), rejectApplication);
+
+// Utility endpoints
+router.post('/api/referrals/resync-stats', requirePermission(PERMISSIONS.WRITE), resyncAllPartnerStats);
 
 module.exports = router;

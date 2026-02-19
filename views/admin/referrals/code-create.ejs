@@ -733,8 +733,14 @@
     });
 
     // Reset form
-    document.getElementById('resetBtn').addEventListener('click', function() {
-      if (confirm('Are you sure you want to reset the form? All entered data will be lost.')) {
+    document.getElementById('resetBtn').addEventListener('click', async function() {
+      const confirmed = await showConfirm('Are you sure you want to reset the form? All entered data will be lost.', {
+        title: 'Reset Form',
+        type: 'warning',
+        confirmText: 'Reset',
+        confirmClass: 'danger'
+      });
+      if (confirmed) {
         document.getElementById('codeForm').reset();
         document.getElementById('codeInput').value = '';
         document.getElementById('commissionSlider').value = <%= partner.commissionRate || 5 %>;

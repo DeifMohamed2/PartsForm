@@ -401,20 +401,86 @@
     const timeline = document.getElementById('order-timeline');
     if (!timeline) return;
     
+    // Helper function to get icon and label for timeline events
+    function getTimelineEventDetails(event) {
+      const isNote = event.isNote;
+      const status = event.status || 'default';
+      
+      // Note type configurations
+      const noteTypes = {
+        update: { icon: 'refresh-cw', label: 'Update', color: '#3b82f6' },
+        delay: { icon: 'clock', label: 'Delay Notice', color: '#f59e0b' },
+        issue: { icon: 'alert-triangle', label: 'Issue', color: '#ef4444' },
+        info: { icon: 'info', label: 'Information', color: '#6366f1' },
+        action: { icon: 'alert-circle', label: 'Action Required', color: '#8b5cf6' },
+        resolution: { icon: 'check-square', label: 'Resolved', color: '#10b981' },
+        note: { icon: 'message-square', label: 'Note', color: '#6366f1' }
+      };
+      
+      // Status configurations
+      const statusTypes = {
+        pending: { icon: 'clock', label: 'Pending', color: '#f59e0b' },
+        processing: { icon: 'settings', label: 'Processing', color: '#8b5cf6' },
+        shipped: { icon: 'truck', label: 'Shipped', color: '#3b82f6' },
+        delivered: { icon: 'check-circle', label: 'Delivered', color: '#10b981' },
+        completed: { icon: 'check-circle', label: 'Completed', color: '#10b981' },
+        cancelled: { icon: 'x-circle', label: 'Cancelled', color: '#ef4444' }
+      };
+      
+      if (isNote) {
+        return noteTypes[status] || noteTypes.note;
+      }
+      return statusTypes[status] || { icon: 'circle', label: status, color: '#64748b' };
+    }
+    
     // If order has timeline data from backend, use it
     if (order.timeline && order.timeline.length > 0) {
       let html = '';
-      order.timeline.forEach((event, index) => {
-        const isLatest = index === order.timeline.length - 1;
+      const reverseTimeline = [...order.timeline].reverse();
+      
+      reverseTimeline.forEach((event, index) => {
+        const isLatest = index === 0;
+        const details = getTimelineEventDetails(event);
+        const isNote = event.isNote;
+        const noteType = event.status || 'note';
+        
+        // Determine class based on event type
+        let itemClass = 'timeline-item';
+        if (isNote) {
+          itemClass += ` note-${noteType}`;
+        } else if (isLatest && event.status !== 'cancelled') {
+          itemClass += ' active';
+        } else if (event.status === 'cancelled') {
+          itemClass += ' cancelled';
+        } else {
+          itemClass += ' completed';
+        }
+        
+        const formattedDate = formatDateTime(event.timestamp);
+        const displayTitle = isNote ? (event.message.substring(0, 50) + (event.message.length > 50 ? '...' : '')) : details.label;
+        
         html += `
-          <div class="timeline-item ${isLatest ? 'active' : 'completed'}">
-            <div class="timeline-item-title">${event.status.charAt(0).toUpperCase() + event.status.slice(1)}</div>
-            <div class="timeline-item-date">${formatDate(event.timestamp)}</div>
-            <div class="timeline-item-desc">${event.message}</div>
+          <div class="${itemClass}">
+            <div class="timeline-item-content">
+              <div class="timeline-item-header">
+                <div class="timeline-item-title">
+                  <i data-lucide="${details.icon}" style="color: ${details.color};"></i>
+                  ${isNote ? details.label : displayTitle}
+                </div>
+                ${isNote ? `<span class="timeline-note-badge ${noteType}">${details.label}</span>` : ''}
+              </div>
+              <p class="timeline-item-desc">${event.message}</p>
+              <div class="timeline-item-meta">
+                <span><i data-lucide="calendar"></i> ${formattedDate.date}</span>
+                <span><i data-lucide="clock"></i> ${formattedDate.time}</span>
+                ${event.updatedBy ? `<span><i data-lucide="user"></i> ${event.updatedBy}</span>` : ''}
+              </div>
+            </div>
           </div>
         `;
       });
       timeline.innerHTML = html;
+      if (typeof lucide !== 'undefined') lucide.createIcons();
       return;
     }
 
@@ -424,11 +490,11 @@
     const currentStatusIndex = statusOrder.indexOf(order.status);
 
     const timelineSteps = [
-      { status: 'pending', title: 'Order Placed', desc: 'Your order has been received' },
-      { status: 'processing', title: 'Processing', desc: 'We are preparing your order' },
-      { status: 'shipped', title: 'Shipped', desc: 'Your order is on the way' },
-      { status: 'delivered', title: 'Delivered', desc: 'Your order has been delivered' },
-      { status: 'completed', title: 'Completed', desc: 'Order completed successfully' }
+      { status: 'pending', title: 'Order Placed', desc: 'Your order has been received and is being reviewed', icon: 'clock' },
+      { status: 'processing', title: 'Processing', desc: 'We are preparing your order for shipment', icon: 'settings' },
+      { status: 'shipped', title: 'Shipped', desc: 'Your order is on its way to you', icon: 'truck' },
+      { status: 'delivered', title: 'Delivered', desc: 'Your order has been delivered successfully', icon: 'check-circle' },
+      { status: 'completed', title: 'Completed', desc: 'Order completed successfully. Thank you!', icon: 'check-circle' }
     ];
 
     let html = '';
@@ -445,29 +511,71 @@
       if (isCompleted) className += ' completed';
       if (isActive && !isCancelled) className += ' active';
 
-      const date = index === 0 ? formatDate(orderDate) : (isCompleted ? formatDate(orderDate) : 'Pending');
+      const date = index === 0 ? formatDateTime(orderDate) : (isCompleted ? formatDateTime(orderDate) : { date: 'Pending', time: '' });
 
       html += `
         <div class="${className}">
-          <div class="timeline-item-title">${step.title}</div>
-          <div class="timeline-item-date">${date}</div>
-          <div class="timeline-item-desc">${step.desc}</div>
+          <div class="timeline-item-content">
+            <div class="timeline-item-header">
+              <div class="timeline-item-title">
+                <i data-lucide="${step.icon}"></i>
+                ${step.title}
+              </div>
+            </div>
+            <p class="timeline-item-desc">${step.desc}</p>
+            <div class="timeline-item-meta">
+              <span><i data-lucide="calendar"></i> ${date.date}</span>
+              ${date.time ? `<span><i data-lucide="clock"></i> ${date.time}</span>` : ''}
+            </div>
+          </div>
         </div>
       `;
     });
 
     if (order.status === 'cancelled') {
       const cancellation = order.cancellation || {};
+      const cancelDate = formatDateTime(cancellation.cancelledAt || orderDate);
       html += `
         <div class="timeline-item cancelled">
-          <div class="timeline-item-title" style="color: #dc2626;">Order Cancelled</div>
-          <div class="timeline-item-date">${formatDate(cancellation.cancelledAt || orderDate)}</div>
-          <div class="timeline-item-desc">${cancellation.reason || 'This order has been cancelled'}</div>
+          <div class="timeline-item-content" style="border-color: #fca5a5; background: #fef2f2;">
+            <div class="timeline-item-header">
+              <div class="timeline-item-title" style="color: #dc2626;">
+                <i data-lucide="x-circle" style="color: #dc2626;"></i>
+                Order Cancelled
+              </div>
+            </div>
+            <p class="timeline-item-desc">${cancellation.reason || 'This order has been cancelled'}</p>
+            <div class="timeline-item-meta">
+              <span><i data-lucide="calendar"></i> ${cancelDate.date}</span>
+              <span><i data-lucide="clock"></i> ${cancelDate.time}</span>
+              ${cancellation.cancelledBy ? `<span><i data-lucide="user"></i> ${cancellation.cancelledBy}</span>` : ''}
+            </div>
+          </div>
         </div>
       `;
     }
 
     timeline.innerHTML = html;
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+  
+  // Helper function to format date and time separately
+  function formatDateTime(dateInput) {
+    if (!dateInput) return { date: 'N/A', time: '' };
+    const date = new Date(dateInput);
+    if (isNaN(date.getTime())) return { date: 'N/A', time: '' };
+    
+    const dateStr = date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric' 
+    });
+    const timeStr = date.toLocaleTimeString('en-US', { 
+      hour: '2-digit', 
+      minute: '2-digit'
+    });
+    
+    return { date: dateStr, time: timeStr };
   }
 
   // ====================================

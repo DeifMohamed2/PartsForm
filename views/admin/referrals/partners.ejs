@@ -392,7 +392,13 @@
     }
 
     async function regenerateCode(id) {
-      if (!confirm('Are you sure you want to regenerate this referral code? The old code will no longer work.')) return;
+      const confirmed = await showConfirm('Are you sure you want to regenerate this referral code? The old code will no longer work.', {
+        title: 'Regenerate Code',
+        type: 'warning',
+        confirmText: 'Regenerate',
+        confirmClass: 'primary'
+      });
+      if (!confirmed) return;
       
       showLoading();
       try {
@@ -416,7 +422,13 @@
 
     async function updateStatus(id, status) {
       const action = status === 'active' ? 'activate' : 'suspend';
-      if (!confirm(`Are you sure you want to ${action} this partner?`)) return;
+      const confirmed = await showConfirm(`Are you sure you want to ${action} this partner?`, {
+        title: action === 'activate' ? 'Activate Partner' : 'Suspend Partner',
+        type: action === 'activate' ? 'confirm' : 'warning',
+        confirmText: action === 'activate' ? 'Activate' : 'Suspend',
+        confirmClass: action === 'activate' ? 'success' : 'danger'
+      });
+      if (!confirmed) return;
       
       showLoading();
       try {
@@ -440,7 +452,8 @@
     }
 
     async function deletePartner(id, name) {
-      if (!confirm(`Are you sure you want to delete ${name}? This cannot be undone.`)) return;
+      const confirmed = await showDeleteConfirm(name);
+      if (!confirmed) return;
       
       showLoading();
       try {

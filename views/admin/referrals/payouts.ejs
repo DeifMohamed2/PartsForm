@@ -179,22 +179,33 @@
   <div class="referrals-modal" id="processModal">
     <div class="referrals-modal-content">
       <div class="referrals-modal-header">
-        <h3>Process Payout</h3>
+        <div class="referrals-modal-header-title">
+          <div class="referrals-modal-header-icon">
+            <i data-lucide="check-circle"></i>
+          </div>
+          <div>
+            <h3>Process Payout</h3>
+            <p>Mark this payout as completed</p>
+          </div>
+        </div>
         <button class="referrals-modal-close" onclick="closeModal()">&times;</button>
       </div>
       <div class="referrals-modal-body">
         <div class="referrals-form-group">
           <label class="referrals-form-label">Payment Reference</label>
-          <input type="text" id="paymentRef" class="referrals-form-input" placeholder="Transaction ID or reference">
+          <input type="text" id="paymentRef" class="referrals-form-input" placeholder="e.g. TXN-123456 or Bank Reference">
         </div>
         <div class="referrals-form-group">
-          <label class="referrals-form-label">Notes</label>
-          <textarea id="paymentNotes" class="referrals-form-input" rows="3" placeholder="Optional notes"></textarea>
+          <label class="referrals-form-label">Notes (Optional)</label>
+          <textarea id="paymentNotes" class="referrals-form-input" rows="3" placeholder="Add any additional notes about this payment..."></textarea>
         </div>
       </div>
       <div class="referrals-modal-footer">
         <button class="referrals-btn referrals-btn-secondary" onclick="closeModal()">Cancel</button>
-        <button class="referrals-btn referrals-btn-primary" onclick="submitProcess()">Mark as Paid</button>
+        <button class="referrals-btn referrals-btn-primary" onclick="submitProcess()">
+          <i data-lucide="check"></i>
+          Mark as Paid
+        </button>
       </div>
     </div>
   </div>
@@ -235,8 +246,8 @@
                 </div>
               </div>
               <div class="referrals-ready-card-amount">
-                <div class="amount">${p.totalCommission.toFixed(2)} AED</div>
-                <div class="count">${p.commissionsCount} commission(s)</div>
+                <div class="amount">${p.totalCommission.toFixed(2)} <small style="font-size: 0.75rem; font-weight: 600;">AED</small></div>
+                <div class="count">${p.commissionsCount} commission${p.commissionsCount > 1 ? 's' : ''}</div>
               </div>
               <button class="referrals-btn referrals-btn-primary" onclick="createPayout('${p._id}')">
                 <i data-lucide="plus-circle"></i>
@@ -299,7 +310,13 @@
     }
 
     async function createPayout(partnerId) {
-      if (!confirm('Create payout batch for this partner?')) return;
+      const confirmed = await showConfirm('Create payout batch for this partner?', {
+        title: 'Create Payout',
+        type: 'confirm',
+        confirmText: 'Create Payout',
+        confirmClass: 'success'
+      });
+      if (!confirmed) return;
       const month = document.getElementById('monthSelect').value;
       const year = document.getElementById('yearSelect').value;
       try {
@@ -322,11 +339,12 @@
       currentPayoutId = id;
       document.getElementById('paymentRef').value = '';
       document.getElementById('paymentNotes').value = '';
-      document.getElementById('processModal').classList.add('active');
+      document.getElementById('processModal').classList.add('show');
+      lucide.createIcons();
     }
 
     function closeModal() {
-      document.getElementById('processModal').classList.remove('active');
+      document.getElementById('processModal').classList.remove('show');
       currentPayoutId = null;
     }
 

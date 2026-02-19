@@ -234,7 +234,7 @@
     
     // Download Receipt
     function downloadReceipt(paymentId) {
-      alert('Downloading receipt for ' + paymentId + '... (UI Demo)');
+      showToast('Downloading receipt for ' + paymentId + '... (UI Demo)', 'info');
     }
     
     // Refund Modal
@@ -254,7 +254,7 @@
     function confirmRefund() {
       var amount = document.getElementById('refundAmount').value;
       var reason = document.getElementById('refundReason').value;
-      alert('Refund of $' + amount + ' processed for ' + currentRefundPayment + '! (UI Demo)');
+      showToast('Refund of $' + amount + ' processed for ' + currentRefundPayment + '! (UI Demo)', 'success');
       closeModal();
     }
     

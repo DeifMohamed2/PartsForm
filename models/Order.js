@@ -104,6 +104,15 @@ const timelineEventSchema = new mongoose.Schema({
     updatedBy: {
         type: String,
         default: 'System'
+    },
+    isNote: {
+        type: Boolean,
+        default: false
+    },
+    noteType: {
+        type: String,
+        enum: ['update', 'delay', 'issue', 'info', 'action', 'resolution', 'custom', null],
+        default: null
     }
 }, {
     _id: true

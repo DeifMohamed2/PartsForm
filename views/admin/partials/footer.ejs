@@ -1,10 +1,450 @@
   <!-- Responsive CSS - Must load last to override page-specific styles -->
   <link rel="stylesheet" href="/css/adminCSS/admin-responsive.css">
   
+  <!-- Global Modal System -->
+  <div id="globalModal" class="global-modal-overlay">
+    <div class="global-modal">
+      <div class="global-modal-icon" id="globalModalIcon"></div>
+      <h3 class="global-modal-title" id="globalModalTitle">Title</h3>
+      <p class="global-modal-message" id="globalModalMessage">Message</p>
+      <div class="global-modal-actions" id="globalModalActions"></div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <style>
+    /* Global Modal */
+    .global-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.2s ease;
+    }
+    .global-modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    .global-modal {
+      background: var(--admin-bg-secondary, #fff);
+      border-radius: 16px;
+      padding: 2rem;
+      max-width: 420px;
+      width: 90%;
+      text-align: center;
+      transform: scale(0.9) translateY(20px);
+      transition: transform 0.2s ease;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+    }
+    .global-modal-overlay.active .global-modal {
+      transform: scale(1) translateY(0);
+    }
+    .global-modal-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.25rem;
+    }
+    .global-modal-icon svg {
+      width: 32px;
+      height: 32px;
+    }
+    .global-modal-icon.info { background: rgba(59, 130, 246, 0.12); color: #3b82f6; }
+    .global-modal-icon.success { background: rgba(16, 185, 129, 0.12); color: #10b981; }
+    .global-modal-icon.warning { background: rgba(245, 158, 11, 0.12); color: #f59e0b; }
+    .global-modal-icon.error { background: rgba(239, 68, 68, 0.12); color: #ef4444; }
+    .global-modal-icon.confirm { background: rgba(139, 92, 246, 0.12); color: #8b5cf6; }
+    .global-modal-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--admin-text-primary, #1e293b);
+      margin: 0 0 0.5rem;
+    }
+    .global-modal-message {
+      font-size: 0.9rem;
+      color: var(--admin-text-muted, #64748b);
+      margin: 0 0 1.5rem;
+      line-height: 1.5;
+    }
+    .global-modal-actions {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+    }
+    .global-modal-btn {
+      padding: 0.75rem 1.5rem;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s ease;
+      min-width: 100px;
+    }
+    .global-modal-btn.primary {
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      color: white;
+    }
+    .global-modal-btn.primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    }
+    .global-modal-btn.secondary {
+      background: var(--admin-bg-tertiary, #f1f5f9);
+      color: var(--admin-text-primary, #1e293b);
+      border: 1px solid var(--admin-border, #e2e8f0);
+    }
+    .global-modal-btn.secondary:hover {
+      background: var(--admin-bg-primary, #e2e8f0);
+    }
+    .global-modal-btn.danger {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: white;
+    }
+    .global-modal-btn.danger:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+    }
+    .global-modal-btn.success {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+    }
+    .global-modal-btn.success:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+    }
+
+    /* Toast Notifications */
+    .toast-container {
+      position: fixed;
+      top: 1.5rem;
+      right: 1.5rem;
+      z-index: 10001;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      max-width: 380px;
+    }
+    .toast {
+      background: var(--admin-bg-secondary, #fff);
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+      border: 1px solid var(--admin-border, #e2e8f0);
+      animation: toastSlideIn 0.3s ease;
+      position: relative;
+    }
+    .toast.hiding {
+      animation: toastSlideOut 0.3s ease forwards;
+    }
+    @keyframes toastSlideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes toastSlideOut {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(100%); opacity: 0; }
+    }
+    .toast-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .toast-icon svg { width: 14px; height: 14px; }
+    .toast-icon.success { background: rgba(16, 185, 129, 0.12); color: #10b981; }
+    .toast-icon.error { background: rgba(239, 68, 68, 0.12); color: #ef4444; }
+    .toast-icon.warning { background: rgba(245, 158, 11, 0.12); color: #f59e0b; }
+    .toast-icon.info { background: rgba(59, 130, 246, 0.12); color: #3b82f6; }
+    .toast-content { flex: 1; min-width: 0; }
+    .toast-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--admin-text-primary, #1e293b);
+      margin: 0 0 0.15rem;
+    }
+    .toast-message {
+      font-size: 0.8rem;
+      color: var(--admin-text-muted, #64748b);
+      margin: 0;
+      line-height: 1.4;
+    }
+    .toast-close {
+      background: none;
+      border: none;
+      color: var(--admin-text-muted, #64748b);
+      cursor: pointer;
+      padding: 0;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.5;
+      transition: opacity 0.2s;
+    }
+    .toast-close:hover { opacity: 1; }
+    .toast-close svg { width: 14px; height: 14px; }
+  </style>
+
   <!-- Admin Scripts -->
   <script>
     // Initialize Lucide Icons
     lucide.createIcons();
+
+    // ========================================
+    // Global Modal & Toast System
+    // ========================================
+    
+    const GlobalModal = {
+      overlay: null,
+      resolvePromise: null,
+      
+      init() {
+        this.overlay = document.getElementById('globalModal');
+        // Close on overlay click
+        this.overlay?.addEventListener('click', (e) => {
+          if (e.target === this.overlay) this.close(false);
+        });
+        // Close on Escape
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && this.overlay?.classList.contains('active')) {
+            this.close(false);
+          }
+        });
+      },
+      
+      show(options) {
+        return new Promise((resolve) => {
+          this.resolvePromise = resolve;
+          const { type = 'info', title, message, buttons = [] } = options;
+          
+          // Set icon
+          const iconEl = document.getElementById('globalModalIcon');
+          const icons = {
+            info: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>',
+            success: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>',
+            warning: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>',
+            error: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>',
+            confirm: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>',
+            delete: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>'
+          };
+          iconEl.innerHTML = icons[type] || icons.info;
+          iconEl.className = 'global-modal-icon ' + (type === 'delete' ? 'error' : type);
+          
+          // Set content
+          document.getElementById('globalModalTitle').textContent = title || 'Notice';
+          document.getElementById('globalModalMessage').textContent = message || '';
+          
+          // Set buttons
+          const actionsEl = document.getElementById('globalModalActions');
+          actionsEl.innerHTML = buttons.map(btn => 
+            `<button class="global-modal-btn ${btn.class || 'primary'}" data-value="${btn.value !== undefined ? btn.value : true}">${btn.text}</button>`
+          ).join('');
+          
+          // Add click handlers
+          actionsEl.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('click', () => {
+              const val = btn.dataset.value;
+              this.close(val === 'true' ? true : val === 'false' ? false : val);
+            });
+          });
+          
+          // Show modal
+          this.overlay.classList.add('active');
+          document.body.style.overflow = 'hidden';
+        });
+      },
+      
+      close(value) {
+        this.overlay?.classList.remove('active');
+        document.body.style.overflow = '';
+        if (this.resolvePromise) {
+          this.resolvePromise(value);
+          this.resolvePromise = null;
+        }
+      }
+    };
+    
+    // Initialize on DOM ready
+    document.addEventListener('DOMContentLoaded', () => GlobalModal.init());
+    if (document.readyState !== 'loading') GlobalModal.init();
+    
+    // ========================================
+    // Helper Functions (Global)
+    // ========================================
+    
+    /**
+     * Show alert modal
+     * @param {string} message - Message to display
+     * @param {string} type - 'info', 'success', 'warning', 'error'
+     * @param {string} title - Optional title
+     */
+    async function showAlert(message, type = 'info', title = null) {
+      const titles = { info: 'Information', success: 'Success', warning: 'Warning', error: 'Error' };
+      return GlobalModal.show({
+        type,
+        title: title || titles[type] || 'Notice',
+        message,
+        buttons: [{ text: 'OK', class: type === 'error' ? 'danger' : type === 'success' ? 'success' : 'primary', value: true }]
+      });
+    }
+    
+    /**
+     * Show confirm modal
+     * @param {string} message - Message to display
+     * @param {object} options - { title, type, confirmText, cancelText, confirmClass }
+     * @returns {Promise<boolean>}
+     */
+    async function showConfirm(message, options = {}) {
+      const { title = 'Confirm Action', type = 'confirm', confirmText = 'Confirm', cancelText = 'Cancel', confirmClass = 'primary' } = options;
+      return GlobalModal.show({
+        type,
+        title,
+        message,
+        buttons: [
+          { text: cancelText, class: 'secondary', value: false },
+          { text: confirmText, class: confirmClass, value: true }
+        ]
+      });
+    }
+    
+    /**
+     * Show delete confirmation
+     * @param {string} itemName - Name of item being deleted
+     * @returns {Promise<boolean>}
+     */
+    async function showDeleteConfirm(itemName = 'this item') {
+      return GlobalModal.show({
+        type: 'delete',
+        title: 'Delete Confirmation',
+        message: `Are you sure you want to delete ${itemName}? This action cannot be undone.`,
+        buttons: [
+          { text: 'Cancel', class: 'secondary', value: false },
+          { text: 'Delete', class: 'danger', value: true }
+        ]
+      });
+    }
+    
+    /**
+     * Show prompt modal with input field
+     * @param {string} message - Message to display
+     * @param {object} options - { title, type, placeholder, defaultValue, inputType, confirmText, cancelText }
+     * @returns {Promise<string|null>} - Returns input value or null if cancelled
+     */
+    async function showPrompt(message, options = {}) {
+      const { title = 'Input Required', type = 'info', placeholder = '', defaultValue = '', inputType = 'text', confirmText = 'Submit', cancelText = 'Cancel', required = false } = options;
+      
+      return new Promise((resolve) => {
+        const overlay = document.getElementById('globalModal');
+        const iconEl = document.getElementById('globalModalIcon');
+        const icons = {
+          info: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>',
+          warning: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>'
+        };
+        iconEl.innerHTML = icons[type] || icons.info;
+        iconEl.className = 'global-modal-icon ' + type;
+        
+        document.getElementById('globalModalTitle').textContent = title;
+        document.getElementById('globalModalMessage').innerHTML = message + `
+          <div style="margin-top: 1rem;">
+            ${inputType === 'textarea' 
+              ? `<textarea id="promptInput" placeholder="${placeholder}" style="width: 100%; padding: 0.75rem; border: 1px solid var(--admin-border, #e2e8f0); border-radius: 8px; font-size: 0.9rem; resize: vertical; min-height: 80px; font-family: inherit;">${defaultValue}</textarea>`
+              : `<input type="${inputType}" id="promptInput" placeholder="${placeholder}" value="${defaultValue}" style="width: 100%; padding: 0.75rem; border: 1px solid var(--admin-border, #e2e8f0); border-radius: 8px; font-size: 0.9rem;">`
+            }
+          </div>`;
+        
+        const actionsEl = document.getElementById('globalModalActions');
+        actionsEl.innerHTML = `
+          <button class="global-modal-btn secondary" id="promptCancel">${cancelText}</button>
+          <button class="global-modal-btn primary" id="promptConfirm">${confirmText}</button>
+        `;
+        
+        const closeModal = (value) => {
+          overlay.classList.remove('active');
+          document.body.style.overflow = '';
+          resolve(value);
+        };
+        
+        document.getElementById('promptCancel').onclick = () => closeModal(null);
+        document.getElementById('promptConfirm').onclick = () => {
+          const val = document.getElementById('promptInput').value;
+          if (required && !val.trim()) {
+            document.getElementById('promptInput').style.borderColor = '#ef4444';
+            return;
+          }
+          closeModal(val);
+        };
+        
+        overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        
+        setTimeout(() => document.getElementById('promptInput')?.focus(), 100);
+      });
+    }
+    
+    /**
+     * Show toast notification
+     * @param {string} message - Message to display
+     * @param {string} type - 'success', 'error', 'warning', 'info'
+     * @param {number} duration - Duration in ms (default 4000)
+     */
+    function showToast(message, type = 'info', duration = 4000) {
+      const container = document.getElementById('toastContainer');
+      if (!container) return;
+      
+      const icons = {
+        success: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>',
+        error: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>',
+        warning: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>',
+        info: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>'
+      };
+      
+      const titles = { success: 'Success', error: 'Error', warning: 'Warning', info: 'Info' };
+      
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.innerHTML = `
+        <div class="toast-icon ${type}">${icons[type] || icons.info}</div>
+        <div class="toast-content">
+          <p class="toast-title">${titles[type] || 'Notice'}</p>
+          <p class="toast-message">${message}</p>
+        </div>
+        <button class="toast-close"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+      `;
+      
+      const closeBtn = toast.querySelector('.toast-close');
+      const removeToast = () => {
+        toast.classList.add('hiding');
+        setTimeout(() => toast.remove(), 300);
+      };
+      
+      closeBtn.addEventListener('click', removeToast);
+      container.appendChild(toast);
+      
+      if (duration > 0) {
+        setTimeout(removeToast, duration);
+      }
+      
+      return toast;
+    }
   </script>
 </body>
 </html>

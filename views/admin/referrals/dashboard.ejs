@@ -641,6 +641,17 @@
             </div>
             <i data-lucide="chevron-right" class="referrals-quick-action-arrow"></i>
           </a>
+
+          <button type="button" onclick="resyncStats()" class="referrals-quick-action-card" id="resyncBtn" style="width: 100%; text-align: left; border: none; cursor: pointer;">
+            <div class="referrals-quick-action-icon teal">
+              <i data-lucide="refresh-cw"></i>
+            </div>
+            <div class="referrals-quick-action-content">
+              <h4>Resync Partner Stats</h4>
+              <p>Recalculate all partner statistics from commission data</p>
+            </div>
+            <i data-lucide="chevron-right" class="referrals-quick-action-arrow"></i>
+          </button>
         </div>
       </div>
     </main>
@@ -650,6 +661,68 @@
   <script>
     if (typeof lucide !== 'undefined') {
       lucide.createIcons();
+    }
+
+    async function resyncStats() {
+      const btn = document.getElementById('resyncBtn');
+      const originalContent = btn.innerHTML;
+      
+      btn.innerHTML = `
+        <div class="referrals-quick-action-icon teal">
+          <i data-lucide="loader-2" class="animate-spin"></i>
+        </div>
+        <div class="referrals-quick-action-content">
+          <h4>Resyncing...</h4>
+          <p>Please wait while we recalculate partner statistics</p>
+        </div>
+      `;
+      btn.disabled = true;
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+
+      try {
+        const response = await fetch('/admin/api/referrals/resync-stats', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          btn.innerHTML = `
+            <div class="referrals-quick-action-icon green">
+              <i data-lucide="check-circle"></i>
+            </div>
+            <div class="referrals-quick-action-content">
+              <h4>Resync Complete!</h4>
+              <p>${data.data.updated} partners updated successfully</p>
+            </div>
+          `;
+          if (typeof lucide !== 'undefined') lucide.createIcons();
+          
+          // Reload after 2 seconds
+          setTimeout(() => window.location.reload(), 2000);
+        } else {
+          throw new Error(data.message || 'Failed to resync');
+        }
+      } catch (error) {
+        console.error('Resync error:', error);
+        btn.innerHTML = `
+          <div class="referrals-quick-action-icon" style="background: rgba(239, 68, 68, 0.12); color: #ef4444;">
+            <i data-lucide="x-circle"></i>
+          </div>
+          <div class="referrals-quick-action-content">
+            <h4>Resync Failed</h4>
+            <p>${error.message}</p>
+          </div>
+        `;
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+        
+        setTimeout(() => {
+          btn.innerHTML = originalContent;
+          btn.disabled = false;
+          if (typeof lucide !== 'undefined') lucide.createIcons();
+        }, 3000);
+      }
     }
   </script>
 </body>

@@ -1180,21 +1180,34 @@
             <div class="details-card">
               <div class="details-card-header">
                 <h3><i data-lucide="activity"></i> Activity Timeline</h3>
+                <button class="admin-btn admin-btn-sm admin-btn-primary" onclick="showAddNoteModal()" style="padding: 0.35rem 0.75rem; font-size: 0.75rem;">
+                  <i data-lucide="plus" style="width: 14px; height: 14px;"></i>
+                  Add Note
+                </button>
               </div>
               <div class="details-card-body">
-                <div class="activity-log">
+                <div class="activity-log" id="activityLog">
                   <% if (order.timeline && order.timeline.length > 0) { %>
                     <% order.timeline.slice().reverse().forEach((event, index) => { %>
                     <div class="activity-item">
                       <div class="activity-icon-wrapper">
-                        <div class="activity-icon <%= event.status || 'default' %>">
+                        <div class="activity-icon <%= event.isNote ? (event.status || 'note') : (event.status || 'default') %>" style="<%= event.isNote ? 'background: linear-gradient(135deg, #6366f1, #8b5cf6);' : '' %>">
                           <i data-lucide="<%= 
-                            event.status === 'pending' ? 'clock' :
-                            event.status === 'processing' ? 'settings' :
-                            event.status === 'shipped' ? 'truck' :
-                            event.status === 'delivered' ? 'check-circle' :
-                            event.status === 'cancelled' ? 'x-circle' :
-                            'info'
+                            event.isNote ? (
+                              event.status === 'delay' ? 'clock-alert' :
+                              event.status === 'issue' ? 'alert-triangle' :
+                              event.status === 'info' ? 'info' :
+                              event.status === 'action' ? 'alert-circle' :
+                              event.status === 'resolution' ? 'check-square' :
+                              'message-square'
+                            ) : (
+                              event.status === 'pending' ? 'clock' :
+                              event.status === 'processing' ? 'settings' :
+                              event.status === 'shipped' ? 'truck' :
+                              event.status === 'delivered' ? 'check-circle' :
+                              event.status === 'cancelled' ? 'x-circle' :
+                              'info'
+                            )
                           %>"></i>
                         </div>
                       </div>
@@ -1452,8 +1465,100 @@
     </div>
   </div>
 
+  <!-- Add Timeline Note Modal -->
+  <div class="status-modal-overlay" id="addNoteModal">
+    <div class="status-modal" style="max-width: 500px;">
+      <h3 style="display: flex; align-items: center; gap: 0.5rem;">
+        <i data-lucide="message-square-plus" style="width: 20px; height: 20px; color: #6366f1;"></i>
+        Add Timeline Note
+      </h3>
+      <p style="font-size: 0.85rem; color: var(--admin-text-muted); margin-bottom: 1.25rem;">
+        Add a custom note to the order timeline. This will be visible to the customer.
+      </p>
+      
+      <div style="margin-bottom: 1.25rem;">
+        <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--admin-text-primary); margin-bottom: 0.5rem;">
+          Note Type
+        </label>
+        <div class="status-options" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin-bottom: 0;">
+          <label class="status-option selected" data-note-type="update" style="padding: 0.6rem 0.75rem;">
+            <input type="radio" name="noteType" value="update" checked>
+            <div class="status-option-icon" style="background: rgba(59, 130, 246, 0.12); width: 28px; height: 28px;">
+              <i data-lucide="refresh-cw" style="color: #3b82f6; width: 14px; height: 14px;"></i>
+            </div>
+            <div class="status-option-content">
+              <div class="status-option-label" style="font-size: 0.8rem;">Update</div>
+            </div>
+          </label>
+          <label class="status-option" data-note-type="delay" style="padding: 0.6rem 0.75rem;">
+            <input type="radio" name="noteType" value="delay">
+            <div class="status-option-icon" style="background: rgba(245, 158, 11, 0.12); width: 28px; height: 28px;">
+              <i data-lucide="clock" style="color: #f59e0b; width: 14px; height: 14px;"></i>
+            </div>
+            <div class="status-option-content">
+              <div class="status-option-label" style="font-size: 0.8rem;">Delay</div>
+            </div>
+          </label>
+          <label class="status-option" data-note-type="issue" style="padding: 0.6rem 0.75rem;">
+            <input type="radio" name="noteType" value="issue">
+            <div class="status-option-icon" style="background: rgba(239, 68, 68, 0.12); width: 28px; height: 28px;">
+              <i data-lucide="alert-triangle" style="color: #ef4444; width: 14px; height: 14px;"></i>
+            </div>
+            <div class="status-option-content">
+              <div class="status-option-label" style="font-size: 0.8rem;">Issue</div>
+            </div>
+          </label>
+          <label class="status-option" data-note-type="info" style="padding: 0.6rem 0.75rem;">
+            <input type="radio" name="noteType" value="info">
+            <div class="status-option-icon" style="background: rgba(99, 102, 241, 0.12); width: 28px; height: 28px;">
+              <i data-lucide="info" style="color: #6366f1; width: 14px; height: 14px;"></i>
+            </div>
+            <div class="status-option-content">
+              <div class="status-option-label" style="font-size: 0.8rem;">Info</div>
+            </div>
+          </label>
+          <label class="status-option" data-note-type="action" style="padding: 0.6rem 0.75rem;">
+            <input type="radio" name="noteType" value="action">
+            <div class="status-option-icon" style="background: rgba(139, 92, 246, 0.12); width: 28px; height: 28px;">
+              <i data-lucide="alert-circle" style="color: #8b5cf6; width: 14px; height: 14px;"></i>
+            </div>
+            <div class="status-option-content">
+              <div class="status-option-label" style="font-size: 0.8rem;">Action</div>
+            </div>
+          </label>
+          <label class="status-option" data-note-type="resolution" style="padding: 0.6rem 0.75rem;">
+            <input type="radio" name="noteType" value="resolution">
+            <div class="status-option-icon" style="background: rgba(16, 185, 129, 0.12); width: 28px; height: 28px;">
+              <i data-lucide="check-square" style="color: #10b981; width: 14px; height: 14px;"></i>
+            </div>
+            <div class="status-option-content">
+              <div class="status-option-label" style="font-size: 0.8rem;">Resolved</div>
+            </div>
+          </label>
+        </div>
+      </div>
+      
+      <div style="margin-bottom: 1.5rem;">
+        <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--admin-text-primary); margin-bottom: 0.5rem;">
+          Message <span style="color: #ef4444;">*</span>
+        </label>
+        <textarea id="noteMessage" placeholder="Enter a detailed message for the customer..." 
+          style="width: 100%; min-height: 100px; padding: 0.75rem 1rem; background: var(--admin-bg-primary); border: 1px solid var(--admin-border); border-radius: 10px; color: var(--admin-text-primary); font-size: 0.9rem; resize: vertical;"></textarea>
+      </div>
+      
+      <div class="status-modal-actions">
+        <button class="admin-btn admin-btn-secondary" onclick="hideAddNoteModal()">Cancel</button>
+        <button class="admin-btn admin-btn-primary" onclick="submitTimelineNote()" id="submitNoteBtn">
+          <i data-lucide="send" style="width: 14px; height: 14px;"></i>
+          Add Note
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const statusModal = document.getElementById('statusModal');
+    const addNoteModal = document.getElementById('addNoteModal');
     
     function showStatusModal() {
       statusModal.classList.add('active');
@@ -1466,9 +1571,73 @@
       statusModal.classList.remove('active');
     }
     
+    function showAddNoteModal() {
+      addNoteModal.classList.add('active');
+      document.getElementById('noteMessage').value = '';
+      document.getElementById('noteMessage').focus();
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+    }
+    
+    function hideAddNoteModal() {
+      addNoteModal.classList.remove('active');
+    }
+    
+    // Note type selection
+    document.querySelectorAll('#addNoteModal .status-option').forEach(option => {
+      option.addEventListener('click', function() {
+        document.querySelectorAll('#addNoteModal .status-option').forEach(o => o.classList.remove('selected'));
+        this.classList.add('selected');
+        this.querySelector('input').checked = true;
+      });
+    });
+    
+    async function submitTimelineNote() {
+      const message = document.getElementById('noteMessage').value.trim();
+      const noteType = document.querySelector('#addNoteModal input[name="noteType"]:checked')?.value || 'update';
+      
+      if (!message) {
+        showAlert('Please enter a message', 'warning');
+        return;
+      }
+      
+      const submitBtn = document.getElementById('submitNoteBtn');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i data-lucide="loader-2" class="animate-spin"></i> Adding...';
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+      
+      try {
+        const response = await fetch('/admin/api/orders/<%- order.id %>/timeline', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message, noteType })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          // Reload to show the new note
+          window.location.reload();
+        } else {
+          showAlert(data.error || 'Failed to add note', 'error');
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i data-lucide="send"></i> Add Note';
+          if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+      } catch (error) {
+        console.error('Error adding note:', error);
+        showAlert('Failed to add timeline note', 'error');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i data-lucide="send"></i> Add Note';
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      }
+    }
+    
     document.querySelectorAll('.status-option').forEach(option => {
       option.addEventListener('click', function() {
-        document.querySelectorAll('.status-option').forEach(o => o.classList.remove('selected'));
+        const parent = this.closest('.status-options');
+        parent.querySelectorAll('.status-option').forEach(o => o.classList.remove('selected'));
         this.classList.add('selected');
         this.querySelector('input').checked = true;
       });
@@ -1481,7 +1650,7 @@
     async function updateOrderStatus() {
       const selectedStatus = document.querySelector('input[name="newStatus"]:checked');
       if (!selectedStatus) {
-        alert('Please select a status');
+        showAlert('Please select a status', 'warning');
         return;
       }
       
@@ -1497,18 +1666,22 @@
         if (data.success) {
           window.location.reload();
         } else {
-          alert(data.error || 'Failed to update status');
+          showAlert(data.error || 'Failed to update status', 'error');
         }
       } catch (error) {
         console.error('Error updating status:', error);
-        alert('Failed to update order status');
+        showAlert('Failed to update order status', 'error');
       }
     }
     
     async function cancelOrder() {
-      if (!confirm('Are you sure you want to cancel this order? This action cannot be undone.')) {
-        return;
-      }
+      const confirmed = await showConfirm('Are you sure you want to cancel this order? This action cannot be undone.', {
+        title: 'Cancel Order',
+        type: 'warning',
+        confirmText: 'Cancel Order',
+        confirmClass: 'danger'
+      });
+      if (!confirmed) return;
       
       try {
         const response = await fetch('/admin/api/orders/<%= order.id %>/status', {
@@ -1522,11 +1695,11 @@
         if (data.success) {
           window.location.reload();
         } else {
-          alert(data.error || 'Failed to cancel order');
+          showAlert(data.error || 'Failed to cancel order', 'error');
         }
       } catch (error) {
         console.error('Error cancelling order:', error);
-        alert('Failed to cancel order');
+        showAlert('Failed to cancel order', 'error');
       }
     }
     
@@ -1534,8 +1707,15 @@
       if (e.target === this) hideStatusModal();
     });
     
+    addNoteModal.addEventListener('click', function(e) {
+      if (e.target === this) hideAddNoteModal();
+    });
+    
     document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape') hideStatusModal();
+      if (e.key === 'Escape') {
+        hideStatusModal();
+        hideAddNoteModal();
+      }
     });
   </script>
 

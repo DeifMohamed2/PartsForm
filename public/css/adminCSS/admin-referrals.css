@@ -1683,7 +1683,7 @@
    ================================ */
 .referrals-ready-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
     gap: 1rem;
     margin-bottom: 1.5rem;
 }
@@ -1696,7 +1696,7 @@
 
 .referrals-ready-card {
     display: flex;
-    align-items: center;
+    flex-direction: column;
     gap: 1rem;
     padding: 1.25rem;
     background: var(--admin-bg-secondary);
@@ -1725,16 +1725,32 @@
 }
 
 .referrals-ready-card-info {
-    flex: 1;
-    min-width: 0;
     display: flex;
     align-items: center;
     gap: 1rem;
+    flex: 1;
+    min-width: 0;
+}
+
+.referrals-ready-card-info .referrals-partner-avatar {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 0.9rem;
+    flex-shrink: 0;
 }
 
 .referrals-ready-card-details {
     flex: 1;
     min-width: 0;
+    overflow: hidden;
 }
 
 .referrals-ready-card-details h4,
@@ -1743,21 +1759,31 @@
     font-weight: 600;
     color: var(--admin-text-primary);
     margin: 0 0 0.25rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .referrals-ready-card-details p,
 .referrals-ready-card-info p {
     font-size: 0.8rem;
     color: var(--admin-text-muted);
-    margin: 0 0 0.5rem;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .referrals-ready-card-amount {
-    text-align: right;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--admin-border);
 }
 
 .referrals-ready-card-amount .amount {
-    font-size: 1.25rem;
+    font-size: 1.35rem;
     font-weight: 700;
     color: #10b981;
 }
@@ -1765,6 +1791,11 @@
 .referrals-ready-card-amount .count {
     font-size: 0.75rem;
     color: var(--admin-text-muted);
+}
+
+.referrals-ready-card > .referrals-btn {
+    width: 100%;
+    justify-content: center;
 }
 
 .referrals-create-payout-btn {
@@ -2244,20 +2275,21 @@
 }
 
 /* ================================
-   Modal
+   Modal - Enhanced Design
    ================================ */
 .referrals-modal {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(4px);
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(8px);
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 9999;
     opacity: 0;
     visibility: hidden;
-    transition: all 0.2s ease;
+    transition: all 0.25s ease;
+    padding: 1rem;
 }
 
 .referrals-modal.show {
@@ -2267,42 +2299,88 @@
 
 .referrals-modal-content {
     background: var(--admin-bg-primary);
-    border-radius: 16px;
+    border-radius: 20px;
     width: 100%;
-    max-width: 480px;
+    max-width: 440px;
     max-height: 90vh;
     overflow: auto;
-    transform: scale(0.95);
-    transition: transform 0.2s ease;
+    transform: scale(0.9) translateY(20px);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.05);
 }
 
 .referrals-modal.show .referrals-modal-content {
-    transform: scale(1);
+    transform: scale(1) translateY(0);
 }
 
 .referrals-modal-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 1.25rem 1.5rem;
-    border-bottom: 1px solid var(--admin-border);
+    padding: 1.5rem 1.75rem 1rem;
+    border-bottom: none;
+}
+
+.referrals-modal-header-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.referrals-modal-header-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.05));
+    color: #10b981;
+}
+
+.referrals-modal-header-icon svg {
+    width: 22px;
+    height: 22px;
+}
+
+.referrals-modal-header-icon.warning {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.05));
+    color: #f59e0b;
+}
+
+.referrals-modal-header-icon.danger {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(239, 68, 68, 0.05));
+    color: #ef4444;
+}
+
+.referrals-modal-header-icon.primary {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(59, 130, 246, 0.05));
+    color: #3b82f6;
 }
 
 .referrals-modal-header h3 {
-    font-size: 1.1rem;
-    font-weight: 600;
+    font-size: 1.15rem;
+    font-weight: 700;
     color: var(--admin-text-primary);
     margin: 0;
+    letter-spacing: -0.01em;
+}
+
+.referrals-modal-header p {
+    font-size: 0.8rem;
+    color: var(--admin-text-muted);
+    margin: 0.15rem 0 0;
 }
 
 .referrals-modal-close {
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
     border: none;
-    background: var(--admin-bg-tertiary);
-    border-radius: 8px;
+    background: transparent;
+    border-radius: 10px;
     color: var(--admin-text-muted);
-    font-size: 1.25rem;
+    font-size: 1.5rem;
+    font-weight: 300;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -2311,21 +2389,92 @@
 }
 
 .referrals-modal-close:hover {
-    background: var(--admin-bg-secondary);
+    background: var(--admin-bg-tertiary);
     color: var(--admin-text-primary);
 }
 
 .referrals-modal-body {
-    padding: 1.5rem;
+    padding: 0.5rem 1.75rem 1.5rem;
+}
+
+.referrals-modal-body .referrals-form-group {
+    margin-bottom: 1.25rem;
+}
+
+.referrals-modal-body .referrals-form-group:last-child {
+    margin-bottom: 0;
+}
+
+.referrals-modal-body .referrals-form-label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--admin-text-secondary);
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.01em;
+}
+
+.referrals-modal-body .referrals-form-input {
+    width: 100%;
+    padding: 0.85rem 1rem;
+    border: 1.5px solid var(--admin-border);
+    border-radius: 12px;
+    font-size: 0.9rem;
+    color: var(--admin-text-primary);
+    background: var(--admin-bg-secondary);
+    transition: all 0.2s ease;
+}
+
+.referrals-modal-body .referrals-form-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    background: var(--admin-bg-primary);
+}
+
+.referrals-modal-body .referrals-form-input::placeholder {
+    color: var(--admin-text-muted);
+}
+
+.referrals-modal-body textarea.referrals-form-input {
+    resize: vertical;
+    min-height: 90px;
+}
+
+.referrals-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding: 1.25rem 1.75rem;
+    border-top: 1px solid var(--admin-border);
+    background: var(--admin-bg-tertiary);
+    border-radius: 0 0 20px 20px;
+}
+
+.referrals-modal-footer .referrals-btn {
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    border-radius: 10px;
+}
+
+.referrals-modal-footer .referrals-btn-primary {
+    background: linear-gradient(135deg, #10b981, #059669);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.referrals-modal-footer .referrals-btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
 }
 
 .referrals-modal-actions {
     display: flex;
     justify-content: flex-end;
     gap: 0.75rem;
-    padding: 1.25rem 1.5rem;
+    padding: 1.25rem 1.75rem;
     border-top: 1px solid var(--admin-border);
     background: var(--admin-bg-tertiary);
+    border-radius: 0 0 20px 20px;
 }
 
 /* ================================
@@ -2610,11 +2759,18 @@
     
     .referrals-ready-card {
         flex-direction: column;
-        text-align: center;
+    }
+    
+    .referrals-ready-card-info {
+        width: 100%;
+        justify-content: center;
     }
     
     .referrals-ready-card-amount {
+        flex-direction: column;
+        align-items: center;
         text-align: center;
+        gap: 0.25rem;
     }
     
     .referrals-table-wrapper {

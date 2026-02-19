@@ -307,7 +307,13 @@
     }
 
     async function reviewSingle(id, action) {
-      if (!confirm(`${action === 'approve' ? 'Approve' : 'Reject'} this commission?`)) return;
+      const confirmed = await showConfirm(`${action === 'approve' ? 'Approve' : 'Reject'} this commission?`, {
+        title: action === 'approve' ? 'Approve Commission' : 'Reject Commission',
+        type: action === 'approve' ? 'confirm' : 'warning',
+        confirmText: action === 'approve' ? 'Approve' : 'Reject',
+        confirmClass: action === 'approve' ? 'success' : 'danger'
+      });
+      if (!confirmed) return;
       try {
         const res = await fetch(`/admin/api/referrals/commissions/${id}/review`, {
           method: 'PUT',
@@ -326,7 +332,13 @@
 
     async function bulkAction(action) {
       if (selected.size === 0) return;
-      if (!confirm(`${action === 'approve' ? 'Approve' : 'Reject'} ${selected.size} commission(s)?`)) return;
+      const confirmed = await showConfirm(`${action === 'approve' ? 'Approve' : 'Reject'} ${selected.size} commission(s)?`, {
+        title: action === 'approve' ? 'Bulk Approve' : 'Bulk Reject',
+        type: action === 'approve' ? 'confirm' : 'warning',
+        confirmText: action === 'approve' ? 'Approve All' : 'Reject All',
+        confirmClass: action === 'approve' ? 'success' : 'danger'
+      });
+      if (!confirmed) return;
       try {
         const res = await fetch('/admin/api/referrals/commissions/bulk-review', {
           method: 'POST',

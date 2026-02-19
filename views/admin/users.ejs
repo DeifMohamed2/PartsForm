@@ -366,7 +366,7 @@
         }
       }).catch(function(err) {
         console.error('Error updating users:', err);
-        alert('Failed to update users');
+        showAlert('Failed to update users', 'error');
         if (btn) {
           btn.disabled = false;
           btn.innerHTML = originalContent;
@@ -407,7 +407,7 @@
         }
       }).catch(function(err) {
         console.error('Error updating user:', err);
-        alert('Failed to update user status');
+        showAlert('Failed to update user status', 'error');
         // Restore button on error
         if (btn) {
           btn.disabled = false;
@@ -419,10 +419,14 @@
     }
 
     // Approve user
-    function approveUser(userId) {
-      if (!confirm('Are you sure you want to approve this user? They will be able to access their buyer dashboard.')) {
-        return;
-      }
+    async function approveUser(userId) {
+      const confirmed = await showConfirm('Are you sure you want to approve this user? They will be able to access their buyer dashboard.', {
+        title: 'Approve User',
+        type: 'confirm',
+        confirmText: 'Approve',
+        confirmClass: 'success'
+      });
+      if (!confirmed) return;
 
       fetch('/admin/api/users/' + userId + '/approve', {
         method: 'PUT',
@@ -436,17 +440,24 @@
         if (response.ok) {
           location.reload();
         } else {
-          alert('Failed to approve user');
+          showAlert('Failed to approve user', 'error');
         }
       }).catch(function(err) {
         console.error('Error approving user:', err);
-        alert('Failed to approve user');
+        showAlert('Failed to approve user', 'error');
       });
     }
 
     // Reject user
-    function rejectUser(userId) {
-      var reason = prompt('Please provide a reason for rejection (optional):');
+    async function rejectUser(userId) {
+      const reason = await showPrompt('Please provide a reason for rejection:', {
+        title: 'Reject User',
+        type: 'warning',
+        placeholder: 'Enter rejection reason (optional)',
+        inputType: 'textarea',
+        confirmText: 'Reject User',
+        cancelText: 'Cancel'
+      });
       if (reason === null) return; // User cancelled
 
       fetch('/admin/api/users/' + userId + '/reject', {
@@ -461,11 +472,11 @@
         if (response.ok) {
           location.reload();
         } else {
-          alert('Failed to reject user');
+          showAlert('Failed to reject user', 'error');
         }
       }).catch(function(err) {
         console.error('Error rejecting user:', err);
-        alert('Failed to reject user');
+        showAlert('Failed to reject user', 'error');
       });
     }
 
@@ -1146,7 +1157,7 @@
     // Open approve modal for bulk users
     function openBulkApproveModal() {
       if (selectedUsers.length === 0) {
-        alert('Please select users to approve');
+        showAlert('Please select users to approve', 'warning');
         return;
       }
 
@@ -1157,7 +1168,7 @@
       });
 
       if (inactiveUsers.length === 0) {
-        alert('All selected users are already active');
+        showAlert('All selected users are already active', 'info');
         return;
       }
 
@@ -1237,7 +1248,7 @@
       if (markupType === 'custom') {
         markupPercentage = parseFloat(document.getElementById('customMarkupValue').value);
         if (isNaN(markupPercentage) || markupPercentage < 0 || markupPercentage > 100) {
-          alert('Please enter a valid markup percentage between 0 and 100');
+          showAlert('Please enter a valid markup percentage between 0 and 100', 'warning');
           return;
         }
       }
@@ -1264,14 +1275,14 @@
             closeApproveModal();
             location.reload();
           } else {
-            alert(data.error || 'Failed to approve user');
+            showAlert(data.error || 'Failed to approve user', 'error');
             btn.disabled = false;
             btn.innerHTML = '<i data-lucide="check"></i> <span>Approve User</span>';
             if (typeof lucide !== 'undefined') lucide.createIcons();
           }
         }).catch(function(err) {
           console.error('Error approving user:', err);
-          alert('Failed to approve user');
+          showAlert('Failed to approve user', 'error');
           btn.disabled = false;
           btn.innerHTML = '<i data-lucide="check"></i> <span>Approve User</span>';
           if (typeof lucide !== 'undefined') lucide.createIcons();
@@ -1295,14 +1306,14 @@
             clearSelection();
             location.reload();
           } else {
-            alert(data.error || 'Failed to approve users');
+            showAlert(data.error || 'Failed to approve users', 'error');
             btn.disabled = false;
             btn.innerHTML = '<i data-lucide="check"></i> <span>Approve Users</span>';
             if (typeof lucide !== 'undefined') lucide.createIcons();
           }
         }).catch(function(err) {
           console.error('Error approving users:', err);
-          alert('Failed to approve users');
+          showAlert('Failed to approve users', 'error');
           btn.disabled = false;
           btn.innerHTML = '<i data-lucide="check"></i> <span>Approve Users</span>';
           if (typeof lucide !== 'undefined') lucide.createIcons();

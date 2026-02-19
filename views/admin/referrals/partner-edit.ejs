@@ -200,7 +200,13 @@
     });
 
     async function regenerateCode() {
-      if (!confirm('Regenerate referral code? The old code will stop working.')) return;
+      const confirmed = await showConfirm('Regenerate referral code? The old code will stop working.', {
+        title: 'Regenerate Code',
+        type: 'warning',
+        confirmText: 'Regenerate',
+        confirmClass: 'danger'
+      });
+      if (!confirmed) return;
       try {
         const response = await fetch(`/admin/api/referrals/partners/${partnerId}/regenerate-code`, { method: 'POST' });
         const data = await response.json();

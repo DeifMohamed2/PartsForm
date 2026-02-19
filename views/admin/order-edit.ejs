@@ -2,15 +2,15 @@
 <link rel="stylesheet" href="/css/adminCSS/admin-dashboard.css">
 <link rel="stylesheet" href="/css/adminCSS/admin-orders.css">
 <style>
-  /* Edit Order Styles */
+  /* Professional Edit Order Styles */
   .edit-order-page {
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
   }
   
   .edit-order-grid {
     display: grid;
-    grid-template-columns: 1fr 380px;
+    grid-template-columns: 1fr 400px;
     gap: 1.5rem;
   }
   
@@ -24,12 +24,8 @@
     position: relative;
   }
   
-  /* Fix header rounded corners since overflow is visible */
   .form-card-header {
     border-radius: 16px 16px 0 0;
-  }
-  
-  .form-card-header {
     padding: 1rem 1.5rem;
     border-bottom: 1px solid var(--admin-border);
     background: var(--admin-bg-tertiary);
@@ -62,8 +58,12 @@
   .form-row {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 1.5rem;
+    gap: 1.25rem;
     margin-bottom: 1.25rem;
+  }
+  
+  .form-row.three-col {
+    grid-template-columns: repeat(3, 1fr);
   }
   
   .form-row:last-child {
@@ -81,12 +81,14 @@
   }
   
   .form-label {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     font-weight: 600;
     color: var(--admin-text-primary);
     display: flex;
     align-items: center;
     gap: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
   }
   
   .form-label .required {
@@ -113,13 +115,15 @@
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
   }
   
-  .form-input:disabled {
+  .form-input:disabled,
+  .form-select:disabled {
     background: var(--admin-bg-tertiary);
     opacity: 0.7;
+    cursor: not-allowed;
   }
   
   .form-textarea {
-    min-height: 100px;
+    min-height: 80px;
     resize: vertical;
   }
   
@@ -131,7 +135,54 @@
     padding-right: 2.5rem;
   }
   
-  /* Order Header Card */
+  .form-help {
+    font-size: 0.75rem;
+    color: var(--admin-text-muted);
+    margin-top: 0.25rem;
+  }
+  
+  /* Input with prefix/suffix */
+  .input-group {
+    display: flex;
+    align-items: stretch;
+  }
+  
+  .input-prefix,
+  .input-suffix {
+    padding: 0.75rem 1rem;
+    background: var(--admin-bg-tertiary);
+    border: 1px solid var(--admin-border);
+    color: var(--admin-text-muted);
+    font-size: 0.85rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+  }
+  
+  .input-prefix {
+    border-radius: 10px 0 0 10px;
+    border-right: none;
+  }
+  
+  .input-suffix {
+    border-radius: 0 10px 10px 0;
+    border-left: none;
+  }
+  
+  .input-group .form-input {
+    border-radius: 0;
+    flex: 1;
+  }
+  
+  .input-group .form-input:first-child {
+    border-radius: 10px 0 0 10px;
+  }
+  
+  .input-group .form-input:last-child {
+    border-radius: 0 10px 10px 0;
+  }
+  
+  /* Order Header */
   .order-header-card {
     background: linear-gradient(135deg, var(--admin-bg-secondary) 0%, var(--admin-bg-tertiary) 100%);
     border: 1px solid var(--admin-border);
@@ -141,53 +192,123 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-  }
-  
-  .order-header-info {
-    display: flex;
-    align-items: center;
+    flex-wrap: wrap;
     gap: 1rem;
   }
   
+  .order-header-left {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+  }
+  
   .order-number-badge {
-    padding: 0.75rem 1.25rem;
+    padding: 0.875rem 1.5rem;
     background: var(--module-primary, var(--admin-primary));
     color: white;
     border-radius: 12px;
     font-family: 'SF Mono', 'Monaco', monospace;
     font-weight: 600;
-    font-size: 1rem;
+    font-size: 1.1rem;
+    letter-spacing: -0.5px;
   }
   
   .order-header-meta {
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    gap: 0.35rem;
   }
   
   .order-header-meta h2 {
     margin: 0;
-    font-size: 1.25rem;
+    font-size: 1.35rem;
     color: var(--admin-text-primary);
+    font-weight: 700;
   }
   
-  .order-header-meta span {
+  .order-header-meta .order-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
     font-size: 0.85rem;
     color: var(--admin-text-muted);
   }
   
+  .order-header-meta .order-meta-row span {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+  
+  .order-header-meta .order-meta-row i {
+    width: 14px;
+    height: 14px;
+    opacity: 0.7;
+  }
+  
+  .order-header-right {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  
+  /* Current Status Display */
+  .current-status-display {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    background: var(--admin-bg-tertiary);
+    border-radius: 12px;
+    border: 1px dashed var(--admin-border);
+  }
+  
+  .current-status-display .status-badge {
+    font-size: 0.85rem;
+    padding: 0.5rem 1rem;
+  }
+  
+  .current-status-display .status-info {
+    flex: 1;
+  }
+  
+  .current-status-display .status-info p {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--admin-text-muted);
+  }
+  
+  .current-status-display .change-status-link {
+    font-size: 0.8rem;
+    color: var(--module-primary, var(--admin-primary));
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+  
+  .current-status-display .change-status-link:hover {
+    text-decoration: underline;
+  }
+  
+  .current-status-display .change-status-link i {
+    width: 14px;
+    height: 14px;
+  }
+  
+  /* Part Search */
   .part-search-container {
     position: relative;
   }
   
   .part-search-input {
     width: 100%;
-    padding: 1rem 1rem 1rem 3rem;
+    padding: 0.875rem 1rem 0.875rem 2.75rem;
     background: var(--admin-bg-primary);
     border: 2px solid var(--admin-border);
     border-radius: 12px;
     color: var(--admin-text-primary);
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     transition: all 0.2s ease;
   }
   
@@ -199,11 +320,11 @@
   
   .part-search-icon {
     position: absolute;
-    left: 1rem;
+    left: 0.875rem;
     top: 50%;
     transform: translateY(-50%);
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
     color: var(--admin-text-muted);
     pointer-events: none;
   }
@@ -221,8 +342,8 @@
   }
   
   .part-search-loading i {
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
     color: var(--module-primary, var(--admin-primary));
     animation: spin 1s linear infinite;
   }
@@ -232,7 +353,14 @@
     to { transform: rotate(360deg); }
   }
   
-  /* Search Results Dropdown */
+  .part-search-section {
+    position: relative;
+    z-index: 100;
+    margin-bottom: 1.25rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--admin-border);
+  }
+  
   .part-search-results {
     position: absolute;
     top: calc(100% + 8px);
@@ -241,20 +369,11 @@
     background: var(--admin-bg-secondary);
     border: 1px solid var(--admin-border);
     border-radius: 12px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(0, 0, 0, 0.1);
-    max-height: 400px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    max-height: 350px;
     overflow-y: auto;
     z-index: 9999;
     display: none;
-  }
-  
-  /* Ensure part search container has stacking context */
-  .part-search-section {
-    position: relative;
-    z-index: 100;
-    margin-bottom: 1.5rem;
-    padding-bottom: 1.5rem;
-    border-bottom: 1px solid var(--admin-border);
   }
   
   .part-search-results.active {
@@ -275,55 +394,7 @@
     z-index: 1;
   }
   
-  /* Suggestions Style */
-  .suggestion-item {
-    padding: 0.6rem 0.75rem;
-    border-bottom: 1px solid var(--admin-border);
-    cursor: pointer;
-    transition: background 0.15s ease;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  
-  .suggestion-item:last-child {
-    border-bottom: none;
-  }
-  
-  .suggestion-item:hover {
-    background: var(--admin-bg-tertiary);
-  }
-  
-  .suggestion-part-number {
-    font-weight: 600;
-    color: var(--admin-text-primary);
-    font-family: 'SF Mono', 'Monaco', monospace;
-    font-size: 0.85rem;
-  }
-  
-  .suggestion-meta {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.7rem;
-    color: var(--admin-text-muted);
-  }
-  
-  .suggestion-meta .brand {
-    background: rgba(59, 130, 246, 0.1);
-    color: var(--module-primary, #3b82f6);
-    padding: 0.15rem 0.4rem;
-    border-radius: 4px;
-    font-weight: 500;
-  }
-  
-  .suggestion-arrow {
-    color: var(--admin-text-muted);
-    width: 14px;
-    height: 14px;
-  }
-  
-  /* Results Table Style */
+  /* Results Table */
   .results-table {
     width: 100%;
     border-collapse: collapse;
@@ -387,89 +458,68 @@
     width: 12px;
     height: 12px;
   }
-
-  .part-search-item {
-    padding: 1rem;
+  
+  .suggestion-item {
+    padding: 0.6rem 0.75rem;
     border-bottom: 1px solid var(--admin-border);
     cursor: pointer;
-    transition: background 0.2s ease;
+    transition: background 0.15s ease;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 1rem;
   }
   
-  .part-search-item:last-child {
+  .suggestion-item:last-child {
     border-bottom: none;
   }
   
-  .part-search-item:hover {
+  .suggestion-item:hover {
     background: var(--admin-bg-tertiary);
   }
   
-  .part-search-item-info {
-    flex: 1;
-  }
-  
-  .part-search-item-number {
+  .suggestion-part-number {
     font-weight: 600;
     color: var(--admin-text-primary);
     font-family: 'SF Mono', 'Monaco', monospace;
-    font-size: 0.9rem;
-    margin-bottom: 0.25rem;
+    font-size: 0.85rem;
   }
   
-  .part-search-item-meta {
+  .suggestion-meta {
     display: flex;
-    gap: 1rem;
-    font-size: 0.8rem;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.7rem;
     color: var(--admin-text-muted);
   }
   
-  .part-search-item-price {
-    font-weight: 700;
-    color: var(--module-primary, var(--admin-primary));
-    font-size: 0.95rem;
+  .suggestion-meta .brand {
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--module-primary, #3b82f6);
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    font-weight: 500;
   }
   
-  .part-search-item-add {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    background: var(--module-primary, var(--admin-primary));
-    color: white;
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
-    flex-shrink: 0;
-  }
-  
-  .part-search-item-add:hover {
-    transform: scale(1.1);
-  }
-  
-  .part-search-item-add i {
-    width: 16px;
-    height: 16px;
+  .suggestion-arrow {
+    color: var(--admin-text-muted);
+    width: 14px;
+    height: 14px;
   }
   
   .part-search-empty {
-    padding: 2rem;
+    padding: 1.5rem;
     text-align: center;
     color: var(--admin-text-muted);
   }
   
   .part-search-empty i {
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
     margin-bottom: 0.5rem;
     opacity: 0.5;
   }
   
-  /* Selected Items List */
+  /* Items Table */
   .selected-items-table {
     width: 100%;
     border-collapse: collapse;
@@ -477,9 +527,9 @@
   
   .selected-items-table th {
     text-align: left;
-    padding: 0.75rem 1rem;
+    padding: 0.65rem 0.75rem;
     background: var(--admin-bg-tertiary);
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -488,9 +538,9 @@
   }
   
   .selected-items-table td {
-    padding: 1rem;
+    padding: 0.875rem 0.75rem;
     border-bottom: 1px solid var(--admin-border);
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     color: var(--admin-text-primary);
   }
   
@@ -509,12 +559,12 @@
   }
   
   .remove-item-btn {
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
     border: none;
     background: rgba(239, 68, 68, 0.1);
     color: #ef4444;
-    border-radius: 8px;
+    border-radius: 6px;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -526,9 +576,14 @@
     background: rgba(239, 68, 68, 0.2);
   }
   
+  .remove-item-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+  
   .remove-item-btn i {
-    width: 16px;
-    height: 16px;
+    width: 14px;
+    height: 14px;
   }
   
   .no-items-row td {
@@ -537,42 +592,57 @@
     color: var(--admin-text-muted);
   }
   
-  /* Order Summary Sidebar */
-  .order-summary-sidebar {
+  /* Sidebar */
+  .sidebar-card {
     position: sticky;
     top: 1.5rem;
   }
   
-  .summary-total-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 0.75rem 0;
+  .summary-section {
+    padding: 1rem 1.25rem;
     border-bottom: 1px solid var(--admin-border);
   }
   
-  .summary-total-row:last-child {
+  .summary-section:last-child {
     border-bottom: none;
   }
   
-  .summary-total-row.grand-total {
-    border-top: 2px solid var(--admin-border);
-    margin-top: 0.5rem;
-    padding-top: 1rem;
+  .summary-section-title {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--admin-text-muted);
+    margin-bottom: 0.75rem;
   }
   
-  .summary-total-row .label {
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+  }
+  
+  .summary-row .label {
     color: var(--admin-text-muted);
+    font-size: 0.85rem;
+  }
+  
+  .summary-row .value {
+    font-weight: 600;
+    color: var(--admin-text-primary);
     font-size: 0.9rem;
   }
   
-  .summary-total-row .value {
-    font-weight: 600;
-    color: var(--admin-text-primary);
+  .summary-row.total {
+    border-top: 2px solid var(--admin-border);
+    margin-top: 0.5rem;
+    padding-top: 0.75rem;
   }
   
-  .summary-total-row.grand-total .label,
-  .summary-total-row.grand-total .value {
-    font-size: 1.1rem;
+  .summary-row.total .label,
+  .summary-row.total .value {
+    font-size: 1rem;
     font-weight: 700;
     color: var(--admin-text-primary);
   }
@@ -580,55 +650,91 @@
   .items-count-badge {
     background: var(--module-primary, var(--admin-primary));
     color: white;
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     font-weight: 600;
-    padding: 0.2rem 0.5rem;
+    padding: 0.15rem 0.45rem;
     border-radius: 20px;
-    margin-left: 0.5rem;
+    margin-left: 0.35rem;
   }
   
-  /* Status Select */
-  .status-select-wrapper {
+  /* Customer Info Display */
+  .customer-display {
     display: flex;
     align-items: center;
     gap: 1rem;
     padding: 1rem;
     background: var(--admin-bg-tertiary);
-    border-radius: 12px;
+    border-radius: 10px;
   }
   
-  .status-select-wrapper .form-select {
+  .customer-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    background: var(--module-primary, var(--admin-primary));
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+  
+  .customer-details {
     flex: 1;
+    min-width: 0;
+  }
+  
+  .customer-details h4 {
+    margin: 0 0 0.25rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--admin-text-primary);
+  }
+  
+  .customer-details p {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--admin-text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .customer-link {
+    flex-shrink: 0;
   }
   
   /* Form Actions */
-  .form-actions {
+  .form-actions-section {
+    padding: 1.25rem;
+    background: var(--admin-bg-tertiary);
+    border-radius: 0 0 16px 16px;
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
-    margin-top: 1.5rem;
   }
   
-  .form-actions .admin-btn {
+  .form-actions-section .admin-btn {
     width: 100%;
     justify-content: center;
     padding: 0.875rem 1.5rem;
   }
   
   .danger-zone {
-    margin-top: 1.5rem;
-    padding-top: 1.5rem;
+    padding: 1rem 1.25rem;
     border-top: 1px solid var(--admin-border);
   }
   
   .danger-btn {
     width: 100%;
-    padding: 0.75rem 1rem;
-    background: rgba(239, 68, 68, 0.1);
+    padding: 0.65rem 1rem;
+    background: transparent;
     color: #ef4444;
-    border: 1px solid rgba(239, 68, 68, 0.2);
-    border-radius: 10px;
-    font-size: 0.9rem;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 8px;
+    font-size: 0.85rem;
     font-weight: 500;
     cursor: pointer;
     display: flex;
@@ -639,34 +745,98 @@
   }
   
   .danger-btn:hover {
-    background: rgba(239, 68, 68, 0.2);
-    border-color: rgba(239, 68, 68, 0.3);
+    background: rgba(239, 68, 68, 0.1);
+    border-color: rgba(239, 68, 68, 0.5);
   }
   
   .danger-btn i {
-    width: 16px;
-    height: 16px;
+    width: 14px;
+    height: 14px;
   }
+  
+  /* Section Tabs */
+  .section-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--admin-border);
+    overflow-x: auto;
+  }
+  
+  .section-tab {
+    padding: 0.5rem 1rem;
+    background: var(--admin-bg-tertiary);
+    border: 1px solid var(--admin-border);
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--admin-text-muted);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+  }
+  
+  .section-tab:hover {
+    background: var(--admin-bg-primary);
+    color: var(--admin-text-primary);
+  }
+  
+  .section-tab.active {
+    background: var(--module-primary, var(--admin-primary));
+    border-color: var(--module-primary, var(--admin-primary));
+    color: white;
+  }
+  
+  /* Status Badges Override */
+  .status-badge.pending { background: #fef3c7; color: #d97706; border: 1px solid #fcd34d; }
+  .status-badge.processing { background: #dbeafe; color: #2563eb; border: 1px solid #93c5fd; }
+  .status-badge.shipped { background: #e0e7ff; color: #6366f1; border: 1px solid #a5b4fc; }
+  .status-badge.delivered, .status-badge.completed { background: #d1fae5; color: #059669; border: 1px solid #6ee7b7; }
+  .status-badge.cancelled { background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; }
+  
+  /* Payment Status Badges */
+  .payment-badge { 
+    display: inline-flex; 
+    align-items: center; 
+    gap: 0.35rem; 
+    padding: 0.35rem 0.75rem; 
+    border-radius: 6px; 
+    font-size: 0.75rem; 
+    font-weight: 600; 
+  }
+  .payment-badge.paid { background: #d1fae5; color: #059669; }
+  .payment-badge.pending { background: #fef3c7; color: #d97706; }
+  .payment-badge.partial { background: #dbeafe; color: #2563eb; }
+  .payment-badge.failed { background: #fee2e2; color: #dc2626; }
   
   @media (max-width: 1024px) {
     .edit-order-grid {
       grid-template-columns: 1fr;
     }
     
-    .order-summary-sidebar {
+    .sidebar-card {
       position: static;
     }
   }
   
   @media (max-width: 640px) {
-    .form-row {
+    .form-row,
+    .form-row.three-col {
       grid-template-columns: 1fr;
     }
     
     .order-header-card {
       flex-direction: column;
-      gap: 1rem;
       align-items: flex-start;
+    }
+    
+    .order-header-right {
+      width: 100%;
+    }
+    
+    .order-header-right .admin-btn {
+      flex: 1;
     }
   }
 </style>
@@ -689,71 +859,77 @@
 
         <!-- Order Header -->
         <div class="order-header-card">
-          <div class="order-header-info">
+          <div class="order-header-left">
             <div class="order-number-badge"><%= order.id %></div>
             <div class="order-header-meta">
               <h2>Edit Order</h2>
-              <span>Created: <%= order.date %></span>
+              <div class="order-meta-row">
+                <span><i data-lucide="calendar"></i> <%= order.date %></span>
+                <span><i data-lucide="clock"></i> <%= order.time %></span>
+                <span><i data-lucide="package"></i> <%= order.items?.length || 0 %> items</span>
+              </div>
             </div>
           </div>
-          <a href="/admin/orders/<%= order.id %>" class="admin-btn admin-btn-secondary">
-            <i data-lucide="eye"></i>
-            View Order
-          </a>
+          <div class="order-header-right">
+            <span class="status-badge <%= order.status %>" style="display: flex; align-items: center; gap: 0.35rem; padding: 0.5rem 1rem;">
+              <% 
+                const statusIcons = {
+                  pending: 'clock',
+                  confirmed: 'check',
+                  processing: 'loader',
+                  shipped: 'truck',
+                  delivered: 'check-circle',
+                  cancelled: 'x-circle'
+                };
+              %>
+              <i data-lucide="<%= statusIcons[order.status] || 'circle' %>" style="width: 14px; height: 14px;"></i>
+              <%= order.status.charAt(0).toUpperCase() + order.status.slice(1) %>
+            </span>
+            <a href="/admin/orders/<%= order.id %>" class="admin-btn admin-btn-secondary">
+              <i data-lucide="eye"></i>
+              View Details
+            </a>
+          </div>
         </div>
 
         <form id="editOrderForm">
           <div class="edit-order-grid">
             <!-- Left Column - Main Form -->
             <div>
-              <!-- Status Update -->
-              <div class="form-card">
-                <div class="form-card-header">
-                  <h3><i data-lucide="activity"></i> Order Status</h3>
+              <!-- Current Status Notice -->
+              <div class="current-status-display" style="margin-bottom: 1.5rem;">
+                <span class="status-badge <%= order.status %>" style="display: flex; align-items: center; gap: 0.35rem;">
+                  <i data-lucide="<%= statusIcons[order.status] || 'circle' %>" style="width: 14px; height: 14px;"></i>
+                  <%= order.status.charAt(0).toUpperCase() + order.status.slice(1) %>
+                </span>
+                <div class="status-info">
+                  <p>Order status can only be changed from the Order Details page to maintain activity timeline.</p>
                 </div>
-                <div class="form-card-body">
-                  <div class="status-select-wrapper">
-                    <label class="form-label" style="margin: 0;">Status:</label>
-                    <select id="orderStatus" name="status" class="form-select">
-                      <option value="pending" <%= order.status === 'pending' ? 'selected' : '' %>>Pending</option>
-                      <option value="confirmed" <%= order.status === 'confirmed' ? 'selected' : '' %>>Confirmed</option>
-                      <option value="processing" <%= order.status === 'processing' ? 'selected' : '' %>>Processing</option>
-                      <option value="shipped" <%= order.status === 'shipped' ? 'selected' : '' %>>Shipped</option>
-                      <option value="delivered" <%= order.status === 'delivered' ? 'selected' : '' %>>Delivered</option>
-                      <option value="cancelled" <%= order.status === 'cancelled' ? 'selected' : '' %>>Cancelled</option>
-                    </select>
-                    <span class="status-badge <%= order.status %>" id="statusBadge" style="display: flex; align-items: center; gap: 0.25rem;">
-                      <% 
-                        const statusIcons = {
-                          pending: 'clock',
-                          confirmed: 'check',
-                          processing: 'loader',
-                          shipped: 'truck',
-                          delivered: 'check-circle',
-                          cancelled: 'x-circle'
-                        };
-                      %>
-                      <i data-lucide="<%= statusIcons[order.status] || 'circle' %>"></i>
-                      <%= order.status %>
-                    </span>
-                  </div>
-                </div>
+                <a href="/admin/orders/<%= order.id %>" class="change-status-link">
+                  <i data-lucide="external-link"></i>
+                  Update Status
+                </a>
               </div>
 
-              <!-- Customer Information (Read-only) -->
+              <!-- Customer Information -->
               <div class="form-card">
                 <div class="form-card-header">
-                  <h3><i data-lucide="user"></i> Customer Information</h3>
+                  <h3><i data-lucide="user"></i> Customer</h3>
+                  <% if (order.buyer) { %>
+                  <a href="/admin/users/<%= order.buyer.id %>" class="admin-btn admin-btn-sm admin-btn-ghost" style="padding: 0.35rem 0.75rem; font-size: 0.75rem;">
+                    <i data-lucide="external-link" style="width: 12px; height: 12px;"></i>
+                    View Profile
+                  </a>
+                  <% } %>
                 </div>
                 <div class="form-card-body">
-                  <div class="form-row">
-                    <div class="form-group">
-                      <label class="form-label">Customer</label>
-                      <input type="text" class="form-input" value="<%= order.customer %>" disabled>
+                  <div class="customer-display">
+                    <div class="customer-avatar">
+                      <%= order.customer ? order.customer.charAt(0).toUpperCase() : '?' %>
                     </div>
-                    <div class="form-group">
-                      <label class="form-label">Email</label>
-                      <input type="email" class="form-input" value="<%= order.email || 'N/A' %>" disabled>
+                    <div class="customer-details">
+                      <h4><%= order.customer || 'Unknown Customer' %></h4>
+                      <p><%= order.email || 'No email' %> • <%= order.phone || 'No phone' %></p>
                     </div>
                   </div>
                 </div>
@@ -763,23 +939,22 @@
               <div class="form-card">
                 <div class="form-card-header">
                   <h3><i data-lucide="package"></i> Order Items</h3>
+                  <span class="items-count-badge" id="itemsCountBadge"><%= order.items?.length || 0 %></span>
                 </div>
                 <div class="form-card-body">
                   <!-- Part Search -->
                   <div class="part-search-section">
-                    <label class="form-label" style="margin-bottom: 0.75rem;">Add More Parts</label>
+                    <label class="form-label" style="margin-bottom: 0.5rem;">Add Part</label>
                     <div class="part-search-container">
                       <i data-lucide="search" class="part-search-icon"></i>
                       <input type="text" 
                              id="partSearchInput" 
                              class="part-search-input" 
-                             placeholder="Search part number to add..."
+                             placeholder="Search by part number..."
                              autocomplete="off">
                       <div class="part-search-loading" id="partSearchLoading">
                         <i data-lucide="loader-2"></i>
                       </div>
-                      
-                      <!-- Search Results -->
                       <div class="part-search-results" id="partSearchResults">
                         <div class="part-search-results-header">Search Results</div>
                         <div id="partSearchResultsList"></div>
@@ -788,63 +963,58 @@
                   </div>
                   
                   <!-- Items Table -->
-                  <table class="selected-items-table" id="itemsTable">
-                    <thead>
-                      <tr>
-                        <th>Part Number</th>
-                        <th>Brand</th>
-                        <th>Supplier</th>
-                        <th>Price</th>
-                        <th style="width: 50px;"></th>
-                      </tr>
-                    </thead>
-                    <tbody id="itemsTableBody">
-                      <% if (order.items && order.items.length > 0) { %>
-                        <% order.items.forEach((item, index) => { %>
-                          <tr data-index="<%= index %>">
-                            <td class="part-number"><%= item.partNumber %></td>
-                            <td><%= item.brand || 'N/A' %></td>
-                            <td><%= item.supplier || 'N/A' %></td>
-                            <td class="price"><%= item.currency || 'AED' %> <%= (item.price || 0).toLocaleString('en-US', { minimumFractionDigits: 2 }) %></td>
-                            <td>
-                              <button type="button" class="remove-item-btn" onclick="removeItem(<%= index %>)" <%= order.items.length === 1 ? 'disabled style="opacity: 0.3;"' : '' %>>
-                                <i data-lucide="trash-2"></i>
-                              </button>
+                  <div style="overflow-x: auto;">
+                    <table class="selected-items-table" id="itemsTable">
+                      <thead>
+                        <tr>
+                          <th>Part Number</th>
+                          <th>Brand</th>
+                          <th>Supplier</th>
+                          <th>Price</th>
+                          <th style="width: 40px;"></th>
+                        </tr>
+                      </thead>
+                      <tbody id="itemsTableBody">
+                        <% if (order.items && order.items.length > 0) { %>
+                          <% order.items.forEach((item, index) => { %>
+                            <tr data-index="<%= index %>">
+                              <td class="part-number"><%= item.partNumber %></td>
+                              <td><%= item.brand || 'N/A' %></td>
+                              <td><%= item.supplier || 'N/A' %></td>
+                              <td class="price"><%= item.currency || 'AED' %> <%= (item.price || 0).toLocaleString('en-US', { minimumFractionDigits: 2 }) %></td>
+                              <td>
+                                <button type="button" class="remove-item-btn" onclick="removeItem(<%= index %>)" <%= order.items.length === 1 ? 'disabled' : '' %>>
+                                  <i data-lucide="trash-2"></i>
+                                </button>
+                              </td>
+                            </tr>
+                          <% }); %>
+                        <% } else { %>
+                          <tr class="no-items-row">
+                            <td colspan="5">
+                              <i data-lucide="package-x"></i>
+                              <p>No items in this order</p>
                             </td>
                           </tr>
-                        <% }); %>
-                      <% } else { %>
-                        <tr class="no-items-row">
-                          <td colspan="5">
-                            <i data-lucide="package-x"></i>
-                            <p>No items in this order</p>
-                          </td>
-                        </tr>
-                      <% } %>
-                    </tbody>
-                  </table>
+                        <% } %>
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
 
-              <!-- Order Details -->
+              <!-- Payment Information -->
               <div class="form-card">
                 <div class="form-card-header">
-                  <h3><i data-lucide="settings"></i> Order Details</h3>
+                  <h3><i data-lucide="credit-card"></i> Payment Information</h3>
                 </div>
                 <div class="form-card-body">
-                  <div class="form-row">
-                    <div class="form-group">
-                      <label class="form-label">Priority</label>
-                      <select id="priority" name="priority" class="form-select">
-                        <option value="normal" <%= order.priority === 'normal' ? 'selected' : '' %>>Normal</option>
-                        <option value="high" <%= order.priority === 'high' ? 'selected' : '' %>>High</option>
-                        <option value="urgent" <%= order.priority === 'urgent' ? 'selected' : '' %>>Urgent</option>
-                      </select>
-                    </div>
+                  <% const payment = order.payment || {}; %>
+                  <div class="form-row three-col">
                     <div class="form-group">
                       <label class="form-label">Payment Method</label>
                       <select id="paymentMethod" name="paymentMethod" class="form-select">
-                        <% const paymentMethod = order.payment?.method || 'bank-dubai'; %>
+                        <% const paymentMethod = payment.method || 'bank-dubai'; %>
                         <option value="bank-dubai" <%= paymentMethod === 'bank-dubai' ? 'selected' : '' %>>Bank Transfer (Dubai)</option>
                         <option value="bank-international" <%= paymentMethod === 'bank-international' ? 'selected' : '' %>>International Wire</option>
                         <option value="card" <%= paymentMethod === 'card' ? 'selected' : '' %>>Credit/Debit Card</option>
@@ -852,107 +1022,298 @@
                         <option value="cod" <%= paymentMethod === 'cod' ? 'selected' : '' %>>Cash on Delivery</option>
                       </select>
                     </div>
-                  </div>
-                  <div class="form-row single">
                     <div class="form-group">
-                      <label class="form-label">Order Notes</label>
-                      <textarea id="notes" name="notes" class="form-textarea" placeholder="Add any special instructions or notes..."><%= order.notes || '' %></textarea>
+                      <label class="form-label">Payment Status</label>
+                      <select id="paymentStatus" name="paymentStatus" class="form-select">
+                        <% const paymentStatus = payment.status || 'pending'; %>
+                        <option value="pending" <%= paymentStatus === 'pending' ? 'selected' : '' %>>Pending</option>
+                        <option value="paid" <%= paymentStatus === 'paid' ? 'selected' : '' %>>Paid</option>
+                        <option value="partial" <%= paymentStatus === 'partial' ? 'selected' : '' %>>Partial</option>
+                        <option value="failed" <%= paymentStatus === 'failed' ? 'selected' : '' %>>Failed</option>
+                        <option value="refunded" <%= paymentStatus === 'refunded' ? 'selected' : '' %>>Refunded</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Payment Type</label>
+                      <select id="paymentType" name="paymentType" class="form-select">
+                        <% const paymentType = payment.type || 'full'; %>
+                        <option value="full" <%= paymentType === 'full' ? 'selected' : '' %>>Full Payment</option>
+                        <option value="partial" <%= paymentType === 'partial' ? 'selected' : '' %>>Partial (20%)</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label class="form-label">Amount Paid</label>
+                      <div class="input-group">
+                        <span class="input-prefix"><%= order.currency || 'AED' %></span>
+                        <input type="number" id="amountPaid" name="amountPaid" class="form-input" 
+                               value="<%= payment.amountPaid || 0 %>" step="0.01" min="0">
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Amount Due</label>
+                      <div class="input-group">
+                        <span class="input-prefix"><%= order.currency || 'AED' %></span>
+                        <input type="number" id="amountDue" name="amountDue" class="form-input" 
+                               value="<%= payment.amountDue || 0 %>" step="0.01" min="0">
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <!-- Shipping Address -->
+              <!-- Pricing Adjustments -->
               <div class="form-card">
                 <div class="form-card-header">
-                  <h3><i data-lucide="map-pin"></i> Shipping Address</h3>
+                  <h3><i data-lucide="calculator"></i> Pricing</h3>
+                </div>
+                <div class="form-card-body">
+                  <% const pricing = order.pricing || { subtotal: 0, tax: 0, shipping: 0, processingFee: 0, discount: 0, total: 0 }; %>
+                  <div class="form-row three-col">
+                    <div class="form-group">
+                      <label class="form-label">Shipping Cost</label>
+                      <div class="input-group">
+                        <span class="input-prefix"><%= order.currency || 'AED' %></span>
+                        <input type="number" id="shippingCost" name="shippingCost" class="form-input" 
+                               value="<%= pricing.shipping || 0 %>" step="0.01" min="0">
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Tax</label>
+                      <div class="input-group">
+                        <span class="input-prefix"><%= order.currency || 'AED' %></span>
+                        <input type="number" id="taxAmount" name="taxAmount" class="form-input" 
+                               value="<%= pricing.tax || 0 %>" step="0.01" min="0">
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Discount</label>
+                      <div class="input-group">
+                        <span class="input-prefix"><%= order.currency || 'AED' %></span>
+                        <input type="number" id="discountAmount" name="discountAmount" class="form-input" 
+                               value="<%= pricing.discount || 0 %>" step="0.01" min="0">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-help" style="margin-top: 0.5rem;">
+                    <i data-lucide="info" style="width: 12px; height: 12px; display: inline;"></i>
+                    Processing fee is calculated automatically. Total will update when you save changes.
+                  </div>
+                </div>
+              </div>
+
+              <!-- Shipping Information -->
+              <div class="form-card">
+                <div class="form-card-header">
+                  <h3><i data-lucide="truck"></i> Shipping Information</h3>
                 </div>
                 <div class="form-card-body">
                   <% const shipping = order.shipping || {}; %>
                   <div class="form-row">
                     <div class="form-group">
                       <label class="form-label">Full Name <span class="required">*</span></label>
-                      <input type="text" id="shippingName" name="shippingName" class="form-input" value="<%= shipping.fullName || '' %>" required>
+                      <input type="text" id="shippingName" name="shippingName" class="form-input" 
+                             value="<%= shipping.fullName || '' %>" required>
                     </div>
                     <div class="form-group">
                       <label class="form-label">Phone <span class="required">*</span></label>
-                      <input type="text" id="shippingPhone" name="shippingPhone" class="form-input" value="<%= shipping.phone || '' %>" required>
+                      <input type="text" id="shippingPhone" name="shippingPhone" class="form-input" 
+                             value="<%= shipping.phone || '' %>" required>
                     </div>
                   </div>
                   <div class="form-row single">
                     <div class="form-group">
                       <label class="form-label">Street Address <span class="required">*</span></label>
-                      <input type="text" id="shippingStreet" name="shippingStreet" class="form-input" value="<%= shipping.street || '' %>" required>
+                      <input type="text" id="shippingStreet" name="shippingStreet" class="form-input" 
+                             value="<%= shipping.street || '' %>" required>
                     </div>
                   </div>
-                  <div class="form-row">
+                  <div class="form-row three-col">
                     <div class="form-group">
                       <label class="form-label">City <span class="required">*</span></label>
-                      <input type="text" id="shippingCity" name="shippingCity" class="form-input" value="<%= shipping.city || '' %>" required>
+                      <input type="text" id="shippingCity" name="shippingCity" class="form-input" 
+                             value="<%= shipping.city || '' %>" required>
                     </div>
                     <div class="form-group">
                       <label class="form-label">State/Province</label>
-                      <input type="text" id="shippingState" name="shippingState" class="form-input" value="<%= shipping.state || '' %>">
+                      <input type="text" id="shippingState" name="shippingState" class="form-input" 
+                             value="<%= shipping.state || '' %>">
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Postal Code</label>
+                      <input type="text" id="shippingPostalCode" name="shippingPostalCode" class="form-input" 
+                             value="<%= shipping.postalCode || '' %>">
                     </div>
                   </div>
                   <div class="form-row">
                     <div class="form-group">
                       <label class="form-label">Country <span class="required">*</span></label>
-                      <input type="text" id="shippingCountry" name="shippingCountry" class="form-input" value="<%= shipping.country || '' %>" required>
+                      <input type="text" id="shippingCountry" name="shippingCountry" class="form-input" 
+                             value="<%= shipping.country || '' %>" required>
                     </div>
                     <div class="form-group">
-                      <label class="form-label">Postal Code</label>
-                      <input type="text" id="shippingPostalCode" name="shippingPostalCode" class="form-input" value="<%= shipping.postalCode || '' %>">
+                      <label class="form-label">Tracking Number</label>
+                      <input type="text" id="trackingNumber" name="trackingNumber" class="form-input" 
+                             value="<%= shipping.trackingNumber || '' %>" placeholder="Enter tracking number">
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label class="form-label">Carrier</label>
+                      <select id="carrier" name="carrier" class="form-select">
+                        <% const carrier = shipping.carrier || ''; %>
+                        <option value="" <%= !carrier ? 'selected' : '' %>>Select Carrier</option>
+                        <option value="DHL" <%= carrier === 'DHL' ? 'selected' : '' %>>DHL</option>
+                        <option value="FedEx" <%= carrier === 'FedEx' ? 'selected' : '' %>>FedEx</option>
+                        <option value="UPS" <%= carrier === 'UPS' ? 'selected' : '' %>>UPS</option>
+                        <option value="Aramex" <%= carrier === 'Aramex' ? 'selected' : '' %>>Aramex</option>
+                        <option value="Emirates Post" <%= carrier === 'Emirates Post' ? 'selected' : '' %>>Emirates Post</option>
+                        <option value="Other" <%= carrier === 'Other' ? 'selected' : '' %>>Other</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Estimated Delivery</label>
+                      <input type="date" id="estimatedDelivery" name="estimatedDelivery" class="form-input" 
+                             value="<%= shipping.estimatedDelivery ? new Date(shipping.estimatedDelivery).toISOString().split('T')[0] : '' %>">
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Order Settings -->
+              <div class="form-card">
+                <div class="form-card-header">
+                  <h3><i data-lucide="settings"></i> Order Settings</h3>
+                </div>
+                <div class="form-card-body">
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label class="form-label">Priority</label>
+                      <select id="priority" name="priority" class="form-select">
+                        <option value="normal" <%= order.priority === 'normal' ? 'selected' : '' %>>Normal</option>
+                        <option value="high" <%= order.priority === 'high' ? 'selected' : '' %>>High Priority</option>
+                        <option value="urgent" <%= order.priority === 'urgent' ? 'selected' : '' %>>Urgent</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Currency</label>
+                      <select id="currency" name="currency" class="form-select" disabled>
+                        <option value="AED" <%= order.currency === 'AED' ? 'selected' : '' %>>AED - UAE Dirham</option>
+                        <option value="USD" <%= order.currency === 'USD' ? 'selected' : '' %>>USD - US Dollar</option>
+                        <option value="EUR" <%= order.currency === 'EUR' ? 'selected' : '' %>>EUR - Euro</option>
+                      </select>
+                      <span class="form-help">Currency cannot be changed after order creation</span>
+                    </div>
+                  </div>
+                  <div class="form-row single">
+                    <div class="form-group">
+                      <label class="form-label">Internal Notes</label>
+                      <textarea id="notes" name="notes" class="form-textarea" 
+                                placeholder="Add internal notes about this order (not visible to customer)..."><%= order.notes || '' %></textarea>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            <!-- Right Column - Order Summary -->
+            <!-- Right Column - Sidebar -->
             <div>
-              <div class="form-card order-summary-sidebar">
+              <div class="form-card sidebar-card">
                 <div class="form-card-header">
                   <h3><i data-lucide="receipt"></i> Order Summary</h3>
                 </div>
-                <div class="form-card-body">
-                  <% const pricing = order.pricing || { subtotal: 0, tax: 0, shipping: 0, total: 0 }; %>
-                  <div class="summary-total-row">
-                    <span class="label">Items<span class="items-count-badge" id="summaryItemsCount"><%= order.items?.length || 0 %></span></span>
-                    <span class="value" id="summaryItemsTotal"><%= pricing.currency || 'AED' %> <%= (pricing.subtotal || 0).toLocaleString('en-US', { minimumFractionDigits: 2 }) %></span>
+                
+                <!-- Order Info -->
+                <div class="summary-section">
+                  <div class="summary-section-title">Order Info</div>
+                  <div class="summary-row">
+                    <span class="label">Order Number</span>
+                    <span class="value" style="font-family: monospace;"><%= order.id %></span>
                   </div>
-                  <div class="summary-total-row">
-                    <span class="label">Shipping</span>
-                    <span class="value"><%= pricing.currency || 'AED' %> <%= (pricing.shipping || 0).toLocaleString('en-US', { minimumFractionDigits: 2 }) %></span>
+                  <div class="summary-row">
+                    <span class="label">Created</span>
+                    <span class="value"><%= order.date %></span>
                   </div>
-                  <div class="summary-total-row">
-                    <span class="label">Processing Fee</span>
-                    <span class="value"><%= pricing.currency || 'AED' %> <%= (pricing.processingFee || 0).toLocaleString('en-US', { minimumFractionDigits: 2 }) %></span>
-                  </div>
-                  <div class="summary-total-row grand-total">
-                    <span class="label">Total</span>
-                    <span class="value" id="summaryGrandTotal"><%= pricing.currency || 'AED' %> <%= (pricing.total || 0).toLocaleString('en-US', { minimumFractionDigits: 2 }) %></span>
+                  <div class="summary-row">
+                    <span class="label">Status</span>
+                    <span class="status-badge <%= order.status %>" style="font-size: 0.75rem; padding: 0.25rem 0.6rem;">
+                      <%= order.status.charAt(0).toUpperCase() + order.status.slice(1) %>
+                    </span>
                   </div>
                 </div>
                 
-                <div style="padding: 0 1.5rem 1.5rem;">
-                  <div class="form-actions">
-                    <button type="submit" class="admin-btn admin-btn-primary" id="saveOrderBtn">
-                      <i data-lucide="check-circle"></i>
-                      Save Changes
-                    </button>
-                    <a href="/admin/orders/<%= order.id %>" class="admin-btn admin-btn-secondary">
-                      <i data-lucide="x"></i>
-                      Cancel
-                    </a>
+                <!-- Pricing Summary -->
+                <div class="summary-section">
+                  <div class="summary-section-title">Pricing</div>
+                  <div class="summary-row">
+                    <span class="label">Items <span class="items-count-badge" id="summaryItemsCount"><%= order.items?.length || 0 %></span></span>
+                    <span class="value" id="summarySubtotal"><%= order.currency || 'AED' %> <%= (pricing.subtotal || 0).toLocaleString('en-US', { minimumFractionDigits: 2 }) %></span>
                   </div>
-                  
-                  <div class="danger-zone">
-                    <button type="button" class="danger-btn" onclick="confirmDelete()">
-                      <i data-lucide="trash-2"></i>
-                      Delete Order
-                    </button>
+                  <div class="summary-row">
+                    <span class="label">Shipping</span>
+                    <span class="value" id="summaryShipping"><%= order.currency || 'AED' %> <%= (pricing.shipping || 0).toLocaleString('en-US', { minimumFractionDigits: 2 }) %></span>
                   </div>
+                  <div class="summary-row">
+                    <span class="label">Tax</span>
+                    <span class="value" id="summaryTax"><%= order.currency || 'AED' %> <%= (pricing.tax || 0).toLocaleString('en-US', { minimumFractionDigits: 2 }) %></span>
+                  </div>
+                  <% if (pricing.processingFee > 0) { %>
+                  <div class="summary-row">
+                    <span class="label">Processing Fee</span>
+                    <span class="value"><%= order.currency || 'AED' %> <%= (pricing.processingFee || 0).toLocaleString('en-US', { minimumFractionDigits: 2 }) %></span>
+                  </div>
+                  <% } %>
+                  <% if (pricing.discount > 0) { %>
+                  <div class="summary-row">
+                    <span class="label">Discount</span>
+                    <span class="value" style="color: #10b981;">-<%= order.currency || 'AED' %> <%= (pricing.discount || 0).toLocaleString('en-US', { minimumFractionDigits: 2 }) %></span>
+                  </div>
+                  <% } %>
+                  <div class="summary-row total">
+                    <span class="label">Total</span>
+                    <span class="value" id="summaryTotal"><%= order.currency || 'AED' %> <%= (pricing.total || 0).toLocaleString('en-US', { minimumFractionDigits: 2 }) %></span>
+                  </div>
+                </div>
+                
+                <!-- Payment Status -->
+                <div class="summary-section">
+                  <div class="summary-section-title">Payment</div>
+                  <div class="summary-row">
+                    <span class="label">Status</span>
+                    <span class="payment-badge <%= payment.status || 'pending' %>">
+                      <%= (payment.status || 'pending').charAt(0).toUpperCase() + (payment.status || 'pending').slice(1) %>
+                    </span>
+                  </div>
+                  <div class="summary-row">
+                    <span class="label">Paid</span>
+                    <span class="value" style="color: #10b981;"><%= order.currency || 'AED' %> <%= (payment.amountPaid || 0).toLocaleString('en-US', { minimumFractionDigits: 2 }) %></span>
+                  </div>
+                  <% if (payment.amountDue > 0) { %>
+                  <div class="summary-row">
+                    <span class="label">Due</span>
+                    <span class="value" style="color: #f59e0b;"><%= order.currency || 'AED' %> <%= (payment.amountDue || 0).toLocaleString('en-US', { minimumFractionDigits: 2 }) %></span>
+                  </div>
+                  <% } %>
+                </div>
+                
+                <!-- Actions -->
+                <div class="form-actions-section">
+                  <button type="submit" class="admin-btn admin-btn-primary" id="saveOrderBtn">
+                    <i data-lucide="save"></i>
+                    Save Changes
+                  </button>
+                  <a href="/admin/orders/<%= order.id %>" class="admin-btn admin-btn-secondary">
+                    <i data-lucide="x"></i>
+                    Cancel
+                  </a>
+                </div>
+                
+                <div class="danger-zone">
+                  <button type="button" class="danger-btn" onclick="confirmDelete()">
+                    <i data-lucide="trash-2"></i>
+                    Delete Order
+                  </button>
                 </div>
               </div>
             </div>
@@ -965,9 +1326,9 @@
   <script>
     // Order state
     const orderState = {
-      id: '<%= order.id %>',
-      items: <%= JSON.stringify(order.items || []) %>,
-      currency: '<%= order.pricing?.currency || "AED" %>'
+      id: '<%- order.id %>',
+      items: <%- JSON.stringify(order.items || []) %>,
+      currency: '<%- order.pricing?.currency || "AED" %>'
     };
     
     // DOM elements
@@ -977,8 +1338,9 @@
     const partSearchResultsList = document.getElementById('partSearchResultsList');
     const itemsTableBody = document.getElementById('itemsTableBody');
     const summaryItemsCount = document.getElementById('summaryItemsCount');
-    const summaryItemsTotal = document.getElementById('summaryItemsTotal');
-    const summaryGrandTotal = document.getElementById('summaryGrandTotal');
+    const itemsCountBadge = document.getElementById('itemsCountBadge');
+    const summarySubtotal = document.getElementById('summarySubtotal');
+    const summaryTotal = document.getElementById('summaryTotal');
     
     // Part search
     let searchTimeout = null;
@@ -1002,7 +1364,6 @@
       }
     });
     
-    // Close search results when clicking outside
     document.addEventListener('click', function(e) {
       if (!e.target.closest('.part-search-container')) {
         partSearchResults.classList.remove('active');
@@ -1013,12 +1374,10 @@
       partSearchLoading.classList.add('active');
       
       try {
-        // First try autocomplete for prefix matching
         const autocompleteResponse = await fetch(`/admin/api/search/autocomplete?q=${encodeURIComponent(query)}&limit=10`);
         const autocompleteData = await autocompleteResponse.json();
         
         if (autocompleteData.success && autocompleteData.suggestions && autocompleteData.suggestions.length > 0) {
-          // Get full details for the first suggested part number
           const partNumber = autocompleteData.suggestions[0].partNumber;
           const partsResponse = await fetch(`/admin/api/search?q=${encodeURIComponent(partNumber)}&limit=20`);
           const partsData = await partsResponse.json();
@@ -1029,12 +1388,10 @@
             renderSearchResults(partsData.results);
             partSearchResults.classList.add('active');
           } else {
-            // Show autocomplete suggestions
             renderAutocompleteSuggestions(autocompleteData.suggestions);
             partSearchResults.classList.add('active');
           }
         } else {
-          // Fallback to direct exact search
           const response = await fetch(`/admin/api/search?q=${encodeURIComponent(query)}&limit=10`);
           const data = await response.json();
           
@@ -1063,7 +1420,7 @@
     function renderAutocompleteSuggestions(suggestions) {
       partSearchResultsList.innerHTML = `
         <div class="part-search-results-header">Suggestions</div>
-        ${suggestions.map((suggestion, index) => `
+        ${suggestions.map((suggestion) => `
           <div class="suggestion-item" onclick="selectSuggestion('${escapeHtml(suggestion.partNumber)}')">
             <span class="suggestion-part-number">${escapeHtml(suggestion.partNumber)}</span>
             <div class="suggestion-meta">
@@ -1074,7 +1431,6 @@
           </div>
         `).join('')}
       `;
-      
       if (typeof lucide !== 'undefined') lucide.createIcons();
     }
     
@@ -1128,7 +1484,6 @@
           </tbody>
         </table>
       `;
-      
       window.searchResults = results;
       if (typeof lucide !== 'undefined') lucide.createIcons();
     }
@@ -1162,6 +1517,7 @@
     function updateItemsTable() {
       const count = orderState.items.length;
       summaryItemsCount.textContent = count;
+      itemsCountBadge.textContent = count;
       
       if (count === 0) {
         itemsTableBody.innerHTML = `
@@ -1172,8 +1528,7 @@
             </td>
           </tr>
         `;
-        summaryItemsTotal.textContent = 'AED 0.00';
-        summaryGrandTotal.textContent = 'AED 0.00';
+        summarySubtotal.textContent = `${orderState.currency} 0.00`;
         if (typeof lucide !== 'undefined') lucide.createIcons();
         return;
       }
@@ -1185,62 +1540,44 @@
           <td>${escapeHtml(item.supplier || 'N/A')}</td>
           <td class="price">${item.currency || 'AED'} ${(item.price || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
           <td>
-            <button type="button" class="remove-item-btn" onclick="removeItem(${index})" ${count === 1 ? 'disabled style="opacity: 0.3;"' : ''}>
+            <button type="button" class="remove-item-btn" onclick="removeItem(${index})" ${count === 1 ? 'disabled' : ''}>
               <i data-lucide="trash-2"></i>
             </button>
           </td>
         </tr>
       `).join('');
       
-      // Calculate totals
-      const total = orderState.items.reduce((sum, item) => sum + (item.price || 0), 0);
-      summaryItemsTotal.textContent = `${orderState.currency} ${total.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
-      summaryGrandTotal.textContent = `${orderState.currency} ${total.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+      const subtotal = orderState.items.reduce((sum, item) => sum + (item.price || 0), 0);
+      summarySubtotal.textContent = `${orderState.currency} ${subtotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
       
       if (typeof lucide !== 'undefined') lucide.createIcons();
     }
     
-    // Status change preview
-    document.getElementById('orderStatus').addEventListener('change', function() {
-      const badge = document.getElementById('statusBadge');
-      const status = this.value;
-      badge.className = 'status-badge ' + status;
-      
-      const iconMap = {
-        'pending': 'clock',
-        'confirmed': 'check',
-        'processing': 'loader',
-        'shipped': 'truck',
-        'delivered': 'check-circle',
-        'cancelled': 'x-circle'
-      };
-      
-      badge.innerHTML = '<i data-lucide="' + iconMap[status] + '"></i> ' + status;
-      badge.style.display = 'flex';
-      badge.style.alignItems = 'center';
-      badge.style.gap = '0.25rem';
-      if (typeof lucide !== 'undefined') lucide.createIcons();
-    });
-    
     // Delete confirmation
     async function confirmDelete() {
-      if (confirm('Are you sure you want to delete this order? This action cannot be undone.')) {
-        try {
-          const response = await fetch('/admin/api/orders/<%= order.id %>', {
-            method: 'DELETE'
-          });
-          
-          const data = await response.json();
-          
-          if (data.success) {
-            window.location.href = '/admin/orders';
-          } else {
-            alert(data.error || 'Failed to delete order');
-          }
-        } catch (error) {
-          console.error('Delete error:', error);
-          alert('Failed to delete order');
+      const confirmed = await showConfirm('Are you sure you want to delete this order? This action cannot be undone.', {
+        title: 'Delete Order',
+        type: 'delete',
+        confirmText: 'Delete',
+        confirmClass: 'danger'
+      });
+      if (!confirmed) return;
+      
+      try {
+        const response = await fetch('/admin/api/orders/<%= order.id %>', {
+          method: 'DELETE'
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          window.location.href = '/admin/orders';
+        } else {
+          showAlert(data.error || 'Failed to delete order', 'error');
         }
+      } catch (error) {
+        console.error('Delete error:', error);
+        showAlert('Failed to delete order', 'error');
       }
     }
     
@@ -1251,14 +1588,23 @@
       const saveBtn = document.getElementById('saveOrderBtn');
       saveBtn.disabled = true;
       saveBtn.innerHTML = '<i data-lucide="loader-2" class="animate-spin"></i> Saving...';
+      if (typeof lucide !== 'undefined') lucide.createIcons();
       
       const orderData = {
-        status: document.getElementById('orderStatus').value,
         priority: document.getElementById('priority').value,
         notes: document.getElementById('notes').value,
         items: orderState.items,
         payment: {
-          method: document.getElementById('paymentMethod').value
+          method: document.getElementById('paymentMethod').value,
+          status: document.getElementById('paymentStatus').value,
+          type: document.getElementById('paymentType').value,
+          amountPaid: parseFloat(document.getElementById('amountPaid').value) || 0,
+          amountDue: parseFloat(document.getElementById('amountDue').value) || 0
+        },
+        pricing: {
+          shipping: parseFloat(document.getElementById('shippingCost').value) || 0,
+          tax: parseFloat(document.getElementById('taxAmount').value) || 0,
+          discount: parseFloat(document.getElementById('discountAmount').value) || 0
         },
         shipping: {
           fullName: document.getElementById('shippingName').value,
@@ -1267,7 +1613,10 @@
           city: document.getElementById('shippingCity').value,
           state: document.getElementById('shippingState').value,
           country: document.getElementById('shippingCountry').value,
-          postalCode: document.getElementById('shippingPostalCode').value
+          postalCode: document.getElementById('shippingPostalCode').value,
+          trackingNumber: document.getElementById('trackingNumber').value,
+          carrier: document.getElementById('carrier').value,
+          estimatedDelivery: document.getElementById('estimatedDelivery').value || null
         }
       };
       
@@ -1285,16 +1634,16 @@
         if (data.success) {
           window.location.href = '/admin/orders/<%= order.id %>';
         } else {
-          alert(data.error || 'Failed to update order');
+          showAlert(data.error || 'Failed to update order', 'error');
           saveBtn.disabled = false;
-          saveBtn.innerHTML = '<i data-lucide="check-circle"></i> Save Changes';
+          saveBtn.innerHTML = '<i data-lucide="save"></i> Save Changes';
           if (typeof lucide !== 'undefined') lucide.createIcons();
         }
       } catch (error) {
         console.error('Error updating order:', error);
-        alert('Failed to update order. Please try again.');
+        showAlert('Failed to update order. Please try again.', 'error');
         saveBtn.disabled = false;
-        saveBtn.innerHTML = '<i data-lucide="check-circle"></i> Save Changes';
+        saveBtn.innerHTML = '<i data-lucide="save"></i> Save Changes';
         if (typeof lucide !== 'undefined') lucide.createIcons();
       }
     });

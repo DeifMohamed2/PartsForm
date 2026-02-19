@@ -217,11 +217,11 @@
           });
         }
       }).then(function(data) {
-        alert('User created successfully!');
+        showToast('User created successfully!', 'success');
         window.location.href = '/admin/users/' + data.data.id;
       }).catch(function(err) {
         console.error('Error creating user:', err);
-        alert(err.message || 'Failed to create user');
+        showAlert(err.message || 'Failed to create user', 'error');
       });
     });
   </script>

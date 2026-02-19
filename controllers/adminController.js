@@ -1344,6 +1344,73 @@ const updateOrderStatus = async (req, res) => {
 };
 
 /**
+ * Add Timeline Note (API)
+ * Allows adding custom timeline notes without changing order status
+ */
+const addTimelineNote = async (req, res) => {
+  try {
+    const orderId = req.params.id;
+    const { message, noteType } = req.body;
+
+    if (!message || !message.trim()) {
+      return res
+        .status(400)
+        .json({ success: false, error: 'Message is required' });
+    }
+
+    // Find order
+    let order = await Order.findOne({ orderNumber: orderId });
+    if (!order) {
+      const mongoose = require('mongoose');
+      if (mongoose.Types.ObjectId.isValid(orderId)) {
+        order = await Order.findById(orderId);
+      }
+    }
+
+    if (!order) {
+      return res.status(404).json({ success: false, error: 'Order not found' });
+    }
+
+    // Define note type labels for timeline
+    const noteTypeLabels = {
+      update: 'Update',
+      delay: 'Delay Notice',
+      issue: 'Issue',
+      info: 'Information',
+      action: 'Action Required',
+      resolution: 'Resolution',
+      custom: 'Note'
+    };
+
+    const timelineEntry = {
+      status: noteType || 'note',
+      message: message.trim(),
+      timestamp: new Date(),
+      updatedBy: req.admin?.username || 'Admin',
+      isNote: true, // Flag to distinguish from status changes
+      noteType: noteType || 'note' // Store the note type
+    };
+
+    order.timeline.push(timelineEntry);
+    await order.save();
+
+    res.json({
+      success: true,
+      message: 'Timeline note added successfully',
+      timelineEntry: {
+        ...timelineEntry,
+        typeLabel: noteTypeLabels[noteType] || 'Note'
+      }
+    });
+  } catch (error) {
+    console.error('Error in addTimelineNote:', error);
+    res
+      .status(500)
+      .json({ success: false, error: 'Failed to add timeline note' });
+  }
+};
+
+/**
  * Get Order Stats (API) - For dashboard
  */
 const getOrderStats = async (req, res) => {
@@ -4665,6 +4732,7 @@ module.exports = {
   createOrder,
   updateOrder,
   updateOrderStatus,
+  addTimelineNote,
   getOrderStats,
   getTicketsManagement,
   getTicketDetails,

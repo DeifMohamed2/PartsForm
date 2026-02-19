@@ -362,7 +362,13 @@
     const inquiryId = '<%= inquiry._id %>';
 
     async function retryInquiry() {
-      if (!confirm('Retry processing this inquiry?')) return;
+      const confirmed = await showConfirm('Retry processing this inquiry?', {
+        title: 'Retry Processing',
+        type: 'confirm',
+        confirmText: 'Retry',
+        confirmClass: 'primary'
+      });
+      if (!confirmed) return;
       
       try {
         const response = await fetch(`/admin/api/email-inquiries/${inquiryId}/retry`, { method: 'POST' });
@@ -380,7 +386,13 @@
     }
 
     async function resendQuotation() {
-      if (!confirm('Resend quotation to customer?')) return;
+      const confirmed = await showConfirm('Resend quotation to customer?', {
+        title: 'Resend Quotation',
+        type: 'confirm',
+        confirmText: 'Resend',
+        confirmClass: 'primary'
+      });
+      if (!confirmed) return;
       
       try {
         const response = await fetch(`/admin/api/email-inquiries/${inquiryId}/resend-quotation`, { method: 'POST' });
@@ -398,7 +410,13 @@
     }
 
     async function regenerateQuotation() {
-      if (!confirm('Regenerate quotation with current data?')) return;
+      const confirmed = await showConfirm('Regenerate quotation with current data?', {
+        title: 'Regenerate Quotation',
+        type: 'confirm',
+        confirmText: 'Regenerate',
+        confirmClass: 'primary'
+      });
+      if (!confirmed) return;
       
       try {
         const response = await fetch(`/admin/api/email-inquiries/${inquiryId}/regenerate-quotation`, { method: 'POST' });

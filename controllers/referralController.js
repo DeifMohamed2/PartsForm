@@ -248,6 +248,47 @@ const getReferralPartnerDetails = async (req, res) => {
       });
     }
 
+    // Calculate live stats from ReferralCommission to ensure accuracy
+    const liveStats = await ReferralCommission.aggregate([
+      { $match: { referralPartner: partner._id } },
+      {
+        $group: {
+          _id: null,
+          totalReferrals: { $sum: 1 },
+          successfulReferrals: {
+            $sum: { $cond: [{ $in: ['$status', ['approved', 'paid']] }, 1, 0] },
+          },
+          pendingCommission: {
+            $sum: { $cond: [{ $eq: ['$status', 'pending'] }, '$commissionAmount', 0] },
+          },
+          approvedCommission: {
+            $sum: { $cond: [{ $eq: ['$status', 'approved'] }, '$commissionAmount', 0] },
+          },
+          paidCommission: {
+            $sum: { $cond: [{ $eq: ['$status', 'paid'] }, '$commissionAmount', 0] },
+          },
+          rejectedCommission: {
+            $sum: { $cond: [{ $eq: ['$status', 'rejected'] }, '$commissionAmount', 0] },
+          },
+          totalOrderValue: { $sum: '$orderSubtotal' },
+        },
+      },
+    ]);
+
+    // Update partner stats with live data (and persist for future use)
+    if (liveStats.length > 0) {
+      partner.stats = {
+        totalReferrals: liveStats[0].totalReferrals || 0,
+        successfulReferrals: liveStats[0].successfulReferrals || 0,
+        pendingCommission: liveStats[0].pendingCommission || 0,
+        paidCommission: liveStats[0].paidCommission || 0,
+        rejectedCommission: liveStats[0].rejectedCommission || 0,
+        totalOrderValue: liveStats[0].totalOrderValue || 0,
+      };
+      // Save updated stats to database
+      await partner.save();
+    }
+
     // Get recent commissions
     const recentCommissions = await ReferralCommission.find({
       referralPartner: partner._id,
@@ -256,12 +297,18 @@ const getReferralPartnerDetails = async (req, res) => {
       .sort({ createdAt: -1 })
       .limit(10);
 
+    // Get partner's referral codes
+    const referralCodes = await ReferralCode.find({
+      referralPartner: partner._id,
+    }).sort({ createdAt: -1 });
+
     res.render('admin/referrals/partner-details', {
       title: `Partner: ${partner.fullName}`,
       admin: req.user,
       activePage: 'referrals',
       partner,
       recentCommissions,
+      referralCodes,
     });
   } catch (error) {
     console.error('Error loading partner details:', error);
@@ -305,6 +352,7 @@ const getReferralPartnerEdit = async (req, res) => {
 
 /**
  * Get referral partners list (API)
+ * Now includes live stats calculation from ReferralCommission
  */
 const getPartnersApi = async (req, res) => {
   try {
@@ -343,13 +391,60 @@ const getPartnersApi = async (req, res) => {
         .select('-password -passwordResetToken -passwordResetExpires')
         .sort(sortOptions)
         .skip(skip)
-        .limit(parseInt(limit)),
+        .limit(parseInt(limit))
+        .lean(),
       ReferralPartner.countDocuments(query),
     ]);
 
+    // Calculate live stats for each partner from ReferralCommission
+    const partnerIds = partners.map(p => p._id);
+    const commissionStats = await ReferralCommission.aggregate([
+      { $match: { referralPartner: { $in: partnerIds } } },
+      {
+        $group: {
+          _id: '$referralPartner',
+          totalReferrals: { $sum: 1 },
+          successfulReferrals: {
+            $sum: { $cond: [{ $in: ['$status', ['approved', 'paid']] }, 1, 0] },
+          },
+          pendingCommission: {
+            $sum: { $cond: [{ $eq: ['$status', 'pending'] }, '$commissionAmount', 0] },
+          },
+          paidCommission: {
+            $sum: { $cond: [{ $eq: ['$status', 'paid'] }, '$commissionAmount', 0] },
+          },
+          totalOrderValue: { $sum: '$orderSubtotal' },
+        },
+      },
+    ]);
+
+    // Create a map of partner stats
+    const statsMap = {};
+    commissionStats.forEach(stat => {
+      statsMap[stat._id.toString()] = {
+        totalReferrals: stat.totalReferrals || 0,
+        successfulReferrals: stat.successfulReferrals || 0,
+        pendingCommission: stat.pendingCommission || 0,
+        paidCommission: stat.paidCommission || 0,
+        totalOrderValue: stat.totalOrderValue || 0,
+      };
+    });
+
+    // Merge live stats into partners
+    const partnersWithStats = partners.map(partner => ({
+      ...partner,
+      stats: statsMap[partner._id.toString()] || {
+        totalReferrals: 0,
+        successfulReferrals: 0,
+        pendingCommission: 0,
+        paidCommission: 0,
+        totalOrderValue: 0,
+      },
+    }));
+
     res.json({
       success: true,
-      partners,
+      partners: partnersWithStats,
       pagination: {
         page: parseInt(page),
         limit: parseInt(limit),
@@ -2364,6 +2459,92 @@ const getPendingApplicationsCount = async (req, res) => {
   }
 };
 
+/**
+ * Resync all partner stats from ReferralCommission
+ * Use this to fix any data sync issues
+ */
+const resyncAllPartnerStats = async (req, res) => {
+  try {
+    // Get all partners
+    const partners = await ReferralPartner.find({});
+    
+    let updated = 0;
+    let errors = 0;
+    
+    for (const partner of partners) {
+      try {
+        // Calculate live stats from ReferralCommission
+        const liveStats = await ReferralCommission.aggregate([
+          { $match: { referralPartner: partner._id } },
+          {
+            $group: {
+              _id: null,
+              totalReferrals: { $sum: 1 },
+              successfulReferrals: {
+                $sum: { $cond: [{ $in: ['$status', ['approved', 'paid']] }, 1, 0] },
+              },
+              pendingCommission: {
+                $sum: { $cond: [{ $eq: ['$status', 'pending'] }, '$commissionAmount', 0] },
+              },
+              paidCommission: {
+                $sum: { $cond: [{ $eq: ['$status', 'paid'] }, '$commissionAmount', 0] },
+              },
+              rejectedCommission: {
+                $sum: { $cond: [{ $eq: ['$status', 'rejected'] }, '$commissionAmount', 0] },
+              },
+              totalOrderValue: { $sum: '$orderSubtotal' },
+            },
+          },
+        ]);
+        
+        if (liveStats.length > 0) {
+          partner.stats = {
+            totalReferrals: liveStats[0].totalReferrals || 0,
+            successfulReferrals: liveStats[0].successfulReferrals || 0,
+            pendingCommission: liveStats[0].pendingCommission || 0,
+            paidCommission: liveStats[0].paidCommission || 0,
+            rejectedCommission: liveStats[0].rejectedCommission || 0,
+            totalOrderValue: liveStats[0].totalOrderValue || 0,
+          };
+        } else {
+          // Reset stats if no commissions found
+          partner.stats = {
+            totalReferrals: 0,
+            successfulReferrals: 0,
+            pendingCommission: 0,
+            paidCommission: 0,
+            rejectedCommission: 0,
+            totalOrderValue: 0,
+          };
+        }
+        
+        await partner.save();
+        updated++;
+      } catch (err) {
+        console.error(`Error updating partner ${partner._id}:`, err);
+        errors++;
+      }
+    }
+    
+    res.json({
+      success: true,
+      message: `Resynced ${updated} partners successfully`,
+      data: {
+        total: partners.length,
+        updated,
+        errors,
+      },
+    });
+  } catch (error) {
+    console.error('Error in resyncAllPartnerStats:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to resync partner stats',
+      error: error.message,
+    });
+  }
+};
+
 // ==========================================
 // EXPORTS
 // ==========================================
@@ -2418,6 +2599,9 @@ module.exports = {
   approveApplication,
   rejectApplication,
   getPendingApplicationsCount,
+  
+  // Utility
+  resyncAllPartnerStats,
   
   // Buyer validation
   validateReferralCode,

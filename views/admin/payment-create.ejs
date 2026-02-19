@@ -188,14 +188,14 @@
     });
 
     function saveDraft() {
-      alert('Payment saved as draft! (UI Demo)');
+      showToast('Payment saved as draft! (UI Demo)', 'success');
     }
 
     document.getElementById('recordPaymentForm').addEventListener('submit', function(e) {
       e.preventDefault();
       
       var paymentId = 'PAY-2025-' + String(Math.floor(Math.random() * 900) + 100);
-      alert('Payment ' + paymentId + ' recorded successfully!');
+      showToast('Payment ' + paymentId + ' recorded successfully!', 'success');
       window.location.href = '/admin/payments/' + paymentId;
     });
   </script>

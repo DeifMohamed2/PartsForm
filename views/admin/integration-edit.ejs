@@ -1313,8 +1313,14 @@
     }
 
     // Sync now
-    function syncNow() {
-      if (!confirm('Start a sync now? This may take a while for large datasets.')) return;
+    async function syncNow() {
+      const confirmed = await showConfirm('Start a sync now? This may take a while for large datasets.', {
+        title: 'Start Sync',
+        type: 'confirm',
+        confirmText: 'Start Sync',
+        confirmClass: 'primary'
+      });
+      if (!confirmed) return;
 
       showToast('Starting sync...', 'success');
 

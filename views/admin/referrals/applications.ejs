@@ -1011,7 +1011,7 @@
         const data = await response.json();
 
         if (!data.success) {
-          alert('Failed to load application details');
+          showAlert('Failed to load application details', 'error');
           return;
         }
 
@@ -1129,7 +1129,7 @@
         }
       } catch (error) {
         console.error('Error loading application:', error);
-        alert('Failed to load application details');
+        showAlert('Failed to load application details', 'error');
       }
     }
 
