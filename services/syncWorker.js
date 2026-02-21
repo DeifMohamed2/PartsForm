@@ -23,6 +23,7 @@
  * - Log throttling (prevent log spam during outages)
  * - Memory watchdog (stop before OOM)
  * - Exponential backoff on failures
+ * - SYSTEM MEMORY MONITOR with proactive pause/resume
  */
 
 require('dotenv').config();
@@ -32,13 +33,15 @@ const Integration = require('../models/Integration');
 const SyncHistory = require('../models/SyncHistory');
 const { runTurboSync, CONFIG: TURBO_CONFIG } = require('./turboSyncEngine');
 
-// OOM Prevention utilities
+// OOM Prevention utilities (enhanced with system monitoring)
 const { 
   circuitBreakers, 
   logThrottle, 
   memoryWatchdog, 
   ExponentialBackoff,
-  isConnectionError 
+  isConnectionError,
+  systemMemoryMonitor,
+  memorySafeExecutor,
 } = require('../utils/oomPrevention');
 
 // Increase event listener limit
@@ -463,12 +466,29 @@ class SyncWorker {
           continue;
         }
         
-        // Memory guard - don't start sync if memory is too high
+        // Memory guard - don't start sync if memory is too high (ENHANCED)
         const memStatus = memoryWatchdog.checkMemory();
         if (!memStatus.safe) {
-          logThrottle.log('sync-worker-memory', `⏸️  Memory too high (${memStatus.usage.rss}MB) - skipping sync`);
+          logThrottle.log('sync-worker-memory', `⏸️  Memory too high: ${memStatus.reason} - skipping sync`);
           // Try to force GC if available
-          memoryWatchdog.forceGC();
+          const gcResult = memoryWatchdog.forceGC();
+          if (gcResult.success && gcResult.freed > 100) {
+            this.log(`GC freed ${gcResult.freed}MB, rechecking...`);
+            // Recheck after GC
+            if (!memoryWatchdog.checkMemory().safe) {
+              await new Promise(resolve => setTimeout(resolve, CONFIG.POLL_INTERVAL_BACKOFF));
+              continue;
+            }
+          } else {
+            await new Promise(resolve => setTimeout(resolve, CONFIG.POLL_INTERVAL_BACKOFF));
+            continue;
+          }
+        }
+        
+        // Also check if sync is paused by system memory monitor
+        const pauseStatus = memoryWatchdog.isSyncPaused();
+        if (pauseStatus.paused) {
+          logThrottle.log('sync-worker-paused', `⏸️  Sync paused: ${pauseStatus.reason}`);
           await new Promise(resolve => setTimeout(resolve, CONFIG.POLL_INTERVAL_BACKOFF));
           continue;
         }
@@ -532,12 +552,47 @@ class SyncWorker {
    */
   async start() {
     console.log('\n' + '='.repeat(60));
-    console.log('� TURBO SYNC WORKER v2.0');
+    console.log('🚀 TURBO SYNC WORKER v2.0');
     console.log('='.repeat(60));
-    console.log(`   Memory: ${(process.memoryUsage().heapTotal / 1024 / 1024).toFixed(0)} MB allocated`);
+    const os = require('os');
+    const totalMemGB = Math.round(os.totalmem() / 1024 / 1024 / 1024);
+    console.log(`   System Memory: ${totalMemGB} GB total`);
+    console.log(`   Process Memory: ${(process.memoryUsage().heapTotal / 1024 / 1024).toFixed(0)} MB allocated`);
     console.log(`   Engine: ${USE_TURBO_ENGINE ? 'TURBO (mongoimport)' : 'Legacy (Node.js)'}`);
     console.log(`   Target: 75M records in ~30 minutes`);
     console.log('='.repeat(60) + '\n');
+
+    // Initialize system memory monitor with handlers
+    systemMemoryMonitor.setHandlers({
+      onWarning: (status) => {
+        this.log(`Memory warning: ${status.freePercent}% free (${status.freeMB}MB)`, 'PROGRESS');
+      },
+      onCritical: async (status) => {
+        this.log(`Memory CRITICAL: ${status.freePercent}% free - pausing new syncs`, 'ERROR');
+        // Don't start new syncs when memory is critical
+      },
+      onEmergency: async (status) => {
+        this.log(`Memory EMERGENCY: ${status.freePercent}% free - stopping sync if possible`, 'ERROR');
+        // If we're syncing, try to gracefully stop
+        if (this.isProcessing && this.currentSync) {
+          this.log('Attempting graceful sync pause due to memory emergency...', 'ERROR');
+        }
+      },
+      onRecovered: (status) => {
+        this.log(`Memory recovered: ${status.freePercent}% free - resuming normal operation`, 'SUCCESS');
+      },
+    });
+    
+    // Start system memory monitoring
+    systemMemoryMonitor.start();
+    
+    // Log memory status periodically
+    setInterval(() => {
+      const memStatus = memoryWatchdog.getStatus();
+      if (memStatus.level !== 'ok') {
+        this.log(`Memory: ${memStatus.rss}MB RSS, ${memStatus.systemFreePercent}% system free (${memStatus.level})`, 'PROGRESS');
+      }
+    }, 60000); // Log every minute if not OK
 
     await this.connect();
     await this.watchForRequests();

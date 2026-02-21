@@ -7,13 +7,14 @@ module.exports = {
     // - max_memory_restart ensures PM2 restarts before system OOM killer
     // - node_args --max-old-space-size limits V8 heap
     // - exp_backoff_restart_delay prevents restart storms
+    // - --expose-gc enables manual GC for memory management
     {
       name: 'partsform',
       script: 'app.js',
       instances: 1,
       exec_mode: 'fork',
-      max_memory_restart: '1500M',   // Restart before hitting 2GB limit
-      node_args: '--max-old-space-size=1536',  // V8 heap limit (slightly less than max_memory)
+      max_memory_restart: '2G',   // Restart before hitting memory issue
+      node_args: '--max-old-space-size=2048 --expose-gc',  // V8 heap limit + GC control
       env: {
         NODE_ENV: 'production',
         SYNC_USE_WORKER: 'true',  // Delegate sync to worker process
@@ -41,18 +42,20 @@ module.exports = {
     // OOM Prevention:
     // - Lower memory limit than available to leave room for MongoDB + ES
     // - --expose-gc allows manual GC triggering
+    // - --gc-interval for periodic automatic GC during heavy ops
     // - Circuit breaker in code prevents retry storms
+    // - SystemMemoryMonitor pauses sync when system memory is low
     // - Autorestart with backoff prevents crash loops
     {
       name: 'sync-worker',
       script: 'services/syncWorker.js',
       instances: 1,
       exec_mode: 'fork',
-      max_memory_restart: '8G',   // 8GB limit - leaves room for MongoDB (4GB) + Elasticsearch (4GB) + OS
+      max_memory_restart: '8G',   // 8GB limit - leaves room for MongoDB (16GB) + Elasticsearch (16GB) + OS
       node_args: '--max-old-space-size=8192 --expose-gc --gc-interval=100',
       autorestart: true,
       watch: false,
-      kill_timeout: 60000,        // 60s to gracefully shutdown (let current batch complete)
+      kill_timeout: 120000,       // 120s to gracefully shutdown (let current batch complete)
       env: {
         NODE_ENV: 'production',
         SYNC_ENGINE: 'turbo',
