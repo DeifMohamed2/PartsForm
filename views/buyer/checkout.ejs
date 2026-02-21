@@ -13,14 +13,13 @@
         <div class="container">
           <div class="header-bar-content">
             <div class="header-left">
-              <h1 class="header-title">Checkout</h1>
-              <p class="header-subtitle" id="checkout-subtitle">Review your order and select your preferred payment
-                method</p>
+              <h1 class="header-title"><%= t('checkout.title') %></h1>
+              <p class="header-subtitle" id="checkout-subtitle"><%= t('checkout.subtitle') %></p>
             </div>
             <div class="header-right">
               <div class="checkout-badge" id="secure-badge">
                 <i data-lucide="shield-check"></i>
-                <span>Secure Checkout</span>
+                <span><%= t('checkout.secureBadge') %></span>
               </div>
             </div>
           </div>
@@ -38,29 +37,29 @@
                 <div class="step-item active" data-step="1">
                   <div class="step-number">1</div>
                   <div class="step-info">
-                    <span class="step-title">Shipping</span>
-                    <span class="step-desc">Select address</span>
+                    <span class="step-title"><%= t('delivery.title') %></span>
+                    <span class="step-desc"><%= t('checkout.steps.paymentType.desc') %></span>
                   </div>
                 </div>
                 <div class="step-item" data-step="2">
                   <div class="step-number">2</div>
                   <div class="step-info">
-                    <span class="step-title">Payment Type</span>
-                    <span class="step-desc">Choose payment plan</span>
+                    <span class="step-title"><%= t('checkout.steps.paymentType.title') %></span>
+                    <span class="step-desc"><%= t('checkout.steps.paymentType.desc') %></span>
                   </div>
                 </div>
                 <div class="step-item" data-step="3">
                   <div class="step-number">3</div>
                   <div class="step-info">
-                    <span class="step-title">Payment Method</span>
-                    <span class="step-desc">Select payment option</span>
+                    <span class="step-title"><%= t('checkout.steps.paymentMethod.title') %></span>
+                    <span class="step-desc"><%= t('checkout.steps.paymentMethod.desc') %></span>
                   </div>
                 </div>
                 <div class="step-item" data-step="4">
                   <div class="step-number">4</div>
                   <div class="step-info">
-                    <span class="step-title">Confirmation</span>
-                    <span class="step-desc">Review & complete</span>
+                    <span class="step-title"><%= t('checkout.steps.confirmation.title') %></span>
+                    <span class="step-desc"><%= t('checkout.steps.confirmation.desc') %></span>
                   </div>
                 </div>
               </div>
@@ -141,12 +140,12 @@
                 <div class="section-header">
                   <h2 class="section-title">
                     <i data-lucide="wallet"></i>
-                    <span>Select Payment Type</span>
+                    <span><%= t('checkout.step1.title') %></span>
                   </h2>
-                  <p class="section-subtitle">Choose how you'd like to pay for your order</p>
+                  <p class="section-subtitle"><%= t('checkout.step1.subtitle') %></p>
                 </div>
 
-                <div class="payment-types">
+              <div class="payment-types">
                   <div class="payment-type-card" data-type="full">
                     <div class="payment-type-radio">
                       <input type="radio" name="payment-type" id="payment-full" value="full" checked>
@@ -156,14 +155,14 @@
                       <div class="payment-type-icon full">
                         <i data-lucide="check-circle"></i>
                       </div>
-                      <h3 class="payment-type-title">Full Payment</h3>
-                      <p class="payment-type-desc">Pay the complete amount now and receive your order immediately</p>
+                      <h3 class="payment-type-title"><%= t('checkout.step1.fullPayment.title') %></h3>
+                      <p class="payment-type-desc"><%= t('checkout.step1.fullPayment.desc') %></p>
                       <div class="payment-type-badge">
                         <i data-lucide="gift"></i>
-                        <span>Best Value - No Additional Fees</span>
+                        <span><%= t('checkout.step1.fullPayment.badge') %></span>
                       </div>
                       <div class="payment-type-amount">
-                        <span class="amount-label">Total Amount:</span>
+                        <span class="amount-label"><%= t('checkout.step1.fullPayment.totalAmount') %></span>
                         <span class="amount-value" id="full-amount">0.00 د.إ</span>
                       </div>
                     </div>
@@ -178,20 +177,20 @@
                       <div class="payment-type-icon partial">
                         <i data-lucide="percent"></i>
                       </div>
-                      <h3 class="payment-type-title">Minimum Payment (20%)</h3>
-                      <p class="payment-type-desc">Pay 20% now and the remaining 80% before delivery</p>
+                      <h3 class="payment-type-title"><%= t('checkout.step1.partialPayment.title') %></h3>
+                      <p class="payment-type-desc"><%= t('checkout.step1.partialPayment.desc') %></p>
                       <div class="payment-type-breakdown">
                         <div class="breakdown-item">
-                          <span class="breakdown-label">Pay Now (20%):</span>
+                          <span class="breakdown-label"><%= t('checkout.step1.partialPayment.payNow') %></span>
                           <span class="breakdown-value" id="partial-now">0.00 د.إ</span>
                         </div>
                         <div class="breakdown-item">
-                          <span class="breakdown-label">Pay Later (80%):</span>
+                          <span class="breakdown-label"><%= t('checkout.step1.partialPayment.payLater') %></span>
                           <span class="breakdown-value" id="partial-later">0.00 د.إ</span>
                         </div>
                       </div>
                       <div class="payment-type-amount">
-                        <span class="amount-label">Due Now:</span>
+                        <span class="amount-label"><%= t('checkout.step1.partialPayment.dueNow') %></span>
                         <span class="amount-value" id="partial-amount">0.00 د.إ</span>
                       </div>
                     </div>
@@ -201,10 +200,10 @@
                 <div class="section-actions">
                   <button class="btn-back" id="btn-to-step-1-back">
                     <i data-lucide="arrow-left"></i>
-                    <span>Back to Shipping</span>
+                    <span><%= t('common.buttons.back') %></span>
                   </button>
                   <button class="btn-next" id="btn-to-step-3">
-                    <span>Continue to Payment Method</span>
+                    <span><%= t('checkout.step1.continue') %></span>
                     <i data-lucide="arrow-right"></i>
                   </button>
                 </div>
@@ -215,9 +214,9 @@
                 <div class="section-header">
                   <h2 class="section-title">
                     <i data-lucide="credit-card"></i>
-                    <span>Select Payment Method</span>
+                    <span><%= t('checkout.step2.title') %></span>
                   </h2>
-                  <p class="section-subtitle">Choose your preferred payment option</p>
+                  <p class="section-subtitle"><%= t('checkout.step2.subtitle') %></p>
                 </div>
 
                 <div class="payment-methods">
@@ -233,8 +232,8 @@
                           <i data-lucide="credit-card"></i>
                         </div>
                         <div class="payment-method-info">
-                          <h3 class="payment-method-title">Credit/Debit Card</h3>
-                          <p class="payment-method-desc">Visa, Mastercard, American Express</p>
+                          <h3 class="payment-method-title"><%= t('checkout.step2.card.title') %></h3>
+                          <p class="payment-method-desc"><%= t('checkout.step2.card.desc') %></p>
                         </div>
                       </div>
                       <div class="payment-method-brands">
@@ -245,7 +244,7 @@
                       </div>
                       <div class="payment-method-fee">
                         <i data-lucide="info"></i>
-                        <span>Processing fee: 2.9% + 1.50 د.إ</span>
+                        <span><%= t('checkout.step2.card.fee') %></span>
                       </div>
                     </div>
                   </div>
@@ -262,18 +261,18 @@
                           <i data-lucide="building-2"></i>
                         </div>
                         <div class="payment-method-info">
-                          <h3 class="payment-method-title">Bank Transfer (UAE)</h3>
-                          <p class="payment-method-desc">Direct bank transfer within UAE</p>
+                          <h3 class="payment-method-title"><%= t('checkout.step2.bankDubai.title') %></h3>
+                          <p class="payment-method-desc"><%= t('checkout.step2.bankDubai.desc') %></p>
                         </div>
                         <div class="payment-method-badge free">
                           <i data-lucide="check-circle"></i>
-                          <span>No Fees</span>
+                          <span><%= t('checkout.step2.bankDubai.noFees') %></span>
                         </div>
                       </div>
                       <div class="payment-method-details">
                         <div class="detail-item">
                           <i data-lucide="clock"></i>
-                          <span>Processing time: 1-2 business days</span>
+                          <span><%= t('checkout.step2.bankDubai.processingTime') %></span>
                         </div>
                       </div>
                     </div>
@@ -291,13 +290,13 @@
                           <i data-lucide="globe"></i>
                         </div>
                         <div class="payment-method-info">
-                          <h3 class="payment-method-title">International Bank Transfer</h3>
-                          <p class="payment-method-desc">SWIFT/Wire transfer from abroad</p>
+                          <h3 class="payment-method-title"><%= t('checkout.step2.bankInternational.title') %></h3>
+                          <p class="payment-method-desc"><%= t('checkout.step2.bankInternational.desc') %></p>
                         </div>
                       </div>
                       <div class="payment-method-fee">
                         <i data-lucide="alert-circle"></i>
-                        <span>Bank fees: 25-50 د.إ (varies by bank)</span>
+                        <span><%= t('checkout.step2.bankInternational.fee') %></span>
                       </div>
                     </div>
                   </div>
@@ -314,13 +313,13 @@
                           <i data-lucide="wallet"></i>
                         </div>
                         <div class="payment-method-info">
-                          <h3 class="payment-method-title">PayPal</h3>
-                          <p class="payment-method-desc">Pay securely with your PayPal account</p>
+                          <h3 class="payment-method-title"><%= t('checkout.step2.paypal.title') %></h3>
+                          <p class="payment-method-desc"><%= t('checkout.step2.paypal.desc') %></p>
                         </div>
                       </div>
                       <div class="payment-method-fee">
                         <i data-lucide="info"></i>
-                        <span>Processing fee: 3.9% + 1.50 د.إ</span>
+                        <span><%= t('checkout.step2.paypal.fee') %></span>
                       </div>
                     </div>
                   </div>
@@ -337,17 +336,17 @@
                           <i data-lucide="banknote"></i>
                         </div>
                         <div class="payment-method-info">
-                          <h3 class="payment-method-title">Cash on Delivery</h3>
-                          <p class="payment-method-desc">Pay when you receive your order</p>
+                          <h3 class="payment-method-title"><%= t('checkout.step2.cod.title') %></h3>
+                          <p class="payment-method-desc"><%= t('checkout.step2.cod.desc') %></p>
                         </div>
                       </div>
                       <div class="payment-method-fee">
                         <i data-lucide="info"></i>
-                        <span>Service fee: 15.00 د.إ</span>
+                        <span><%= t('checkout.step2.cod.fee') %></span>
                       </div>
                       <div class="payment-method-note">
                         <i data-lucide="map-pin"></i>
-                        <span>Available in UAE only</span>
+                        <span><%= t('checkout.step2.cod.note') %></span>
                       </div>
                     </div>
                   </div>
@@ -356,10 +355,10 @@
                 <div class="section-actions">
                   <button class="btn-back" id="btn-to-step-2-back">
                     <i data-lucide="arrow-left"></i>
-                    <span>Back to Payment Type</span>
+                    <span><%= t('checkout.step2.back') %></span>
                   </button>
                   <button class="btn-next" id="btn-to-step-4">
-                    <span>Review Order</span>
+                    <span><%= t('checkout.step2.reviewOrder') %></span>
                     <i data-lucide="arrow-right"></i>
                   </button>
                 </div>
@@ -370,9 +369,9 @@
                 <div class="section-header">
                   <h2 class="section-title">
                     <i data-lucide="check-circle"></i>
-                    <span>Review & Confirm</span>
+                    <span><%= t('checkout.step3.title') %></span>
                   </h2>
-                  <p class="section-subtitle">Please review your order before completing payment</p>
+                  <p class="section-subtitle"><%= t('checkout.step3.subtitle') %></p>
                 </div>
 
                 <div class="confirmation-details">
@@ -392,22 +391,22 @@
                   </div>
 
                   <div class="confirmation-card">
-                    <h3 class="confirmation-title">Payment Summary</h3>
+                    <h3 class="confirmation-title"><%= t('checkout.step3.summary.title') %></h3>
                     <div class="confirmation-item">
-                      <span class="confirmation-label">Payment Type:</span>
-                      <span class="confirmation-value" id="confirm-type">Full Payment</span>
+                      <span class="confirmation-label"><%= t('checkout.step3.summary.paymentType') %></span>
+                      <span class="confirmation-value" id="confirm-type"><%= t('checkout.step1.fullPayment.title') %></span>
                     </div>
                     <div class="confirmation-item">
-                      <span class="confirmation-label">Payment Method:</span>
-                      <span class="confirmation-value" id="confirm-method">Credit/Debit Card</span>
+                      <span class="confirmation-label"><%= t('checkout.step3.summary.paymentMethod') %></span>
+                      <span class="confirmation-value" id="confirm-method"><%= t('checkout.step2.card.title') %></span>
                     </div>
                     <div class="confirmation-item">
-                      <span class="confirmation-label">Processing Fee:</span>
+                      <span class="confirmation-label"><%= t('checkout.step3.summary.processingFee') %></span>
                       <span class="confirmation-value" id="confirm-fee">0.00 د.إ</span>
                     </div>
                     <div class="confirmation-divider"></div>
                     <div class="confirmation-item total">
-                      <span class="confirmation-label">Amount to Pay:</span>
+                      <span class="confirmation-label"><%= t('checkout.step3.summary.amountToPay') %></span>
                       <span class="confirmation-value" id="confirm-total">0.00 د.إ</span>
                     </div>
                   </div>
@@ -415,8 +414,7 @@
                   <div class="confirmation-terms">
                     <label class="checkbox-container">
                       <input type="checkbox" id="terms-checkbox">
-                      <span class="checkbox-label">I agree to the <a href="#" class="link">Terms & Conditions</a> and <a
-                          href="#" class="link">Privacy Policy</a></span>
+                      <span class="checkbox-label"><%= t('checkout.step3.terms') %></span>
                     </label>
                   </div>
                 </div>
@@ -424,11 +422,11 @@
                 <div class="section-actions">
                   <button class="btn-back" id="btn-to-step-3-back">
                     <i data-lucide="arrow-left"></i>
-                    <span>Back to Payment Method</span>
+                    <span><%= t('checkout.step3.back') %></span>
                   </button>
                   <button class="btn-complete" id="btn-complete-payment" disabled>
                     <i data-lucide="lock"></i>
-                    <span>Complete Payment</span>
+                    <span><%= t('checkout.step3.completePayment') %></span>
                   </button>
                 </div>
               </div>
@@ -491,19 +489,19 @@
 
                   <div class="summary-totals">
                     <div class="summary-row">
-                      <span class="summary-label">Subtotal:</span>
+                      <span class="summary-label"><%= t('checkout.summary.subtotal') %></span>
                       <span class="summary-value" id="summary-subtotal">0.00 د.إ</span>
                     </div>
                     <div class="summary-row">
-                      <span class="summary-label">Items:</span>
+                      <span class="summary-label"><%= t('checkout.summary.items') %></span>
                       <span class="summary-value" id="summary-items-count">0 PCS</span>
                     </div>
                     <div class="summary-row">
-                      <span class="summary-label">Total Weight:</span>
+                      <span class="summary-label"><%= t('checkout.summary.totalWeight') %></span>
                       <span class="summary-value" id="summary-weight">0.000 kg</span>
                     </div>
                     <div class="summary-row fee" id="summary-fee-row" style="display: none;">
-                      <span class="summary-label">Processing Fee:</span>
+                      <span class="summary-label"><%= t('checkout.summary.processingFee') %></span>
                       <span class="summary-value" id="summary-fee">0.00 د.إ</span>
                     </div>
                   </div>
@@ -511,7 +509,7 @@
                   <div class="summary-divider"></div>
 
                   <div class="summary-total">
-                    <span class="total-label">Total Amount:</span>
+                    <span class="total-label"><%= t('checkout.summary.totalAmount') %></span>
                     <span class="total-value" id="summary-total">0.00 د.إ</span>
                   </div>
 
@@ -519,7 +517,7 @@
                   <div class="referral-code-section" id="referral-section" style="display: none;">
                     <div class="referral-code-header">
                       <i data-lucide="gift"></i>
-                      <span>Your Referral Discount</span>
+                      <span><%= t('checkout.summary.referralDiscount') %></span>
                     </div>
                     <div class="referral-code-status" id="referral-status" style="display: none;">
                       <div class="referral-success registration-referral" id="referral-success" style="display: none;">
@@ -534,14 +532,14 @@
 
                   <!-- Referral Discount Row (shown when code applied) -->
                   <div class="summary-row discount" id="summary-referral-row" style="display: none;">
-                    <span class="summary-label">Referral Discount:</span>
+                    <span class="summary-label"><%= t('checkout.summary.referralDiscountLabel') %></span>
                     <span class="summary-value discount-value" id="summary-referral-discount">-0.00 د.إ</span>
                   </div>
                 </div>
 
                 <div class="summary-security">
                   <i data-lucide="shield-check"></i>
-                  <span>Secured by 256-bit SSL encryption</span>
+                  <span><%= t('checkout.summary.security') %></span>
                 </div>
               </div>
             </div>

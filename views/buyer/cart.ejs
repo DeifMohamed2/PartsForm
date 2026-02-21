@@ -17,13 +17,13 @@
           <div class="cart-hero-content">
             <div class="cart-badge">
               <i data-lucide="shopping-cart"></i>
-              <span>Shopping Cart</span>
+              <span><%= t('cart.badge') %></span>
             </div>
             <h1 class="cart-hero-title">
-              Your <span class="highlight">Shopping Cart</span>
+              <%= t('cart.title') %>
             </h1>
             <p class="cart-hero-subtitle">
-              Review and manage your selected parts before placing an order
+              <%= t('cart.subtitle') %>
             </p>
           </div>
         </div>
@@ -37,14 +37,14 @@
             <div class="empty-cart-icon">
               <i data-lucide="shopping-cart"></i>
             </div>
-            <h2 class="empty-cart-title">Your cart is empty</h2>
+            <h2 class="empty-cart-title"><%= t('cart.emptyState.title') %></h2>
             <p class="empty-cart-text">
-              Browse our extensive catalog and add parts to your cart
+              <%= t('cart.emptyState.text') %>
             </p>
             <div class="empty-cart-actions">
               <a href="/buyer/search-automotive" class="btn-primary">
                 <i data-lucide="car-front"></i>
-                <span>Search Automotive Parts</span>
+                <span><%= t('cart.emptyState.searchAutomotive') %></span>
               </a>
             </div>
           </div>
@@ -56,11 +56,11 @@
               <div class="cart-actions-left">
                 <button class="btn-select-all" id="select-all-btn">
                   <i data-lucide="check-square"></i>
-                  <span>Select All</span>
+                  <span><%= t('cart.actions.selectAll') %></span>
                 </button>
                 <button class="btn-remove-selected" id="remove-selected-btn" disabled>
                   <i data-lucide="trash-2"></i>
-                  <span>Remove Selected</span>
+                  <span><%= t('cart.actions.removeSelected') %></span>
                 </button>
               </div>
               <div class="cart-actions-right">
@@ -74,7 +74,7 @@
                 </button>
                 <button class="btn-clear-cart" id="clear-cart-btn">
                   <i data-lucide="x-circle"></i>
-                  <span>Empty Cart</span>
+                  <span><%= t('cart.actions.emptyCart') %></span>
                 </button>
               </div>
             </div>
@@ -87,13 +87,13 @@
                     <th class="th-checkbox">
                       <input type="checkbox" id="header-checkbox" class="cart-checkbox">
                     </th>
-                    <th class="th-brand">Brand</th>
-                    <th class="th-part-number">Vendor Code</th>
-                    <th class="th-description">Description</th>
-                    <th class="th-stock">Stock Code</th>
-                    <th class="th-qty">QTY</th>
-                    <th class="th-price">Unit Price</th>
-                    <th class="th-amount">Amount</th>
+                    <th class="th-brand"><%= t('cart.table.brand') %></th>
+                    <th class="th-part-number"><%= t('cart.table.partNumber') %></th>
+                    <th class="th-description"><%= t('cart.table.description') %></th>
+                    <th class="th-stock"><%= t('cart.table.stock') %></th>
+                    <th class="th-qty"><%= t('cart.table.qty') %></th>
+                    <th class="th-price"><%= t('cart.table.price') %></th>
+                    <th class="th-amount"><%= t('cart.table.amount') %></th>
                     <th class="th-actions"></th>
                   </tr>
                 </thead>
@@ -108,32 +108,28 @@
               <div class="cart-summary-left">
                 <div class="cart-summary-info">
                   <p class="summary-text">
-                    <i data-lucide="shopping-cart" style="width: 18px; height: 18px; margin-right: 8px; vertical-align: middle;"></i>
-                    <strong id="total-items-count">0</strong> items in cart
+                    <i data-lucide="shopping-cart" class="summary-icon"></i>
+                    <strong id="total-items-count">0</strong> <%= t('cart.summary.pcs') %>
                     <span class="summary-separator">•</span>
-                    Total: <strong id="total-amount-text">0.00</strong> <span class="cart-currency-label">AED</span>
+                    <%= t('cart.summary.total') %> <strong id="total-amount-text">0.00</strong> <span class="cart-currency-label">AED</span>
                   </p>
                   <p class="summary-note">
-                    <i data-lucide="clock" style="width: 14px; height: 14px; margin-right: 6px; vertical-align: middle;"></i>
-                    Items saved for 30 days.
-                    <span id="cart-expiry-text">Time remaining: --</span>
-                  </p>
-                  <p class="summary-tip">
-                    <i data-lucide="lightbulb" style="width: 14px; height: 14px; margin-right: 6px; vertical-align: middle;"></i>
-                    <strong>Tip:</strong> Use "Create Quotation" to generate professional invoices for your customers with custom markup.
+                    <i data-lucide="clock" class="summary-icon-small"></i>
+                    <%= t('cart.summary.note') %>
+                    <span id="cart-expiry-text"><%= t('cart.summary.timeRemaining') %> --</span>
                   </p>
                 </div>
               </div>
               <div class="cart-summary-right">
                 <div class="cart-total">
-                  <span class="total-label">Grand Total:</span>
+                  <span class="total-label"><%= t('cart.summary.total') %></span>
                   <div class="total-details">
-                    <span class="total-items"><strong id="total-items">0</strong> items</span>
+                    <span class="total-items"><strong id="total-items">0</strong> <%= t('cart.summary.pcs') %></span>
                     <span class="total-amount"><strong id="total-amount">0.00</strong> <span class="cart-currency-label">AED</span></span>
                   </div>
                 </div>
                 <button class="btn-checkout" id="checkout-btn" disabled>
-                  <span>Proceed to Checkout</span>
+                  <span><%= t('cart.checkout') %></span>
                   <i data-lucide="arrow-right"></i>
                 </button>
               </div>

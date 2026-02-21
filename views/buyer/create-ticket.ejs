@@ -13,12 +13,12 @@
     <div class="create-ticket-hero-content">
       <div class="hero-badge">
         <i data-lucide="life-buoy"></i>
-        <span>Support Center</span>
+        <span><%= t('tickets.create.badge') %></span>
       </div>
 
-      <h1 class="create-ticket-hero-title">Create Support Ticket</h1>
+      <h1 class="create-ticket-hero-title"><%= t('tickets.create.title') %></h1>
       <p class="create-ticket-hero-subtitle">
-        Tell us about your issue and we'll get back to you as soon as possible
+        <%= t('tickets.create.subtitle') %>
       </p>
     </div>
   </div>
@@ -30,14 +30,14 @@
         <!-- Back Button -->
         <a href="/buyer/tickets" class="btn-back">
           <i data-lucide="arrow-left"></i>
-          <span>Back to Tickets</span>
+          <span><%= t('tickets.create.backToTickets') %></span>
         </a>
 
         <!-- Form Card -->
         <div class="create-ticket-card">
           <div class="card-header">
-            <h2 class="card-title">Ticket Information</h2>
-            <p class="card-subtitle">Please provide details about your issue</p>
+            <h2 class="card-title"><%= t('tickets.create.cardTitle') %></h2>
+            <p class="card-subtitle"><%= t('tickets.create.cardSubtitle') %></p>
           </div>
 
           <form id="create-ticket-form" class="ticket-form">
@@ -45,35 +45,35 @@
             <div class="form-group">
               <label for="category" class="form-label">
                 <i data-lucide="tag"></i>
-                <span>Category</span>
-                <span class="required">*</span>
+                <span><%= t('tickets.create.category') %></span>
+                <span class="required"><%= t('tickets.create.required') %></span>
               </label>
               <select id="category" name="category" class="form-select" required>
-                <option value="">Select a category</option>
-                <option value="Shipping Issue">Shipping Issue</option>
-                <option value="Order Issue">Order Issue</option>
-                <option value="Product Inquiry">Product Inquiry</option>
-                <option value="Payment">Payment</option>
-                <option value="Documentation">Documentation</option>
-                <option value="Technical Issue">Technical Issue</option>
-                <option value="General">General</option>
+                <option value=""><%= t('tickets.create.selectCategoryPlaceholder') %></option>
+                <option value="Shipping Issue"><%= t('tickets.categories.shipping') %></option>
+                <option value="Order Issue"><%= t('tickets.categories.order') %></option>
+                <option value="Product Inquiry"><%= t('tickets.categories.product') %></option>
+                <option value="Payment"><%= t('tickets.categories.payment') %></option>
+                <option value="Documentation"><%= t('tickets.categories.documentation') %></option>
+                <option value="Technical Issue"><%= t('tickets.categories.technical') %></option>
+                <option value="General"><%= t('tickets.categories.other') %></option>
               </select>
-              <span class="form-hint">Choose the category that best describes your issue</span>
+              <span class="form-hint"><%= t('tickets.create.categoryHint') %></span>
             </div>
 
             <!-- Order Number (Optional - shown for order-related categories) -->
             <div class="form-group" id="order-group">
               <label for="order-number" class="form-label">
                 <i data-lucide="package"></i>
-                <span>Related Order</span>
-                <span class="optional">(Optional)</span>
+                <span><%= t('tickets.create.relatedOrder') %></span>
+                <span class="optional"><%= t('tickets.create.optional') %></span>
               </label>
               <select 
                 id="order-number" 
                 name="orderNumber" 
                 class="form-select"
               >
-                <option value="">No specific order</option>
+                <option value=""><%= t('tickets.create.noSpecificOrder') %></option>
                 <% if (typeof orders !== 'undefined' && orders && orders.length > 0) { %>
                   <% orders.forEach(function(order) { %>
                     <option value="<%= order.orderNumber %>">
@@ -82,51 +82,51 @@
                   <% }); %>
                 <% } %>
               </select>
-              <span class="form-hint">Select an order if this issue is related to a specific order</span>
+              <span class="form-hint"><%= t('tickets.create.orderHint') %></span>
             </div>
 
             <!-- Subject -->
             <div class="form-group">
               <label for="subject" class="form-label">
                 <i data-lucide="type"></i>
-                <span>Subject</span>
-                <span class="required">*</span>
+                <span><%= t('tickets.create.subject') %></span>
+                <span class="required"><%= t('tickets.create.required') %></span>
               </label>
               <input 
                 type="text" 
                 id="subject" 
                 name="subject" 
                 class="form-input" 
-                placeholder="Brief description of your issue"
+                placeholder="<%= t('tickets.create.subjectPlaceholder') %>"
                 required
               >
-              <span class="form-hint">Provide a clear, concise summary of your issue</span>
+              <span class="form-hint"><%= t('tickets.create.subjectHint') %></span>
             </div>
 
             <!-- Description -->
             <div class="form-group">
               <label for="description" class="form-label">
                 <i data-lucide="file-text"></i>
-                <span>Description</span>
-                <span class="required">*</span>
+                <span><%= t('tickets.create.description') %></span>
+                <span class="required"><%= t('tickets.create.required') %></span>
               </label>
               <textarea 
                 id="description" 
                 name="description" 
                 class="form-textarea" 
                 rows="6"
-                placeholder="Please provide detailed information about your issue..."
+                placeholder="<%= t('tickets.create.descriptionPlaceholder') %>"
                 required
               ></textarea>
-              <span class="form-hint">Include as much detail as possible to help us resolve your issue quickly</span>
+              <span class="form-hint"><%= t('tickets.create.descriptionHint') %></span>
             </div>
 
             <!-- File Attachments -->
             <div class="form-group">
               <label for="attachments" class="form-label">
                 <i data-lucide="paperclip"></i>
-                <span>Attachments</span>
-                <span class="optional">(Optional)</span>
+                <span><%= t('tickets.create.attachmentsLabel') %></span>
+                <span class="optional"><%= t('tickets.create.optional') %></span>
               </label>
               <div class="file-upload-area" id="file-upload-area">
                 <input 
@@ -142,10 +142,10 @@
                     <i data-lucide="upload-cloud"></i>
                   </div>
                   <p class="file-upload-text">
-                    <strong>Click to upload</strong> or drag and drop
+                    <strong><%= t('tickets.create.clickToUpload') %></strong> <%= t('tickets.create.orDragDrop') %>
                   </p>
                   <p class="file-upload-hint">
-                    PNG, JPG, PDF up to 10MB each
+                    <%= t('tickets.create.fileTypes') %>
                   </p>
                 </div>
               </div>
@@ -156,11 +156,11 @@
             <div class="form-actions">
               <button type="button" class="btn-cancel" onclick="window.location.href='/buyer/tickets'">
                 <i data-lucide="x"></i>
-                <span>Cancel</span>
+                <span><%= t('tickets.create.cancel') %></span>
               </button>
               <button type="submit" class="btn-submit">
                 <i data-lucide="send"></i>
-                <span>Submit Ticket</span>
+                <span><%= t('tickets.create.submit') %></span>
               </button>
             </div>
           </form>
@@ -172,9 +172,9 @@
             <i data-lucide="info"></i>
           </div>
           <div class="help-content">
-            <h3 class="help-title">Need Immediate Assistance?</h3>
+            <h3 class="help-title"><%= t('tickets.create.helpTitle') %></h3>
             <p class="help-text">
-              For urgent matters, you can also reach us directly:
+              <%= t('tickets.create.helpText') %>
             </p>
             <div class="help-contacts">
               <a href="mailto:support@partsform.com" class="help-contact">

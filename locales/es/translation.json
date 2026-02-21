@@ -31,7 +31,8 @@
     "cart": "Carrito de compras",
     "quickSearch": "Búsqueda rápida",
     "currencyConverter": "Convertidor de divisas",
-    "currency": {
+    "currency": "Moneda",
+    "currencySettings": {
       "label": "Moneda",
       "badge": "Tasas de cambio en vivo",
       "title": "Convertidor de divisas",
@@ -43,7 +44,9 @@
       "searchPlaceholder": "Buscar monedas...",
       "updating": "Actualizando..."
     },
-    "language": {
+    "preferredCurrency": "Moneda preferida",
+    "language": "Idioma",
+    "languageNames": {
       "english": "English",
       "arabic": "Arabic",
       "russian": "Russian",
@@ -56,7 +59,9 @@
       "profile": "Profile",
       "settings": "Settings",
       "logout": "Logout"
-    }
+    },
+    "preferredCurrencyTitle": "Moneda Preferida",
+    "searchCurrency": "Buscar moneda..."
   },
   "common": {
     "buttons": {
@@ -111,191 +116,1191 @@
       "success": "Success!",
       "confirmDelete": "Are you sure you want to delete this?",
       "unsavedChanges": "You have unsaved changes"
-    }
+    },
+    "welcomeBack": "Bienvenido de nuevo",
+    "signIn": "Iniciar Sesión",
+    "signInDesc": "Ingrese sus credenciales para acceder a su cuenta",
+    "email": "Correo electrónico",
+    "emailPlaceholder": "Ingrese su correo electrónico",
+    "password": "Contraseña",
+    "forgotPassword": "¿Olvidó su contraseña?",
+    "noAccount": "¿No tiene cuenta?",
+    "signUp": "Registrarse",
+    "orContinueWith": "o continuar con",
+    "edit": "Edit",
+    "manage": "Manage",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "view": "View",
+    "close": "Close",
+    "submit": "Submit",
+    "saveChanges": "Save Changes",
+    "default": "Default"
   },
   "orders": {
-    "title": "My Orders",
-    "subtitle": "Track and manage your orders",
-    "orderNumber": "Order Number",
-    "date": "Date",
-    "total": "Total",
-    "status": "Status",
-    "actions": "Actions",
-    "noOrders": "No orders found",
-    "viewOrder": "View Order",
-    "trackShipment": "Track Shipment",
-    "downloadInvoice": "Download Invoice",
+    "title": "Mis Pedidos",
+    "subtitle": "Rastree y gestione todos sus pedidos en un solo lugar",
+    "stats": {
+      "pending": "Pendiente",
+      "processing": "En Proceso",
+      "completed": "Completado"
+    },
+    "filters": {
+      "status": "Estado",
+      "allStatuses": "Todos los Estados",
+      "pending": "Pendiente",
+      "processing": "En Proceso",
+      "shipped": "Enviado",
+      "delivered": "Entregado",
+      "completed": "Completado",
+      "cancelled": "Cancelado",
+      "dateFrom": "Fecha Desde",
+      "dateTo": "Fecha Hasta",
+      "searchOrder": "Buscar Pedido",
+      "searchPlaceholder": "Número de pedido, número de pieza...",
+      "applyFilters": "Aplicar Filtros",
+      "reset": "Restablecer"
+    },
+    "table": {
+      "orderNumber": "Número de Pedido",
+      "date": "Fecha",
+      "status": "Estado",
+      "items": "Artículos",
+      "amount": "Monto",
+      "actions": "Acciones"
+    },
+    "pagination": {
+      "previous": "Anterior",
+      "next": "Siguiente",
+      "showing": "Mostrando",
+      "of": "de"
+    },
+    "emptyState": {
+      "title": "Sin Pedidos Aún",
+      "text": "Aún no ha realizado ningún pedido. Comience a comprar para ver sus pedidos aquí.",
+      "startShopping": "Comenzar a Comprar",
+      "backToMain": "Volver al Inicio"
+    },
+    "actions": {
+      "viewOrder": "Ver Pedido",
+      "trackOrder": "Rastrear Pedido"
+    },
     "details": {
-      "title": "Order Details",
-      "orderInfo": "Order Information",
-      "shippingAddress": "Shipping Address",
-      "billingAddress": "Billing Address",
-      "items": "Items",
-      "subtotal": "Subtotal",
-      "shipping": "Shipping",
-      "tax": "Tax",
-      "total": "Total"
+      "title": "Detalles del Pedido",
+      "backToOrders": "Volver a Pedidos",
+      "loading": "Cargando...",
+      "loadingText": "Cargando detalles del pedido...",
+      "print": "Imprimir",
+      "downloadInvoice": "Descargar Factura",
+      "orderItems": "Artículos del Pedido",
+      "partDetails": "Detalles de la Pieza",
+      "weight": "Peso",
+      "stock": "Stock",
+      "price": "Precio",
+      "paymentInfo": "Información de Pago",
+      "orderTimeline": "Línea de Tiempo del Pedido",
+      "orderSummary": "Resumen del Pedido",
+      "shippingInfo": "Información de Envío",
+      "errorTitle": "Pedido No Encontrado",
+      "errorText": "El pedido que busca no existe o ha sido eliminado."
     }
   },
   "cart": {
-    "title": "Shopping Cart",
-    "subtitle": "Review your items",
-    "item": "Item",
-    "quantity": "Quantity",
-    "price": "Price",
-    "total": "Total",
-    "emptyCart": "Your cart is empty",
-    "continueShopping": "Continue Shopping",
-    "proceedToCheckout": "Proceed to Checkout",
-    "removeItem": "Remove Item",
-    "updateCart": "Update Cart",
-    "cartSummary": "Cart Summary",
-    "subtotal": "Subtotal",
-    "shipping": "Shipping",
-    "tax": "Tax",
-    "grandTotal": "Grand Total"
+    "badge": "Carrito de Compras",
+    "title": "Su Carrito de Compras",
+    "subtitle": "Revise y gestione las piezas seleccionadas antes de realizar el pedido",
+    "emptyState": {
+      "title": "Su carrito está vacío",
+      "text": "Explore nuestro extenso catálogo y agregue piezas a su carrito",
+      "searchAutomotive": "Buscar Repuestos Automotrices",
+      "searchAviation": "Buscar Piezas de Aviación",
+      "searchMachinery": "Buscar Piezas de Maquinaria"
+    },
+    "actions": {
+      "selectAll": "Seleccionar Todo",
+      "removeSelected": "Eliminar Seleccionados",
+      "downloadExcel": "Descargar Excel",
+      "emptyCart": "Vaciar Carrito"
+    },
+    "table": {
+      "brand": "Marca",
+      "partNumber": "Número de Pieza",
+      "description": "Descripción",
+      "terms": "Términos",
+      "weight": "Peso",
+      "stock": "Stock",
+      "aircraft": "Tipo A/C",
+      "qty": "Cant.",
+      "addPacking": "Agregar Empaque",
+      "price": "Precio",
+      "amount": "Monto",
+      "reference": "Referencia",
+      "dateCreated": "Fecha de Creación"
+    },
+    "summary": {
+      "totalInCart": "Total en carrito",
+      "pcs": "PZA.",
+      "forTheAmount": "por el monto",
+      "weight": "Peso",
+      "note": "Los artículos seleccionados se almacenarán en su carrito durante 30 días.",
+      "timeRemaining": "Tiempo restante:",
+      "total": "Total:"
+    },
+    "checkout": "Proceder al Pago"
   },
   "checkout": {
-    "title": "Checkout",
-    "subtitle": "Complete your purchase",
-    "shippingInfo": "Shipping Information",
-    "billingInfo": "Billing Information",
-    "paymentMethod": "Payment Method",
-    "reviewOrder": "Review Order",
-    "placeOrder": "Place Order",
-    "sameAsShipping": "Same as shipping address"
+    "title": "Pago",
+    "subtitle": "Revise su pedido y seleccione su método de pago preferido",
+    "secureBadge": "Pago Seguro",
+    "steps": {
+      "paymentType": {
+        "title": "Tipo de Pago",
+        "desc": "Elegir plan de pago"
+      },
+      "paymentMethod": {
+        "title": "Método de Pago",
+        "desc": "Seleccionar opción de pago"
+      },
+      "confirmation": {
+        "title": "Confirmación",
+        "desc": "Revisar y completar"
+      }
+    },
+    "step1": {
+      "title": "Seleccionar Tipo de Pago",
+      "subtitle": "Elija cómo desea pagar su pedido",
+      "fullPayment": {
+        "title": "Pago Completo",
+        "desc": "Pague el monto total ahora y reciba su pedido inmediatamente",
+        "badge": "Mejor Valor - Sin Cargos Adicionales",
+        "totalAmount": "Monto Total:"
+      },
+      "partialPayment": {
+        "title": "Pago Mínimo (20%)",
+        "desc": "Pague 20% ahora y el 80% restante antes de la entrega",
+        "payNow": "Pagar Ahora (20%):",
+        "payLater": "Pagar Después (80%):",
+        "dueNow": "A Pagar Ahora:"
+      },
+      "continue": "Continuar al Método de Pago"
+    },
+    "step2": {
+      "title": "Seleccionar Método de Pago",
+      "subtitle": "Elija su opción de pago preferida",
+      "card": {
+        "title": "Tarjeta de Crédito/Débito",
+        "desc": "Visa, Mastercard, American Express",
+        "fee": "Comisión de procesamiento: 2.9% + 1.50 د.إ"
+      },
+      "bankDubai": {
+        "title": "Transferencia Bancaria (EAU)",
+        "desc": "Transferencia bancaria directa dentro de EAU",
+        "noFees": "Sin Comisiones",
+        "processingTime": "Tiempo de procesamiento: 1-2 días hábiles"
+      },
+      "bankInternational": {
+        "title": "Transferencia Bancaria Internacional",
+        "desc": "Transferencia SWIFT desde el extranjero",
+        "fee": "Comisiones bancarias: 25-50 د.إ (varía según el banco)"
+      },
+      "paypal": {
+        "title": "PayPal",
+        "desc": "Pague de forma segura con su cuenta PayPal",
+        "fee": "Comisión de procesamiento: 3.9% + 1.50 د.إ"
+      },
+      "cod": {
+        "title": "Contra Reembolso",
+        "desc": "Pague cuando reciba su pedido",
+        "fee": "Comisión de servicio: 15.00 د.إ",
+        "note": "Disponible solo en EAU"
+      },
+      "back": "Volver al Tipo de Pago",
+      "reviewOrder": "Revisar Pedido"
+    },
+    "step3": {
+      "title": "Revisar y Confirmar",
+      "subtitle": "Por favor revise su pedido antes de completar el pago",
+      "summary": {
+        "title": "Resumen del Pago",
+        "paymentType": "Tipo de Pago:",
+        "paymentMethod": "Método de Pago:",
+        "processingFee": "Comisión de Procesamiento:",
+        "amountToPay": "Monto a Pagar:"
+      },
+      "terms": "Acepto los Términos y Condiciones y la Política de Privacidad",
+      "back": "Volver al Método de Pago",
+      "completePayment": "Completar Pago"
+    },
+    "orderSummary": {
+      "title": "Resumen del Pedido",
+      "subtotal": "Subtotal:",
+      "items": "Artículos:",
+      "totalWeight": "Peso Total:",
+      "processingFee": "Comisión de Procesamiento:",
+      "totalAmount": "Monto Total:",
+      "security": "Protegido con encriptación SSL de 256 bits"
+    },
+    "success": {
+      "title": "¡Pago Exitoso!",
+      "message": "Su pedido ha sido realizado exitosamente",
+      "orderNumber": "Número de Pedido:",
+      "paymentMethod": "Método de Pago:",
+      "amountPaid": "Monto Pagado:",
+      "viewOrders": "Ver Mis Pedidos",
+      "continueShopping": "Continuar Comprando"
+    }
   },
   "payment": {
-    "title": "Payment",
-    "subtitle": "Secure payment processing",
-    "methods": {
-      "creditCard": "Credit Card",
-      "debitCard": "Debit Card",
-      "bankTransfer": "Bank Transfer",
-      "paypal": "PayPal"
+    "title": "Pagos y Facturación",
+    "subtitle": "Gestione el saldo de su cuenta y métodos de pago",
+    "addFunds": "Agregar Fondos",
+    "balance": {
+      "title": "Saldo de Cuenta",
+      "available": "Saldo Disponible",
+      "readyToUse": "Listo para usar",
+      "pending": "Pago Pendiente",
+      "processing": "En proceso",
+      "totalSpent": "Total Gastado",
+      "allTime": "Todo el tiempo"
     },
-    "cardNumber": "Card Number",
-    "expiryDate": "Expiry Date",
-    "cvv": "CVV",
-    "cardholderName": "Cardholder Name"
+    "methods": {
+      "title": "Métodos de Pago",
+      "addMethod": "Agregar Método",
+      "emptyTitle": "Sin Métodos de Pago",
+      "emptyText": "Agregue un método de pago para facilitar sus compras",
+      "addPaymentMethod": "Agregar Método de Pago"
+    },
+    "transactions": {
+      "title": "Historial de Transacciones",
+      "all": "Todos",
+      "completed": "Completadas",
+      "pending": "Pendientes",
+      "refunded": "Reembolsadas",
+      "date": "Fecha",
+      "description": "Descripción",
+      "type": "Tipo",
+      "amount": "Monto",
+      "status": "Estado",
+      "actions": "Acciones",
+      "emptyTitle": "Sin Transacciones Aún",
+      "emptyText": "Su historial de transacciones aparecerá aquí"
+    },
+    "addFundsModal": {
+      "title": "Agregar Fondos",
+      "subtitle": "Recargue el saldo de su cuenta",
+      "amount": "Monto (USD)",
+      "paymentMethod": "Método de Pago",
+      "selectPaymentMethod": "Seleccionar método de pago",
+      "creditCard": "Tarjeta de Crédito/Débito",
+      "bankTransfer": "Transferencia Bancaria",
+      "paypal": "PayPal",
+      "cancel": "Cancelar",
+      "addFunds": "Agregar Fondos"
+    },
+    "addMethodModal": {
+      "title": "Agregar Método de Pago",
+      "subtitle": "Guarde un método de pago para un pago más rápido",
+      "cardholderName": "Nombre del Titular *",
+      "cardNumber": "Número de Tarjeta *",
+      "expiryDate": "Fecha de Vencimiento *",
+      "cvv": "CVV *",
+      "setDefault": "Establecer como método de pago predeterminado",
+      "cancel": "Cancelar",
+      "saveMethod": "Guardar Método"
+    },
+    "addFundsDesc": "Recargue el saldo de su cuenta",
+    "accountBalance": "Saldo de Cuenta",
+    "totalSpent": "Total Gastado",
+    "allTime": "Todo el tiempo",
+    "pendingPayment": "Pago Pendiente",
+    "processing": "En proceso",
+    "availableBalance": "Saldo Disponible",
+    "readyToUse": "Listo para usar",
+    "paymentMethods": "Métodos de Pago",
+    "addMethod": "Agregar Método",
+    "noPaymentMethods": "Sin Métodos de Pago",
+    "noPaymentMethodsDesc": "Agregue un método de pago para facilitar sus compras",
+    "addPaymentMethod": "Agregar Método de Pago",
+    "addPaymentMethodDesc": "Guarde un método de pago para un pago más rápido",
+    "transactionHistory": "Historial de Transacciones",
+    "noTransactions": "Sin Transacciones Aún",
+    "noTransactionsDesc": "Su historial de transacciones aparecerá aquí",
+    "amountUSD": "Monto (USD)",
+    "selectPaymentMethod": "Método de Pago",
+    "selectPaymentMethodPlaceholder": "Seleccionar método de pago",
+    "creditDebitCard": "Tarjeta de Crédito/Débito",
+    "bankTransfer": "Transferencia Bancaria",
+    "cardHolderName": "Nombre del Titular *",
+    "cardNumber": "Número de Tarjeta *",
+    "expiryDate": "Fecha de Vencimiento *",
+    "setDefault": "Establecer como método de pago predeterminado",
+    "saveMethod": "Guardar Método",
+    "filters": {
+      "all": "Todos",
+      "completed": "Completadas",
+      "pending": "Pendientes",
+      "refunded": "Reembolsadas"
+    },
+    "table": {
+      "date": "Fecha",
+      "description": "Descripción",
+      "type": "Tipo",
+      "amount": "Monto",
+      "status": "Estado",
+      "actions": "Acciones"
+    }
   },
   "delivery": {
-    "title": "Delivery",
-    "subtitle": "Track your shipment",
-    "trackingNumber": "Tracking Number",
-    "carrier": "Carrier",
-    "estimatedDelivery": "Estimated Delivery",
-    "status": "Status",
-    "shippingAddress": "Shipping Address",
-    "deliveryInstructions": "Delivery Instructions"
+    "title": "Direcciones de Entrega",
+    "subtitle": "Gestione sus direcciones de entrega y rastree envíos",
+    "addNewAddress": "Agregar Nueva Dirección",
+    "savedAddresses": "Direcciones Guardadas",
+    "emptyState": {
+      "title": "Sin Direcciones Aún",
+      "text": "Agregue su primera dirección de entrega para comenzar",
+      "addAddress": "Agregar Dirección"
+    },
+    "trackOrder": "Rastrear Su Pedido",
+    "addAddressModal": {
+      "title": "Agregar Nueva Dirección",
+      "editTitle": "Editar Dirección",
+      "subtitle": "Complete los detalles a continuación",
+      "addressLabel": "Etiqueta de Dirección *",
+      "addressLabelPlaceholder": "ej., Casa, Oficina, Almacén",
+      "fullName": "Nombre Completo *",
+      "fullNamePlaceholder": "Nombre completo del destinatario",
+      "phone": "Número de Teléfono *",
+      "phonePlaceholder": "+971 XX XXX XXXX",
+      "street": "Dirección *",
+      "streetPlaceholder": "Número de edificio, nombre de calle",
+      "city": "Ciudad *",
+      "cityPlaceholder": "ej., Dubai",
+      "state": "Estado/Emirato *",
+      "statePlaceholder": "ej., Dubai",
+      "country": "País *",
+      "countryPlaceholder": "ej., Emiratos Árabes Unidos",
+      "postalCode": "Código Postal",
+      "postalCodePlaceholder": "Opcional",
+      "notes": "Notas Adicionales",
+      "notesPlaceholder": "Puntos de referencia, instrucciones especiales, etc.",
+      "setDefault": "Establecer como dirección predeterminada",
+      "cancel": "Cancelar",
+      "saveAddress": "Guardar Dirección"
+    },
+    "deleteModal": {
+      "title": "¿Eliminar Dirección?",
+      "text": "Esta acción no se puede deshacer.",
+      "cancel": "Cancelar",
+      "delete": "Eliminar",
+      "message": "¿Está seguro de que desea eliminar esta dirección?"
+    },
+    "savedAddressesObj": {
+      "title": "Direcciones Guardadas",
+      "subtitle": "Gestione sus ubicaciones de entrega"
+    },
+    "manageLocations": "Gestione sus ubicaciones de entrega",
+    "noAddresses": "Sin Direcciones Aún",
+    "noAddressesDesc": "Agregue su primera dirección de entrega para comenzar",
+    "addAddress": "Agregar Dirección",
+    "trackOrderObj": {
+      "title": "Rastrear Su Pedido",
+      "subtitle": "Ingrese su número de pedido para rastrear el envío",
+      "placeholder": "Ingrese número de pedido (ej., ORD-123456)",
+      "track": "Rastrear",
+      "viewAllOrders": "Ver Todos los Pedidos"
+    },
+    "trackOrderDesc": "Ingrese su número de pedido para rastrear el envío",
+    "trackingPlaceholder": "Ingrese número de pedido (ej., ORD-123456)",
+    "track": "Rastrear",
+    "viewAllOrders": "Ver Todos los Pedidos",
+    "deleteAddress": "¿Eliminar Dirección?",
+    "deleteAddressConfirm": "¿Está seguro de que desea eliminar esta dirección?",
+    "fillDetails": "Complete los detalles a continuación",
+    "saveAddress": "Guardar Dirección",
+    "form": {
+      "label": "Etiqueta de Dirección *",
+      "labelPlaceholder": "ej., Casa, Oficina, Almacén",
+      "fullName": "Nombre Completo *",
+      "fullNamePlaceholder": "Nombre completo del destinatario",
+      "phone": "Número de Teléfono *",
+      "street": "Dirección *",
+      "streetPlaceholder": "Número de edificio, nombre de calle",
+      "city": "Ciudad *",
+      "cityPlaceholder": "ej., Dubai",
+      "state": "Estado/Emirato *",
+      "statePlaceholder": "ej., Dubai",
+      "country": "País *",
+      "countryPlaceholder": "ej., Emiratos Árabes Unidos",
+      "postalCode": "Código Postal",
+      "notes": "Notas Adicionales",
+      "notesPlaceholder": "Puntos de referencia, instrucciones especiales, etc.",
+      "setDefault": "Establecer como dirección predeterminada",
+      "optional": "(Optional)"
+    }
   },
   "profile": {
-    "title": "Profile",
-    "subtitle": "Manage your account",
-    "personalInfo": "Personal Information",
-    "firstName": "First Name",
-    "lastName": "Last Name",
-    "email": "Email",
-    "phone": "Phone",
-    "company": "Company",
-    "jobTitle": "Job Title",
-    "updateProfile": "Update Profile"
+    "badge": "Mi Perfil",
+    "title": "Mi Perfil",
+    "subtitle": "Gestione su información personal y configuración de cuenta",
+    "tabs": {
+      "personal": "Información Personal",
+      "company": "Información de Empresa",
+      "security": "Seguridad"
+    },
+    "personal": {
+      "title": "Información Personal",
+      "subtitle": "Actualice su información personal básica",
+      "firstName": "Nombre *",
+      "lastName": "Apellido *",
+      "email": "Correo Electrónico *",
+      "phone": "Número de Teléfono",
+      "saveChanges": "Guardar Cambios"
+    },
+    "company": {
+      "title": "Información de Empresa",
+      "subtitle": "Actualice los detalles de su organización",
+      "companyName": "Nombre de Empresa *",
+      "industry": "Industria",
+      "selectIndustry": "Seleccionar industria",
+      "website": "Sitio Web",
+      "taxId": "ID Fiscal / NIF",
+      "saveChanges": "Guardar Cambios"
+    },
+    "security": {
+      "title": "Seguridad de Cuenta",
+      "subtitle": "Gestione su contraseña y configuración de seguridad",
+      "changePassword": "Cambiar Contraseña",
+      "currentPassword": "Contraseña Actual *",
+      "newPassword": "Nueva Contraseña *",
+      "confirmPassword": "Confirmar Nueva Contraseña *",
+      "updatePassword": "Actualizar Contraseña",
+      "twoFactor": "Autenticación de Dos Factores",
+      "twoFactorDesc": "Agregue una capa extra de seguridad a su cuenta",
+      "enable2FA": "Habilitar 2FA",
+      "password": "Contraseña",
+      "lastChanged": "Última vez cambiada hace 30 días",
+      "notEnabled": "No habilitado"
+    },
+    "activeAccount": "Cuenta Activa",
+    "stats": {
+      "totalOrders": "Total de Pedidos",
+      "memberSince": "Miembro Desde"
+    },
+    "personalInfo": "Información Personal",
+    "addressInfo": {
+      "title": "Información de Dirección",
+      "edit": "Editar",
+      "street": "Calle",
+      "city": "Ciudad",
+      "state": "Estado/Provincia",
+      "country": "País",
+      "postalCode": "Código Postal"
+    },
+    "totalOrders": "Total de Pedidos",
+    "memberSince": "Miembro Desde",
+    "personalInfoObj": {
+      "title": "Información Personal",
+      "edit": "Editar",
+      "fullName": "Nombre Completo",
+      "email": "Correo Electrónico",
+      "phone": "Teléfono",
+      "dateOfBirth": "Fecha de Nacimiento"
+    },
+    "fullName": "Nombre Completo",
+    "emailAddress": "Correo Electrónico",
+    "phoneNumber": "Teléfono",
+    "myAddresses": "My Addresses",
+    "loadingAddresses": "Loading addresses...",
+    "accountSecurity": "Seguridad de Cuenta",
+    "password": "Contraseña",
+    "lastChanged": "Last changed {{days}} days ago",
+    "changePassword": "Cambiar Contraseña",
+    "changePasswordDesc": "Update your account password",
+    "twoFA": "Autenticación de Dos Factores",
+    "notEnabled": "No habilitado",
+    "inactive": "Inactive",
+    "newsletter": "Newsletter",
+    "subscribed": "Subscribed",
+    "notSubscribed": "Not subscribed",
+    "editPersonalInfo": "Edit Personal Information",
+    "updateDetails": "Update Details",
+    "updatePassword": "Update Password",
+    "uploadPhoto": "Upload Photo",
+    "uploadPhotoBtn": "Upload Photo",
+    "choosePhoto": "Choose Photo",
+    "dropImage": "or drop image here",
+    "imageFormats": "JPG, PNG, GIF up to 5MB",
+    "uploading": "Uploading...",
+    "passwordRequirements": "Password Requirements",
+    "form": {
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "companyName": "Company Name",
+      "currentPassword": "Current Password",
+      "newPassword": "New Password",
+      "confirmPassword": "Confirm Password",
+      "shippingAddress": "Shipping Address",
+      "city": "City",
+      "minChars": "At least {{count}} characters"
+    },
+    "req": {
+      "minLength": "At least 8 characters",
+      "match": "Passwords match"
+    }
   },
   "settings": {
-    "title": "Settings",
-    "subtitle": "Customize your preferences",
-    "account": "Account Settings",
-    "notifications": "Notifications",
-    "security": "Security",
-    "preferences": "Preferences",
-    "language": "Language",
-    "timezone": "Timezone",
-    "currency": "Currency"
+    "badge": "Configuración",
+    "title": "Configuración",
+    "subtitle": "Personalice su experiencia y preferencias",
+    "sections": {
+      "preferences": "Preferencias",
+      "notifications": "Notificaciones",
+      "privacy": "Privacidad"
+    },
+    "preferences": {
+      "title": "Preferencias",
+      "subtitle": "Personalizar tu experiencia",
+      "language": "Idioma",
+      "selectLanguage": "Seleccionar idioma",
+      "currency": "Moneda",
+      "selectCurrency": "Seleccionar moneda",
+      "timezone": "Zona Horaria",
+      "selectTimezone": "Seleccionar zona horaria",
+      "dateFormat": "Formato de Fecha",
+      "savePreferences": "Guardar Preferencias",
+      "theme": "Tema",
+      "itemsPerPage": "Elementos por Página",
+      "themeDesc": "Elegir tema de color",
+      "light": "Claro",
+      "dark": "Oscuro",
+      "auto": "Auto (Sistema)",
+      "itemsPerPageDesc": "Número de elementos a mostrar"
+    },
+    "notifications": {
+      "title": "Configuración de Notificaciones",
+      "subtitle": "Controla cómo y cuándo recibes notificaciones",
+      "email": "Notificaciones por Email",
+      "push": {
+        "title": "Notificaciones Push",
+        "enabled": "Habilitar notificaciones push",
+        "enabledDesc": "Recibir notificaciones en tiempo real en su navegador"
+      },
+      "saveNotifications": "Guardar Configuración",
+      "orderUpdates": "Actualizaciones de Pedidos",
+      "promotional": "Emails Promocionales",
+      "sms": "Notificaciones SMS",
+      "emailDesc": "Recibir notificaciones por email",
+      "orderUpdatesDesc": "Notificación cuando cambia el estado",
+      "promotionalDesc": "Recibir ofertas especiales",
+      "smsDesc": "Recibir SMS para actualizaciones urgentes"
+    },
+    "privacy": {
+      "title": "Configuración de Privacidad",
+      "subtitle": "Administrar preferencias de privacidad",
+      "dataSharing": "Compartir Datos",
+      "dataSharingDesc": "Permitir compartir datos anónimos de uso para mejoras de servicio",
+      "activityTracking": "Seguimiento de Actividad",
+      "activityTrackingDesc": "Permitir seguimiento de actividad para recomendaciones personalizadas",
+      "savePrivacy": "Guardar Configuración",
+      "profileVisibility": {
+        "title": "Visibilidad del Perfil",
+        "desc": "Quién puede ver tu perfil",
+        "public": "Público",
+        "private": "Privado",
+        "friendsOnly": "Solo Amigos"
+      },
+      "dataCollection": "Recopilación de Datos",
+      "cookies": "Cookies",
+      "visibility": "Visibilidad del Perfil",
+      "visibilityDesc": "Quién puede ver tu perfil",
+      "public": "Público",
+      "private": "Privado",
+      "friendsOnly": "Solo Amigos",
+      "dataCollectionDesc": "Permitir análisis para mejorar el servicio",
+      "cookiesDesc": "Aceptar cookies para mejor experiencia"
+    },
+    "dangerZone": {
+      "title": "Zona de Peligro",
+      "deleteAccount": "Eliminar Cuenta",
+      "deleteAccountDesc": "Eliminar permanentemente su cuenta y todos los datos asociados",
+      "deleteButton": "Eliminar Cuenta"
+    },
+    "nav": {
+      "general": "General",
+      "notifications": "Notificaciones",
+      "privacy": "Privacidad",
+      "security": "Seguridad",
+      "preferences": "Preferencias",
+      "billing": "Facturación"
+    },
+    "general": {
+      "title": "Configuración General",
+      "subtitle": "Administrar preferencias generales de la cuenta",
+      "language": "Idioma",
+      "timezone": "Zona Horaria",
+      "dateFormat": "Formato de Fecha",
+      "currency": {
+        "title": "Moneda",
+        "desc": "Selecciona tu moneda preferida"
+      },
+      "languageDesc": "Elige tu idioma preferido",
+      "timezoneDesc": "Establece tu zona horaria",
+      "dateFormatDesc": "Elige cómo se muestran las fechas"
+    },
+    "security": {
+      "title": "Configuración de Seguridad",
+      "subtitle": "Administrar seguridad de la cuenta",
+      "twoFactor": {
+        "title": "Autenticación de Dos Factores",
+        "desc": "Añadir capa extra de seguridad",
+        "setup": "Configurar 2FA"
+      },
+      "changePassword": "Cambiar Contraseña",
+      "sessions": {
+        "title": "Sesiones Activas",
+        "desc": "Ver dispositivos conectados",
+        "view": "Ver Sesiones"
+      },
+      "twoFA": "Autenticación de Dos Factores",
+      "twoFADesc": "Añadir capa extra de seguridad",
+      "changePasswordDesc": "Actualizar contraseña regularmente",
+      "changePasswordBtn": "Cambiar Contraseña",
+      "activeSessions": "Sesiones Activas",
+      "activeSessionsDesc": "Ver dispositivos conectados",
+      "viewSessions": "Ver Sesiones"
+    },
+    "billing": {
+      "title": "Configuración de Facturación",
+      "subtitle": "Administrar métodos de pago",
+      "paymentMethods": "Métodos de Pago",
+      "billingAddress": "Dirección de Facturación",
+      "invoices": {
+        "title": "Historial de Facturas",
+        "desc": "Ver y descargar facturas",
+        "view": "Ver Facturas"
+      },
+      "paymentMethodsDesc": "Administrar métodos guardados",
+      "managePaymentMethods": "Administrar Métodos",
+      "billingAddressDesc": "Actualizar dirección",
+      "updateAddress": "Actualizar Dirección",
+      "invoiceHistory": "Historial de Facturas",
+      "invoiceHistoryDesc": "Ver y descargar facturas",
+      "viewInvoices": "Ver Facturas"
+    },
+    "actions": {
+      "saveChanges": "Guardar Cambios",
+      "resetToDefault": "Restablecer Valores"
+    },
+    "resetToDefault": "Restablecer Valores"
   },
   "tickets": {
-    "title": "Support Tickets",
-    "subtitle": "Get help with your orders",
-    "createTicket": "Create Ticket",
-    "ticketNumber": "Ticket Number",
-    "subject": "Subject",
-    "category": "Category",
-    "priority": "Priority",
-    "status": "Status",
-    "created": "Created",
-    "updated": "Updated",
-    "noTickets": "No tickets found",
+    "badge": "Soporte",
+    "title": "Tickets de Soporte",
+    "subtitle": "Obtenga ayuda con sus pedidos y consultas",
+    "createTicket": "Crear Ticket",
+    "stats": {
+      "open": "Abiertos",
+      "inProgress": "En Progreso",
+      "resolved": "Resueltos"
+    },
+    "filters": {
+      "status": "Estado",
+      "allStatuses": "Todos los Estados",
+      "open": "Abierto",
+      "inProgress": "En Progreso",
+      "resolved": "Resuelto",
+      "closed": "Cerrado",
+      "searchTicket": "Buscar Tickets",
+      "searchPlaceholder": "Número de ticket, asunto...",
+      "applyFilters": "Aplicar Filtros",
+      "reset": "Restablecer"
+    },
+    "table": {
+      "ticketNumber": "Número de Ticket",
+      "subject": "Asunto",
+      "category": "Categoría",
+      "priority": "Prioridad",
+      "status": "Estado",
+      "created": "Creado",
+      "actions": "Acciones"
+    },
+    "priorities": {
+      "low": "Baja",
+      "medium": "Media",
+      "high": "Alta",
+      "urgent": "Urgente"
+    },
     "categories": {
-      "shipping": "Shipping Issue",
-      "order": "Order Issue",
-      "product": "Product Inquiry",
-      "payment": "Payment",
-      "documentation": "Documentation",
-      "other": "Other"
+      "shipping": "Problema de Envío",
+      "order": "Problema con Pedido",
+      "product": "Consulta de Producto",
+      "payment": "Pago",
+      "documentation": "Documentación",
+      "other": "Otro",
+      "technical": "Problema Técnico"
+    },
+    "emptyState": {
+      "title": "Sin Tickets de Soporte",
+      "text": "Todavía no ha creado ningún ticket de soporte. Si necesita ayuda, cree un nuevo ticket.",
+      "createTicket": "Crear Ticket"
+    },
+    "actions": {
+      "viewTicket": "Ver Ticket",
+      "closeTicket": "Cerrar Ticket"
     },
     "details": {
-      "title": "Ticket Details",
-      "messages": "Messages",
-      "reply": "Reply",
-      "attachments": "Attachments",
-      "addAttachment": "Add Attachment"
+      "title": "Detalles del Ticket",
+      "backToTickets": "Volver a Tickets",
+      "ticketInfo": "Información del Ticket",
+      "conversation": "Conversación",
+      "reply": "Responder",
+      "replyPlaceholder": "Escriba su respuesta...",
+      "sendReply": "Enviar Respuesta",
+      "attachFile": "Adjuntar Archivo",
+      "closeTicket": "Cerrar Ticket",
+      "loading": "Cargando...",
+      "category": "Categoría",
+      "status": "Estado",
+      "lastUpdated": "Última Actualización",
+      "chatWithSupport": "Chatear con soporte",
+      "typePlaceholder": "Escribe tu mensaje...",
+      "send": "Enviar",
+      "messages": "Mensajes",
+      "attachments": "Archivos Adjuntos",
+      "addAttachment": "Agregar Adjunto"
     },
     "create": {
-      "title": "Create Support Ticket",
-      "subtitle": "We're here to help",
-      "orderNumber": "Order Number",
-      "selectCategory": "Select Category",
-      "selectPriority": "Select Priority",
-      "describeIssue": "Describe your issue",
-      "attachFiles": "Attach Files"
+      "title": "Crear Ticket de Soporte",
+      "subtitle": "Estamos aquí para ayudar",
+      "orderNumber": "Número de Pedido",
+      "orderNumberPlaceholder": "Ingrese número de pedido relacionado (opcional)",
+      "selectCategory": "Seleccionar Categoría",
+      "selectPriority": "Seleccionar Prioridad",
+      "subject": "Asunto",
+      "subjectPlaceholder": "Breve descripción de su problema",
+      "description": "Descripción",
+      "descriptionPlaceholder": "Por favor proporcione información detallada sobre su problema...",
+      "attachFiles": "Adjuntar Archivos",
+      "submitTicket": "Enviar Ticket",
+      "badge": "Centro de Soporte",
+      "backToTickets": "Volver a Tickets",
+      "cardTitle": "Información del Ticket",
+      "cardSubtitle": "Por favor proporcione detalles sobre su problema",
+      "category": "Categoría",
+      "required": "*",
+      "optional": "(Opcional)",
+      "selectCategoryPlaceholder": "Seleccionar categoría",
+      "categoryHint": "Elija la categoría que mejor describa su problema",
+      "relatedOrder": "Pedido Relacionado",
+      "noSpecificOrder": "Sin pedido específico",
+      "orderHint": "Seleccione un pedido si este problema está relacionado con un pedido específico",
+      "orderHintRecommended": "Recomendado: Seleccione el pedido relacionado para una resolución más rápida",
+      "subjectHint": "Proporcione un resumen claro y conciso de su problema",
+      "descriptionHint": "Incluya tantos detalles como sea posible para ayudarnos a resolver su problema rápidamente",
+      "attachmentsLabel": "Archivos Adjuntos",
+      "clickToUpload": "Haga clic para cargar",
+      "orDragDrop": "o arrastre y suelte",
+      "fileTypes": "PNG, JPG, PDF hasta 10MB cada uno",
+      "cancel": "Cancelar",
+      "submit": "Enviar Ticket",
+      "helpTitle": "¿Necesita Asistencia Inmediata?",
+      "helpText": "Para asuntos urgentes, también puede contactarnos directamente:",
+      "describeIssue": "Describa su problema"
+    },
+    "ticketNumber": "Número de Ticket",
+    "subject": "Asunto",
+    "category": "Categoría",
+    "priority": "Prioridad",
+    "status": "Estado",
+    "created": "Creado",
+    "updated": "Actualizado",
+    "noTickets": "No se encontraron tickets",
+    "empty": {
+      "title": "No Tickets Yet",
+      "text": "You haven't created any support tickets",
+      "createFirst": "Create First Ticket"
     }
   },
   "affiliate": {
-    "title": "Affiliate Program",
-    "subtitle": "Earn rewards by referring others",
-    "yourLink": "Your Referral Link",
-    "copyLink": "Copy Link",
-    "earnings": "Total Earnings",
-    "referrals": "Total Referrals",
-    "howItWorks": "How It Works",
-    "benefits": "Benefits",
-    "getStarted": "Get Started"
+    "badge": "Programa de Afiliados",
+    "title": "Programa de Fidelidad para Nuestros Clientes",
+    "subtitle": "Valoramos a cada cliente y ofrecemos las mejores recompensas a quienes contribuyen a su marca. ¡Cuanto más avance con nosotros, más recompensas recibirá!",
+    "description": "Nuestro programa incluye los siguientes niveles: BRONCE – condiciones mejoradas y descuentos adicionales; PLATA – descuentos premium y servicio prioritario; ORO – precios exclusivos y soporte dedicado; PLATINO – beneficios VIP y enfoque personalizado; PLATINO+ – el nivel más alto con condiciones VIP+, privilegios prioritarios y ofertas exclusivas.",
+    "tiers": {
+      "title": "Niveles de Membresía",
+      "subtitle": "Su lealtad determina el nivel de su compra según el volumen de pedidos. Cuanto mejor sea el nivel, más beneficios recibirá.",
+      "bronze": {
+        "name": "Bronce",
+        "range": "0-5.000$",
+        "revenue": "Ventas mensuales",
+        "discountLevel": "Nivel de descuento",
+        "orderingOption": "Opción de pedido",
+        "shipping": "Envío",
+        "procurement": "Adquisición",
+        "paySplit": "Pago fraccionado",
+        "freeStorage": "Almacenamiento Gratuito",
+        "currentLevel": "Nivel Actual"
+      },
+      "silver": {
+        "name": "Plata",
+        "range": "5.000-15.000$",
+        "revenue": "Ventas mensuales"
+      },
+      "gold": {
+        "name": "Oro",
+        "range": "15.000-50.000$",
+        "revenue": "Ventas mensuales"
+      },
+      "platinum": {
+        "name": "Platino",
+        "range": "50.000-100.000$",
+        "revenue": "Ventas mensuales"
+      },
+      "platinumPlus": {
+        "name": "Platino+",
+        "range": "100.000+ $",
+        "revenue": "Ventas mensuales",
+        "premiumBenefits": "Beneficios Premium"
+      }
+    },
+    "stats": {
+      "discountLevel": "Nivel de descuento",
+      "orderingOption": "Opción de pedido",
+      "shipping": "Envío",
+      "procurement": "Adquisición",
+      "paySplit": "Pago fraccionado",
+      "freeStorage": "Almacenamiento Gratuito",
+      "website": "Sitio Web",
+      "manual": "Manual",
+      "viaWebsite": "Vía Sitio Web",
+      "viaManager": "Vía Gerente",
+      "days": "días",
+      "free": "Gratis",
+      "individual": "Individual"
+    },
+    "benefits": {
+      "title": "Beneficios",
+      "managerSupport": "Soporte de gerente",
+      "freeStorage": "Almacenamiento gratuito 5000$",
+      "analytics": "Análisis",
+      "trackAvailability": "Seguimiento de disponibilidad y proveedor",
+      "yes": "Sí",
+      "no": "No",
+      "unlimited": "Ilimitado",
+      "advanced": "Avanzado",
+      "realTime": "Tiempo real"
+    },
+    "howItWorks": {
+      "title": "Cómo Funciona",
+      "subtitle": "Proceso simple y transparente para maximizar sus beneficios",
+      "placeOrders": {
+        "title": "Realizar Pedidos",
+        "description": "Continúe comprando piezas a través de nuestra plataforma como de costumbre"
+      },
+      "growSales": {
+        "title": "Aumentar Ventas",
+        "description": "Su volumen de ventas mensual determina su nivel"
+      },
+      "earnRewards": {
+        "title": "Ganar Recompensas",
+        "description": "Desbloquee mejores descuentos, soporte prioritario y beneficios exclusivos"
+      }
+    },
+    "disclaimer": {
+      "note": "Nota:",
+      "text": "Su nivel se calculará en función del volumen de compra mensual acumulado desde la creación de su cuenta. La membresía de nivel se actualiza mensualmente y todos los beneficios se aplican automáticamente a su cuenta calificada."
+    },
+    "learnMore": "Más Información"
   },
   "contacts": {
-    "title": "Contact Us",
-    "subtitle": "Get in touch with our team",
-    "name": "Name",
-    "email": "Email",
-    "subject": "Subject",
-    "message": "Message",
-    "sendMessage": "Send Message",
-    "contactInfo": "Contact Information",
-    "address": "Address",
-    "phone": "Phone",
-    "emailAddress": "Email Address",
-    "businessHours": "Business Hours"
+    "title": "Contáctenos",
+    "subtitle": "Póngase en contacto con nuestro equipo",
+    "name": "Nombre",
+    "email": "Correo electrónico",
+    "subject": "Asunto",
+    "message": "Mensaje",
+    "sendMessage": "Enviar Mensaje",
+    "contactInfo": "Información de Contacto",
+    "address": "Dirección",
+    "phone": "Teléfono",
+    "emailAddress": "Correo Electrónico",
+    "businessHours": "Horario Comercial",
+    "badge": "Soporte 24/7",
+    "website": "Sitio Web"
   },
   "search": {
-    "title": "Search Parts",
-    "subtitle": "Find the parts you need",
-    "partNumber": "Part Number",
-    "description": "Description",
-    "manufacturer": "Manufacturer",
-    "category": "Category",
-    "searchPlaceholder": "Enter part number or description",
-    "results": "Search Results",
-    "noResults": "No results found",
-    "refineSearch": "Refine your search",
+    "badge": "Búsqueda de Repuestos Automotrices",
+    "heroTitle": "Encuentra Repuestos Automotrices",
+    "heroSubtitle": "Busca millones de repuestos automotrices de proveedores verificados en todo el mundo",
+    "placeholder": "Ingresa número de parte, modelo de vehículo o descripción...",
+    "searchBtn": "Buscar",
+    "resetBtn": "Restablecer",
+    "excelImport": "Importar Excel",
+    "aiSmartFilter": "Filtro Inteligente IA",
+    "advancedFilters": "Filtros Avanzados",
+    "title": "Buscar Repuestos",
+    "subtitle": "Encuentra los repuestos que necesitas",
+    "partNumber": "Número de Parte",
+    "description": "Descripción",
+    "manufacturer": "Fabricante",
+    "category": "Categoría",
+    "searchPlaceholder": "Ingresa número de parte o descripción",
+    "results": "Resultados de Búsqueda",
+    "noResults": "No se encontraron resultados",
+    "refineSearch": "Refina tu búsqueda",
+    "aiFilter": {
+      "title": "Filtro Inteligente",
+      "subtitle": "Describe lo que buscas en lenguaje natural",
+      "placeholder": "Ej: Encuentra pastillas de freno menores a $200 de proveedores alemanes...",
+      "findParts": "Encontrar Repuestos",
+      "try": "Prueba:",
+      "hint1": "Repuestos OEM de frenos menores a $500",
+      "hint2": "Rodamientos SKF en stock",
+      "hint3": "Proveedores alemanes con certificación ISO",
+      "analyzing": "Analizando tu solicitud...",
+      "foundFilters": "Filtros identificados",
+      "applyFilters": "Aplicar Filtros",
+      "sidebarHint": "Los filtros aparecerán en la barra lateral para mayor refinamiento",
+      "features": {
+        "smartSearch": {
+          "title": "Búsqueda Inteligente",
+          "desc": "La IA entiende consultas complejas"
+        },
+        "autoFilters": {
+          "title": "Filtros Automáticos",
+          "desc": "Configura automáticamente filtros óptimos"
+        },
+        "saveTime": {
+          "title": "Ahorra Tiempo",
+          "desc": "Encuentra repuestos 10 veces más rápido"
+        }
+      }
+    },
     "automotive": {
-      "title": "Automotive Parts",
-      "subtitle": "Search for vehicle parts and components"
+      "title": "Repuestos Automotrices",
+      "subtitle": "Busca piezas y componentes de vehículos"
     },
     "aviation": {
-      "title": "Aviation Parts",
-      "subtitle": "Search for aircraft parts and systems"
+      "title": "Repuestos de Aviación",
+      "subtitle": "Busca piezas y sistemas de aeronaves"
     },
     "machinery": {
-      "title": "Heavy Machinery Parts",
-      "subtitle": "Search for industrial equipment parts"
+      "title": "Repuestos de Maquinaria Pesada",
+      "subtitle": "Busca piezas de equipos industriales"
+    },
+    "emptyState": {
+      "title": "Inicia tu Búsqueda",
+      "text": "Ingresa un número de parte, nombre de marca o descripción para encontrar repuestos de proveedores verificados en todo el mundo.",
+      "popularSearches": "BÚSQUEDAS POPULARES"
     }
+  },
+  "searchResults": {
+    "title": "Resultados de Búsqueda",
+    "showing": "Mostrando",
+    "results": "resultados para",
+    "sortBy": "Ordenar por:",
+    "relevance": "Relevancia",
+    "priceLowHigh": "Precio: Menor a Mayor",
+    "priceHighLow": "Precio: Mayor a Menor",
+    "delivery": "Tiempo de Entrega",
+    "addToCart": "Agregar al Carrito",
+    "viewDetails": "Ver Detalles",
+    "inStock": "En Stock",
+    "outOfStock": "Sin Stock",
+    "limitedStock": "Stock Limitado",
+    "filters": {
+      "title": "Filtros",
+      "subtitle": "Refinar resultados de búsqueda",
+      "clearAll": "Limpiar Todo",
+      "filterByResults": "Filtrar por Resultados",
+      "partsFound": "repuestos encontrados",
+      "priceRange": "Rango de Precio",
+      "min": "Mín",
+      "max": "Máx",
+      "stockCode": "Código de Stock",
+      "allStockCodes": "Todos los Códigos",
+      "brand": "Marca",
+      "searchBrands": "Buscar marcas...",
+      "allBrands": "Todas las Marcas",
+      "showMore": "Mostrar más",
+      "deliveryTime": "Tiempo de Entrega",
+      "days": "días",
+      "express": "Express (1-2 días)",
+      "fast": "Rápido (3-5 días)",
+      "standard": "Estándar (7-14 días)",
+      "availableQty": "Cantidad Disponible",
+      "units": "unidades",
+      "minAvailable": "Mínimo Disponible",
+      "weight": "Peso",
+      "matching": "Coincidentes:",
+      "parts": "repuestos",
+      "reset": "Restablecer",
+      "applyFilters": "Aplicar Filtros"
+    },
+    "header": {
+      "found": "Encontrados",
+      "partsMatching": "repuestos que coinciden con tu búsqueda",
+      "selectItems": "Selecciona artículos para agregar al carrito",
+      "selected": "Seleccionados",
+      "selectedTotal": "Total Seleccionado",
+      "addToCart": "Agregar al Carrito",
+      "addToCartCount": "Agregar al Carrito",
+      "filters": "Filtros"
+    },
+    "sort": {
+      "sortBy": "Ordenar por:",
+      "relevance": "Relevancia",
+      "cheapest": "Más Barato",
+      "expensive": "Más Caro",
+      "fastestDelivery": "Entrega Más Rápida",
+      "mostStock": "Mayor Stock",
+      "inStockOnly": "Solo en Stock",
+      "lowStock": "Stock Bajo"
+    },
+    "table": {
+      "select": "SELECCIONAR",
+      "brand": "MARCA",
+      "vendorCode": "CÓDIGO PROVEEDOR",
+      "description": "DESCRIPCIÓN",
+      "qty": "CANT",
+      "stockCode": "CÓDIGO STOCK",
+      "volume": "VOLUMEN",
+      "weight": "PESO",
+      "delivery": "ENTREGA",
+      "orderQty": "CANT. PEDIDO",
+      "total": "TOTAL"
+    },
+    "footer": {
+      "addSelectedToCart": "Agregar Seleccionados al Carrito",
+      "selectedTotal": "TOTAL SELECCIONADO:"
+    },
+    "emptyState": {
+      "title": "Inicia tu Búsqueda",
+      "description": "Ingresa un número de parte, nombre de marca o descripción para encontrar repuestos de proveedores verificados en todo el mundo.",
+      "popularSearches": "BÚSQUEDAS POPULARES",
+      "brakePads": "Pastillas de Freno",
+      "oilFilter": "Filtro de Aceite",
+      "alternator": "Alternador",
+      "waterPump": "Bomba de Agua",
+      "verifiedSuppliers": "Proveedores Verificados",
+      "globalNetwork": "Red Global",
+      "fastDelivery": "Entrega Rápida",
+      "qualityGuaranteed": "Calidad Garantizada",
+      "features": {
+        "verifiedSuppliers": "Proveedores Verificados",
+        "globalNetwork": "Red Global",
+        "fastDelivery": "Entrega Rápida",
+        "qualityGuaranteed": "Calidad Garantizada"
+      }
+    },
+    "noResults": {
+      "title": "No Se Encontraron Repuestos",
+      "noPartsFound": "No pudimos encontrar repuestos que coincidan con",
+      "description": "No pudimos encontrar repuestos que coincidan con",
+      "tryDifferent": "Intenta con un número de parte diferente o contacta a nuestro equipo para asistencia.",
+      "tryAgain": "Intentar de Nuevo",
+      "contactSupport": "Contactar Soporte",
+      "suggestions": "Sugerencias:",
+      "checkSpelling": "Verifica la ortografía de tu búsqueda",
+      "tryDifferentFormat": "Intenta usar un formato de número de parte diferente",
+      "useFewerKeywords": "Usa menos palabras clave o más generales",
+      "clearFilters": "Limpia los filtros para ampliar tu búsqueda",
+      "suggestion1": "Verifica la ortografía de tu búsqueda",
+      "suggestion2": "Intenta usar un formato de número de parte diferente",
+      "suggestion3": "Usa menos palabras clave o más generales",
+      "suggestion4": "Limpia los filtros para ampliar tu búsqueda"
+    },
+    "excel": {
+      "title": "Importar Excel",
+      "aiBadge": "IA",
+      "subtitle": "La IA analiza tu hoja de cálculo para extraer repuestos automáticamente",
+      "dragDrop": "Arrastra y suelta tu archivo Excel",
+      "aiExtract": "La IA extraerá inteligentemente repuestos de cualquier formato",
+      "browseFiles": "Explorar Archivos",
+      "supportedFormats": "Soporta .xlsx, .xls, .csv • Máx 10MB • Máx 5,000 filas • Máx 1,000 repuestos por búsqueda",
+      "fileHint": "Soporta .xlsx, .xls, .csv • Máx 10MB • Máx 5,000 filas • Máx 1,000 repuestos por búsqueda",
+      "formatHint": "Funciona con cualquier formato, pero datos estructurados dan mejores resultados",
+      "sampleHint": "Funciona con cualquier formato, pero datos estructurados dan mejores resultados",
+      "downloadSample": "Descargar Plantilla de Ejemplo",
+      "fileTooLarge": "Archivo Muy Grande",
+      "analyzing": "La IA está analizando tu hoja de cálculo...",
+      "readingData": "Leyendo datos de la hoja",
+      "detectingParts": "Detectando números de parte",
+      "extractingData": "Extrayendo cantidades y marcas",
+      "extractingQty": "Extrayendo cantidades y marcas",
+      "validating": "Validando y organizando",
+      "analysisComplete": "¡Análisis Completado!",
+      "partsReady": "25 repuestos encontrados listos para buscar",
+      "foundParts": "{count} repuestos encontrados listos para buscar",
+      "aiPowered": "Potenciado por IA",
+      "dataQuality": "Calidad de Datos:",
+      "qualityGood": "Buena",
+      "selectAll": "Seleccionar Todo",
+      "selectFirst1000": "Seleccionar Primeros 1,000",
+      "partsSelected": "0 repuestos seleccionados",
+      "filterAll": "Todos",
+      "filterHigh": "Alta Confianza",
+      "filterMedium": "Media",
+      "filterLow": "Baja",
+      "all": "Todos",
+      "highConfidence": "Alta Confianza",
+      "medium": "Media",
+      "low": "Baja",
+      "aiSuggestions": "Sugerencias de IA",
+      "importAnalytics": "Análisis de Importación",
+      "totalParts": "Total de Repuestos",
+      "found": "Encontrados",
+      "notFound": "No Encontrados",
+      "duplicates": "Duplicados",
+      "notCounted": "No contados",
+      "successRate": "Tasa de Éxito",
+      "partsNotFound": "Repuestos No Encontrados",
+      "duplicatesDetected": "Repuestos duplicados detectados y fusionados",
+      "searchResultsTitle": "Resultados de Búsqueda y Recomendaciones de IA",
+      "foundOptions": "Opciones encontradas para 25 repuestos",
+      "backToParts": "Volver a Repuestos",
+      "uploadNewFile": "Subir Nuevo Archivo",
+      "searchParts": "Buscar Repuestos",
+      "addToCartBtn": "Agregar al Carrito"
+    },
+    "recentSearches": {
+      "title": "Búsquedas Recientes",
+      "empty": "Sin búsquedas recientes aún",
+      "clearHistory": "Borrar Historial"
+    }
+  },
+  "footer": {
+    "tagline": "Plataforma de Abastecimiento Global",
+    "description": "Conectando fabricantes con proveedores verificados en más de 40 países. Construida para escala empresarial, diseñada para precisión.",
+    "platform": "Plataforma",
+    "main": "Principal",
+    "sectors": "Sectores",
+    "allSectors": "Todos los Sectores",
+    "oemParts": "Piezas OEM",
+    "aftermarketParts": "Piezas de Repuesto",
+    "performanceParts": "Piezas de Rendimiento",
+    "company": "Empresa",
+    "support": "Soporte",
+    "aboutUs": "Sobre Nosotros",
+    "helpCenter": "Centro de Ayuda",
+    "resources": "Recursos",
+    "documentation": "Documentación",
+    "apiReference": "Referencia API",
+    "blog": "Blog",
+    "faq": "Preguntas Frecuentes",
+    "copyright": "Todos los derechos reservados",
+    "privacyPolicy": "Política de Privacidad",
+    "termsOfService": "Términos de Servicio",
+    "cookiePolicy": "Política de Cookies"
+  },
+  "quickSearch": {
+    "badge": "BÚSQUEDA RÁPIDA",
+    "title": "Buscar Piezas Industriales",
+    "subtitle": "Ingrese número de pieza o descripción para buscar en todos los sectores",
+    "placeholder": "Ingrese número de pieza o descripción...",
+    "selectCategory": "Seleccionar Categoría:",
+    "searchNow": "Buscar Ahora",
+    "recentSearches": "Búsquedas Recientes"
   }
 }

@@ -15,14 +15,14 @@
         <div class="payment-header-left">
           <h1 class="payment-header-title">
             <i data-lucide="wallet"></i>
-            <span>Payment & Billing</span>
+            <span><%= t('payment.title') %></span>
           </h1>
-          <p class="payment-header-subtitle">Manage your account balance and payment methods</p>
+          <p class="payment-header-subtitle"><%= t('payment.subtitle') %></p>
         </div>
         <div class="payment-header-right">
           <button class="btn-add-funds" id="btn-add-funds">
             <i data-lucide="plus-circle"></i>
-            <span>Add Funds</span>
+            <span><%= t('payment.addFunds') %></span>
           </button>
         </div>
       </div>
@@ -38,7 +38,7 @@
         <div class="balance-header">
           <h2 class="section-title">
             <i data-lucide="trending-up"></i>
-            <span>Account Balance</span>
+            <span><%= t('payment.accountBalance') %></span>
           </h2>
         </div>
 
@@ -49,11 +49,11 @@
               <div class="balance-icon">
                 <i data-lucide="wallet"></i>
               </div>
-              <span class="balance-label">Available Balance</span>
+              <span class="balance-label"><%= t('payment.availableBalance') %></span>
             </div>
             <div class="balance-amount">$0.00</div>
             <div class="balance-footer">
-              <span class="balance-note">Ready to use</span>
+              <span class="balance-note"><%= t('payment.readyToUse') %></span>
             </div>
           </div>
 
@@ -63,11 +63,11 @@
               <div class="balance-icon pending">
                 <i data-lucide="clock"></i>
               </div>
-              <span class="balance-label">Pending Payment</span>
+              <span class="balance-label"><%= t('payment.pendingPayment') %></span>
             </div>
             <div class="balance-amount secondary">$0.00</div>
             <div class="balance-footer">
-              <span class="balance-note">Processing</span>
+              <span class="balance-note"><%= t('payment.processing') %></span>
             </div>
           </div>
 
@@ -77,11 +77,11 @@
               <div class="balance-icon spent">
                 <i data-lucide="shopping-bag"></i>
               </div>
-              <span class="balance-label">Total Spent</span>
+              <span class="balance-label"><%= t('payment.totalSpent') %></span>
             </div>
             <div class="balance-amount secondary">$0.00</div>
             <div class="balance-footer">
-              <span class="balance-note">All time</span>
+              <span class="balance-note"><%= t('payment.allTime') %></span>
             </div>
           </div>
         </div>
@@ -92,11 +92,11 @@
         <div class="section-header">
           <h2 class="section-title">
             <i data-lucide="credit-card"></i>
-            <span>Payment Methods</span>
+            <span><%= t('payment.paymentMethods') %></span>
           </h2>
           <button class="btn-add-method" id="btn-add-method">
             <i data-lucide="plus"></i>
-            <span>Add Method</span>
+            <span><%= t('payment.addMethod') %></span>
           </button>
         </div>
 
@@ -109,11 +109,11 @@
           <div class="empty-icon">
             <i data-lucide="credit-card"></i>
           </div>
-          <h3 class="empty-title">No Payment Methods</h3>
-          <p class="empty-text">Add a payment method to make purchases easier</p>
+          <h3 class="empty-title"><%= t('payment.noPaymentMethods') %></h3>
+          <p class="empty-text"><%= t('payment.noPaymentMethodsDesc') %></p>
           <button class="btn-empty-action" onclick="document.getElementById('btn-add-method').click()">
             <i data-lucide="plus"></i>
-            <span>Add Payment Method</span>
+            <span><%= t('payment.addPaymentMethod') %></span>
           </button>
         </div>
       </div>
@@ -123,13 +123,13 @@
         <div class="section-header">
           <h2 class="section-title">
             <i data-lucide="receipt"></i>
-            <span>Transaction History</span>
+            <span><%= t('payment.transactionHistory') %></span>
           </h2>
           <div class="transaction-filters">
-            <button class="filter-btn active" data-filter="all">All</button>
-            <button class="filter-btn" data-filter="completed">Completed</button>
-            <button class="filter-btn" data-filter="pending">Pending</button>
-            <button class="filter-btn" data-filter="refunded">Refunded</button>
+            <button class="filter-btn active" data-filter="all"><%= t('payment.filters.all') %></button>
+            <button class="filter-btn" data-filter="completed"><%= t('payment.filters.completed') %></button>
+            <button class="filter-btn" data-filter="pending"><%= t('payment.filters.pending') %></button>
+            <button class="filter-btn" data-filter="refunded"><%= t('payment.filters.refunded') %></button>
           </div>
         </div>
 
@@ -138,12 +138,12 @@
             <table class="transactions-table" id="transactions-table">
               <thead>
                 <tr>
-                  <th>Date</th>
-                  <th>Description</th>
-                  <th>Type</th>
-                  <th>Amount</th>
-                  <th>Status</th>
-                  <th>Actions</th>
+                  <th><%= t('payment.table.date') %></th>
+                  <th><%= t('payment.table.description') %></th>
+                  <th><%= t('payment.table.type') %></th>
+                  <th><%= t('payment.table.amount') %></th>
+                  <th><%= t('payment.table.status') %></th>
+                  <th><%= t('payment.table.actions') %></th>
                 </tr>
               </thead>
               <tbody id="transactions-tbody">
@@ -157,8 +157,8 @@
             <div class="empty-icon">
               <i data-lucide="file-text"></i>
             </div>
-            <h3 class="empty-title">No Transactions Yet</h3>
-            <p class="empty-text">Your transaction history will appear here</p>
+            <h3 class="empty-title"><%= t('payment.noTransactions') %></h3>
+            <p class="empty-text"><%= t('payment.noTransactionsDesc') %></p>
           </div>
         </div>
       </div>
@@ -180,13 +180,13 @@
         <div class="modal-icon">
           <i data-lucide="plus-circle"></i>
         </div>
-        <h2 class="modal-title">Add Funds</h2>
-        <p class="modal-subtitle">Top up your account balance</p>
+        <h2 class="modal-title"><%= t('payment.addFunds') %></h2>
+        <p class="modal-subtitle"><%= t('payment.addFundsDesc') %></p>
       </div>
 
       <form class="payment-form" id="add-funds-form">
         <div class="form-group">
-          <label class="form-label">Amount (USD)</label>
+          <label class="form-label"><%= t('payment.amountUSD') %></label>
           <div class="amount-input-wrapper">
             <span class="currency-symbol">$</span>
             <input 
@@ -209,11 +209,11 @@
         </div>
 
         <div class="form-group">
-          <label class="form-label">Payment Method</label>
+          <label class="form-label"><%= t('payment.selectPaymentMethod') %></label>
           <select class="form-select" id="payment-method" required>
-            <option value="">Select payment method</option>
-            <option value="card">Credit/Debit Card</option>
-            <option value="bank">Bank Transfer</option>
+            <option value=""><%= t('payment.selectPaymentMethodPlaceholder') %></option>
+            <option value="card"><%= t('payment.creditDebitCard') %></option>
+            <option value="bank"><%= t('payment.bankTransfer') %></option>
             <option value="paypal">PayPal</option>
           </select>
         </div>
@@ -221,11 +221,11 @@
         <div class="form-actions">
           <button type="button" class="btn-cancel" id="funds-btn-cancel">
             <i data-lucide="x"></i>
-            <span>Cancel</span>
+            <span><%= t('common.cancel') %></span>
           </button>
           <button type="submit" class="btn-save">
             <i data-lucide="check"></i>
-            <span>Add Funds</span>
+            <span><%= t('payment.addFunds') %></span>
           </button>
         </div>
       </form>
@@ -246,15 +246,15 @@
         <div class="modal-icon">
           <i data-lucide="credit-card"></i>
         </div>
-        <h2 class="modal-title" id="method-modal-title">Add Payment Method</h2>
-        <p class="modal-subtitle">Save a payment method for faster checkout</p>
+        <h2 class="modal-title" id="method-modal-title"><%= t('payment.addPaymentMethod') %></h2>
+        <p class="modal-subtitle"><%= t('payment.addPaymentMethodDesc') %></p>
       </div>
 
       <form class="payment-form" id="payment-method-form">
         <input type="hidden" id="method-id">
         
         <div class="form-group">
-          <label class="form-label">Card Holder Name *</label>
+          <label class="form-label"><%= t('payment.cardHolderName') %> *</label>
           <input 
             type="text" 
             class="form-input" 
@@ -265,7 +265,7 @@
         </div>
 
         <div class="form-group">
-          <label class="form-label">Card Number *</label>
+          <label class="form-label"><%= t('payment.cardNumber') %> *</label>
           <input 
             type="text" 
             class="form-input" 
@@ -278,7 +278,7 @@
 
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label">Expiry Date *</label>
+            <label class="form-label"><%= t('payment.expiryDate') %> *</label>
             <input 
               type="text" 
               class="form-input" 
@@ -304,18 +304,18 @@
         <div class="form-row">
           <label class="checkbox-label">
             <input type="checkbox" id="method-default">
-            <span>Set as default payment method</span>
+            <span><%= t('payment.setDefault') %></span>
           </label>
         </div>
 
         <div class="form-actions">
           <button type="button" class="btn-cancel" id="method-btn-cancel">
             <i data-lucide="x"></i>
-            <span>Cancel</span>
+            <span><%= t('common.cancel') %></span>
           </button>
           <button type="submit" class="btn-save">
             <i data-lucide="check"></i>
-            <span>Save Method</span>
+            <span><%= t('payment.saveMethod') %></span>
           </button>
         </div>
       </form>

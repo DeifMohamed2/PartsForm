@@ -10,6 +10,14 @@ const socketService = require('../services/socketService');
 const { getEffectiveMarkup, applyMarkupToPrice } = require('../utils/priceMarkup');
 const referralService = require('../services/referralService');
 
+// Parts Analytics tracking service
+let partsAnalyticsService = null;
+try {
+  partsAnalyticsService = require('../services/partsAnalyticsService');
+} catch (err) {
+  console.warn('⚠️ Parts analytics service not available:', err.message);
+}
+
 /**
  * Get buyer dashboard/main page
  */
@@ -1408,6 +1416,12 @@ const createOrder = async (req, res) => {
     }
 
     const order = await Order.createFromCartItems(buyer, validatedItems, paymentInfo);
+
+    // Track purchase in analytics (non-blocking)
+    if (partsAnalyticsService && order) {
+      partsAnalyticsService.trackPurchase(order)
+        .catch(err => console.error('[Analytics] Purchase tracking error:', err.message));
+    }
 
     // Process referral commission if referral was applied
     if (referralData && order) {

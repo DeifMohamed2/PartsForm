@@ -342,6 +342,43 @@ router.delete('/api/admins/:id', requireAllPermissions(PERMISSIONS.DELETE, PERMI
 // Parts Analytics
 router.get('/parts-analytics', getPartsAnalytics);
 
+// Parts Analytics API endpoints
+const {
+  getDashboardStats: getAnalyticsDashboard,
+  getMostSearched,
+  getTopPurchased,
+  getMissedOpportunities,
+  getTrending,
+  getSearchTrends,
+  getExcelAnalytics,
+  getCategoryAnalytics,
+  getPurchaseFrequency,
+  getAIInsights,
+  aiChat,
+  getDemandForecast,
+  syncHistorical,
+  runMaintenance,
+  trackSearch: trackSearchAnalytics,
+  getComprehensiveAnalytics,
+} = require('../controllers/analyticsController');
+
+router.get('/api/analytics/dashboard', getAnalyticsDashboard);
+router.get('/api/analytics/comprehensive', getComprehensiveAnalytics);
+router.get('/api/analytics/most-searched', getMostSearched);
+router.get('/api/analytics/top-purchased', getTopPurchased);
+router.get('/api/analytics/missed-opportunities', getMissedOpportunities);
+router.get('/api/analytics/trending', getTrending);
+router.get('/api/analytics/search-trends', getSearchTrends);
+router.get('/api/analytics/excel', getExcelAnalytics);
+router.get('/api/analytics/categories', getCategoryAnalytics);
+router.get('/api/analytics/purchase-frequency', getPurchaseFrequency);
+router.get('/api/analytics/ai-insights', getAIInsights);
+router.post('/api/analytics/ai-chat', aiChat);
+router.get('/api/analytics/demand-forecast', getDemandForecast);
+router.post('/api/analytics/sync-historical', requirePermission(PERMISSIONS.MANAGE_SETTINGS), syncHistorical);
+router.post('/api/analytics/run-maintenance', requirePermission(PERMISSIONS.MANAGE_SETTINGS), runMaintenance);
+router.post('/api/analytics/track-search', trackSearchAnalytics);
+
 // Admin Settings - Require manage_settings permission for updates
 router.get('/settings', getAdminSettings);
 

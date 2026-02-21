@@ -347,9 +347,9 @@ referralCommissionSchema.statics.updateOrderStatus = async function (orderId, ne
 };
 
 // Indexes for efficient queries
+// Note: order index is already created by unique: true
 referralCommissionSchema.index({ referralPartner: 1, periodMonth: 1, periodYear: 1 });
 referralCommissionSchema.index({ status: 1, periodMonth: 1, periodYear: 1 });
-referralCommissionSchema.index({ order: 1 });
 referralCommissionSchema.index({ buyer: 1 });
 referralCommissionSchema.index({ orderNumber: 1 });
 referralCommissionSchema.index({ createdAt: -1 });

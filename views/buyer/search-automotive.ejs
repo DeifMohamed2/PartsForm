@@ -27,16 +27,15 @@
       <div class="search2-hero-content">
         <div class="search2-badge automotive-badge">
           <i data-lucide="car-front"></i>
-          <span>Automotive Parts Search</span>
+          <span><%= t('search.badge') %></span>
         </div>
 
         <h1 class="search2-hero-title">
-          Find <span class="highlight">Automotive Parts</span><br>
-          From Global Suppliers
+          <%= t('search.heroTitle') %>
         </h1>
 
         <p class="search2-hero-subtitle">
-          Access premium OEM and aftermarket automotive components with verified quality
+          <%= t('search.heroSubtitle') %>
         </p>
 
         <!-- Enhanced Search Bar -->
@@ -44,20 +43,20 @@
           <div class="search2-bar">
             <div class="search2-input-group">
               <i data-lucide="search" class="search2-icon"></i>
-              <input type="text" class="search2-input" id="search2-input" placeholder="Enter part number (or multiple: CAF-000267, SAF-000033, ICL-000013)" autocomplete="off">
+              <input type="text" class="search2-input" id="search2-input" placeholder="<%= t('search.placeholder') %>" autocomplete="off">
               <button class="search2-clear-btn" id="search2-clear" style="display: none;">
                 <i data-lucide="x"></i>
               </button>
             </div>
 
             <button class="search2-btn" id="search2-btn">
-              <span>Search</span>
+              <span><%= t('search.searchBtn') %></span>
               <i data-lucide="arrow-right"></i>
             </button>
 
             <button class="search2-reset-btn" id="search2-reset-btn" style="display: none;">
               <i data-lucide="rotate-ccw"></i>
-              <span>Reset</span>
+              <span><%= t('search.resetBtn') %></span>
             </button>
           </div>
 
@@ -68,17 +67,17 @@
         <div class="search2-quick-actions">
           <button class="quick-action-btn ai-excel-action" id="excel-upload-trigger">
             <i data-lucide="file-spreadsheet"></i>
-            <span>Excel Import</span>
+            <span><%= t('search.excelImport') %></span>
             <span class="ai-chip">AI</span>
           </button>
           <button class="quick-action-btn ai-filter-btn" id="ai-filter-trigger">
             <div class="ai-glow"></div>
             <i data-lucide="sparkles"></i>
-            <span>AI Smart Filter</span>
+            <span><%= t('search.aiSmartFilter') %></span>
           </button>
           <button class="quick-action-btn" id="advanced-filter-trigger" style="display: none;">
             <i data-lucide="sliders-horizontal"></i>
-            <span>Advanced Filters</span>
+            <span><%= t('search.advancedFilters') %></span>
           </button>
         </div>
       </div>
@@ -113,8 +112,8 @@
           <i data-lucide="sparkles" class="ai-icon"></i>
         </div>
         <div class="ai-title-content">
-          <h2 class="ai-filter-title"><span class="title-ai">AI</span> Smart Filter</h2>
-          <p class="ai-filter-subtitle">Tell me what you're looking for and I'll help you find it</p>
+          <h2 class="ai-filter-title"><span class="title-ai">AI</span> <%= t('search.aiFilter.title') %></h2>
+          <p class="ai-filter-subtitle"><%= t('search.aiFilter.subtitle') %></p>
         </div>
       </div>
       <button class="ai-filter-close" id="ai-filter-close">
@@ -127,24 +126,24 @@
       <!-- AI Input Section - Moved to Top -->
       <div class="ai-input-section">
         <div class="ai-input-wrapper">
-          <textarea class="ai-input" id="ai-filter-input" placeholder="Example: Find me Bosch brake pads under $500 from German suppliers..." rows="2"></textarea>
-          <button class="ai-submit-btn" id="ai-submit-btn" title="Find Parts">
+          <textarea class="ai-input" id="ai-filter-input" placeholder="<%= t('search.aiFilter.placeholder') %>" rows="2"></textarea>
+          <button class="ai-submit-btn" id="ai-submit-btn" title="<%= t('search.aiFilter.findParts') %>">
             <i data-lucide="search"></i>
           </button>
         </div>
 
         <!-- Quick Suggestion Chips -->
         <div class="ai-input-hints">
-          <span class="hint-label">Try:</span>
+          <span class="hint-label"><%= t('search.aiFilter.try') %></span>
           <div class="ai-hints-container">
             <button class="ai-hint-chip" data-hint="Find OEM brake parts under $500 from verified suppliers">
-              OEM parts under $500
+              <%= t('search.aiFilter.hint1') %>
             </button>
             <button class="ai-hint-chip" data-hint="Show bearings from SKF in stock with express delivery">
-              SKF bearings with fast delivery
+              <%= t('search.aiFilter.hint2') %>
             </button>
             <button class="ai-hint-chip" data-hint="German suppliers with ISO certification">
-              German certified suppliers
+              <%= t('search.aiFilter.hint3') %>
             </button>
           </div>
         </div>
@@ -159,11 +158,11 @@
               <span></span>
               <span></span>
             </div>
-            <span class="thinking-text">Analyzing your request...</span>
+            <span class="thinking-text"><%= t('search.aiFilter.analyzing') %></span>
           </div>
           <div class="ai-response-title" id="ai-response-title" style="display: none;">
             <i data-lucide="check-circle"></i>
-            <span>Found the perfect filters!</span>
+            <span><%= t('search.aiFilter.foundFilters') %></span>
           </div>
         </div>
 
@@ -182,8 +181,8 @@
             <i data-lucide="brain"></i>
           </div>
           <div class="ai-feature-content">
-            <h4>Smart Search</h4>
-            <p>Understands natural language queries</p>
+            <h4><%= t('search.aiFilter.features.smartSearch.title') %></h4>
+            <p><%= t('search.aiFilter.features.smartSearch.desc') %></p>
           </div>
         </div>
         <div class="ai-feature-item">
@@ -191,8 +190,8 @@
             <i data-lucide="sliders-horizontal"></i>
           </div>
           <div class="ai-feature-content">
-            <h4>Auto Filters</h4>
-            <p>Automatically applies relevant filters</p>
+            <h4><%= t('search.aiFilter.features.autoFilters.title') %></h4>
+            <p><%= t('search.aiFilter.features.autoFilters.desc') %></p>
           </div>
         </div>
         <div class="ai-feature-item">
@@ -200,8 +199,8 @@
             <i data-lucide="zap"></i>
           </div>
           <div class="ai-feature-content">
-            <h4>Save Time</h4>
-            <p>Find parts faster than manual filtering</p>
+            <h4><%= t('search.aiFilter.features.saveTime.title') %></h4>
+            <p><%= t('search.aiFilter.features.saveTime.desc') %></p>
           </div>
         </div>
       </div>
@@ -211,16 +210,16 @@
     <div class="ai-filter-footer">
       <div class="ai-footer-info">
         <i data-lucide="info"></i>
-        <span>Use sidebar for manual filters</span>
+        <span><%= t('search.aiFilter.sidebarHint') %></span>
       </div>
       <div class="ai-filter-actions">
         <button class="ai-btn-secondary" id="ai-clear-all">
           <i data-lucide="rotate-ccw"></i>
-          <span>Reset</span>
+          <span><%= t('search.resetBtn') %></span>
         </button>
         <button class="ai-btn-primary" id="ai-apply-filters">
           <i data-lucide="search"></i>
-          <span>Apply Filters</span>
+          <span><%= t('search.aiFilter.applyFilters') %></span>
           <span class="results-count" id="results-preview">0</span>
         </button>
       </div>
@@ -242,25 +241,25 @@
       <!-- Header Badge -->
       <div class="modal-badge">
         <i data-lucide="sparkles"></i>
-        <span>WELCOME BACK</span>
+        <span><%= t('common.welcomeBack') %></span>
       </div>
 
-      <h3 class="modal-title">Sign In</h3>
+      <h3 class="modal-title"><%= t('common.signIn') %></h3>
       <p class="modal-description">
-        Continue your industrial sourcing journey
+        <%= t('common.signInDesc') %>
       </p>
 
       <form class="sign-in-form" id="sign-in-form">
         <div class="form-group">
-          <label class="form-label">Email Address</label>
+          <label class="form-label"><%= t('common.email') %></label>
           <div class="input-wrapper">
             <i data-lucide="mail" class="input-icon"></i>
-            <input type="email" class="form-input" id="login-email" placeholder="your@email.com" required>
+            <input type="email" class="form-input" id="login-email" placeholder="<%= t('common.emailPlaceholder') %>" required>
           </div>
         </div>
 
         <div class="form-group">
-          <label class="form-label">Password</label>
+          <label class="form-label"><%= t('common.password') %></label>
           <div class="input-wrapper">
             <i data-lucide="lock" class="input-icon"></i>
             <input type="password" class="form-input" id="login-password" placeholder="••••••••" required>
@@ -268,24 +267,24 @@
         </div>
 
         <div class="form-footer">
-          <a href="#" class="forgot-password">Forgot password?</a>
+          <a href="#" class="forgot-password"><%= t('common.forgotPassword') %></a>
         </div>
 
         <button type="submit" class="btn-primary btn-full">
-          <span>Sign In</span>
+          <span><%= t('common.signIn') %></span>
           <i data-lucide="arrow-right"></i>
         </button>
       </form>
 
       <!-- Sign Up Link -->
       <div class="modal-footer">
-        <span>Don't have an account?</span>
-        <a href="#" class="sign-up-link">Sign Up</a>
+        <span><%= t('common.noAccount') %></span>
+        <a href="#" class="sign-up-link"><%= t('common.signUp') %></a>
       </div>
 
       <!-- Divider -->
       <div class="modal-divider">
-        <span>or continue with</span>
+        <span><%= t('common.orContinueWith') %></span>
       </div>
 
       <!-- Social Login -->
@@ -301,6 +300,20 @@
 <script src="/js/main.js"></script>
 <script src="/js/cart.js"></script>
 <script src="/js/buyer-auth.js"></script>
+<script>
+  // Pass translations to JavaScript
+  window.__translations = {
+    search: {
+      placeholder: "<%= t('search.placeholder') %>",
+      emptyState: {
+        title: "<%= t('searchResults.emptyState.title') %>",
+        description: "<%= t('searchResults.emptyState.description') %>"
+      },
+      signInRequired: "<%= t('common.signInRequired') || 'Sign In Required' %>",
+      signInToSearch: "<%= t('common.signInToSearch') || 'Please sign in to search for parts from verified suppliers worldwide.' %>"
+    }
+  };
+</script>
 <script src="/js/search.js"></script>
 <script src="/js/quick-search.js"></script>
 <script src="/js/cart-badge-updater.js"></script>

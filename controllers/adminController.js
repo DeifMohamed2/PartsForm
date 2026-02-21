@@ -303,6 +303,24 @@ const getAdminDashboard = async (req, res) => {
                 }
               }
             ],
+            // Most wanted/ordered parts - from all non-cancelled orders
+            mostWantedParts: [
+              { $match: { status: { $nin: ['cancelled'] } } },
+              { $unwind: '$items' },
+              {
+                $group: {
+                  _id: '$items.partNumber',
+                  description: { $first: '$items.description' },
+                  brand: { $first: '$items.brand' },
+                  category: { $first: '$items.category' },
+                  orderCount: { $sum: 1 },
+                  totalRevenue: { $sum: '$items.price' },
+                }
+              },
+              { $match: { _id: { $ne: null, $ne: '' } } },
+              { $sort: { orderCount: -1, totalRevenue: -1 } },
+              { $limit: 5 },
+            ],
           },
         },
       ]),
@@ -582,6 +600,17 @@ const getAdminDashboard = async (req, res) => {
       timeAgo: getTimeAgo(order.createdAt),
     }));
 
+    // Format most wanted parts for display
+    const mostWantedPartsData = (stats_data.mostWantedParts || []).map((part, index) => ({
+      rank: index + 1,
+      partNumber: part._id,
+      description: part.description || part._id,
+      brand: part.brand || 'N/A',
+      category: part.category || 'General',
+      orderCount: part.orderCount || 0,
+      totalRevenue: part.totalRevenue || 0,
+    }));
+
     // Cache the result
     const cacheData = {
       activePage: 'dashboard',
@@ -591,7 +620,7 @@ const getAdminDashboard = async (req, res) => {
       tickets: formattedTickets,
       topBuyers: topBuyersData,
       ordersByCountry,
-      mostWantedParts: [],
+      mostWantedParts: mostWantedPartsData,
       performanceMetrics,
       topSellingParts: [],
       recentActivity,

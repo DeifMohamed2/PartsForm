@@ -27,19 +27,19 @@
             </div>
             <div class="analytics-hero-stats">
               <div class="analytics-hero-stat">
-                <div class="analytics-hero-stat-value">47,892</div>
+                <div class="analytics-hero-stat-value">--</div>
                 <div class="analytics-hero-stat-label">Total Searches</div>
               </div>
               <div class="analytics-hero-stat">
-                <div class="analytics-hero-stat-value">12,456</div>
+                <div class="analytics-hero-stat-value">--</div>
                 <div class="analytics-hero-stat-label">Parts Viewed</div>
               </div>
               <div class="analytics-hero-stat">
-                <div class="analytics-hero-stat-value">3,847</div>
+                <div class="analytics-hero-stat-value">--</div>
                 <div class="analytics-hero-stat-label">Purchases</div>
               </div>
               <div class="analytics-hero-stat">
-                <div class="analytics-hero-stat-value">23.4%</div>
+                <div class="analytics-hero-stat-value">--</div>
                 <div class="analytics-hero-stat-label">Conversion Rate</div>
               </div>
             </div>
@@ -48,74 +48,9 @@
         
         <!-- Quick Stats Grid -->
         <div class="analytics-quick-stats">
-          <div class="quick-stat-card blue">
-            <div class="quick-stat-header">
-              <div class="quick-stat-icon">
-                <i data-lucide="search"></i>
-              </div>
-              <div class="quick-stat-change positive">
-                <i data-lucide="trending-up"></i>
-                +18.5%
-              </div>
-            </div>
-            <div class="quick-stat-value">47,892</div>
-            <div class="quick-stat-label">Total Searches This Month</div>
-          </div>
-          
-          <div class="quick-stat-card green">
-            <div class="quick-stat-header">
-              <div class="quick-stat-icon">
-                <i data-lucide="shopping-cart"></i>
-              </div>
-              <div class="quick-stat-change positive">
-                <i data-lucide="trending-up"></i>
-                +12.3%
-              </div>
-            </div>
-            <div class="quick-stat-value">3,847</div>
-            <div class="quick-stat-label">Parts Purchased</div>
-          </div>
-          
-          <div class="quick-stat-card purple">
-            <div class="quick-stat-header">
-              <div class="quick-stat-icon">
-                <i data-lucide="eye-off"></i>
-              </div>
-              <div class="quick-stat-change negative">
-                <i data-lucide="trending-down"></i>
-                -8.2%
-              </div>
-            </div>
-            <div class="quick-stat-value">1,234</div>
-            <div class="quick-stat-label">Searched Not Bought</div>
-          </div>
-          
-          <div class="quick-stat-card amber">
-            <div class="quick-stat-header">
-              <div class="quick-stat-icon">
-                <i data-lucide="alert-circle"></i>
-              </div>
-              <div class="quick-stat-change negative">
-                <i data-lucide="trending-up"></i>
-                +5.7%
-              </div>
-            </div>
-            <div class="quick-stat-value">567</div>
-            <div class="quick-stat-label">Missing Parts Requests</div>
-          </div>
-          
-          <div class="quick-stat-card cyan">
-            <div class="quick-stat-header">
-              <div class="quick-stat-icon">
-                <i data-lucide="flame"></i>
-              </div>
-              <div class="quick-stat-change positive">
-                <i data-lucide="trending-up"></i>
-                +24.1%
-              </div>
-            </div>
-            <div class="quick-stat-value">89</div>
-            <div class="quick-stat-label">Trending Parts</div>
+          <div style="grid-column: 1 / -1; text-align: center; padding: 1rem; color: var(--admin-text-muted);">
+            <i data-lucide="loader" class="animate-spin" style="width: 24px; height: 24px;"></i>
+            <span style="margin-left: 0.5rem;">Loading statistics...</span>
           </div>
         </div>
         
@@ -168,7 +103,7 @@
                 </select>
               </div>
               <div class="analytics-card-body">
-                <table class="searched-parts-table">
+                <table class="searched-parts-table" id="mostSearchedTable">
                   <thead>
                     <tr>
                       <th>Part</th>
@@ -179,84 +114,10 @@
                   </thead>
                   <tbody>
                     <tr>
-                      <td>
-                        <div class="part-info">
-                          <div class="part-icon brake">
-                            <i data-lucide="disc"></i>
-                          </div>
-                          <div>
-                            <div class="part-name">Ceramic Brake Pads Set</div>
-                            <div class="part-number">PN: BP-4521-CER</div>
-                          </div>
-                        </div>
+                      <td colspan="4" style="text-align: center; padding: 2rem; color: var(--admin-text-muted);">
+                        <i data-lucide="loader" class="animate-spin" style="width: 32px; height: 32px;"></i>
+                        <p style="margin-top: 0.5rem;">Loading search data...</p>
                       </td>
-                      <td><span class="search-count"><i data-lucide="search"></i> 2,847</span></td>
-                      <td><span class="conversion-rate high">68%</span></td>
-                      <td><span class="status-badge available">In Stock</span></td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <div class="part-info">
-                          <div class="part-icon engine">
-                            <i data-lucide="settings"></i>
-                          </div>
-                          <div>
-                            <div class="part-name">Alternator Assembly 150A</div>
-                            <div class="part-number">PN: ALT-7890-PRO</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td><span class="search-count"><i data-lucide="search"></i> 2,156</span></td>
-                      <td><span class="conversion-rate high">72%</span></td>
-                      <td><span class="status-badge available">In Stock</span></td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <div class="part-info">
-                          <div class="part-icon suspension">
-                            <i data-lucide="move-vertical"></i>
-                          </div>
-                          <div>
-                            <div class="part-name">Front Strut Assembly</div>
-                            <div class="part-number">PN: SUS-3456-FR</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td><span class="search-count"><i data-lucide="search"></i> 1,892</span></td>
-                      <td><span class="conversion-rate medium">45%</span></td>
-                      <td><span class="status-badge limited">Low Stock</span></td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <div class="part-info">
-                          <div class="part-icon electrical">
-                            <i data-lucide="zap"></i>
-                          </div>
-                          <div>
-                            <div class="part-name">Spark Plug Platinum Set</div>
-                            <div class="part-number">PN: SP-1234-PLT</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td><span class="search-count"><i data-lucide="search"></i> 1,654</span></td>
-                      <td><span class="conversion-rate high">78%</span></td>
-                      <td><span class="status-badge available">In Stock</span></td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <div class="part-info">
-                          <div class="part-icon body">
-                            <i data-lucide="filter"></i>
-                          </div>
-                          <div>
-                            <div class="part-name">Oil Filter Premium</div>
-                            <div class="part-number">PN: OF-7890-PRO</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td><span class="search-count"><i data-lucide="search"></i> 1,423</span></td>
-                      <td><span class="conversion-rate low">28%</span></td>
-                      <td><span class="status-badge out-of-stock">Out of Stock</span></td>
                     </tr>
                     <tr>
                       <td>
@@ -293,75 +154,10 @@
                 </div>
               </div>
               <div class="analytics-card-body">
-                <div class="missed-opportunities-list">
-                  <div class="missed-opportunity-item">
-                    <div class="missed-opportunity-icon">
-                      <i data-lucide="x-circle"></i>
-                    </div>
-                    <div class="missed-opportunity-content">
-                      <div class="missed-opportunity-name">Turbocharger Assembly</div>
-                      <div class="missed-opportunity-meta">Not in inventory • High demand</div>
-                    </div>
-                    <div class="missed-opportunity-value">
-                      <div class="missed-opportunity-searches">847</div>
-                      <div class="missed-opportunity-label">searches</div>
-                    </div>
-                  </div>
-                  
-                  <div class="missed-opportunity-item">
-                    <div class="missed-opportunity-icon">
-                      <i data-lucide="x-circle"></i>
-                    </div>
-                    <div class="missed-opportunity-content">
-                      <div class="missed-opportunity-name">LED Headlight Kit</div>
-                      <div class="missed-opportunity-meta">Price too high • Lost to competitors</div>
-                    </div>
-                    <div class="missed-opportunity-value">
-                      <div class="missed-opportunity-searches">623</div>
-                      <div class="missed-opportunity-label">searches</div>
-                    </div>
-                  </div>
-                  
-                  <div class="missed-opportunity-item">
-                    <div class="missed-opportunity-icon">
-                      <i data-lucide="x-circle"></i>
-                    </div>
-                    <div class="missed-opportunity-content">
-                      <div class="missed-opportunity-name">Performance Exhaust System</div>
-                      <div class="missed-opportunity-meta">Out of stock frequently</div>
-                    </div>
-                    <div class="missed-opportunity-value">
-                      <div class="missed-opportunity-searches">512</div>
-                      <div class="missed-opportunity-label">searches</div>
-                    </div>
-                  </div>
-                  
-                  <div class="missed-opportunity-item">
-                    <div class="missed-opportunity-icon">
-                      <i data-lucide="x-circle"></i>
-                    </div>
-                    <div class="missed-opportunity-content">
-                      <div class="missed-opportunity-name">Cold Air Intake Kit</div>
-                      <div class="missed-opportunity-meta">Compatibility issues reported</div>
-                    </div>
-                    <div class="missed-opportunity-value">
-                      <div class="missed-opportunity-searches">398</div>
-                      <div class="missed-opportunity-label">searches</div>
-                    </div>
-                  </div>
-                  
-                  <div class="missed-opportunity-item">
-                    <div class="missed-opportunity-icon">
-                      <i data-lucide="x-circle"></i>
-                    </div>
-                    <div class="missed-opportunity-content">
-                      <div class="missed-opportunity-name">Racing Clutch Kit</div>
-                      <div class="missed-opportunity-meta">Limited fitment options</div>
-                    </div>
-                    <div class="missed-opportunity-value">
-                      <div class="missed-opportunity-searches">287</div>
-                      <div class="missed-opportunity-label">searches</div>
-                    </div>
+                <div class="missed-opportunities-list" id="missedOpportunitiesList">
+                  <div style="text-align: center; padding: 2rem; color: var(--admin-text-muted);">
+                    <i data-lucide="loader" class="animate-spin" style="width: 32px; height: 32px;"></i>
+                    <p style="margin-top: 0.5rem;">Loading missed opportunities...</p>
                   </div>
                 </div>
               </div>
@@ -405,81 +201,10 @@
             Top Purchased Parts
           </h3>
           
-          <div class="top-parts-grid">
-            <div class="top-part-card">
-              <div class="top-part-rank gold">1</div>
-              <div class="top-part-icon" style="background: rgba(239, 68, 68, 0.12); color: #ef4444;">
-                <i data-lucide="disc"></i>
-              </div>
-              <div class="top-part-name">Ceramic Brake Pads Set</div>
-              <div class="top-part-category">Brake Systems</div>
-              <div class="top-part-stats">
-                <div class="top-part-stat">
-                  <div class="top-part-stat-value">1,847</div>
-                  <div class="top-part-stat-label">Orders</div>
-                </div>
-                <div class="top-part-stat">
-                  <div class="top-part-stat-value">$165K</div>
-                  <div class="top-part-stat-label">Revenue</div>
-                </div>
-              </div>
-            </div>
-            
-            <div class="top-part-card">
-              <div class="top-part-rank silver">2</div>
-              <div class="top-part-icon" style="background: rgba(59, 130, 246, 0.12); color: #3b82f6;">
-                <i data-lucide="settings"></i>
-              </div>
-              <div class="top-part-name">Alternator Assembly</div>
-              <div class="top-part-category">Electrical</div>
-              <div class="top-part-stats">
-                <div class="top-part-stat">
-                  <div class="top-part-stat-value">1,456</div>
-                  <div class="top-part-stat-label">Orders</div>
-                </div>
-                <div class="top-part-stat">
-                  <div class="top-part-stat-value">$298K</div>
-                  <div class="top-part-stat-label">Revenue</div>
-                </div>
-              </div>
-            </div>
-            
-            <div class="top-part-card">
-              <div class="top-part-rank bronze">3</div>
-              <div class="top-part-icon" style="background: rgba(16, 185, 129, 0.12); color: #10b981;">
-                <i data-lucide="filter"></i>
-              </div>
-              <div class="top-part-name">Oil Filter Premium</div>
-              <div class="top-part-category">Filters</div>
-              <div class="top-part-stats">
-                <div class="top-part-stat">
-                  <div class="top-part-stat-value">1,234</div>
-                  <div class="top-part-stat-label">Orders</div>
-                </div>
-                <div class="top-part-stat">
-                  <div class="top-part-stat-value">$24K</div>
-                  <div class="top-part-stat-label">Revenue</div>
-                </div>
-              </div>
-            </div>
-            
-            <div class="top-part-card">
-              <div class="top-part-rank default">4</div>
-              <div class="top-part-icon" style="background: rgba(139, 92, 246, 0.12); color: #8b5cf6;">
-                <i data-lucide="move-vertical"></i>
-              </div>
-              <div class="top-part-name">Front Strut Assembly</div>
-              <div class="top-part-category">Suspension</div>
-              <div class="top-part-stats">
-                <div class="top-part-stat">
-                  <div class="top-part-stat-value">987</div>
-                  <div class="top-part-stat-label">Orders</div>
-                </div>
-                <div class="top-part-stat">
-                  <div class="top-part-stat-value">$145K</div>
-                  <div class="top-part-stat-label">Revenue</div>
-                </div>
-              </div>
+          <div class="top-parts-grid" id="topPurchasedGrid">
+            <div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: var(--admin-text-muted);">
+              <i data-lucide="loader" class="animate-spin" style="width: 32px; height: 32px;"></i>
+              <p style="margin-top: 0.5rem;">Loading top purchased parts...</p>
             </div>
           </div>
           
@@ -532,27 +257,16 @@
                   <i data-lucide="repeat"></i>
                 </div>
                 <div>
-                  <h3>Repeat Purchase Analysis</h3>
-                  <p>Parts frequently bought together or repurchased</p>
+                  <h3>Top Purchased Parts Summary</h3>
+                  <p>Parts with highest sales volume this month</p>
                 </div>
               </div>
             </div>
             <div class="analytics-card-body">
-              <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
-                <div style="padding: 1.5rem; background: var(--admin-bg-tertiary); border-radius: 16px; text-align: center;">
-                  <div style="font-size: 2rem; font-weight: 800; color: #3b82f6;">78%</div>
-                  <div style="font-size: 0.9rem; color: var(--admin-text-muted); margin-top: 0.5rem;">Brake Pads + Rotors</div>
-                  <div style="font-size: 0.8rem; color: var(--admin-text-secondary); margin-top: 0.25rem;">Bought together</div>
-                </div>
-                <div style="padding: 1.5rem; background: var(--admin-bg-tertiary); border-radius: 16px; text-align: center;">
-                  <div style="font-size: 2rem; font-weight: 800; color: #10b981;">65%</div>
-                  <div style="font-size: 0.9rem; color: var(--admin-text-muted); margin-top: 0.5rem;">Oil Filter + Oil</div>
-                  <div style="font-size: 0.8rem; color: var(--admin-text-secondary); margin-top: 0.25rem;">Bought together</div>
-                </div>
-                <div style="padding: 1.5rem; background: var(--admin-bg-tertiary); border-radius: 16px; text-align: center;">
-                  <div style="font-size: 2rem; font-weight: 800; color: #8b5cf6;">52%</div>
-                  <div style="font-size: 0.9rem; color: var(--admin-text-muted); margin-top: 0.5rem;">Spark Plugs + Ignition Coils</div>
-                  <div style="font-size: 0.8rem; color: var(--admin-text-secondary); margin-top: 0.25rem;">Bought together</div>
+              <div id="repeatPurchaseAnalysis" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+                <div style="padding: 2rem; text-align: center; grid-column: 1 / -1; color: var(--admin-text-muted);">
+                  <i data-lucide="loader" class="animate-spin" style="width: 32px; height: 32px;"></i>
+                  <p style="margin-top: 0.5rem;">Loading purchase analysis...</p>
                 </div>
               </div>
             </div>
@@ -573,8 +287,8 @@
                     <i data-lucide="trending-up"></i>
                   </div>
                   <div>
-                    <h3>30-Day Demand Forecast</h3>
-                    <p>AI-predicted demand with 94.2% accuracy</p>
+                    <h3>30-Day Order Trend</h3>
+                    <p>Real-time demand based on actual purchase data</p>
                   </div>
                 </div>
                 <div style="display: flex; gap: 0.75rem;">
@@ -669,67 +383,22 @@
               </div>
             </div>
             <div class="analytics-card-body">
-              <table class="searched-parts-table">
+              <table class="searched-parts-table" id="demandForecastTable">
                 <thead>
                   <tr>
                     <th>Part</th>
-                    <th>Current Stock</th>
-                    <th>Predicted Demand</th>
-                    <th>Stock Status</th>
+                    <th>Current Demand</th>
+                    <th>7-Day Forecast</th>
+                    <th>Recommendation</th>
                     <th>Action</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
-                    <td>
-                      <div class="part-info">
-                        <div class="part-icon brake">
-                          <i data-lucide="disc"></i>
-                        </div>
-                        <div>
-                          <div class="part-name">Ceramic Brake Pads Set</div>
-                          <div class="part-number">PN: BP-4521-CER</div>
-                        </div>
-                      </div>
+                    <td colspan="5" style="text-align: center; padding: 2rem; color: var(--admin-text-muted);">
+                      <i data-lucide="loader" class="animate-spin" style="width: 32px; height: 32px;"></i>
+                      <p style="margin-top: 0.5rem;">Loading demand forecast...</p>
                     </td>
-                    <td><span style="font-weight: 600;">456</span></td>
-                    <td><span style="font-weight: 700; color: #ef4444;">+892</span></td>
-                    <td><span class="status-badge limited">Restock Needed</span></td>
-                    <td><button class="admin-btn admin-btn-primary" style="padding: 0.4rem 0.75rem; font-size: 0.8rem;">Order Now</button></td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <div class="part-info">
-                        <div class="part-icon engine">
-                          <i data-lucide="settings"></i>
-                        </div>
-                        <div>
-                          <div class="part-name">Alternator Assembly 150A</div>
-                          <div class="part-number">PN: ALT-7890-PRO</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td><span style="font-weight: 600;">234</span></td>
-                    <td><span style="font-weight: 700; color: #f59e0b;">+567</span></td>
-                    <td><span class="status-badge limited">Low Stock</span></td>
-                    <td><button class="admin-btn admin-btn-primary" style="padding: 0.4rem 0.75rem; font-size: 0.8rem;">Order Now</button></td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <div class="part-info">
-                        <div class="part-icon electrical">
-                          <i data-lucide="zap"></i>
-                        </div>
-                        <div>
-                          <div class="part-name">Spark Plug Platinum Set</div>
-                          <div class="part-number">PN: SP-1234-PLT</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td><span style="font-weight: 600;">1,234</span></td>
-                    <td><span style="font-weight: 700; color: #10b981;">+423</span></td>
-                    <td><span class="status-badge available">Sufficient</span></td>
-                    <td><button class="admin-btn admin-btn-secondary" style="padding: 0.4rem 0.75rem; font-size: 0.8rem;">Monitor</button></td>
                   </tr>
                 </tbody>
               </table>
@@ -762,137 +431,15 @@
             </div>
             
             <!-- AI Recommendations Grid -->
-            <div class="ai-recommendations-grid">
-              
-              <!-- Opportunity Card -->
-              <div class="ai-recommendation-card opportunity">
+            <div class="ai-recommendations-grid" id="aiRecommendationsGrid">
+              <div class="ai-recommendation-card insight" style="grid-column: 1 / -1;">
                 <div class="ai-recommendation-header">
-                  <span class="ai-recommendation-type">High Opportunity</span>
-                  <div class="ai-recommendation-icon">
-                    <i data-lucide="trending-up"></i>
-                  </div>
+                  <span class="ai-recommendation-type">Loading</span>
+                  <div class="ai-recommendation-icon"><i data-lucide="loader" class="animate-spin"></i></div>
                 </div>
                 <div class="ai-recommendation-body">
-                  <h4 class="ai-recommendation-title">Stock Turbocharger Assemblies</h4>
-                  <p class="ai-recommendation-description">847 searches with 0% conversion due to missing inventory. High demand detected from performance shops.</p>
-                  <div class="ai-recommendation-impact">
-                    <span class="ai-recommendation-impact-label">Potential Revenue</span>
-                    <span class="ai-recommendation-impact-value">+$127,500</span>
-                  </div>
-                  <button class="ai-recommendation-action">
-                    <i data-lucide="plus"></i>
-                    Add to Inventory
-                  </button>
-                </div>
-              </div>
-              
-              <!-- Warning Card -->
-              <div class="ai-recommendation-card warning">
-                <div class="ai-recommendation-header">
-                  <span class="ai-recommendation-type">Urgent Action</span>
-                  <div class="ai-recommendation-icon">
-                    <i data-lucide="alert-triangle"></i>
-                  </div>
-                </div>
-                <div class="ai-recommendation-body">
-                  <h4 class="ai-recommendation-title">Restock Brake Pads Immediately</h4>
-                  <p class="ai-recommendation-description">Current stock will run out in 5 days based on demand forecast. 35% demand surge predicted.</p>
-                  <div class="ai-recommendation-impact">
-                    <span class="ai-recommendation-impact-label">At-Risk Revenue</span>
-                    <span class="ai-recommendation-impact-value">$89,200</span>
-                  </div>
-                  <button class="ai-recommendation-action">
-                    <i data-lucide="shopping-cart"></i>
-                    Reorder Stock
-                  </button>
-                </div>
-              </div>
-              
-              <!-- Insight Card -->
-              <div class="ai-recommendation-card insight">
-                <div class="ai-recommendation-header">
-                  <span class="ai-recommendation-type">Bundle Opportunity</span>
-                  <div class="ai-recommendation-icon">
-                    <i data-lucide="gift"></i>
-                  </div>
-                </div>
-                <div class="ai-recommendation-body">
-                  <h4 class="ai-recommendation-title">Create Oil Change Bundle</h4>
-                  <p class="ai-recommendation-description">78% of oil filter buyers also purchase engine oil. Bundle discount could boost conversions by 23%.</p>
-                  <div class="ai-recommendation-impact">
-                    <span class="ai-recommendation-impact-label">Conversion Boost</span>
-                    <span class="ai-recommendation-impact-value">+23%</span>
-                  </div>
-                  <button class="ai-recommendation-action">
-                    <i data-lucide="package"></i>
-                    Create Bundle
-                  </button>
-                </div>
-              </div>
-              
-              <!-- Pricing Insight -->
-              <div class="ai-recommendation-card insight">
-                <div class="ai-recommendation-header">
-                  <span class="ai-recommendation-type">Pricing Insight</span>
-                  <div class="ai-recommendation-icon">
-                    <i data-lucide="dollar-sign"></i>
-                  </div>
-                </div>
-                <div class="ai-recommendation-body">
-                  <h4 class="ai-recommendation-title">Adjust LED Headlight Pricing</h4>
-                  <p class="ai-recommendation-description">Your price is 15% higher than market average. 623 lost searches due to price sensitivity.</p>
-                  <div class="ai-recommendation-impact">
-                    <span class="ai-recommendation-impact-label">Suggested Reduction</span>
-                    <span class="ai-recommendation-impact-value">-12%</span>
-                  </div>
-                  <button class="ai-recommendation-action">
-                    <i data-lucide="edit"></i>
-                    Adjust Price
-                  </button>
-                </div>
-              </div>
-              
-              <!-- Supplier Recommendation -->
-              <div class="ai-recommendation-card opportunity">
-                <div class="ai-recommendation-header">
-                  <span class="ai-recommendation-type">Supplier Insight</span>
-                  <div class="ai-recommendation-icon">
-                    <i data-lucide="truck"></i>
-                  </div>
-                </div>
-                <div class="ai-recommendation-body">
-                  <h4 class="ai-recommendation-title">Diversify Brake Pad Suppliers</h4>
-                  <p class="ai-recommendation-description">Single supplier risk detected. 3 alternative suppliers identified with better lead times.</p>
-                  <div class="ai-recommendation-impact">
-                    <span class="ai-recommendation-impact-label">Lead Time Savings</span>
-                    <span class="ai-recommendation-impact-value">-3 days</span>
-                  </div>
-                  <button class="ai-recommendation-action">
-                    <i data-lucide="users"></i>
-                    View Suppliers
-                  </button>
-                </div>
-              </div>
-              
-              <!-- Seasonal Trend -->
-              <div class="ai-recommendation-card warning">
-                <div class="ai-recommendation-header">
-                  <span class="ai-recommendation-type">Seasonal Alert</span>
-                  <div class="ai-recommendation-icon">
-                    <i data-lucide="calendar"></i>
-                  </div>
-                </div>
-                <div class="ai-recommendation-body">
-                  <h4 class="ai-recommendation-title">Winter Parts Demand Incoming</h4>
-                  <p class="ai-recommendation-description">Based on historical data, battery and wiper blade demand will spike 45% in 3 weeks.</p>
-                  <div class="ai-recommendation-impact">
-                    <span class="ai-recommendation-impact-label">Demand Increase</span>
-                    <span class="ai-recommendation-impact-value">+45%</span>
-                  </div>
-                  <button class="ai-recommendation-action">
-                    <i data-lucide="snowflake"></i>
-                    Prepare Stock
-                  </button>
+                  <h4 class="ai-recommendation-title">Loading AI Insights...</h4>
+                  <p class="ai-recommendation-description">AI is analyzing your data to generate insights and recommendations.</p>
                 </div>
               </div>
             </div>
@@ -965,60 +512,629 @@
 
   <!-- Chart.js Scripts -->
   <script>
-    // Tab Switching Function
-    function switchAnalyticsTab(tabName) {
-      // Hide all panels
-      document.querySelectorAll('.analytics-panel').forEach(panel => {
-        panel.classList.remove('active');
-      });
+    // ═══════════════════════════════════════════════════════════════════════════
+    // GLOBAL STATE
+    // ═══════════════════════════════════════════════════════════════════════════
+    let analyticsData = {
+      dashboard: {},
+      mostSearched: [],
+      topPurchased: [],
+      missedOpportunities: [],
+      trending: [],
+      searchTrends: [],
+      categories: [],
+      purchaseFrequency: [],
+      excelAnalytics: {},
+      demandForecast: {},
+      aiInsights: {}
+    };
+    let currentPeriod = 30; // days
+    let isLoading = false;
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // API FUNCTIONS
+    // ═══════════════════════════════════════════════════════════════════════════
+    
+    async function fetchAnalyticsData(days = 30) {
+      try {
+        isLoading = true;
+        showLoadingState();
+        
+        const response = await fetch(`/admin/api/analytics/comprehensive?days=${days}`);
+        const result = await response.json();
+        
+        if (result.success) {
+          analyticsData = result.data;
+          renderAllData();
+        } else {
+          console.error('Failed to fetch analytics:', result.error);
+          showErrorState('Failed to load analytics data');
+        }
+      } catch (error) {
+        console.error('Error fetching analytics:', error);
+        showErrorState('Connection error. Please try again.');
+      } finally {
+        isLoading = false;
+        hideLoadingState();
+      }
+    }
+
+    async function fetchAIInsights() {
+      try {
+        const response = await fetch(`/admin/api/analytics/ai-insights?days=${currentPeriod}`);
+        const result = await response.json();
+        if (result.success) {
+          analyticsData.aiInsights = result.data;
+          renderAIInsights();
+        }
+      } catch (error) {
+        console.error('Error fetching AI insights:', error);
+      }
+    }
+
+    async function fetchDemandForecast() {
+      try {
+        const response = await fetch(`/admin/api/analytics/demand-forecast?days=${currentPeriod}`);
+        const result = await response.json();
+        if (result.success) {
+          analyticsData.demandForecast = result.data;
+          renderDemandForecast();
+        }
+      } catch (error) {
+        console.error('Error fetching demand forecast:', error);
+      }
+    }
+
+    async function syncHistoricalData() {
+      try {
+        const btn = event.target;
+        btn.disabled = true;
+        btn.innerHTML = '<i data-lucide="loader" class="animate-spin"></i> Syncing...';
+        
+        const response = await fetch('/admin/api/analytics/sync-historical', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ days: 365 })
+        });
+        const result = await response.json();
+        
+        if (result.success) {
+          alert(`Successfully synced ${result.data.processed} orders to analytics!`);
+          fetchAnalyticsData(currentPeriod);
+        }
+        
+        btn.disabled = false;
+        btn.innerHTML = '<i data-lucide="refresh-cw"></i> Sync Data';
+        lucide.createIcons();
+      } catch (error) {
+        console.error('Error syncing:', error);
+        alert('Sync failed. Please try again.');
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // RENDER FUNCTIONS
+    // ═══════════════════════════════════════════════════════════════════════════
+    
+    function renderAllData() {
+      renderDashboardStats();
+      renderQuickStats();
+      renderMostSearched();
+      renderMissedOpportunities();
+      renderTopPurchased();
+      renderPurchaseAnalysis();
+      renderAIInsights();
       
-      // Remove active from all tabs
-      document.querySelectorAll('.analytics-tab').forEach(tab => {
-        tab.classList.remove('active');
-      });
-      
-      // Show selected panel
-      document.getElementById('tab-' + tabName).classList.add('active');
-      
-      // Add active to clicked tab
-      event.target.closest('.analytics-tab').classList.add('active');
-      
-      // Reinitialize Lucide icons
+      // Reinitialize icons
       if (typeof lucide !== 'undefined') {
         lucide.createIcons();
       }
+    }
+
+    function renderDashboardStats() {
+      const d = analyticsData.dashboard || {};
       
-      // Initialize charts for the tab if needed
-      if (tabName === 'search-behavior' && !window.searchTrendsChartInit) {
-        initSearchTrendsChart();
-        window.searchTrendsChartInit = true;
-      }
-      if (tabName === 'purchase-patterns' && !window.purchaseChartsInit) {
-        initPurchaseCharts();
-        window.purchaseChartsInit = true;
-      }
-      if (tabName === 'demand-forecast' && !window.demandForecastChartInit) {
-        initDemandForecastChart();
-        window.demandForecastChartInit = true;
+      // Hero stats
+      const heroStats = document.querySelector('.analytics-hero-stats');
+      if (heroStats) {
+        heroStats.innerHTML = `
+          <div class="analytics-hero-stat">
+            <div class="analytics-hero-stat-value">${formatNumber(d.totalSearches || 0)}</div>
+            <div class="analytics-hero-stat-label">Total Searches</div>
+          </div>
+          <div class="analytics-hero-stat">
+            <div class="analytics-hero-stat-value">${formatNumber(d.partsViewed || 0)}</div>
+            <div class="analytics-hero-stat-label">Parts Viewed</div>
+          </div>
+          <div class="analytics-hero-stat">
+            <div class="analytics-hero-stat-value">${formatNumber(d.purchases || 0)}</div>
+            <div class="analytics-hero-stat-label">Purchases</div>
+          </div>
+          <div class="analytics-hero-stat">
+            <div class="analytics-hero-stat-value">${d.conversionRate || 0}%</div>
+            <div class="analytics-hero-stat-label">Conversion Rate</div>
+          </div>
+        `;
       }
     }
+
+    function renderQuickStats() {
+      const d = analyticsData.dashboard || {};
+      
+      const statsContainer = document.querySelector('.analytics-quick-stats');
+      if (statsContainer) {
+        statsContainer.innerHTML = `
+          <div class="quick-stat-card blue">
+            <div class="quick-stat-header">
+              <div class="quick-stat-icon"><i data-lucide="search"></i></div>
+              <div class="quick-stat-change ${d.searchesChange >= 0 ? 'positive' : 'negative'}">
+                <i data-lucide="${d.searchesChange >= 0 ? 'trending-up' : 'trending-down'}"></i>
+                ${d.searchesChange >= 0 ? '+' : ''}${d.searchesChange || 0}%
+              </div>
+            </div>
+            <div class="quick-stat-value">${formatNumber(d.totalSearches || 0)}</div>
+            <div class="quick-stat-label">Total Searches This Month</div>
+          </div>
+          
+          <div class="quick-stat-card green">
+            <div class="quick-stat-header">
+              <div class="quick-stat-icon"><i data-lucide="shopping-cart"></i></div>
+              <div class="quick-stat-change ${d.purchasesChange >= 0 ? 'positive' : 'negative'}">
+                <i data-lucide="${d.purchasesChange >= 0 ? 'trending-up' : 'trending-down'}"></i>
+                ${d.purchasesChange >= 0 ? '+' : ''}${d.purchasesChange || 0}%
+              </div>
+            </div>
+            <div class="quick-stat-value">${formatNumber(d.purchases || 0)}</div>
+            <div class="quick-stat-label">Parts Purchased</div>
+          </div>
+          
+          <div class="quick-stat-card purple">
+            <div class="quick-stat-header">
+              <div class="quick-stat-icon"><i data-lucide="eye-off"></i></div>
+              <div class="quick-stat-change negative">
+                <i data-lucide="alert-circle"></i>
+              </div>
+            </div>
+            <div class="quick-stat-value">${formatNumber(d.searchedNotBought || 0)}</div>
+            <div class="quick-stat-label">Searched Not Bought</div>
+          </div>
+          
+          <div class="quick-stat-card amber">
+            <div class="quick-stat-header">
+              <div class="quick-stat-icon"><i data-lucide="alert-circle"></i></div>
+              <div class="quick-stat-change ${d.missedChange <= 0 ? 'positive' : 'negative'}">
+                <i data-lucide="${d.missedChange <= 0 ? 'trending-down' : 'trending-up'}"></i>
+                ${d.missedChange >= 0 ? '+' : ''}${d.missedChange || 0}%
+              </div>
+            </div>
+            <div class="quick-stat-value">${formatNumber(d.missedOpportunities || 0)}</div>
+            <div class="quick-stat-label">Missing Parts Requests</div>
+          </div>
+          
+          <div class="quick-stat-card cyan">
+            <div class="quick-stat-header">
+              <div class="quick-stat-icon"><i data-lucide="flame"></i></div>
+              <div class="quick-stat-change positive">
+                <i data-lucide="trending-up"></i>
+              </div>
+            </div>
+            <div class="quick-stat-value">${formatNumber(d.trendingParts || 0)}</div>
+            <div class="quick-stat-label">Trending Parts</div>
+          </div>
+        `;
+      }
+    }
+
+    function renderMostSearched() {
+      const parts = analyticsData.mostSearched || [];
+      const tbody = document.querySelector('#mostSearchedTable tbody');
+      if (!tbody) return;
+
+      if (parts.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="4" style="text-align: center; padding: 2rem; color: var(--admin-text-muted);">
+              <i data-lucide="search" style="width: 48px; height: 48px; opacity: 0.3;"></i>
+              <p style="margin-top: 1rem;">No search data yet. Searches will appear here as users search for parts.</p>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = parts.map(part => `
+        <tr>
+          <td>
+            <div class="part-info">
+              <div class="part-icon ${getCategoryClass(part.category)}">
+                <i data-lucide="${getCategoryIcon(part.category)}"></i>
+              </div>
+              <div>
+                <div class="part-name">${escapeHtml(part.description || part.partNumber)}</div>
+                <div class="part-number">PN: ${escapeHtml(part.partNumber)}</div>
+              </div>
+            </div>
+          </td>
+          <td><span class="search-count"><i data-lucide="search"></i> ${formatNumber(part.searches)}</span></td>
+          <td><span class="conversion-rate ${getConversionClass(part.conversion)}">${part.conversion}%</span></td>
+          <td><span class="status-badge ${getStockStatusClass(part.status)}">${getStockStatusText(part.status)}</span></td>
+        </tr>
+      `).join('');
+    }
+
+    function renderMissedOpportunities() {
+      const missed = analyticsData.missedOpportunities || [];
+      const container = document.querySelector('#missedOpportunitiesList');
+      if (!container) return;
+
+      if (missed.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 2rem; color: var(--admin-text-muted);">
+            <i data-lucide="check-circle" style="width: 48px; height: 48px; opacity: 0.3; color: #10b981;"></i>
+            <p style="margin-top: 1rem;">Great! No significant missed opportunities detected.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = missed.map(item => `
+        <div class="missed-opportunity-item">
+          <div class="missed-opportunity-icon">
+            <i data-lucide="x-circle"></i>
+          </div>
+          <div class="missed-opportunity-content">
+            <div class="missed-opportunity-name">${escapeHtml(item.partNumber)}</div>
+            <div class="missed-opportunity-meta">${escapeHtml(item.reason)} ${item.isExcelSearch ? '• Excel Import' : ''}</div>
+          </div>
+          <div class="missed-opportunity-value">
+            <div class="missed-opportunity-searches">${formatNumber(item.searches)}</div>
+            <div class="missed-opportunity-label">searches</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderTopPurchased() {
+      const parts = analyticsData.topPurchased || [];
+      const container = document.querySelector('#topPurchasedGrid');
+      if (!container) return;
+
+      if (parts.length === 0) {
+        container.innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: var(--admin-text-muted);">
+            <i data-lucide="shopping-bag" style="width: 48px; height: 48px; opacity: 0.3;"></i>
+            <p style="margin-top: 1rem;">No purchase data yet. Purchases will appear here.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = parts.slice(0, 4).map((part, index) => {
+        const rankClass = index === 0 ? 'gold' : index === 1 ? 'silver' : index === 2 ? 'bronze' : 'default';
+        // Use part number as the main display, with description below
+        const displayName = part.partNumber || 'Unknown Part';
+        const displayDesc = part.description && part.description !== part.partNumber ? part.description : '';
+        return `
+          <div class="top-part-card">
+            <div class="top-part-rank ${rankClass}">${index + 1}</div>
+            <div class="top-part-icon" style="background: ${getCategoryBg(part.category)}; color: ${getCategoryColor(part.category)};">
+              <i data-lucide="${getCategoryIcon(part.category)}"></i>
+            </div>
+            <div class="top-part-name" title="${escapeHtml(displayName)}">${escapeHtml(displayName)}</div>
+            ${displayDesc ? `<div class="top-part-desc" style="font-size: 0.75rem; color: var(--admin-text-muted); margin-top: 0.25rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${escapeHtml(displayDesc)}">${escapeHtml(displayDesc)}</div>` : ''}
+            <div class="top-part-category">${escapeHtml(part.brand || part.category || 'General')}</div>
+            <div class="top-part-stats">
+              <div class="top-part-stat">
+                <div class="top-part-stat-value">${formatNumber(part.orders)}</div>
+                <div class="top-part-stat-label">Orders</div>
+              </div>
+              <div class="top-part-stat">
+                <div class="top-part-stat-value">${formatCurrency(part.revenue)}</div>
+                <div class="top-part-stat-label">Revenue</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderPurchaseAnalysis() {
+      const parts = analyticsData.topPurchased || [];
+      const container = document.getElementById('repeatPurchaseAnalysis');
+      if (!container) return;
+      
+      // Get top 3 purchased parts from the data
+      const topParts = parts.slice(0, 3);
+      
+      if (topParts.length === 0) {
+        container.innerHTML = `
+          <div style="padding: 2rem; text-align: center; grid-column: 1 / -1; color: var(--admin-text-muted);">
+            <i data-lucide="shopping-bag" style="width: 48px; height: 48px; opacity: 0.3;"></i>
+            <p style="margin-top: 0.5rem;">No purchase data available yet</p>
+          </div>
+        `;
+        return;
+      }
+      
+      const colors = ['#3b82f6', '#10b981', '#8b5cf6'];
+      
+      // Calculate total orders for percentage calculation
+      const totalOrders = parts.reduce((sum, p) => sum + (p.orders || 0), 0);
+      
+      container.innerHTML = topParts.map((part, index) => {
+        const percentage = totalOrders > 0 ? Math.round((part.orders / totalOrders) * 100) : 0;
+        const displayName = part.partNumber || 'Unknown';
+        const displayDesc = part.description && part.description !== part.partNumber 
+          ? part.description.substring(0, 25) + (part.description.length > 25 ? '...' : '')
+          : part.brand || 'Part';
+        
+        return `
+          <div style="padding: 1.5rem; background: var(--admin-bg-tertiary); border-radius: 16px; text-align: center;">
+            <div style="font-size: 2rem; font-weight: 800; color: ${colors[index]};">${part.orders}</div>
+            <div style="font-size: 0.85rem; color: var(--admin-text-primary); margin-top: 0.5rem; font-weight: 600;" title="${part.partNumber}">${displayName}</div>
+            <div style="font-size: 0.75rem; color: var(--admin-text-muted); margin-top: 0.25rem;">${displayDesc}</div>
+            <div style="font-size: 0.7rem; color: ${colors[index]}; margin-top: 0.5rem; font-weight: 600;">
+              ${formatCurrency(part.revenue)} revenue
+            </div>
+            <div style="font-size: 0.65rem; color: var(--admin-text-secondary); margin-top: 0.25rem;">${percentage}% of orders</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderAIInsights() {
+      const insights = analyticsData.aiInsights || {};
+      const container = document.querySelector('#aiRecommendationsGrid');
+      if (!container) return;
+
+      const recommendations = insights.recommendations || [];
+      const keyInsights = insights.keyInsights || [];
+
+      if (keyInsights.length === 0 && recommendations.length === 0) {
+        container.innerHTML = `
+          <div class="ai-recommendation-card insight" style="grid-column: 1 / -1;">
+            <div class="ai-recommendation-header">
+              <span class="ai-recommendation-type">Getting Started</span>
+              <div class="ai-recommendation-icon"><i data-lucide="info"></i></div>
+            </div>
+            <div class="ai-recommendation-body">
+              <h4 class="ai-recommendation-title">Building Intelligence</h4>
+              <p class="ai-recommendation-description">AI insights will appear as more data is collected. Keep using the system and check back soon!</p>
+              <button class="ai-recommendation-action" onclick="syncHistoricalData()">
+                <i data-lucide="refresh-cw"></i>
+                Sync Historical Data
+              </button>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      let html = '';
+      
+      keyInsights.forEach(insight => {
+        const cardType = insight.type === 'success' ? 'opportunity' : 
+                        insight.type === 'warning' ? 'warning' : 'insight';
+        html += `
+          <div class="ai-recommendation-card ${cardType}">
+            <div class="ai-recommendation-header">
+              <span class="ai-recommendation-type">${escapeHtml(insight.type || 'Insight')}</span>
+              <div class="ai-recommendation-icon"><i data-lucide="${insight.icon || 'lightbulb'}"></i></div>
+            </div>
+            <div class="ai-recommendation-body">
+              <h4 class="ai-recommendation-title">${escapeHtml(insight.title)}</h4>
+              <p class="ai-recommendation-description">${escapeHtml(insight.description)}</p>
+            </div>
+          </div>
+        `;
+      });
+
+      recommendations.forEach(rec => {
+        const cardType = rec.priority === 'high' ? 'warning' : 'opportunity';
+        html += `
+          <div class="ai-recommendation-card ${cardType}">
+            <div class="ai-recommendation-header">
+              <span class="ai-recommendation-type">${rec.priority} Priority</span>
+              <div class="ai-recommendation-icon"><i data-lucide="target"></i></div>
+            </div>
+            <div class="ai-recommendation-body">
+              <h4 class="ai-recommendation-title">${escapeHtml(rec.action)}</h4>
+              <p class="ai-recommendation-description">${escapeHtml(rec.description)}</p>
+              <div class="ai-recommendation-impact">
+                <span class="ai-recommendation-impact-label">Impact</span>
+                <span class="ai-recommendation-impact-value">${escapeHtml(rec.impact)}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    function renderDemandForecast() {
+      const forecast = analyticsData.demandForecast || {};
+      const forecasts = forecast.forecasts || [];
+      const summary = forecast.summary || {};
+      
+      // Update sidebar metrics with real data
+      updateDemandForecastSidebar(forecast);
+      
+      const tbody = document.querySelector('#demandForecastTable tbody');
+      if (!tbody) return;
+
+      if (forecasts.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5" style="text-align: center; padding: 2rem; color: var(--admin-text-muted);">
+              <p>No purchase data available for forecasting. Data will appear as orders are placed.</p>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = forecasts.slice(0, 8).map(item => {
+        const displayName = item.partNumber || 'Unknown';
+        const displayDesc = item.description && item.description !== item.partNumber ? item.description : '';
+        const trendIcon = item.trend === 'rising' ? 'trending-up' : item.trend === 'falling' ? 'trending-down' : 'minus';
+        const trendColor = item.trend === 'rising' ? '#ef4444' : item.trend === 'falling' ? '#3b82f6' : '#6b7280';
+        
+        return `
+        <tr>
+          <td>
+            <div class="part-info">
+              <div class="part-icon ${getCategoryClass(item.category || 'general')}">
+                <i data-lucide="${getCategoryIcon(item.category || 'general')}"></i>
+              </div>
+              <div>
+                <div class="part-name" style="font-weight: 600;">${escapeHtml(displayName)}</div>
+                ${displayDesc ? `<div class="part-number" style="font-size: 0.75rem; color: var(--admin-text-muted);">${escapeHtml(displayDesc.substring(0, 40))}${displayDesc.length > 40 ? '...' : ''}</div>` : ''}
+                <div class="part-number" style="font-size: 0.7rem; color: var(--admin-text-secondary);">${item.brand || 'N/A'}</div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <span style="font-weight: 600;">${formatNumber(item.currentDemand)}</span>
+              <i data-lucide="${trendIcon}" style="width: 16px; height: 16px; color: ${trendColor};"></i>
+              <span style="font-size: 0.75rem; color: ${trendColor};">${item.weeklyChange >= 0 ? '+' : ''}${item.weeklyChange}%</span>
+            </div>
+          </td>
+          <td>
+            <span style="font-weight: 700; color: ${item.forecast7Days > item.thisWeekOrders ? '#10b981' : '#6b7280'};">
+              ${formatNumber(item.forecast7Days)}
+            </span>
+          </td>
+          <td>
+            <span class="status-badge ${item.recommendation.includes('Increase') || item.recommendation.includes('ensure') ? 'limited' : item.recommendation.includes('Monitor') ? 'warning' : 'available'}">
+              ${item.recommendation}
+            </span>
+          </td>
+          <td>
+            <button class="admin-btn admin-btn-${item.recommendation.includes('Increase') || item.recommendation.includes('ensure') ? 'primary' : 'secondary'}" style="padding: 0.4rem 0.75rem; font-size: 0.8rem;">
+              ${item.recommendation.includes('Increase') || item.recommendation.includes('ensure') ? 'Order Now' : 'Monitor'}
+            </button>
+          </td>
+        </tr>
+      `}).join('');
+    }
     
-    // Search Trends Chart
+    function updateDemandForecastSidebar(forecast) {
+      const summary = forecast.summary || {};
+      const forecasts = forecast.forecasts || [];
+      
+      // Calculate totals from forecasts
+      const totalForecast7Days = forecasts.reduce((sum, f) => sum + (f.forecast7Days || 0), 0);
+      const totalRevenue = forecasts.reduce((sum, f) => sum + (f.revenue || 0), 0);
+      const avgConfidence = forecasts.length > 0 
+        ? Math.round(forecasts.reduce((sum, f) => sum + (f.confidence || 0), 0) / forecasts.length)
+        : 0;
+      
+      // Week over week change
+      const weekChange = summary.totalLastWeek > 0 
+        ? Math.round(((summary.totalThisWeek - summary.totalLastWeek) / summary.totalLastWeek) * 100)
+        : (summary.totalThisWeek > 0 ? 100 : 0);
+      
+      // Update the sidebar cards
+      const sidebar = document.querySelector('.prediction-sidebar');
+      if (sidebar) {
+        sidebar.innerHTML = `
+          <div class="prediction-metric-card">
+            <div class="prediction-metric-header">
+              <div class="prediction-metric-icon" style="background: rgba(16, 185, 129, 0.12); color: #10b981;">
+                <i data-lucide="trending-up"></i>
+              </div>
+              <div class="prediction-metric-title">This Week Orders</div>
+            </div>
+            <div class="prediction-metric-value">${formatNumber(summary.totalThisWeek || 0)}</div>
+            <div class="prediction-metric-change ${weekChange >= 0 ? 'positive' : 'negative'}">
+              <i data-lucide="${weekChange >= 0 ? 'arrow-up' : 'arrow-down'}"></i>
+              ${weekChange >= 0 ? '+' : ''}${weekChange}% vs last week
+            </div>
+          </div>
+          
+          <div class="prediction-metric-card">
+            <div class="prediction-metric-header">
+              <div class="prediction-metric-icon" style="background: rgba(59, 130, 246, 0.12); color: #3b82f6;">
+                <i data-lucide="dollar-sign"></i>
+              </div>
+              <div class="prediction-metric-title">Month Revenue</div>
+            </div>
+            <div class="prediction-metric-value">${formatCurrency(totalRevenue)}</div>
+            <div class="prediction-metric-change positive">
+              <i data-lucide="package"></i>
+              ${formatNumber(summary.totalThisMonth || 0)} orders
+            </div>
+          </div>
+          
+          <div class="prediction-metric-card">
+            <div class="prediction-metric-header">
+              <div class="prediction-metric-icon" style="background: rgba(245, 158, 11, 0.12); color: #f59e0b;">
+                <i data-lucide="package"></i>
+              </div>
+              <div class="prediction-metric-title">7-Day Forecast</div>
+            </div>
+            <div class="prediction-metric-value">${formatNumber(totalForecast7Days)}</div>
+            <div class="prediction-metric-change ${totalForecast7Days > summary.totalThisWeek ? 'positive' : 'neutral'}">
+              <i data-lucide="calendar"></i>
+              Expected orders
+            </div>
+          </div>
+          
+          <div class="prediction-metric-card">
+            <div class="prediction-metric-header">
+              <div class="prediction-metric-icon" style="background: rgba(139, 92, 246, 0.12); color: #8b5cf6;">
+                <i data-lucide="target"></i>
+              </div>
+              <div class="prediction-metric-title">Unique Parts</div>
+            </div>
+            <div class="prediction-metric-value">${formatNumber(summary.uniquePartsOrdered || 0)}</div>
+            <div class="prediction-metric-change positive">
+              <i data-lucide="box"></i>
+              Parts ordered this month
+            </div>
+          </div>
+        `;
+        
+        // Reinitialize Lucide icons
+        if (typeof lucide !== 'undefined') {
+          lucide.createIcons();
+        }
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // CHART FUNCTIONS
+    // ═══════════════════════════════════════════════════════════════════════════
+    
     function initSearchTrendsChart() {
       const ctx = document.getElementById('searchTrendsChart');
       if (!ctx) return;
+      
+      const trends = analyticsData.searchTrends || [];
+      const labels = trends.map(t => t.date);
+      const data = trends.map(t => t.totalSearches);
+      
+      // Use fallback data if no real data
+      const chartLabels = labels.length > 0 ? labels : Array.from({length: 30}, (_, i) => `Day ${i + 1}`);
+      const chartData = data.length > 0 ? data : Array(30).fill(0);
       
       const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 300);
       gradient.addColorStop(0, 'rgba(59, 130, 246, 0.3)');
       gradient.addColorStop(1, 'rgba(59, 130, 246, 0.02)');
       
-      new Chart(ctx, {
+      if (window.searchTrendsChartInstance) {
+        window.searchTrendsChartInstance.destroy();
+      }
+      
+      window.searchTrendsChartInstance = new Chart(ctx, {
         type: 'line',
         data: {
-          labels: Array.from({length: 30}, (_, i) => 'Day ' + (i + 1)),
+          labels: chartLabels,
           datasets: [{
             label: 'Searches',
-            data: [1200, 1350, 1280, 1420, 1580, 1450, 1320, 1650, 1780, 1620, 1890, 1750, 1920, 2100, 1980, 2150, 2280, 2050, 2320, 2180, 2450, 2380, 2520, 2650, 2480, 2720, 2850, 2680, 2920, 3100],
+            data: chartData,
             borderColor: '#3b82f6',
             backgroundColor: gradient,
             borderWidth: 3,
@@ -1036,42 +1152,33 @@
           maintainAspectRatio: false,
           plugins: {
             legend: { display: false },
-            tooltip: {
-              backgroundColor: 'rgba(30, 41, 59, 0.95)',
-              padding: 12,
-              cornerRadius: 8
-            }
+            tooltip: { backgroundColor: 'rgba(30, 41, 59, 0.95)', padding: 12, cornerRadius: 8 }
           },
           scales: {
-            y: {
-              beginAtZero: false,
-              grid: { color: 'rgba(0, 0, 0, 0.05)' },
-              ticks: { color: '#64748b' }
-            },
-            x: {
-              grid: { display: false },
-              ticks: { 
-                color: '#64748b',
-                maxTicksLimit: 10
-              }
-            }
+            y: { beginAtZero: true, grid: { color: 'rgba(0, 0, 0, 0.05)' }, ticks: { color: '#64748b' } },
+            x: { grid: { display: false }, ticks: { color: '#64748b', maxTicksLimit: 10 } }
           }
         }
       });
     }
     
-    // Purchase Charts
     function initPurchaseCharts() {
       // Category Pie Chart
       const pieCtx = document.getElementById('categoryPieChart');
       if (pieCtx) {
-        new Chart(pieCtx, {
+        const categories = analyticsData.categories || [];
+        const labels = categories.length > 0 ? categories.map(c => c.category) : ['No Data'];
+        const data = categories.length > 0 ? categories.map(c => c.revenue) : [1];
+        
+        if (window.categoryPieChartInstance) window.categoryPieChartInstance.destroy();
+        
+        window.categoryPieChartInstance = new Chart(pieCtx, {
           type: 'doughnut',
           data: {
-            labels: ['Brake Systems', 'Electrical', 'Filters', 'Suspension', 'Engine Parts'],
+            labels: labels,
             datasets: [{
-              data: [28, 22, 18, 17, 15],
-              backgroundColor: ['#ef4444', '#3b82f6', '#10b981', '#8b5cf6', '#f59e0b'],
+              data: data,
+              backgroundColor: ['#ef4444', '#3b82f6', '#10b981', '#8b5cf6', '#f59e0b', '#06b6d4'],
               borderWidth: 0,
               hoverOffset: 10
             }]
@@ -1079,12 +1186,7 @@
           options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: {
-              legend: {
-                position: 'bottom',
-                labels: { usePointStyle: true, padding: 15 }
-              }
-            },
+            plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 15 } } },
             cutout: '60%'
           }
         });
@@ -1093,46 +1195,57 @@
       // Purchase Frequency Chart
       const freqCtx = document.getElementById('purchaseFrequencyChart');
       if (freqCtx) {
-        new Chart(freqCtx, {
+        const frequency = analyticsData.purchaseFrequency || [];
+        const labels = frequency.length > 0 ? frequency.map(f => f.label) : ['1-time', '2-3 times', '4-6 times', '7+ times'];
+        const data = frequency.length > 0 ? frequency.map(f => f.count) : [0, 0, 0, 0];
+        
+        if (window.purchaseFreqChartInstance) window.purchaseFreqChartInstance.destroy();
+        
+        window.purchaseFreqChartInstance = new Chart(freqCtx, {
           type: 'bar',
           data: {
-            labels: ['1-time', '2-3 times', '4-6 times', '7-10 times', '10+ times'],
-            datasets: [{
-              label: 'Customers',
-              data: [1245, 892, 567, 234, 156],
-              backgroundColor: ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444'],
-              borderRadius: 8
-            }]
+            labels: labels,
+            datasets: [{ label: 'Customers', data: data, backgroundColor: ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b'], borderRadius: 8 }]
           },
           options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: {
-              legend: { display: false }
-            },
+            plugins: { legend: { display: false } },
             scales: {
-              y: {
-                beginAtZero: true,
-                grid: { color: 'rgba(0, 0, 0, 0.05)' },
-                ticks: { color: '#64748b' }
-              },
-              x: {
-                grid: { display: false },
-                ticks: { color: '#64748b' }
-              }
+              y: { beginAtZero: true, grid: { color: 'rgba(0, 0, 0, 0.05)' }, ticks: { color: '#64748b' } },
+              x: { grid: { display: false }, ticks: { color: '#64748b' } }
             }
           }
         });
       }
     }
     
-    // Demand Forecast Chart
     function initDemandForecastChart() {
       const ctx = document.getElementById('demandForecastChart');
       if (!ctx) return;
       
-      const historicalData = [2100, 2250, 2180, 2350, 2480, 2520, 2650, 2780, 2850, 2920, null, null, null, null, null];
-      const forecastData = [null, null, null, null, null, null, null, null, null, 2920, 3050, 3180, 3320, 3480, 3650];
+      const forecast = analyticsData.demandForecast || {};
+      const trendData = forecast.trendData || [];
+      
+      // Build chart data from trend data (uses orders not totalSearches)
+      const labels = trendData.length > 0 
+        ? [...trendData.map(t => t.date.split('-').slice(1).join('/')), 'Forecast +1', 'Forecast +2', 'Forecast +3']
+        : ['Week -4', 'Week -3', 'Week -2', 'Week -1', 'Current', 'Forecast +1', 'Forecast +2', 'Forecast +3'];
+      
+      const historicalData = trendData.length > 0 
+        ? [...trendData.map(t => t.orders || 0), null, null, null]
+        : [0, 0, 0, 0, 0, null, null, null];
+      
+      // Calculate forecast based on recent trend
+      const recentValues = historicalData.filter(v => v !== null && v > 0);
+      const lastValue = recentValues.length > 0 ? recentValues[recentValues.length - 1] : 0;
+      const avgValue = recentValues.length > 0 ? Math.round(recentValues.reduce((a, b) => a + b, 0) / recentValues.length) : 0;
+      
+      const forecastData = trendData.length > 0
+        ? [...trendData.map(() => null), avgValue, Math.round(avgValue * 1.05), Math.round(avgValue * 1.1)]
+        : [null, null, null, null, null, 0, 0, 0];
+      
+      if (window.demandForecastChartInstance) window.demandForecastChartInstance.destroy();
       
       const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 320);
       gradient.addColorStop(0, 'rgba(59, 130, 246, 0.2)');
@@ -1142,14 +1255,14 @@
       forecastGradient.addColorStop(0, 'rgba(16, 185, 129, 0.3)');
       forecastGradient.addColorStop(1, 'rgba(16, 185, 129, 0.02)');
       
-      new Chart(ctx, {
+      window.demandForecastChartInstance = new Chart(ctx, {
         type: 'line',
         data: {
-          labels: ['Week -4', 'Week -3', 'Week -2', 'Week -1', 'Current', 'Week +1', 'Week +2', 'Week +3', 'Week +4', 'Now', 'Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5'],
+          labels: labels.slice(-10),
           datasets: [
             {
-              label: 'Historical Orders',
-              data: historicalData,
+              label: 'Historical',
+              data: historicalData.slice(-10),
               borderColor: '#3b82f6',
               backgroundColor: gradient,
               borderWidth: 3,
@@ -1162,7 +1275,7 @@
             },
             {
               label: 'Forecast',
-              data: forecastData,
+              data: forecastData.slice(-10),
               borderColor: '#10b981',
               backgroundColor: forecastGradient,
               borderWidth: 3,
@@ -1179,44 +1292,97 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              backgroundColor: 'rgba(30, 41, 59, 0.95)',
-              padding: 12,
-              cornerRadius: 8
-            }
-          },
+          plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(30, 41, 59, 0.95)', padding: 12, cornerRadius: 8 } },
           scales: {
-            y: {
-              beginAtZero: false,
-              min: 1800,
-              grid: { color: 'rgba(0, 0, 0, 0.05)' },
-              ticks: { color: '#64748b' }
-            },
-            x: {
-              grid: { display: false },
-              ticks: { color: '#64748b' }
-            }
+            y: { beginAtZero: false, grid: { color: 'rgba(0, 0, 0, 0.05)' }, ticks: { color: '#64748b' } },
+            x: { grid: { display: false }, ticks: { color: '#64748b' } }
           }
         }
       });
     }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // TAB SWITCHING
+    // ═══════════════════════════════════════════════════════════════════════════
     
-    // AI Chat Functions
+    function switchAnalyticsTab(tabName) {
+      document.querySelectorAll('.analytics-panel').forEach(panel => panel.classList.remove('active'));
+      document.querySelectorAll('.analytics-tab').forEach(tab => tab.classList.remove('active'));
+      
+      document.getElementById('tab-' + tabName).classList.add('active');
+      event.target.closest('.analytics-tab').classList.add('active');
+      
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+      
+      // Initialize charts for tab
+      if (tabName === 'search-behavior' && !window.searchTrendsChartInit) {
+        setTimeout(() => { initSearchTrendsChart(); window.searchTrendsChartInit = true; }, 100);
+      }
+      if (tabName === 'purchase-patterns' && !window.purchaseChartsInit) {
+        setTimeout(() => { initPurchaseCharts(); window.purchaseChartsInit = true; }, 100);
+      }
+      if (tabName === 'demand-forecast') {
+        fetchDemandForecast();
+        setTimeout(() => { initDemandForecastChart(); window.demandForecastChartInit = true; }, 100);
+      }
+      if (tabName === 'ai-insights') {
+        fetchAIInsights();
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // AI CHAT FUNCTIONS
+    // ═══════════════════════════════════════════════════════════════════════════
+    
+    // Parse and clean AI response - handles markdown code fences and basic formatting
+    function parseAIResponse(text) {
+      if (!text) return '<p>No response received.</p>';
+      
+      // Remove markdown code fences (```html, ```, etc.)
+      let cleaned = text
+        .replace(/```html\s*/gi, '')
+        .replace(/```\s*/g, '')
+        .trim();
+      
+      // If response doesn't start with HTML tag, wrap in paragraph
+      if (!cleaned.match(/^\s*<[a-z]/i)) {
+        // Convert line breaks to paragraphs for plain text
+        cleaned = cleaned
+          .split(/\n\n+/)
+          .map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`)
+          .join('');
+      }
+      
+      // Convert markdown-style bold **text** to <strong>
+      cleaned = cleaned.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+      
+      // Convert markdown-style italic *text* to <em>
+      cleaned = cleaned.replace(/(?<!\*)\*([^*]+)\*(?!\*)/g, '<em>$1</em>');
+      
+      // Convert markdown bullet points to HTML lists
+      cleaned = cleaned.replace(/(<p>\s*[-•]\s*.+(?:<br>[-•]\s*.+)*<\/p>)/gi, (match) => {
+        const items = match
+          .replace(/<\/?p>/gi, '')
+          .split(/<br>/i)
+          .filter(i => i.trim())
+          .map(i => `<li>${i.replace(/^\s*[-•]\s*/, '')}</li>`)
+          .join('');
+        return `<ul>${items}</ul>`;
+      });
+      
+      return cleaned;
+    }
+    
     function askAI(question) {
-      const input = document.getElementById('aiChatInput');
-      input.value = question;
+      document.getElementById('aiChatInput').value = question;
       sendAIMessage();
     }
     
     function handleChatKeypress(event) {
-      if (event.key === 'Enter') {
-        sendAIMessage();
-      }
+      if (event.key === 'Enter') sendAIMessage();
     }
     
-    function sendAIMessage() {
+    async function sendAIMessage() {
       const input = document.getElementById('aiChatInput');
       const messagesContainer = document.getElementById('aiChatMessages');
       const message = input.value.trim();
@@ -1224,131 +1390,177 @@
       if (!message) return;
       
       // Add user message
-      const userMessageHTML = `
+      messagesContainer.insertAdjacentHTML('beforeend', `
         <div class="ai-chat-message user">
-          <div class="ai-chat-message-avatar">
-            <i data-lucide="user"></i>
-          </div>
-          <div class="ai-chat-message-content">
-            <p>${message}</p>
-          </div>
+          <div class="ai-chat-message-avatar"><i data-lucide="user"></i></div>
+          <div class="ai-chat-message-content"><p>${escapeHtml(message)}</p></div>
         </div>
-      `;
-      messagesContainer.insertAdjacentHTML('beforeend', userMessageHTML);
+      `);
       
-      // Clear input
       input.value = '';
-      
-      // Scroll to bottom
       messagesContainer.scrollTop = messagesContainer.scrollHeight;
       
-      // Simulate AI response
-      setTimeout(() => {
-        const aiResponse = getAIResponse(message);
-        const aiMessageHTML = `
+      // Show loading
+      messagesContainer.insertAdjacentHTML('beforeend', `
+        <div class="ai-chat-message assistant" id="aiLoadingMessage">
+          <div class="ai-chat-message-avatar"><i data-lucide="bot"></i></div>
+          <div class="ai-chat-message-content"><p><em>Analyzing your data...</em></p></div>
+        </div>
+      `);
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+      
+      try {
+        const response = await fetch('/admin/api/analytics/ai-chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message })
+        });
+        const result = await response.json();
+        
+        // Remove loading message
+        const loadingMsg = document.getElementById('aiLoadingMessage');
+        if (loadingMsg) loadingMsg.remove();
+        
+        // Add AI response - parse and clean the response
+        const rawResponse = result.success ? result.data.response : 'Sorry, I encountered an error. Please try again.';
+        const aiResponse = parseAIResponse(rawResponse);
+        messagesContainer.insertAdjacentHTML('beforeend', `
           <div class="ai-chat-message assistant">
-            <div class="ai-chat-message-avatar">
-              <i data-lucide="bot"></i>
-            </div>
-            <div class="ai-chat-message-content">
-              ${aiResponse}
-            </div>
+            <div class="ai-chat-message-avatar"><i data-lucide="bot"></i></div>
+            <div class="ai-chat-message-content">${aiResponse}</div>
           </div>
-        `;
-        messagesContainer.insertAdjacentHTML('beforeend', aiMessageHTML);
+        `);
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
         
-        // Reinitialize Lucide icons
-        if (typeof lucide !== 'undefined') {
-          lucide.createIcons();
-        }
-      }, 1000);
+      } catch (error) {
+        const loadingMsg = document.getElementById('aiLoadingMessage');
+        if (loadingMsg) loadingMsg.remove();
+        
+        messagesContainer.insertAdjacentHTML('beforeend', `
+          <div class="ai-chat-message assistant">
+            <div class="ai-chat-message-avatar"><i data-lucide="bot"></i></div>
+            <div class="ai-chat-message-content"><p>Sorry, I encountered a connection error. Please try again.</p></div>
+          </div>
+        `);
+      }
+      
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // UTILITY FUNCTIONS
+    // ═══════════════════════════════════════════════════════════════════════════
+    
+    function formatNumber(num) {
+      if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+      if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+      return num.toLocaleString();
     }
     
-    function getAIResponse(question) {
-      const q = question.toLowerCase();
-      
-      if (q.includes('trending') || q.includes('top')) {
-        return `
-          <p><strong>📈 Top Trending Parts This Week:</strong></p>
-          <ol style="margin: 0.75rem 0; padding-left: 1.25rem;">
-            <li><strong>Ceramic Brake Pads</strong> - 2,847 searches (+24% vs last week)</li>
-            <li><strong>Alternator Assembly 150A</strong> - 2,156 searches (+18%)</li>
-            <li><strong>Front Strut Assembly</strong> - 1,892 searches (+15%)</li>
-            <li><strong>Spark Plug Platinum Set</strong> - 1,654 searches (+12%)</li>
-          </ol>
-          <p>The brake pads surge is likely due to seasonal winter preparation. I recommend increasing stock by 35%.</p>
-        `;
-      }
-      
-      if (q.includes('missed') || q.includes('opportunit')) {
-        return `
-          <p><strong>🚨 Top Missed Sales Opportunities:</strong></p>
-          <ul style="margin: 0.75rem 0; padding-left: 1.25rem;">
-            <li><strong>Turbocharger Assembly</strong> - 847 searches, 0% conversion (not in stock)</li>
-            <li><strong>LED Headlight Kit</strong> - 623 searches, 8% conversion (price too high)</li>
-            <li><strong>Performance Exhaust</strong> - 512 searches, 12% conversion (frequently out of stock)</li>
-          </ul>
-          <p><strong>💡 Recommendation:</strong> Adding Turbocharger Assemblies to inventory could generate an estimated <strong>$127,500</strong> in additional revenue based on current demand.</p>
-        `;
-      }
-      
-      if (q.includes('restock') || q.includes('stock')) {
-        return `
-          <p><strong>📦 Immediate Restock Recommendations:</strong></p>
-          <table style="width: 100%; margin: 0.75rem 0; font-size: 0.85rem;">
-            <tr style="border-bottom: 1px solid var(--admin-border);">
-              <td style="padding: 0.5rem 0;"><strong>Ceramic Brake Pads</strong></td>
-              <td style="padding: 0.5rem 0; color: #ef4444;">Critical - 5 days stock left</td>
-            </tr>
-            <tr style="border-bottom: 1px solid var(--admin-border);">
-              <td style="padding: 0.5rem 0;"><strong>Alternator Assembly</strong></td>
-              <td style="padding: 0.5rem 0; color: #f59e0b;">Low - 12 days stock left</td>
-            </tr>
-            <tr>
-              <td style="padding: 0.5rem 0;"><strong>Oil Filter Premium</strong></td>
-              <td style="padding: 0.5rem 0; color: #f59e0b;">Low - 8 days stock left</td>
-            </tr>
-          </table>
-          <p>Based on the 30-day demand forecast, I recommend ordering <strong>500 units</strong> of brake pads and <strong>300 units</strong> of alternators immediately.</p>
-        `;
-      }
-      
-      if (q.includes('brake')) {
-        return `
-          <p><strong>🔍 Brake Pads Demand Analysis:</strong></p>
-          <ul style="margin: 0.75rem 0; padding-left: 1.25rem;">
-            <li><strong>Current Monthly Demand:</strong> 1,847 units</li>
-            <li><strong>30-Day Forecast:</strong> 2,492 units (+35%)</li>
-            <li><strong>Current Stock:</strong> 456 units</li>
-            <li><strong>Days Until Stockout:</strong> ~5 days</li>
-          </ul>
-          <p><strong>Why the surge?</strong> Winter season preparation typically increases brake system demand. Historical data shows 30-40% increase in Nov-Jan.</p>
-          <p><strong>💡 Action:</strong> Order at least 2,000 units to cover the next 30 days with safety buffer.</p>
-        `;
-      }
-      
-      // Default response
-      return `
-        <p>I analyzed your question about "${question}". Here's what I found:</p>
-        <p>Based on current analytics data, I can provide insights on:</p>
-        <ul style="margin: 0.75rem 0; padding-left: 1.25rem;">
-          <li>Parts search and purchase patterns</li>
-          <li>Demand forecasting and stock recommendations</li>
-          <li>Pricing optimization opportunities</li>
-          <li>Customer behavior analysis</li>
-        </ul>
-        <p>Could you be more specific about what aspect you'd like to explore?</p>
-      `;
+    function formatCurrency(amount) {
+      if (amount >= 1000000) return '$' + (amount / 1000000).toFixed(1) + 'M';
+      if (amount >= 1000) return '$' + (amount / 1000).toFixed(0) + 'K';
+      return '$' + amount.toLocaleString();
     }
     
-    // Initialize first tab chart on load
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+    
+    function getCategoryClass(category) {
+      const cat = (category || '').toLowerCase();
+      if (cat.includes('brake')) return 'brake';
+      if (cat.includes('engine') || cat.includes('motor')) return 'engine';
+      if (cat.includes('electric') || cat.includes('ignition')) return 'electrical';
+      if (cat.includes('suspens') || cat.includes('strut')) return 'suspension';
+      if (cat.includes('filter')) return 'body';
+      if (cat.includes('transmiss')) return 'transmission';
+      return 'general';
+    }
+    
+    function getCategoryIcon(category) {
+      const cat = (category || '').toLowerCase();
+      if (cat.includes('brake')) return 'disc';
+      if (cat.includes('engine') || cat.includes('motor')) return 'settings';
+      if (cat.includes('electric') || cat.includes('ignition')) return 'zap';
+      if (cat.includes('suspens') || cat.includes('strut')) return 'move-vertical';
+      if (cat.includes('filter')) return 'filter';
+      if (cat.includes('transmiss')) return 'cog';
+      return 'package';
+    }
+    
+    function getCategoryColor(category) {
+      const cat = (category || '').toLowerCase();
+      if (cat.includes('brake')) return '#ef4444';
+      if (cat.includes('engine')) return '#3b82f6';
+      if (cat.includes('electric')) return '#f59e0b';
+      if (cat.includes('suspens')) return '#8b5cf6';
+      if (cat.includes('filter')) return '#10b981';
+      return '#64748b';
+    }
+    
+    function getCategoryBg(category) {
+      return `${getCategoryColor(category)}1f`;
+    }
+    
+    function getConversionClass(rate) {
+      if (rate >= 60) return 'high';
+      if (rate >= 30) return 'medium';
+      return 'low';
+    }
+    
+    function getStockStatusClass(status) {
+      if (status === 'available' || status === 'in-stock') return 'available';
+      if (status === 'limited' || status === 'low-stock') return 'limited';
+      return 'out-of-stock';
+    }
+    
+    function getStockStatusText(status) {
+      if (status === 'available' || status === 'in-stock') return 'In Stock';
+      if (status === 'limited' || status === 'low-stock') return 'Low Stock';
+      return 'Out of Stock';
+    }
+    
+    function showLoadingState() {
+      // Add loading overlay or skeleton states
+    }
+    
+    function hideLoadingState() {
+      // Remove loading states
+    }
+    
+    function showErrorState(message) {
+      console.error(message);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // INITIALIZATION
+    // ═══════════════════════════════════════════════════════════════════════════
+    
     document.addEventListener('DOMContentLoaded', function() {
+      // Fetch initial data
+      fetchAnalyticsData(currentPeriod);
+      
+      // Initialize first chart
       setTimeout(function() {
         initSearchTrendsChart();
         window.searchTrendsChartInit = true;
       }, 500);
     });
+
+    // Period selector change handler
+    function changePeriod(days) {
+      currentPeriod = days;
+      fetchAnalyticsData(days);
+      
+      // Update active button states
+      document.querySelectorAll('.period-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+    }
   </script>
 
 <%- include('partials/footer') %>

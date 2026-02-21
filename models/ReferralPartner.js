@@ -376,8 +376,7 @@ referralPartnerSchema.methods.updateStats = async function () {
 };
 
 // Indexes
-referralPartnerSchema.index({ email: 1 });
-referralPartnerSchema.index({ status: 1 });
+// Note: email index is already created by unique: true
 referralPartnerSchema.index({ createdAt: -1 });
 
 const ReferralPartner = mongoose.model('ReferralPartner', referralPartnerSchema);

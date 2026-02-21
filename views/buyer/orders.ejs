@@ -15,9 +15,9 @@
             <div class="orders-header-left">
               <h1 class="orders-header-title">
                 <i data-lucide="package"></i>
-                <span>My Orders</span>
+                <span><%= t('orders.title') %></span>
               </h1>
-              <p class="orders-header-subtitle">Track and manage all your orders in one place</p>
+              <p class="orders-header-subtitle"><%= t('orders.subtitle') %></p>
             </div>
             <div class="orders-header-right">
               <div class="orders-stats">
@@ -27,7 +27,7 @@
                   </div>
                   <div class="stat-card-content">
                     <span class="stat-card-value" id="stat-pending">0</span>
-                    <span class="stat-card-label">Pending</span>
+                    <span class="stat-card-label"><%= t('orders.stats.pending') %></span>
                   </div>
                 </div>
                 <div class="stat-card">
@@ -36,7 +36,7 @@
                   </div>
                   <div class="stat-card-content">
                     <span class="stat-card-value" id="stat-processing">0</span>
-                    <span class="stat-card-label">Processing</span>
+                    <span class="stat-card-label"><%= t('orders.stats.processing') %></span>
                   </div>
                 </div>
                 <div class="stat-card">
@@ -45,7 +45,7 @@
                   </div>
                   <div class="stat-card-content">
                     <span class="stat-card-value" id="stat-completed">0</span>
-                    <span class="stat-card-label">Completed</span>
+                    <span class="stat-card-label"><%= t('orders.stats.completed') %></span>
                   </div>
                 </div>
               </div>
@@ -61,37 +61,37 @@
           <div class="orders-filters">
             <div class="filters-row">
               <div class="filter-group">
-                <label class="filter-label" for="filter-status">Status</label>
+                <label class="filter-label" for="filter-status"><%= t('orders.filters.status') %></label>
                 <select class="filter-select" id="filter-status">
-                  <option value="">All Statuses</option>
-                  <option value="pending">Pending</option>
-                  <option value="processing">Processing</option>
-                  <option value="shipped">Shipped</option>
-                  <option value="delivered">Delivered</option>
-                  <option value="completed">Completed</option>
-                  <option value="cancelled">Cancelled</option>
+                  <option value=""><%= t('orders.filters.allStatuses') %></option>
+                  <option value="pending"><%= t('orders.filters.pending') %></option>
+                  <option value="processing"><%= t('orders.filters.processing') %></option>
+                  <option value="shipped"><%= t('orders.filters.shipped') %></option>
+                  <option value="delivered"><%= t('orders.filters.delivered') %></option>
+                  <option value="completed"><%= t('orders.filters.completed') %></option>
+                  <option value="cancelled"><%= t('orders.filters.cancelled') %></option>
                 </select>
               </div>
               <div class="filter-group">
-                <label class="filter-label" for="filter-date-from">Date From</label>
+                <label class="filter-label" for="filter-date-from"><%= t('orders.filters.dateFrom') %></label>
                 <input type="date" class="filter-input" id="filter-date-from">
               </div>
               <div class="filter-group">
-                <label class="filter-label" for="filter-date-to">Date To</label>
+                <label class="filter-label" for="filter-date-to"><%= t('orders.filters.dateTo') %></label>
                 <input type="date" class="filter-input" id="filter-date-to">
               </div>
               <div class="filter-group">
-                <label class="filter-label" for="filter-search">Search Order</label>
-                <input type="text" class="filter-input" id="filter-search" placeholder="Order number, part number...">
+                <label class="filter-label" for="filter-search"><%= t('orders.filters.searchOrder') %></label>
+                <input type="text" class="filter-input" id="filter-search" placeholder="<%= t('orders.filters.searchPlaceholder') %>">
               </div>
               <div class="filter-actions">
                 <button class="btn-filter" id="btn-apply-filters">
                   <i data-lucide="filter"></i>
-                  <span>Apply Filters</span>
+                  <span><%= t('orders.filters.applyFilters') %></span>
                 </button>
                 <button class="btn-reset" id="btn-reset-filters">
                   <i data-lucide="x"></i>
-                  <span>Reset</span>
+                  <span><%= t('orders.filters.reset') %></span>
                 </button>
               </div>
             </div>
@@ -103,17 +103,17 @@
               <thead>
                 <tr>
                   <th class="sortable" data-sort="orderNumber">
-                    Order Number
+                    <%= t('orders.table.orderNumber') %>
                   </th>
                   <th class="sortable" data-sort="date">
-                    Date
+                    <%= t('orders.table.date') %>
                   </th>
-                  <th>Status</th>
-                  <th>Items</th>
+                  <th><%= t('orders.table.status') %></th>
+                  <th><%= t('orders.table.items') %></th>
                   <th class="sortable" data-sort="amount">
-                    Amount
+                    <%= t('orders.table.amount') %>
                   </th>
-                  <th>Actions</th>
+                  <th><%= t('orders.table.actions') %></th>
                 </tr>
               </thead>
               <tbody id="orders-tbody">
@@ -126,12 +126,12 @@
           <div class="orders-pagination" id="orders-pagination" style="display: none;">
             <button class="pagination-btn" id="btn-prev" disabled>
               <i data-lucide="chevron-left"></i>
-              <span>Previous</span>
+              <span><%= t('orders.pagination.previous') %></span>
             </button>
-            <span class="pagination-info" id="pagination-info">Showing <span id="pagination-from">0</span>-<span
-                id="pagination-to">0</span> of <span id="pagination-total">0</span></span>
+            <span class="pagination-info" id="pagination-info"><%= t('orders.pagination.showing') %> <span id="pagination-from">0</span>-<span
+                id="pagination-to">0</span> <%= t('orders.pagination.of') %> <span id="pagination-total">0</span></span>
             <button class="pagination-btn" id="btn-next" disabled>
-              <span>Next</span>
+              <span><%= t('orders.pagination.next') %></span>
               <i data-lucide="chevron-right"></i>
             </button>
           </div>
@@ -141,18 +141,18 @@
             <div class="orders-empty-icon">
               <i data-lucide="package-x"></i>
             </div>
-            <h2 class="orders-empty-title">No Orders Yet</h2>
+            <h2 class="orders-empty-title"><%= t('orders.emptyState.title') %></h2>
             <p class="orders-empty-text">
-              You haven't placed any orders yet. Start shopping to see your orders here.
+              <%= t('orders.emptyState.text') %>
             </p>
             <div class="orders-empty-actions">
               <a href="/buyer/search-automotive" class="btn-empty-action primary">
                 <i data-lucide="shopping-bag"></i>
-                <span>Start Shopping</span>
+                <span><%= t('orders.emptyState.startShopping') %></span>
               </a>
               <a href="/buyer" class="btn-empty-action secondary">
                 <i data-lucide="arrow-left"></i>
-                <span>Back to Main</span>
+                <span><%= t('orders.emptyState.backToMain') %></span>
               </a>
             </div>
           </div>

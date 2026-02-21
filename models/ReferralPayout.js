@@ -259,9 +259,9 @@ referralPayoutSchema.statics.getMonthlySummary = async function (month, year) {
 };
 
 // Indexes
+// Note: payoutNumber index is already created by unique: true
+// Note: status index is already created by index: true in schema field
 referralPayoutSchema.index({ referralPartner: 1, periodMonth: 1, periodYear: 1 });
-referralPayoutSchema.index({ status: 1 });
-referralPayoutSchema.index({ payoutNumber: 1 });
 referralPayoutSchema.index({ createdAt: -1 });
 
 const ReferralPayout = mongoose.model('ReferralPayout', referralPayoutSchema);

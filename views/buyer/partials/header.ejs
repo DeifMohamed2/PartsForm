@@ -13,10 +13,15 @@
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="/images/PARTSFORM-LOGO.png">
 
-  <!-- Google Fonts -->
+  <!-- Google Fonts - Standard + Arabic -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <% if (isRTL) { %>
+  <!-- Arabic Fonts: Cairo + Noto Sans Arabic -->
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <% } else { %>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <% } %>
 
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@0.294.0/dist/umd/lucide.min.js"></script>
@@ -31,4 +36,4 @@
   <% } %>
 </head>
 
-<body>
+<body class="<%= isRTL ? 'rtl-mode' : 'ltr-mode' %>">

@@ -13,6 +13,14 @@ const {
   getRequestMarkup,
 } = require('../utils/priceMarkup');
 
+// Parts Analytics tracking service
+let partsAnalyticsService = null;
+try {
+  partsAnalyticsService = require('../services/partsAnalyticsService');
+} catch (err) {
+  console.warn('⚠️ Parts analytics service not available:', err.message);
+}
+
 // New modular search pipeline (V2)
 const { 
   aiSearchV2, 
@@ -140,6 +148,27 @@ const searchParts = async (req, res) => {
     const markupPercentage = await getRequestMarkup(req);
     if (markupPercentage > 0) {
       filteredResults = applyMarkupToParts(filteredResults, markupPercentage);
+    }
+
+    // Track search in analytics (non-blocking)
+    if (partsAnalyticsService && partNumber) {
+      const partsFound = filteredResults.map(r => r.partNumber).filter(Boolean);
+      const partsNotFound = filteredResults.length === 0 ? [partNumber] : [];
+      
+      partsAnalyticsService.trackSearch({
+        query: partNumber,
+        source: 'manual',
+        totalFound: filteredResults.length,
+        partsFound: [...new Set(partsFound)],
+        partsNotFound,
+        dataSource: source,
+        sessionId: req.sessionID || req.headers['x-session-id'],
+        buyerId: req.user?._id,
+        metadata: {
+          userAgent: req.headers['user-agent'],
+          ip: req.ip,
+        },
+      }).catch(err => console.error('Analytics tracking error:', err.message));
     }
 
     res.json({
@@ -703,6 +732,19 @@ const aiExcelSearch = async (req, res) => {
     const markupPercentage = await getRequestMarkup(req);
     if (markupPercentage > 0) {
       allResults = applyMarkupToParts(allResults, markupPercentage);
+    }
+
+    // Track Excel search in analytics (non-blocking)
+    if (partsAnalyticsService) {
+      partsAnalyticsService.trackExcelSearch({
+        filename: req.body.filename || 'excel-import',
+        sheetName: req.body.sheetName || 'Sheet1',
+        partsFound: found,
+        partsNotFound: notFound,
+        searchTime,
+        sessionId: req.sessionID || req.headers['x-session-id'],
+        buyerId: req.user?._id,
+      }).catch(err => console.error('Excel analytics tracking error:', err.message));
     }
 
     res.json({

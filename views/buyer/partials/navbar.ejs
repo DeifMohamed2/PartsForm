@@ -24,7 +24,7 @@
     <div class="nav-links" id="navLinks">
       <!-- Parts Search - Direct link to automotive -->
       <a href="/buyer/search-automotive" class="nav-link" data-section="search">
-        <i data-lucide="search" style="width: 16px; height: 16px; margin-right: 4px;"></i>
+        <i data-lucide="search" class="nav-icon-search"></i>
         <%= t('nav.search') %>
       </a>
 
@@ -126,7 +126,7 @@
 
           <!-- Currency -->
           <div class="tools-dropdown-section">
-            <div class="tools-section-label">Currency</div>
+            <div class="tools-section-label"><%= t('nav.currency') %></div>
             <button class="tools-dropdown-item" id="currency-converter-btn" title="<%= t('nav.currencyConverter') %>">
               <i data-lucide="repeat"></i>
               <span><%= t('nav.currencyConverter') || 'Converter' %></span>
@@ -149,15 +149,31 @@
 
           <!-- Language -->
           <div class="tools-dropdown-section">
-            <div class="tools-section-label">Language</div>
-            <div class="tools-language-grid" id="toolsLanguageGrid">
+            <div class="tools-section-label"><%= t('nav.language') %></div>
+            <div class="tools-language-grid tools-language-grid-expanded" id="toolsLanguageGrid">
               <button class="tools-lang-option" data-lang="en" data-flag="🇬🇧">
                 <span class="lang-flag">🇬🇧</span>
                 <span class="lang-name">English</span>
               </button>
-              <button class="tools-lang-option" data-lang="ar" data-flag="🇸🇦">
-                <span class="lang-flag">🇸🇦</span>
-                <span class="lang-name">العربية</span>
+              <button class="tools-lang-option" data-lang="de" data-flag="🇩🇪">
+                <span class="lang-flag">🇩🇪</span>
+                <span class="lang-name">Deutsch</span>
+              </button>
+              <button class="tools-lang-option" data-lang="fr" data-flag="🇫🇷">
+                <span class="lang-flag">🇫🇷</span>
+                <span class="lang-name">Français</span>
+              </button>
+              <button class="tools-lang-option" data-lang="es" data-flag="🇪🇸">
+                <span class="lang-flag">🇪🇸</span>
+                <span class="lang-name">Español</span>
+              </button>
+              <button class="tools-lang-option" data-lang="it" data-flag="🇮🇹">
+                <span class="lang-flag">🇮🇹</span>
+                <span class="lang-name">Italiano</span>
+              </button>
+              <button class="tools-lang-option" data-lang="pt" data-flag="🇵🇹">
+                <span class="lang-flag">🇵🇹</span>
+                <span class="lang-name">Português</span>
               </button>
               <button class="tools-lang-option" data-lang="ru" data-flag="🇷🇺">
                 <span class="lang-flag">🇷🇺</span>
@@ -167,13 +183,33 @@
                 <span class="lang-flag">🇺🇦</span>
                 <span class="lang-name">Українська</span>
               </button>
-              <button class="tools-lang-option" data-lang="fr" data-flag="🇫🇷">
-                <span class="lang-flag">🇫🇷</span>
-                <span class="lang-name">Français</span>
+              <button class="tools-lang-option" data-lang="pl" data-flag="🇵🇱">
+                <span class="lang-flag">🇵🇱</span>
+                <span class="lang-name">Polski</span>
               </button>
-              <button class="tools-lang-option" data-lang="es" data-flag="🇪🇸">
-                <span class="lang-flag">🇪🇸</span>
-                <span class="lang-name">Español</span>
+              <button class="tools-lang-option" data-lang="nl" data-flag="🇳🇱">
+                <span class="lang-flag">🇳🇱</span>
+                <span class="lang-name">Nederlands</span>
+              </button>
+              <button class="tools-lang-option" data-lang="tr" data-flag="🇹🇷">
+                <span class="lang-flag">🇹🇷</span>
+                <span class="lang-name">Türkçe</span>
+              </button>
+              <button class="tools-lang-option" data-lang="zh" data-flag="🇨🇳">
+                <span class="lang-flag">🇨🇳</span>
+                <span class="lang-name">中文</span>
+              </button>
+              <button class="tools-lang-option" data-lang="ja" data-flag="🇯🇵">
+                <span class="lang-flag">🇯🇵</span>
+                <span class="lang-name">日本語</span>
+              </button>
+              <button class="tools-lang-option" data-lang="ko" data-flag="🇰🇷">
+                <span class="lang-flag">🇰🇷</span>
+                <span class="lang-name">한국어</span>
+              </button>
+              <button class="tools-lang-option" data-lang="ar" data-flag="🇸🇦" data-rtl="true">
+                <span class="lang-flag">🇸🇦</span>
+                <span class="lang-name">العربية</span>
               </button>
             </div>
           </div>

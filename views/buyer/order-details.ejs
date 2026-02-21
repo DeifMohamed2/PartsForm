@@ -15,24 +15,24 @@
             <div class="order-details-header-left">
               <a href="/buyer/orders" class="order-details-back-btn">
                 <i data-lucide="arrow-left"></i>
-                <span>Back to Orders</span>
+                <span><%= t('orders.details.backToOrders') %></span>
               </a>
               <div class="order-details-title-section">
-                <h1 class="order-details-title" id="order-details-title">Order Details</h1>
+                <h1 class="order-details-title" id="order-details-title"><%= t('orders.details.title') %></h1>
                 <span class="order-details-status-badge" id="order-status-badge">
                   <i data-lucide="clock"></i>
-                  <span>Loading...</span>
+                  <span><%= t('orders.details.loading') %></span>
                 </span>
               </div>
             </div>
             <div class="order-details-header-right" id="order-header-actions">
               <button class="order-details-action-btn secondary" id="btn-print-order">
                 <i data-lucide="printer"></i>
-                <span>Print</span>
+                <span><%= t('orders.details.print') %></span>
               </button>
               <button class="order-details-action-btn secondary" id="btn-download-invoice" style="display: none;">
                 <i data-lucide="download"></i>
-                <span>Download Invoice</span>
+                <span><%= t('orders.details.downloadInvoice') %></span>
               </button>
             </div>
           </div>
@@ -45,7 +45,7 @@
           <!-- Loading State -->
           <div class="order-details-loading" id="order-loading">
             <div class="loading-spinner"></div>
-            <p class="loading-text">Loading order details...</p>
+            <p class="loading-text"><%= t('orders.details.loadingText') %></p>
           </div>
 
           <!-- Order Content (hidden initially) -->
@@ -58,16 +58,16 @@
                 <div class="order-details-section">
                   <h2 class="order-details-section-title">
                     <i data-lucide="package"></i>
-                    <span>Order Items</span>
+                    <span><%= t('orders.details.orderItems') %></span>
                   </h2>
                   <div class="order-items-table-container">
                     <table class="order-items-table" id="order-items-table">
                       <thead>
                         <tr>
-                          <th>Part Details</th>
-                          <th style="text-align: center;">Weight</th>
-                          <th style="text-align: center;">Stock</th>
-                          <th style="text-align: right;">Price</th>
+                          <th><%= t('orders.details.partDetails') %></th>
+                          <th style="text-align: center;"><%= t('orders.details.weight') %></th>
+                          <th style="text-align: center;"><%= t('orders.details.stock') %></th>
+                          <th style="text-align: right;"><%= t('orders.details.price') %></th>
                         </tr>
                       </thead>
                       <tbody id="order-items-tbody">
@@ -81,7 +81,7 @@
                 <div class="order-details-section">
                   <h2 class="order-details-section-title">
                     <i data-lucide="credit-card"></i>
-                    <span>Payment Information</span>
+                    <span><%= t('orders.details.paymentInfo') %></span>
                   </h2>
                   <div class="payment-info-grid" id="payment-info-grid">
                     <!-- Payment info will be populated by JavaScript -->
@@ -92,7 +92,7 @@
                 <div class="order-details-section">
                   <h2 class="order-details-section-title">
                     <i data-lucide="clock"></i>
-                    <span>Order Timeline</span>
+                    <span><%= t('orders.details.orderTimeline') %></span>
                   </h2>
                   <div class="order-timeline" id="order-timeline">
                     <!-- Timeline will be populated by JavaScript -->
@@ -105,7 +105,7 @@
                 <div class="order-summary-card">
                   <h3 class="order-details-section-title" style="margin-bottom: 1.5rem;">
                     <i data-lucide="receipt"></i>
-                    <span>Order Summary</span>
+                    <span><%= t('orders.details.orderSummary') %></span>
                   </h3>
                   <div id="order-summary-content">
                     <!-- Summary will be populated by JavaScript -->
@@ -116,7 +116,7 @@
                 <div class="order-details-section" id="shipping-section" style="display: none;">
                   <h2 class="order-details-section-title">
                     <i data-lucide="truck"></i>
-                    <span>Shipping Information</span>
+                    <span><%= t('orders.details.shippingInfo') %></span>
                   </h2>
                   <div class="shipping-info-card" id="shipping-info-card">
                     <!-- Shipping info will be populated by JavaScript -->
@@ -133,13 +133,12 @@
                 style="width: 80px; height: 80px; margin: 0 auto 1.5rem; background: #fee2e2; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
                 <i data-lucide="alert-circle" style="width: 40px; height: 40px; color: #dc2626;"></i>
               </div>
-              <h2 style="font-size: 1.5rem; font-weight: 700; color: #1a2b3d; margin-bottom: 0.5rem;">Order Not Found
+              <h2 style="font-size: 1.5rem; font-weight: 700; color: #1a2b3d; margin-bottom: 0.5rem;"><%= t('orders.details.errorTitle') %>
               </h2>
-              <p style="color: #64748b; margin-bottom: 2rem;">The order you're looking for doesn't exist or has been
-                removed.</p>
+              <p style="color: #64748b; margin-bottom: 2rem;"><%= t('orders.details.errorText') %></p>
               <a href="/buyer/orders" class="order-details-action-btn primary">
                 <i data-lucide="arrow-left"></i>
-                <span>Back to Orders</span>
+                <span><%= t('orders.details.backToOrders') %></span>
               </a>
             </div>
           </div>

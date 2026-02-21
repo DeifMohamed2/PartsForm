@@ -15,14 +15,14 @@
         <div class="delivery-header-left">
           <h1 class="delivery-header-title">
             <i data-lucide="truck"></i>
-            <span>Delivery Addresses</span>
+            <span><%= t('delivery.title') %></span>
           </h1>
-          <p class="delivery-header-subtitle">Manage your delivery addresses and track shipments</p>
+          <p class="delivery-header-subtitle"><%= t('delivery.subtitle') %></p>
         </div>
         <div class="delivery-header-right">
           <button class="btn-add-address" id="btn-add-address">
             <i data-lucide="plus"></i>
-            <span>Add New Address</span>
+            <span><%= t('delivery.addNewAddress') %></span>
           </button>
         </div>
       </div>
@@ -37,9 +37,9 @@
         <div class="section-header">
           <h2 class="section-title">
             <i data-lucide="map-pin"></i>
-            <span>Saved Addresses</span>
+            <span><%= t('delivery.savedAddresses') %></span>
           </h2>
-          <p class="section-subtitle">Manage your delivery locations</p>
+          <p class="section-subtitle"><%= t('delivery.manageLocations') %></p>
         </div>
 
         <div class="addresses-grid" id="addresses-grid">
@@ -51,11 +51,11 @@
           <div class="empty-icon">
             <i data-lucide="map-pin-off"></i>
           </div>
-          <h3 class="empty-title">No Addresses Yet</h3>
-          <p class="empty-text">Add your first delivery address to get started</p>
+          <h3 class="empty-title"><%= t('delivery.noAddresses') %></h3>
+          <p class="empty-text"><%= t('delivery.noAddressesDesc') %></p>
           <button class="btn-empty-action" onclick="document.getElementById('btn-add-address').click()">
             <i data-lucide="plus"></i>
-            <span>Add Address</span>
+            <span><%= t('delivery.addAddress') %></span>
           </button>
         </div>
       </div>
@@ -65,9 +65,9 @@
         <div class="section-header">
           <h2 class="section-title">
             <i data-lucide="package-search"></i>
-            <span>Track Your Order</span>
+            <span><%= t('delivery.trackOrder') %></span>
           </h2>
-          <p class="section-subtitle">Enter your order number to track shipment</p>
+          <p class="section-subtitle"><%= t('delivery.trackOrderDesc') %></p>
         </div>
 
         <div class="tracking-card">
@@ -77,17 +77,17 @@
               type="text" 
               class="tracking-input" 
               id="tracking-input" 
-              placeholder="Enter order number (e.g., ORD-123456)"
+              placeholder="<%= t('delivery.trackingPlaceholder') %>"
             >
             <button class="btn-track" id="btn-track">
-              <span>Track</span>
+              <span><%= t('delivery.track') %></span>
               <i data-lucide="arrow-right"></i>
             </button>
           </div>
           <div class="tracking-quick-links">
             <a href="/buyer/orders" class="quick-link">
               <i data-lucide="package"></i>
-              <span>View All Orders</span>
+              <span><%= t('delivery.viewAllOrders') %></span>
             </a>
           </div>
         </div>
@@ -109,8 +109,8 @@
         <div class="modal-icon">
           <i data-lucide="map-pin"></i>
         </div>
-        <h2 class="modal-title" id="modal-title">Add New Address</h2>
-        <p class="modal-subtitle">Fill in the details below</p>
+        <h2 class="modal-title" id="modal-title"><%= t('delivery.addNewAddress') %></h2>
+        <p class="modal-subtitle"><%= t('delivery.fillDetails') %></p>
       </div>
 
       <form class="address-form" id="address-form">
@@ -118,12 +118,12 @@
         
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label" for="address-name">Address Label *</label>
+            <label class="form-label" for="address-name"><%= t('delivery.form.label') %> *</label>
             <input 
               type="text" 
               class="form-input" 
               id="address-name" 
-              placeholder="e.g., Home, Office, Warehouse"
+              placeholder="<%= t('delivery.form.labelPlaceholder') %>"
               required
             >
           </div>
@@ -131,17 +131,17 @@
 
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label" for="address-fullname">Full Name *</label>
+            <label class="form-label" for="address-fullname"><%= t('delivery.form.fullName') %> *</label>
             <input 
               type="text" 
               class="form-input" 
               id="address-fullname" 
-              placeholder="Recipient's full name"
+              placeholder="<%= t('delivery.form.fullNamePlaceholder') %>"
               required
             >
           </div>
           <div class="form-group">
-            <label class="form-label" for="address-phone">Phone Number *</label>
+            <label class="form-label" for="address-phone"><%= t('delivery.form.phone') %> *</label>
             <input 
               type="tel" 
               class="form-input" 
@@ -154,12 +154,12 @@
 
         <div class="form-row">
           <div class="form-group full-width">
-            <label class="form-label" for="address-street">Street Address *</label>
+            <label class="form-label" for="address-street"><%= t('delivery.form.street') %> *</label>
             <input 
               type="text" 
               class="form-input" 
               id="address-street" 
-              placeholder="Building number, street name"
+              placeholder="<%= t('delivery.form.streetPlaceholder') %>"
               required
             >
           </div>
@@ -167,22 +167,22 @@
 
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label" for="address-city">City *</label>
+            <label class="form-label" for="address-city"><%= t('delivery.form.city') %> *</label>
             <input 
               type="text" 
               class="form-input" 
               id="address-city" 
-              placeholder="e.g., Dubai"
+              placeholder="<%= t('delivery.form.cityPlaceholder') %>"
               required
             >
           </div>
           <div class="form-group">
-            <label class="form-label" for="address-state">State/Emirate *</label>
+            <label class="form-label" for="address-state"><%= t('delivery.form.state') %> *</label>
             <input 
               type="text" 
               class="form-input" 
               id="address-state" 
-              placeholder="e.g., Dubai"
+              placeholder="<%= t('delivery.form.statePlaceholder') %>"
               required
             >
           </div>
@@ -190,34 +190,34 @@
 
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label" for="address-country">Country *</label>
+            <label class="form-label" for="address-country"><%= t('delivery.form.country') %> *</label>
             <input 
               type="text" 
               class="form-input" 
               id="address-country" 
-              placeholder="e.g., United Arab Emirates"
+              placeholder="<%= t('delivery.form.countryPlaceholder') %>"
               required
             >
           </div>
           <div class="form-group">
-            <label class="form-label" for="address-postal">Postal Code</label>
+            <label class="form-label" for="address-postal"><%= t('delivery.form.postalCode') %></label>
             <input 
               type="text" 
               class="form-input" 
               id="address-postal" 
-              placeholder="Optional"
+              placeholder="<%= t('delivery.form.optional') %>"
             >
           </div>
         </div>
 
         <div class="form-row">
           <div class="form-group full-width">
-            <label class="form-label" for="address-notes">Additional Notes</label>
+            <label class="form-label" for="address-notes"><%= t('delivery.form.notes') %></label>
             <textarea 
               class="form-textarea" 
               id="address-notes" 
               rows="3"
-              placeholder="Landmarks, special instructions, etc."
+              placeholder="<%= t('delivery.form.notesPlaceholder') %>"
             ></textarea>
           </div>
         </div>
@@ -225,18 +225,18 @@
         <div class="form-row">
           <label class="checkbox-label">
             <input type="checkbox" id="address-default">
-            <span>Set as default address</span>
+            <span><%= t('delivery.form.setDefault') %></span>
           </label>
         </div>
 
         <div class="form-actions">
           <button type="button" class="btn-cancel" id="btn-cancel">
             <i data-lucide="x"></i>
-            <span>Cancel</span>
+            <span><%= t('common.cancel') %></span>
           </button>
           <button type="submit" class="btn-save">
             <i data-lucide="check"></i>
-            <span>Save Address</span>
+            <span><%= t('delivery.saveAddress') %></span>
           </button>
         </div>
       </form>
@@ -252,17 +252,17 @@
       <div class="confirm-icon">
         <i data-lucide="alert-triangle"></i>
       </div>
-      <h2 class="confirm-title" id="confirm-title">Delete Address?</h2>
-      <p class="confirm-message" id="confirm-message">Are you sure you want to delete this address?</p>
+      <h2 class="confirm-title" id="confirm-title"><%= t('delivery.deleteAddress') %></h2>
+      <p class="confirm-message" id="confirm-message"><%= t('delivery.deleteAddressConfirm') %></p>
       
       <div class="confirm-actions">
         <button class="btn-confirm-cancel" id="btn-confirm-cancel">
           <i data-lucide="x"></i>
-          <span>Cancel</span>
+          <span><%= t('common.cancel') %></span>
         </button>
         <button class="btn-confirm-delete" id="btn-confirm-delete">
           <i data-lucide="trash-2"></i>
-          <span>Delete</span>
+          <span><%= t('common.delete') %></span>
         </button>
       </div>
     </div>

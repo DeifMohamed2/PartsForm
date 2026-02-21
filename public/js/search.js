@@ -143,10 +143,10 @@
           '.empty-state-description'
         );
         if (emptyStateTitle) {
-          emptyStateTitle.textContent = 'Sign In Required';
+          emptyStateTitle.textContent = window.__translations?.search?.signInRequired || 'Sign In Required';
         }
         if (emptyStateDescription) {
-          emptyStateDescription.innerHTML =
+          emptyStateDescription.innerHTML = window.__translations?.search?.signInToSearch ||
             'Please <strong>sign in</strong> to search for parts from verified suppliers worldwide.';
         }
       }
@@ -157,7 +157,7 @@
         // Restore original placeholder based on page
         const pageTheme = document.querySelector('.search2-page')?.classList;
         if (pageTheme?.contains('automotive-theme')) {
-          elements.searchInput.placeholder =
+          elements.searchInput.placeholder = window.__translations?.search?.placeholder ||
             'Enter part number, vehicle model, or description...';
         } else if (pageTheme?.contains('aviation-theme')) {
           elements.searchInput.placeholder =
@@ -202,10 +202,10 @@
           '.empty-state-description'
         );
         if (emptyStateTitle) {
-          emptyStateTitle.textContent = 'Start Your Search';
+          emptyStateTitle.textContent = window.__translations?.search?.emptyState?.title || 'Start Your Search';
         }
         if (emptyStateDescription) {
-          emptyStateDescription.innerHTML =
+          emptyStateDescription.innerHTML = window.__translations?.search?.emptyState?.description ||
             'Enter a part number, brand name, or description to find parts from verified suppliers worldwide.';
         }
       }

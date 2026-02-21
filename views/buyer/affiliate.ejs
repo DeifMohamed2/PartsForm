@@ -13,15 +13,15 @@
     <div class="affiliate-hero-content">
       <div class="affiliate-badge">
         <i data-lucide="trophy"></i>
-        <span>Affiliate Program</span>
+        <span><%= t('affiliate.badge') %></span>
       </div>
 
-      <h1 class="affiliate-hero-title">Loyalty Program for Our Clients</h1>
+      <h1 class="affiliate-hero-title"><%= t('affiliate.title') %></h1>
       <p class="affiliate-hero-subtitle">
-        We value every client and offer top rewards who contribute to your brand. The more you progress with us, the more rewards you receive!
+        <%= t('affiliate.subtitle') %>
       </p>
       <p class="affiliate-hero-description">
-        Our program includes the following levels: BRONZE – improved conditions and additional discounts; SILVER – premium discounts and priority service; GOLD – exclusive pricing and dedicated support; PLATINUM – VIP benefits and personalized approach; PLATINUM+ – the highest level with VIP+ conditions, priority privileges, and unique offers.
+        <%= t('affiliate.description') %>
       </p>
     </div>
   </div>
@@ -30,9 +30,9 @@
   <div class="buyer-container">
     <div class="affiliate-section">
       <div class="section-header">
-        <h2 class="section-title">Membership Tiers</h2>
+        <h2 class="section-title"><%= t('affiliate.tiers.title') %></h2>
         <p class="section-subtitle">
-          Your loyalty determines the level of your purchase based on your order volume. The better the level, the more benefits you receive.
+          <%= t('affiliate.tiers.subtitle') %>
         </p>
       </div>
 
@@ -44,60 +44,60 @@
             <div class="tier-icon">
               <i data-lucide="award"></i>
             </div>
-            <h3 class="tier-name">Bronze</h3>
-            <p class="tier-range">0-5 000$</p>
-            <p class="tier-revenue">Monthly sales</p>
+            <h3 class="tier-name"><%= t('affiliate.tiers.bronze.name') %></h3>
+            <p class="tier-range"><%= t('affiliate.tiers.bronze.range') %></p>
+            <p class="tier-revenue"><%= t('affiliate.tiers.bronze.revenue') %></p>
           </div>
 
           <div class="tier-stats">
             <div class="tier-stat">
-              <span class="stat-label">Discount level</span>
+              <span class="stat-label"><%= t('affiliate.stats.discountLevel') %></span>
               <span class="stat-value">0.00%</span>
             </div>
             <div class="tier-stat">
-              <span class="stat-label">Ordering option</span>
-              <span class="stat-value">Website</span>
+              <span class="stat-label"><%= t('affiliate.stats.orderingOption') %></span>
+              <span class="stat-value"><%= t('affiliate.stats.website') %></span>
             </div>
             <div class="tier-stat">
-              <span class="stat-label">Shipping</span>
-              <span class="stat-value">Via Website</span>
+              <span class="stat-label"><%= t('affiliate.stats.shipping') %></span>
+              <span class="stat-value"><%= t('affiliate.stats.viaWebsite') %></span>
             </div>
             <div class="tier-stat">
-              <span class="stat-label">Procurement</span>
+              <span class="stat-label"><%= t('affiliate.stats.procurement') %></span>
               <span class="stat-value">30%</span>
             </div>
             <div class="tier-stat">
-              <span class="stat-label">Pay split</span>
+              <span class="stat-label"><%= t('affiliate.stats.paySplit') %></span>
               <span class="stat-value">1.00%</span>
             </div>
             <div class="tier-stat">
-              <span class="stat-label">Free Storage</span>
-              <span class="stat-value">30 days</span>
+              <span class="stat-label"><%= t('affiliate.stats.freeStorage') %></span>
+              <span class="stat-value">30 <%= t('affiliate.stats.days') %></span>
             </div>
           </div>
 
           <div class="tier-benefits">
-            <h4 class="tier-benefits-title">Benefits</h4>
+            <h4 class="tier-benefits-title"><%= t('affiliate.benefits.title') %></h4>
             <div class="benefit-item">
               <i data-lucide="x-circle" class="benefit-icon not-available"></i>
-              <span class="benefit-text not-available">Manager support</span>
+              <span class="benefit-text not-available"><%= t('affiliate.benefits.managerSupport') %></span>
             </div>
             <div class="benefit-item">
               <i data-lucide="x-circle" class="benefit-icon not-available"></i>
-              <span class="benefit-text not-available">Free storage 5000$</span>
+              <span class="benefit-text not-available"><%= t('affiliate.benefits.freeStorage') %></span>
             </div>
             <div class="benefit-item">
               <i data-lucide="x-circle" class="benefit-icon not-available"></i>
-              <span class="benefit-text not-available">Analytics</span>
+              <span class="benefit-text not-available"><%= t('affiliate.benefits.analytics') %></span>
             </div>
             <div class="benefit-item">
               <i data-lucide="x-circle" class="benefit-icon not-available"></i>
-              <span class="benefit-text not-available">Track availability and supplier</span>
+              <span class="benefit-text not-available"><%= t('affiliate.benefits.trackAvailability') %></span>
             </div>
           </div>
 
           <button class="tier-action">
-            <span>Current Level</span>
+            <span><%= t('affiliate.tiers.bronze.currentLevel') %></span>
             <i data-lucide="arrow-right"></i>
           </button>
         </div>
@@ -108,61 +108,61 @@
             <div class="tier-icon">
               <i data-lucide="medal"></i>
             </div>
-            <h3 class="tier-name">Silver</h3>
-            <p class="tier-range">5 000-15 000$</p>
-            <p class="tier-revenue">Monthly sales</p>
+            <h3 class="tier-name"><%= t('affiliate.tiers.silver.name') %></h3>
+            <p class="tier-range"><%= t('affiliate.tiers.silver.range') %></p>
+            <p class="tier-revenue"><%= t('affiliate.tiers.silver.revenue') %></p>
           </div>
 
           <div class="tier-stats">
             <div class="tier-stat">
-              <span class="stat-label">Discount level</span>
+              <span class="stat-label"><%= t('affiliate.stats.discountLevel') %></span>
               <span class="stat-value highlight">3.00%</span>
             </div>
             <div class="tier-stat">
-              <span class="stat-label">Ordering option</span>
-              <span class="stat-value">Website + Manual</span>
+              <span class="stat-label"><%= t('affiliate.stats.orderingOption') %></span>
+              <span class="stat-value"><%= t('affiliate.stats.website') %> + <%= t('affiliate.stats.manual') %></span>
             </div>
             <div class="tier-stat">
-              <span class="stat-label">Shipping</span>
-              <span class="stat-value">Via Manager</span>
+              <span class="stat-label"><%= t('affiliate.stats.shipping') %></span>
+              <span class="stat-value"><%= t('affiliate.stats.viaManager') %></span>
             </div>
             <div class="tier-stat">
-              <span class="stat-label">Procurement</span>
+              <span class="stat-label"><%= t('affiliate.stats.procurement') %></span>
               <span class="stat-value">30%</span>
             </div>
             <div class="tier-stat">
-              <span class="stat-label">Pay split</span>
+              <span class="stat-label"><%= t('affiliate.stats.paySplit') %></span>
               <span class="stat-value">3.00%</span>
             </div>
             <div class="tier-stat">
-              <span class="stat-label">Free Storage</span>
-              <span class="stat-value">30 days</span>
+              <span class="stat-label"><%= t('affiliate.stats.freeStorage') %></span>
+              <span class="stat-value">30 <%= t('affiliate.stats.days') %></span>
             </div>
           </div>
 
           <div class="tier-benefits">
-            <h4 class="tier-benefits-title">Benefits</h4>
+            <h4 class="tier-benefits-title"><%= t('affiliate.benefits.title') %></h4>
             <div class="benefit-item">
               <i data-lucide="check-circle-2" class="benefit-icon available"></i>
-              <span class="benefit-text">Shipping</span>
-              <span class="benefit-badge">Via Manager</span>
+              <span class="benefit-text"><%= t('affiliate.stats.shipping') %></span>
+              <span class="benefit-badge"><%= t('affiliate.stats.viaManager') %></span>
             </div>
             <div class="benefit-item">
               <i data-lucide="x-circle" class="benefit-icon not-available"></i>
-              <span class="benefit-text not-available">Free storage 5000$</span>
+              <span class="benefit-text not-available"><%= t('affiliate.benefits.freeStorage') %></span>
             </div>
             <div class="benefit-item">
               <i data-lucide="x-circle" class="benefit-icon not-available"></i>
-              <span class="benefit-text not-available">Analytics</span>
+              <span class="benefit-text not-available"><%= t('affiliate.benefits.analytics') %></span>
             </div>
             <div class="benefit-item">
               <i data-lucide="x-circle" class="benefit-icon not-available"></i>
-              <span class="benefit-text not-available">Track availability and supplier</span>
+              <span class="benefit-text not-available"><%= t('affiliate.benefits.trackAvailability') %></span>
             </div>
           </div>
 
           <button class="tier-action">
-            <span>Learn More</span>
+            <span><%= t('affiliate.learnMore') %></span>
             <i data-lucide="arrow-right"></i>
           </button>
         </div>
@@ -173,62 +173,62 @@
             <div class="tier-icon">
               <i data-lucide="crown"></i>
             </div>
-            <h3 class="tier-name">Gold</h3>
-            <p class="tier-range">15 000-50 000$</p>
-            <p class="tier-revenue">Monthly sales</p>
+            <h3 class="tier-name"><%= t('affiliate.tiers.gold.name') %></h3>
+            <p class="tier-range"><%= t('affiliate.tiers.gold.range') %></p>
+            <p class="tier-revenue"><%= t('affiliate.tiers.gold.revenue') %></p>
           </div>
 
           <div class="tier-stats">
             <div class="tier-stat">
-              <span class="stat-label">Discount level</span>
+              <span class="stat-label"><%= t('affiliate.stats.discountLevel') %></span>
               <span class="stat-value highlight">4.00%</span>
             </div>
             <div class="tier-stat">
-              <span class="stat-label">Ordering option</span>
-              <span class="stat-value">Website + Manual</span>
+              <span class="stat-label"><%= t('affiliate.stats.orderingOption') %></span>
+              <span class="stat-value"><%= t('affiliate.stats.website') %> + <%= t('affiliate.stats.manual') %></span>
             </div>
             <div class="tier-stat">
-              <span class="stat-label">Shipping</span>
-              <span class="stat-value">Via Manager</span>
+              <span class="stat-label"><%= t('affiliate.stats.shipping') %></span>
+              <span class="stat-value"><%= t('affiliate.stats.viaManager') %></span>
             </div>
             <div class="tier-stat">
-              <span class="stat-label">Procurement</span>
+              <span class="stat-label"><%= t('affiliate.stats.procurement') %></span>
               <span class="stat-value">30%</span>
             </div>
             <div class="tier-stat">
-              <span class="stat-label">Pay split</span>
+              <span class="stat-label"><%= t('affiliate.stats.paySplit') %></span>
               <span class="stat-value success">6.00%</span>
             </div>
             <div class="tier-stat">
-              <span class="stat-label">Free Storage</span>
-              <span class="stat-value">30 days</span>
+              <span class="stat-label"><%= t('affiliate.stats.freeStorage') %></span>
+              <span class="stat-value">30 <%= t('affiliate.stats.days') %></span>
             </div>
           </div>
 
           <div class="tier-benefits">
-            <h4 class="tier-benefits-title">Benefits</h4>
+            <h4 class="tier-benefits-title"><%= t('affiliate.benefits.title') %></h4>
             <div class="benefit-item">
               <i data-lucide="check-circle-2" class="benefit-icon available"></i>
-              <span class="benefit-text">Shipping</span>
-              <span class="benefit-badge">Via Manager</span>
+              <span class="benefit-text"><%= t('affiliate.stats.shipping') %></span>
+              <span class="benefit-badge"><%= t('affiliate.stats.viaManager') %></span>
             </div>
             <div class="benefit-item">
               <i data-lucide="check-circle-2" class="benefit-icon available"></i>
-              <span class="benefit-text">Free storage 5000$</span>
-              <span class="benefit-badge">Yes</span>
+              <span class="benefit-text"><%= t('affiliate.benefits.freeStorage') %></span>
+              <span class="benefit-badge"><%= t('affiliate.benefits.yes') %></span>
             </div>
             <div class="benefit-item">
               <i data-lucide="x-circle" class="benefit-icon not-available"></i>
-              <span class="benefit-text not-available">Analytics</span>
+              <span class="benefit-text not-available"><%= t('affiliate.benefits.analytics') %></span>
             </div>
             <div class="benefit-item">
               <i data-lucide="x-circle" class="benefit-icon not-available"></i>
-              <span class="benefit-text not-available">Track availability and supplier</span>
+              <span class="benefit-text not-available"><%= t('affiliate.benefits.trackAvailability') %></span>
             </div>
           </div>
 
           <button class="tier-action">
-            <span>Learn More</span>
+            <span><%= t('affiliate.learnMore') %></span>
             <i data-lucide="arrow-right"></i>
           </button>
         </div>
@@ -239,63 +239,63 @@
             <div class="tier-icon">
               <i data-lucide="gem"></i>
             </div>
-            <h3 class="tier-name">Platinum</h3>
-            <p class="tier-range">50 000-100 000$</p>
-            <p class="tier-revenue">Monthly sales</p>
+            <h3 class="tier-name"><%= t('affiliate.tiers.platinum.name') %></h3>
+            <p class="tier-range"><%= t('affiliate.tiers.platinum.range') %></p>
+            <p class="tier-revenue"><%= t('affiliate.tiers.platinum.revenue') %></p>
           </div>
 
           <div class="tier-stats">
             <div class="tier-stat">
-              <span class="stat-label">Discount level</span>
+              <span class="stat-label"><%= t('affiliate.stats.discountLevel') %></span>
               <span class="stat-value highlight">5.00%</span>
             </div>
             <div class="tier-stat">
-              <span class="stat-label">Ordering option</span>
-              <span class="stat-value">Website + Manual</span>
+              <span class="stat-label"><%= t('affiliate.stats.orderingOption') %></span>
+              <span class="stat-value"><%= t('affiliate.stats.website') %> + <%= t('affiliate.stats.manual') %></span>
             </div>
             <div class="tier-stat">
-              <span class="stat-label">Shipping</span>
-              <span class="stat-value">Via Manager</span>
+              <span class="stat-label"><%= t('affiliate.stats.shipping') %></span>
+              <span class="stat-value"><%= t('affiliate.stats.viaManager') %></span>
             </div>
             <div class="tier-stat">
-              <span class="stat-label">Procurement</span>
+              <span class="stat-label"><%= t('affiliate.stats.procurement') %></span>
               <span class="stat-label">10%</span>
             </div>
             <div class="tier-stat">
-              <span class="stat-label">Pay split</span>
+              <span class="stat-label"><%= t('affiliate.stats.paySplit') %></span>
               <span class="stat-value success">8.00%</span>
             </div>
             <div class="tier-stat">
-              <span class="stat-label">Free Storage</span>
-              <span class="stat-value">30 days</span>
+              <span class="stat-label"><%= t('affiliate.stats.freeStorage') %></span>
+              <span class="stat-value">30 <%= t('affiliate.stats.days') %></span>
             </div>
           </div>
 
           <div class="tier-benefits">
-            <h4 class="tier-benefits-title">Benefits</h4>
+            <h4 class="tier-benefits-title"><%= t('affiliate.benefits.title') %></h4>
             <div class="benefit-item">
               <i data-lucide="check-circle-2" class="benefit-icon available"></i>
-              <span class="benefit-text">Shipping</span>
-              <span class="benefit-badge">Via Manager</span>
+              <span class="benefit-text"><%= t('affiliate.stats.shipping') %></span>
+              <span class="benefit-badge"><%= t('affiliate.stats.viaManager') %></span>
             </div>
             <div class="benefit-item">
               <i data-lucide="check-circle-2" class="benefit-icon available"></i>
-              <span class="benefit-text">Free storage 5000$</span>
-              <span class="benefit-badge">Yes</span>
+              <span class="benefit-text"><%= t('affiliate.benefits.freeStorage') %></span>
+              <span class="benefit-badge"><%= t('affiliate.benefits.yes') %></span>
             </div>
             <div class="benefit-item">
               <i data-lucide="check-circle-2" class="benefit-icon available"></i>
-              <span class="benefit-text">Analytics</span>
-              <span class="benefit-badge">Yes</span>
+              <span class="benefit-text"><%= t('affiliate.benefits.analytics') %></span>
+              <span class="benefit-badge"><%= t('affiliate.benefits.yes') %></span>
             </div>
             <div class="benefit-item">
               <i data-lucide="x-circle" class="benefit-icon not-available"></i>
-              <span class="benefit-text not-available">Track availability and supplier</span>
+              <span class="benefit-text not-available"><%= t('affiliate.benefits.trackAvailability') %></span>
             </div>
           </div>
 
           <button class="tier-action">
-            <span>Learn More</span>
+            <span><%= t('affiliate.learnMore') %></span>
             <i data-lucide="arrow-right"></i>
           </button>
         </div>
@@ -306,64 +306,64 @@
             <div class="tier-icon">
               <i data-lucide="sparkles"></i>
             </div>
-            <h3 class="tier-name">Platinum+</h3>
-            <p class="tier-range">100 000+ $</p>
-            <p class="tier-revenue">Monthly sales</p>
+            <h3 class="tier-name"><%= t('affiliate.tiers.platinumPlus.name') %></h3>
+            <p class="tier-range"><%= t('affiliate.tiers.platinumPlus.range') %></p>
+            <p class="tier-revenue"><%= t('affiliate.tiers.platinumPlus.revenue') %></p>
           </div>
 
           <div class="tier-stats">
             <div class="tier-stat">
-              <span class="stat-label">Discount level</span>
+              <span class="stat-label"><%= t('affiliate.stats.discountLevel') %></span>
               <span class="stat-value highlight">6.00%</span>
             </div>
             <div class="tier-stat">
-              <span class="stat-label">Ordering option</span>
-              <span class="stat-value">Website + Manual</span>
+              <span class="stat-label"><%= t('affiliate.stats.orderingOption') %></span>
+              <span class="stat-value"><%= t('affiliate.stats.website') %> + <%= t('affiliate.stats.manual') %></span>
             </div>
             <div class="tier-stat">
-              <span class="stat-label">Shipping</span>
-              <span class="stat-value">Via Manager</span>
+              <span class="stat-label"><%= t('affiliate.stats.shipping') %></span>
+              <span class="stat-value"><%= t('affiliate.stats.viaManager') %></span>
             </div>
             <div class="tier-stat">
-              <span class="stat-label">Procurement</span>
+              <span class="stat-label"><%= t('affiliate.stats.procurement') %></span>
               <span class="stat-value">10%</span>
             </div>
             <div class="tier-stat">
-              <span class="stat-label">Pay split</span>
-              <span class="stat-value success">Individual</span>
+              <span class="stat-label"><%= t('affiliate.stats.paySplit') %></span>
+              <span class="stat-value success"><%= t('affiliate.stats.individual') %></span>
             </div>
             <div class="tier-stat">
-              <span class="stat-label">Free Storage</span>
-              <span class="stat-value">Free</span>
+              <span class="stat-label"><%= t('affiliate.stats.freeStorage') %></span>
+              <span class="stat-value"><%= t('affiliate.stats.free') %></span>
             </div>
           </div>
 
           <div class="tier-benefits">
-            <h4 class="tier-benefits-title">Premium Benefits</h4>
+            <h4 class="tier-benefits-title"><%= t('affiliate.tiers.platinumPlus.premiumBenefits') %></h4>
             <div class="benefit-item">
               <i data-lucide="check-circle-2" class="benefit-icon available"></i>
-              <span class="benefit-text">Shipping</span>
-              <span class="benefit-badge">Via Manager</span>
+              <span class="benefit-text"><%= t('affiliate.stats.shipping') %></span>
+              <span class="benefit-badge"><%= t('affiliate.stats.viaManager') %></span>
             </div>
             <div class="benefit-item">
               <i data-lucide="check-circle-2" class="benefit-icon available"></i>
-              <span class="benefit-text">Free storage 5000$</span>
-              <span class="benefit-badge">Unlimited</span>
+              <span class="benefit-text"><%= t('affiliate.benefits.freeStorage') %></span>
+              <span class="benefit-badge"><%= t('affiliate.benefits.unlimited') %></span>
             </div>
             <div class="benefit-item">
               <i data-lucide="check-circle-2" class="benefit-icon available"></i>
-              <span class="benefit-text">Analytics</span>
-              <span class="benefit-badge">Advanced</span>
+              <span class="benefit-text"><%= t('affiliate.benefits.analytics') %></span>
+              <span class="benefit-badge"><%= t('affiliate.benefits.advanced') %></span>
             </div>
             <div class="benefit-item">
               <i data-lucide="check-circle-2" class="benefit-icon available"></i>
-              <span class="benefit-text">Track availability and supplier</span>
-              <span class="benefit-badge">Real-time</span>
+              <span class="benefit-text"><%= t('affiliate.benefits.trackAvailability') %></span>
+              <span class="benefit-badge"><%= t('affiliate.benefits.realTime') %></span>
             </div>
           </div>
 
           <button class="tier-action">
-            <span>Learn More</span>
+            <span><%= t('affiliate.learnMore') %></span>
             <i data-lucide="arrow-right"></i>
           </button>
         </div>
@@ -372,57 +372,57 @@
       <!-- Info Section - Photo Based Design -->
       <div class="affiliate-info-photo" id="how-it-works">
         <div class="section-header">
-          <h2 class="section-title">How It Works</h2>
+          <h2 class="section-title"><%= t('affiliate.howItWorks.title') %></h2>
           <p class="section-subtitle">
-            Simple and transparent process to maximize your benefits
+            <%= t('affiliate.howItWorks.subtitle') %>
           </p>
         </div>
 
         <div class="info-photo-grid">
           <div class="info-photo-item">
             <div class="info-photo-bg">
-              <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?q=80&w=1600&auto=format&fit=crop" alt="Place Orders" loading="lazy">
+              <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?q=80&w=1600&auto=format&fit=crop" alt="<%= t('affiliate.howItWorks.placeOrders.title') %>" loading="lazy">
               <div class="info-photo-overlay"></div>
             </div>
             <div class="info-photo-content">
               <div class="info-photo-icon">
                 <i data-lucide="shopping-cart"></i>
               </div>
-              <h3 class="info-photo-title">Place Orders</h3>
+              <h3 class="info-photo-title"><%= t('affiliate.howItWorks.placeOrders.title') %></h3>
               <p class="info-photo-text">
-                Continue purchasing parts through our platform as usual
+                <%= t('affiliate.howItWorks.placeOrders.description') %>
               </p>
             </div>
           </div>
 
           <div class="info-photo-item">
             <div class="info-photo-bg">
-              <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=1600&auto=format&fit=crop" alt="Grow Sales" loading="lazy">
+              <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=1600&auto=format&fit=crop" alt="<%= t('affiliate.howItWorks.growSales.title') %>" loading="lazy">
               <div class="info-photo-overlay"></div>
             </div>
             <div class="info-photo-content">
               <div class="info-photo-icon">
                 <i data-lucide="trending-up"></i>
               </div>
-              <h3 class="info-photo-title">Grow Sales</h3>
+              <h3 class="info-photo-title"><%= t('affiliate.howItWorks.growSales.title') %></h3>
               <p class="info-photo-text">
-                Your monthly sales volume determines your tier level
+                <%= t('affiliate.howItWorks.growSales.description') %>
               </p>
             </div>
           </div>
 
           <div class="info-photo-item">
             <div class="info-photo-bg">
-              <img src="https://images.unsplash.com/photo-1559526324-4b87b5e36e44?q=80&w=1600&auto=format&fit=crop" alt="Earn Rewards" loading="lazy">
+              <img src="https://images.unsplash.com/photo-1559526324-4b87b5e36e44?q=80&w=1600&auto=format&fit=crop" alt="<%= t('affiliate.howItWorks.earnRewards.title') %>" loading="lazy">
               <div class="info-photo-overlay"></div>
             </div>
             <div class="info-photo-content">
               <div class="info-photo-icon">
                 <i data-lucide="gift"></i>
               </div>
-              <h3 class="info-photo-title">Earn Rewards</h3>
+              <h3 class="info-photo-title"><%= t('affiliate.howItWorks.earnRewards.title') %></h3>
               <p class="info-photo-text">
-                Unlock better discounts, priority support, and exclusive benefits
+                <%= t('affiliate.howItWorks.earnRewards.description') %>
               </p>
             </div>
           </div>
@@ -435,7 +435,7 @@
           <i data-lucide="info"></i>
         </div>
         <p class="disclaimer-text">
-          <strong>Note:</strong> Your tier level will be calculated based on your cumulative monthly purchase volume from when your account was created. Tier membership is updated monthly and all benefits are applied automatically to your qualified account.
+          <strong><%= t('affiliate.disclaimer.note') %></strong> <%= t('affiliate.disclaimer.text') %>
         </p>
       </div>
     </div>

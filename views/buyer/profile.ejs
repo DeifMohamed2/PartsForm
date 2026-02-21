@@ -13,12 +13,12 @@
     <div class="profile-hero-content">
       <div class="profile-badge">
         <i data-lucide="user-circle"></i>
-        <span>My Profile</span>
+        <span><%= t('profile.badge') %></span>
       </div>
 
-      <h1 class="profile-hero-title">User Profile</h1>
+      <h1 class="profile-hero-title"><%= t('profile.title') %></h1>
       <p class="profile-hero-subtitle">
-        Manage your personal information and account details
+        <%= t('profile.subtitle') %>
       </p>
     </div>
   </div>
@@ -51,12 +51,12 @@
               <% if (buyer.isActive) { %>
               <span class="status-badge active">
                 <i data-lucide="check-circle"></i>
-                <span>Active Account</span>
+                <span><%= t('profile.activeAccount') %></span>
               </span>
               <% } else { %>
               <span class="status-badge inactive">
                 <i data-lucide="x-circle"></i>
-                <span>Inactive</span>
+                <span><%= t('profile.inactive') %></span>
               </span>
               <% } %>
             </div>
@@ -69,7 +69,7 @@
               </div>
               <div class="stat-content">
                 <span class="stat-value" id="totalOrders">0</span>
-                <span class="stat-label">Total Orders</span>
+                <span class="stat-label"><%= t('profile.totalOrders') %></span>
               </div>
             </div>
             <div class="profile-stat-item">
@@ -78,7 +78,7 @@
               </div>
               <div class="stat-content">
                 <span class="stat-value" id="memberSince"><%= buyer.memberSince %></span>
-                <span class="stat-label">Member Since</span>
+                <span class="stat-label"><%= t('profile.memberSince') %></span>
               </div>
             </div>
           </div>
@@ -91,39 +91,39 @@
             <div class="info-card-header">
               <div class="info-card-title-wrapper">
                 <i data-lucide="user"></i>
-                <h3 class="info-card-title">Personal Information</h3>
+                <h3 class="info-card-title"><%= t('profile.personalInfo') %></h3>
               </div>
               <button class="info-card-edit-btn" id="editPersonalInfoBtn">
                 <i data-lucide="edit"></i>
-                <span>Edit</span>
+                <span><%= t('common.edit') %></span>
               </button>
             </div>
             <div class="info-card-body">
               <div class="info-row">
                 <div class="info-label">
                   <i data-lucide="user"></i>
-                  <span>Full Name</span>
+                  <span><%= t('profile.fullName') %></span>
                 </div>
                 <div class="info-value" id="fullNameValue"><%= buyer.fullName %></div>
               </div>
               <div class="info-row">
                 <div class="info-label">
                   <i data-lucide="mail"></i>
-                  <span>Email Address</span>
+                  <span><%= t('profile.emailAddress') %></span>
                 </div>
                 <div class="info-value" id="emailValue"><%= buyer.email %></div>
               </div>
               <div class="info-row">
                 <div class="info-label">
                   <i data-lucide="phone"></i>
-                  <span>Phone Number</span>
+                  <span><%= t('profile.phoneNumber') %></span>
                 </div>
                 <div class="info-value" id="phoneValue"><%= buyer.phone %></div>
               </div>
               <div class="info-row">
                 <div class="info-label">
                   <i data-lucide="building-2"></i>
-                  <span>Company</span>
+                  <span><%= t('profile.company') %></span>
                 </div>
                 <div class="info-value" id="companyValue"><%= buyer.companyName %></div>
               </div>
@@ -135,18 +135,18 @@
             <div class="info-card-header">
               <div class="info-card-title-wrapper">
                 <i data-lucide="map-pin"></i>
-                <h3 class="info-card-title">My Addresses</h3>
+                <h3 class="info-card-title"><%= t('profile.myAddresses') %></h3>
               </div>
               <a href="/buyer/delivery" class="info-card-edit-btn">
                 <i data-lucide="plus"></i>
-                <span>Manage</span>
+                <span><%= t('common.manage') %></span>
               </a>
             </div>
             <div class="info-card-body">
               <div class="addresses-container" id="addressesContainer">
                 <div class="addresses-loading">
                   <div class="spinner"></div>
-                  <span>Loading addresses...</span>
+                  <span><%= t('profile.loadingAddresses') %></span>
                 </div>
               </div>
             </div>
@@ -157,43 +157,43 @@
             <div class="info-card-header">
               <div class="info-card-title-wrapper">
                 <i data-lucide="shield"></i>
-                <h3 class="info-card-title">Account Security</h3>
+                <h3 class="info-card-title"><%= t('profile.accountSecurity') %></h3>
               </div>
             </div>
             <div class="info-card-body">
               <div class="info-row">
                 <div class="info-label">
                   <i data-lucide="lock"></i>
-                  <span>Password</span>
+                  <span><%= t('profile.password') %></span>
                 </div>
                 <div class="info-value-action">
-                  <span class="info-value-text">Last changed <%= buyer.passwordLastChanged %> days ago</span>
+                  <span class="info-value-text"><%= t('profile.lastChanged', { days: buyer.passwordLastChanged }) %></span>
                   <button class="info-action-btn" id="changePasswordBtn">
                     <i data-lucide="key"></i>
-                    <span>Change Password</span>
+                    <span><%= t('profile.changePassword') %></span>
                   </button>
                 </div>
               </div>
               <div class="info-row">
                 <div class="info-label">
                   <i data-lucide="smartphone"></i>
-                  <span>Two-Factor Authentication</span>
+                  <span><%= t('profile.twoFA') %></span>
                 </div>
                 <div class="info-value-action">
-                  <span class="info-value-text">Not enabled</span>
+                  <span class="info-value-text"><%= t('profile.notEnabled') %></span>
                   <button class="info-action-btn" id="enable2FABtn">
                     <i data-lucide="shield-check"></i>
-                    <span>Enable 2FA</span>
+                    <span><%= t('profile.enable2FA') %></span>
                   </button>
                 </div>
               </div>
               <div class="info-row">
                 <div class="info-label">
                   <i data-lucide="mail-check"></i>
-                  <span>Newsletter</span>
+                  <span><%= t('profile.newsletter') %></span>
                 </div>
                 <div class="info-value-action">
-                  <span class="info-value-text"><%= buyer.newsletter ? 'Subscribed' : 'Not subscribed' %></span>
+                  <span class="info-value-text"><%= buyer.newsletter ? t('profile.subscribed') : t('profile.notSubscribed') %></span>
                 </div>
               </div>
             </div>
@@ -215,8 +215,8 @@
       <i data-lucide="x"></i>
     </button>
     <div class="avatar-modal-header">
-      <h3>Upload Profile Photo</h3>
-      <p>Choose a new profile picture</p>
+      <h3><%= t('profile.uploadPhoto') %></h3>
+      <p><%= t('profile.choosePhoto') %></p>
     </div>
     <div class="avatar-upload-area" id="avatarUploadArea">
       <div class="upload-preview" id="uploadPreview" style="display: none;">
@@ -224,22 +224,22 @@
       </div>
       <div class="upload-placeholder" id="uploadPlaceholder">
         <i data-lucide="image-plus"></i>
-        <span>Drop image here or click to browse</span>
-        <span class="upload-hint">Supports: JPG, PNG, WebP, GIF (Max 5MB)</span>
+        <span><%= t('profile.dropImage') %></span>
+        <span class="upload-hint"><%= t('profile.imageFormats') %></span>
       </div>
     </div>
     <div class="avatar-modal-actions">
-      <button class="btn-cancel" id="avatarCancelBtn">Cancel</button>
+      <button class="btn-cancel" id="avatarCancelBtn"><%= t('common.cancel') %></button>
       <button class="btn-upload" id="avatarUploadBtn" disabled>
         <i data-lucide="upload"></i>
-        <span>Upload Photo</span>
+        <span><%= t('profile.uploadPhotoBtn') %></span>
       </button>
     </div>
     <div class="upload-progress" id="uploadProgress" style="display: none;">
       <div class="progress-bar">
         <div class="progress-fill" id="progressFill"></div>
       </div>
-      <span class="progress-text" id="progressText">Uploading...</span>
+      <span class="progress-text" id="progressText"><%= t('profile.uploading') %></span>
     </div>
   </div>
 </div>
@@ -255,42 +255,42 @@
       <div class="modal-icon">
         <i data-lucide="user-pen"></i>
       </div>
-      <h3>Edit Personal Information</h3>
-      <p>Update your personal details below</p>
+      <h3><%= t('profile.editPersonalInfo') %></h3>
+      <p><%= t('profile.updateDetails') %></p>
     </div>
     <form id="editProfileForm" class="profile-form">
       <div class="form-grid">
         <div class="form-group">
-          <label for="editFirstName">First Name</label>
+          <label for="editFirstName"><%= t('profile.form.firstName') %></label>
           <input type="text" id="editFirstName" name="firstName" value="<%= buyer.firstName %>" required>
         </div>
         <div class="form-group">
-          <label for="editLastName">Last Name</label>
+          <label for="editLastName"><%= t('profile.form.lastName') %></label>
           <input type="text" id="editLastName" name="lastName" value="<%= buyer.lastName %>" required>
         </div>
       </div>
       <div class="form-group">
-        <label for="editPhone">Phone Number</label>
+        <label for="editPhone"><%= t('profile.phoneNumber') %></label>
         <input type="tel" id="editPhone" name="phone" value="<%= buyer.phone %>" required>
       </div>
       <div class="form-group">
-        <label for="editCompanyName">Company Name</label>
+        <label for="editCompanyName"><%= t('profile.form.companyName') %></label>
         <input type="text" id="editCompanyName" name="companyName" value="<%= buyer.companyName %>" required>
       </div>
       <div class="form-group">
-        <label for="editCity">City</label>
+        <label for="editCity"><%= t('profile.form.city') %></label>
         <input type="text" id="editCity" name="city" value="<%= buyer.city %>" required>
       </div>
       <div class="form-group">
-        <label for="editShippingAddress">Default Shipping Address</label>
+        <label for="editShippingAddress"><%= t('profile.form.shippingAddress') %></label>
         <textarea id="editShippingAddress" name="shippingAddress" rows="3" required><%= buyer.shippingAddress %></textarea>
       </div>
       <div class="form-message" id="editProfileMessage"></div>
       <div class="profile-modal-actions">
-        <button type="button" class="btn-cancel" id="editProfileCancelBtn">Cancel</button>
+        <button type="button" class="btn-cancel" id="editProfileCancelBtn"><%= t('common.cancel') %></button>
         <button type="submit" class="btn-save" id="editProfileSaveBtn">
           <i data-lucide="check"></i>
-          <span>Save Changes</span>
+          <span><%= t('common.saveChanges') %></span>
         </button>
       </div>
     </form>
@@ -308,12 +308,12 @@
       <div class="modal-icon warning">
         <i data-lucide="key-round"></i>
       </div>
-      <h3>Change Password</h3>
-      <p>Enter your current password and choose a new one</p>
+      <h3><%= t('profile.changePassword') %></h3>
+      <p><%= t('profile.changePasswordDesc') %></p>
     </div>
     <form id="changePasswordForm" class="profile-form">
       <div class="form-group">
-        <label for="currentPassword">Current Password</label>
+        <label for="currentPassword"><%= t('profile.form.currentPassword') %></label>
         <div class="password-input-wrapper">
           <input type="password" id="currentPassword" name="currentPassword" required>
           <button type="button" class="toggle-password" data-target="currentPassword">
@@ -322,17 +322,17 @@
         </div>
       </div>
       <div class="form-group">
-        <label for="newPassword">New Password</label>
+        <label for="newPassword"><%= t('profile.form.newPassword') %></label>
         <div class="password-input-wrapper">
           <input type="password" id="newPassword" name="newPassword" required minlength="8">
           <button type="button" class="toggle-password" data-target="newPassword">
             <i data-lucide="eye"></i>
           </button>
         </div>
-        <span class="form-hint">Minimum 8 characters</span>
+        <span class="form-hint"><%= t('profile.form.minChars') %></span>
       </div>
       <div class="form-group">
-        <label for="confirmPassword">Confirm New Password</label>
+        <label for="confirmPassword"><%= t('profile.form.confirmPassword') %></label>
         <div class="password-input-wrapper">
           <input type="password" id="confirmPassword" name="confirmPassword" required minlength="8">
           <button type="button" class="toggle-password" data-target="confirmPassword">
@@ -341,18 +341,18 @@
         </div>
       </div>
       <div class="password-requirements">
-        <p class="requirements-title">Password requirements:</p>
+        <p class="requirements-title"><%= t('profile.passwordRequirements') %></p>
         <ul>
-          <li id="reqLength"><i data-lucide="circle"></i> At least 8 characters</li>
-          <li id="reqMatch"><i data-lucide="circle"></i> Passwords match</li>
+          <li id="reqLength"><i data-lucide="circle"></i> <%= t('profile.req.minLength') %></li>
+          <li id="reqMatch"><i data-lucide="circle"></i> <%= t('profile.req.match') %></li>
         </ul>
       </div>
       <div class="form-message" id="changePasswordMessage"></div>
       <div class="profile-modal-actions">
-        <button type="button" class="btn-cancel" id="changePasswordCancelBtn">Cancel</button>
+        <button type="button" class="btn-cancel" id="changePasswordCancelBtn"><%= t('common.cancel') %></button>
         <button type="submit" class="btn-save" id="changePasswordSaveBtn">
           <i data-lucide="lock"></i>
-          <span>Update Password</span>
+          <span><%= t('profile.updatePassword') %></span>
         </button>
       </div>
     </form>

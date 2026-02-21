@@ -8,8 +8,8 @@
     <aside class="filters-sidebar" id="filters-sidebar">
       <div class="filters-header">
         <div class="filters-header-content">
-          <h3 class="filters-title">Filters</h3>
-          <span class="filters-subtitle">Refine your search results</span>
+          <h3 class="filters-title"><%= t('searchResults.filters.title') %></h3>
+          <span class="filters-subtitle"><%= t('searchResults.filters.subtitle') %></span>
         </div>
         <button class="filters-close" id="filters-close">
           <i data-lucide="x"></i>
@@ -22,7 +22,7 @@
           <div class="active-filters-list" id="active-filters-list"></div>
           <button class="clear-active-filters" id="clear-active-filters">
             <i data-lucide="x"></i>
-            Clear All
+            <%= t('searchResults.filters.clearAll') %>
           </button>
         </div>
 
@@ -30,10 +30,10 @@
         <div class="filter-stats-banner" id="filter-stats-banner" style="display: none;">
           <div class="filter-stats-header">
             <i data-lucide="bar-chart-3"></i>
-            <span>Filter by Search Results</span>
+            <span><%= t('searchResults.filters.filterByResults') %></span>
           </div>
           <div class="filter-stats-info">
-            <span class="filter-stats-count" id="filter-stats-count">0</span> parts found
+            <span class="filter-stats-count" id="filter-stats-count">0</span> <%= t('searchResults.filters.partsFound') %>
           </div>
         </div>
 
@@ -42,7 +42,7 @@
           <div class="filter-section-header">
             <h4 class="filter-section-title">
               <i data-lucide="banknote"></i>
-              Price Range
+              <%= t('searchResults.filters.priceRange') %>
             </h4>
             <span class="filter-section-unit" id="price-currency">USD</span>
           </div>
@@ -66,12 +66,12 @@
           <!-- Price Input Fields -->
           <div class="filter-range-inputs compact">
             <div class="filter-input-group">
-              <label>Min</label>
+              <label><%= t('searchResults.filters.min') %></label>
               <input type="number" id="min-price-input" value="0" min="0" max="500000" placeholder="0">
             </div>
             <span class="filter-range-separator">–</span>
             <div class="filter-input-group">
-              <label>Max</label>
+              <label><%= t('searchResults.filters.max') %></label>
               <input type="number" id="max-price-input" value="500000" min="0" max="500000" placeholder="500,000">
             </div>
           </div>
@@ -89,7 +89,7 @@
           <div class="filter-section-header">
             <h4 class="filter-section-title">
               <i data-lucide="tag"></i>
-              Stock Code
+              <%= t('searchResults.filters.stockCode') %>
             </h4>
             <span class="filter-count-badge" id="stockcode-total-count">0</span>
           </div>
@@ -97,7 +97,7 @@
             <label class="filter-checkbox">
               <input type="checkbox" name="stockCode" value="All" data-filter="stockCode" data-value="All" checked>
               <span class="filter-checkbox-box"></span>
-              <span class="filter-checkbox-label">All Stock Codes</span>
+              <span class="filter-checkbox-label"><%= t('searchResults.filters.allStockCodes') %></span>
               <span class="filter-item-count" id="stockcode-all-count"></span>
             </label>
             <!-- Dynamic stock code options will be inserted here -->
@@ -109,13 +109,13 @@
           <div class="filter-section-header">
             <h4 class="filter-section-title">
               <i data-lucide="award"></i>
-              Brand
+              <%= t('searchResults.filters.brand') %>
             </h4>
             <span class="filter-count-badge" id="brand-total-count">0</span>
           </div>
           <div class="filter-search-box">
             <i data-lucide="search"></i>
-            <input type="text" id="brand-filter-search" placeholder="Search brands...">
+            <input type="text" id="brand-filter-search" placeholder="<%= t('searchResults.filters.searchBrands') %>">
             <button class="filter-search-clear" id="brand-search-clear" style="display: none;">
               <i data-lucide="x"></i>
             </button>
@@ -124,14 +124,14 @@
             <label class="filter-checkbox">
               <input type="checkbox" name="brand" value="All" data-filter="brand" data-value="All" checked>
               <span class="filter-checkbox-box"></span>
-              <span class="filter-checkbox-label">All Brands</span>
+              <span class="filter-checkbox-label"><%= t('searchResults.filters.allBrands') %></span>
               <span class="filter-item-count" id="brand-all-count"></span>
             </label>
             <!-- Dynamic brand options will be inserted here -->
           </div>
           <div class="filter-show-more" id="brand-show-more" style="display: none;">
             <button class="show-more-btn" data-target="brand">
-              <span>Show more</span>
+              <span><%= t('searchResults.filters.showMore') %></span>
               <i data-lucide="chevron-down"></i>
             </button>
           </div>
@@ -142,9 +142,9 @@
           <div class="filter-section-header">
             <h4 class="filter-section-title">
               <i data-lucide="truck"></i>
-              Delivery Time
+              <%= t('searchResults.filters.deliveryTime') %>
             </h4>
-            <span class="filter-section-unit">days</span>
+            <span class="filter-section-unit"><%= t('searchResults.filters.days') %></span>
           </div>
           
           <!-- Delivery Range Display -->
@@ -167,15 +167,15 @@
           <div class="filter-quick-options">
             <button class="filter-quick-btn" data-delivery="express" data-min="0" data-max="2">
               <i data-lucide="zap"></i>
-              Express (1-2 days)
+              <%= t('searchResults.filters.express') %>
             </button>
             <button class="filter-quick-btn" data-delivery="fast" data-min="0" data-max="5">
               <i data-lucide="clock"></i>
-              Fast (3-5 days)
+              <%= t('searchResults.filters.fast') %>
             </button>
             <button class="filter-quick-btn" data-delivery="standard" data-min="0" data-max="14">
               <i data-lucide="calendar"></i>
-              Standard (7-14 days)
+              <%= t('searchResults.filters.standard') %>
             </button>
           </div>
         </div>
@@ -185,9 +185,9 @@
           <div class="filter-section-header">
             <h4 class="filter-section-title">
               <i data-lucide="layers"></i>
-              Available Quantity
+              <%= t('searchResults.filters.availableQty') %>
             </h4>
-            <span class="filter-section-unit">units</span>
+            <span class="filter-section-unit"><%= t('searchResults.filters.units') %></span>
           </div>
           
           <!-- Quantity Range Display -->
@@ -209,7 +209,7 @@
           <!-- Min Quantity Input -->
           <div class="filter-range-inputs compact">
             <div class="filter-input-group full-width">
-              <label>Minimum Available</label>
+              <label><%= t('searchResults.filters.minAvailable') %></label>
               <input type="number" id="min-quantity-input" value="0" min="0" placeholder="0">
             </div>
           </div>
@@ -220,7 +220,7 @@
           <div class="filter-section-header">
             <h4 class="filter-section-title">
               <i data-lucide="weight"></i>
-              Weight
+              <%= t('searchResults.filters.weight') %>
             </h4>
             <span class="filter-section-unit">kg</span>
           </div>
@@ -244,12 +244,12 @@
           <!-- Weight Inputs -->
           <div class="filter-range-inputs compact">
             <div class="filter-input-group">
-              <label>Min</label>
+              <label><%= t('searchResults.filters.min') %></label>
               <input type="number" id="min-weight-input" value="0" min="0" step="0.1" placeholder="0">
             </div>
             <span class="filter-range-separator">–</span>
             <div class="filter-input-group">
-              <label>Max</label>
+              <label><%= t('searchResults.filters.max') %></label>
               <input type="number" id="max-weight-input" value="100" min="0" step="0.1" placeholder="100">
             </div>
           </div>
@@ -259,18 +259,18 @@
       <!-- Filter Footer with Results Preview -->
       <div class="filters-footer">
         <div class="filter-results-preview">
-          <span class="preview-label">Matching:</span>
+          <span class="preview-label"><%= t('searchResults.filters.matching') %></span>
           <span class="preview-count" id="filter-preview-count">0</span>
-          <span class="preview-label">parts</span>
+          <span class="preview-label"><%= t('searchResults.filters.parts') %></span>
         </div>
         <div class="filter-footer-actions">
           <button class="filter-btn-clear" id="clear-filters">
             <i data-lucide="rotate-ccw"></i>
-            Reset
+            <%= t('searchResults.filters.reset') %>
           </button>
           <button class="filter-btn-apply" id="apply-filters">
             <i data-lucide="check"></i>
-            Apply Filters
+            <%= t('searchResults.filters.applyFilters') %>
           </button>
         </div>
       </div>
@@ -282,30 +282,30 @@
       <div class="results-header" id="results-header" style="display: none;">
         <div class="results-header-left">
         <p class="results-count">
-          Found <strong id="results-count">0</strong> parts matching your search
+          <%= t('searchResults.header.found') %> <strong id="results-count">0</strong> <%= t('searchResults.header.partsMatching') %>
           <span class="results-page-info" id="results-page-info" style="display: none;"></span>
         </p>
         <p class="results-subtitle">
-          <span id="selection-status">Select items to add to cart</span>
+          <span id="selection-status"><%= t('searchResults.header.selectItems') %></span>
           <span class="selected-badge" id="selected-badge" style="display: none;">
             <i data-lucide="shopping-cart"></i>
-            <span id="selected-items-count">0</span> Selected
+            <span id="selected-items-count">0</span> <%= t('searchResults.header.selected') %>
           </span>
         </p>
         </div>
         <div class="results-header-right">
         <div class="selected-total-box">
-          <span class="selected-total-label">Selected Total</span>
+          <span class="selected-total-label"><%= t('searchResults.header.selectedTotal') %></span>
           <span class="selected-total-amount" id="selected-total">0.00 AED</span>
           </div>
           <!-- Add to Cart Button in Header -->
           <button class="btn-add-to-cart-header" id="add-to-cart-btn-header" disabled>
             <i data-lucide="shopping-cart"></i>
-            <span>Add to Cart (<span id="selected-count-header">0</span>)</span>
+            <span><%= t('searchResults.header.addToCart') %> (<span id="selected-count-header">0</span>)</span>
           </button>
           <button class="filter-toggle-btn" id="mobile-filter-toggle">
             <i data-lucide="sliders-horizontal"></i>
-            <span>Filters</span>
+            <span><%= t('searchResults.header.filters') %></span>
           </button>
         </div>
       </div>
@@ -313,38 +313,38 @@
       <!-- Quick Sort & Filter Bar -->
       <div class="quick-sort-bar" id="quick-sort-bar" style="display: none;">
         <div class="quick-sort-left">
-          <span class="quick-sort-label">Sort by:</span>
+          <span class="quick-sort-label"><%= t('searchResults.sort.sortBy') %></span>
           <div class="quick-sort-buttons">
             <button class="quick-sort-btn active" data-sort="relevance" data-order="desc">
               <i data-lucide="sparkles"></i>
-              <span>Relevance</span>
+              <span><%= t('searchResults.sort.relevance') %></span>
             </button>
             <button class="quick-sort-btn" data-sort="price" data-order="asc">
               <i data-lucide="arrow-down-narrow-wide"></i>
-              <span>Cheapest</span>
+              <span><%= t('searchResults.sort.cheapest') %></span>
             </button>
             <button class="quick-sort-btn" data-sort="price" data-order="desc">
               <i data-lucide="arrow-up-narrow-wide"></i>
-              <span>Expensive</span>
+              <span><%= t('searchResults.sort.expensive') %></span>
             </button>
             <button class="quick-sort-btn" data-sort="deliveryDays" data-order="asc">
               <i data-lucide="zap"></i>
-              <span>Fastest Delivery</span>
+              <span><%= t('searchResults.sort.fastestDelivery') %></span>
             </button>
             <button class="quick-sort-btn" data-sort="quantity" data-order="desc">
               <i data-lucide="package-check"></i>
-              <span>Most Stock</span>
+              <span><%= t('searchResults.sort.mostStock') %></span>
             </button>
           </div>
         </div>
         <div class="quick-sort-right">
           <button class="quick-filter-btn" data-filter="in-stock">
             <span class="stock-dot green"></span>
-            In Stock Only
+            <%= t('searchResults.sort.inStockOnly') %>
           </button>
           <button class="quick-filter-btn" data-filter="low-stock">
             <span class="stock-dot yellow"></span>
-            Low Stock
+            <%= t('searchResults.sort.lowStock') %>
           </button>
         </div>
       </div>
@@ -355,17 +355,17 @@
           <table class="results-table" id="results-table">
             <thead>
               <tr>
-                <th>SELECT</th>
-                <th>BRAND</th>
-                <th>VENDOR CODE</th>
-                <th>DESCRIPTION</th>
-                <th>QTY</th>
-                <th>STOCK CODE</th>
-                <th>VOLUME</th>
-                <th>WEIGHT</th>
-                <th>DELIVERY</th>
-                <th>ORDER QTY</th>
-                <th>TOTAL</th>
+                <th><%= t('searchResults.table.select') %></th>
+                <th><%= t('searchResults.table.brand') %></th>
+                <th><%= t('searchResults.table.vendorCode') %></th>
+                <th><%= t('searchResults.table.description') %></th>
+                <th><%= t('searchResults.table.qty') %></th>
+                <th><%= t('searchResults.table.stockCode') %></th>
+                <th><%= t('searchResults.table.volume') %></th>
+                <th><%= t('searchResults.table.weight') %></th>
+                <th><%= t('searchResults.table.delivery') %></th>
+                <th><%= t('searchResults.table.orderQty') %></th>
+                <th><%= t('searchResults.table.total') %></th>
                 <th>-</th>
               </tr>
             </thead>
@@ -385,11 +385,11 @@
           <div class="results-footer-left">
             <button class="btn-add-to-cart" id="add-to-cart-btn" disabled>
               <i data-lucide="shopping-cart"></i>
-            Add Selected to Cart (<span id="selected-count">0</span>)
+            <%= t('searchResults.footer.addSelectedToCart') %> (<span id="selected-count">0</span>)
           </button>
           </div>
           <div class="selected-total-footer">
-            <span class="selected-total-label-footer">SELECTED TOTAL:</span>
+            <span class="selected-total-label-footer"><%= t('searchResults.footer.selectedTotal') %></span>
             <span class="selected-total-amount-footer" id="selected-total-footer">0.00 AED</span>
           </div>
         </div>
@@ -400,14 +400,14 @@
         <div class="empty-state-icon-wrapper">
           <i data-lucide="search" class="empty-state-icon"></i>
         </div>
-        <h3 class="empty-state-title">Start Your Search</h3>
+        <h3 class="empty-state-title"><%= t('searchResults.emptyState.title') %></h3>
         <p class="empty-state-description">
-          Enter a part number, brand name, or description to find parts from verified suppliers worldwide.
+          <%= t('searchResults.emptyState.description') %>
         </p>
 
         <!-- Popular Searches -->
         <div class="popular-searches">
-          <h4 class="popular-searches-title">Popular Searches</h4>
+          <h4 class="popular-searches-title"><%= t('searchResults.emptyState.popularSearches') %></h4>
           <div class="popular-chips">
             <button class="popular-chip" data-search="8471474">
               <i data-lucide="trending-up"></i>
@@ -415,19 +415,19 @@
             </button>
             <button class="popular-chip" data-search="brake pads">
               <i data-lucide="disc"></i>
-              Brake Pads
+              <%= t('searchResults.emptyState.brakePads') %>
             </button>
             <button class="popular-chip" data-search="oil filter">
               <i data-lucide="filter"></i>
-              Oil Filter
+              <%= t('searchResults.emptyState.oilFilter') %>
             </button>
             <button class="popular-chip" data-search="alternator">
               <i data-lucide="zap"></i>
-              Alternator
+              <%= t('searchResults.emptyState.alternator') %>
             </button>
             <button class="popular-chip" data-search="water pump">
               <i data-lucide="droplets"></i>
-              Water Pump
+              <%= t('searchResults.emptyState.waterPump') %>
             </button>
           </div>
         </div>
@@ -436,19 +436,19 @@
         <div class="empty-state-features">
           <div class="feature-item">
             <i data-lucide="shield-check"></i>
-            <span>Verified Suppliers</span>
+            <span><%= t('searchResults.emptyState.verifiedSuppliers') %></span>
           </div>
           <div class="feature-item">
             <i data-lucide="globe"></i>
-            <span>Global Network</span>
+            <span><%= t('searchResults.emptyState.globalNetwork') %></span>
           </div>
           <div class="feature-item">
             <i data-lucide="zap"></i>
-            <span>Fast Delivery</span>
+            <span><%= t('searchResults.emptyState.fastDelivery') %></span>
           </div>
           <div class="feature-item">
             <i data-lucide="award"></i>
-            <span>Quality Guaranteed</span>
+            <span><%= t('searchResults.emptyState.qualityGuaranteed') %></span>
           </div>
         </div>
       </div>
@@ -458,31 +458,31 @@
         <div class="empty-state-icon-wrapper">
           <i data-lucide="package-x" class="empty-state-icon"></i>
         </div>
-        <h3 class="empty-state-title">No Parts Found</h3>
+        <h3 class="empty-state-title"><%= t('searchResults.noResults.title') %></h3>
         <p class="empty-state-description">
-          We couldn't find any parts matching "<strong id="no-results-query"></strong>".
-          Try a different part number or contact our team for assistance.
+          <%= t('searchResults.noResults.noPartsFound') %> "<strong id="no-results-query"></strong>".
+          <%= t('searchResults.noResults.tryDifferent') %>
         </p>
 
         <div class="no-results-actions">
           <button class="btn-try-again" id="try-again-btn">
             <i data-lucide="refresh-cw"></i>
-            Try Again
+            <%= t('searchResults.noResults.tryAgain') %>
           </button>
           <button class="btn-contact-support">
             <i data-lucide="message-circle"></i>
-            Contact Support
+            <%= t('searchResults.noResults.contactSupport') %>
           </button>
         </div>
 
         <!-- Suggestions -->
         <div class="no-results-suggestions">
-          <h4>Suggestions:</h4>
+          <h4><%= t('searchResults.noResults.suggestions') %></h4>
           <ul>
-            <li>Check the spelling of your search term</li>
-            <li>Try using a different part number format</li>
-            <li>Use fewer or more general keywords</li>
-            <li>Clear filters to broaden your search</li>
+            <li><%= t('searchResults.noResults.checkSpelling') %></li>
+            <li><%= t('searchResults.noResults.tryDifferentFormat') %></li>
+            <li><%= t('searchResults.noResults.useFewerKeywords') %></li>
+            <li><%= t('searchResults.noResults.clearFilters') %></li>
           </ul>
         </div>
       </div>
@@ -502,10 +502,10 @@
         </div>
         <div class="ai-excel-title-content">
           <h3 class="modal-title">
-            Excel Import
-            <span class="ai-badge">AI</span>
+            <%= t('searchResults.excel.title') %>
+            <span class="ai-badge"><%= t('searchResults.excel.aiBadge') %></span>
           </h3>
-          <p class="ai-excel-subtitle">AI analyzes your spreadsheet to extract parts automatically</p>
+          <p class="ai-excel-subtitle"><%= t('searchResults.excel.subtitle') %></p>
         </div>
       </div>
       <button class="modal-close" id="excel-modal-close">
@@ -522,7 +522,7 @@
             <i data-lucide="alert-triangle"></i>
           </div>
           <div class="upload-error-content">
-            <h4 class="upload-error-title" id="upload-error-title">File Too Large</h4>
+            <h4 class="upload-error-title" id="upload-error-title"><%= t('searchResults.excel.fileTooLarge') %></h4>
             <p class="upload-error-message" id="upload-error-message"></p>
             <div class="upload-error-details" id="upload-error-details"></div>
           </div>
@@ -545,28 +545,28 @@
             </div>
           </div>
           
-          <h4 class="upload-title">Drag & drop your Excel file</h4>
-          <p class="upload-subtitle">AI will intelligently extract parts from any format</p>
+          <h4 class="upload-title"><%= t('searchResults.excel.dragDrop') %></h4>
+          <p class="upload-subtitle"><%= t('searchResults.excel.aiExtract') %></p>
           
           <button class="btn-primary ai-browse-btn" id="browse-file-btn">
             <i data-lucide="folder-open"></i>
-            <span>Browse Files</span>
+            <span><%= t('searchResults.excel.browseFiles') %></span>
           </button>
           
           <p class="upload-hint">
             <i data-lucide="check-circle"></i>
-            Supports .xlsx, .xls, .csv • Max 10MB • Max 5,000 rows • Max 1,000 parts per search
+            <%= t('searchResults.excel.supportedFormats') %>
           </p>
         </div>
 
         <div class="sample-format ai-sample-format">
           <div class="sample-header">
             <i data-lucide="info"></i>
-            <span>Works with any format, but structured data gives better results</span>
+            <span><%= t('searchResults.excel.formatHint') %></span>
           </div>
           <a href="/api/download-sample-excel" class="download-sample" download>
             <i data-lucide="download"></i>
-            <span>Download Sample Template</span>
+            <span><%= t('searchResults.excel.downloadSample') %></span>
           </a>
         </div>
       </div>
@@ -586,28 +586,28 @@
           </div>
           
           <div class="ai-analyzing-content">
-            <h4 class="ai-analyzing-title">AI is analyzing your spreadsheet...</h4>
+            <h4 class="ai-analyzing-title"><%= t('searchResults.excel.analyzing') %></h4>
             <p class="ai-analyzing-file" id="analyzing-file-name">processing file.xlsx</p>
             
             <div class="ai-analyzing-steps">
               <div class="ai-step" id="ai-step-reading">
                 <div class="ai-step-icon"><i data-lucide="file-search"></i></div>
-                <span>Reading spreadsheet data</span>
+                <span><%= t('searchResults.excel.readingData') %></span>
                 <div class="ai-step-status"><i data-lucide="loader-2" class="spin"></i></div>
               </div>
               <div class="ai-step" id="ai-step-detecting">
                 <div class="ai-step-icon"><i data-lucide="scan-search"></i></div>
-                <span>Detecting part numbers</span>
+                <span><%= t('searchResults.excel.detectingParts') %></span>
                 <div class="ai-step-status"></div>
               </div>
               <div class="ai-step" id="ai-step-extracting">
                 <div class="ai-step-icon"><i data-lucide="wand-2"></i></div>
-                <span>Extracting quantities & brands</span>
+                <span><%= t('searchResults.excel.extractingData') %></span>
                 <div class="ai-step-status"></div>
               </div>
               <div class="ai-step" id="ai-step-validating">
                 <div class="ai-step-icon"><i data-lucide="check-circle"></i></div>
-                <span>Validating & organizing</span>
+                <span><%= t('searchResults.excel.validating') %></span>
                 <div class="ai-step-status"></div>
               </div>
             </div>
@@ -623,23 +623,23 @@
             <i data-lucide="sparkles"></i>
           </div>
           <div class="ai-summary-content">
-            <h4 class="ai-summary-title" id="ai-summary-title">Analysis Complete!</h4>
-            <p class="ai-summary-text" id="ai-summary-text">Found 25 parts ready for search</p>
+            <h4 class="ai-summary-title" id="ai-summary-title"><%= t('searchResults.excel.analysisComplete') %></h4>
+            <p class="ai-summary-text" id="ai-summary-text"><%= t('searchResults.excel.partsReady') %></p>
           </div>
           <div class="ai-summary-badge" id="ai-summary-badge">
             <i data-lucide="zap"></i>
-            <span>AI Powered</span>
+            <span><%= t('searchResults.excel.aiPowered') %></span>
           </div>
         </div>
 
         <!-- Data Quality Indicator -->
         <div class="ai-data-quality" id="ai-data-quality">
           <div class="quality-meter">
-            <div class="quality-label">Data Quality:</div>
+            <div class="quality-label"><%= t('searchResults.excel.dataQuality') %></div>
             <div class="quality-bar">
               <div class="quality-fill" id="quality-fill"></div>
             </div>
-            <div class="quality-text" id="quality-text">Good</div>
+            <div class="quality-text" id="quality-text"><%= t('searchResults.excel.qualityGood') %></div>
           </div>
           <div class="quality-issues" id="quality-issues" style="display: none;">
             <i data-lucide="alert-circle"></i>
@@ -653,21 +653,21 @@
             <label class="select-all-checkbox">
               <input type="checkbox" id="select-all-parts" checked>
               <span class="checkbox-custom"></span>
-              <span class="checkbox-label">Select All</span>
+              <span class="checkbox-label"><%= t('searchResults.excel.selectAll') %></span>
             </label>
             <label class="select-all-checkbox select-first-option" id="select-first-1000-label" style="display: none;">
               <input type="checkbox" id="select-first-1000">
               <span class="checkbox-custom"></span>
-              <span class="checkbox-label">Select First 1,000</span>
+              <span class="checkbox-label"><%= t('searchResults.excel.selectFirst1000') %></span>
             </label>
-            <span class="parts-count" id="parts-count">0 parts selected</span>
+            <span class="parts-count" id="parts-count"><%= t('searchResults.excel.partsSelected') %></span>
           </div>
           <div class="parts-header-right">
             <div class="parts-filter">
-              <button class="filter-btn active" data-filter="all">All</button>
-              <button class="filter-btn" data-filter="high">High Confidence</button>
-              <button class="filter-btn" data-filter="medium">Medium</button>
-              <button class="filter-btn" data-filter="low">Low</button>
+              <button class="filter-btn active" data-filter="all"><%= t('searchResults.excel.filterAll') %></button>
+              <button class="filter-btn" data-filter="high"><%= t('searchResults.excel.filterHigh') %></button>
+              <button class="filter-btn" data-filter="medium"><%= t('searchResults.excel.filterMedium') %></button>
+              <button class="filter-btn" data-filter="low"><%= t('searchResults.excel.filterLow') %></button>
             </div>
           </div>
         </div>
@@ -681,7 +681,7 @@
         <div class="ai-suggestions" id="ai-suggestions" style="display: none;">
           <div class="suggestions-header">
             <i data-lucide="lightbulb"></i>
-            <span>AI Suggestions</span>
+            <span><%= t('searchResults.excel.aiSuggestions') %></span>
           </div>
           <ul class="suggestions-list" id="suggestions-list">
           </ul>
@@ -693,7 +693,7 @@
         <!-- Analytics Summary -->
         <div class="excel-analytics" id="excel-analytics">
           <div class="analytics-header">
-            <h4>Import Analytics</h4>
+            <h4><%= t('searchResults.excel.importAnalytics') %></h4>
             <span class="analytics-filename" id="analytics-filename">file.xlsx</span>
           </div>
           
@@ -705,7 +705,7 @@
               </div>
               <div class="stat-content">
                 <div class="stat-value" id="stat-total">0</div>
-                <div class="stat-label">Total Parts</div>
+                <div class="stat-label"><%= t('searchResults.excel.totalParts') %></div>
               </div>
             </div>
             <div class="stat-card stat-found">
@@ -714,7 +714,7 @@
               </div>
               <div class="stat-content">
                 <div class="stat-value" id="stat-found">0</div>
-                <div class="stat-label">Found</div>
+                <div class="stat-label"><%= t('searchResults.excel.found') %></div>
               </div>
               <div class="stat-percent stat-percent-found" id="stat-percent-found">0%</div>
             </div>
@@ -724,7 +724,7 @@
               </div>
               <div class="stat-content">
                 <div class="stat-value" id="stat-not-found">0</div>
-                <div class="stat-label">Not Found</div>
+                <div class="stat-label"><%= t('searchResults.excel.notFound') %></div>
               </div>
               <div class="stat-percent stat-percent-not-found" id="stat-percent-not-found">0%</div>
             </div>
@@ -734,16 +734,16 @@
               </div>
               <div class="stat-content">
                 <div class="stat-value" id="stat-duplicates">0</div>
-                <div class="stat-label">Duplicates</div>
+                <div class="stat-label"><%= t('searchResults.excel.duplicates') %></div>
               </div>
-              <div class="stat-note">Not counted</div>
+              <div class="stat-note"><%= t('searchResults.excel.notCounted') %></div>
             </div>
           </div>
           
           <!-- Success Rate Bar -->
           <div class="success-rate-container">
             <div class="success-rate-header">
-              <span class="success-rate-label">Success Rate</span>
+              <span class="success-rate-label"><%= t('searchResults.excel.successRate') %></span>
               <span class="success-rate-value" id="success-rate-value">0%</span>
             </div>
             <div class="success-rate-bar">
@@ -755,7 +755,7 @@
           <div class="not-found-section" id="not-found-section" style="display: none;">
             <div class="not-found-header">
               <i data-lucide="alert-triangle"></i>
-              <span>Parts Not Found</span>
+              <span><%= t('searchResults.excel.partsNotFound') %></span>
               <button class="not-found-toggle" id="not-found-toggle">
                 <i data-lucide="chevron-down"></i>
               </button>
@@ -769,7 +769,7 @@
           <div class="duplicates-section" id="duplicates-section" style="display: none;">
             <div class="duplicates-header">
               <i data-lucide="info"></i>
-              <span>Duplicate parts detected and merged</span>
+              <span><%= t('searchResults.excel.duplicatesDetected') %></span>
               <button class="duplicates-toggle" id="duplicates-toggle">
                 <i data-lucide="chevron-down"></i>
               </button>
@@ -782,13 +782,13 @@
 
         <div class="ai-search-header">
           <div class="search-header-left">
-            <h4>Search Results & AI Recommendations</h4>
-            <p class="search-summary" id="search-summary">Found options for 25 parts</p>
+            <h4><%= t('searchResults.excel.searchResultsTitle') %></h4>
+            <p class="search-summary" id="search-summary"><%= t('searchResults.excel.foundOptions') %></p>
           </div>
           <div class="search-header-right">
             <button class="btn-secondary" id="back-to-parts-btn">
               <i data-lucide="arrow-left"></i>
-              <span>Back to Parts</span>
+              <span><%= t('searchResults.excel.backToParts') %></span>
             </button>
           </div>
         </div>
@@ -805,21 +805,21 @@
       <div class="footer-left">
         <button class="btn-secondary" id="excel-reset-btn" style="display: none;">
           <i data-lucide="rotate-ccw"></i>
-          <span>Upload New File</span>
+          <span><%= t('searchResults.excel.uploadNewFile') %></span>
         </button>
       </div>
       <div class="footer-right">
         <button class="btn-secondary" id="excel-cancel-btn">
-          Cancel
+          <%= t('common.cancel') %>
         </button>
         <button class="btn-primary ai-search-btn" id="excel-search-btn" style="display: none;">
           <i data-lucide="search"></i>
-          <span>Search Parts</span>
+          <span><%= t('searchResults.excel.searchParts') %></span>
           <span class="search-count" id="excel-search-count">0</span>
         </button>
         <button class="btn-primary ai-cart-btn" id="excel-add-cart-btn" style="display: none;">
           <i data-lucide="shopping-cart"></i>
-          <span>Add to Cart</span>
+          <span><%= t('searchResults.excel.addToCartBtn') %></span>
           <span class="cart-count" id="excel-cart-count">0</span>
         </button>
       </div>
@@ -834,7 +834,7 @@
     <div class="modal-header">
       <h3 class="modal-title">
         <i data-lucide="clock"></i>
-        <span>Recent Searches</span>
+        <span><%= t('searchResults.recentSearches.title') %></span>
       </h3>
       <button class="modal-close" id="recent-searches-close">
         <i data-lucide="x"></i>
@@ -845,12 +845,12 @@
         <!-- Recent searches will be populated here -->
         <div class="recent-search-empty">
           <i data-lucide="search"></i>
-          <p>No recent searches yet</p>
+          <p><%= t('searchResults.recentSearches.empty') %></p>
         </div>
       </div>
       <button class="btn-clear-history" id="clear-search-history" style="display: none;">
         <i data-lucide="trash-2"></i>
-        Clear History
+        <%= t('searchResults.recentSearches.clearHistory') %>
       </button>
     </div>
   </div>

@@ -36,6 +36,1148 @@ aiLearningService.initialize().catch((err) => {
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════
+ * MULTILINGUAL SUPPORT - Professional 15-language understanding
+ * Supports: Arabic, German, English, Spanish, French, Italian, Japanese,
+ *           Korean, Dutch, Polish, Portuguese, Russian, Turkish, Ukrainian, Chinese
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+const MULTILINGUAL_DICTIONARY = {
+  // ═══════════════════════════════════════════════════════════════════════════
+  // PRICE & QUANTITY TERMS
+  // ═══════════════════════════════════════════════════════════════════════════
+  price: {
+    ar: ['سعر', 'ثمن', 'تكلفة', 'قيمة'],
+    de: ['preis', 'kosten', 'wert'],
+    es: ['precio', 'costo', 'coste', 'valor'],
+    fr: ['prix', 'coût', 'tarif', 'valeur'],
+    it: ['prezzo', 'costo', 'valore'],
+    ja: ['価格', '値段', 'プライス', 'コスト'],
+    ko: ['가격', '비용', '값'],
+    nl: ['prijs', 'kosten', 'waarde'],
+    pl: ['cena', 'koszt', 'wartość'],
+    pt: ['preço', 'custo', 'valor'],
+    ru: ['цена', 'стоимость', 'цену'],
+    tr: ['fiyat', 'maliyet', 'değer'],
+    ua: ['ціна', 'вартість', 'коштує'],
+    zh: ['价格', '价钱', '费用', '成本']
+  },
+  cheap: {
+    ar: ['رخيص', 'اقتصادي', 'موفر', 'بسعر منخفض'],
+    de: ['billig', 'günstig', 'preiswert', 'erschwinglich'],
+    es: ['barato', 'económico', 'asequible', 'bajo precio'],
+    fr: ['pas cher', 'bon marché', 'économique', 'abordable'],
+    it: ['economico', 'conveniente', 'a buon mercato'],
+    ja: ['安い', '格安', 'お買い得', '低価格'],
+    ko: ['싼', '저렴한', '경제적인'],
+    nl: ['goedkoop', 'betaalbaar', 'voordelig'],
+    pl: ['tani', 'niedrogi', 'ekonomiczny'],
+    pt: ['barato', 'econômico', 'acessível'],
+    ru: ['дешевый', 'недорогой', 'экономичный', 'дёшево'],
+    tr: ['ucuz', 'ekonomik', 'uygun fiyat'],
+    ua: ['дешевий', 'недорогий', 'економний'],
+    zh: ['便宜', '实惠', '经济', '低价']
+  },
+  expensive: {
+    ar: ['غالي', 'مكلف', 'باهظ'],
+    de: ['teuer', 'hochpreisig', 'kostspielig'],
+    es: ['caro', 'costoso', 'premium'],
+    fr: ['cher', 'coûteux', 'onéreux'],
+    it: ['costoso', 'caro', 'premium'],
+    ja: ['高い', '高価', 'プレミアム'],
+    ko: ['비싼', '고가의', '프리미엄'],
+    nl: ['duur', 'prijzig', 'kostbaar'],
+    pl: ['drogi', 'kosztowny'],
+    pt: ['caro', 'premium'],
+    ru: ['дорогой', 'дорого', 'премиум'],
+    tr: ['pahalı', 'premium'],
+    ua: ['дорогий', 'коштовний'],
+    zh: ['贵', '昂贵', '高价']
+  },
+  under: {
+    ar: ['تحت', 'أقل من', 'دون', 'ما دون'],
+    de: ['unter', 'weniger als', 'bis zu', 'maximal'],
+    es: ['menos de', 'bajo', 'hasta', 'máximo'],
+    fr: ['moins de', 'sous', 'jusqu\'à', 'maximum'],
+    it: ['sotto', 'meno di', 'fino a', 'massimo'],
+    ja: ['以下', '未満', 'まで'],
+    ko: ['이하', '미만', '까지'],
+    nl: ['onder', 'minder dan', 'tot'],
+    pl: ['poniżej', 'mniej niż', 'do'],
+    pt: ['abaixo de', 'menos de', 'até'],
+    ru: ['меньше', 'ниже', 'до', 'не более'],
+    tr: ['altında', 'den az', 'kadar'],
+    ua: ['менше', 'нижче', 'до'],
+    zh: ['以下', '低于', '不超过']
+  },
+  over: {
+    ar: ['فوق', 'أكثر من', 'أعلى من'],
+    de: ['über', 'mehr als', 'mindestens'],
+    es: ['más de', 'sobre', 'mínimo'],
+    fr: ['plus de', 'au-dessus', 'minimum'],
+    it: ['sopra', 'più di', 'minimo'],
+    ja: ['以上', '超', '最低'],
+    ko: ['이상', '초과', '최소'],
+    nl: ['boven', 'meer dan', 'minimaal'],
+    pl: ['powyżej', 'więcej niż', 'minimum'],
+    pt: ['acima de', 'mais de', 'mínimo'],
+    ru: ['больше', 'выше', 'от', 'минимум'],
+    tr: ['üstünde', 'den fazla', 'minimum'],
+    ua: ['більше', 'вище', 'від'],
+    zh: ['以上', '超过', '大于']
+  },
+  quantity: {
+    ar: ['كمية', 'عدد', 'قطعة', 'وحدة'],
+    de: ['menge', 'anzahl', 'stück', 'einheit'],
+    es: ['cantidad', 'unidad', 'pieza', 'número'],
+    fr: ['quantité', 'unité', 'pièce', 'nombre'],
+    it: ['quantità', 'unità', 'pezzi', 'numero'],
+    ja: ['数量', '個数', '台', '個'],
+    ko: ['수량', '개수', '단위'],
+    nl: ['aantal', 'hoeveelheid', 'stuks'],
+    pl: ['ilość', 'sztuk', 'jednostka'],
+    pt: ['quantidade', 'unidade', 'peça'],
+    ru: ['количество', 'штук', 'единиц', 'шт'],
+    tr: ['miktar', 'adet', 'birim'],
+    ua: ['кількість', 'штук', 'одиниць'],
+    zh: ['数量', '个数', '件', '台']
+  },
+  // ═══════════════════════════════════════════════════════════════════════════
+  // STOCK & AVAILABILITY
+  // ═══════════════════════════════════════════════════════════════════════════
+  inStock: {
+    ar: ['متوفر', 'في المخزون', 'موجود', 'متاح'],
+    de: ['auf lager', 'verfügbar', 'vorrätig', 'lieferbar'],
+    es: ['en stock', 'disponible', 'en existencia', 'hay'],
+    fr: ['en stock', 'disponible', 'en inventaire'],
+    it: ['disponibile', 'in magazzino', 'in stock'],
+    ja: ['在庫あり', '在庫有', '入荷', 'ストック'],
+    ko: ['재고 있음', '재고있음', '구매 가능'],
+    nl: ['op voorraad', 'beschikbaar', 'leverbaar'],
+    pl: ['na stanie', 'dostępny', 'w magazynie'],
+    pt: ['em estoque', 'disponível', 'pronta entrega'],
+    ru: ['в наличии', 'есть в наличии', 'доступно', 'на складе'],
+    tr: ['stokta', 'mevcut', 'bulunur'],
+    ua: ['в наявності', 'є в наявності', 'доступно'],
+    zh: ['有货', '现货', '库存', '有存货']
+  },
+  outOfStock: {
+    ar: ['غير متوفر', 'نفذ', 'غير موجود'],
+    de: ['nicht auf lager', 'nicht verfügbar', 'ausverkauft'],
+    es: ['agotado', 'sin stock', 'no disponible'],
+    fr: ['rupture', 'épuisé', 'non disponible'],
+    it: ['esaurito', 'non disponibile'],
+    ja: ['在庫なし', '品切れ', '売り切れ'],
+    ko: ['재고 없음', '품절'],
+    nl: ['niet op voorraad', 'uitverkocht'],
+    pl: ['brak', 'niedostępny', 'wyprzedane'],
+    pt: ['esgotado', 'sem estoque', 'indisponível'],
+    ru: ['нет в наличии', 'отсутствует', 'распродано'],
+    tr: ['stokta yok', 'tükendi'],
+    ua: ['немає в наявності', 'відсутній'],
+    zh: ['无货', '缺货', '售罄']
+  },
+  // ═══════════════════════════════════════════════════════════════════════════
+  // DELIVERY & SHIPPING
+  // ═══════════════════════════════════════════════════════════════════════════
+  delivery: {
+    ar: ['توصيل', 'شحن', 'إرسال', 'تسليم'],
+    de: ['lieferung', 'versand', 'zustellung'],
+    es: ['entrega', 'envío', 'despacho'],
+    fr: ['livraison', 'expédition', 'envoi'],
+    it: ['consegna', 'spedizione', 'invio'],
+    ja: ['配送', '配達', '出荷', 'デリバリー'],
+    ko: ['배송', '배달', '발송'],
+    nl: ['levering', 'verzending', 'bezorging'],
+    pl: ['dostawa', 'wysyłka', 'przesyłka'],
+    pt: ['entrega', 'envio', 'frete'],
+    ru: ['доставка', 'отправка', 'пересылка'],
+    tr: ['teslimat', 'kargo', 'gönderim'],
+    ua: ['доставка', 'відправка', 'пересилка'],
+    zh: ['配送', '发货', '运输', '快递']
+  },
+  fast: {
+    ar: ['سريع', 'عاجل', 'فوري', 'خاطف'],
+    de: ['schnell', 'express', 'eilig', 'sofort'],
+    es: ['rápido', 'urgente', 'express', 'inmediato'],
+    fr: ['rapide', 'urgent', 'express', 'immédiat'],
+    it: ['veloce', 'rapido', 'urgente', 'express'],
+    ja: ['速い', '急ぎ', '即日', 'エクスプレス'],
+    ko: ['빠른', '급한', '익스프레스'],
+    nl: ['snel', 'express', 'spoed'],
+    pl: ['szybki', 'ekspres', 'pilny'],
+    pt: ['rápido', 'urgente', 'expresso'],
+    ru: ['быстро', 'срочно', 'экспресс', 'быстрая'],
+    tr: ['hızlı', 'acil', 'ekspres'],
+    ua: ['швидко', 'терміново', 'експрес'],
+    zh: ['快速', '急', '加急', '极速']
+  },
+  freeShipping: {
+    ar: ['شحن مجاني', 'توصيل مجاني'],
+    de: ['kostenloser versand', 'versandkostenfrei'],
+    es: ['envío gratis', 'envío gratuito'],
+    fr: ['livraison gratuite', 'port gratuit'],
+    it: ['spedizione gratuita', 'consegna gratuita'],
+    ja: ['送料無料', '無料配送'],
+    ko: ['무료 배송', '배송비 무료'],
+    nl: ['gratis verzending', 'verzendkosten vrij'],
+    pl: ['darmowa wysyłka', 'bezpłatna dostawa'],
+    pt: ['frete grátis', 'entrega gratuita'],
+    ru: ['бесплатная доставка', 'бесплатно доставка'],
+    tr: ['ücretsiz kargo', 'bedava gönderim'],
+    ua: ['безкоштовна доставка', 'доставка безкоштовно'],
+    zh: ['免运费', '包邮', '免费配送']
+  },
+  // ═══════════════════════════════════════════════════════════════════════════
+  // QUALITY & TYPE
+  // ═══════════════════════════════════════════════════════════════════════════
+  oem: {
+    ar: ['أصلي', 'أصيل', 'من المصنع', 'جينوين'],
+    de: ['original', 'oem', 'echt', 'genuine'],
+    es: ['original', 'oem', 'genuino', 'de fábrica'],
+    fr: ['original', 'oem', 'd\'origine', 'authentique'],
+    it: ['originale', 'oem', 'genuino', 'di fabbrica'],
+    ja: ['純正', 'OEM', 'オリジナル', '正規品'],
+    ko: ['순정', '정품', 'OEM', '오리지널'],
+    nl: ['origineel', 'oem', 'echt', 'fabriek'],
+    pl: ['oryginalny', 'oem', 'fabryczny'],
+    pt: ['original', 'oem', 'genuíno', 'de fábrica'],
+    ru: ['оригинал', 'оригинальный', 'заводской', 'OEM'],
+    tr: ['orijinal', 'oem', 'gerçek', 'fabrika'],
+    ua: ['оригінал', 'оригінальний', 'заводський'],
+    zh: ['原装', '原厂', 'OEM', '正品']
+  },
+  aftermarket: {
+    ar: ['بديل', 'غير أصلي', 'ما بعد البيع'],
+    de: ['aftermarket', 'nachbau', 'ersatzmarkt', 'zubehör'],
+    es: ['aftermarket', 'genérico', 'alternativo'],
+    fr: ['aftermarket', 'secondaire', 'générique'],
+    it: ['aftermarket', 'ricambio', 'generico'],
+    ja: ['社外品', 'アフターマーケット', '汎用'],
+    ko: ['애프터마켓', '호환', '범용'],
+    nl: ['aftermarket', 'generiek', 'vervangend'],
+    pl: ['aftermarket', 'zamiennik', 'nieoryginalny'],
+    pt: ['aftermarket', 'paralelo', 'genérico'],
+    ru: ['аналог', 'неоригинал', 'афтермаркет', 'заменитель'],
+    tr: ['aftermarket', 'yedek', 'muadil'],
+    ua: ['аналог', 'неоригінал', 'замінник'],
+    zh: ['副厂', '替代', '通用', '后市场']
+  },
+  premium: {
+    ar: ['ممتاز', 'فاخر', 'عالي الجودة'],
+    de: ['premium', 'hochwertig', 'qualität'],
+    es: ['premium', 'alta calidad', 'superior'],
+    fr: ['premium', 'haute qualité', 'supérieur'],
+    it: ['premium', 'alta qualità', 'superiore'],
+    ja: ['プレミアム', '高品質', '上質'],
+    ko: ['프리미엄', '고품질', '상급'],
+    nl: ['premium', 'hoge kwaliteit', 'superior'],
+    pl: ['premium', 'wysokiej jakości'],
+    pt: ['premium', 'alta qualidade', 'superior'],
+    ru: ['премиум', 'высокое качество', 'премиальный'],
+    tr: ['premium', 'yüksek kalite', 'üstün'],
+    ua: ['преміум', 'висока якість'],
+    zh: ['高端', '优质', '顶级', '精品']
+  },
+  warranty: {
+    ar: ['ضمان', 'كفالة', 'مكفول'],
+    de: ['garantie', 'gewährleistung'],
+    es: ['garantía', 'garantizado'],
+    fr: ['garantie', 'garanti'],
+    it: ['garanzia', 'garantito'],
+    ja: ['保証', '保証付き', 'ワランティ'],
+    ko: ['보증', '워런티'],
+    nl: ['garantie', 'gegarandeerd'],
+    pl: ['gwarancja', 'gwarantowany'],
+    pt: ['garantia', 'garantido'],
+    ru: ['гарантия', 'с гарантией', 'гарантийный'],
+    tr: ['garanti', 'garantili'],
+    ua: ['гарантія', 'з гарантією'],
+    zh: ['保修', '质保', '有保障']
+  },
+  // ═══════════════════════════════════════════════════════════════════════════
+  // SORTING & COMPARISON
+  // ═══════════════════════════════════════════════════════════════════════════
+  best: {
+    ar: ['أفضل', 'أحسن', 'الأفضل'],
+    de: ['beste', 'bester', 'am besten', 'top'],
+    es: ['mejor', 'mejores', 'el mejor', 'top'],
+    fr: ['meilleur', 'meilleures', 'le meilleur', 'top'],
+    it: ['migliore', 'migliori', 'il migliore', 'top'],
+    ja: ['最高', 'ベスト', '一番', 'トップ'],
+    ko: ['최고', '베스트', '가장 좋은', '탑'],
+    nl: ['beste', 'top', 'hoogste'],
+    pl: ['najlepszy', 'najlepsze', 'top'],
+    pt: ['melhor', 'melhores', 'o melhor', 'top'],
+    ru: ['лучший', 'лучшие', 'лучше', 'топ'],
+    tr: ['en iyi', 'en iyisi', 'top'],
+    ua: ['найкращий', 'кращий', 'топ'],
+    zh: ['最好', '最佳', '顶级', '优选']
+  },
+  cheapest: {
+    ar: ['الأرخص', 'الأقل سعراً'],
+    de: ['billigste', 'günstigste', 'am günstigsten'],
+    es: ['más barato', 'el más económico'],
+    fr: ['le moins cher', 'le plus économique'],
+    it: ['il più economico', 'il più conveniente'],
+    ja: ['最安', '一番安い', '最安値'],
+    ko: ['가장 싼', '최저가'],
+    nl: ['goedkoopste', 'laagste prijs'],
+    pl: ['najtańszy', 'najniższa cena'],
+    pt: ['mais barato', 'menor preço'],
+    ru: ['самый дешевый', 'дешевле всего', 'самая низкая цена'],
+    tr: ['en ucuz', 'en uygun'],
+    ua: ['найдешевший', 'найнижча ціна'],
+    zh: ['最便宜', '最低价', '最划算']
+  },
+  fastest: {
+    ar: ['الأسرع', 'أسرع توصيل'],
+    de: ['schnellste', 'am schnellsten'],
+    es: ['más rápido', 'el más rápido'],
+    fr: ['le plus rapide', 'au plus vite'],
+    it: ['il più veloce', 'più rapido'],
+    ja: ['最速', '一番早い'],
+    ko: ['가장 빠른', '최고속'],
+    nl: ['snelste', 'snelst'],
+    pl: ['najszybszy', 'najszybciej'],
+    pt: ['mais rápido', 'o mais rápido'],
+    ru: ['самый быстрый', 'быстрее всего'],
+    tr: ['en hızlı', 'en süratli'],
+    ua: ['найшвидший', 'швидше за все'],
+    zh: ['最快', '最速']
+  },
+  compare: {
+    ar: ['قارن', 'مقارنة', 'قابل'],
+    de: ['vergleichen', 'vergleich', 'gegenüber'],
+    es: ['comparar', 'comparación', 'versus'],
+    fr: ['comparer', 'comparaison', 'versus'],
+    it: ['confrontare', 'confronto', 'versus'],
+    ja: ['比較', '比べる', '対比'],
+    ko: ['비교', '대비'],
+    nl: ['vergelijken', 'vergelijking'],
+    pl: ['porównaj', 'porównanie'],
+    pt: ['comparar', 'comparação', 'versus'],
+    ru: ['сравнить', 'сравнение', 'против'],
+    tr: ['karşılaştır', 'karşılaştırma'],
+    ua: ['порівняти', 'порівняння'],
+    zh: ['比较', '对比', '对照']
+  },
+  alternative: {
+    ar: ['بديل', 'بدائل', 'معادل'],
+    de: ['alternative', 'ersatz', 'gleichwertig'],
+    es: ['alternativa', 'sustituto', 'equivalente'],
+    fr: ['alternative', 'substitut', 'équivalent'],
+    it: ['alternativa', 'sostituto', 'equivalente'],
+    ja: ['代替', '代わり', '互換'],
+    ko: ['대안', '대체품', '호환품'],
+    nl: ['alternatief', 'vervanger', 'equivalent'],
+    pl: ['alternatywa', 'zamiennik', 'odpowiednik'],
+    pt: ['alternativa', 'substituto', 'equivalente'],
+    ru: ['альтернатива', 'замена', 'эквивалент', 'аналог'],
+    tr: ['alternatif', 'muadil', 'eşdeğer'],
+    ua: ['альтернатива', 'заміна', 'еквівалент'],
+    zh: ['替代品', '代替', '等效']
+  },
+  // ═══════════════════════════════════════════════════════════════════════════
+  // SEARCH & FIND
+  // ═══════════════════════════════════════════════════════════════════════════
+  find: {
+    ar: ['ابحث', 'جد', 'اعثر', 'أريد'],
+    de: ['finden', 'suchen', 'ich brauche', 'zeig mir'],
+    es: ['buscar', 'encontrar', 'necesito', 'quiero'],
+    fr: ['chercher', 'trouver', 'je veux', 'j\'ai besoin'],
+    it: ['cercare', 'trovare', 'ho bisogno', 'voglio'],
+    ja: ['探す', '検索', '見つける', '欲しい'],
+    ko: ['찾기', '검색', '필요합니다'],
+    nl: ['zoeken', 'vinden', 'ik wil', 'ik nodig'],
+    pl: ['szukaj', 'znajdź', 'potrzebuję', 'chcę'],
+    pt: ['buscar', 'encontrar', 'preciso', 'quero'],
+    ru: ['найти', 'искать', 'мне нужно', 'хочу'],
+    tr: ['bul', 'ara', 'istiyorum', 'lazım'],
+    ua: ['знайти', 'шукати', 'мені потрібно', 'хочу'],
+    zh: ['找', '搜索', '查找', '需要', '要']
+  },
+  show: {
+    ar: ['أظهر', 'اعرض', 'أرني'],
+    de: ['zeigen', 'anzeigen'],
+    es: ['mostrar', 'ver', 'enseñar'],
+    fr: ['montrer', 'afficher', 'voir'],
+    it: ['mostrare', 'visualizzare', 'vedere'],
+    ja: ['表示', '見せて', '出して'],
+    ko: ['보여줘', '표시'],
+    nl: ['tonen', 'laten zien'],
+    pl: ['pokaż', 'wyświetl'],
+    pt: ['mostrar', 'exibir', 'ver'],
+    ru: ['показать', 'покажи', 'отобразить'],
+    tr: ['göster', 'listele'],
+    ua: ['показати', 'покажи'],
+    zh: ['显示', '展示', '看看']
+  },
+  // ═══════════════════════════════════════════════════════════════════════════
+  // PARTS CATEGORIES (Main automotive parts)
+  // ═══════════════════════════════════════════════════════════════════════════
+  brake: {
+    ar: ['فرامل', 'مكابح', 'بريك'],
+    de: ['bremse', 'bremsen', 'bremsbelag'],
+    es: ['freno', 'frenos', 'pastillas'],
+    fr: ['frein', 'freins', 'plaquette'],
+    it: ['freno', 'freni', 'pastiglie'],
+    ja: ['ブレーキ', 'ブレーキパッド'],
+    ko: ['브레이크', '제동'],
+    nl: ['rem', 'remmen', 'remblok'],
+    pl: ['hamulec', 'hamulce', 'klocki'],
+    pt: ['freio', 'freios', 'pastilha'],
+    ru: ['тормоз', 'тормоза', 'тормозные колодки'],
+    tr: ['fren', 'frenler', 'balata'],
+    ua: ['гальмо', 'гальма', 'гальмівні колодки'],
+    zh: ['刹车', '制动', '刹车片']
+  },
+  filter: {
+    ar: ['فلتر', 'مرشح', 'مصفي'],
+    de: ['filter', 'luftfilter', 'ölfilter'],
+    es: ['filtro', 'filtros'],
+    fr: ['filtre', 'filtres'],
+    it: ['filtro', 'filtri'],
+    ja: ['フィルター', 'フィルタ'],
+    ko: ['필터', '여과기'],
+    nl: ['filter', 'filters'],
+    pl: ['filtr', 'filtry'],
+    pt: ['filtro', 'filtros'],
+    ru: ['фильтр', 'фильтры'],
+    tr: ['filtre', 'filtreler'],
+    ua: ['фільтр', 'фільтри'],
+    zh: ['滤清器', '过滤器', '滤芯']
+  },
+  oilFilter: {
+    ar: ['فلتر زيت', 'فلتر الزيت'],
+    de: ['ölfilter'],
+    es: ['filtro de aceite'],
+    fr: ['filtre à huile'],
+    it: ['filtro olio'],
+    ja: ['オイルフィルター', 'オイルエレメント'],
+    ko: ['오일 필터'],
+    nl: ['oliefilter'],
+    pl: ['filtr oleju'],
+    pt: ['filtro de óleo'],
+    ru: ['масляный фильтр'],
+    tr: ['yağ filtresi'],
+    ua: ['масляний фільтр'],
+    zh: ['机油滤清器', '机油滤芯']
+  },
+  airFilter: {
+    ar: ['فلتر هواء', 'فلتر الهواء'],
+    de: ['luftfilter'],
+    es: ['filtro de aire'],
+    fr: ['filtre à air'],
+    it: ['filtro aria'],
+    ja: ['エアフィルター', 'エアクリーナー'],
+    ko: ['에어 필터'],
+    nl: ['luchtfilter'],
+    pl: ['filtr powietrza'],
+    pt: ['filtro de ar'],
+    ru: ['воздушный фильтр'],
+    tr: ['hava filtresi'],
+    ua: ['повітряний фільтр'],
+    zh: ['空气滤清器', '空滤']
+  },
+  engine: {
+    ar: ['محرك', 'موتور'],
+    de: ['motor', 'engine'],
+    es: ['motor', 'motores'],
+    fr: ['moteur', 'moteurs'],
+    it: ['motore', 'motori'],
+    ja: ['エンジン', 'モーター'],
+    ko: ['엔진', '모터'],
+    nl: ['motor', 'engine'],
+    pl: ['silnik', 'silniki'],
+    pt: ['motor', 'motores'],
+    ru: ['двигатель', 'мотор'],
+    tr: ['motor', 'motorlar'],
+    ua: ['двигун', 'мотор'],
+    zh: ['发动机', '引擎', '马达']
+  },
+  suspension: {
+    ar: ['تعليق', 'نظام التعليق'],
+    de: ['federung', 'fahrwerk', 'aufhängung'],
+    es: ['suspensión', 'amortiguador'],
+    fr: ['suspension', 'amortisseur'],
+    it: ['sospensione', 'ammortizzatore'],
+    ja: ['サスペンション', 'ショック'],
+    ko: ['서스펜션', '현가장치'],
+    nl: ['ophanging', 'vering'],
+    pl: ['zawieszenie', 'amortyzator'],
+    pt: ['suspensão', 'amortecedor'],
+    ru: ['подвеска', 'амортизатор'],
+    tr: ['süspansiyon', 'amortisör'],
+    ua: ['підвіска', 'амортизатор'],
+    zh: ['悬挂', '悬架', '减震']
+  },
+  bearing: {
+    ar: ['محمل', 'رولمان بلي', 'بلي'],
+    de: ['lager', 'kugellager', 'radlager'],
+    es: ['rodamiento', 'cojinete'],
+    fr: ['roulement', 'palier'],
+    it: ['cuscinetto', 'cuscinetti'],
+    ja: ['ベアリング', '軸受'],
+    ko: ['베어링', '축받이'],
+    nl: ['lager', 'kogellager'],
+    pl: ['łożysko', 'łożyska'],
+    pt: ['rolamento', 'mancal'],
+    ru: ['подшипник', 'подшипники'],
+    tr: ['rulman', 'yatak'],
+    ua: ['підшипник', 'підшипники'],
+    zh: ['轴承', '轴瓦']
+  },
+  clutch: {
+    ar: ['كلتش', 'قابض', 'دبرياج'],
+    de: ['kupplung', 'kupplungssatz'],
+    es: ['embrague', 'clutch'],
+    fr: ['embrayage', 'disque'],
+    it: ['frizione', 'disco frizione'],
+    ja: ['クラッチ'],
+    ko: ['클러치'],
+    nl: ['koppeling'],
+    pl: ['sprzęgło'],
+    pt: ['embreagem'],
+    ru: ['сцепление', 'диск сцепления'],
+    tr: ['debriyaj', 'kavrama'],
+    ua: ['зчеплення', 'диск зчеплення'],
+    zh: ['离合器']
+  },
+  steering: {
+    ar: ['توجيه', 'مقود', 'دركسيون'],
+    de: ['lenkung', 'steuerung'],
+    es: ['dirección', 'volante'],
+    fr: ['direction', 'volant'],
+    it: ['sterzo', 'direzione'],
+    ja: ['ステアリング', 'ハンドル'],
+    ko: ['스티어링', '조향'],
+    nl: ['stuurinrichting', 'besturing'],
+    pl: ['kierownica', 'układ kierowniczy'],
+    pt: ['direção', 'volante'],
+    ru: ['рулевое управление', 'рулевая'],
+    tr: ['direksiyon'],
+    ua: ['кермо', 'рульове управління'],
+    zh: ['转向', '方向盘']
+  },
+  exhaust: {
+    ar: ['عادم', 'شكمان', 'إكزوست'],
+    de: ['auspuff', 'abgas'],
+    es: ['escape', 'tubo de escape'],
+    fr: ['échappement', 'pot'],
+    it: ['scarico', 'marmitta'],
+    ja: ['排気', 'マフラー', 'エキゾースト'],
+    ko: ['배기', '머플러'],
+    nl: ['uitlaat', 'uitlaatpijp'],
+    pl: ['wydech', 'układ wydechowy'],
+    pt: ['escapamento', 'descarga'],
+    ru: ['выхлоп', 'выхлопная система', 'глушитель'],
+    tr: ['egzoz'],
+    ua: ['вихлоп', 'глушник'],
+    zh: ['排气', '排气管', '消声器']
+  },
+  cooling: {
+    ar: ['تبريد', 'نظام التبريد', 'راديتر'],
+    de: ['kühlung', 'kühler', 'kühlsystem'],
+    es: ['refrigeración', 'radiador', 'enfriamiento'],
+    fr: ['refroidissement', 'radiateur'],
+    it: ['raffreddamento', 'radiatore'],
+    ja: ['冷却', 'ラジエーター', '冷却系'],
+    ko: ['냉각', '라디에이터'],
+    nl: ['koeling', 'radiateur'],
+    pl: ['chłodzenie', 'chłodnica'],
+    pt: ['arrefecimento', 'radiador', 'refrigeração'],
+    ru: ['охлаждение', 'радиатор', 'система охлаждения'],
+    tr: ['soğutma', 'radyatör'],
+    ua: ['охолодження', 'радіатор'],
+    zh: ['冷却', '散热', '水箱']
+  },
+  electrical: {
+    ar: ['كهربائي', 'كهرباء'],
+    de: ['elektrisch', 'elektrik'],
+    es: ['eléctrico', 'electrónico'],
+    fr: ['électrique', 'électronique'],
+    it: ['elettrico', 'elettronica'],
+    ja: ['電気', '電装', 'エレクトリック'],
+    ko: ['전기', '전자'],
+    nl: ['elektrisch', 'elektra'],
+    pl: ['elektryczny', 'elektryka'],
+    pt: ['elétrico', 'eletrônico'],
+    ru: ['электрика', 'электрический'],
+    tr: ['elektrik', 'elektronik'],
+    ua: ['електрика', 'електричний'],
+    zh: ['电气', '电子', '电路']
+  },
+  transmission: {
+    ar: ['ناقل حركة', 'قير', 'جيربكس'],
+    de: ['getriebe', 'schaltgetriebe'],
+    es: ['transmisión', 'caja de cambios'],
+    fr: ['transmission', 'boîte de vitesses'],
+    it: ['trasmissione', 'cambio'],
+    ja: ['トランスミッション', 'ギアボックス', '変速機'],
+    ko: ['트랜스미션', '변속기'],
+    nl: ['transmissie', 'versnellingsbak'],
+    pl: ['skrzynia biegów', 'przekładnia'],
+    pt: ['transmissão', 'câmbio'],
+    ru: ['коробка передач', 'трансмиссия', 'КПП'],
+    tr: ['şanzıman', 'vites kutusu'],
+    ua: ['коробка передач', 'трансмісія'],
+    zh: ['变速箱', '传动', '变速器']
+  },
+  turbo: {
+    ar: ['تيربو', 'شاحن توربيني'],
+    de: ['turbo', 'turbolader'],
+    es: ['turbo', 'turbocompresor'],
+    fr: ['turbo', 'turbocompresseur'],
+    it: ['turbo', 'turbocompressore'],
+    ja: ['ターボ', 'ターボチャージャー'],
+    ko: ['터보', '터보차저'],
+    nl: ['turbo', 'turbocharger'],
+    pl: ['turbo', 'turbosprężarka'],
+    pt: ['turbo', 'turbocompressor'],
+    ru: ['турбо', 'турбина', 'турбонаддув'],
+    tr: ['turbo', 'turboşarj'],
+    ua: ['турбо', 'турбіна'],
+    zh: ['涡轮', '增压器', '涡轮增压']
+  },
+  spark: {
+    ar: ['شمعة', 'بوجيه', 'شمعات إشعال'],
+    de: ['zündkerze', 'kerze'],
+    es: ['bujía', 'bujías'],
+    fr: ['bougie', 'bougies'],
+    it: ['candela', 'candele'],
+    ja: ['スパークプラグ', '点火プラグ'],
+    ko: ['점화 플러그', '스파크 플러그'],
+    nl: ['bougie', 'bougies'],
+    pl: ['świeca zapłonowa', 'świece'],
+    pt: ['vela', 'velas'],
+    ru: ['свеча зажигания', 'свечи'],
+    tr: ['buji', 'ateşleme bujisi'],
+    ua: ['свічка запалювання', 'свічки'],
+    zh: ['火花塞', '点火塞']
+  },
+  sensor: {
+    ar: ['حساس', 'مستشعر', 'سنسر'],
+    de: ['sensor', 'fühler', 'geber'],
+    es: ['sensor', 'sensores'],
+    fr: ['capteur', 'sonde'],
+    it: ['sensore', 'sensori'],
+    ja: ['センサー', 'センサ'],
+    ko: ['센서'],
+    nl: ['sensor', 'voeler'],
+    pl: ['czujnik', 'sensor'],
+    pt: ['sensor', 'sensores'],
+    ru: ['датчик', 'сенсор'],
+    tr: ['sensör'],
+    ua: ['датчик', 'сенсор'],
+    zh: ['传感器', '感应器']
+  },
+  gasket: {
+    ar: ['جوان', 'حشية', 'جوانات'],
+    de: ['dichtung', 'zylinderkopfdichtung'],
+    es: ['junta', 'empaque'],
+    fr: ['joint', 'joints'],
+    it: ['guarnizione', 'guarnizioni'],
+    ja: ['ガスケット', 'パッキン'],
+    ko: ['가스켓', '개스킷'],
+    nl: ['pakking', 'afdichting'],
+    pl: ['uszczelka', 'uszczelki'],
+    pt: ['junta', 'gaxeta'],
+    ru: ['прокладка', 'уплотнитель'],
+    tr: ['conta', 'sızdırmazlık'],
+    ua: ['прокладка', 'ущільнювач'],
+    zh: ['垫片', '密封垫']
+  },
+  belt: {
+    ar: ['سير', 'حزام', 'سيور'],
+    de: ['riemen', 'keilriemen', 'zahnriemen'],
+    es: ['correa', 'cinturón'],
+    fr: ['courroie', 'ceinture'],
+    it: ['cinghia', 'cinghie'],
+    ja: ['ベルト', 'タイミングベルト'],
+    ko: ['벨트'],
+    nl: ['riem', 'snaar'],
+    pl: ['pasek', 'pas'],
+    pt: ['correia', 'cinto'],
+    ru: ['ремень', 'ремни'],
+    tr: ['kayış', 'bant'],
+    ua: ['ремінь', 'ремені'],
+    zh: ['皮带', '正时皮带']
+  },
+  pump: {
+    ar: ['مضخة', 'طلمبة', 'بمب'],
+    de: ['pumpe', 'wasserpumpe'],
+    es: ['bomba', 'bombas'],
+    fr: ['pompe', 'pompes'],
+    it: ['pompa', 'pompe'],
+    ja: ['ポンプ', 'ウォーターポンプ'],
+    ko: ['펌프'],
+    nl: ['pomp', 'pompen'],
+    pl: ['pompa', 'pompy'],
+    pt: ['bomba', 'bombas'],
+    ru: ['насос', 'помпа'],
+    tr: ['pompa'],
+    ua: ['насос', 'помпа'],
+    zh: ['泵', '水泵']
+  },
+  // ═══════════════════════════════════════════════════════════════════════════
+  // CONDITION
+  // ═══════════════════════════════════════════════════════════════════════════
+  new: {
+    ar: ['جديد', 'جديدة'],
+    de: ['neu', 'neuware'],
+    es: ['nuevo', 'nueva'],
+    fr: ['neuf', 'nouveau'],
+    it: ['nuovo', 'nuova'],
+    ja: ['新品', '新しい'],
+    ko: ['새것', '신품'],
+    nl: ['nieuw'],
+    pl: ['nowy', 'nowa'],
+    pt: ['novo', 'nova'],
+    ru: ['новый', 'новая'],
+    tr: ['yeni'],
+    ua: ['новий', 'нова'],
+    zh: ['新', '新品', '全新']
+  },
+  used: {
+    ar: ['مستعمل', 'مستخدم'],
+    de: ['gebraucht', 'benutzt'],
+    es: ['usado', 'segunda mano'],
+    fr: ['occasion', 'utilisé'],
+    it: ['usato', 'seconda mano'],
+    ja: ['中古', '使用済み'],
+    ko: ['중고', '사용한'],
+    nl: ['gebruikt', 'tweedehands'],
+    pl: ['używany', 'z drugiej ręki'],
+    pt: ['usado', 'segunda mão'],
+    ru: ['б/у', 'бу', 'подержанный'],
+    tr: ['ikinci el', 'kullanılmış'],
+    ua: ['б/в', 'вживаний'],
+    zh: ['二手', '旧', '使用过']
+  },
+  refurbished: {
+    ar: ['مجدد', 'معاد التصنيع'],
+    de: ['aufbereitet', 'refurbished', 'wiederaufbereitet'],
+    es: ['reacondicionado', 'restaurado'],
+    fr: ['reconditionné', 'remis à neuf'],
+    it: ['ricondizionato', 'rigenerato'],
+    ja: ['リファービッシュ', '再生品', 'リビルト'],
+    ko: ['리퍼', '재생품'],
+    nl: ['refurbished', 'gereviseerd'],
+    pl: ['odnowiony', 'regenerowany'],
+    pt: ['recondicionado', 'restaurado'],
+    ru: ['восстановленный', 'реманофакт'],
+    tr: ['yenilenmiş', 'onarılmış'],
+    ua: ['відновлений', 'реманофакт'],
+    zh: ['翻新', '再制造', '修复']
+  },
+  // ═══════════════════════════════════════════════════════════════════════════
+  // ORIGINS / COUNTRIES
+  // ═══════════════════════════════════════════════════════════════════════════
+  german: {
+    ar: ['ألماني', 'المانيا', 'ألمانية'],
+    de: ['deutsch', 'deutschland', 'deutsche'],
+    es: ['alemán', 'alemania'],
+    fr: ['allemand', 'allemagne'],
+    it: ['tedesco', 'germania'],
+    ja: ['ドイツ', 'ドイツ製'],
+    ko: ['독일', '독일산'],
+    nl: ['duits', 'duitsland'],
+    pl: ['niemiecki', 'niemcy'],
+    pt: ['alemão', 'alemanha'],
+    ru: ['немецкий', 'германия', 'германский'],
+    tr: ['alman', 'almanya'],
+    ua: ['німецький', 'німеччина'],
+    zh: ['德国', '德国产']
+  },
+  japanese: {
+    ar: ['ياباني', 'يابانية', 'اليابان'],
+    de: ['japanisch', 'japan'],
+    es: ['japonés', 'japón'],
+    fr: ['japonais', 'japon'],
+    it: ['giapponese', 'giappone'],
+    ja: ['日本', '日本製', '国産'],
+    ko: ['일본', '일본산'],
+    nl: ['japans', 'japan'],
+    pl: ['japoński', 'japonia'],
+    pt: ['japonês', 'japão'],
+    ru: ['японский', 'япония', 'японское'],
+    tr: ['japon', 'japonya'],
+    ua: ['японський', 'японія'],
+    zh: ['日本', '日本产']
+  },
+  american: {
+    ar: ['أمريكي', 'أمريكا', 'امريكية'],
+    de: ['amerikanisch', 'usa', 'amerika'],
+    es: ['americano', 'estadounidense', 'usa'],
+    fr: ['américain', 'usa', 'états-unis'],
+    it: ['americano', 'usa', 'stati uniti'],
+    ja: ['アメリカ', 'アメリカ製', '米国'],
+    ko: ['미국', '미국산'],
+    nl: ['amerikaans', 'usa', 'amerika'],
+    pl: ['amerykański', 'usa', 'ameryka'],
+    pt: ['americano', 'usa', 'estados unidos'],
+    ru: ['американский', 'сша', 'американское'],
+    tr: ['amerikan', 'abd', 'amerika'],
+    ua: ['американський', 'сша'],
+    zh: ['美国', '美国产']
+  },
+  korean: {
+    ar: ['كوري', 'كورية', 'كوريا'],
+    de: ['koreanisch', 'korea'],
+    es: ['coreano', 'corea'],
+    fr: ['coréen', 'corée'],
+    it: ['coreano', 'corea'],
+    ja: ['韓国', '韓国製'],
+    ko: ['한국', '한국산', '국산'],
+    nl: ['koreaans', 'korea'],
+    pl: ['koreański', 'korea'],
+    pt: ['coreano', 'coreia'],
+    ru: ['корейский', 'корея'],
+    tr: ['koreli', 'kore'],
+    ua: ['корейський', 'корея'],
+    zh: ['韩国', '韩国产']
+  },
+  chinese: {
+    ar: ['صيني', 'صينية', 'الصين'],
+    de: ['chinesisch', 'china'],
+    es: ['chino', 'china'],
+    fr: ['chinois', 'chine'],
+    it: ['cinese', 'cina'],
+    ja: ['中国', '中国製'],
+    ko: ['중국', '중국산'],
+    nl: ['chinees', 'china'],
+    pl: ['chiński', 'chiny'],
+    pt: ['chinês', 'china'],
+    ru: ['китайский', 'китай'],
+    tr: ['çin', 'çinli'],
+    ua: ['китайський', 'китай'],
+    zh: ['中国', '国产']
+  },
+  european: {
+    ar: ['أوروبي', 'أوروبية', 'أوروبا'],
+    de: ['europäisch', 'europa', 'eu'],
+    es: ['europeo', 'europa'],
+    fr: ['européen', 'europe'],
+    it: ['europeo', 'europa'],
+    ja: ['ヨーロッパ', '欧州'],
+    ko: ['유럽', '유럽산'],
+    nl: ['europees', 'europa'],
+    pl: ['europejski', 'europa'],
+    pt: ['europeu', 'europa'],
+    ru: ['европейский', 'европа'],
+    tr: ['avrupa', 'avrupalı'],
+    ua: ['європейський', 'європа'],
+    zh: ['欧洲', '欧洲产']
+  },
+  // ═══════════════════════════════════════════════════════════════════════════
+  // FUEL TYPES
+  // ═══════════════════════════════════════════════════════════════════════════
+  diesel: {
+    ar: ['ديزل', 'سولار'],
+    de: ['diesel'],
+    es: ['diésel', 'diesel'],
+    fr: ['diesel'],
+    it: ['diesel', 'gasolio'],
+    ja: ['ディーゼル', '軽油'],
+    ko: ['디젤'],
+    nl: ['diesel'],
+    pl: ['diesel', 'olej napędowy'],
+    pt: ['diesel'],
+    ru: ['дизель', 'дизельный'],
+    tr: ['dizel'],
+    ua: ['дизель', 'дизельний'],
+    zh: ['柴油', '柴油车']
+  },
+  petrol: {
+    ar: ['بنزين', 'وقود'],
+    de: ['benzin', 'benziner'],
+    es: ['gasolina', 'nafta'],
+    fr: ['essence'],
+    it: ['benzina'],
+    ja: ['ガソリン', 'ガソリン車'],
+    ko: ['가솔린', '휘발유'],
+    nl: ['benzine'],
+    pl: ['benzyna'],
+    pt: ['gasolina'],
+    ru: ['бензин', 'бензиновый'],
+    tr: ['benzin', 'benzinli'],
+    ua: ['бензин', 'бензиновий'],
+    zh: ['汽油', '汽油车']
+  },
+  hybrid: {
+    ar: ['هايبرد', 'هجين'],
+    de: ['hybrid'],
+    es: ['híbrido'],
+    fr: ['hybride'],
+    it: ['ibrido'],
+    ja: ['ハイブリッド'],
+    ko: ['하이브리드'],
+    nl: ['hybride'],
+    pl: ['hybrydowy', 'hybryda'],
+    pt: ['híbrido'],
+    ru: ['гибрид', 'гибридный'],
+    tr: ['hibrit'],
+    ua: ['гібрид', 'гібридний'],
+    zh: ['混动', '混合动力']
+  },
+  electric: {
+    ar: ['كهربائي', 'كهرباء'],
+    de: ['elektrisch', 'elektro'],
+    es: ['eléctrico'],
+    fr: ['électrique'],
+    it: ['elettrico'],
+    ja: ['電気', '電動', 'EV'],
+    ko: ['전기', '전기차'],
+    nl: ['elektrisch'],
+    pl: ['elektryczny'],
+    pt: ['elétrico'],
+    ru: ['электрический', 'электро', 'электромобиль'],
+    tr: ['elektrikli'],
+    ua: ['електричний', 'електро'],
+    zh: ['电动', '纯电']
+  },
+  // ═══════════════════════════════════════════════════════════════════════════
+  // VEHICLE TYPES
+  // ═══════════════════════════════════════════════════════════════════════════
+  car: {
+    ar: ['سيارة', 'سيارت', 'عربية'],
+    de: ['auto', 'pkw', 'wagen', 'fahrzeug'],
+    es: ['coche', 'auto', 'carro', 'vehículo'],
+    fr: ['voiture', 'auto', 'véhicule'],
+    it: ['auto', 'macchina', 'veicolo'],
+    ja: ['車', '自動車', 'クルマ'],
+    ko: ['자동차', '차', '차량'],
+    nl: ['auto', 'wagen', 'voertuig'],
+    pl: ['samochód', 'auto', 'pojazd'],
+    pt: ['carro', 'automóvel', 'veículo'],
+    ru: ['автомобиль', 'машина', 'авто'],
+    tr: ['araba', 'otomobil', 'araç'],
+    ua: ['автомобіль', 'машина', 'авто'],
+    zh: ['汽车', '车', '轿车']
+  },
+  truck: {
+    ar: ['شاحنة', 'لوري', 'تريلا'],
+    de: ['lkw', 'lastwagen', 'truck'],
+    es: ['camión', 'truck'],
+    fr: ['camion', 'poids lourd'],
+    it: ['camion', 'autocarro'],
+    ja: ['トラック', '貨物車'],
+    ko: ['트럭', '화물차'],
+    nl: ['vrachtwagen', 'truck'],
+    pl: ['ciężarówka', 'truck'],
+    pt: ['caminhão', 'camião'],
+    ru: ['грузовик', 'грузовой'],
+    tr: ['kamyon', 'tır'],
+    ua: ['вантажівка', 'грузовик'],
+    zh: ['卡车', '货车', '大卡']
+  },
+  suv: {
+    ar: ['جيب', 'دفع رباعي'],
+    de: ['suv', 'geländewagen'],
+    es: ['suv', 'todoterreno', 'camioneta'],
+    fr: ['suv', '4x4', 'tout-terrain'],
+    it: ['suv', 'fuoristrada'],
+    ja: ['SUV', 'クロスオーバー'],
+    ko: ['SUV', '스포츠유틸리티'],
+    nl: ['suv', 'terreinwagen'],
+    pl: ['suv', 'terenowy'],
+    pt: ['suv', 'utilitário'],
+    ru: ['внедорожник', 'джип', 'кроссовер'],
+    tr: ['suv', 'arazi aracı'],
+    ua: ['позашляховик', 'джип'],
+    zh: ['SUV', '越野', '城市越野']
+  },
+  motorcycle: {
+    ar: ['دراجة نارية', 'موتوسيكل'],
+    de: ['motorrad', 'bike'],
+    es: ['moto', 'motocicleta'],
+    fr: ['moto', 'motocyclette'],
+    it: ['moto', 'motocicletta'],
+    ja: ['バイク', 'オートバイ', '二輪'],
+    ko: ['오토바이', '모터사이클'],
+    nl: ['motorfiets', 'motor'],
+    pl: ['motocykl', 'motor'],
+    pt: ['moto', 'motocicleta'],
+    ru: ['мотоцикл', 'мото'],
+    tr: ['motosiklet', 'motor'],
+    ua: ['мотоцикл', 'мото'],
+    zh: ['摩托车', '机车']
+  },
+  // ═══════════════════════════════════════════════════════════════════════════
+  // MISCELLANEOUS
+  // ═══════════════════════════════════════════════════════════════════════════
+  part: {
+    ar: ['قطعة', 'جزء', 'قطع غيار'],
+    de: ['teil', 'ersatzteil', 'bauteil'],
+    es: ['pieza', 'parte', 'repuesto'],
+    fr: ['pièce', 'partie', 'rechange'],
+    it: ['pezzo', 'parte', 'ricambio'],
+    ja: ['部品', 'パーツ', '部分'],
+    ko: ['부품', '파츠'],
+    nl: ['onderdeel', 'stuk'],
+    pl: ['część', 'element'],
+    pt: ['peça', 'parte'],
+    ru: ['деталь', 'запчасть', 'часть'],
+    tr: ['parça', 'yedek parça'],
+    ua: ['деталь', 'запчастина'],
+    zh: ['零件', '配件', '部件']
+  },
+  supplier: {
+    ar: ['مورد', 'موزع', 'تاجر'],
+    de: ['lieferant', 'anbieter', 'händler'],
+    es: ['proveedor', 'distribuidor'],
+    fr: ['fournisseur', 'distributeur'],
+    it: ['fornitore', 'distributore'],
+    ja: ['サプライヤー', '供給者', '販売店'],
+    ko: ['공급업체', '판매자'],
+    nl: ['leverancier', 'distributeur'],
+    pl: ['dostawca', 'dystrybutor'],
+    pt: ['fornecedor', 'distribuidor'],
+    ru: ['поставщик', 'дистрибьютор'],
+    tr: ['tedarikçi', 'dağıtıcı'],
+    ua: ['постачальник', 'дистриб\'ютор'],
+    zh: ['供应商', '供货商', '经销商']
+  },
+  wholesale: {
+    ar: ['جملة', 'بالجملة'],
+    de: ['großhandel', 'grosshandel'],
+    es: ['mayorista', 'al por mayor'],
+    fr: ['grossiste', 'en gros'],
+    it: ['ingrosso', 'all\'ingrosso'],
+    ja: ['卸売', '卸', 'ホールセール'],
+    ko: ['도매', '대량'],
+    nl: ['groothandel'],
+    pl: ['hurtowy', 'hurt'],
+    pt: ['atacado', 'grossista'],
+    ru: ['оптом', 'оптовый', 'опт'],
+    tr: ['toptan', 'toptancı'],
+    ua: ['оптом', 'оптовий'],
+    zh: ['批发', '批量']
+  },
+  days: {
+    ar: ['يوم', 'أيام'],
+    de: ['tag', 'tage'],
+    es: ['día', 'días'],
+    fr: ['jour', 'jours'],
+    it: ['giorno', 'giorni'],
+    ja: ['日', '日間'],
+    ko: ['일', '일간'],
+    nl: ['dag', 'dagen'],
+    pl: ['dzień', 'dni'],
+    pt: ['dia', 'dias'],
+    ru: ['день', 'дней', 'дня'],
+    tr: ['gün'],
+    ua: ['день', 'днів', 'дня'],
+    zh: ['天', '日']
+  }
+};
+
+/**
+ * Language detection - identifies user's input language
+ */
+function detectLanguage(text) {
+  if (!text) return 'en';
+  const lowerText = text.toLowerCase();
+  
+  // Arabic detection (Arabic script)
+  if (/[\u0600-\u06FF]/.test(text)) return 'ar';
+  
+  // Japanese detection (Hiragana, Katakana, Kanji)
+  if (/[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF]/.test(text)) return 'ja';
+  
+  // Chinese detection (CJK without Japanese-specific characters)
+  if (/[\u4E00-\u9FFF]/.test(text) && !/[\u3040-\u309F\u30A0-\u30FF]/.test(text)) return 'zh';
+  
+  // Korean detection (Hangul)
+  if (/[\uAC00-\uD7AF\u1100-\u11FF]/.test(text)) return 'ko';
+  
+  // Russian detection (Cyrillic with Russian-specific chars)
+  if (/[\u0400-\u04FF]/.test(text)) {
+    // Ukrainian has specific chars: ї, і, є, ґ
+    if (/[їієґ]/i.test(text)) return 'ua';
+    return 'ru';
+  }
+  
+  // Turkish detection (specific chars: ş, ğ, ı, ü, ö, ç)
+  if (/[şğıüöç]/i.test(text) && /\b(ve|bu|için|ile|var|bir)\b/i.test(lowerText)) return 'tr';
+  
+  // Polish detection (specific chars: ą, ę, ł, ń, ó, ś, ź, ż)
+  if (/[ąęłńśźż]/i.test(text)) return 'pl';
+  
+  // German detection (ß, umlauts in common German words)
+  if (/ß/.test(text) || (/[äöü]/.test(text) && /\b(und|der|die|das|ist|für|auf|mit)\b/i.test(lowerText))) return 'de';
+  
+  // French detection (common French patterns)
+  if (/[àâçéèêëîïôùûü]/.test(text) && /\b(le|la|les|de|du|des|et|pour|avec|dans|une|un)\b/i.test(lowerText)) return 'fr';
+  
+  // Spanish detection
+  if (/[áéíóúñ¿¡]/.test(text) && /\b(el|la|los|las|de|en|que|es|para|con|del)\b/i.test(lowerText)) return 'es';
+  
+  // Portuguese detection 
+  if (/[ãõç]/.test(text) && /\b(de|em|que|para|com|uma|um|não|mais|está)\b/i.test(lowerText)) return 'pt';
+  
+  // Italian detection
+  if (/[àèìòù]/.test(text) && /\b(di|che|il|la|per|un|una|in|con|non)\b/i.test(lowerText)) return 'it';
+  
+  // Dutch detection
+  if (/\b(de|het|een|van|en|is|op|te|naar|met)\b/i.test(lowerText) && /[ëïé]/.test(text)) return 'nl';
+  
+  // Default to English
+  return 'en';
+}
+
+/**
+ * Translate multilingual terms to English equivalents
+ */
+function translateToEnglish(text) {
+  if (!text) return text;
+  
+  const detectedLang = detectLanguage(text);
+  if (detectedLang === 'en') return text;
+  
+  let translatedText = text.toLowerCase();
+  
+  // Iterate through dictionary and replace terms
+  for (const [englishTerm, translations] of Object.entries(MULTILINGUAL_DICTIONARY)) {
+    if (translations[detectedLang]) {
+      for (const foreignTerm of translations[detectedLang]) {
+        const regex = new RegExp(foreignTerm, 'gi');
+        if (regex.test(translatedText)) {
+          // Replace with English equivalent
+          translatedText = translatedText.replace(regex, englishTerm);
+        }
+      }
+    }
+  }
+  
+  console.log(`🌐 Translated [${detectedLang}]: "${text}" → "${translatedText}"`);
+  return translatedText;
+}
+
+/**
+ * Get all foreign terms for a concept (for regex matching)
+ */
+function getAllTermsForConcept(concept) {
+  const terms = [concept]; // Start with English
+  if (MULTILINGUAL_DICTIONARY[concept]) {
+    for (const langTerms of Object.values(MULTILINGUAL_DICTIONARY[concept])) {
+      terms.push(...langTerms);
+    }
+  }
+  return terms;
+}
+
+/**
+ * Build multilingual regex pattern for a concept
+ */
+function buildMultilingualRegex(concept, flags = 'gi') {
+  const terms = getAllTermsForConcept(concept);
+  const pattern = terms.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
+  return new RegExp(`\\b(${pattern})\\b`, flags);
+}
+
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
  * INTENT PARSER v2 - Clean, deterministic intent extraction
  * Uses Gemini ONLY for complex natural language understanding
  * Falls back to robust local parser for reliability
@@ -44,6 +1186,29 @@ aiLearningService.initialize().catch((err) => {
 const INTENT_PARSER_INSTRUCTION = `You are an expert automotive parts search query parser for a B2B parts marketplace. Your job is to extract structured filters from natural language queries so our multi-factor AI ranking engine can find the best results.
 
 RESPOND WITH VALID JSON ONLY. No markdown, no explanation, no extra text.
+
+═══════════════════════════════════════════════════════════════
+🌍 MULTILINGUAL SUPPORT — 15 Languages Fully Supported
+═══════════════════════════════════════════════════════════════
+You MUST understand and parse queries in ALL these languages professionally:
+• Arabic (ar): "أريد فلتر زيت رخيص بتوصيل سريع" → cheap oil filter, fast delivery
+• German (de): "Günstige Bremsbeläge für BMW auf Lager" → cheap brake pads for BMW, in stock
+• Spanish (es): "Buscar filtros de aceite baratos con envío rápido" → cheap oil filters, fast shipping
+• French (fr): "Je cherche des plaquettes de frein pas cher livraison rapide" → cheap brake pads, fast delivery
+• Italian (it): "Filtro olio economico disponibile veloce" → cheap oil filter, available fast
+• Japanese (ja): "安いブレーキパッド在庫あり即日配送" → cheap brake pads, in stock, same day
+• Korean (ko): "저렴한 브레이크 패드 재고 있음 빠른 배송" → cheap brake pads, in stock, fast delivery
+• Dutch (nl): "Goedkope remblokken op voorraad snelle levering" → cheap brake pads, in stock, fast delivery
+• Polish (pl): "Tanie klocki hamulcowe dostępne szybka dostawa" → cheap brake pads, available, fast delivery
+• Portuguese (pt): "Filtro de óleo barato em estoque entrega rápida" → cheap oil filter, in stock, fast delivery
+• Russian (ru): "Дешевые тормозные колодки в наличии быстрая доставка" → cheap brake pads, in stock, fast delivery
+• Turkish (tr): "Ucuz fren balatası stokta hızlı teslimat" → cheap brake pads, in stock, fast delivery
+• Ukrainian (ua): "Дешеві гальмівні колодки в наявності швидка доставка" → cheap brake pads, in stock, fast delivery
+• Chinese (zh): "便宜的刹车片有货快速配送" → cheap brake pads, in stock, fast delivery
+• English (en): Default language
+
+CRITICAL: Parse ALL languages with same accuracy. Extract intent regardless of input language.
+Convert all foreign concepts to standard English output fields.
 
 ═══════════════════════════════════════════════════════════════
 SYSTEM CONTEXT — How results are ranked AFTER your parsing:
@@ -75,6 +1240,15 @@ CRITICAL RULES — Follow these EXACTLY:
    - "cheap" / "budget" / "affordable" → maxPrice:100, sortPreference:"price_asc"
    - "expensive" / "premium" / "high-end" → minPrice:500
    - AED/dirham → priceCurrency:"AED". EUR/euro → priceCurrency:"EUR". GBP/pound → priceCurrency:"GBP"
+   
+   MULTILINGUAL PRICE TERMS:
+   - Arabic: رخيص/اقتصادي (cheap), غالي (expensive), سعر (price), أقل من (under), أكثر من (over)
+   - German: billig/günstig (cheap), teuer (expensive), preis (price), unter (under), über (over)
+   - Spanish: barato/económico (cheap), caro (expensive), precio (price), menos de (under), más de (over)
+   - French: pas cher/bon marché (cheap), cher (expensive), prix (price), moins de (under), plus de (over)
+   - Russian: дешевый/недорогой (cheap), дорогой (expensive), цена (price), меньше (under), больше (over)
+   - Chinese: 便宜 (cheap), 贵 (expensive), 价格 (price), 以下 (under), 以上 (over)
+   - Japanese: 安い (cheap), 高い (expensive), 価格 (price), 以下 (under), 以上 (over)
 
 3. BRANDS — Two types, NEVER confuse them:
    - VEHICLE brands (what the part fits): Toyota, BMW, Mercedes, Nissan, Hyundai, Kia, Ford, etc.
@@ -84,16 +1258,31 @@ CRITICAL RULES — Follow these EXACTLY:
    - "Bosch brake pads for Toyota" → vehicleBrand:"TOYOTA", partsBrands:["BOSCH"]
 
 4. CATEGORIES: Extract part types — brake, filter, engine, suspension, bearing, clutch, steering, exhaust, electrical, cooling, transmission, wheel, pump, sensor, gasket, belt, hose, turbo, fuel, seal, wiper, body, lighting, hub, axle, valve, ac, interior, ignition
+   
+   MULTILINGUAL CATEGORY TERMS:
+   - brake: فرامل (ar), Bremse (de), freno (es), frein (fr), тормоз (ru), 刹车 (zh), ブレーキ (ja), 브레이크 (ko)
+   - filter: فلتر (ar), Filter (de), filtro (es/it/pt), filtre (fr/tr), фильтр (ru), 滤清器 (zh), フィルター (ja), 필터 (ko)
+   - engine: محرك (ar), Motor (de), motor (es/pt), moteur (fr), двигатель (ru), 发动机 (zh), エンジン (ja), 엔진 (ko)
+   - suspension: تعليق (ar), Federung (de), suspensión (es), suspension (fr), подвеска (ru), 悬挂 (zh), サスペンション (ja)
+   - bearing: محمل (ar), Lager (de), rodamiento (es), roulement (fr), подшипник (ru), 轴承 (zh), ベアリング (ja)
+   - clutch: كلتش (ar), Kupplung (de), embrague (es), embrayage (fr), сцепление (ru), 离合器 (zh), クラッチ (ja)
 
 5. STOCK REQUIREMENTS:
    - "in stock" / "available" / "have it" / "on hand" / "in warehouse" → requireInStock:true
    - "full stock" / "plenty" / "bulk" / "large qty" / "abundant" / "sufficient" → requireHighStock:true
+   
+   MULTILINGUAL STOCK TERMS:
+   - in stock: متوفر (ar), auf Lager/verfügbar (de), en stock/disponible (es), en stock/disponible (fr), в наличии (ru), 有货/现货 (zh), 在庫あり (ja), 재고있음 (ko)
 
 6. DELIVERY:
    - "fast delivery" / "express" / "urgent" / "rush" / "asap" / "same day" / "next day" / "overnight" → fastDelivery:true
    - "within 3 days" / "3-day delivery" → maxDeliveryDays:3
    - "same day" / "today" → maxDeliveryDays:0
    - "ready to ship" / "quick turnaround" → fastDelivery:true
+   
+   MULTILINGUAL DELIVERY TERMS:
+   - fast delivery: توصيل سريع (ar), schnelle Lieferung (de), entrega rápida (es/pt), livraison rapide (fr), быстрая доставка (ru), 快速配送 (zh), 即日配送 (ja), 빠른 배송 (ko)
+   - free shipping: شحن مجاني (ar), kostenloser Versand (de), envío gratis (es), livraison gratuite (fr), бесплатная доставка (ru), 免运费/包邮 (zh), 送料無料 (ja)
 
 7. QUALITY:
    - "OEM" / "genuine" / "original" → oem:true
@@ -111,13 +1300,31 @@ CRITICAL RULES — Follow these EXACTLY:
 9. ORIGIN PREFERENCES:
    - "German parts" / "made in Germany" → supplierOrigin:"German"
    - "Japanese" / "European" / "American" / "Italian" / "French" / "Korean" → supplierOrigin
+   
+   MULTILINGUAL ORIGIN TERMS:
+   - German: ألماني (ar), deutsch (de), alemán (es), allemand (fr), немецкий (ru), 德国 (zh), ドイツ (ja)
+   - Japanese: ياباني (ar), japanisch (de), japonés (es), japonais (fr), японский (ru), 日本 (zh), 日本 (ja)
+   - American: أمريكي (ar), amerikanisch (de), americano (es), américain (fr), американский (ru), 美国 (zh)
+   - Chinese: صيني (ar), chinesisch (de), chino (es), chinois (fr), китайский (ru), 中国 (zh)
+   - European: أوروبي (ar), europäisch (de), europeo (es), européen (fr), европейский (ru), 欧洲 (zh)
 
 10. VEHICLE CONTEXT:
     - Year: "2019 Toyota" → vehicleYear:2019. "2015-2020" → vehicleYearMin:2015, vehicleYearMax:2020
     - Fuel: "diesel" / "petrol" / "gasoline" / "hybrid" / "electric" → fuelType
     - Application: "passenger" / "commercial" / "heavy duty" / "performance" → applicationType
+    
+    MULTILINGUAL FUEL TERMS:
+    - diesel: ديزل (ar), Diesel (de), diésel (es), diesel (fr/it), дизель (ru), 柴油 (zh), ディーゼル (ja)
+    - petrol/gasoline: بنزين (ar), Benzin (de), gasolina (es/pt), essence (fr), бензин (ru), 汽油 (zh), ガソリン (ja)
+    - hybrid: هايبرد (ar), Hybrid (de), híbrido (es/pt), hybride (fr), гибрид (ru), 混动 (zh), ハイブリッド (ja)
+    - electric: كهربائي (ar), elektrisch (de), eléctrico (es), électrique (fr), электрический (ru), 电动 (zh), 電気 (ja)
 
 11. CONDITION: "new" / "used" / "refurbished" / "remanufactured" / "reman" / "rebuilt" → condition
+    
+    MULTILINGUAL CONDITION TERMS:
+    - new: جديد (ar), neu (de), nuevo (es), neuf (fr), новый (ru), 新/全新 (zh), 新品 (ja), 새것 (ko)
+    - used: مستعمل (ar), gebraucht (de), usado (es), occasion (fr), б/у (ru), 二手 (zh), 中古 (ja), 중고 (ko)
+    - refurbished: مجدد (ar), aufbereitet (de), reacondicionado (es), reconditionné (fr), восстановленный (ru), 翻新 (zh)
 
 12. COMPARISON: "compare" / "versus" / "vs" → compareMode:true. "alternative" / "substitute" / "equivalent" → findAlternatives:true
 
@@ -309,7 +1516,17 @@ function buildLocalParsedIntent(query) {
       confidence: 'LOW',
     };
 
-  let q = query.toLowerCase().trim();
+  // ═══════════════════════════════════════════════════════════════════════════
+  // STEP 0: MULTILINGUAL TRANSLATION - Translate query to English first
+  // ═══════════════════════════════════════════════════════════════════════════
+  const detectedLanguage = detectLanguage(query);
+  const originalQuery = query;
+  
+  // Translate foreign terms to English
+  let q = translateToEnglish(query).toLowerCase().trim();
+  
+  // Also keep original query for mixed-language scenarios
+  const originalLower = originalQuery.toLowerCase().trim();
 
   // ── Typo corrections (comprehensive B2B auto parts marketplace) ──
   const typoMap = {
@@ -430,6 +1647,10 @@ function buildLocalParsedIntent(query) {
     freeShipping: false,
     confidence: 'MEDIUM',
     suggestions: [],
+    // Multilingual tracking
+    detectedLanguage: detectedLanguage,
+    originalQuery: originalQuery,
+    translatedQuery: q !== originalLower ? q : null,
   };
 
   // ── Price extraction (comprehensive B2B patterns) ──
@@ -483,6 +1704,14 @@ function buildLocalParsedIntent(query) {
     result.maxPrice = 100;
     if (!result.sortPreference) result.sortPreference = 'price_asc';
   }
+  
+  // MULTILINGUAL: cheap/affordable detection (also check original query for non-Latin scripts)
+  const cheapMultiPattern = buildMultilingualRegex('cheap');
+  if (cheapMultiPattern.test(originalLower) && !result.maxPrice) {
+    result.maxPrice = 100;
+    if (!result.sortPreference) result.sortPreference = 'price_asc';
+  }
+  
   // "expensive" / "premium" / "high-end"
   if (
     /\b(expensive|premium|high[\s-]?end|luxury|top[\s-]*tier|flagship)\b/.test(q) &&
@@ -490,10 +1719,21 @@ function buildLocalParsedIntent(query) {
   ) {
     result.minPrice = 500;
   }
+  
+  // MULTILINGUAL: expensive/premium detection
+  const expensiveMultiPattern = buildMultilingualRegex('expensive');
+  const premiumMultiPattern = buildMultilingualRegex('premium');
+  if ((expensiveMultiPattern.test(originalLower) || premiumMultiPattern.test(originalLower)) && !result.minPrice) {
+    result.minPrice = 500;
+  }
 
   // "free shipping" / "no shipping cost"
   if (/\b(free\s+shipping|no\s+shipping\s+cost|shipping\s+included|delivery\s+included)\b/.test(q))
     result.freeShipping = true;
+  
+  // MULTILINGUAL: free shipping detection
+  const freeShippingMultiPattern = buildMultilingualRegex('freeShipping');
+  if (freeShippingMultiPattern.test(originalLower)) result.freeShipping = true;
 
   // Currency detection (comprehensive)
   if (/\b(aed|dirham|dhs|drhm)\b/.test(q)) result.priceCurrency = 'AED';
@@ -826,6 +2066,22 @@ function buildLocalParsedIntent(query) {
       addedCategories.add(categoryMap[key]);
     }
   }
+  
+  // MULTILINGUAL: Category detection for non-Latin scripts
+  const multilingualCategories = [
+    'brake', 'filter', 'engine', 'suspension', 'bearing', 'clutch',
+    'steering', 'exhaust', 'cooling', 'electrical', 'transmission',
+    'turbo', 'spark', 'sensor', 'gasket', 'belt', 'pump'
+  ];
+  for (const category of multilingualCategories) {
+    if (!addedCategories.has(category)) {
+      const multiPattern = buildMultilingualRegex(category);
+      if (multiPattern.test(originalLower)) {
+        result.categories.push(category);
+        addedCategories.add(category);
+      }
+    }
+  }
 
   // ── Search keywords (for description matching) ──
   const stopWords = new Set([
@@ -1016,6 +2272,12 @@ function buildLocalParsedIntent(query) {
   if (/\b(availability|avail)\b/.test(q)) {
     result.requireInStock = true;
   }
+  
+  // MULTILINGUAL: in-stock detection
+  const inStockMultiPattern = buildMultilingualRegex('inStock');
+  if (inStockMultiPattern.test(originalLower)) {
+    result.requireInStock = true;
+  }
 
   // ── Delivery (comprehensive) ──
   if (/\b(fast|express|quick|urgent|rush|asap|immediate|next\s*day|same\s*day|overnight|priority|speedy|rapid)\b/.test(q))
@@ -1029,6 +2291,13 @@ function buildLocalParsedIntent(query) {
   // "short lead time" / "quick turnaround"
   if (/\b(short\s*lead\s*time|quick\s*turnaround|no\s*wait|ready\s*to\s*ship)\b/.test(q))
     result.fastDelivery = true;
+  
+  // MULTILINGUAL: fast delivery detection
+  const fastMultiPattern = buildMultilingualRegex('fast');
+  const deliveryMultiPattern = buildMultilingualRegex('delivery');
+  if (fastMultiPattern.test(originalLower) && deliveryMultiPattern.test(originalLower)) {
+    result.fastDelivery = true;
+  }
 
   // ── OEM / Genuine / Aftermarket / Quality ──
   if (/\b(oem|genuine|original|factory|authentic)\b/.test(q)) result.oem = true;
@@ -1039,6 +2308,15 @@ function buildLocalParsedIntent(query) {
   // Quality markers
   if (/\b(premium|high[\s-]*quality|top[\s-]*quality|grade\s*a|first[\s-]*class|pro[\s-]*grade|professional)\b/.test(q))
     result.premiumQuality = true;
+  
+  // MULTILINGUAL: OEM/Aftermarket/Warranty detection
+  const oemMultiPattern = buildMultilingualRegex('oem');
+  const aftermarketMultiPattern = buildMultilingualRegex('aftermarket');
+  const warrantyMultiPattern = buildMultilingualRegex('warranty');
+  if (oemMultiPattern.test(originalLower)) result.oem = true;
+  if (aftermarketMultiPattern.test(originalLower)) result.aftermarket = true;
+  if (warrantyMultiPattern.test(originalLower)) result.requireWarranty = true;
+  
   // Warranty
   if (/\b(warranty|warrantied|guaranteed|guarantee)\b/.test(q))
     result.requireWarranty = true;
@@ -2579,6 +3857,121 @@ function generateRecommendationReason(part, requestedQty) {
   return reasons.join(' • ') || 'Best match';
 }
 
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * ANALYTICS CHAT - AI-powered analytics assistant
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+
+const ANALYTICS_CHAT_PROMPT = `You are an expert automotive parts sales analytics assistant. You help administrators understand their parts sales data, search trends, and make data-driven decisions.
+
+Given the analytics data provided and the user's question, provide helpful, actionable insights.
+
+RESPONSE FORMAT:
+- Use HTML formatting for structure (p, ul, ol, strong, em tags)
+- Be concise but comprehensive
+- Include relevant numbers from the data
+- Provide actionable recommendations when appropriate
+- Use professional, friendly tone
+
+AVAILABLE DATA CONTEXT:
+- Dashboard stats (searches, views, purchases, conversion rates)
+- Top searched parts (what customers are looking for)
+- Top purchased parts (what's actually selling)
+- Missed opportunities (searches that didn't convert)
+- Trending parts (rising/falling demand)
+- Excel import analytics (bulk search patterns)
+
+When relevant data isn't available, acknowledge it and provide general guidance based on industry best practices.`;
+
+async function analyticsChat(message, analyticsContext) {
+  if (!ai) {
+    throw new Error('Gemini API not initialized');
+  }
+
+  try {
+    // Format the analytics data for the AI
+    const contextString = formatAnalyticsContext(analyticsContext);
+    
+    const prompt = `${ANALYTICS_CHAT_PROMPT}\n\nCURRENT ANALYTICS DATA:\n${contextString}\n\nUSER QUESTION: ${message}`;
+    
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.0-flash',
+      contents: prompt,
+      config: {
+        temperature: 0.7,
+        topP: 0.95,
+        maxOutputTokens: 1024,
+      },
+    });
+
+    const text = response?.text || '';
+    
+    if (!text) {
+      throw new Error('No response from AI');
+    }
+
+    return text;
+  } catch (error) {
+    console.error('Analytics chat AI error:', error);
+    throw error;
+  }
+}
+
+function formatAnalyticsContext(context) {
+  const sections = [];
+  
+  if (context.dashboardStats) {
+    const d = context.dashboardStats;
+    sections.push(`DASHBOARD OVERVIEW:
+- Total Searches: ${d.totalSearches || 0} (${d.searchesChange >= 0 ? '+' : ''}${d.searchesChange || 0}% vs last period)
+- Parts Viewed: ${d.partsViewed || 0}
+- Purchases: ${d.purchases || 0} (${d.purchasesChange >= 0 ? '+' : ''}${d.purchasesChange || 0}% vs last period)
+- Conversion Rate: ${d.conversionRate || 0}%
+- Missed Opportunities: ${d.missedOpportunities || 0}
+- Excel Searches: ${d.excelSearches || 0}
+- Revenue: $${(d.revenue || 0).toLocaleString()}`);
+  }
+  
+  if (context.topSearched?.length > 0) {
+    const top = context.topSearched.slice(0, 5).map((p, i) => 
+      `${i + 1}. ${p.partNumber}: ${p.searches} searches, ${p.conversion || 0}% conversion`
+    ).join('\n');
+    sections.push(`TOP SEARCHED PARTS:\n${top}`);
+  }
+  
+  if (context.topPurchased?.length > 0) {
+    const top = context.topPurchased.slice(0, 5).map((p, i) => 
+      `${i + 1}. ${p.partNumber}: ${p.orders} orders, $${(p.revenue || 0).toLocaleString()} revenue`
+    ).join('\n');
+    sections.push(`TOP PURCHASED PARTS:\n${top}`);
+  }
+  
+  if (context.missedOpportunities?.length > 0) {
+    const missed = context.missedOpportunities.slice(0, 5).map((p, i) => 
+      `${i + 1}. ${p.partNumber}: ${p.searches} searches - ${p.reason || 'Not converted'}`
+    ).join('\n');
+    sections.push(`MISSED OPPORTUNITIES:\n${missed}`);
+  }
+  
+  if (context.trending?.length > 0) {
+    const trend = context.trending.slice(0, 5).map((p, i) => 
+      `${i + 1}. ${p.partNumber}: ${p.trend} (${p.trendPercentage > 0 ? '+' : ''}${p.trendPercentage}%)`
+    ).join('\n');
+    sections.push(`TRENDING PARTS:\n${trend}`);
+  }
+  
+  if (context.excelAnalytics) {
+    const e = context.excelAnalytics;
+    sections.push(`EXCEL IMPORT ANALYTICS:
+- Total Excel Searches: ${e.totalSearches || 0}
+- Parts Found via Excel: ${e.partsFound || 0}
+- Parts Not Found: ${e.partsNotFound || 0}`);
+  }
+  
+  return sections.join('\n\n') || 'No analytics data available yet.';
+}
+
 module.exports = {
   parseSearchQuery,
   parseUserIntent,
@@ -2587,4 +3980,5 @@ module.exports = {
   analyzeResults,
   analyzeExcelData,
   recommendBestParts,
+  analyticsChat,
 };

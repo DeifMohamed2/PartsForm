@@ -31,7 +31,8 @@
     "cart": "Корзина",
     "quickSearch": "Быстрый поиск",
     "currencyConverter": "Конвертер валют",
-    "currency": {
+    "currency": "Валюта",
+    "currencySettings": {
       "label": "Валюта",
       "badge": "Курсы валют в реальном времени",
       "title": "Конвертер валют",
@@ -43,7 +44,9 @@
       "searchPlaceholder": "Поиск валют...",
       "updating": "Обновление..."
     },
-    "language": {
+    "preferredCurrency": "Предпочитаемая валюта",
+    "language": "Язык",
+    "languageNames": {
       "english": "Английский",
       "arabic": "Арабский",
       "russian": "Русский",
@@ -56,7 +59,9 @@
       "profile": "Профиль",
       "settings": "Настройки",
       "logout": "Выйти"
-    }
+    },
+    "preferredCurrencyTitle": "Предпочтительная Валюта",
+    "searchCurrency": "Поиск валюты..."
   },
   "common": {
     "buttons": {
@@ -111,112 +116,799 @@
       "success": "Успешно!",
       "confirmDelete": "Вы уверены, что хотите удалить это?",
       "unsavedChanges": "У вас есть несохраненные изменения"
-    }
+    },
+    "welcomeBack": "С возвращением",
+    "signIn": "Войти",
+    "signInDesc": "Введите данные для входа в аккаунт",
+    "email": "Электронная почта",
+    "emailPlaceholder": "Введите email",
+    "password": "Пароль",
+    "forgotPassword": "Забыли пароль?",
+    "noAccount": "Нет аккаунта?",
+    "signUp": "Регистрация",
+    "orContinueWith": "или продолжить через",
+    "edit": "Редактировать",
+    "manage": "Manage",
+    "save": "Сохранить",
+    "cancel": "Отмена",
+    "delete": "Удалить",
+    "view": "Просмотр",
+    "close": "Закрыть",
+    "submit": "Отправить",
+    "saveChanges": "Save Changes",
+    "default": "Default"
   },
   "orders": {
-    "title": "Мои заказы",
-    "subtitle": "Отслеживайте и управляйте своими заказами",
-    "orderNumber": "Номер заказа",
-    "date": "Дата",
-    "total": "Итого",
-    "status": "Статус",
-    "actions": "Действия",
-    "noOrders": "Заказы не найдены",
-    "viewOrder": "Просмотреть заказ",
-    "trackShipment": "Отследить отправление",
-    "downloadInvoice": "Скачать счет",
-    "details": {
-      "title": "Детали заказа",
-      "orderInfo": "Информация о заказе",
-      "shippingAddress": "Адрес доставки",
-      "billingAddress": "Адрес для счета",
+    "title": "Мои Заказы",
+    "subtitle": "Отслеживайте и управляйте всеми вашими заказами в одном месте",
+    "stats": {
+      "pending": "Ожидает",
+      "processing": "В обработке",
+      "completed": "Завершено"
+    },
+    "filters": {
+      "status": "Статус",
+      "allStatuses": "Все Статусы",
+      "pending": "Ожидает",
+      "processing": "В обработке",
+      "shipped": "Отправлено",
+      "delivered": "Доставлено",
+      "completed": "Завершено",
+      "cancelled": "Отменено",
+      "dateFrom": "Дата От",
+      "dateTo": "Дата До",
+      "searchOrder": "Поиск Заказа",
+      "searchPlaceholder": "Номер заказа, номер детали...",
+      "applyFilters": "Применить Фильтры",
+      "reset": "Сбросить"
+    },
+    "table": {
+      "orderNumber": "Номер Заказа",
+      "date": "Дата",
+      "status": "Статус",
       "items": "Товары",
-      "subtotal": "Промежуточный итог",
-      "shipping": "Доставка",
-      "tax": "Налог",
-      "total": "Итого"
+      "amount": "Сумма",
+      "actions": "Действия"
+    },
+    "pagination": {
+      "previous": "Предыдущая",
+      "next": "Следующая",
+      "showing": "Показано",
+      "of": "из"
+    },
+    "emptyState": {
+      "title": "Заказов Пока Нет",
+      "text": "Вы еще не сделали ни одного заказа. Начните покупки, чтобы увидеть ваши заказы здесь.",
+      "startShopping": "Начать Покупки",
+      "backToMain": "Вернуться на Главную"
+    },
+    "actions": {
+      "viewOrder": "Просмотреть Заказ",
+      "trackOrder": "Отследить Заказ"
+    },
+    "details": {
+      "title": "Детали Заказа",
+      "backToOrders": "Вернуться к Заказам",
+      "loading": "Загрузка...",
+      "loadingText": "Загрузка деталей заказа...",
+      "print": "Печать",
+      "downloadInvoice": "Скачать Счет",
+      "orderItems": "Товары Заказа",
+      "partDetails": "Детали Запчасти",
+      "weight": "Вес",
+      "stock": "Наличие",
+      "price": "Цена",
+      "paymentInfo": "Информация об Оплате",
+      "orderTimeline": "Хронология Заказа",
+      "orderSummary": "Итог Заказа",
+      "shippingInfo": "Информация о Доставке",
+      "errorTitle": "Заказ Не Найден",
+      "errorText": "Заказ, который вы ищете, не существует или был удален."
     }
   },
   "cart": {
-    "title": "Корзина",
-    "subtitle": "Просмотрите свои товары",
-    "item": "Товар",
-    "quantity": "Количество",
-    "price": "Цена",
-    "total": "Итого",
-    "emptyCart": "Ваша корзина пуста",
-    "continueShopping": "Продолжить покупки",
-    "proceedToCheckout": "Перейти к оформлению",
-    "removeItem": "Удалить товар",
-    "updateCart": "Обновить корзину",
-    "cartSummary": "Итоги корзины",
-    "subtotal": "Промежуточный итог",
-    "shipping": "Доставка",
-    "tax": "Налог",
-    "grandTotal": "Общий итог"
+    "badge": "Корзина",
+    "title": "Ваша Корзина",
+    "subtitle": "Просмотрите и управляйте выбранными запчастями перед оформлением заказа",
+    "emptyState": {
+      "title": "Ваша корзина пуста",
+      "text": "Просмотрите наш обширный каталог и добавьте запчасти в корзину",
+      "searchAutomotive": "Искать Автозапчасти",
+      "searchAviation": "Искать Авиазапчасти",
+      "searchMachinery": "Искать Запчасти для Техники"
+    },
+    "actions": {
+      "selectAll": "Выбрать Все",
+      "removeSelected": "Удалить Выбранное",
+      "downloadExcel": "Скачать Excel",
+      "emptyCart": "Очистить Корзину"
+    },
+    "table": {
+      "brand": "Бренд",
+      "partNumber": "Номер Детали",
+      "description": "Описание",
+      "terms": "Условия",
+      "weight": "Вес",
+      "stock": "Наличие",
+      "aircraft": "Тип ВС",
+      "qty": "Кол-во",
+      "addPacking": "Добавить Упаковку",
+      "price": "Цена",
+      "amount": "Сумма",
+      "reference": "Референс",
+      "dateCreated": "Дата Создания"
+    },
+    "summary": {
+      "totalInCart": "Всего в корзине",
+      "pcs": "ШТ.",
+      "forTheAmount": "на сумму",
+      "weight": "Вес",
+      "note": "Выбранные товары будут храниться в вашей корзине 30 дней.",
+      "timeRemaining": "Осталось времени:",
+      "total": "Итого:"
+    },
+    "checkout": "Перейти к Оплате"
   },
   "checkout": {
-    "title": "Оформление",
-    "subtitle": "Завершите покупку",
-    "shippingInfo": "Информация о доставке",
-    "billingInfo": "Платежная информация",
-    "paymentMethod": "Способ оплаты",
-    "reviewOrder": "Проверить заказ",
-    "placeOrder": "Разместить заказ",
-    "sameAsShipping": "Совпадает с адресом доставки"
+    "title": "Оплата",
+    "subtitle": "Просмотрите свой заказ и выберите предпочтительный способ оплаты",
+    "secureBadge": "Безопасная Оплата",
+    "steps": {
+      "paymentType": {
+        "title": "Тип Оплаты",
+        "desc": "Выберите план оплаты"
+      },
+      "paymentMethod": {
+        "title": "Способ Оплаты",
+        "desc": "Выберите вариант оплаты"
+      },
+      "confirmation": {
+        "title": "Подтверждение",
+        "desc": "Проверка и завершение"
+      }
+    },
+    "step1": {
+      "title": "Выберите Тип Оплаты",
+      "subtitle": "Выберите, как вы хотите оплатить свой заказ",
+      "fullPayment": {
+        "title": "Полная Оплата",
+        "desc": "Оплатите полную сумму сейчас и получите заказ немедленно",
+        "badge": "Лучшая Цена - Без Дополнительных Комиссий",
+        "totalAmount": "Общая Сумма:"
+      },
+      "partialPayment": {
+        "title": "Минимальная Оплата (20%)",
+        "desc": "Оплатите 20% сейчас, а оставшиеся 80% перед доставкой",
+        "payNow": "Оплатить Сейчас (20%):",
+        "payLater": "Оплатить Позже (80%):",
+        "dueNow": "К Оплате Сейчас:"
+      },
+      "continue": "Продолжить к Способу Оплаты"
+    },
+    "step2": {
+      "title": "Выберите Способ Оплаты",
+      "subtitle": "Выберите предпочтительный вариант оплаты",
+      "card": {
+        "title": "Кредитная/Дебетовая Карта",
+        "desc": "Visa, Mastercard, American Express",
+        "fee": "Комиссия за обработку: 2,9% + 1,50 د.إ"
+      },
+      "bankDubai": {
+        "title": "Банковский Перевод (ОАЭ)",
+        "desc": "Прямой банковский перевод в пределах ОАЭ",
+        "noFees": "Без Комиссий",
+        "processingTime": "Время обработки: 1-2 рабочих дня"
+      },
+      "bankInternational": {
+        "title": "Международный Банковский Перевод",
+        "desc": "SWIFT перевод из-за рубежа",
+        "fee": "Банковские комиссии: 25-50 د.إ (зависит от банка)"
+      },
+      "paypal": {
+        "title": "PayPal",
+        "desc": "Оплатите безопасно через ваш PayPal счет",
+        "fee": "Комиссия за обработку: 3,9% + 1,50 د.إ"
+      },
+      "cod": {
+        "title": "Оплата при Доставке",
+        "desc": "Оплатите при получении заказа",
+        "fee": "Сервисная комиссия: 15,00 د.إ",
+        "note": "Доступно только в ОАЭ"
+      },
+      "back": "Вернуться к Типу Оплаты",
+      "reviewOrder": "Просмотреть Заказ"
+    },
+    "step3": {
+      "title": "Проверка и Подтверждение",
+      "subtitle": "Пожалуйста, проверьте заказ перед завершением оплаты",
+      "summary": {
+        "title": "Итог Оплаты",
+        "paymentType": "Тип Оплаты:",
+        "paymentMethod": "Способ Оплаты:",
+        "processingFee": "Комиссия за Обработку:",
+        "amountToPay": "Сумма к Оплате:"
+      },
+      "terms": "Я соглашаюсь с Условиями и Положениями и Политикой Конфиденциальности",
+      "back": "Вернуться к Способу Оплаты",
+      "completePayment": "Завершить Оплату"
+    },
+    "orderSummary": {
+      "title": "Итог Заказа",
+      "subtotal": "Промежуточный итог:",
+      "items": "Товары:",
+      "totalWeight": "Общий Вес:",
+      "processingFee": "Комиссия за Обработку:",
+      "totalAmount": "Общая Сумма:",
+      "security": "Защищено 256-битным SSL шифрованием"
+    },
+    "success": {
+      "title": "Оплата Успешна!",
+      "message": "Ваш заказ успешно оформлен",
+      "orderNumber": "Номер Заказа:",
+      "paymentMethod": "Способ Оплаты:",
+      "amountPaid": "Оплаченная Сумма:",
+      "viewOrders": "Просмотреть Мои Заказы",
+      "continueShopping": "Продолжить Покупки"
+    }
   },
   "payment": {
-    "title": "Оплата",
-    "subtitle": "Безопасная обработка платежей",
-    "methods": {
-      "creditCard": "Кредитная карта",
-      "debitCard": "Дебетовая карта",
-      "bankTransfer": "Банковский перевод",
-      "paypal": "PayPal"
+    "title": "Платежи и Счета",
+    "subtitle": "Управляйте балансом счета и способами оплаты",
+    "addFunds": "Пополнить",
+    "balance": {
+      "title": "Баланс Счета",
+      "available": "Доступный Баланс",
+      "readyToUse": "Готов к использованию",
+      "pending": "Ожидающий Платеж",
+      "processing": "В обработке",
+      "totalSpent": "Всего Потрачено",
+      "allTime": "За все время"
     },
-    "cardNumber": "Номер карты",
-    "expiryDate": "Срок действия",
-    "cvv": "CVV",
-    "cardholderName": "Имя держателя карты"
+    "methods": {
+      "title": "Способы Оплаты",
+      "addMethod": "Добавить Способ",
+      "emptyTitle": "Нет Способов Оплаты",
+      "emptyText": "Добавьте способ оплаты для более удобных покупок",
+      "addPaymentMethod": "Добавить Способ Оплаты"
+    },
+    "transactions": {
+      "title": "История Транзакций",
+      "all": "Все",
+      "completed": "Завершенные",
+      "pending": "Ожидающие",
+      "refunded": "Возвращенные",
+      "date": "Дата",
+      "description": "Описание",
+      "type": "Тип",
+      "amount": "Сумма",
+      "status": "Статус",
+      "actions": "Действия",
+      "emptyTitle": "Транзакций Пока Нет",
+      "emptyText": "Ваша история транзакций появится здесь"
+    },
+    "addFundsModal": {
+      "title": "Пополнить",
+      "subtitle": "Пополните баланс вашего счета",
+      "amount": "Сумма (USD)",
+      "paymentMethod": "Способ Оплаты",
+      "selectPaymentMethod": "Выберите способ оплаты",
+      "creditCard": "Кредитная/Дебетовая Карта",
+      "bankTransfer": "Банковский Перевод",
+      "paypal": "PayPal",
+      "cancel": "Отмена",
+      "addFunds": "Пополнить"
+    },
+    "addMethodModal": {
+      "title": "Добавить Способ Оплаты",
+      "subtitle": "Сохраните способ оплаты для быстрых покупок",
+      "cardholderName": "Имя Владельца Карты *",
+      "cardNumber": "Номер Карты *",
+      "expiryDate": "Срок Действия *",
+      "cvv": "CVV *",
+      "setDefault": "Установить как способ оплаты по умолчанию",
+      "cancel": "Отмена",
+      "saveMethod": "Сохранить Способ"
+    },
+    "addFundsDesc": "Пополните баланс вашего счета",
+    "accountBalance": "Баланс Счета",
+    "totalSpent": "Всего Потрачено",
+    "allTime": "За все время",
+    "pendingPayment": "Ожидающий Платеж",
+    "processing": "В обработке",
+    "availableBalance": "Доступный Баланс",
+    "readyToUse": "Готов к использованию",
+    "paymentMethods": "Способы Оплаты",
+    "addMethod": "Добавить Способ",
+    "noPaymentMethods": "Нет Способов Оплаты",
+    "noPaymentMethodsDesc": "Добавьте способ оплаты для более удобных покупок",
+    "addPaymentMethod": "Добавить Способ Оплаты",
+    "addPaymentMethodDesc": "Сохраните способ оплаты для быстрых покупок",
+    "transactionHistory": "История Транзакций",
+    "noTransactions": "Транзакций Пока Нет",
+    "noTransactionsDesc": "Ваша история транзакций появится здесь",
+    "amountUSD": "Сумма (USD)",
+    "selectPaymentMethod": "Способ Оплаты",
+    "selectPaymentMethodPlaceholder": "Выберите способ оплаты",
+    "creditDebitCard": "Кредитная/Дебетовая Карта",
+    "bankTransfer": "Банковский Перевод",
+    "cardHolderName": "Имя Владельца Карты *",
+    "cardNumber": "Номер Карты *",
+    "expiryDate": "Срок Действия *",
+    "setDefault": "Установить как способ оплаты по умолчанию",
+    "saveMethod": "Сохранить Способ",
+    "filters": {
+      "all": "Все",
+      "completed": "Завершенные",
+      "pending": "Ожидающие",
+      "refunded": "Возвращенные"
+    },
+    "table": {
+      "date": "Дата",
+      "description": "Описание",
+      "type": "Тип",
+      "amount": "Сумма",
+      "status": "Статус",
+      "actions": "Действия"
+    }
   },
   "delivery": {
-    "title": "Доставка",
-    "subtitle": "Отследите свою посылку",
-    "trackingNumber": "Номер отслеживания",
-    "carrier": "Перевозчик",
-    "estimatedDelivery": "Ожидаемая доставка",
-    "status": "Статус",
-    "shippingAddress": "Адрес доставки",
-    "deliveryInstructions": "Инструкции по доставке"
+    "title": "Адреса Доставки",
+    "subtitle": "Управляйте адресами доставки и отслеживайте отправления",
+    "addNewAddress": "Добавить Новый Адрес",
+    "savedAddresses": "Сохраненные Адреса",
+    "emptyState": {
+      "title": "Адресов Пока Нет",
+      "text": "Добавьте ваш первый адрес доставки, чтобы начать",
+      "addAddress": "Добавить Адрес"
+    },
+    "trackOrder": "Отследить Ваш Заказ",
+    "addAddressModal": {
+      "title": "Добавить Новый Адрес",
+      "editTitle": "Редактировать Адрес",
+      "subtitle": "Заполните детали ниже",
+      "addressLabel": "Название Адреса *",
+      "addressLabelPlaceholder": "напр., Дом, Офис, Склад",
+      "fullName": "Полное Имя *",
+      "fullNamePlaceholder": "Полное имя получателя",
+      "phone": "Номер Телефона *",
+      "phonePlaceholder": "+971 XX XXX XXXX",
+      "street": "Адрес *",
+      "streetPlaceholder": "Номер дома, название улицы",
+      "city": "Город *",
+      "cityPlaceholder": "напр., Дубай",
+      "state": "Область/Эмират *",
+      "statePlaceholder": "напр., Дубай",
+      "country": "Страна *",
+      "countryPlaceholder": "напр., Объединенные Арабские Эмираты",
+      "postalCode": "Почтовый Индекс",
+      "postalCodePlaceholder": "Необязательно",
+      "notes": "Дополнительные Примечания",
+      "notesPlaceholder": "Ориентиры, специальные инструкции и т.д.",
+      "setDefault": "Установить как адрес по умолчанию",
+      "cancel": "Отмена",
+      "saveAddress": "Сохранить Адрес"
+    },
+    "deleteModal": {
+      "title": "Удалить Адрес?",
+      "text": "Это действие нельзя отменить.",
+      "cancel": "Отмена",
+      "delete": "Удалить",
+      "message": "Вы уверены, что хотите удалить этот адрес?"
+    },
+    "savedAddressesObj": {
+      "title": "Сохраненные Адреса",
+      "subtitle": "Управляйте вашими местами доставки"
+    },
+    "manageLocations": "Управляйте вашими местами доставки",
+    "noAddresses": "Адресов Пока Нет",
+    "noAddressesDesc": "Добавьте ваш первый адрес доставки, чтобы начать",
+    "addAddress": "Добавить Адрес",
+    "trackOrderObj": {
+      "title": "Отследить Ваш Заказ",
+      "subtitle": "Введите номер заказа для отслеживания отправления",
+      "placeholder": "Введите номер заказа (напр., ORD-123456)",
+      "track": "Отследить",
+      "viewAllOrders": "Просмотреть Все Заказы"
+    },
+    "trackOrderDesc": "Введите номер заказа для отслеживания отправления",
+    "trackingPlaceholder": "Введите номер заказа (напр., ORD-123456)",
+    "track": "Отследить",
+    "viewAllOrders": "Просмотреть Все Заказы",
+    "deleteAddress": "Удалить Адрес?",
+    "deleteAddressConfirm": "Вы уверены, что хотите удалить этот адрес?",
+    "fillDetails": "Заполните детали ниже",
+    "saveAddress": "Сохранить Адрес",
+    "form": {
+      "label": "Название Адреса *",
+      "labelPlaceholder": "напр., Дом, Офис, Склад",
+      "fullName": "Полное Имя *",
+      "fullNamePlaceholder": "Полное имя получателя",
+      "phone": "Номер Телефона *",
+      "street": "Адрес *",
+      "streetPlaceholder": "Номер дома, название улицы",
+      "city": "Город *",
+      "cityPlaceholder": "напр., Дубай",
+      "state": "Область/Эмират *",
+      "statePlaceholder": "напр., Дубай",
+      "country": "Страна *",
+      "countryPlaceholder": "напр., Объединенные Арабские Эмираты",
+      "postalCode": "Почтовый Индекс",
+      "notes": "Дополнительные Примечания",
+      "notesPlaceholder": "Ориентиры, специальные инструкции и т.д.",
+      "setDefault": "Установить как адрес по умолчанию",
+      "optional": "(Optional)"
+    }
   },
   "profile": {
-    "title": "Профиль",
-    "subtitle": "Управляйте своей учетной записью",
-    "personalInfo": "Личная информация",
-    "firstName": "Имя",
-    "lastName": "Фамилия",
-    "email": "Email",
-    "phone": "Телефон",
-    "company": "Компания",
-    "jobTitle": "Должность",
-    "updateProfile": "Обновить профиль"
+    "badge": "Мой Профиль",
+    "title": "Мой Профиль",
+    "subtitle": "Управляйте личной информацией и настройками учетной записи",
+    "tabs": {
+      "personal": "Личная Информация",
+      "company": "Информация о Компании",
+      "security": "Безопасность"
+    },
+    "personal": {
+      "title": "Личная Информация",
+      "subtitle": "Обновите вашу основную личную информацию",
+      "firstName": "Имя *",
+      "lastName": "Фамилия *",
+      "email": "Электронная почта *",
+      "phone": "Номер Телефона",
+      "saveChanges": "Сохранить Изменения"
+    },
+    "company": {
+      "title": "Информация о Компании",
+      "subtitle": "Обновите данные вашей организации",
+      "companyName": "Название Компании *",
+      "industry": "Отрасль",
+      "selectIndustry": "Выберите отрасль",
+      "website": "Вебсайт",
+      "taxId": "ИНН",
+      "saveChanges": "Сохранить Изменения"
+    },
+    "security": {
+      "title": "Безопасность Учетной Записи",
+      "subtitle": "Управляйте паролем и настройками безопасности",
+      "changePassword": "Изменить Пароль",
+      "currentPassword": "Текущий Пароль *",
+      "newPassword": "Новый Пароль *",
+      "confirmPassword": "Подтвердить Новый Пароль *",
+      "updatePassword": "Обновить Пароль",
+      "twoFactor": "Двухфакторная Аутентификация",
+      "twoFactorDesc": "Добавьте дополнительный уровень безопасности к вашей учетной записи",
+      "enable2FA": "Включить 2FA",
+      "password": "Пароль",
+      "lastChanged": "Последнее изменение 30 дней назад",
+      "notEnabled": "Не включено"
+    },
+    "activeAccount": "Активный Аккаунт",
+    "stats": {
+      "totalOrders": "Всего Заказов",
+      "memberSince": "Участник С"
+    },
+    "personalInfo": "Личная Информация",
+    "addressInfo": {
+      "title": "Адресная Информация",
+      "edit": "Редактировать",
+      "street": "Улица",
+      "city": "Город",
+      "state": "Область",
+      "country": "Страна",
+      "postalCode": "Почтовый Индекс"
+    },
+    "totalOrders": "Всего Заказов",
+    "memberSince": "Участник С",
+    "personalInfoObj": {
+      "title": "Личная Информация",
+      "edit": "Редактировать",
+      "fullName": "Полное Имя",
+      "email": "Email",
+      "phone": "Телефон",
+      "dateOfBirth": "Дата Рождения"
+    },
+    "fullName": "Полное Имя",
+    "emailAddress": "Email",
+    "phoneNumber": "Телефон",
+    "myAddresses": "My Addresses",
+    "loadingAddresses": "Loading addresses...",
+    "accountSecurity": "Безопасность Учетной Записи",
+    "password": "Пароль",
+    "lastChanged": "Last changed {{days}} days ago",
+    "changePassword": "Изменить Пароль",
+    "changePasswordDesc": "Update your account password",
+    "twoFA": "Двухфакторная Аутентификация",
+    "notEnabled": "Не включено",
+    "inactive": "Inactive",
+    "newsletter": "Newsletter",
+    "subscribed": "Subscribed",
+    "notSubscribed": "Not subscribed",
+    "editPersonalInfo": "Edit Personal Information",
+    "updateDetails": "Update Details",
+    "updatePassword": "Update Password",
+    "uploadPhoto": "Upload Photo",
+    "uploadPhotoBtn": "Upload Photo",
+    "choosePhoto": "Choose Photo",
+    "dropImage": "or drop image here",
+    "imageFormats": "JPG, PNG, GIF up to 5MB",
+    "uploading": "Uploading...",
+    "passwordRequirements": "Password Requirements",
+    "form": {
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "companyName": "Company Name",
+      "currentPassword": "Current Password",
+      "newPassword": "New Password",
+      "confirmPassword": "Confirm Password",
+      "shippingAddress": "Shipping Address",
+      "city": "City",
+      "minChars": "At least {{count}} characters"
+    },
+    "req": {
+      "minLength": "At least 8 characters",
+      "match": "Passwords match"
+    }
   },
   "settings": {
+    "badge": "Настройки",
     "title": "Настройки",
-    "subtitle": "Настройте свои предпочтения",
-    "account": "Настройки учетной записи",
-    "notifications": "Уведомления",
-    "security": "Безопасность",
-    "preferences": "Предпочтения",
-    "language": "Язык",
-    "timezone": "Часовой пояс",
-    "currency": "Валюта"
+    "subtitle": "Настройте свой опыт и предпочтения",
+    "sections": {
+      "preferences": "Предпочтения",
+      "notifications": "Уведомления",
+      "privacy": "Конфиденциальность"
+    },
+    "preferences": {
+      "title": "Предпочтения",
+      "subtitle": "Настройте ваш опыт",
+      "language": "Язык",
+      "selectLanguage": "Выберите язык",
+      "currency": "Валюта",
+      "selectCurrency": "Выберите валюту",
+      "timezone": "Часовой Пояс",
+      "selectTimezone": "Выберите часовой пояс",
+      "dateFormat": "Формат Даты",
+      "savePreferences": "Сохранить Предпочтения",
+      "theme": "Тема",
+      "itemsPerPage": "Элементов на Странице",
+      "themeDesc": "Выберите цветовую тему",
+      "light": "Светлая",
+      "dark": "Темная",
+      "auto": "Авто (Система)",
+      "itemsPerPageDesc": "Количество отображаемых элементов"
+    },
+    "notifications": {
+      "title": "Настройки Уведомлений",
+      "subtitle": "Управление уведомлениями",
+      "email": "Email Уведомления",
+      "push": {
+        "title": "Push Уведомления",
+        "enabled": "Включить push уведомления",
+        "enabledDesc": "Получать уведомления в реальном времени в вашем браузере"
+      },
+      "saveNotifications": "Сохранить Настройки",
+      "orderUpdates": "Обновления Заказов",
+      "promotional": "Рекламные Письма",
+      "sms": "SMS Уведомления",
+      "emailDesc": "Получать уведомления по email",
+      "orderUpdatesDesc": "Уведомления об изменении статуса",
+      "promotionalDesc": "Получать специальные предложения",
+      "smsDesc": "Получать SMS для срочных обновлений"
+    },
+    "privacy": {
+      "title": "Настройки Конфиденциальности",
+      "subtitle": "Управление настройками приватности",
+      "dataSharing": "Обмен Данными",
+      "dataSharingDesc": "Разрешить анонимный обмен данными для улучшения сервиса",
+      "activityTracking": "Отслеживание Активности",
+      "activityTrackingDesc": "Разрешить отслеживание активности для персонализированных рекомендаций",
+      "savePrivacy": "Сохранить Настройки",
+      "profileVisibility": {
+        "title": "Видимость Профиля",
+        "desc": "Кто может видеть ваш профиль",
+        "public": "Публичный",
+        "private": "Приватный",
+        "friendsOnly": "Только Друзья"
+      },
+      "dataCollection": "Сбор Данных",
+      "cookies": "Cookies",
+      "visibility": "Видимость Профиля",
+      "visibilityDesc": "Кто может видеть ваш профиль",
+      "public": "Публичный",
+      "private": "Приватный",
+      "friendsOnly": "Только Друзья",
+      "dataCollectionDesc": "Разрешить аналитику для улучшения сервиса",
+      "cookiesDesc": "Принять cookies для лучшего опыта"
+    },
+    "dangerZone": {
+      "title": "Опасная Зона",
+      "deleteAccount": "Удалить Учетную Запись",
+      "deleteAccountDesc": "Навсегда удалить вашу учетную запись и все связанные данные",
+      "deleteButton": "Удалить Учетную Запись"
+    },
+    "nav": {
+      "general": "Общие",
+      "notifications": "Уведомления",
+      "privacy": "Конфиденциальность",
+      "security": "Безопасность",
+      "preferences": "Предпочтения",
+      "billing": "Счета"
+    },
+    "general": {
+      "title": "Общие Настройки",
+      "subtitle": "Управление общими настройками аккаунта",
+      "language": "Язык",
+      "timezone": "Часовой Пояс",
+      "dateFormat": "Формат Даты",
+      "currency": {
+        "title": "Валюта",
+        "desc": "Выберите предпочитаемую валюту"
+      },
+      "languageDesc": "Выберите предпочитаемый язык",
+      "timezoneDesc": "Установите ваш часовой пояс",
+      "dateFormatDesc": "Выберите формат отображения дат"
+    },
+    "security": {
+      "title": "Настройки Безопасности",
+      "subtitle": "Управление безопасностью аккаунта",
+      "twoFactor": {
+        "title": "Двухфакторная Аутентификация",
+        "desc": "Добавить дополнительный уровень безопасности",
+        "setup": "Настроить 2FA"
+      },
+      "changePassword": "Изменить Пароль",
+      "sessions": {
+        "title": "Активные Сессии",
+        "desc": "Просмотр подключенных устройств",
+        "view": "Просмотреть Сессии"
+      },
+      "twoFA": "Двухфакторная Аутентификация",
+      "twoFADesc": "Добавить дополнительный уровень безопасности",
+      "changePasswordDesc": "Регулярно обновляйте пароль",
+      "changePasswordBtn": "Изменить Пароль",
+      "activeSessions": "Активные Сессии",
+      "activeSessionsDesc": "Просмотр подключенных устройств",
+      "viewSessions": "Просмотреть Сессии"
+    },
+    "billing": {
+      "title": "Настройки Счетов",
+      "subtitle": "Управление способами оплаты",
+      "paymentMethods": "Способы Оплаты",
+      "billingAddress": "Адрес Выставления Счетов",
+      "invoices": {
+        "title": "История Счетов",
+        "desc": "Просмотр и скачивание счетов",
+        "view": "Просмотр Счетов"
+      },
+      "paymentMethodsDesc": "Управление сохраненными методами",
+      "managePaymentMethods": "Управление Методами",
+      "billingAddressDesc": "Обновить адрес",
+      "updateAddress": "Обновить Адрес",
+      "invoiceHistory": "История Счетов",
+      "invoiceHistoryDesc": "Просмотр и скачивание счетов",
+      "viewInvoices": "Просмотр Счетов"
+    },
+    "actions": {
+      "saveChanges": "Сохранить Изменения",
+      "resetToDefault": "Сбросить Настройки"
+    },
+    "resetToDefault": "Сбросить Настройки"
   },
   "tickets": {
-    "title": "Заявки в поддержку",
-    "subtitle": "Получите помощь по своим заказам",
-    "createTicket": "Создать заявку",
-    "ticketNumber": "Номер заявки",
+    "badge": "Поддержка",
+    "title": "Заявки в Поддержку",
+    "subtitle": "Получите помощь по вашим заказам и запросам",
+    "createTicket": "Создать Заявку",
+    "stats": {
+      "open": "Открытые",
+      "inProgress": "В Работе",
+      "resolved": "Решенные"
+    },
+    "filters": {
+      "status": "Статус",
+      "allStatuses": "Все Статусы",
+      "open": "Открытая",
+      "inProgress": "В Работе",
+      "resolved": "Решенная",
+      "closed": "Закрытая",
+      "searchTicket": "Поиск Заявок",
+      "searchPlaceholder": "Номер заявки, тема...",
+      "applyFilters": "Применить Фильтры",
+      "reset": "Сбросить"
+    },
+    "table": {
+      "ticketNumber": "Номер Заявки",
+      "subject": "Тема",
+      "category": "Категория",
+      "priority": "Приоритет",
+      "status": "Статус",
+      "created": "Создано",
+      "actions": "Действия"
+    },
+    "priorities": {
+      "low": "Низкий",
+      "medium": "Средний",
+      "high": "Высокий",
+      "urgent": "Срочный"
+    },
+    "categories": {
+      "shipping": "Проблема с Доставкой",
+      "order": "Проблема с Заказом",
+      "product": "Вопрос о Товаре",
+      "payment": "Оплата",
+      "documentation": "Документация",
+      "other": "Другое",
+      "technical": "Техническая проблема"
+    },
+    "emptyState": {
+      "title": "Заявок в Поддержку Нет",
+      "text": "Вы еще не создали ни одной заявки в поддержку. Если вам нужна помощь, создайте новую заявку.",
+      "createTicket": "Создать Заявку"
+    },
+    "actions": {
+      "viewTicket": "Просмотреть Заявку",
+      "closeTicket": "Закрыть Заявку"
+    },
+    "details": {
+      "title": "Детали Заявки",
+      "backToTickets": "К Заявкам",
+      "ticketInfo": "Информация о Заявке",
+      "conversation": "Переписка",
+      "reply": "Ответить",
+      "replyPlaceholder": "Введите ваш ответ...",
+      "sendReply": "Отправить Ответ",
+      "attachFile": "Прикрепить Файл",
+      "closeTicket": "Закрыть Заявку",
+      "loading": "Загрузка...",
+      "category": "Категория",
+      "status": "Статус",
+      "lastUpdated": "Последнее обновление",
+      "chatWithSupport": "Чат с поддержкой",
+      "typePlaceholder": "Введите сообщение...",
+      "send": "Отправить",
+      "messages": "Сообщения",
+      "attachments": "Вложения",
+      "addAttachment": "Добавить Вложение"
+    },
+    "create": {
+      "title": "Создать Заявку в Поддержку",
+      "subtitle": "Мы здесь, чтобы помочь",
+      "orderNumber": "Номер Заказа",
+      "orderNumberPlaceholder": "Введите связанный номер заказа (необязательно)",
+      "selectCategory": "Выберите Категорию",
+      "selectPriority": "Выберите Приоритет",
+      "subject": "Тема",
+      "subjectPlaceholder": "Краткое описание проблемы",
+      "description": "Описание",
+      "descriptionPlaceholder": "Пожалуйста, предоставьте подробную информацию о вашей проблеме...",
+      "attachFiles": "Прикрепить Файлы",
+      "submitTicket": "Отправить Заявку",
+      "badge": "Центр Поддержки",
+      "backToTickets": "Назад к Заявкам",
+      "cardTitle": "Информация о Заявке",
+      "cardSubtitle": "Пожалуйста, укажите детали вашей проблемы",
+      "category": "Категория",
+      "required": "*",
+      "optional": "(Необязательно)",
+      "selectCategoryPlaceholder": "Выберите категорию",
+      "categoryHint": "Выберите категорию, которая лучше всего описывает вашу проблему",
+      "relatedOrder": "Связанный заказ",
+      "noSpecificOrder": "Нет конкретного заказа",
+      "orderHint": "Выберите заказ, если эта проблема связана с конкретным заказом",
+      "orderHintRecommended": "Рекомендуется: Выберите связанный заказ для более быстрого решения",
+      "subjectHint": "Предоставьте четкое и краткое описание вашей проблемы",
+      "descriptionHint": "Включите как можно больше деталей, чтобы помочь нам быстро решить проблему",
+      "attachmentsLabel": "Вложения",
+      "clickToUpload": "Нажмите для загрузки",
+      "orDragDrop": "или перетащите",
+      "fileTypes": "PNG, JPG, PDF до 10МБ каждый",
+      "cancel": "Отмена",
+      "submit": "Отправить Заявку",
+      "helpTitle": "Нужна Срочная Помощь?",
+      "helpText": "Для срочных вопросов вы также можете связаться с нами напрямую:",
+      "describeIssue": "Опишите вашу проблему"
+    },
+    "ticketNumber": "Номер Заявки",
     "subject": "Тема",
     "category": "Категория",
     "priority": "Приоритет",
@@ -224,41 +916,102 @@
     "created": "Создано",
     "updated": "Обновлено",
     "noTickets": "Заявки не найдены",
-    "categories": {
-      "shipping": "Проблема с доставкой",
-      "order": "Проблема с заказом",
-      "product": "Вопрос о продукте",
-      "payment": "Оплата",
-      "documentation": "Документация",
-      "other": "Другое"
-    },
-    "details": {
-      "title": "Детали заявки",
-      "messages": "Сообщения",
-      "reply": "Ответить",
-      "attachments": "Вложения",
-      "addAttachment": "Добавить вложение"
-    },
-    "create": {
-      "title": "Создать заявку в поддержку",
-      "subtitle": "Мы здесь, чтобы помочь",
-      "orderNumber": "Номер заказа",
-      "selectCategory": "Выберите категорию",
-      "selectPriority": "Выберите приоритет",
-      "describeIssue": "Опишите вашу проблему",
-      "attachFiles": "Прикрепить файлы"
+    "empty": {
+      "title": "No Tickets Yet",
+      "text": "You haven't created any support tickets",
+      "createFirst": "Create First Ticket"
     }
   },
   "affiliate": {
-    "title": "Партнерская программа",
-    "subtitle": "Зарабатывайте, приглашая других",
-    "yourLink": "Ваша реферальная ссылка",
-    "copyLink": "Скопировать ссылку",
-    "earnings": "Общий доход",
-    "referrals": "Всего рефералов",
-    "howItWorks": "Как это работает",
-    "benefits": "Преимущества",
-    "getStarted": "Начать"
+    "badge": "Партнерская программа",
+    "title": "Программа лояльности для наших клиентов",
+    "subtitle": "Мы ценим каждого клиента и предлагаем лучшие награды тем, кто способствует развитию вашего бренда. Чем больше вы продвигаетесь с нами, тем больше наград получаете!",
+    "description": "Наша программа включает следующие уровни: БРОНЗА – улучшенные условия и дополнительные скидки; СЕРЕБРО – премиум скидки и приоритетное обслуживание; ЗОЛОТО – эксклюзивные цены и выделенная поддержка; ПЛАТИНА – VIP-преимущества и персональный подход; ПЛАТИНА+ – высший уровень с VIP+ условиями, приоритетными привилегиями и уникальными предложениями.",
+    "tiers": {
+      "title": "Уровни членства",
+      "subtitle": "Ваша лояльность определяет уровень ваших покупок на основе объема заказов. Чем выше уровень, тем больше преимуществ вы получаете.",
+      "bronze": {
+        "name": "Бронза",
+        "range": "0-5 000$",
+        "revenue": "Ежемесячные продажи",
+        "discountLevel": "Уровень скидки",
+        "orderingOption": "Способ заказа",
+        "shipping": "Доставка",
+        "procurement": "Закупки",
+        "paySplit": "Рассрочка",
+        "freeStorage": "Бесплатное хранение",
+        "currentLevel": "Текущий уровень"
+      },
+      "silver": {
+        "name": "Серебро",
+        "range": "5 000-15 000$",
+        "revenue": "Ежемесячные продажи"
+      },
+      "gold": {
+        "name": "Золото",
+        "range": "15 000-50 000$",
+        "revenue": "Ежемесячные продажи"
+      },
+      "platinum": {
+        "name": "Платина",
+        "range": "50 000-100 000$",
+        "revenue": "Ежемесячные продажи"
+      },
+      "platinumPlus": {
+        "name": "Платина+",
+        "range": "100 000+ $",
+        "revenue": "Ежемесячные продажи",
+        "premiumBenefits": "Премиум преимущества"
+      }
+    },
+    "stats": {
+      "discountLevel": "Уровень скидки",
+      "orderingOption": "Способ заказа",
+      "shipping": "Доставка",
+      "procurement": "Закупки",
+      "paySplit": "Рассрочка",
+      "freeStorage": "Бесплатное хранение",
+      "website": "Сайт",
+      "manual": "Вручную",
+      "viaWebsite": "Через сайт",
+      "viaManager": "Через менеджера",
+      "days": "дней",
+      "free": "Бесплатно",
+      "individual": "Индивидуально"
+    },
+    "benefits": {
+      "title": "Преимущества",
+      "managerSupport": "Поддержка менеджера",
+      "freeStorage": "Бесплатное хранение 5000$",
+      "analytics": "Аналитика",
+      "trackAvailability": "Отслеживание наличия и поставщика",
+      "yes": "Да",
+      "no": "Нет",
+      "unlimited": "Без ограничений",
+      "advanced": "Расширенная",
+      "realTime": "В реальном времени"
+    },
+    "howItWorks": {
+      "title": "Как это работает",
+      "subtitle": "Простой и прозрачный процесс для максимизации ваших преимуществ",
+      "placeOrders": {
+        "title": "Оформляйте заказы",
+        "description": "Продолжайте покупать запчасти через нашу платформу как обычно"
+      },
+      "growSales": {
+        "title": "Увеличивайте продажи",
+        "description": "Ваш ежемесячный объем продаж определяет ваш уровень"
+      },
+      "earnRewards": {
+        "title": "Получайте награды",
+        "description": "Открывайте лучшие скидки, приоритетную поддержку и эксклюзивные преимущества"
+      }
+    },
+    "disclaimer": {
+      "note": "Примечание:",
+      "text": "Ваш уровень будет рассчитан на основе накопленного ежемесячного объема покупок с момента создания вашей учетной записи. Членство в уровне обновляется ежемесячно, и все преимущества автоматически применяются к вашей учетной записи."
+    },
+    "learnMore": "Узнать больше"
   },
   "contacts": {
     "title": "Свяжитесь с нами",
@@ -272,9 +1025,20 @@
     "address": "Адрес",
     "phone": "Телефон",
     "emailAddress": "Email адрес",
-    "businessHours": "Часы работы"
+    "businessHours": "Часы работы",
+    "badge": "Поддержка 24/7",
+    "website": "Сайт"
   },
   "search": {
+    "badge": "Поиск Автозапчастей",
+    "heroTitle": "Найдите Автозапчасти",
+    "heroSubtitle": "Поиск миллионов автозапчастей от проверенных поставщиков по всему миру",
+    "placeholder": "Введите номер детали, модель автомобиля или описание...",
+    "searchBtn": "Поиск",
+    "resetBtn": "Сбросить",
+    "excelImport": "Импорт Excel",
+    "aiSmartFilter": "Умный Фильтр ИИ",
+    "advancedFilters": "Расширенные Фильтры",
     "title": "Поиск запчастей",
     "subtitle": "Найдите нужные вам запчасти",
     "partNumber": "Номер запчасти",
@@ -285,6 +1049,34 @@
     "results": "Результаты поиска",
     "noResults": "Результаты не найдены",
     "refineSearch": "Уточните поиск",
+    "aiFilter": {
+      "title": "Умный Фильтр",
+      "subtitle": "Опишите, что вы ищете, на естественном языке",
+      "placeholder": "Например: Найти тормозные колодки дешевле $200 от немецких поставщиков...",
+      "findParts": "Найти Запчасти",
+      "try": "Попробуйте:",
+      "hint1": "Оригинальные тормозные детали до $500",
+      "hint2": "Подшипники SKF в наличии",
+      "hint3": "Немецкие поставщики с сертификатом ISO",
+      "analyzing": "Анализ вашего запроса...",
+      "foundFilters": "Фильтры определены",
+      "applyFilters": "Применить Фильтры",
+      "sidebarHint": "Фильтры появятся в боковой панели для дальнейшей настройки",
+      "features": {
+        "smartSearch": {
+          "title": "Умный Поиск",
+          "desc": "ИИ понимает сложные запросы"
+        },
+        "autoFilters": {
+          "title": "Автофильтры",
+          "desc": "Автоматически устанавливает оптимальные фильтры"
+        },
+        "saveTime": {
+          "title": "Экономия Времени",
+          "desc": "Находите запчасти в 10 раз быстрее"
+        }
+      }
+    },
     "automotive": {
       "title": "Автомобильные запчасти",
       "subtitle": "Поиск запчастей и компонентов для транспортных средств"
@@ -296,6 +1088,219 @@
     "machinery": {
       "title": "Запчасти для тяжелой техники",
       "subtitle": "Поиск запчастей для промышленного оборудования"
+    },
+    "emptyState": {
+      "title": "Начните Поиск",
+      "text": "Введите номер детали, название бренда или описание, чтобы найти запчасти от проверенных поставщиков по всему миру.",
+      "popularSearches": "ПОПУЛЯРНЫЕ ЗАПРОСЫ"
     }
+  },
+  "searchResults": {
+    "title": "Результаты Поиска",
+    "showing": "Показано",
+    "results": "результатов для",
+    "sortBy": "Сортировать по:",
+    "relevance": "Релевантность",
+    "priceLowHigh": "Цена: По возрастанию",
+    "priceHighLow": "Цена: По убыванию",
+    "delivery": "Срок Доставки",
+    "addToCart": "В Корзину",
+    "viewDetails": "Подробнее",
+    "inStock": "В Наличии",
+    "outOfStock": "Нет в Наличии",
+    "limitedStock": "Ограниченный Запас",
+    "filters": {
+      "title": "Фильтры",
+      "subtitle": "Уточнить результаты поиска",
+      "clearAll": "Очистить Все",
+      "filterByResults": "Фильтровать по Результатам",
+      "partsFound": "запчастей найдено",
+      "priceRange": "Диапазон Цен",
+      "min": "Мин",
+      "max": "Макс",
+      "stockCode": "Код Склада",
+      "allStockCodes": "Все Коды Склада",
+      "brand": "Бренд",
+      "searchBrands": "Поиск брендов...",
+      "allBrands": "Все Бренды",
+      "showMore": "Показать больше",
+      "deliveryTime": "Срок Доставки",
+      "days": "дней",
+      "express": "Экспресс (1-2 дня)",
+      "fast": "Быстрая (3-5 дней)",
+      "standard": "Стандартная (7-14 дней)",
+      "availableQty": "Доступное Количество",
+      "units": "единиц",
+      "minAvailable": "Минимум Доступно",
+      "weight": "Вес",
+      "matching": "Совпадений:",
+      "parts": "запчастей",
+      "reset": "Сбросить",
+      "applyFilters": "Применить Фильтры"
+    },
+    "header": {
+      "found": "Найдено",
+      "partsMatching": "запчастей по вашему запросу",
+      "selectItems": "Выберите товары для добавления в корзину",
+      "selected": "Выбрано",
+      "selectedTotal": "Итого Выбрано",
+      "addToCart": "В Корзину",
+      "addToCartCount": "В Корзину",
+      "filters": "Фильтры"
+    },
+    "sort": {
+      "sortBy": "Сортировать по:",
+      "relevance": "Релевантность",
+      "cheapest": "Дешевле",
+      "expensive": "Дороже",
+      "fastestDelivery": "Быстрая Доставка",
+      "mostStock": "Больше Запаса",
+      "inStockOnly": "Только в Наличии",
+      "lowStock": "Мало на Складе"
+    },
+    "table": {
+      "select": "ВЫБРАТЬ",
+      "brand": "БРЕНД",
+      "vendorCode": "КОД ПОСТАВЩИКА",
+      "description": "ОПИСАНИЕ",
+      "qty": "КОЛ-ВО",
+      "stockCode": "КОД СКЛАДА",
+      "volume": "ОБЪЕМ",
+      "weight": "ВЕС",
+      "delivery": "ДОСТАВКА",
+      "orderQty": "КОЛ-ВО ЗАКАЗА",
+      "total": "ИТОГО"
+    },
+    "footer": {
+      "addSelectedToCart": "Добавить Выбранное в Корзину",
+      "selectedTotal": "ИТОГО ВЫБРАНО:"
+    },
+    "emptyState": {
+      "title": "Начните Поиск",
+      "description": "Введите номер детали, название бренда или описание, чтобы найти запчасти от проверенных поставщиков по всему миру.",
+      "popularSearches": "ПОПУЛЯРНЫЕ ЗАПРОСЫ",
+      "brakePads": "Тормозные Колодки",
+      "oilFilter": "Масляный Фильтр",
+      "alternator": "Генератор",
+      "waterPump": "Водяной Насос",
+      "verifiedSuppliers": "Проверенные Поставщики",
+      "globalNetwork": "Глобальная Сеть",
+      "fastDelivery": "Быстрая Доставка",
+      "qualityGuaranteed": "Гарантия Качества",
+      "features": {
+        "verifiedSuppliers": "Проверенные Поставщики",
+        "globalNetwork": "Глобальная Сеть",
+        "fastDelivery": "Быстрая Доставка",
+        "qualityGuaranteed": "Гарантия Качества"
+      }
+    },
+    "noResults": {
+      "title": "Запчасти Не Найдены",
+      "noPartsFound": "Мы не нашли запчастей, соответствующих",
+      "description": "Мы не нашли запчастей, соответствующих",
+      "tryDifferent": "Попробуйте другой номер детали или свяжитесь с нашей командой для помощи.",
+      "tryAgain": "Попробовать Снова",
+      "contactSupport": "Связаться с Поддержкой",
+      "suggestions": "Предложения:",
+      "checkSpelling": "Проверьте правописание поискового запроса",
+      "tryDifferentFormat": "Попробуйте другой формат номера детали",
+      "useFewerKeywords": "Используйте меньше или более общие ключевые слова",
+      "clearFilters": "Очистите фильтры для расширения поиска",
+      "suggestion1": "Проверьте правописание поискового запроса",
+      "suggestion2": "Попробуйте другой формат номера детали",
+      "suggestion3": "Используйте меньше или более общие ключевые слова",
+      "suggestion4": "Очистите фильтры для расширения поиска"
+    },
+    "excel": {
+      "title": "Импорт Excel",
+      "aiBadge": "ИИ",
+      "subtitle": "ИИ анализирует вашу таблицу для автоматического извлечения запчастей",
+      "dragDrop": "Перетащите файл Excel сюда",
+      "aiExtract": "ИИ интеллектуально извлечет запчасти из любого формата",
+      "browseFiles": "Обзор Файлов",
+      "supportedFormats": "Поддерживает .xlsx, .xls, .csv • Макс 10MB • Макс 5 000 строк • Макс 1 000 запчастей за поиск",
+      "fileHint": "Поддерживает .xlsx, .xls, .csv • Макс 10MB • Макс 5 000 строк • Макс 1 000 запчастей за поиск",
+      "formatHint": "Работает с любым форматом, но структурированные данные дают лучшие результаты",
+      "sampleHint": "Работает с любым форматом, но структурированные данные дают лучшие результаты",
+      "downloadSample": "Скачать Шаблон",
+      "fileTooLarge": "Файл Слишком Большой",
+      "analyzing": "ИИ анализирует вашу таблицу...",
+      "readingData": "Чтение данных таблицы",
+      "detectingParts": "Обнаружение номеров деталей",
+      "extractingData": "Извлечение количества и брендов",
+      "extractingQty": "Извлечение количества и брендов",
+      "validating": "Проверка и организация",
+      "analysisComplete": "Анализ Завершен!",
+      "partsReady": "Найдено 25 запчастей для поиска",
+      "foundParts": "Найдено {count} запчастей для поиска",
+      "aiPowered": "На Базе ИИ",
+      "dataQuality": "Качество Данных:",
+      "qualityGood": "Хорошее",
+      "selectAll": "Выбрать Все",
+      "selectFirst1000": "Выбрать Первые 1 000",
+      "partsSelected": "0 запчастей выбрано",
+      "filterAll": "Все",
+      "filterHigh": "Высокая Уверенность",
+      "filterMedium": "Средняя",
+      "filterLow": "Низкая",
+      "all": "Все",
+      "highConfidence": "Высокая Уверенность",
+      "medium": "Средняя",
+      "low": "Низкая",
+      "aiSuggestions": "Предложения ИИ",
+      "importAnalytics": "Аналитика Импорта",
+      "totalParts": "Всего Запчастей",
+      "found": "Найдено",
+      "notFound": "Не Найдено",
+      "duplicates": "Дубликаты",
+      "notCounted": "Не учтено",
+      "successRate": "Успешность",
+      "partsNotFound": "Запчасти Не Найдены",
+      "duplicatesDetected": "Обнаружены и объединены дубликаты",
+      "searchResultsTitle": "Результаты Поиска и Рекомендации ИИ",
+      "foundOptions": "Найдены варианты для 25 запчастей",
+      "backToParts": "Назад к Запчастям",
+      "uploadNewFile": "Загрузить Новый Файл",
+      "searchParts": "Искать Запчасти",
+      "addToCartBtn": "В Корзину"
+    },
+    "recentSearches": {
+      "title": "Недавние Поиски",
+      "empty": "Пока нет недавних поисков",
+      "clearHistory": "Очистить Историю"
+    }
+  },
+  "footer": {
+    "tagline": "Глобальная Платформа Снабжения",
+    "description": "Связываем производителей с проверенными поставщиками в более чем 40 странах. Создана для масштаба предприятия, спроектирована для точности.",
+    "platform": "Платформа",
+    "main": "Главная",
+    "sectors": "Секторы",
+    "allSectors": "Все Секторы",
+    "oemParts": "OEM Запчасти",
+    "aftermarketParts": "Запчасти Aftermarket",
+    "performanceParts": "Тюнинг Запчасти",
+    "company": "Компания",
+    "support": "Поддержка",
+    "aboutUs": "О Нас",
+    "helpCenter": "Центр Помощи",
+    "resources": "Ресурсы",
+    "documentation": "Документация",
+    "apiReference": "API Справка",
+    "blog": "Блог",
+    "faq": "ЧаВо",
+    "copyright": "Все права защищены",
+    "privacyPolicy": "Политика Конфиденциальности",
+    "termsOfService": "Условия Использования",
+    "cookiePolicy": "Политика Cookies"
+  },
+  "quickSearch": {
+    "badge": "БЫСТРЫЙ ПОИСК",
+    "title": "Найти Промышленные Детали",
+    "subtitle": "Введите номер детали или описание для поиска по всем секторам",
+    "placeholder": "Введите номер детали или описание...",
+    "selectCategory": "Выберите Категорию:",
+    "searchNow": "Искать Сейчас",
+    "recentSearches": "Недавние Поиски"
   }
 }

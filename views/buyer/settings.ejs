@@ -13,12 +13,12 @@
     <div class="settings-hero-content">
       <div class="settings-badge">
         <i data-lucide="settings"></i>
-        <span>Account Settings</span>
+        <span><%= t('settings.badge') %></span>
       </div>
 
-      <h1 class="settings-hero-title">Settings</h1>
+      <h1 class="settings-hero-title"><%= t('settings.title') %></h1>
       <p class="settings-hero-subtitle">
-        Customize your account preferences and manage your settings
+        <%= t('settings.subtitle') %>
       </p>
     </div>
   </div>
@@ -32,27 +32,27 @@
           <div class="settings-nav">
             <button class="settings-nav-item active" data-section="general">
               <i data-lucide="sliders"></i>
-              <span>General</span>
+              <span><%= t('settings.nav.general') %></span>
             </button>
             <button class="settings-nav-item" data-section="notifications">
               <i data-lucide="bell"></i>
-              <span>Notifications</span>
+              <span><%= t('settings.nav.notifications') %></span>
             </button>
             <button class="settings-nav-item" data-section="privacy">
               <i data-lucide="lock"></i>
-              <span>Privacy</span>
+              <span><%= t('settings.nav.privacy') %></span>
             </button>
             <button class="settings-nav-item" data-section="security">
               <i data-lucide="shield"></i>
-              <span>Security</span>
+              <span><%= t('settings.nav.security') %></span>
             </button>
             <button class="settings-nav-item" data-section="preferences">
               <i data-lucide="palette"></i>
-              <span>Preferences</span>
+              <span><%= t('settings.nav.preferences') %></span>
             </button>
             <button class="settings-nav-item" data-section="billing">
               <i data-lucide="credit-card"></i>
-              <span>Billing</span>
+              <span><%= t('settings.nav.billing') %></span>
             </button>
           </div>
         </div>
@@ -64,16 +64,16 @@
             <div class="settings-panel-header">
               <h2 class="settings-panel-title">
                 <i data-lucide="sliders"></i>
-                <span>General Settings</span>
+                <span><%= t('settings.general.title') %></span>
               </h2>
-              <p class="settings-panel-subtitle">Manage your account general preferences</p>
+              <p class="settings-panel-subtitle"><%= t('settings.general.subtitle') %></p>
             </div>
 
             <div class="settings-group">
               <div class="setting-item">
                 <div class="setting-info">
-                  <h3 class="setting-title">Language</h3>
-                  <p class="setting-description">Choose your preferred language for the interface</p>
+                  <h3 class="setting-title"><%= t('settings.general.language') %></h3>
+                  <p class="setting-description"><%= t('settings.general.languageDesc') %></p>
                 </div>
                 <div class="setting-control">
                   <select class="setting-select" id="languageSelect">
@@ -89,8 +89,8 @@
 
               <div class="setting-item">
                 <div class="setting-info">
-                  <h3 class="setting-title">Timezone</h3>
-                  <p class="setting-description">Set your timezone for accurate time display</p>
+                  <h3 class="setting-title"><%= t('settings.general.timezone') %></h3>
+                  <p class="setting-description"><%= t('settings.general.timezoneDesc') %></p>
                 </div>
                 <div class="setting-control">
                   <select class="setting-select" id="timezoneSelect">
@@ -107,8 +107,8 @@
 
               <div class="setting-item">
                 <div class="setting-info">
-                  <h3 class="setting-title">Date Format</h3>
-                  <p class="setting-description">Choose how dates are displayed</p>
+                  <h3 class="setting-title"><%= t('settings.general.dateFormat') %></h3>
+                  <p class="setting-description"><%= t('settings.general.dateFormatDesc') %></p>
                 </div>
                 <div class="setting-control">
                   <select class="setting-select" id="dateFormatSelect">
@@ -121,8 +121,8 @@
 
               <div class="setting-item">
                 <div class="setting-info">
-                  <h3 class="setting-title">Preferred Currency</h3>
-                  <p class="setting-description">Choose your preferred currency for displaying prices</p>
+                  <h3 class="setting-title"><%= t('settings.general.currency') %></h3>
+                  <p class="setting-description"><%= t('settings.general.currencyDesc') %></p>
                 </div>
                 <div class="setting-control">
                   <select class="setting-select" id="preferredCurrencySelect">
@@ -179,16 +179,16 @@
             <div class="settings-panel-header">
               <h2 class="settings-panel-title">
                 <i data-lucide="bell"></i>
-                <span>Notification Settings</span>
+                <span><%= t('settings.notifications.title') %></span>
               </h2>
-              <p class="settings-panel-subtitle">Control how and when you receive notifications</p>
+              <p class="settings-panel-subtitle"><%= t('settings.notifications.subtitle') %></p>
             </div>
 
             <div class="settings-group">
               <div class="setting-item">
                 <div class="setting-info">
-                  <h3 class="setting-title">Email Notifications</h3>
-                  <p class="setting-description">Receive email notifications for important updates</p>
+                  <h3 class="setting-title"><%= t('settings.notifications.email') %></h3>
+                  <p class="setting-description"><%= t('settings.notifications.emailDesc') %></p>
                 </div>
                 <div class="setting-control">
                   <label class="toggle-switch">
@@ -200,8 +200,8 @@
 
               <div class="setting-item">
                 <div class="setting-info">
-                  <h3 class="setting-title">Order Updates</h3>
-                  <p class="setting-description">Get notified when your order status changes</p>
+                  <h3 class="setting-title"><%= t('settings.notifications.orderUpdates') %></h3>
+                  <p class="setting-description"><%= t('settings.notifications.orderUpdatesDesc') %></p>
                 </div>
                 <div class="setting-control">
                   <label class="toggle-switch">
@@ -213,8 +213,8 @@
 
               <div class="setting-item">
                 <div class="setting-info">
-                  <h3 class="setting-title">Promotional Emails</h3>
-                  <p class="setting-description">Receive emails about new products and special offers</p>
+                  <h3 class="setting-title"><%= t('settings.notifications.promotional') %></h3>
+                  <p class="setting-description"><%= t('settings.notifications.promotionalDesc') %></p>
                 </div>
                 <div class="setting-control">
                   <label class="toggle-switch">
@@ -226,8 +226,8 @@
 
               <div class="setting-item">
                 <div class="setting-info">
-                  <h3 class="setting-title">SMS Notifications</h3>
-                  <p class="setting-description">Receive SMS notifications for urgent updates</p>
+                  <h3 class="setting-title"><%= t('settings.notifications.sms') %></h3>
+                  <p class="setting-description"><%= t('settings.notifications.smsDesc') %></p>
                 </div>
                 <div class="setting-control">
                   <label class="toggle-switch">
@@ -244,30 +244,30 @@
             <div class="settings-panel-header">
               <h2 class="settings-panel-title">
                 <i data-lucide="lock"></i>
-                <span>Privacy Settings</span>
+                <span><%= t('settings.privacy.title') %></span>
               </h2>
-              <p class="settings-panel-subtitle">Manage your privacy and data preferences</p>
+              <p class="settings-panel-subtitle"><%= t('settings.privacy.subtitle') %></p>
             </div>
 
             <div class="settings-group">
               <div class="setting-item">
                 <div class="setting-info">
-                  <h3 class="setting-title">Profile Visibility</h3>
-                  <p class="setting-description">Control who can see your profile information</p>
+                  <h3 class="setting-title"><%= t('settings.privacy.visibility') %></h3>
+                  <p class="setting-description"><%= t('settings.privacy.visibilityDesc') %></p>
                 </div>
                 <div class="setting-control">
                   <select class="setting-select" id="profileVisibility">
-                    <option value="public">Public</option>
-                    <option value="private">Private</option>
-                    <option value="friends">Friends Only</option>
+                    <option value="public"><%= t('settings.privacy.public') %></option>
+                    <option value="private"><%= t('settings.privacy.private') %></option>
+                    <option value="friends"><%= t('settings.privacy.friendsOnly') %></option>
                   </select>
                 </div>
               </div>
 
               <div class="setting-item">
                 <div class="setting-info">
-                  <h3 class="setting-title">Data Collection</h3>
-                  <p class="setting-description">Allow us to collect analytics data to improve our service</p>
+                  <h3 class="setting-title"><%= t('settings.privacy.dataCollection') %></h3>
+                  <p class="setting-description"><%= t('settings.privacy.dataCollectionDesc') %></p>
                 </div>
                 <div class="setting-control">
                   <label class="toggle-switch">
@@ -279,8 +279,8 @@
 
               <div class="setting-item">
                 <div class="setting-info">
-                  <h3 class="setting-title">Cookies</h3>
-                  <p class="setting-description">Accept cookies for a better browsing experience</p>
+                  <h3 class="setting-title"><%= t('settings.privacy.cookies') %></h3>
+                  <p class="setting-description"><%= t('settings.privacy.cookiesDesc') %></p>
                 </div>
                 <div class="setting-control">
                   <label class="toggle-switch">
@@ -297,47 +297,47 @@
             <div class="settings-panel-header">
               <h2 class="settings-panel-title">
                 <i data-lucide="shield"></i>
-                <span>Security Settings</span>
+                <span><%= t('settings.security.title') %></span>
               </h2>
-              <p class="settings-panel-subtitle">Manage your account security and authentication</p>
+              <p class="settings-panel-subtitle"><%= t('settings.security.subtitle') %></p>
             </div>
 
             <div class="settings-group">
               <div class="setting-item">
                 <div class="setting-info">
-                  <h3 class="setting-title">Two-Factor Authentication</h3>
-                  <p class="setting-description">Add an extra layer of security to your account</p>
+                  <h3 class="setting-title"><%= t('settings.security.twoFA') %></h3>
+                  <p class="setting-description"><%= t('settings.security.twoFADesc') %></p>
                 </div>
                 <div class="setting-control">
                   <button class="setting-action-btn" id="setup2FABtn">
                     <i data-lucide="shield-check"></i>
-                    <span>Setup 2FA</span>
+                    <span><%= t('settings.security.setup2FA') %></span>
                   </button>
                 </div>
               </div>
 
               <div class="setting-item">
                 <div class="setting-info">
-                  <h3 class="setting-title">Change Password</h3>
-                  <p class="setting-description">Update your account password regularly</p>
+                  <h3 class="setting-title"><%= t('settings.security.changePassword') %></h3>
+                  <p class="setting-description"><%= t('settings.security.changePasswordDesc') %></p>
                 </div>
                 <div class="setting-control">
                   <button class="setting-action-btn" id="changePasswordBtn">
                     <i data-lucide="key"></i>
-                    <span>Change Password</span>
+                    <span><%= t('settings.security.changePasswordBtn') %></span>
                   </button>
                 </div>
               </div>
 
               <div class="setting-item">
                 <div class="setting-info">
-                  <h3 class="setting-title">Active Sessions</h3>
-                  <p class="setting-description">View and manage devices where you're logged in</p>
+                  <h3 class="setting-title"><%= t('settings.security.activeSessions') %></h3>
+                  <p class="setting-description"><%= t('settings.security.activeSessionsDesc') %></p>
                 </div>
                 <div class="setting-control">
                   <button class="setting-action-btn" id="viewSessionsBtn">
                     <i data-lucide="monitor"></i>
-                    <span>View Sessions</span>
+                    <span><%= t('settings.security.viewSessions') %></span>
                   </button>
                 </div>
               </div>
@@ -349,30 +349,30 @@
             <div class="settings-panel-header">
               <h2 class="settings-panel-title">
                 <i data-lucide="palette"></i>
-                <span>Preferences</span>
+                <span><%= t('settings.preferences.title') %></span>
               </h2>
-              <p class="settings-panel-subtitle">Customize your experience</p>
+              <p class="settings-panel-subtitle"><%= t('settings.preferences.subtitle') %></p>
             </div>
 
             <div class="settings-group">
               <div class="setting-item">
                 <div class="setting-info">
-                  <h3 class="setting-title">Theme</h3>
-                  <p class="setting-description">Choose your preferred color theme</p>
+                  <h3 class="setting-title"><%= t('settings.preferences.theme') %></h3>
+                  <p class="setting-description"><%= t('settings.preferences.themeDesc') %></p>
                 </div>
                 <div class="setting-control">
                   <select class="setting-select" id="themeSelect">
-                    <option value="light">Light</option>
-                    <option value="dark">Dark</option>
-                    <option value="auto">Auto (System)</option>
+                    <option value="light"><%= t('settings.preferences.light') %></option>
+                    <option value="dark"><%= t('settings.preferences.dark') %></option>
+                    <option value="auto"><%= t('settings.preferences.auto') %></option>
                   </select>
                 </div>
               </div>
 
               <div class="setting-item">
                 <div class="setting-info">
-                  <h3 class="setting-title">Items Per Page</h3>
-                  <p class="setting-description">Number of items to display per page</p>
+                  <h3 class="setting-title"><%= t('settings.preferences.itemsPerPage') %></h3>
+                  <p class="setting-description"><%= t('settings.preferences.itemsPerPageDesc') %></p>
                 </div>
                 <div class="setting-control">
                   <select class="setting-select" id="itemsPerPage">
@@ -391,47 +391,47 @@
             <div class="settings-panel-header">
               <h2 class="settings-panel-title">
                 <i data-lucide="credit-card"></i>
-                <span>Billing Settings</span>
+                <span><%= t('settings.billing.title') %></span>
               </h2>
-              <p class="settings-panel-subtitle">Manage your payment methods and billing information</p>
+              <p class="settings-panel-subtitle"><%= t('settings.billing.subtitle') %></p>
             </div>
 
             <div class="settings-group">
               <div class="setting-item">
                 <div class="setting-info">
-                  <h3 class="setting-title">Payment Methods</h3>
-                  <p class="setting-description">Manage your saved payment methods</p>
+                  <h3 class="setting-title"><%= t('settings.billing.paymentMethods') %></h3>
+                  <p class="setting-description"><%= t('settings.billing.paymentMethodsDesc') %></p>
                 </div>
                 <div class="setting-control">
                   <button class="setting-action-btn" id="managePaymentMethodsBtn">
                     <i data-lucide="credit-card"></i>
-                    <span>Manage Payment Methods</span>
+                    <span><%= t('settings.billing.managePaymentMethods') %></span>
                   </button>
                 </div>
               </div>
 
               <div class="setting-item">
                 <div class="setting-info">
-                  <h3 class="setting-title">Billing Address</h3>
-                  <p class="setting-description">Update your billing address</p>
+                  <h3 class="setting-title"><%= t('settings.billing.billingAddress') %></h3>
+                  <p class="setting-description"><%= t('settings.billing.billingAddressDesc') %></p>
                 </div>
                 <div class="setting-control">
                   <button class="setting-action-btn" id="updateBillingAddressBtn">
                     <i data-lucide="map-pin"></i>
-                    <span>Update Address</span>
+                    <span><%= t('settings.billing.updateAddress') %></span>
                   </button>
                 </div>
               </div>
 
               <div class="setting-item">
                 <div class="setting-info">
-                  <h3 class="setting-title">Invoice History</h3>
-                  <p class="setting-description">View and download your past invoices</p>
+                  <h3 class="setting-title"><%= t('settings.billing.invoiceHistory') %></h3>
+                  <p class="setting-description"><%= t('settings.billing.invoiceHistoryDesc') %></p>
                 </div>
                 <div class="setting-control">
                   <button class="setting-action-btn" id="viewInvoicesBtn">
                     <i data-lucide="file-text"></i>
-                    <span>View Invoices</span>
+                    <span><%= t('settings.billing.viewInvoices') %></span>
                   </button>
                 </div>
               </div>
@@ -442,11 +442,11 @@
           <div class="settings-actions">
             <button class="settings-save-btn" id="saveSettingsBtn">
               <i data-lucide="save"></i>
-              <span>Save Changes</span>
+              <span><%= t('common.saveChanges') %></span>
             </button>
             <button class="settings-reset-btn" id="resetSettingsBtn">
               <i data-lucide="refresh-cw"></i>
-              <span>Reset to Default</span>
+              <span><%= t('settings.resetToDefault') %></span>
             </button>
           </div>
         </div>

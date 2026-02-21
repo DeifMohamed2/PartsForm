@@ -31,7 +31,8 @@
     "cart": "عربة التسوق",
     "quickSearch": "بحث سريع",
     "currencyConverter": "محول العملات",
-    "currency": {
+    "currency": "العملة",
+    "currencySettings": {
       "label": "العملة",
       "badge": "أسعار الصرف المباشرة",
       "title": "محول العملات",
@@ -43,7 +44,9 @@
       "searchPlaceholder": "البحث عن العملات...",
       "updating": "جارٍ التحديث..."
     },
-    "language": {
+    "preferredCurrency": "العملة المفضلة",
+    "language": "اللغة",
+    "languageNames": {
       "english": "الإنجليزية",
       "arabic": "العربية",
       "russian": "الروسية",
@@ -56,9 +59,29 @@
       "profile": "الملف الشخصي",
       "settings": "الإعدادات",
       "logout": "تسجيل الخروج"
-    }
+    },
+    "preferredCurrencyTitle": "العملة المفضلة",
+    "searchCurrency": "بحث عن العملة..."
   },
   "common": {
+    "edit": "تعديل",
+    "manage": "إدارة",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "delete": "حذف",
+    "view": "عرض",
+    "close": "إغلاق",
+    "submit": "إرسال",
+    "apply": "تطبيق",
+    "clear": "مسح",
+    "search": "بحث",
+    "back": "رجوع",
+    "next": "التالي",
+    "previous": "السابق",
+    "confirm": "تأكيد",
+    "default": "افتراضي",
+    "saveChanges": "حفظ التغييرات",
+    "viewDetails": "عرض التفاصيل",
     "buttons": {
       "submit": "إرسال",
       "cancel": "إلغاء",
@@ -111,7 +134,17 @@
       "success": "نجح!",
       "confirmDelete": "هل أنت متأكد أنك تريد حذف هذا؟",
       "unsavedChanges": "لديك تغييرات غير محفوظة"
-    }
+    },
+    "welcomeBack": "مرحباً بعودتك",
+    "signIn": "تسجيل الدخول",
+    "signInDesc": "أدخل بياناتك للوصول إلى حسابك",
+    "email": "البريد الإلكتروني",
+    "emailPlaceholder": "أدخل بريدك الإلكتروني",
+    "password": "كلمة المرور",
+    "forgotPassword": "نسيت كلمة المرور؟",
+    "noAccount": "ليس لديك حساب؟",
+    "signUp": "إنشاء حساب",
+    "orContinueWith": "أو المتابعة مع"
   },
   "orders": {
     "title": "طلباتي",
@@ -160,6 +193,25 @@
     "actions": {
       "viewOrder": "عرض الطلب",
       "trackOrder": "تتبع الطلب"
+    },
+    "details": {
+      "title": "تفاصيل الطلب",
+      "backToOrders": "العودة للطلبات",
+      "loading": "جاري التحميل...",
+      "loadingText": "جاري تحميل تفاصيل الطلب...",
+      "print": "طباعة",
+      "downloadInvoice": "تحميل الفاتورة",
+      "orderItems": "عناصر الطلب",
+      "partDetails": "تفاصيل القطعة",
+      "weight": "الوزن",
+      "stock": "المخزون",
+      "price": "السعر",
+      "paymentInfo": "معلومات الدفع",
+      "orderTimeline": "جدول الطلب الزمني",
+      "orderSummary": "ملخص الطلب",
+      "shippingInfo": "معلومات الشحن",
+      "errorTitle": "الطلب غير موجود",
+      "errorText": "الطلب الذي تبحث عنه غير موجود أو تم حذفه."
     }
   },
   "cart": {
@@ -311,6 +363,47 @@
     "title": "الدفع والفواتير",
     "subtitle": "إدارة رصيد حسابك وطرق الدفع",
     "addFunds": "إضافة أموال",
+    "addFundsDesc": "تعبئة رصيد حسابك",
+    "accountBalance": "رصيد الحساب",
+    "totalSpent": "إجمالي الإنفاق",
+    "allTime": "طوال الوقت",
+    "pendingPayment": "الدفع المعلق",
+    "processing": "قيد المعالجة",
+    "availableBalance": "الرصيد المتاح",
+    "readyToUse": "جاهز للاستخدام",
+    "paymentMethods": "طرق الدفع",
+    "addMethod": "إضافة طريقة",
+    "noPaymentMethods": "لا توجد طرق دفع",
+    "noPaymentMethodsDesc": "أضف طريقة دفع لتسهيل عمليات الشراء",
+    "addPaymentMethod": "إضافة طريقة دفع",
+    "addPaymentMethodDesc": "احفظ طريقة دفع لدفع أسرع",
+    "transactionHistory": "سجل المعاملات",
+    "noTransactions": "لا توجد معاملات بعد",
+    "noTransactionsDesc": "سيظهر سجل معاملاتك هنا",
+    "amountUSD": "المبلغ (بالدولار)",
+    "selectPaymentMethod": "طريقة الدفع",
+    "selectPaymentMethodPlaceholder": "اختر طريقة الدفع",
+    "creditDebitCard": "بطاقة ائتمان/خصم",
+    "bankTransfer": "تحويل بنكي",
+    "cardHolderName": "اسم حامل البطاقة *",
+    "cardNumber": "رقم البطاقة *",
+    "expiryDate": "تاريخ الانتهاء *",
+    "setDefault": "تعيين كطريقة دفع افتراضية",
+    "saveMethod": "حفظ الطريقة",
+    "filters": {
+      "all": "الكل",
+      "completed": "مكتمل",
+      "pending": "قيد الانتظار",
+      "refunded": "مسترد"
+    },
+    "table": {
+      "date": "التاريخ",
+      "description": "الوصف",
+      "type": "النوع",
+      "amount": "المبلغ",
+      "status": "الحالة",
+      "actions": "الإجراءات"
+    },
     "balance": {
       "title": "رصيد الحساب",
       "available": "الرصيد المتاح",
@@ -370,7 +463,41 @@
     "title": "عناوين التوصيل",
     "subtitle": "إدارة عناوين التوصيل وتتبع الشحنات",
     "addNewAddress": "إضافة عنوان جديد",
-    "savedAddresses": {
+    "savedAddresses": "العناوين المحفوظة",
+    "manageLocations": "إدارة مواقع التوصيل الخاصة بك",
+    "noAddresses": "لا توجد عناوين بعد",
+    "noAddressesDesc": "أضف عنوان التوصيل الأول للبدء",
+    "addAddress": "إضافة عنوان",
+    "trackOrder": "تتبع طلبك",
+    "trackOrderDesc": "أدخل رقم طلبك لتتبع الشحنة",
+    "trackingPlaceholder": "أدخل رقم الطلب (مثال: ORD-123456)",
+    "track": "تتبع",
+    "viewAllOrders": "عرض جميع الطلبات",
+    "deleteAddress": "حذف العنوان",
+    "deleteAddressConfirm": "هل أنت متأكد أنك تريد حذف هذا العنوان؟",
+    "fillDetails": "املأ التفاصيل أدناه",
+    "saveAddress": "حفظ العنوان",
+    "form": {
+      "label": "تسمية العنوان",
+      "labelPlaceholder": "مثال: المنزل، المكتب",
+      "fullName": "الاسم الكامل",
+      "fullNamePlaceholder": "اسم المستلم الكامل",
+      "phone": "رقم الهاتف",
+      "street": "عنوان الشارع",
+      "streetPlaceholder": "رقم المبنى، اسم الشارع",
+      "city": "المدينة",
+      "cityPlaceholder": "مثال: دبي",
+      "state": "الولاية/الإمارة",
+      "statePlaceholder": "مثال: دبي",
+      "country": "الدولة",
+      "countryPlaceholder": "مثال: الإمارات",
+      "postalCode": "الرمز البريدي",
+      "notes": "ملاحظات إضافية",
+      "notesPlaceholder": "معالم، تعليمات خاصة، إلخ.",
+      "setDefault": "تعيين كعنوان افتراضي",
+      "optional": "(اختياري)"
+    },
+    "savedAddressesObj": {
       "title": "العناوين المحفوظة",
       "subtitle": "إدارة مواقع التوصيل الخاصة بك"
     },
@@ -379,7 +506,7 @@
       "text": "أضف عنوان التوصيل الأول للبدء",
       "addAddress": "إضافة عنوان"
     },
-    "trackOrder": {
+    "trackOrderObj": {
       "title": "تتبع طلبك",
       "subtitle": "أدخل رقم طلبك لتتبع الشحنة",
       "placeholder": "أدخل رقم الطلب (مثال: ORD-123456)",
@@ -424,11 +551,56 @@
     "title": "ملف المستخدم",
     "subtitle": "إدارة معلوماتك الشخصية وتفاصيل الحساب",
     "activeAccount": "حساب نشط",
+    "inactive": "غير نشط",
+    "totalOrders": "إجمالي الطلبات",
+    "memberSince": "عضو منذ",
+    "personalInfo": "المعلومات الشخصية",
+    "fullName": "الاسم الكامل",
+    "emailAddress": "عنوان البريد الإلكتروني",
+    "phoneNumber": "رقم الهاتف",
+    "company": "الشركة",
+    "myAddresses": "عناويني",
+    "loadingAddresses": "جاري تحميل العناوين...",
+    "accountSecurity": "أمان الحساب",
+    "password": "كلمة المرور",
+    "lastChanged": "آخر تغيير منذ {{days}} يومًا",
+    "changePassword": "تغيير كلمة المرور",
+    "changePasswordDesc": "تحديث كلمة مرور حسابك",
+    "twoFA": "المصادقة الثنائية",
+    "notEnabled": "غير مفعل",
+    "newsletter": "النشرة الإخبارية",
+    "subscribed": "مشترك",
+    "notSubscribed": "غير مشترك",
+    "editPersonalInfo": "تعديل المعلومات الشخصية",
+    "updateDetails": "تحديث التفاصيل",
+    "updatePassword": "تحديث كلمة المرور",
+    "uploadPhoto": "رفع صورة",
+    "uploadPhotoBtn": "رفع صورة",
+    "choosePhoto": "اختر صورة",
+    "dropImage": "أو اسحب الصورة هنا",
+    "imageFormats": "JPG، PNG، GIF حتى 5 ميجابايت",
+    "uploading": "جاري الرفع...",
+    "passwordRequirements": "متطلبات كلمة المرور",
+    "form": {
+      "firstName": "الاسم الأول",
+      "lastName": "اسم العائلة",
+      "companyName": "اسم الشركة",
+      "currentPassword": "كلمة المرور الحالية",
+      "newPassword": "كلمة المرور الجديدة",
+      "confirmPassword": "تأكيد كلمة المرور",
+      "shippingAddress": "عنوان الشحن",
+      "city": "المدينة",
+      "minChars": "على الأقل {{count}} أحرف"
+    },
+    "req": {
+      "minLength": "على الأقل 8 أحرف",
+      "match": "كلمات المرور متطابقة"
+    },
     "stats": {
       "totalOrders": "إجمالي الطلبات",
       "memberSince": "عضو منذ"
     },
-    "personalInfo": {
+    "personalInfoObj": {
       "title": "المعلومات الشخصية",
       "edit": "تعديل",
       "fullName": "الاسم الكامل",
@@ -459,6 +631,7 @@
     "badge": "إعدادات الحساب",
     "title": "الإعدادات",
     "subtitle": "تخصيص تفضيلات حسابك وإدارة إعداداتك",
+    "resetToDefault": "إعادة تعيين إلى الافتراضي",
     "nav": {
       "general": "عام",
       "notifications": "الإشعارات",
@@ -470,76 +643,62 @@
     "general": {
       "title": "الإعدادات العامة",
       "subtitle": "إدارة التفضيلات العامة لحسابك",
-      "language": {
-        "title": "اللغة",
-        "desc": "اختر لغتك المفضلة للواجهة",
-        "english": "الإنجليزية",
-        "arabic": "العربية",
-        "russian": "الروسية",
-        "ukrainian": "الأوكرانية",
-        "french": "الفرنسية",
-        "spanish": "الإسبانية"
-      },
-      "timezone": {
-        "title": "المنطقة الزمنية",
-        "desc": "اضبط منطقتك الزمنية لعرض الوقت بدقة"
-      },
-      "dateFormat": {
-        "title": "تنسيق التاريخ",
-        "desc": "اختر كيفية عرض التواريخ"
-      }
+      "language": "اللغة",
+      "languageDesc": "اختر لغتك المفضلة للواجهة",
+      "timezone": "المنطقة الزمنية",
+      "timezoneDesc": "اضبط منطقتك الزمنية لعرض الوقت بدقة",
+      "dateFormat": "تنسيق التاريخ",
+      "dateFormatDesc": "اختر كيفية عرض التواريخ",
+      "currency": "العملة",
+      "currencyDesc": "اختر عملتك المفضلة"
     },
     "notifications": {
       "title": "إعدادات الإشعارات",
       "subtitle": "تحكم في كيفية ومتى تستلم الإشعارات",
-      "email": {
-        "title": "إشعارات البريد الإلكتروني",
-        "desc": "استلم إشعارات البريد الإلكتروني للتحديثات المهمة"
-      },
-      "orderUpdates": {
-        "title": "تحديثات الطلبات",
-        "desc": "احصل على إشعار عند تغيير حالة طلبك"
-      },
-      "promotional": {
-        "title": "رسائل ترويجية",
-        "desc": "استلم رسائل بريد إلكتروني حول المنتجات الجديدة والعروض الخاصة"
-      },
-      "sms": {
-        "title": "إشعارات SMS",
-        "desc": "استلم إشعارات SMS للتحديثات العاجلة"
-      }
+      "email": "إشعارات البريد الإلكتروني",
+      "emailDesc": "استلم إشعارات البريد الإلكتروني للتحديثات المهمة",
+      "orderUpdates": "تحديثات الطلبات",
+      "orderUpdatesDesc": "احصل على إشعار عند تغيير حالة طلبك",
+      "promotional": "رسائل ترويجية",
+      "promotionalDesc": "استلم رسائل بريد إلكتروني حول المنتجات الجديدة والعروض الخاصة",
+      "sms": "إشعارات SMS",
+      "smsDesc": "استلم إشعارات SMS للتحديثات العاجلة"
     },
     "privacy": {
       "title": "إعدادات الخصوصية",
       "subtitle": "إدارة تفضيلات الخصوصية والبيانات",
+      "visibility": "ظهور الملف الشخصي",
+      "visibilityDesc": "تحكم في من يمكنه رؤية معلومات ملفك الشخصي",
+      "public": "عام",
+      "private": "خاص",
+      "friendsOnly": "الأصدقاء فقط",
+      "dataCollection": "جمع البيانات",
+      "dataCollectionDesc": "اسمح لنا بجمع بيانات التحليلات لتحسين خدمتنا",
+      "cookies": "ملفات تعريف الارتباط",
+      "cookiesDesc": "قبول ملفات تعريف الارتباط لتجربة تصفح أفضل",
       "profileVisibility": {
         "title": "ظهور الملف الشخصي",
         "desc": "تحكم في من يمكنه رؤية معلومات ملفك الشخصي",
         "public": "عام",
         "private": "خاص",
         "friendsOnly": "الأصدقاء فقط"
-      },
-      "dataCollection": {
-        "title": "جمع البيانات",
-        "desc": "اسمح لنا بجمع بيانات التحليلات لتحسين خدمتنا"
-      },
-      "cookies": {
-        "title": "ملفات تعريف الارتباط",
-        "desc": "قبول ملفات تعريف الارتباط لتجربة تصفح أفضل"
       }
     },
     "security": {
       "title": "إعدادات الأمان",
       "subtitle": "إدارة أمان حسابك والمصادقة",
+      "twoFA": "المصادقة الثنائية",
+      "twoFADesc": "أضف طبقة إضافية من الأمان إلى حسابك",
+      "changePassword": "تغيير كلمة المرور",
+      "changePasswordDesc": "حدّث كلمة مرور حسابك بانتظام",
+      "changePasswordBtn": "تغيير كلمة المرور",
+      "activeSessions": "الجلسات النشطة",
+      "activeSessionsDesc": "عرض وإدارة الأجهزة التي قمت بتسجيل الدخول عليها",
+      "viewSessions": "عرض الجلسات",
       "twoFactor": {
         "title": "المصادقة الثنائية",
         "desc": "أضف طبقة إضافية من الأمان إلى حسابك",
         "setup": "إعداد المصادقة الثنائية"
-      },
-      "changePassword": {
-        "title": "تغيير كلمة المرور",
-        "desc": "حدّث كلمة مرور حسابك بانتظام",
-        "button": "تغيير كلمة المرور"
       },
       "sessions": {
         "title": "الجلسات النشطة",
@@ -550,36 +709,26 @@
     "preferences": {
       "title": "التفضيلات",
       "subtitle": "تخصيص تجربتك",
-      "theme": {
-        "title": "السمة",
-        "desc": "اختر سمة اللون المفضلة",
-        "light": "فاتح",
-        "dark": "داكن",
-        "auto": "تلقائي (النظام)"
-      },
-      "itemsPerPage": {
-        "title": "عدد العناصر في الصفحة",
-        "desc": "عدد العناصر المراد عرضها في كل صفحة"
-      }
+      "theme": "السمة",
+      "themeDesc": "اختر سمة اللون المفضلة",
+      "light": "فاتح",
+      "dark": "داكن",
+      "auto": "تلقائي (النظام)",
+      "itemsPerPage": "عدد العناصر في الصفحة",
+      "itemsPerPageDesc": "عدد العناصر المراد عرضها في كل صفحة"
     },
     "billing": {
       "title": "إعدادات الفواتير",
       "subtitle": "إدارة طرق الدفع ومعلومات الفواتير",
-      "paymentMethods": {
-        "title": "طرق الدفع",
-        "desc": "إدارة طرق الدفع المحفوظة",
-        "manage": "إدارة طرق الدفع"
-      },
-      "billingAddress": {
-        "title": "عنوان الفواتير",
-        "desc": "تحديث عنوان الفواتير",
-        "update": "تحديث العنوان"
-      },
-      "invoices": {
-        "title": "سجل الفواتير",
-        "desc": "عرض وتحميل فواتيرك السابقة",
-        "view": "عرض الفواتير"
-      }
+      "paymentMethods": "طرق الدفع",
+      "paymentMethodsDesc": "إدارة طرق الدفع المحفوظة",
+      "managePaymentMethods": "إدارة طرق الدفع",
+      "billingAddress": "عنوان الفواتير",
+      "billingAddressDesc": "تحديث عنوان الفواتير",
+      "updateAddress": "تحديث العنوان",
+      "invoiceHistory": "سجل الفواتير",
+      "invoiceHistoryDesc": "عرض وتحميل فواتيرك السابقة",
+      "viewInvoices": "عرض الفواتير"
     },
     "actions": {
       "saveChanges": "حفظ التغييرات",
@@ -589,6 +738,7 @@
   "tickets": {
     "title": "تذاكر الدعم",
     "subtitle": "احصل على مساعدة بشأن طلباتك",
+    "badge": "مركز الدعم",
     "createTicket": "إنشاء تذكرة",
     "ticketNumber": "رقم التذكرة",
     "subject": "الموضوع",
@@ -598,20 +748,50 @@
     "created": "تم الإنشاء",
     "updated": "تم التحديث",
     "noTickets": "لم يتم العثور على تذاكر",
+    "stats": {
+      "resolved": "تم الحل",
+      "inProgress": "قيد التنفيذ",
+      "open": "مفتوح"
+    },
+    "filters": {
+      "status": "الحالة",
+      "allStatuses": "جميع الحالات",
+      "search": "بحث",
+      "searchPlaceholder": "البحث عن تذكرة...",
+      "apply": "تطبيق الفلاتر",
+      "reset": "إعادة تعيين"
+    },
+    "empty": {
+      "title": "لا توجد تذاكر بعد",
+      "text": "لم تقم بإنشاء أي تذاكر دعم",
+      "createFirst": "إنشاء أول تذكرة"
+    },
     "categories": {
       "shipping": "مشكلة في الشحن",
       "order": "مشكلة في الطلب",
       "product": "استفسار عن المنتج",
       "payment": "الدفع",
       "documentation": "التوثيق",
-      "other": "أخرى"
+      "other": "أخرى",
+      "technical": "مشكلة تقنية",
+      "general": "عام"
     },
     "details": {
       "title": "تفاصيل التذكرة",
       "messages": "الرسائل",
       "reply": "رد",
       "attachments": "المرفقات",
-      "addAttachment": "إضافة مرفق"
+      "addAttachment": "إضافة مرفق",
+      "backToTickets": "العودة للتذاكر",
+      "loading": "جاري التحميل...",
+      "ticketInfo": "معلومات التذكرة",
+      "category": "الفئة",
+      "status": "الحالة",
+      "lastUpdated": "آخر تحديث",
+      "conversation": "المحادثة",
+      "chatWithSupport": "تحدث مع فريق الدعم",
+      "typePlaceholder": "اكتب رسالتك...",
+      "send": "إرسال"
     },
     "create": {
       "title": "إنشاء تذكرة دعم",
@@ -620,7 +800,34 @@
       "selectCategory": "اختر الفئة",
       "selectPriority": "اختر الأولوية",
       "describeIssue": "صف مشكلتك",
-      "attachFiles": "إرفاق ملفات"
+      "attachFiles": "إرفاق ملفات",
+      "badge": "مركز الدعم",
+      "backToTickets": "العودة إلى التذاكر",
+      "cardTitle": "معلومات التذكرة",
+      "cardSubtitle": "يرجى تقديم تفاصيل حول مشكلتك",
+      "category": "الفئة",
+      "required": "*",
+      "optional": "(اختياري)",
+      "selectCategoryPlaceholder": "اختر فئة",
+      "categoryHint": "اختر الفئة التي تصف مشكلتك بشكل أفضل",
+      "relatedOrder": "الطلب المتعلق",
+      "noSpecificOrder": "لا يوجد طلب محدد",
+      "orderHint": "اختر طلباً إذا كانت هذه المشكلة متعلقة بطلب معين",
+      "orderHintRecommended": "موصى به: اختر الطلب ذا الصلة لحل أسرع",
+      "subject": "الموضوع",
+      "subjectPlaceholder": "وصف موجز لمشكلتك",
+      "subjectHint": "قدم ملخصاً واضحاً وموجزاً لمشكلتك",
+      "description": "الوصف",
+      "descriptionPlaceholder": "يرجى تقديم معلومات مفصلة عن مشكلتك...",
+      "descriptionHint": "قم بتضمين أكبر قدر ممكن من التفاصيل لمساعدتنا في حل مشكلتك بسرعة",
+      "attachmentsLabel": "المرفقات",
+      "clickToUpload": "انقر للتحميل",
+      "orDragDrop": "أو اسحب وأفلت",
+      "fileTypes": "PNG, JPG, PDF حتى 10 ميجابايت لكل ملف",
+      "cancel": "إلغاء",
+      "submit": "إرسال التذكرة",
+      "helpTitle": "هل تحتاج مساعدة فورية؟",
+      "helpText": "للأمور العاجلة، يمكنك أيضاً التواصل معنا مباشرة:"
     }
   },
   "affiliate": {
@@ -731,6 +938,15 @@
     "website": "الموقع الإلكتروني"
   },
   "search": {
+    "badge": "بحث قطع غيار السيارات",
+    "heroTitle": "ابحث عن قطع غيار السيارات",
+    "heroSubtitle": "ابحث في ملايين قطع غيار السيارات من موردين موثقين حول العالم",
+    "placeholder": "أدخل رقم القطعة أو موديل السيارة أو الوصف...",
+    "searchBtn": "بحث",
+    "resetBtn": "إعادة تعيين",
+    "excelImport": "استيراد Excel",
+    "aiSmartFilter": "فلتر ذكي بالذكاء الاصطناعي",
+    "advancedFilters": "فلاتر متقدمة",
     "title": "البحث عن قطع الغيار",
     "subtitle": "ابحث عن القطع التي تحتاجها",
     "partNumber": "رقم القطعة",
@@ -741,6 +957,34 @@
     "results": "نتائج البحث",
     "noResults": "لم يتم العثور على نتائج",
     "refineSearch": "حسّن بحثك",
+    "aiFilter": {
+      "title": "فلتر ذكي",
+      "subtitle": "صف ما تبحث عنه باللغة الطبيعية",
+      "placeholder": "مثال: ابحث عن فرامل بأقل من 200 دولار من موردين ألمان...",
+      "findParts": "ابحث عن قطع",
+      "try": "جرب:",
+      "hint1": "قطع فرامل OEM بأقل من 500 دولار",
+      "hint2": "محامل SKF متوفرة",
+      "hint3": "موردين ألمان معتمدين ISO",
+      "analyzing": "جاري تحليل طلبك...",
+      "foundFilters": "تم تحديد الفلاتر",
+      "applyFilters": "تطبيق الفلاتر",
+      "sidebarHint": "ستظهر الفلاتر في الشريط الجانبي لمزيد من التصفية",
+      "features": {
+        "smartSearch": {
+          "title": "بحث ذكي",
+          "desc": "الذكاء الاصطناعي يفهم الاستفسارات المعقدة"
+        },
+        "autoFilters": {
+          "title": "فلاتر تلقائية",
+          "desc": "يضبط الفلاتر المثالية تلقائياً"
+        },
+        "saveTime": {
+          "title": "وفر الوقت",
+          "desc": "اعثر على القطع أسرع 10 مرات"
+        }
+      }
+    },
     "automotive": {
       "title": "قطع غيار السيارات",
       "subtitle": "ابحث عن قطع غيار ومكونات المركبات"
@@ -752,6 +996,219 @@
     "machinery": {
       "title": "قطع غيار الآلات الثقيلة",
       "subtitle": "ابحث عن قطع غيار المعدات الصناعية"
+    },
+    "emptyState": {
+      "title": "ابدأ البحث",
+      "text": "أدخل رقم القطعة أو اسم العلامة التجارية أو الوصف للعثور على قطع من موردين موثقين حول العالم.",
+      "popularSearches": "عمليات البحث الشائعة"
     }
+  },
+  "searchResults": {
+    "title": "نتائج البحث",
+    "showing": "عرض",
+    "results": "نتائج لـ",
+    "sortBy": "ترتيب حسب:",
+    "relevance": "الصلة",
+    "priceLowHigh": "السعر: من الأقل إلى الأعلى",
+    "priceHighLow": "السعر: من الأعلى إلى الأقل",
+    "delivery": "وقت التسليم",
+    "addToCart": "أضف إلى السلة",
+    "viewDetails": "عرض التفاصيل",
+    "inStock": "متوفر",
+    "outOfStock": "غير متوفر",
+    "limitedStock": "مخزون محدود",
+    "filters": {
+      "title": "الفلاتر",
+      "subtitle": "تحسين نتائج البحث",
+      "clearAll": "مسح الكل",
+      "filterByResults": "تصفية حسب النتائج",
+      "partsFound": "قطع تم العثور عليها",
+      "priceRange": "نطاق السعر",
+      "min": "الحد الأدنى",
+      "max": "الحد الأقصى",
+      "stockCode": "رمز المخزون",
+      "allStockCodes": "جميع رموز المخزون",
+      "brand": "العلامة التجارية",
+      "searchBrands": "البحث عن علامات تجارية...",
+      "allBrands": "جميع العلامات التجارية",
+      "showMore": "عرض المزيد",
+      "deliveryTime": "وقت التسليم",
+      "days": "أيام",
+      "express": "سريع (1-2 يوم)",
+      "fast": "سريع (3-5 أيام)",
+      "standard": "قياسي (7-14 يوم)",
+      "availableQty": "الكمية المتاحة",
+      "units": "وحدات",
+      "minAvailable": "الحد الأدنى المتاح",
+      "weight": "الوزن",
+      "matching": "متطابق:",
+      "parts": "قطع",
+      "reset": "إعادة تعيين",
+      "applyFilters": "تطبيق الفلاتر"
+    },
+    "header": {
+      "found": "تم العثور على",
+      "partsMatching": "قطع تطابق بحثك",
+      "selectItems": "حدد العناصر لإضافتها إلى السلة",
+      "selected": "المحدد",
+      "selectedTotal": "المجموع المحدد",
+      "addToCart": "أضف إلى السلة",
+      "addToCartCount": "أضف إلى السلة",
+      "filters": "الفلاتر"
+    },
+    "sort": {
+      "sortBy": "ترتيب حسب:",
+      "relevance": "الصلة",
+      "cheapest": "الأرخص",
+      "expensive": "الأغلى",
+      "fastestDelivery": "أسرع تسليم",
+      "mostStock": "أكثر مخزون",
+      "inStockOnly": "متوفر فقط",
+      "lowStock": "مخزون منخفض"
+    },
+    "table": {
+      "select": "تحديد",
+      "brand": "العلامة التجارية",
+      "vendorCode": "رمز المورد",
+      "description": "الوصف",
+      "qty": "الكمية",
+      "stockCode": "رمز المخزون",
+      "volume": "الحجم",
+      "weight": "الوزن",
+      "delivery": "التسليم",
+      "orderQty": "كمية الطلب",
+      "total": "المجموع"
+    },
+    "footer": {
+      "addSelectedToCart": "أضف المحدد إلى السلة",
+      "selectedTotal": "المجموع المحدد:"
+    },
+    "emptyState": {
+      "title": "ابدأ البحث",
+      "description": "أدخل رقم القطعة أو اسم العلامة التجارية أو الوصف للعثور على قطع من موردين موثقين حول العالم.",
+      "popularSearches": "عمليات البحث الشائعة",
+      "brakePads": "تيل الفرامل",
+      "oilFilter": "فلتر الزيت",
+      "alternator": "المولد",
+      "waterPump": "مضخة المياه",
+      "verifiedSuppliers": "موردون موثقون",
+      "globalNetwork": "شبكة عالمية",
+      "fastDelivery": "توصيل سريع",
+      "qualityGuaranteed": "جودة مضمونة",
+      "features": {
+        "verifiedSuppliers": "موردون موثقون",
+        "globalNetwork": "شبكة عالمية",
+        "fastDelivery": "توصيل سريع",
+        "qualityGuaranteed": "جودة مضمونة"
+      }
+    },
+    "noResults": {
+      "title": "لم يتم العثور على قطع",
+      "noPartsFound": "لم نتمكن من العثور على قطع تطابق",
+      "description": "لم نتمكن من العثور على قطع تطابق",
+      "tryDifferent": "جرب رقم قطعة مختلف أو تواصل مع فريقنا للمساعدة.",
+      "tryAgain": "حاول مرة أخرى",
+      "contactSupport": "تواصل مع الدعم",
+      "suggestions": "اقتراحات:",
+      "checkSpelling": "تحقق من إملاء مصطلح البحث",
+      "tryDifferentFormat": "جرب استخدام تنسيق مختلف لرقم القطعة",
+      "useFewerKeywords": "استخدم كلمات مفتاحية أقل أو أكثر عمومية",
+      "clearFilters": "امسح الفلاتر لتوسيع بحثك",
+      "suggestion1": "تحقق من إملاء مصطلح البحث",
+      "suggestion2": "جرب استخدام تنسيق مختلف لرقم القطعة",
+      "suggestion3": "استخدم كلمات مفتاحية أقل أو أكثر عمومية",
+      "suggestion4": "امسح الفلاتر لتوسيع بحثك"
+    },
+    "excel": {
+      "title": "استيراد Excel",
+      "aiBadge": "ذكاء",
+      "subtitle": "الذكاء الاصطناعي يحلل جدول البيانات لاستخراج القطع تلقائياً",
+      "dragDrop": "اسحب وأفلت ملف Excel الخاص بك",
+      "aiExtract": "سيستخرج الذكاء الاصطناعي القطع بذكاء من أي تنسيق",
+      "browseFiles": "تصفح الملفات",
+      "supportedFormats": "يدعم .xlsx, .xls, .csv • الحد الأقصى 10MB • الحد الأقصى 5,000 صف • الحد الأقصى 1,000 قطعة لكل بحث",
+      "fileHint": "يدعم .xlsx, .xls, .csv • الحد الأقصى 10MB • الحد الأقصى 5,000 صف • الحد الأقصى 1,000 قطعة لكل بحث",
+      "formatHint": "يعمل مع أي تنسيق، لكن البيانات المنظمة تعطي نتائج أفضل",
+      "sampleHint": "يعمل مع أي تنسيق، لكن البيانات المنظمة تعطي نتائج أفضل",
+      "downloadSample": "تحميل قالب العينة",
+      "fileTooLarge": "الملف كبير جداً",
+      "analyzing": "الذكاء الاصطناعي يحلل جدول البيانات...",
+      "readingData": "قراءة بيانات الجدول",
+      "detectingParts": "اكتشاف أرقام القطع",
+      "extractingData": "استخراج الكميات والعلامات التجارية",
+      "extractingQty": "استخراج الكميات والعلامات التجارية",
+      "validating": "التحقق والتنظيم",
+      "analysisComplete": "اكتمل التحليل!",
+      "partsReady": "تم العثور على 25 قطعة جاهزة للبحث",
+      "foundParts": "تم العثور على {count} قطعة جاهزة للبحث",
+      "aiPowered": "مدعوم بالذكاء الاصطناعي",
+      "dataQuality": "جودة البيانات:",
+      "qualityGood": "جيدة",
+      "selectAll": "تحديد الكل",
+      "selectFirst1000": "تحديد أول 1,000",
+      "partsSelected": "0 قطع محددة",
+      "filterAll": "الكل",
+      "filterHigh": "ثقة عالية",
+      "filterMedium": "متوسط",
+      "filterLow": "منخفض",
+      "all": "الكل",
+      "highConfidence": "ثقة عالية",
+      "medium": "متوسط",
+      "low": "منخفض",
+      "aiSuggestions": "اقتراحات الذكاء الاصطناعي",
+      "importAnalytics": "تحليلات الاستيراد",
+      "totalParts": "إجمالي القطع",
+      "found": "موجود",
+      "notFound": "غير موجود",
+      "duplicates": "مكررات",
+      "notCounted": "غير محسوب",
+      "successRate": "معدل النجاح",
+      "partsNotFound": "قطع غير موجودة",
+      "duplicatesDetected": "تم اكتشاف قطع مكررة ودمجها",
+      "searchResultsTitle": "نتائج البحث وتوصيات الذكاء الاصطناعي",
+      "foundOptions": "تم العثور على خيارات لـ 25 قطعة",
+      "backToParts": "العودة إلى القطع",
+      "uploadNewFile": "رفع ملف جديد",
+      "searchParts": "البحث عن قطع",
+      "addToCartBtn": "أضف إلى السلة"
+    },
+    "recentSearches": {
+      "title": "عمليات البحث الأخيرة",
+      "empty": "لا توجد عمليات بحث حديثة بعد",
+      "clearHistory": "مسح السجل"
+    }
+  },
+  "footer": {
+    "tagline": "منصة التوريد العالمية",
+    "description": "ربط المصنعين مع الموردين المعتمدين في أكثر من 40 دولة. مصممة للمؤسسات الكبيرة ومهندسة للدقة.",
+    "platform": "المنصة",
+    "main": "الرئيسية",
+    "sectors": "القطاعات",
+    "allSectors": "جميع القطاعات",
+    "oemParts": "قطع OEM",
+    "aftermarketParts": "قطع ما بعد البيع",
+    "performanceParts": "قطع الأداء",
+    "company": "الشركة",
+    "support": "الدعم",
+    "aboutUs": "من نحن",
+    "helpCenter": "مركز المساعدة",
+    "resources": "الموارد",
+    "documentation": "التوثيق",
+    "apiReference": "مرجع API",
+    "blog": "المدونة",
+    "faq": "الأسئلة الشائعة",
+    "copyright": "جميع الحقوق محفوظة",
+    "privacyPolicy": "سياسة الخصوصية",
+    "termsOfService": "شروط الخدمة",
+    "cookiePolicy": "سياسة ملفات تعريف الارتباط"
+  },
+  "quickSearch": {
+    "badge": "بحث سريع",
+    "title": "البحث عن قطع صناعية",
+    "subtitle": "أدخل رقم القطعة أو الوصف للبحث في جميع القطاعات",
+    "placeholder": "أدخل رقم القطعة أو الوصف...",
+    "selectCategory": "اختر الفئة:",
+    "searchNow": "ابحث الآن",
+    "recentSearches": "عمليات البحث الأخيرة"
   }
 }
