@@ -83,6 +83,10 @@ const {
   getServerStatusApi,
   getServerHealthApi,
   getServerLogsApi,
+  // Logs Management
+  getLogsPage,
+  getLogsApi,
+  getErrorStatsApi,
 } = require('../controllers/adminController');
 
 // Import email inquiry controller
@@ -490,5 +494,15 @@ router.get('/server-status', requirePermission(PERMISSIONS.MANAGE_SETTINGS), get
 router.get('/api/server-status', requirePermission(PERMISSIONS.MANAGE_SETTINGS), getServerStatusApi);
 router.get('/api/server-status/health', requirePermission(PERMISSIONS.MANAGE_SETTINGS), getServerHealthApi);
 router.get('/api/server-status/logs', requirePermission(PERMISSIONS.MANAGE_SETTINGS), getServerLogsApi);
+
+// ==========================================
+// System Logs (Super Admin Only)
+// ==========================================
+// Logs Viewer Page
+router.get('/logs', requirePermission(PERMISSIONS.MANAGE_SETTINGS), getLogsPage);
+
+// Logs API endpoints
+router.get('/api/logs', requirePermission(PERMISSIONS.MANAGE_SETTINGS), getLogsApi);
+router.get('/api/logs/errors', requirePermission(PERMISSIONS.MANAGE_SETTINGS), getErrorStatsApi);
 
 module.exports = router;

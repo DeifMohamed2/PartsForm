@@ -4,6 +4,7 @@
  * Supports 200M+ records with optimized indexing and search
  */
 const { Client } = require('@elastic/elasticsearch');
+const logger = require('../utils/logger');
 
 class ElasticsearchService {
   constructor() {
@@ -80,7 +81,7 @@ class ElasticsearchService {
 
       // Test connection with timeout
       const health = await this.client.cluster.health({}, { requestTimeout: 5000 });
-      console.log(`✅ Elasticsearch connected - Status: ${health.status}`);
+      logger.info(`Elasticsearch connected - Status: ${health.status}`, { service: 'elasticsearch' });
 
       this.isAvailable = true;
 
@@ -89,8 +90,8 @@ class ElasticsearchService {
 
       return true;
     } catch (error) {
-      console.error('⚠️  Elasticsearch connection failed:', error.message);
-      console.log('   Falling back to MongoDB for search');
+      logger.error('Elasticsearch connection failed', { service: 'elasticsearch', error: error.message });
+      logger.warn('Falling back to MongoDB for search', { service: 'elasticsearch' });
       this.isAvailable = false;
       return false;
     }

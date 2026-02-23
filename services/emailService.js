@@ -5,6 +5,7 @@
  */
 const Imap = require('imap');
 const { simpleParser } = require('mailparser');
+const logger = require('../utils/logger');
 const nodemailer = require('nodemailer');
 const fs = require('fs').promises;
 const path = require('path');

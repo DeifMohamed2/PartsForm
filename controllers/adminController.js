@@ -4791,6 +4791,66 @@ const getServerLogsApi = async (req, res) => {
 };
 
 /**
+ * Get Logs Page - Dedicated log viewer page
+ */
+const getLogsPage = async (req, res) => {
+  res.render('admin/logs', {
+    title: req.__('System Logs'),
+    admin: req.admin,
+    activePage: 'logs',
+  });
+};
+
+/**
+ * Get Logs API - Enhanced logs API using Winston logger
+ */
+const getLogsApi = async (req, res) => {
+  try {
+    const serverStatusService = require('../services/serverStatusService');
+    const { lines = 100, type = 'combined', search = '' } = req.query;
+    
+    const result = await serverStatusService.getLogs({
+      lines: Math.min(parseInt(lines) || 100, 500),
+      type,
+      search,
+    });
+    
+    res.json({ 
+      success: true, 
+      logs: result.logs || [],
+      source: result.source || 'unknown',
+    });
+  } catch (error) {
+    const logger = require('../utils/logger');
+    logger.error('Error fetching logs', { error: error.message });
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/**
+ * Get Error Tracking Stats API
+ */
+const getErrorStatsApi = async (req, res) => {
+  try {
+    const errorTracker = require('../services/errorTrackerService');
+    const stats = errorTracker.getStats();
+    const topErrors = errorTracker.getTopErrors(10);
+    const recentErrors = errorTracker.getRecentErrors(20);
+    
+    res.json({
+      success: true,
+      stats,
+      topErrors,
+      recentErrors,
+    });
+  } catch (error) {
+    const logger = require('../utils/logger');
+    logger.error('Error fetching error stats', { error: error.message });
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/**
  * Get Sidebar Notification Counts API
  * Returns counts for new orders and open tickets for real-time updates
  */
@@ -4906,4 +4966,8 @@ module.exports = {
   getServerStatusApi,
   getServerHealthApi,
   getServerLogsApi,
+  // Logs Management
+  getLogsPage,
+  getLogsApi,
+  getErrorStatsApi,
 };

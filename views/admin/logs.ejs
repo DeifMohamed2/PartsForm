@@ -1,0 +1,777 @@
+<%- include('partials/header') %>
+<style>
+  /* Log Viewer Page - Premium Design */
+  
+  .logs-hero {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    border-radius: var(--admin-radius-xl);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    color: white;
+    position: relative;
+    overflow: hidden;
+  }
+  .logs-hero::before {
+    content: '';
+    position: absolute;
+    top: -50px;
+    right: -50px;
+    width: 200px;
+    height: 200px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 50%;
+  }
+  .hero-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+  }
+  .hero-text h2 {
+    font-size: 1.75rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .hero-text p {
+    opacity: 0.8;
+    font-size: 0.95rem;
+  }
+  .hero-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+  }
+  
+  /* Stats Cards */
+  .log-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .log-stat-card {
+    background: var(--admin-card-bg);
+    border-radius: var(--admin-radius-lg);
+    padding: 1.25rem;
+    border: 1px solid var(--admin-border);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.2s;
+  }
+  .log-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+  }
+  .log-stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--admin-radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+  }
+  .log-stat-icon.info { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
+  .log-stat-icon.warn { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+  .log-stat-icon.error { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+  .log-stat-icon.total { background: rgba(139, 92, 246, 0.15); color: #8b5cf6; }
+  .log-stat-content h4 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+  }
+  .log-stat-content span {
+    color: var(--admin-text-muted);
+    font-size: 0.85rem;
+  }
+  
+  /* Controls Bar */
+  .logs-controls {
+    background: var(--admin-card-bg);
+    border-radius: var(--admin-radius-lg);
+    padding: 1rem 1.5rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--admin-border);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: center;
+  }
+  .control-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .control-group label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--admin-text-muted);
+  }
+  .control-group select, .control-group input {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius-md);
+    background: var(--admin-bg);
+    color: var(--admin-text);
+    font-size: 0.9rem;
+    min-width: 120px;
+  }
+  .control-group input[type="search"] {
+    min-width: 200px;
+  }
+  .btn-control {
+    padding: 0.5rem 1rem;
+    border-radius: var(--admin-radius-md);
+    border: 1px solid var(--admin-border);
+    background: var(--admin-primary);
+    color: white;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
+  }
+  .btn-control:hover {
+    background: var(--admin-primary-dark);
+  }
+  .btn-control.secondary {
+    background: transparent;
+    color: var(--admin-text);
+  }
+  .btn-control.secondary:hover {
+    background: var(--admin-hover);
+  }
+  .auto-refresh-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-left: auto;
+  }
+  .toggle-switch {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    background: var(--admin-border);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .toggle-switch.active {
+    background: var(--admin-primary);
+  }
+  .toggle-switch::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 20px;
+    height: 20px;
+    background: white;
+    border-radius: 50%;
+    transition: all 0.3s;
+  }
+  .toggle-switch.active::after {
+    left: 22px;
+  }
+  
+  /* Log Viewer */
+  .log-viewer-container {
+    background: var(--admin-card-bg);
+    border-radius: var(--admin-radius-lg);
+    border: 1px solid var(--admin-border);
+    overflow: hidden;
+  }
+  .log-viewer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    background: var(--admin-bg);
+    border-bottom: 1px solid var(--admin-border);
+  }
+  .log-viewer-title {
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .log-source-badge {
+    padding: 0.25rem 0.5rem;
+    background: var(--admin-primary);
+    color: white;
+    border-radius: var(--admin-radius-sm);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+  }
+  .log-viewer-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+  .btn-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--admin-radius-md);
+    border: 1px solid var(--admin-border);
+    background: transparent;
+    color: var(--admin-text);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+  .btn-icon:hover {
+    background: var(--admin-hover);
+  }
+  
+  .log-viewer {
+    background: #0d1117;
+    color: #c9d1d9;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Monaco', monospace;
+    font-size: 0.82rem;
+    line-height: 1.6;
+    padding: 1rem;
+    height: 600px;
+    overflow-y: auto;
+    overflow-x: auto;
+  }
+  .log-entry {
+    display: flex;
+    gap: 0.75rem;
+    padding: 0.35rem 0.5rem;
+    border-radius: 4px;
+    transition: background 0.2s;
+    margin-bottom: 2px;
+  }
+  .log-entry:hover {
+    background: rgba(255,255,255,0.05);
+  }
+  .log-timestamp {
+    color: #8b949e;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .log-level {
+    font-weight: 600;
+    text-transform: uppercase;
+    width: 60px;
+    text-align: center;
+    flex-shrink: 0;
+    padding: 0 0.5rem;
+    border-radius: 3px;
+  }
+  .log-level.error { background: rgba(248, 81, 73, 0.2); color: #f85149; }
+  .log-level.warn { background: rgba(210, 153, 34, 0.2); color: #d29922; }
+  .log-level.info { background: rgba(56, 139, 253, 0.2); color: #58a6ff; }
+  .log-level.http { background: rgba(163, 113, 247, 0.2); color: #a371f7; }
+  .log-level.debug { background: rgba(136, 136, 136, 0.2); color: #888; }
+  .log-message {
+    flex: 1;
+    word-break: break-word;
+    white-space: pre-wrap;
+  }
+  .log-meta {
+    color: #8b949e;
+    font-size: 0.75rem;
+    margin-left: 0.5rem;
+  }
+  
+  /* Error Tracking Section */
+  .error-tracking-section {
+    margin-top: 2rem;
+  }
+  .error-tracking-section h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .top-errors-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 1rem;
+  }
+  .error-card {
+    background: var(--admin-card-bg);
+    border-radius: var(--admin-radius-lg);
+    border: 1px solid var(--admin-border);
+    padding: 1rem 1.25rem;
+    border-left: 4px solid;
+  }
+  .error-card.critical { border-left-color: #ef4444; }
+  .error-card.high { border-left-color: #f97316; }
+  .error-card.medium { border-left-color: #eab308; }
+  .error-card.low { border-left-color: #3b82f6; }
+  .error-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+  }
+  .error-card-title {
+    font-weight: 600;
+    font-size: 0.9rem;
+    word-break: break-word;
+  }
+  .error-count-badge {
+    padding: 0.25rem 0.5rem;
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+    border-radius: var(--admin-radius-sm);
+    font-weight: 600;
+    font-size: 0.8rem;
+    white-space: nowrap;
+  }
+  .error-card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    font-size: 0.8rem;
+    color: var(--admin-text-muted);
+  }
+  .error-card-meta span {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+  
+  /* Loading States */
+  .loading-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--admin-radius-lg);
+    z-index: 10;
+  }
+  .loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(255,255,255,0.2);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  
+  /* Empty State */
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 300px;
+    color: #8b949e;
+    text-align: center;
+  }
+  .empty-state i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+  }
+  
+  @media (max-width: 768px) {
+    .hero-content { flex-direction: column; gap: 1rem; text-align: center; }
+    .logs-controls { flex-direction: column; }
+    .auto-refresh-toggle { margin-left: 0; }
+    .top-errors-grid { grid-template-columns: 1fr; }
+  }
+</style>
+
+<div class="admin-content">
+  <!-- Hero Section -->
+  <div class="logs-hero">
+    <div class="hero-content">
+      <div class="hero-text">
+        <h2><i class="fas fa-scroll"></i> <%= __('System Logs') %></h2>
+        <p><%= __('Monitor application logs, errors, and system events in real-time') %></p>
+      </div>
+      <div class="hero-actions">
+        <button class="btn-control" onclick="refreshLogs()">
+          <i class="fas fa-sync-alt"></i> <%= __('Refresh') %>
+        </button>
+        <button class="btn-control secondary" onclick="downloadLogs()">
+          <i class="fas fa-download"></i> <%= __('Export') %>
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Stats Cards -->
+  <div class="log-stats-grid">
+    <div class="log-stat-card">
+      <div class="log-stat-icon total"><i class="fas fa-list"></i></div>
+      <div class="log-stat-content">
+        <h4 id="stat-total">0</h4>
+        <span><%= __('Total Entries') %></span>
+      </div>
+    </div>
+    <div class="log-stat-card">
+      <div class="log-stat-icon info"><i class="fas fa-info-circle"></i></div>
+      <div class="log-stat-content">
+        <h4 id="stat-info">0</h4>
+        <span><%= __('Info') %></span>
+      </div>
+    </div>
+    <div class="log-stat-card">
+      <div class="log-stat-icon warn"><i class="fas fa-exclamation-triangle"></i></div>
+      <div class="log-stat-content">
+        <h4 id="stat-warn">0</h4>
+        <span><%= __('Warnings') %></span>
+      </div>
+    </div>
+    <div class="log-stat-card">
+      <div class="log-stat-icon error"><i class="fas fa-times-circle"></i></div>
+      <div class="log-stat-content">
+        <h4 id="stat-error">0</h4>
+        <span><%= __('Errors') %></span>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Controls -->
+  <div class="logs-controls">
+    <div class="control-group">
+      <label><%= __('Log Type') %></label>
+      <select id="log-type" onchange="refreshLogs()">
+        <option value="combined"><%= __('All Logs') %></option>
+        <option value="error"><%= __('Errors Only') %></option>
+        <option value="access"><%= __('HTTP Access') %></option>
+        <option value="pm2"><%= __('PM2 Logs') %></option>
+      </select>
+    </div>
+    <div class="control-group">
+      <label><%= __('Lines') %></label>
+      <select id="log-lines" onchange="refreshLogs()">
+        <option value="50">50</option>
+        <option value="100" selected>100</option>
+        <option value="200">200</option>
+        <option value="500">500</option>
+      </select>
+    </div>
+    <div class="control-group">
+      <label><%= __('Level') %></label>
+      <select id="log-level" onchange="filterByLevel()">
+        <option value="all"><%= __('All Levels') %></option>
+        <option value="error"><%= __('Error') %></option>
+        <option value="warn"><%= __('Warning') %></option>
+        <option value="info"><%= __('Info') %></option>
+        <option value="http"><%= __('HTTP') %></option>
+        <option value="debug"><%= __('Debug') %></option>
+      </select>
+    </div>
+    <div class="control-group">
+      <input type="search" id="log-search" placeholder="<%= __('Search logs...') %>" onkeyup="handleSearch(event)">
+    </div>
+    <div class="auto-refresh-toggle">
+      <span><%= __('Auto-refresh') %></span>
+      <div class="toggle-switch" id="auto-refresh-toggle" onclick="toggleAutoRefresh()"></div>
+    </div>
+  </div>
+  
+  <!-- Log Viewer -->
+  <div class="log-viewer-container" style="position: relative;">
+    <div class="log-viewer-header">
+      <div class="log-viewer-title">
+        <i class="fas fa-terminal"></i>
+        <span><%= __('Log Output') %></span>
+        <span class="log-source-badge" id="log-source">winston</span>
+      </div>
+      <div class="log-viewer-actions">
+        <button class="btn-icon" onclick="scrollToTop()" title="<%= __('Scroll to Top') %>">
+          <i class="fas fa-arrow-up"></i>
+        </button>
+        <button class="btn-icon" onclick="scrollToBottom()" title="<%= __('Scroll to Bottom') %>">
+          <i class="fas fa-arrow-down"></i>
+        </button>
+        <button class="btn-icon" onclick="clearViewer()" title="<%= __('Clear View') %>">
+          <i class="fas fa-eraser"></i>
+        </button>
+        <button class="btn-icon" onclick="copyLogs()" title="<%= __('Copy Logs') %>">
+          <i class="fas fa-copy"></i>
+        </button>
+      </div>
+    </div>
+    <div class="log-viewer" id="log-viewer">
+      <div class="empty-state" id="empty-state">
+        <i class="fas fa-scroll"></i>
+        <p><%= __('Loading logs...') %></p>
+      </div>
+    </div>
+    <div class="loading-overlay" id="loading-overlay" style="display: none;">
+      <div class="loading-spinner"></div>
+    </div>
+  </div>
+  
+  <!-- Error Tracking Section -->
+  <div class="error-tracking-section">
+    <h3><i class="fas fa-bug"></i> <%= __('Top Errors (Recent)') %></h3>
+    <div class="top-errors-grid" id="top-errors-grid">
+      <div class="empty-state">
+        <i class="fas fa-check-circle"></i>
+        <p><%= __('No errors tracked recently') %></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let autoRefreshInterval = null;
+let allLogs = [];
+let currentLevelFilter = 'all';
+
+document.addEventListener('DOMContentLoaded', function() {
+  refreshLogs();
+  loadErrorStats();
+});
+
+async function refreshLogs() {
+  const logType = document.getElementById('log-type').value;
+  const lines = document.getElementById('log-lines').value;
+  const search = document.getElementById('log-search').value;
+  
+  showLoading(true);
+  
+  try {
+    const response = await fetch(`/admin/api/logs?type=${logType}&lines=${lines}&search=${encodeURIComponent(search)}`);
+    const data = await response.json();
+    
+    if (data.success) {
+      allLogs = data.logs || [];
+      document.getElementById('log-source').textContent = data.source || 'logs';
+      displayLogs(allLogs);
+      updateStats(allLogs);
+    } else {
+      showError(data.message || 'Failed to load logs');
+    }
+  } catch (error) {
+    showError('Error loading logs: ' + error.message);
+  } finally {
+    showLoading(false);
+  }
+}
+
+function displayLogs(logs) {
+  const viewer = document.getElementById('log-viewer');
+  const emptyState = document.getElementById('empty-state');
+  
+  // Filter by level if needed
+  let filteredLogs = logs;
+  if (currentLevelFilter !== 'all') {
+    filteredLogs = logs.filter(log => log.level === currentLevelFilter);
+  }
+  
+  if (filteredLogs.length === 0) {
+    viewer.innerHTML = `
+      <div class="empty-state">
+        <i class="fas fa-scroll"></i>
+        <p><%= __('No logs found') %></p>
+      </div>
+    `;
+    return;
+  }
+  
+  const html = filteredLogs.map(log => {
+    const timestamp = formatTimestamp(log.timestamp);
+    const level = (log.level || 'info').toLowerCase();
+    const message = escapeHtml(log.message || JSON.stringify(log));
+    const meta = log.requestId ? `<span class="log-meta">[${log.requestId}]</span>` : '';
+    
+    return `
+      <div class="log-entry">
+        <span class="log-timestamp">${timestamp}</span>
+        <span class="log-level ${level}">${level}</span>
+        <span class="log-message">${message}${meta}</span>
+      </div>
+    `;
+  }).join('');
+  
+  viewer.innerHTML = html;
+}
+
+function updateStats(logs) {
+  const total = logs.length;
+  const info = logs.filter(l => l.level === 'info').length;
+  const warn = logs.filter(l => l.level === 'warn' || l.level === 'warning').length;
+  const error = logs.filter(l => l.level === 'error').length;
+  
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-info').textContent = info;
+  document.getElementById('stat-warn').textContent = warn;
+  document.getElementById('stat-error').textContent = error;
+}
+
+async function loadErrorStats() {
+  try {
+    const response = await fetch('/admin/api/logs/errors');
+    const data = await response.json();
+    
+    if (data.success && data.topErrors && data.topErrors.length > 0) {
+      displayTopErrors(data.topErrors);
+    }
+  } catch (error) {
+    console.error('Failed to load error stats:', error);
+  }
+}
+
+function displayTopErrors(errors) {
+  const container = document.getElementById('top-errors-grid');
+  
+  const html = errors.slice(0, 6).map(error => {
+    const severityClass = error.severity || 'medium';
+    const lastSeen = formatTimestamp(error.lastSeen);
+    
+    return `
+      <div class="error-card ${severityClass}">
+        <div class="error-card-header">
+          <span class="error-card-title">${escapeHtml(error.message || error.type)}</span>
+          <span class="error-count-badge">${error.count}x</span>
+        </div>
+        <div class="error-card-meta">
+          <span><i class="fas fa-clock"></i> ${lastSeen}</span>
+          <span><i class="fas fa-tag"></i> ${error.type || 'unknown'}</span>
+          ${error.file ? `<span><i class="fas fa-file"></i> ${error.file}</span>` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+  
+  container.innerHTML = html || `
+    <div class="empty-state">
+      <i class="fas fa-check-circle"></i>
+      <p><%= __('No errors tracked recently') %></p>
+    </div>
+  `;
+}
+
+function filterByLevel() {
+  currentLevelFilter = document.getElementById('log-level').value;
+  displayLogs(allLogs);
+}
+
+function handleSearch(event) {
+  if (event.key === 'Enter') {
+    refreshLogs();
+  }
+}
+
+function toggleAutoRefresh() {
+  const toggle = document.getElementById('auto-refresh-toggle');
+  
+  if (autoRefreshInterval) {
+    clearInterval(autoRefreshInterval);
+    autoRefreshInterval = null;
+    toggle.classList.remove('active');
+  } else {
+    autoRefreshInterval = setInterval(refreshLogs, 5000);
+    toggle.classList.add('active');
+  }
+}
+
+function scrollToTop() {
+  document.getElementById('log-viewer').scrollTop = 0;
+}
+
+function scrollToBottom() {
+  const viewer = document.getElementById('log-viewer');
+  viewer.scrollTop = viewer.scrollHeight;
+}
+
+function clearViewer() {
+  document.getElementById('log-viewer').innerHTML = `
+    <div class="empty-state">
+      <i class="fas fa-scroll"></i>
+      <p><%= __('View cleared. Click refresh to reload.') %></p>
+    </div>
+  `;
+  allLogs = [];
+  updateStats([]);
+}
+
+function copyLogs() {
+  const text = allLogs.map(log => 
+    `[${log.timestamp}] [${log.level}] ${log.message}`
+  ).join('\n');
+  
+  navigator.clipboard.writeText(text).then(() => {
+    showToast('<%= __('Logs copied to clipboard') %>', 'success');
+  }).catch(err => {
+    showToast('<%= __('Failed to copy logs') %>', 'error');
+  });
+}
+
+function downloadLogs() {
+  const text = allLogs.map(log => 
+    JSON.stringify(log)
+  ).join('\n');
+  
+  const blob = new Blob([text], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `logs-${new Date().toISOString().split('T')[0]}.jsonl`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function showLoading(show) {
+  document.getElementById('loading-overlay').style.display = show ? 'flex' : 'none';
+}
+
+function showError(message) {
+  document.getElementById('log-viewer').innerHTML = `
+    <div class="empty-state">
+      <i class="fas fa-exclamation-circle"></i>
+      <p style="color: #ef4444;">${escapeHtml(message)}</p>
+    </div>
+  `;
+}
+
+function formatTimestamp(timestamp) {
+  if (!timestamp) return '-';
+  try {
+    const date = new Date(timestamp);
+    return date.toLocaleString('en-US', {
+      month: 'short',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    });
+  } catch {
+    return timestamp;
+  }
+}
+
+function escapeHtml(text) {
+  if (typeof text !== 'string') return text;
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function showToast(message, type = 'info') {
+  if (typeof window.showNotification === 'function') {
+    window.showNotification(message, type);
+  } else {
+    console.log(message);
+  }
+}
+</script>
+
+<%- include('partials/footer') %>

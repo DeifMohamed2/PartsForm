@@ -10,14 +10,24 @@ const middleware = require('i18next-http-middleware');
 const connectDB = require('./config/database');
 const { initializeUploadDirectories } = require('./utils/fileUploader');
 
+// Professional Logger
+const logger = require('./utils/logger');
+const {
+  requestIdMiddleware,
+  morganMiddleware,
+  errorLoggerMiddleware,
+  securityLoggerMiddleware,
+  slowRequestLoggerMiddleware,
+} = require('./middleware/requestLogger');
+const errorTracker = require('./services/errorTrackerService');
+
 // Validate required environment variables
 const requiredEnvVars = ['JWT_SECRET'];
 const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
 
 if (missingEnvVars.length > 0) {
-  console.error('❌ FATAL: Missing required environment variables:');
-  missingEnvVars.forEach(envVar => console.error(`   - ${envVar}`));
-  console.error('   Please check your .env file');
+  logger.error('FATAL: Missing required environment variables', { missingEnvVars });
+  missingEnvVars.forEach(envVar => logger.error(`Missing: ${envVar}`));
   process.exit(1);
 }
 
@@ -25,8 +35,7 @@ if (missingEnvVars.length > 0) {
 const recommendedEnvVars = ['GEMINI_API_KEY', 'MONGODB_URI'];
 const missingRecommended = recommendedEnvVars.filter(envVar => !process.env[envVar]);
 if (missingRecommended.length > 0) {
-  console.warn('⚠️  Warning: Some recommended environment variables are not set:');
-  missingRecommended.forEach(envVar => console.warn(`   - ${envVar} (using default)`));
+  logger.warn('Some recommended environment variables are not set', { missingRecommended });
 }
 
 // Services
@@ -47,7 +56,7 @@ connectDB().then(async () => {
   try {
     const staleIntegrations = await Integration.find({ status: 'syncing' });
     if (staleIntegrations.length > 0) {
-      console.log(`🧹 Cleaning up ${staleIntegrations.length} stale syncing status(es) from previous server session...`);
+      logger.info(`Cleaning up ${staleIntegrations.length} stale syncing status(es)`);
       
       for (const integration of staleIntegrations) {
         // Only set error message if there was actual sync progress
@@ -70,40 +79,43 @@ connectDB().then(async () => {
       }
     }
   } catch (error) {
-    console.error('Failed to cleanup stale syncing statuses:', error.message);
+    logger.error('Failed to cleanup stale syncing statuses', { error: error.message });
   }
   
   // Initialize Elasticsearch
   try {
     await elasticsearchService.initialize();
+    logger.info('Elasticsearch initialized successfully');
   } catch (error) {
-    console.error('Elasticsearch initialization failed:', error.message);
-    console.log('⚠️  Falling back to MongoDB for search');
+    logger.error('Elasticsearch initialization failed', { error: error.message });
+    logger.warn('Falling back to MongoDB for search');
   }
   
   // Initialize scheduler for integration syncs (skip in development mode)
   if (process.env.NODE_ENV === 'development') {
-    console.log('⏸️  Skipping sync scheduler (NODE_ENV=development)');
+    logger.info('Skipping sync scheduler (NODE_ENV=development)');
   } else {
     try {
       await schedulerService.initialize();
+      logger.info('Scheduler service initialized');
     } catch (error) {
-      console.error('Scheduler initialization failed:', error.message);
+      logger.error('Scheduler initialization failed', { error: error.message });
     }
   }
   
   // Initialize email inquiry scheduler for automated email processing (skip in development mode)
   if (process.env.NODE_ENV === 'development') {
-    console.log('⏸️  Skipping email inquiry scheduler (NODE_ENV=development)');
+    logger.info('Skipping email inquiry scheduler (NODE_ENV=development)');
   } else {
     try {
       const emailInitialized = await emailInquiryScheduler.initialize();
       if (emailInitialized) {
         emailInquiryScheduler.start();
+        logger.info('Email inquiry scheduler started');
       }
     } catch (error) {
-      console.error('Email inquiry scheduler initialization failed:', error.message);
-      console.log('⚠️  Email inquiries will need to be manually triggered');
+      logger.error('Email inquiry scheduler initialization failed', { error: error.message });
+      logger.warn('Email inquiries will need to be manually triggered');
     }
   }
 });
@@ -132,6 +144,14 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Request logging middleware (before routes)
+app.use(requestIdMiddleware);
+app.use(morganMiddleware);
+app.use(securityLoggerMiddleware);
+if (process.env.NODE_ENV !== 'production') {
+  app.use(slowRequestLoggerMiddleware);
+}
+
 // i18n Middleware
 app.use(middleware.handle(i18next));
 
@@ -159,18 +179,68 @@ app.use('/buyer', buyerRoutes);
 app.use('/admin', adminRoutes);
 app.use('/partner', partnerRoutes);
 
+// Error logging middleware (after routes)
+app.use(errorLoggerMiddleware);
+
+// Global error handler
+app.use((err, req, res, next) => {
+  // Track error
+  errorTracker.trackError(err, {
+    requestId: req.requestId,
+    userId: req.user?.id || req.admin?.id,
+    url: req.originalUrl,
+    method: req.method,
+    ip: req.ip,
+    userAgent: req.get('user-agent'),
+  });
+  
+  // Log error
+  logger.error('Unhandled error', {
+    requestId: req.requestId,
+    error: err.message,
+    stack: err.stack,
+    url: req.originalUrl,
+  });
+  
+  // Send error response
+  const statusCode = err.status || err.statusCode || 500;
+  
+  if (req.xhr || req.headers.accept?.includes('application/json')) {
+    return res.status(statusCode).json({
+      success: false,
+      message: process.env.NODE_ENV === 'production' ? 'An error occurred' : err.message,
+      requestId: req.requestId,
+    });
+  }
+  
+  res.status(statusCode).render('error', {
+    title: 'Error',
+    error: process.env.NODE_ENV === 'production' ? 'An error occurred' : err.message,
+    requestId: req.requestId,
+  });
+});
+
 // Start server with Socket.io
 server.listen(PORT, () => {
+  logger.info('PARTSFORM Server Started', {
+    port: PORT,
+    nodeEnv: process.env.NODE_ENV || 'development',
+    nodeVersion: process.version,
+    pid: process.pid,
+  });
+  
   console.log(`\n🚀 PARTSFORM Server Running!\n`);
   console.log(`   ➜ Local:    http://localhost:${PORT}`);
-  console.log(`   ➜ Views:    ${path.join(__dirname, 'views')}`);
+  console.log(`   ➜ Logs:     ${path.join(__dirname, 'logs')}`);
   console.log(`   ➜ Socket:   Real-time chat enabled`);
   
   // AI Status
   if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== 'your-gemini-api-key-here') {
     console.log(`   ➜ AI:       ✅ Gemini AI is RUNNING`);
+    logger.info('Gemini AI enabled');
   } else {
     console.log(`   ➜ AI:       ❌ Gemini AI is NOT running (GEMINI_API_KEY not set)`);
+    logger.warn('Gemini AI not configured');
   }
   
   // Email Inquiry Status - check config instead of isRunning (which is set async)
@@ -182,7 +252,8 @@ server.listen(PORT, () => {
   );
   
   if (emailConfigured) {
-    console.log(`   ➜ Email:    ✅ Email inquiry processor configured (starting...)`);
+    console.log(`   ➜ Email:    ✅ Email inquiry processor configured`);
+    logger.info('Email inquiry processor configured');
   } else {
     console.log(`   ➜ Email:    ⚠️  Email inquiry processor not configured`);
   }
@@ -191,8 +262,12 @@ server.listen(PORT, () => {
   cacheService.checkConnection().then(() => {
     const status = cacheService.getStatus();
     console.log(`   ➜ Redis:    ${status.message}`);
+    logger.info('Cache service status', { status: status.message });
   }).catch(() => {
     console.log(`   ➜ Redis:    ⚠️  Redis connection failed (L1 cache only)`);
+    logger.warn('Redis connection failed, using L1 cache only');
   });
+  
+  console.log(`   ➜ Logger:   ✅ Winston logger active`);
   console.log('');
 });

@@ -4,6 +4,7 @@
  * Based on the working implementation - closes FTP after each file
  */
 const EventEmitter = require('events');
+const logger = require('../utils/logger');
 const ftpService = require('./ftpService');
 const apiService = require('./apiService');
 const csvParserService = require('./csvParserService');
@@ -34,7 +35,7 @@ class SyncService extends EventEmitter {
   }
 
   log(...args) {
-    if (this.debug) console.log(...args);
+    if (this.debug) logger.debug(args.join(' '), { service: 'sync' });
   }
 
   /**

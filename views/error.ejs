@@ -16,6 +16,11 @@
                 <p style="font-size: 1.125rem; color: #64748B; margin-bottom: 2rem;">
                     We're sorry, but something unexpected happened. Please try again later or contact support if the problem persists.
                 </p>
+                <% if (typeof requestId !== 'undefined' && requestId) { %>
+                <p style="font-size: 0.875rem; color: #94a3b8; margin-bottom: 1rem;">
+                    Reference ID: <code style="background: #f1f5f9; padding: 0.25rem 0.5rem; border-radius: 4px;"><%= requestId %></code>
+                </p>
+                <% } %>
                 <div style="display: flex; gap: 1rem; justify-content: center;">
                     <a href="/" class="btn-primary" style="text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;">
                         <i data-lucide="home"></i>

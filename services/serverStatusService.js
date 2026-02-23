@@ -383,11 +383,24 @@ class ServerStatusService {
 
     // Get active connections count
     try {
-      if (os.platform() !== 'win32') {
-        const stdout = execSync("ss -n state established '( sport = :3000 or sport = :27017 or sport = :9200 )' 2>/dev/null | wc -l", { encoding: 'utf8', timeout: 2000 });
-        result.connections = Math.max(0, parseInt(stdout.trim()) - 1);
+      const platform = os.platform();
+      if (platform !== 'win32') {
+        let stdout = '';
+        if (platform === 'darwin') {
+          // macOS: use netstat
+          stdout = execSync("netstat -an | grep ESTABLISHED | grep -E '\\.(3000|27017|9200)' | wc -l", { encoding: 'utf8', timeout: 3000 });
+        } else {
+          // Linux: try ss first, fallback to netstat
+          try {
+            stdout = execSync("ss -tn state established 2>/dev/null | grep -E ':3000|:27017|:9200' | wc -l", { encoding: 'utf8', timeout: 3000 });
+          } catch {
+            stdout = execSync("netstat -tn | grep ESTABLISHED | grep -E ':3000|:27017|:9200' | wc -l", { encoding: 'utf8', timeout: 3000 });
+          }
+        }
+        result.connections = Math.max(0, parseInt(stdout.trim()) || 0);
       }
     } catch (e) {
+      // Silent fallback
       result.connections = 0;
     }
 
@@ -408,19 +421,42 @@ class ServerStatusService {
    */
   async getProcessInfo() {
     return new Promise((resolve) => {
-      if (os.platform() === 'win32') {
+      const platform = os.platform();
+      
+      if (platform === 'win32') {
         resolve({ top: [] });
         return;
       }
 
-      exec('ps aux --sort=-%mem | head -11', { timeout: 3000 }, (error, stdout) => {
+      // Different commands for macOS vs Linux
+      let cmd;
+      if (platform === 'darwin') {
+        // macOS: ps doesn't support --sort, use different approach
+        cmd = 'ps aux -r | head -11';  // -r sorts by CPU on macOS
+      } else {
+        // Linux
+        cmd = 'ps aux --sort=-%mem | head -11';
+      }
+
+      exec(cmd, { timeout: 5000 }, (error, stdout, stderr) => {
         if (error) {
+          // Log the error for debugging
+          console.error('Process info error:', error.message, stderr);
           resolve({ top: [] });
           return;
         }
-        const lines = stdout.trim().split('\n').slice(1);
+        
+        if (!stdout || !stdout.trim()) {
+          resolve({ top: [] });
+          return;
+        }
+        
+        const lines = stdout.trim().split('\n').slice(1); // Skip header
         const processes = lines.map((line) => {
           const parts = line.split(/\s+/);
+          if (parts.length < 11) {
+            return null;
+          }
           return {
             user: parts[0],
             pid: parts[1],
@@ -430,7 +466,8 @@ class ServerStatusService {
             rss: parseInt(parts[5]) || 0,
             command: parts.slice(10).join(' ').substring(0, 50),
           };
-        });
+        }).filter(Boolean);
+        
         resolve({ top: processes });
       });
     });
@@ -567,11 +604,40 @@ class ServerStatusService {
   }
 
   /**
-   * Get recent logs
+   * Get recent logs from Winston logger or PM2
    */
   async getLogs(options = {}) {
     const { lines = 100, type = 'all', search = '' } = options;
 
+    // Try to use Winston logger first for structured logs
+    try {
+      const logger = require('../utils/logger');
+      
+      // Map type to Winston log type
+      let logType = 'combined';
+      if (type === 'error') logType = 'error';
+      else if (type === 'http' || type === 'access') logType = 'access';
+      else if (type === 'exceptions') logType = 'exceptions';
+      
+      const logs = await logger.getRecentLogs(logType, lines, search);
+      
+      if (logs && logs.length > 0) {
+        return { 
+          logs: logs.map((log, index) => ({
+            id: index,
+            timestamp: log.timestamp,
+            level: log.level || 'info',
+            message: log.message || JSON.stringify(log),
+            ...log,
+          })),
+          source: 'winston',
+        };
+      }
+    } catch (e) {
+      // Winston not available, fall back to PM2
+    }
+
+    // Fallback to PM2/system logs
     return new Promise((resolve) => {
       let cmd = '';
 
@@ -599,19 +665,16 @@ class ServerStatusService {
 
         // Parse log lines
         const logs = logLines.map((line, index) => {
-          // Try to extract timestamp and level
           let timestamp = new Date().toISOString();
           let level = 'info';
           let message = line;
 
-          // PM2 format: "PM2  | App [name]: message"
           const pm2Match = line.match(/^(\d{4}-\d{2}-\d{2}T[\d:.]+(Z|[+-]\d{2}:\d{2})?)\s*\|?\s*(.+)$/);
           if (pm2Match) {
             timestamp = pm2Match[1];
             message = pm2Match[3];
           }
 
-          // Detect log level
           const lineLower = line.toLowerCase();
           if (lineLower.includes('error') || lineLower.includes('err:')) {
             level = 'error';
@@ -624,7 +687,7 @@ class ServerStatusService {
           return { id: index, timestamp, level, message, raw: line };
         });
 
-        resolve({ logs: logs.slice(-lines) });
+        resolve({ logs: logs.slice(-lines), source: 'pm2' });
       });
     });
   }
