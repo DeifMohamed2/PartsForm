@@ -434,15 +434,20 @@ class ServerStatusService {
         // macOS: ps doesn't support --sort, use different approach
         cmd = 'ps aux -r | head -11';  // -r sorts by CPU on macOS
       } else {
-        // Linux
-        cmd = 'ps aux --sort=-%mem | head -11';
+        // Linux: use simple ps aux and sort with shell
+        cmd = 'ps aux | sort -nrk 4 | head -10';
       }
 
-      exec(cmd, { timeout: 5000 }, (error, stdout, stderr) => {
+      exec(cmd, { timeout: 10000, maxBuffer: 1024 * 1024 }, (error, stdout, stderr) => {
         if (error) {
-          // Log the error for debugging
-          console.error('Process info error:', error.message, stderr);
-          resolve({ top: [] });
+          // Try fallback command
+          exec('ps aux | head -11', { timeout: 5000 }, (err2, stdout2) => {
+            if (err2 || !stdout2) {
+              resolve({ top: [] });
+              return;
+            }
+            resolve({ top: this._parseProcessOutput(stdout2) });
+          });
           return;
         }
         
@@ -451,26 +456,34 @@ class ServerStatusService {
           return;
         }
         
-        const lines = stdout.trim().split('\n').slice(1); // Skip header
-        const processes = lines.map((line) => {
-          const parts = line.split(/\s+/);
-          if (parts.length < 11) {
-            return null;
-          }
-          return {
-            user: parts[0],
-            pid: parts[1],
-            cpu: parseFloat(parts[2]) || 0,
-            mem: parseFloat(parts[3]) || 0,
-            vsz: parseInt(parts[4]) || 0,
-            rss: parseInt(parts[5]) || 0,
-            command: parts.slice(10).join(' ').substring(0, 50),
-          };
-        }).filter(Boolean);
-        
-        resolve({ top: processes });
+        resolve({ top: this._parseProcessOutput(stdout) });
       });
     });
+  }
+
+  /**
+   * Parse ps aux output into process objects
+   */
+  _parseProcessOutput(stdout) {
+    const lines = stdout.trim().split('\n');
+    // Skip header if present (starts with USER)
+    const startIndex = lines[0]?.includes('USER') ? 1 : 0;
+    
+    return lines.slice(startIndex, startIndex + 10).map((line) => {
+      const parts = line.trim().split(/\s+/);
+      if (parts.length < 11) {
+        return null;
+      }
+      return {
+        user: parts[0],
+        pid: parts[1],
+        cpu: parseFloat(parts[2]) || 0,
+        mem: parseFloat(parts[3]) || 0,
+        vsz: parseInt(parts[4]) || 0,
+        rss: parseInt(parts[5]) || 0,
+        command: parts.slice(10).join(' ').substring(0, 50),
+      };
+    }).filter(Boolean);
   }
 
   /**
