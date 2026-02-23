@@ -11,7 +11,7 @@
  */
 
 const morgan = require('morgan');
-const { v4: uuidv4 } = require('uuid');
+const crypto = require('crypto');
 const logger = require('../utils/logger');
 
 // Skip logging for these paths (health checks, static files, etc.)
@@ -31,7 +31,7 @@ const SKIP_PATHS = [
  */
 const requestIdMiddleware = (req, res, next) => {
   // Use existing request ID from header (for distributed tracing) or generate new one
-  req.requestId = req.headers['x-request-id'] || uuidv4();
+  req.requestId = req.headers['x-request-id'] || crypto.randomUUID();
   
   // Add request ID to response headers for client-side tracking
   res.setHeader('X-Request-ID', req.requestId);
