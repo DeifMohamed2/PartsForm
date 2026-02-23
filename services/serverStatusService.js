@@ -429,42 +429,39 @@ class ServerStatusService {
       }
 
       // Different commands for macOS vs Linux
-      let cmd;
       if (platform === 'darwin') {
-        // macOS: ps doesn't support --sort, use different approach
-        cmd = 'ps aux -r | head -11';  // -r sorts by CPU on macOS
+        // macOS: use ps
+        exec('ps aux -r | head -11', { timeout: 5000 }, (error, stdout) => {
+          if (error || !stdout) {
+            resolve({ top: [] });
+            return;
+          }
+          resolve({ top: this._parsePsOutput(stdout) });
+        });
       } else {
-        // Linux: use simple ps aux and sort with shell
-        cmd = 'ps aux | sort -nrk 4 | head -10';
+        // Linux: use top -bn1 (ps can be unreliable in some environments)
+        exec('top -bn1 -o %MEM | head -17', { timeout: 10000 }, (error, stdout) => {
+          if (error || !stdout) {
+            // Fallback to ps
+            exec('ps aux --sort=-%mem 2>/dev/null | head -11', { timeout: 5000 }, (err2, stdout2) => {
+              if (err2 || !stdout2) {
+                resolve({ top: [] });
+                return;
+              }
+              resolve({ top: this._parsePsOutput(stdout2) });
+            });
+            return;
+          }
+          resolve({ top: this._parseTopOutput(stdout) });
+        });
       }
-
-      exec(cmd, { timeout: 10000, maxBuffer: 1024 * 1024 }, (error, stdout, stderr) => {
-        if (error) {
-          // Try fallback command
-          exec('ps aux | head -11', { timeout: 5000 }, (err2, stdout2) => {
-            if (err2 || !stdout2) {
-              resolve({ top: [] });
-              return;
-            }
-            resolve({ top: this._parseProcessOutput(stdout2) });
-          });
-          return;
-        }
-        
-        if (!stdout || !stdout.trim()) {
-          resolve({ top: [] });
-          return;
-        }
-        
-        resolve({ top: this._parseProcessOutput(stdout) });
-      });
     });
   }
 
   /**
    * Parse ps aux output into process objects
    */
-  _parseProcessOutput(stdout) {
+  _parsePsOutput(stdout) {
     const lines = stdout.trim().split('\n');
     // Skip header if present (starts with USER)
     const startIndex = lines[0]?.includes('USER') ? 1 : 0;
@@ -484,6 +481,50 @@ class ServerStatusService {
         command: parts.slice(10).join(' ').substring(0, 50),
       };
     }).filter(Boolean);
+  }
+
+  /**
+   * Parse top -bn1 output into process objects
+   */
+  _parseTopOutput(stdout) {
+    const lines = stdout.trim().split('\n');
+    // Find the header line (contains PID USER)
+    let startIndex = 0;
+    for (let i = 0; i < lines.length; i++) {
+      if (lines[i].includes('PID') && lines[i].includes('USER')) {
+        startIndex = i + 1;
+        break;
+      }
+    }
+    
+    return lines.slice(startIndex, startIndex + 10).map((line) => {
+      const parts = line.trim().split(/\s+/);
+      if (parts.length < 12) {
+        return null;
+      }
+      // top format: PID USER PR NI VIRT RES SHR S %CPU %MEM TIME+ COMMAND
+      return {
+        pid: parts[0],
+        user: parts[1],
+        cpu: parseFloat(parts[8]) || 0,
+        mem: parseFloat(parts[9]) || 0,
+        vsz: this._parseMemoryValue(parts[4]),
+        rss: this._parseMemoryValue(parts[5]),
+        command: parts.slice(11).join(' ').substring(0, 50),
+      };
+    }).filter(Boolean);
+  }
+
+  /**
+   * Parse memory value from top (handles K, M, G suffixes)
+   */
+  _parseMemoryValue(value) {
+    if (!value) return 0;
+    const num = parseFloat(value);
+    if (value.endsWith('g') || value.endsWith('G')) return Math.round(num * 1024 * 1024);
+    if (value.endsWith('m') || value.endsWith('M')) return Math.round(num * 1024);
+    if (value.endsWith('k') || value.endsWith('K')) return Math.round(num);
+    return Math.round(num);
   }
 
   /**
