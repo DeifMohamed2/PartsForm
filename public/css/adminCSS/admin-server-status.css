@@ -1,0 +1,68 @@
+/**
+ * Server Status Page - Additional Styles
+ * Main styles are included inline in server-status.ejs for module isolation
+ */
+
+/* JetBrains Mono Font for monospace text */
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+/* Ensure smooth animations */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom scrollbar for logs */
+.logs-container::-webkit-scrollbar {
+  width: 8px;
+}
+.logs-container::-webkit-scrollbar-track {
+  background: #161b22;
+}
+.logs-container::-webkit-scrollbar-thumb {
+  background: #30363d;
+  border-radius: 4px;
+}
+.logs-container::-webkit-scrollbar-thumb:hover {
+  background: #484f58;
+}
+
+/* Circular progress animation */
+.circle-fill {
+  transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Card hover effects */
+.quick-stat-card,
+.service-card,
+.server-card {
+  will-change: transform, box-shadow;
+}
+
+/* Button focus states */
+.btn-refresh-hero:focus,
+.log-tab:focus,
+.log-action-btn:focus {
+  outline: 2px solid var(--admin-primary);
+  outline-offset: 2px;
+}
+
+/* Ensure tables don't break layout */
+.processes-table-container {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Print styles */
+@media print {
+  .server-status-hero,
+  .logs-section,
+  .status-footer {
+    display: none;
+  }
+  .server-card,
+  .service-card {
+    break-inside: avoid;
+    box-shadow: none;
+    border: 1px solid #ddd;
+  }
+}

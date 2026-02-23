@@ -78,6 +78,11 @@ const {
   getSystemSettings,
   updateSystemSettings,
   getAdminSettings,
+  // Server Status
+  getServerStatus,
+  getServerStatusApi,
+  getServerHealthApi,
+  getServerLogsApi,
 } = require('../controllers/adminController');
 
 // Import email inquiry controller
@@ -474,5 +479,16 @@ router.post('/api/referrals/applications/:id/reject', requirePermission(PERMISSI
 
 // Utility endpoints
 router.post('/api/referrals/resync-stats', requirePermission(PERMISSIONS.WRITE), resyncAllPartnerStats);
+
+// ==========================================
+// Server Status (Super Admin Only)
+// ==========================================
+// Server Status Page - Real-time monitoring dashboard
+router.get('/server-status', requirePermission(PERMISSIONS.MANAGE_SETTINGS), getServerStatus);
+
+// Server Status API endpoints
+router.get('/api/server-status', requirePermission(PERMISSIONS.MANAGE_SETTINGS), getServerStatusApi);
+router.get('/api/server-status/health', requirePermission(PERMISSIONS.MANAGE_SETTINGS), getServerHealthApi);
+router.get('/api/server-status/logs', requirePermission(PERMISSIONS.MANAGE_SETTINGS), getServerLogsApi);
 
 module.exports = router;

@@ -1,0 +1,1595 @@
+<%- include('partials/header') %>
+<link rel="stylesheet" href="/css/adminCSS/admin-server-status.css">
+<style>
+  /* Server Status Page - Unique Premium Design */
+  
+  /* Hero Banner Matching Dashboard */
+  .server-status-hero {
+    background: linear-gradient(135deg, #1e3a5f 0%, #2b5278 50%, #3d6a96 100%);
+    border-radius: var(--admin-radius-xl);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    color: white;
+    position: relative;
+    overflow: hidden;
+  }
+  .server-status-hero::before {
+    content: '';
+    position: absolute;
+    top: -50px;
+    right: -50px;
+    width: 200px;
+    height: 200px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 50%;
+  }
+  .server-status-hero::after {
+    content: '';
+    position: absolute;
+    bottom: -30px;
+    left: 30%;
+    width: 150px;
+    height: 150px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 50%;
+  }
+  .hero-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+  }
+  .hero-text h2 {
+    font-size: 1.75rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+    color: white;
+  }
+  .hero-text p {
+    opacity: 0.8;
+    font-size: 0.95rem;
+  }
+  .hero-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+  }
+  .health-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    background: rgba(255,255,255,0.1);
+    border-radius: var(--admin-radius-lg);
+    backdrop-filter: blur(10px);
+    font-weight: 600;
+  }
+  .health-badge.healthy { background: rgba(16, 185, 129, 0.25); }
+  .health-badge.warning { background: rgba(245, 158, 11, 0.25); }
+  .health-badge.critical { background: rgba(239, 68, 68, 0.25); }
+  .health-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #10b981;
+    animation: pulse 2s infinite;
+  }
+  .health-badge.warning .health-dot { background: #f59e0b; }
+  .health-badge.critical .health-dot { background: #ef4444; }
+  
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(0.9); }
+  }
+  
+  .btn-refresh-hero {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: var(--admin-radius-lg);
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-refresh-hero:hover {
+    background: rgba(255,255,255,0.25);
+  }
+  .btn-refresh-hero.spinning i {
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  /* Quick Stats Row */
+  .quick-stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  .quick-stat-card {
+    background: var(--admin-bg-primary);
+    border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius-xl);
+    padding: 1.5rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    box-shadow: var(--admin-shadow-sm);
+    position: relative;
+    overflow: hidden;
+  }
+  .quick-stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--stat-color, var(--admin-primary));
+  }
+  .quick-stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--admin-shadow-lg);
+    border-color: var(--stat-color, var(--admin-primary));
+  }
+  .quick-stat-card.cpu { --stat-color: #3b82f6; }
+  .quick-stat-card.memory { --stat-color: #8b5cf6; }
+  .quick-stat-card.disk { --stat-color: #10b981; }
+  .quick-stat-card.uptime { --stat-color: #f59e0b; }
+  
+  .stat-icon-wrap {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 1rem;
+    position: relative;
+  }
+  .stat-icon-wrap svg.circular-progress {
+    transform: rotate(-90deg);
+    width: 60px;
+    height: 60px;
+  }
+  .stat-icon-wrap .circle-bg {
+    fill: none;
+    stroke: var(--admin-bg-tertiary);
+    stroke-width: 6;
+  }
+  .stat-icon-wrap .circle-fill {
+    fill: none;
+    stroke: var(--stat-color, var(--admin-primary));
+    stroke-width: 6;
+    stroke-linecap: round;
+    stroke-dasharray: 157;
+    stroke-dashoffset: 157;
+    transition: stroke-dashoffset 0.8s ease;
+  }
+  .stat-icon-inner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--stat-color, var(--admin-primary));
+  }
+  .stat-icon-inner i {
+    width: 22px;
+    height: 22px;
+  }
+  
+  .quick-stat-value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--admin-text-primary);
+    margin-bottom: 0.25rem;
+  }
+  .quick-stat-label {
+    font-size: 0.85rem;
+    color: var(--admin-text-muted);
+    font-weight: 500;
+  }
+  .quick-stat-sub {
+    font-size: 0.75rem;
+    color: var(--admin-text-muted);
+    margin-top: 0.5rem;
+    opacity: 0.8;
+  }
+
+  /* Main Grid Layout */
+  .server-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  .server-card {
+    background: var(--admin-bg-primary);
+    border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius-xl);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-shadow: var(--admin-shadow-sm);
+  }
+  .server-card:hover {
+    box-shadow: var(--admin-shadow-md);
+    border-color: var(--admin-border-medium);
+  }
+  .server-card.full-width {
+    grid-column: span 2;
+  }
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--admin-border);
+    background: var(--admin-bg-secondary);
+  }
+  .card-header-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .card-header-left i {
+    width: 20px;
+    height: 20px;
+    color: var(--admin-primary);
+  }
+  .card-header h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--admin-text-primary);
+    margin: 0;
+  }
+  .card-badge {
+    padding: 0.35rem 0.75rem;
+    background: var(--admin-bg-tertiary);
+    border-radius: var(--admin-radius-full);
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--admin-text-secondary);
+  }
+  .card-body {
+    padding: 1.5rem;
+  }
+
+  /* System Info */
+  .system-info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+  .info-item {
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    background: var(--admin-bg-secondary);
+    border-radius: var(--admin-radius-lg);
+    border: 1px solid var(--admin-border);
+  }
+  .info-label {
+    font-size: 0.75rem;
+    color: var(--admin-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
+  }
+  .info-value {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--admin-text-primary);
+    word-break: break-word;
+  }
+  .info-value.mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* Services Section */
+  .services-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  .service-card {
+    background: var(--admin-bg-primary);
+    border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius-xl);
+    padding: 1.5rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1.25rem;
+    transition: all 0.3s ease;
+    box-shadow: var(--admin-shadow-sm);
+    position: relative;
+    overflow: hidden;
+  }
+  .service-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--admin-text-muted);
+    transition: background 0.3s;
+  }
+  .service-card.healthy::before { background: #10b981; }
+  .service-card.warning::before { background: #f59e0b; }
+  .service-card.error::before { background: #ef4444; }
+  
+  .service-card:hover {
+    transform: translateX(4px);
+    box-shadow: var(--admin-shadow-md);
+  }
+  .service-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: var(--admin-radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .service-icon.mongodb {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.05));
+    color: #10b981;
+  }
+  .service-icon.elasticsearch {
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.15), rgba(251, 191, 36, 0.05));
+    color: #f59e0b;
+  }
+  .service-icon i {
+    width: 26px;
+    height: 26px;
+  }
+  .service-content {
+    flex: 1;
+    min-width: 0;
+  }
+  .service-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+  }
+  .service-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--admin-text-primary);
+  }
+  .service-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: var(--admin-radius-full);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  .service-status-badge.healthy {
+    background: rgba(16, 185, 129, 0.12);
+    color: #059669;
+  }
+  .service-status-badge.warning {
+    background: rgba(245, 158, 11, 0.12);
+    color: #d97706;
+  }
+  .service-status-badge.error {
+    background: rgba(239, 68, 68, 0.12);
+    color: #dc2626;
+  }
+  .service-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .service-detail {
+    font-size: 0.8rem;
+    color: var(--admin-text-muted);
+  }
+  .service-detail strong {
+    color: var(--admin-text-secondary);
+  }
+
+  /* PM2 Section */
+  .pm2-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+  }
+  .pm2-card {
+    background: var(--admin-bg-secondary);
+    border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius-lg);
+    padding: 1.25rem;
+    transition: all 0.3s ease;
+  }
+  .pm2-card:hover {
+    border-color: var(--admin-primary);
+    box-shadow: var(--admin-shadow-sm);
+  }
+  .pm2-card.online { border-left: 4px solid #10b981; }
+  .pm2-card.stopped { border-left: 4px solid #ef4444; }
+  .pm2-card.errored { border-left: 4px solid #f59e0b; }
+  
+  .pm2-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+  .pm2-name {
+    font-weight: 700;
+    color: var(--admin-text-primary);
+    font-size: 1rem;
+  }
+  .pm2-status {
+    padding: 0.25rem 0.6rem;
+    border-radius: var(--admin-radius-sm);
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+  .pm2-status.online { background: rgba(16, 185, 129, 0.15); color: #059669; }
+  .pm2-status.stopped { background: rgba(239, 68, 68, 0.15); color: #dc2626; }
+  .pm2-status.errored { background: rgba(245, 158, 11, 0.15); color: #d97706; }
+  
+  .pm2-metrics {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  .pm2-metric {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    background: var(--admin-bg-primary);
+    border-radius: var(--admin-radius-md);
+    font-size: 0.8rem;
+  }
+  .pm2-metric i {
+    width: 14px;
+    height: 14px;
+    color: var(--admin-text-muted);
+  }
+  .pm2-metric-value {
+    font-weight: 600;
+    color: var(--admin-text-primary);
+  }
+  .pm2-footer {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: var(--admin-text-muted);
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--admin-border);
+  }
+  .pm2-empty {
+    grid-column: span 2;
+    padding: 3rem;
+    text-align: center;
+    color: var(--admin-text-muted);
+  }
+  .pm2-empty i {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 1rem;
+    opacity: 0.3;
+  }
+
+  /* Disk Section */
+  .disk-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .disk-item {
+    padding: 1rem;
+    background: var(--admin-bg-secondary);
+    border-radius: var(--admin-radius-lg);
+    border: 1px solid var(--admin-border);
+  }
+  .disk-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+  }
+  .disk-mount {
+    font-weight: 700;
+    color: var(--admin-text-primary);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .disk-size {
+    font-size: 0.85rem;
+    color: var(--admin-text-muted);
+  }
+  .disk-progress {
+    height: 8px;
+    background: var(--admin-bg-tertiary);
+    border-radius: var(--admin-radius-full);
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+  }
+  .disk-progress-fill {
+    height: 100%;
+    border-radius: var(--admin-radius-full);
+    background: linear-gradient(90deg, #10b981, #34d399);
+    transition: width 0.5s ease;
+  }
+  .disk-progress-fill.warning { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+  .disk-progress-fill.critical { background: linear-gradient(90deg, #ef4444, #f87171); }
+  .disk-stats {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: var(--admin-text-muted);
+  }
+
+  /* Network Section */
+  .network-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1.5rem;
+  }
+  .network-interfaces {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .network-interface {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    background: var(--admin-bg-secondary);
+    border-radius: var(--admin-radius-md);
+    border: 1px solid var(--admin-border);
+    font-size: 0.85rem;
+  }
+  .iface-name {
+    font-weight: 700;
+    color: var(--admin-text-primary);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .iface-ip {
+    color: var(--admin-primary);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .iface-mac {
+    color: var(--admin-text-muted);
+    font-size: 0.75rem;
+  }
+  .connection-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    background: var(--admin-bg-secondary);
+    border-radius: var(--admin-radius-lg);
+    border: 1px solid var(--admin-border);
+  }
+  .connection-count {
+    font-size: 3rem;
+    font-weight: 800;
+    color: var(--admin-primary);
+    line-height: 1;
+  }
+  .connection-label {
+    font-size: 0.85rem;
+    color: var(--admin-text-muted);
+    margin-top: 0.5rem;
+  }
+
+  /* Processes Table */
+  .processes-table-container {
+    overflow-x: auto;
+  }
+  .processes-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+  }
+  .processes-table th {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: var(--admin-text-muted);
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    letter-spacing: 0.5px;
+    background: var(--admin-bg-secondary);
+    border-bottom: 1px solid var(--admin-border);
+  }
+  .processes-table td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--admin-border);
+    color: var(--admin-text-secondary);
+  }
+  .processes-table tr:hover td {
+    background: var(--admin-bg-secondary);
+  }
+  .processes-table .high-usage {
+    color: #ef4444;
+    font-weight: 600;
+  }
+  .processes-table .command-cell {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+  }
+
+  /* Logs Section */
+  .logs-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--admin-border);
+    background: var(--admin-bg-secondary);
+    flex-wrap: wrap;
+  }
+  .log-type-tabs {
+    display: flex;
+    gap: 0.25rem;
+    background: var(--admin-bg-tertiary);
+    padding: 0.25rem;
+    border-radius: var(--admin-radius-md);
+  }
+  .log-tab {
+    padding: 0.5rem 1rem;
+    border: none;
+    background: transparent;
+    color: var(--admin-text-muted);
+    font-weight: 500;
+    font-size: 0.85rem;
+    border-radius: var(--admin-radius-sm);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .log-tab.active {
+    background: var(--admin-bg-primary);
+    color: var(--admin-primary);
+    box-shadow: var(--admin-shadow-sm);
+  }
+  .log-tab:hover:not(.active) {
+    color: var(--admin-text-primary);
+  }
+  .log-search {
+    flex: 1;
+    max-width: 300px;
+    position: relative;
+  }
+  .log-search input {
+    width: 100%;
+    padding: 0.5rem 1rem 0.5rem 2.25rem;
+    border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius-md);
+    background: var(--admin-bg-primary);
+    color: var(--admin-text-primary);
+    font-size: 0.85rem;
+  }
+  .log-search input:focus {
+    outline: none;
+    border-color: var(--admin-primary);
+  }
+  .log-search i {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    color: var(--admin-text-muted);
+  }
+  .log-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-left: auto;
+  }
+  .log-action-btn {
+    padding: 0.5rem;
+    border: 1px solid var(--admin-border);
+    background: var(--admin-bg-primary);
+    border-radius: var(--admin-radius-md);
+    color: var(--admin-text-muted);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .log-action-btn:hover {
+    border-color: var(--admin-primary);
+    color: var(--admin-primary);
+  }
+  .log-action-btn.paused {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: #ef4444;
+    color: #ef4444;
+  }
+  .log-action-btn i {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .logs-container {
+    height: 350px;
+    overflow-y: auto;
+    background: #0d1117;
+    padding: 1rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    line-height: 1.6;
+  }
+  .log-line {
+    display: flex;
+    gap: 0.75rem;
+    padding: 0.2rem 0;
+  }
+  .log-time {
+    color: #6e7681;
+    flex-shrink: 0;
+  }
+  .log-level {
+    width: 50px;
+    flex-shrink: 0;
+    font-weight: 600;
+  }
+  .log-line.info .log-level { color: #58a6ff; }
+  .log-line.warn .log-level { color: #d29922; }
+  .log-line.error .log-level { color: #f85149; }
+  .log-line.debug .log-level { color: #8b949e; }
+  .log-message {
+    color: #c9d1d9;
+    word-break: break-word;
+  }
+
+  /* Footer */
+  .status-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    background: var(--admin-bg-secondary);
+    border-radius: var(--admin-radius-lg);
+    border: 1px solid var(--admin-border);
+    font-size: 0.85rem;
+    color: var(--admin-text-muted);
+    margin-top: 2rem;
+  }
+  .auto-refresh-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .toggle-switch {
+    position: relative;
+    width: 44px;
+    height: 24px;
+  }
+  .toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  .toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--admin-bg-tertiary);
+    border-radius: var(--admin-radius-full);
+    transition: 0.3s;
+  }
+  .toggle-slider::before {
+    content: '';
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    left: 3px;
+    bottom: 3px;
+    background: white;
+    border-radius: 50%;
+    transition: 0.3s;
+  }
+  .toggle-switch input:checked + .toggle-slider {
+    background: var(--admin-primary);
+  }
+  .toggle-switch input:checked + .toggle-slider::before {
+    transform: translateX(20px);
+  }
+
+  /* Section Title */
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--admin-text-primary);
+    margin-bottom: 1.25rem;
+  }
+  .section-title i {
+    width: 20px;
+    height: 20px;
+    color: var(--admin-primary);
+  }
+
+  /* Responsive */
+  @media (max-width: 1200px) {
+    .quick-stats-row { grid-template-columns: repeat(2, 1fr); }
+    .server-grid { grid-template-columns: 1fr; }
+    .server-card.full-width { grid-column: span 1; }
+    .network-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 768px) {
+    .hero-content { flex-direction: column; gap: 1.5rem; text-align: center; }
+    .hero-actions { flex-wrap: wrap; justify-content: center; }
+    .quick-stats-row { grid-template-columns: 1fr; }
+    .services-row { grid-template-columns: 1fr; }
+    .system-info-grid { grid-template-columns: 1fr; }
+    .logs-controls { flex-direction: column; align-items: stretch; }
+    .log-search { max-width: none; }
+    .log-actions { justify-content: center; }
+  }
+</style>
+</head>
+<body>
+  <div class="admin-wrapper">
+    <%- include('partials/sidebar', { activePage: 'server-status' }) %>
+    
+    <main class="admin-main">
+      <%- include('partials/topbar', { pageTitle: 'Server Status' }) %>
+      
+      <div class="admin-content">
+        <!-- Hero Banner -->
+        <div class="server-status-hero">
+          <div class="hero-content">
+            <div class="hero-text">
+              <h2>Server Status Monitor</h2>
+              <p>Real-time server monitoring and system health overview</p>
+            </div>
+            <div class="hero-actions">
+              <div class="health-badge healthy" id="healthBadge">
+                <span class="health-dot"></span>
+                <span class="health-text">Checking...</span>
+              </div>
+              <button class="btn-refresh-hero" id="refreshBtn">
+                <i data-lucide="refresh-cw"></i>
+                Refresh
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Stats Row -->
+        <div class="quick-stats-row">
+          <div class="quick-stat-card cpu">
+            <div class="stat-icon-wrap">
+              <svg class="circular-progress" viewBox="0 0 56 56">
+                <circle class="circle-bg" cx="28" cy="28" r="25"/>
+                <circle class="circle-fill" id="cpuCircle" cx="28" cy="28" r="25"/>
+              </svg>
+              <div class="stat-icon-inner">
+                <i data-lucide="cpu"></i>
+              </div>
+            </div>
+            <div class="quick-stat-value" id="cpuValue">0%</div>
+            <div class="quick-stat-label">CPU Usage</div>
+            <div class="quick-stat-sub" id="cpuCores">- cores</div>
+          </div>
+          
+          <div class="quick-stat-card memory">
+            <div class="stat-icon-wrap">
+              <svg class="circular-progress" viewBox="0 0 56 56">
+                <circle class="circle-bg" cx="28" cy="28" r="25"/>
+                <circle class="circle-fill" id="memCircle" cx="28" cy="28" r="25"/>
+              </svg>
+              <div class="stat-icon-inner">
+                <i data-lucide="hard-drive"></i>
+              </div>
+            </div>
+            <div class="quick-stat-value" id="memValue">0%</div>
+            <div class="quick-stat-label">Memory Usage</div>
+            <div class="quick-stat-sub" id="memTotal">- GB Total</div>
+          </div>
+          
+          <div class="quick-stat-card disk">
+            <div class="stat-icon-wrap">
+              <svg class="circular-progress" viewBox="0 0 56 56">
+                <circle class="circle-bg" cx="28" cy="28" r="25"/>
+                <circle class="circle-fill" id="diskCircle" cx="28" cy="28" r="25"/>
+              </svg>
+              <div class="stat-icon-inner">
+                <i data-lucide="database"></i>
+              </div>
+            </div>
+            <div class="quick-stat-value" id="diskValue">0%</div>
+            <div class="quick-stat-label">Disk Usage</div>
+            <div class="quick-stat-sub" id="diskTotal">- GB Total</div>
+          </div>
+          
+          <div class="quick-stat-card uptime">
+            <div class="stat-icon-wrap">
+              <svg class="circular-progress" viewBox="0 0 56 56">
+                <circle class="circle-bg" cx="28" cy="28" r="25"/>
+                <circle class="circle-fill" id="uptimeCircle" cx="28" cy="28" r="25" style="stroke-dashoffset: 0;"/>
+              </svg>
+              <div class="stat-icon-inner">
+                <i data-lucide="clock"></i>
+              </div>
+            </div>
+            <div class="quick-stat-value" id="uptimeValue">-</div>
+            <div class="quick-stat-label">System Uptime</div>
+            <div class="quick-stat-sub" id="hostname">-</div>
+          </div>
+        </div>
+
+        <!-- Services Section -->
+        <h3 class="section-title">
+          <i data-lucide="layers"></i>
+          Services Status
+        </h3>
+        <div class="services-row">
+          <div class="service-card" id="mongoCard">
+            <div class="service-icon mongodb">
+              <i data-lucide="database"></i>
+            </div>
+            <div class="service-content">
+              <div class="service-header">
+                <span class="service-name">MongoDB</span>
+                <span class="service-status-badge" id="mongoStatus">Checking</span>
+              </div>
+              <div class="service-details" id="mongoDetails">
+                <span class="service-detail">Loading...</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="service-card" id="esCard">
+            <div class="service-icon elasticsearch">
+              <i data-lucide="search"></i>
+            </div>
+            <div class="service-content">
+              <div class="service-header">
+                <span class="service-name">Elasticsearch</span>
+                <span class="service-status-badge" id="esStatus">Checking</span>
+              </div>
+              <div class="service-details" id="esDetails">
+                <span class="service-detail">Loading...</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Main Grid -->
+        <div class="server-grid">
+          <!-- System Information -->
+          <div class="server-card">
+            <div class="card-header">
+              <div class="card-header-left">
+                <i data-lucide="server"></i>
+                <h3>System Information</h3>
+              </div>
+              <span class="card-badge" id="platformBadge">-</span>
+            </div>
+            <div class="card-body">
+              <div class="system-info-grid" id="systemInfo">
+                <div class="info-item">
+                  <span class="info-label">Hostname</span>
+                  <span class="info-value mono" id="sysHostname">-</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Platform</span>
+                  <span class="info-value" id="sysPlatform">-</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Node.js Version</span>
+                  <span class="info-value mono" id="sysNode">-</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Load Average</span>
+                  <span class="info-value mono" id="sysLoad">-</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">CPU Model</span>
+                  <span class="info-value" id="cpuModel">-</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">CPU Speed</span>
+                  <span class="info-value" id="cpuSpeed">-</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Disk Usage -->
+          <div class="server-card">
+            <div class="card-header">
+              <div class="card-header-left">
+                <i data-lucide="hard-drive"></i>
+                <h3>Disk Storage</h3>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="disk-list" id="diskList">
+                <div class="disk-item">
+                  <div class="disk-header">
+                    <span class="disk-mount">Loading...</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PM2 Section -->
+        <h3 class="section-title">
+          <i data-lucide="terminal"></i>
+          PM2 Processes
+        </h3>
+        <div class="server-card full-width" style="margin-bottom: 2rem;">
+          <div class="card-header">
+            <div class="card-header-left">
+              <i data-lucide="activity"></i>
+              <h3>Process Manager</h3>
+            </div>
+            <span class="card-badge" id="pm2Count">0 processes</span>
+          </div>
+          <div class="card-body">
+            <div class="pm2-grid" id="pm2Grid">
+              <div class="pm2-empty">
+                <i data-lucide="inbox"></i>
+                <p>Loading processes...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Network Section -->
+        <h3 class="section-title">
+          <i data-lucide="wifi"></i>
+          Network Information
+        </h3>
+        <div class="server-card full-width" style="margin-bottom: 2rem;">
+          <div class="card-body">
+            <div class="network-grid">
+              <div class="network-interfaces" id="networkInterfaces">
+                <div class="network-interface">
+                  <span class="iface-name">Loading...</span>
+                </div>
+              </div>
+              <div class="connection-display">
+                <div class="connection-count" id="connectionCount">-</div>
+                <span class="connection-label">Active Connections</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Top Processes -->
+        <h3 class="section-title">
+          <i data-lucide="list"></i>
+          Top Processes (by Memory)
+        </h3>
+        <div class="server-card full-width" style="margin-bottom: 2rem;">
+          <div class="card-body" style="padding: 0;">
+            <div class="processes-table-container">
+              <table class="processes-table">
+                <thead>
+                  <tr>
+                    <th>PID</th>
+                    <th>User</th>
+                    <th>CPU %</th>
+                    <th>MEM %</th>
+                    <th>VSZ</th>
+                    <th>RSS</th>
+                    <th>Command</th>
+                  </tr>
+                </thead>
+                <tbody id="processesTable">
+                  <tr><td colspan="7" style="text-align:center; padding:2rem; color:var(--admin-text-muted);">Loading processes...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Logs Section -->
+        <h3 class="section-title">
+          <i data-lucide="file-text"></i>
+          Live Logs
+        </h3>
+        <div class="server-card full-width">
+          <div class="logs-controls">
+            <div class="log-type-tabs">
+              <button class="log-tab active" data-type="pm2">PM2 Logs</button>
+              <button class="log-tab" data-type="system">System</button>
+            </div>
+            <div class="log-search">
+              <i data-lucide="search"></i>
+              <input type="text" id="logSearch" placeholder="Filter logs...">
+            </div>
+            <div class="log-actions">
+              <button class="log-action-btn" id="clearLogs" title="Clear"><i data-lucide="trash-2"></i></button>
+              <button class="log-action-btn" id="downloadLogs" title="Download"><i data-lucide="download"></i></button>
+              <button class="log-action-btn" id="pauseLogs" title="Pause"><i data-lucide="pause"></i></button>
+            </div>
+          </div>
+          <div class="logs-container" id="logsContainer">
+            <div class="log-line info">
+              <span class="log-time">--:--:--</span>
+              <span class="log-level">INFO</span>
+              <span class="log-message">Loading logs...</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Status Footer -->
+        <div class="status-footer">
+          <span id="lastUpdate">Last updated: -</span>
+          <div class="auto-refresh-toggle">
+            <span>Auto-refresh</span>
+            <label class="toggle-switch">
+              <input type="checkbox" id="autoRefreshToggle" checked>
+              <span class="toggle-slider"></span>
+            </label>
+            <span>every 3s</span>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+<%- include('partials/footer') %>
+
+<script>
+(function() {
+  'use strict';
+
+  const CONFIG = {
+    refreshInterval: 3000,
+    logLines: 100,
+    logRefreshInterval: 5000,
+  };
+
+  let autoRefresh = true;
+  let refreshTimer = null;
+  let logRefreshTimer = null;
+  let logsPaused = false;
+  let currentLogType = 'pm2';
+
+  const els = {
+    healthBadge: document.getElementById('healthBadge'),
+    refreshBtn: document.getElementById('refreshBtn'),
+    autoRefreshToggle: document.getElementById('autoRefreshToggle'),
+    logsContainer: document.getElementById('logsContainer'),
+    lastUpdate: document.getElementById('lastUpdate'),
+  };
+
+  async function init() {
+    lucide.createIcons();
+    setupListeners();
+    await refreshStatus();
+    startAutoRefresh();
+    loadLogs();
+    startLogRefresh();
+  }
+
+  function setupListeners() {
+    els.refreshBtn.addEventListener('click', () => {
+      refreshStatus();
+      els.refreshBtn.classList.add('spinning');
+      setTimeout(() => els.refreshBtn.classList.remove('spinning'), 1000);
+    });
+
+    els.autoRefreshToggle.addEventListener('change', (e) => {
+      autoRefresh = e.target.checked;
+      autoRefresh ? startAutoRefresh() : stopAutoRefresh();
+    });
+
+    document.querySelectorAll('.log-tab').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        document.querySelectorAll('.log-tab').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        currentLogType = e.target.dataset.type;
+        loadLogs();
+      });
+    });
+
+    document.getElementById('logSearch').addEventListener('input', debounce((e) => {
+      loadLogs(e.target.value);
+    }, 300));
+
+    document.getElementById('clearLogs').addEventListener('click', () => {
+      els.logsContainer.innerHTML = '<div class="log-line info"><span class="log-time">--:--:--</span><span class="log-level">INFO</span><span class="log-message">Logs cleared</span></div>';
+    });
+
+    document.getElementById('pauseLogs').addEventListener('click', (e) => {
+      logsPaused = !logsPaused;
+      const icon = e.currentTarget.querySelector('i');
+      if (logsPaused) {
+        icon.setAttribute('data-lucide', 'play');
+        e.currentTarget.classList.add('paused');
+      } else {
+        icon.setAttribute('data-lucide', 'pause');
+        e.currentTarget.classList.remove('paused');
+        loadLogs();
+      }
+      lucide.createIcons();
+    });
+
+    document.getElementById('downloadLogs').addEventListener('click', downloadLogs);
+  }
+
+  function startAutoRefresh() {
+    stopAutoRefresh();
+    refreshTimer = setInterval(refreshStatus, CONFIG.refreshInterval);
+  }
+
+  function stopAutoRefresh() {
+    if (refreshTimer) {
+      clearInterval(refreshTimer);
+      refreshTimer = null;
+    }
+  }
+
+  function startLogRefresh() {
+    logRefreshTimer = setInterval(() => {
+      if (!logsPaused) loadLogs(document.getElementById('logSearch').value);
+    }, CONFIG.logRefreshInterval);
+  }
+
+  async function refreshStatus() {
+    try {
+      const response = await fetch('/admin/api/server-status');
+      const result = await response.json();
+      if (result.success) {
+        updateUI(result.data);
+      }
+    } catch (error) {
+      console.error('Failed to refresh status:', error);
+      updateHealthBadge('error', 'Connection Error');
+    }
+  }
+
+  function updateUI(data) {
+    if (!data) return;
+    updateQuickStats(data);
+    updateSystemInfo(data.system, data.cpu);
+    updateDisk(data.disk);
+    updateServices(data.services);
+    updatePM2(data.pm2);
+    updateNetwork(data.network);
+    updateProcesses(data.processes);
+    updateHealthBadge(getOverallHealth(data));
+    els.lastUpdate.textContent = 'Last updated: ' + new Date().toLocaleTimeString();
+  }
+
+  function updateQuickStats(data) {
+    // CPU
+    const cpuUsage = data.cpu?.usage || 0;
+    document.getElementById('cpuValue').textContent = cpuUsage.toFixed(1) + '%';
+    document.getElementById('cpuCores').textContent = (data.cpu?.cores || '-') + ' cores';
+    updateCircle('cpuCircle', cpuUsage);
+
+    // Memory
+    const memUsage = data.memory?.usedPercent || 0;
+    const memTotalGB = typeof data.memory?.totalGB === 'number' ? data.memory.totalGB.toFixed(1) : '-';
+    document.getElementById('memValue').textContent = memUsage.toFixed(1) + '%';
+    document.getElementById('memTotal').textContent = memTotalGB + ' GB Total';
+    updateCircle('memCircle', memUsage);
+
+    // Disk (primary)
+    const primaryDisk = data.disk?.[0];
+    const diskUsage = primaryDisk?.usedPercent || 0;
+    const diskTotalGB = typeof primaryDisk?.totalGB === 'number' ? primaryDisk.totalGB.toFixed(0) : '-';
+    document.getElementById('diskValue').textContent = diskUsage.toFixed(1) + '%';
+    document.getElementById('diskTotal').textContent = diskTotalGB + ' GB Total';
+    updateCircle('diskCircle', diskUsage);
+
+    // Uptime
+    document.getElementById('uptimeValue').textContent = data.system?.uptimeFormatted || '-';
+    document.getElementById('hostname').textContent = data.system?.hostname || '-';
+  }
+
+  function updateCircle(id, percent) {
+    const circle = document.getElementById(id);
+    if (!circle) return;
+    const circumference = 2 * Math.PI * 25;
+    const offset = circumference - (Math.min(percent, 100) / 100) * circumference;
+    circle.style.strokeDashoffset = offset;
+  }
+
+  function updateSystemInfo(sys, cpu) {
+    if (!sys) return;
+    document.getElementById('sysHostname').textContent = sys.hostname || '-';
+    document.getElementById('sysPlatform').textContent = `${sys.platform || '-'} ${sys.arch || ''} (${sys.release || '-'})`;
+    document.getElementById('sysNode').textContent = sys.nodeVersion || '-';
+    document.getElementById('sysLoad').textContent = sys.loadAvg ? sys.loadAvg.map(l => l.toFixed(2)).join(' / ') : '-';
+    document.getElementById('platformBadge').textContent = sys.platform?.toUpperCase() || '-';
+    
+    if (cpu) {
+      document.getElementById('cpuModel').textContent = cpu.model ? cpu.model.substring(0, 50) : '-';
+      document.getElementById('cpuSpeed').textContent = cpu.speed ? cpu.speed + ' MHz' : '-';
+    }
+  }
+
+  function updateDisk(disks) {
+    const container = document.getElementById('diskList');
+    if (!disks || disks.length === 0) {
+      container.innerHTML = '<div class="disk-item"><div class="disk-header"><span class="disk-mount">No disk info available</span></div></div>';
+      return;
+    }
+
+    container.innerHTML = disks.map(disk => {
+      const totalGB = typeof disk.totalGB === 'number' ? disk.totalGB.toFixed(1) : '0';
+      const usedGB = typeof disk.usedGB === 'number' ? disk.usedGB.toFixed(1) : '0';
+      const freeGB = typeof disk.freeGB === 'number' ? disk.freeGB.toFixed(1) : '0';
+      const usedPercent = typeof disk.usedPercent === 'number' ? disk.usedPercent : 0;
+      const fillClass = usedPercent > 90 ? 'critical' : usedPercent > 80 ? 'warning' : '';
+      
+      return `
+        <div class="disk-item">
+          <div class="disk-header">
+            <span class="disk-mount">${disk.mount || disk.fs || '/'}</span>
+            <span class="disk-size">${totalGB} GB Total</span>
+          </div>
+          <div class="disk-progress">
+            <div class="disk-progress-fill ${fillClass}" style="width: ${usedPercent}%"></div>
+          </div>
+          <div class="disk-stats">
+            <span>Used: ${usedGB} GB (${usedPercent.toFixed(1)}%)</span>
+            <span>Free: ${freeGB} GB</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function updateServices(services) {
+    if (!services) return;
+    updateServiceCard('mongo', services.mongodb);
+    updateServiceCard('es', services.elasticsearch);
+  }
+
+  function updateServiceCard(prefix, service) {
+    const card = document.getElementById(prefix + 'Card');
+    const statusEl = document.getElementById(prefix + 'Status');
+    const detailsEl = document.getElementById(prefix + 'Details');
+
+    if (!service || !card) return;
+
+    const status = service.status || 'error';
+    card.className = 'service-card ' + status;
+    statusEl.className = 'service-status-badge ' + status;
+    statusEl.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+
+    if (service.details) {
+      let html = '';
+      if (prefix === 'mongo') {
+        html = `
+          <span class="service-detail"><strong>Version:</strong> ${service.details.version || '-'}</span>
+          <span class="service-detail"><strong>Uptime:</strong> ${service.details.uptimeFormatted || '-'}</span>
+          <span class="service-detail"><strong>Connections:</strong> ${service.details.connections?.current || 0}</span>
+        `;
+      } else if (prefix === 'es') {
+        html = `
+          <span class="service-detail"><strong>Cluster:</strong> ${service.details.clusterName || '-'}</span>
+          <span class="service-detail"><strong>Nodes:</strong> ${service.details.numberOfNodes || 0}</span>
+          <span class="service-detail"><strong>Docs:</strong> ${(service.details.docs || 0).toLocaleString()}</span>
+          <span class="service-detail"><strong>Size:</strong> ${service.details.storeSizeGB || 0} GB</span>
+        `;
+      }
+      detailsEl.innerHTML = html;
+    } else if (service.error) {
+      detailsEl.innerHTML = `<span class="service-detail" style="color:#ef4444;">${service.error}</span>`;
+    }
+  }
+
+  function updatePM2(pm2) {
+    const container = document.getElementById('pm2Grid');
+    const countEl = document.getElementById('pm2Count');
+    
+    if (!pm2 || !pm2.processes || pm2.processes.length === 0) {
+      container.innerHTML = `
+        <div class="pm2-empty">
+          <i data-lucide="inbox"></i>
+          <p>No PM2 processes running</p>
+        </div>
+      `;
+      countEl.textContent = '0 processes';
+      lucide.createIcons();
+      return;
+    }
+
+    countEl.textContent = pm2.processes.length + ' process' + (pm2.processes.length > 1 ? 'es' : '');
+    
+    container.innerHTML = pm2.processes.map(proc => `
+      <div class="pm2-card ${proc.status}">
+        <div class="pm2-header">
+          <span class="pm2-name">${proc.name}</span>
+          <span class="pm2-status ${proc.status}">${proc.status}</span>
+        </div>
+        <div class="pm2-metrics">
+          <div class="pm2-metric">
+            <i data-lucide="cpu"></i>
+            <span class="pm2-metric-value">${proc.cpu.toFixed(1)}%</span>
+          </div>
+          <div class="pm2-metric">
+            <i data-lucide="hard-drive"></i>
+            <span class="pm2-metric-value">${proc.memoryMB} MB</span>
+          </div>
+          <div class="pm2-metric">
+            <i data-lucide="clock"></i>
+            <span class="pm2-metric-value">${proc.uptimeFormatted}</span>
+          </div>
+          <div class="pm2-metric">
+            <i data-lucide="rotate-ccw"></i>
+            <span class="pm2-metric-value">${proc.restarts}</span>
+          </div>
+        </div>
+        <div class="pm2-footer">
+          <span>PID: ${proc.pid}</span>
+          <span>Mode: ${proc.mode}</span>
+        </div>
+      </div>
+    `).join('');
+    
+    lucide.createIcons();
+  }
+
+  function updateNetwork(network) {
+    if (!network) return;
+
+    const container = document.getElementById('networkInterfaces');
+    if (network.interfaces && network.interfaces.length > 0) {
+      container.innerHTML = network.interfaces.map(iface => `
+        <div class="network-interface">
+          <span class="iface-name">${iface.name}</span>
+          <span class="iface-ip">${iface.address}</span>
+          <span class="iface-mac">${iface.mac || '-'}</span>
+        </div>
+      `).join('');
+    } else {
+      container.innerHTML = '<div class="network-interface"><span class="iface-name">No interfaces found</span></div>';
+    }
+
+    document.getElementById('connectionCount').textContent = network.connections || 0;
+  }
+
+  function updateProcesses(processes) {
+    const tbody = document.getElementById('processesTable');
+    if (!processes || !processes.top || processes.top.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:2rem; color:var(--admin-text-muted);">No process data available</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = processes.top.map(proc => `
+      <tr>
+        <td>${proc.pid}</td>
+        <td>${proc.user}</td>
+        <td class="${proc.cpu > 50 ? 'high-usage' : ''}">${proc.cpu.toFixed(1)}%</td>
+        <td class="${proc.mem > 10 ? 'high-usage' : ''}">${proc.mem.toFixed(1)}%</td>
+        <td>${formatBytes(proc.vsz * 1024)}</td>
+        <td>${formatBytes(proc.rss * 1024)}</td>
+        <td class="command-cell" title="${proc.command}">${proc.command}</td>
+      </tr>
+    `).join('');
+  }
+
+  async function loadLogs(search = '') {
+    if (logsPaused) return;
+    
+    try {
+      const params = new URLSearchParams({
+        type: currentLogType,
+        lines: CONFIG.logLines,
+        search: search,
+      });
+      
+      const response = await fetch('/admin/api/server-status/logs?' + params);
+      const result = await response.json();
+      
+      if (result.success && result.data.logs) {
+        renderLogs(result.data.logs);
+      }
+    } catch (error) {
+      console.error('Failed to load logs:', error);
+    }
+  }
+
+  function renderLogs(logs) {
+    if (!logs || logs.length === 0) {
+      els.logsContainer.innerHTML = '<div class="log-line info"><span class="log-time">--:--:--</span><span class="log-level">INFO</span><span class="log-message">No logs available</span></div>';
+      return;
+    }
+
+    els.logsContainer.innerHTML = logs.map(log => {
+      const time = new Date(log.timestamp).toLocaleTimeString();
+      const level = (log.level || 'info').toLowerCase();
+      return `
+        <div class="log-line ${level}">
+          <span class="log-time">${time}</span>
+          <span class="log-level">${level.toUpperCase()}</span>
+          <span class="log-message">${escapeHtml(log.message)}</span>
+        </div>
+      `;
+    }).join('');
+
+    els.logsContainer.scrollTop = els.logsContainer.scrollHeight;
+  }
+
+  function downloadLogs() {
+    const logs = els.logsContainer.innerText;
+    const blob = new Blob([logs], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `server-logs-${currentLogType}-${new Date().toISOString().split('T')[0]}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function updateHealthBadge(status, text) {
+    const badge = els.healthBadge;
+    badge.className = 'health-badge ' + (status === 'healthy' ? 'healthy' : status === 'warning' ? 'warning' : 'critical');
+    badge.querySelector('.health-text').textContent = text || (status === 'healthy' ? 'All Systems Operational' : status === 'warning' ? 'Some Issues Detected' : 'Critical Issues');
+  }
+
+  function getOverallHealth(data) {
+    if (!data) return 'error';
+    if (data.memory && data.memory.usedPercent > 90) return 'critical';
+    if (data.memory && data.memory.usedPercent > 85) return 'warning';
+    if (data.cpu && data.cpu.usage > 90) return 'critical';
+    if (data.cpu && data.cpu.usage > 80) return 'warning';
+    if (data.services) {
+      if (data.services.mongodb?.status !== 'healthy') return 'critical';
+      if (data.services.elasticsearch?.status === 'error') return 'critical';
+      if (data.services.elasticsearch?.status === 'warning') return 'warning';
+    }
+    return 'healthy';
+  }
+
+  function formatBytes(bytes) {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+  }
+
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  function debounce(func, wait) {
+    let timeout;
+    return function(...args) {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func(...args), wait);
+    };
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>

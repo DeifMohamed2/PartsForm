@@ -4710,6 +4710,87 @@ const updateSystemSettings = async (req, res) => {
 };
 
 /**
+ * Get Server Status Page
+ * Displays comprehensive server monitoring dashboard
+ */
+const getServerStatus = async (req, res) => {
+  try {
+    // userPermissions and currentAdmin are already set by middleware via res.locals
+    // Just get sidebar counts for notifications
+    const [newOrdersCount, openTicketsCount, unreadInquiriesCount] = await Promise.all([
+      Order.countDocuments({ status: { $in: ['pending', 'processing'] } }),
+      Ticket.countDocuments({ status: { $in: ['open', 'in-progress'] } }),
+      EmailInquiry.getUnreadCount(),
+    ]);
+    
+    // Don't wait for full status on page load - load via API for faster page render
+    res.render('admin/server-status', {
+      title: 'Server Status | PARTSFORM Admin',
+      activePage: 'server-status',
+      sidebarCounts: {
+        newOrders: newOrdersCount,
+        openTickets: openTicketsCount,
+        unreadInquiries: unreadInquiriesCount,
+      },
+      initialStatus: null, // Load via API call for faster initial page load
+    });
+  } catch (error) {
+    console.error('Error loading server status page:', error);
+    res.status(500).render('error', {
+      error: 'Failed to load server status',
+      message: error.message,
+    });
+  }
+};
+
+/**
+ * Get Server Status API - Returns current server metrics
+ */
+const getServerStatusApi = async (req, res) => {
+  try {
+    const serverStatusService = require('../services/serverStatusService');
+    const status = await serverStatusService.getFullStatus();
+    res.json({ success: true, data: status });
+  } catch (error) {
+    console.error('Error fetching server status:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * Get Server Health Summary API - Quick health check
+ */
+const getServerHealthApi = async (req, res) => {
+  try {
+    const serverStatusService = require('../services/serverStatusService');
+    const health = await serverStatusService.getHealthSummary();
+    res.json({ success: true, data: health });
+  } catch (error) {
+    console.error('Error fetching health summary:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * Get Server Logs API - Returns recent logs
+ */
+const getServerLogsApi = async (req, res) => {
+  try {
+    const serverStatusService = require('../services/serverStatusService');
+    const { lines = 100, type = 'pm2', search = '' } = req.query;
+    const logs = await serverStatusService.getLogs({
+      lines: Math.min(parseInt(lines) || 100, 500),
+      type,
+      search,
+    });
+    res.json({ success: true, data: logs });
+  } catch (error) {
+    console.error('Error fetching logs:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
  * Get Sidebar Notification Counts API
  * Returns counts for new orders and open tickets for real-time updates
  */
@@ -4820,4 +4901,9 @@ module.exports = {
   updateSystemSettings,
   // Admin Settings page
   getAdminSettings,
+  // Server Status
+  getServerStatus,
+  getServerStatusApi,
+  getServerHealthApi,
+  getServerLogsApi,
 };
