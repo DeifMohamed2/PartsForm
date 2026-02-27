@@ -56,11 +56,14 @@ class SupplierDataService extends EventEmitter {
    * Create a new data table
    */
   async createTable({ supplier, name, description, columns, settings, createdBy, req }) {
+    console.log('[createTable] Starting with:', { name, columnsCount: columns?.length });
     const supplierId = supplier._id || supplier;
+    console.log('[createTable] supplierId:', supplierId);
     
     // Check quota
     const tableCount = await DataTable.countDocuments({ supplier: supplierId, status: { $ne: 'archived' } });
     const supplierDoc = await Supplier.findById(supplierId);
+    console.log('[createTable] tableCount:', tableCount, 'maxTables:', supplierDoc?.quotas?.maxTables);
     
     if (tableCount >= (supplierDoc?.quotas?.maxTables || 10)) {
       throw new Error(`Table limit reached (max: ${supplierDoc?.quotas?.maxTables || 10})`);
@@ -72,6 +75,7 @@ class SupplierDataService extends EventEmitter {
     if (existingSlug) {
       slug = `${slug}_${Date.now()}`;
     }
+    console.log('[createTable] slug:', slug);
 
     // Ensure columns have proper keys
     const processedColumns = columns.map((col, idx) => ({
@@ -81,6 +85,7 @@ class SupplierDataService extends EventEmitter {
       createdAt: new Date(),
       updatedAt: new Date(),
     }));
+    console.log('[createTable] processedColumns:', JSON.stringify(processedColumns));
 
     const table = new DataTable({
       supplier: supplierId,
@@ -93,10 +98,13 @@ class SupplierDataService extends EventEmitter {
       createdBy: createdBy?._id || createdBy,
       updatedBy: createdBy?._id || createdBy,
     });
+    console.log('[createTable] table created, saving...');
 
     await table.save();
+    console.log('[createTable] table saved, id:', table._id);
 
     // Audit log
+    console.log('[createTable] logging audit...');
     await AuditLog.logTableAction({
       action: 'table.create',
       table,
@@ -105,8 +113,10 @@ class SupplierDataService extends EventEmitter {
       changes: { after: { name, slug, columns: processedColumns.length } },
       request: this.buildRequestInfo(req),
     });
+    console.log('[createTable] audit logged');
 
     this.emit('table:created', { table, supplier: supplierId });
+    console.log('[createTable] done');
     return table;
   }
 
