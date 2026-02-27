@@ -1,517 +1,1287 @@
 <%- include('partials/header', { currentPage: 'import', pageTitle: 'Import Data' }) %>
 
-<div class="grid grid-2" style="gap: 24px;">
-  <!-- Upload Section -->
-  <div class="card">
-    <div class="card-header">
-      <h3 class="card-title">Upload File</h3>
-    </div>
-    
-    <div class="upload-zone" id="uploadZone">
-      <i data-lucide="upload-cloud" style="width: 48px; height: 48px; color: var(--primary); margin-bottom: 16px;"></i>
-      <h4 style="margin-bottom: 8px;">Drag and drop your file here</h4>
-      <p style="color: var(--text-secondary); margin-bottom: 16px;">or click to browse</p>
-      <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display: none;">
-      <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
-        Select File
-      </button>
-      <p style="font-size: 12px; color: var(--text-secondary); margin-top: 16px;">
-        Supported formats: Excel (.xlsx, .xls), CSV
-      </p>
-    </div>
-    
-    <div id="fileInfo" style="display: none; margin-top: 20px;">
-      <div style="display: flex; align-items: center; gap: 12px; padding: 16px; background: var(--bg-main); border-radius: 8px;">
-        <i data-lucide="file-spreadsheet" style="width: 32px; height: 32px; color: var(--success);"></i>
-        <div style="flex: 1;">
-          <div style="font-weight: 600;" id="fileName"></div>
-          <div style="font-size: 13px; color: var(--text-secondary);" id="fileSize"></div>
-        </div>
-        <button class="btn btn-secondary btn-sm" onclick="clearFile()">
-          <i data-lucide="x" style="width: 16px; height: 16px;"></i>
-        </button>
-      </div>
-    </div>
-  </div>
-  
-  <!-- Options Section -->
-  <div class="card">
-    <div class="card-header">
-      <h3 class="card-title">Import Options</h3>
-    </div>
-    
-    <form id="importForm">
-      <div class="form-group">
-        <label class="form-label">Target Table *</label>
-        <select id="targetTable" class="form-input form-select" required>
-          <option value="">Select a table...</option>
-          <option value="new">+ Create New Table</option>
-        </select>
-      </div>
-      
-      <div id="newTableFields" style="display: none;">
-        <div class="form-group">
-          <label class="form-label">New Table Name *</label>
-          <input type="text" id="newTableName" class="form-input" placeholder="e.g., Parts Inventory">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Description</label>
-          <textarea id="newTableDescription" class="form-input" rows="2" placeholder="What is this table for?"></textarea>
-        </div>
-      </div>
-      
-      <div class="form-group">
-        <label class="form-label">Import Mode</label>
-        <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 8px;">
-          <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer;">
-            <input type="radio" name="importMode" value="append" checked style="margin-top: 4px;">
-            <div>
-              <strong>Append</strong>
-              <p style="font-size: 13px; color: var(--text-secondary); margin: 0;">Add new records to existing data</p>
-            </div>
-          </label>
-          <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer;">
-            <input type="radio" name="importMode" value="replace" style="margin-top: 4px;">
-            <div>
-              <strong>Replace</strong>
-              <p style="font-size: 13px; color: var(--text-secondary); margin: 0;">Clear existing data and import fresh</p>
-            </div>
-          </label>
-          <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer;">
-            <input type="radio" name="importMode" value="update" style="margin-top: 4px;">
-            <div>
-              <strong>Update</strong>
-              <p style="font-size: 13px; color: var(--text-secondary); margin: 0;">Update existing records by key column</p>
-            </div>
-          </label>
-        </div>
-      </div>
-      
-      <div class="form-group" id="keyColumnGroup" style="display: none;">
-        <label class="form-label">Key Column (for matching)</label>
-        <select id="keyColumn" class="form-input form-select">
-          <option value="">Select after preview...</option>
-        </select>
-      </div>
-      
-      <div class="form-group">
-        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-          <input type="checkbox" id="firstRowHeaders" checked>
-          <span>First row contains headers</span>
-        </label>
-      </div>
-    </form>
-  </div>
-</div>
-
-<!-- Preview Section -->
-<div class="card" id="previewCard" style="display: none; margin-top: 24px;">
-  <div class="card-header">
-    <h3 class="card-title">Preview</h3>
-    <span id="previewInfo" style="font-size: 13px; color: var(--text-secondary);"></span>
-  </div>
-  
-  <!-- Column Mapping -->
-  <div id="columnMapping" style="margin-bottom: 20px;">
-    <h4 style="font-size: 14px; margin-bottom: 12px;">Column Mapping</h4>
-    <div id="mappingContainer" style="display: grid; gap: 8px;"></div>
-  </div>
-  
-  <!-- Data Preview -->
-  <div style="overflow-x: auto;">
-    <table class="data-table" id="previewTable">
-      <thead id="previewHead"></thead>
-      <tbody id="previewBody"></tbody>
-    </table>
-  </div>
-</div>
-
-<!-- Action Buttons -->
-<div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
-  <button class="btn btn-secondary" onclick="previewImport()" id="previewBtn" disabled>
-    <i data-lucide="eye" style="width: 18px; height: 18px;"></i>
-    Preview Import
-  </button>
-  <button class="btn btn-primary" onclick="executeImport()" id="importBtn" disabled>
-    <i data-lucide="upload" style="width: 18px; height: 18px;"></i>
-    Import Data
-  </button>
-</div>
-
 <style>
-  .upload-zone {
-    border: 2px dashed var(--border);
+  /* Page Container */
+  .import-page {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  
+  /* Hero Banner */
+  .import-hero {
+    background: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%);
+    border-radius: 20px;
+    padding: 48px 40px;
+    margin-bottom: 32px;
+    color: white;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .import-hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 400px;
+    height: 400px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+  }
+  
+  .import-hero::after {
+    content: '';
+    position: absolute;
+    bottom: -30%;
+    left: -10%;
+    width: 300px;
+    height: 300px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 50%;
+  }
+  
+  .import-hero-content {
+    position: relative;
+    z-index: 1;
+  }
+  
+  .import-hero h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 12px;
+    letter-spacing: -0.02em;
+  }
+  
+  .import-hero p {
+    opacity: 0.9;
+    font-size: 1.1rem;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+  
+  /* Upload Card */
+  .upload-card {
+    background: white;
+    border-radius: 20px;
+    padding: 60px 40px;
+    text-align: center;
+    border: 3px dashed #e2e8f0;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    margin-bottom: 32px;
+    position: relative;
+  }
+  
+  .upload-card:hover {
+    border-color: var(--primary);
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.02), rgba(14, 165, 233, 0.05));
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px rgba(14, 165, 233, 0.15);
+  }
+  
+  .upload-card.drag-over {
+    border-color: var(--primary);
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.05), rgba(14, 165, 233, 0.1));
+    transform: scale(1.02);
+  }
+  
+  .upload-icon-wrapper {
+    width: 120px;
+    height: 120px;
+    background: linear-gradient(135deg, #0ea5e9, #0284c7);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 32px;
+    box-shadow: 0 12px 24px rgba(14, 165, 233, 0.3);
+    animation: float 3s ease-in-out infinite;
+  }
+  
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+  
+  .upload-icon-wrapper svg {
+    width: 56px;
+    height: 56px;
+    color: white;
+    stroke-width: 1.5;
+  }
+  
+  .upload-card h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 12px;
+  }
+  
+  .upload-card > p {
+    color: #64748b;
+    margin-bottom: 28px;
+    font-size: 1rem;
+  }
+  
+  .upload-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 40px;
+    background: linear-gradient(135deg, #0ea5e9, #0284c7);
+    color: white;
+    font-weight: 600;
+    border-radius: 14px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 1.05rem;
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+  }
+  
+  .upload-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(14, 165, 233, 0.4);
+  }
+  
+  .upload-btn svg {
+    width: 22px;
+    height: 22px;
+  }
+  
+  .file-formats {
+    margin-top: 32px;
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
+  
+  .file-format {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #64748b;
+    font-size: 0.95rem;
+    padding: 10px 16px;
+    background: #f8fafc;
+    border-radius: 10px;
+  }
+  
+  .file-format svg {
+    width: 20px;
+    height: 20px;
+    color: #22c55e;
+  }
+  
+  /* Processing Card */
+  .processing-card {
+    display: none;
+    background: white;
+    border-radius: 20px;
+    padding: 60px 40px;
+    text-align: center;
+    margin-bottom: 32px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  }
+  
+  .processing-spinner {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 32px;
+    position: relative;
+  }
+  
+  .processing-spinner::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: 5px solid #e2e8f0;
+    border-top-color: #0ea5e9;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  
+  .processing-spinner::after {
+    content: '';
+    position: absolute;
+    inset: 12px;
+    border: 4px solid transparent;
+    border-bottom-color: #22c55e;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite reverse;
+  }
+  
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  
+  .processing-card h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 12px;
+  }
+  
+  .processing-card .status-text {
+    color: #64748b;
+    margin-bottom: 32px;
+    font-size: 1rem;
+  }
+  
+  .progress-container {
+    max-width: 450px;
+    margin: 0 auto;
+  }
+  
+  .progress-track {
+    background: #f1f5f9;
     border-radius: 12px;
-    padding: 48px 24px;
+    height: 14px;
+    overflow: hidden;
+  }
+  
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #0ea5e9, #22c55e);
+    border-radius: 12px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+  
+  .progress-percentage {
+    margin-top: 12px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #0ea5e9;
+  }
+  
+  /* AI Steps */
+  .ai-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 350px;
+    margin: 0 auto 32px;
+    text-align: left;
+  }
+  
+  .ai-step {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 16px;
+    background: #f8fafc;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    transition: all 0.3s ease;
+    opacity: 0.5;
+  }
+  
+  .ai-step.active {
+    opacity: 1;
+    background: #f0f9ff;
+    border-color: #0ea5e9;
+    box-shadow: 0 2px 8px rgba(14, 165, 233, 0.15);
+  }
+  
+  .ai-step.completed {
+    opacity: 1;
+    background: #f0fdf4;
+    border-color: #22c55e;
+  }
+  
+  .ai-step-icon {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    background: white;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #e2e8f0;
+  }
+  
+  .ai-step.active .ai-step-icon {
+    background: linear-gradient(135deg, #0ea5e9, #0284c7);
+    border-color: transparent;
+  }
+  
+  .ai-step.completed .ai-step-icon {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    border-color: transparent;
+  }
+  
+  .ai-step-icon svg {
+    width: 18px;
+    height: 18px;
+    color: #64748b;
+  }
+  
+  .ai-step.active .ai-step-icon svg,
+  .ai-step.completed .ai-step-icon svg {
+    color: white;
+  }
+  
+  .ai-step-text {
+    flex: 1;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #64748b;
+  }
+  
+  .ai-step.active .ai-step-text {
+    color: #0369a1;
+  }
+  
+  .ai-step.completed .ai-step-text {
+    color: #15803d;
+  }
+  
+  .ai-step-status {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .ai-step.active .ai-step-status::after {
+    content: '';
+    width: 16px;
+    height: 16px;
+    border: 2px solid #0ea5e9;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  
+  .ai-step.completed .ai-step-status::after {
+    content: '✓';
+    color: #22c55e;
+    font-weight: 700;
+    font-size: 14px;
+  }
+  
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* Success Card */
+  .success-card {
+    display: none;
+    background: white;
+    border-radius: 20px;
+    padding: 60px 40px;
+    text-align: center;
+    margin-bottom: 32px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  }
+  
+  .success-icon-wrapper {
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 32px;
+    box-shadow: 0 12px 24px rgba(34, 197, 94, 0.3);
+    animation: successPop 0.5s ease-out;
+  }
+  
+  @keyframes successPop {
+    0% { transform: scale(0); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+  }
+  
+  .success-icon-wrapper svg {
+    width: 50px;
+    height: 50px;
+    color: white;
+  }
+  
+  .success-card h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #22c55e;
+    margin-bottom: 12px;
+  }
+  
+  .success-card > p {
+    color: #64748b;
+    margin-bottom: 32px;
+    font-size: 1rem;
+  }
+  
+  .success-metrics {
+    display: flex;
+    justify-content: center;
+    gap: 48px;
+    margin-bottom: 40px;
+  }
+  
+  .success-metric {
+    text-align: center;
+  }
+  
+  .success-metric-value {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #1e293b;
+    line-height: 1;
+  }
+  
+  .success-metric-label {
+    font-size: 0.9rem;
+    color: #64748b;
+    margin-top: 8px;
+  }
+  
+  .success-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  
+  .btn-view-table {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 32px;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: white;
+    font-weight: 600;
+    border-radius: 12px;
+    text-decoration: none;
+    transition: all 0.2s;
+    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+  }
+  
+  .btn-view-table:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(34, 197, 94, 0.4);
+  }
+  
+  .btn-import-more {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 32px;
+    background: white;
+    color: #1e293b;
+    font-weight: 600;
+    border-radius: 12px;
+    border: 2px solid #e2e8f0;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .btn-import-more:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+  
+  /* Error Card */
+  .error-card {
+    display: none;
+    background: white;
+    border-radius: 20px;
+    padding: 60px 40px;
+    text-align: center;
+    margin-bottom: 32px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  }
+  
+  .error-icon-wrapper {
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 32px;
+    box-shadow: 0 12px 24px rgba(239, 68, 68, 0.3);
+  }
+  
+  .error-icon-wrapper svg {
+    width: 50px;
+    height: 50px;
+    color: white;
+  }
+  
+  .error-card h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #ef4444;
+    margin-bottom: 12px;
+  }
+  
+  .error-card > p {
+    color: #64748b;
+    margin-bottom: 24px;
+    font-size: 1rem;
+  }
+  
+  .error-details {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 12px;
+    padding: 20px;
+    color: #dc2626;
+    margin-bottom: 32px;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+    font-size: 0.95rem;
+  }
+  
+  .btn-retry {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 32px;
+    background: linear-gradient(135deg, #0ea5e9, #0284c7);
+    color: white;
+    font-weight: 600;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+  }
+  
+  .btn-retry:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(14, 165, 233, 0.4);
+  }
+  
+  /* Features Grid */
+  .features-section {
+    margin-top: 16px;
+  }
+  
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  
+  .feature-item {
+    background: white;
+    border-radius: 16px;
+    padding: 28px;
     text-align: center;
     transition: all 0.2s;
-    cursor: pointer;
+    border: 1px solid #f1f5f9;
   }
   
-  .upload-zone:hover, .upload-zone.dragover {
-    border-color: var(--primary);
-    background: rgba(12, 74, 110, 0.02);
+  .feature-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
   }
   
-  .mapping-row {
-    display: grid;
-    grid-template-columns: 200px 40px 200px 100px;
-    gap: 12px;
+  .feature-icon {
+    width: 56px;
+    height: 56px;
+    background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+    border-radius: 14px;
+    display: flex;
     align-items: center;
-    padding: 8px 12px;
-    background: var(--bg-main);
-    border-radius: 6px;
+    justify-content: center;
+    margin: 0 auto 20px;
   }
   
-  .mapping-arrow {
+  .feature-icon svg {
+    width: 28px;
+    height: 28px;
+    color: #0ea5e9;
+  }
+  
+  .feature-item h3 {
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 10px;
+    color: #1e293b;
+  }
+  
+  .feature-item p {
+    font-size: 0.9rem;
+    color: #64748b;
+    line-height: 1.6;
+  }
+  
+  @media (max-width: 768px) {
+    .import-page {
+      padding: 0 16px;
+    }
+    
+    .import-hero {
+      padding: 32px 24px;
+    }
+    
+    .import-hero h1 {
+      font-size: 1.5rem;
+    }
+    
+    .upload-card {
+      padding: 40px 24px;
+    }
+    
+    .features-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .success-metrics {
+      flex-direction: column;
+      gap: 24px;
+    }
+    
+    .mode-options {
+      flex-direction: column;
+    }
+  }
+  
+  /* Mode Selection Card */
+  .mode-selection-card {
+    background: white;
+    border-radius: 20px;
+    padding: 32px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  }
+  
+  .mode-selection-card h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 20px;
     text-align: center;
-    color: var(--text-secondary);
+  }
+  
+  .mode-options {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  
+  .mode-option {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px;
+    background: #f8fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .mode-option:hover {
+    border-color: #0ea5e9;
+    background: #f0f9ff;
+  }
+  
+  .mode-option.active {
+    border-color: #0ea5e9;
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.05), rgba(14, 165, 233, 0.1));
+  }
+  
+  .mode-icon {
+    width: 48px;
+    height: 48px;
+    background: white;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #e2e8f0;
+  }
+  
+  .mode-option.active .mode-icon {
+    background: linear-gradient(135deg, #0ea5e9, #0284c7);
+    border-color: transparent;
+  }
+  
+  .mode-icon svg {
+    width: 22px;
+    height: 22px;
+    color: #64748b;
+  }
+  
+  .mode-option.active .mode-icon svg {
+    color: white;
+  }
+  
+  .mode-info {
+    flex: 1;
+  }
+  
+  .mode-title {
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 4px;
+  }
+  
+  .mode-desc {
+    font-size: 0.85rem;
+    color: #64748b;
+  }
+  
+  .table-selection {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #e2e8f0;
+  }
+  
+  .table-selection label {
+    display: block;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 10px;
+  }
+  
+  .table-select {
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 1rem;
+    color: #1e293b;
+    background: white;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  
+  .table-select:hover {
+    border-color: #0ea5e9;
+  }
+  
+  .table-select:focus {
+    outline: none;
+    border-color: #0ea5e9;
   }
 </style>
 
+<div class="import-page">
+  <!-- Hero Section -->
+  <div class="import-hero">
+    <div class="import-hero-content">
+      <h1>Smart Data Import</h1>
+      <p>Upload your file to create a new table or update an existing one</p>
+    </div>
+  </div>
+
+  <!-- Mode Selection Card -->
+  <div class="mode-selection-card" id="modeSelectionCard">
+    <h3>What would you like to do?</h3>
+    <div class="mode-options">
+      <div class="mode-option active" data-mode="create" onclick="selectMode('create')">
+        <div class="mode-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3v18"/>
+            <path d="M3 12h18"/>
+          </svg>
+        </div>
+        <div class="mode-info">
+          <div class="mode-title">Create New Table</div>
+          <div class="mode-desc">Import data into a brand new table</div>
+        </div>
+      </div>
+      <div class="mode-option" data-mode="update" onclick="selectMode('update')">
+        <div class="mode-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3Z"/>
+          </svg>
+        </div>
+        <div class="mode-info">
+          <div class="mode-title">Update Existing Table</div>
+          <div class="mode-desc">Replace data in an existing table</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Table Selection (shown when update mode is selected) -->
+    <div class="table-selection" id="tableSelection" style="display: none;">
+      <label for="tableSelect">Select Table to Update:</label>
+      <select id="tableSelect" class="table-select">
+        <option value="">Loading tables...</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Upload Card -->
+  <div class="upload-card" id="uploadZone">
+    <div class="upload-icon-wrapper">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/>
+        <path d="M12 12v9"/>
+        <path d="m16 16-4-4-4 4"/>
+      </svg>
+    </div>
+    <h2>Drag & Drop Your File</h2>
+    <p>or click anywhere to browse your computer</p>
+    <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display: none;">
+    <button class="upload-btn" onclick="event.stopPropagation(); document.getElementById('fileInput').click()">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/>
+        <circle cx="12" cy="13" r="1"/>
+      </svg>
+      Choose File
+    </button>
+    <div class="file-formats">
+      <span class="file-format">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+          <polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>
+        Excel (.xlsx, .xls)
+      </span>
+      <span class="file-format">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+          <polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>
+        CSV (.csv)
+      </span>
+    </div>
+  </div>
+
+  <!-- Processing Card -->
+  <div class="processing-card" id="processingCard">
+    <div class="processing-spinner"></div>
+    <h2>AI Processing Your Data</h2>
+    <p class="status-text" id="statusText">Uploading file...</p>
+    
+    <!-- AI Detection Steps -->
+    <div class="ai-steps" id="aiSteps">
+      <div class="ai-step" id="step1">
+        <div class="ai-step-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </div>
+        <div class="ai-step-text">Reading file structure</div>
+        <div class="ai-step-status"></div>
+      </div>
+      <div class="ai-step" id="step2">
+        <div class="ai-step-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+        </div>
+        <div class="ai-step-text">Detecting column types</div>
+        <div class="ai-step-status"></div>
+      </div>
+      <div class="ai-step" id="step3">
+        <div class="ai-step-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72Z"/><path d="m14 7 3 3"/></svg>
+        </div>
+        <div class="ai-step-text">Smart mapping columns</div>
+        <div class="ai-step-status"></div>
+      </div>
+      <div class="ai-step" id="step4">
+        <div class="ai-step-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        </div>
+        <div class="ai-step-text">Importing records</div>
+        <div class="ai-step-status"></div>
+      </div>
+    </div>
+    
+    <div class="progress-container">
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <div class="progress-percentage" id="progressPercentage">0%</div>
+    </div>
+  </div>
+
+  <!-- Success Card -->
+  <div class="success-card" id="successCard">
+    <div class="success-icon-wrapper">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="20 6 9 17 4 12"/>
+      </svg>
+    </div>
+    <h2>Import Complete!</h2>
+    <p>Your data has been successfully imported and is ready to use</p>
+    <div class="success-metrics">
+      <div class="success-metric">
+        <div class="success-metric-value" id="rowsImported">0</div>
+        <div class="success-metric-label">Rows Imported</div>
+      </div>
+      <div class="success-metric">
+        <div class="success-metric-value" id="columnsDetected">0</div>
+        <div class="success-metric-label">Columns Detected</div>
+      </div>
+    </div>
+    <div class="success-buttons">
+      <a href="#" class="btn-view-table" id="viewTableBtn">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px;">
+          <path d="M12 3v14"/>
+          <path d="M3 10h18"/>
+          <path d="M3 14h18"/>
+          <rect width="18" height="14" x="3" y="3" rx="2"/>
+        </svg>
+        View Table
+      </a>
+      <button class="btn-import-more" onclick="resetPage()">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px;">
+          <line x1="12" y1="5" x2="12" y2="19"/>
+          <line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        Import Another
+      </button>
+    </div>
+  </div>
+
+  <!-- Error Card -->
+  <div class="error-card" id="errorCard">
+    <div class="error-icon-wrapper">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"/>
+        <line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </div>
+    <h2>Import Failed</h2>
+    <p>We encountered an issue while processing your file</p>
+    <div class="error-details" id="errorDetails"></div>
+    <button class="btn-retry" onclick="resetPage()">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px;">
+        <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+        <path d="M21 3v5h-5"/>
+        <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
+        <path d="M8 16H3v5"/>
+      </svg>
+      Try Again
+    </button>
+  </div>
+
+  <!-- Features Section -->
+  <div class="features-section">
+    <div class="features-grid">
+      <div class="feature-item">
+        <div class="feature-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2a4 4 0 0 0-4 4v2H6a2 2 0 0 0-2 2v10c0 1.1.9 2 2 2h12a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2h-2V6a4 4 0 0 0-4-4z"/>
+            <circle cx="12" cy="14" r="2"/>
+          </svg>
+        </div>
+        <h3>AI Type Detection</h3>
+        <p>Automatically detects numbers, dates, emails, URLs, and more from your actual data</p>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72Z"/>
+            <path d="m14 7 3 3"/>
+          </svg>
+        </div>
+        <h3>Smart Column Keys</h3>
+        <p>Intelligently maps headers like "VENDOR CODE" → vendor_code with industry-standard naming</p>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z"/>
+            <path d="m17 4 0 8"/>
+            <path d="m21 8 -8 0"/>
+          </svg>
+        </div>
+        <h3>Universal Format</h3>
+        <p>Handles any delimiter (comma, semicolon), encoding, and special characters automatically</p>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
-  let selectedFile = null;
-  let previewData = null;
-  let tables = [];
-  let targetColumns = [];
+document.addEventListener('DOMContentLoaded', function() {
+  const uploadZone = document.getElementById('uploadZone');
+  const fileInput = document.getElementById('fileInput');
+  const processingCard = document.getElementById('processingCard');
+  const successCard = document.getElementById('successCard');
+  const errorCard = document.getElementById('errorCard');
+  const tableSelection = document.getElementById('tableSelection');
+  const tableSelect = document.getElementById('tableSelect');
   
-  document.addEventListener('DOMContentLoaded', async () => {
-    await loadTables();
-    setupDropZone();
-    setupEventListeners();
-  });
+  let selectedMode = 'create';
+  let existingTables = [];
   
+  // Load existing tables for update mode
   async function loadTables() {
     try {
-      const response = await API.get('/tables');
-      tables = response.tables || [];
-      
-      const select = document.getElementById('targetTable');
-      tables.forEach(table => {
-        const option = document.createElement('option');
-        option.value = table._id;
-        option.textContent = `${table.name} (${table.recordCount || 0} records)`;
-        select.appendChild(option);
+      const token = localStorage.getItem('supplierToken');
+      const response = await fetch('/api/supplier/tables', {
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
       });
-    } catch (err) {
-      console.error('Failed to load tables:', err);
+      const data = await response.json();
+      
+      if (data.success && data.tables) {
+        existingTables = data.tables;
+        renderTableOptions();
+      }
+    } catch (error) {
+      console.error('Failed to load tables:', error);
     }
   }
   
-  function setupDropZone() {
-    const zone = document.getElementById('uploadZone');
-    const fileInput = document.getElementById('fileInput');
-    
-    zone.addEventListener('click', () => fileInput.click());
-    
-    zone.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      zone.classList.add('dragover');
-    });
-    
-    zone.addEventListener('dragleave', () => {
-      zone.classList.remove('dragover');
-    });
-    
-    zone.addEventListener('drop', (e) => {
-      e.preventDefault();
-      zone.classList.remove('dragover');
-      
-      if (e.dataTransfer.files.length) {
-        handleFile(e.dataTransfer.files[0]);
-      }
-    });
-    
-    fileInput.addEventListener('change', (e) => {
-      if (e.target.files.length) {
-        handleFile(e.target.files[0]);
-      }
-    });
-  }
-  
-  function handleFile(file) {
-    const validTypes = ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 
-                       'application/vnd.ms-excel', 
-                       'text/csv',
-                       'application/csv'];
-    
-    if (!validTypes.includes(file.type) && !file.name.match(/\.(xlsx|xls|csv)$/i)) {
-      showToast('Please upload an Excel or CSV file', 'error');
+  function renderTableOptions() {
+    if (existingTables.length === 0) {
+      tableSelect.innerHTML = '<option value="">No tables found - create one first</option>';
       return;
     }
     
-    selectedFile = file;
-    
-    document.getElementById('uploadZone').style.display = 'none';
-    document.getElementById('fileInfo').style.display = 'block';
-    document.getElementById('fileName').textContent = file.name;
-    document.getElementById('fileSize').textContent = formatFileSize(file.size);
-    document.getElementById('previewBtn').disabled = false;
-    
-    lucide.createIcons();
+    tableSelect.innerHTML = '<option value="">Select a table...</option>' + 
+      existingTables.map(t => `<option value="${t._id}">${t.name} (${t.stats?.recordCount || 0} records)</option>`).join('');
   }
   
-  function clearFile() {
-    selectedFile = null;
-    previewData = null;
-    
-    document.getElementById('uploadZone').style.display = 'block';
-    document.getElementById('fileInfo').style.display = 'none';
-    document.getElementById('previewCard').style.display = 'none';
-    document.getElementById('previewBtn').disabled = true;
-    document.getElementById('importBtn').disabled = true;
-    document.getElementById('fileInput').value = '';
-  }
+  // Load tables on page load
+  loadTables();
   
-  function setupEventListeners() {
-    // Target table change
-    document.getElementById('targetTable').addEventListener('change', async (e) => {
-      const newTableFields = document.getElementById('newTableFields');
-      if (e.target.value === 'new') {
-        newTableFields.style.display = 'block';
-        targetColumns = [];
-      } else if (e.target.value) {
-        newTableFields.style.display = 'none';
-        // Load table columns
-        try {
-          const response = await API.get(`/tables/${e.target.value}`);
-          targetColumns = response.table.columns || [];
-          updateColumnMapping();
-        } catch (err) {
-          console.error('Failed to load table columns:', err);
-        }
-      } else {
-        newTableFields.style.display = 'none';
-        targetColumns = [];
+  // Mode selection
+  window.selectMode = function(mode) {
+    selectedMode = mode;
+    
+    // Update UI
+    document.querySelectorAll('.mode-option').forEach(opt => {
+      opt.classList.remove('active');
+      if (opt.dataset.mode === mode) {
+        opt.classList.add('active');
       }
     });
     
-    // Import mode change
-    document.querySelectorAll('input[name="importMode"]').forEach(radio => {
-      radio.addEventListener('change', (e) => {
-        document.getElementById('keyColumnGroup').style.display = 
-          e.target.value === 'update' ? 'block' : 'none';
-      });
-    });
-  }
+    // Show/hide table selection
+    if (mode === 'update') {
+      tableSelection.style.display = 'block';
+    } else {
+      tableSelection.style.display = 'none';
+    }
+  };
   
-  async function previewImport() {
-    if (!selectedFile) return;
+  // Click to upload
+  uploadZone.addEventListener('click', function(e) {
+    if (e.target.tagName !== 'BUTTON') {
+      fileInput.click();
+    }
+  });
+  
+  // Drag and drop
+  uploadZone.addEventListener('dragover', function(e) {
+    e.preventDefault();
+    uploadZone.classList.add('drag-over');
+  });
+  
+  uploadZone.addEventListener('dragleave', function(e) {
+    e.preventDefault();
+    uploadZone.classList.remove('drag-over');
+  });
+  
+  uploadZone.addEventListener('drop', function(e) {
+    e.preventDefault();
+    uploadZone.classList.remove('drag-over');
     
-    const targetTable = document.getElementById('targetTable').value;
-    if (!targetTable) {
-      showToast('Please select a target table', 'error');
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      processFile(files[0]);
+    }
+  });
+  
+  // File input change
+  fileInput.addEventListener('change', function() {
+    if (fileInput.files.length > 0) {
+      processFile(fileInput.files[0]);
+    }
+  });
+  
+  function processFile(file) {
+    // Validate file type
+    const ext = file.name.split('.').pop().toLowerCase();
+    if (!['xlsx', 'xls', 'csv'].includes(ext)) {
+      displayError('Invalid file type. Please upload an Excel (.xlsx, .xls) or CSV file.');
       return;
     }
     
-    const formData = new FormData();
-    formData.append('file', selectedFile);
-    formData.append('preview', 'true');
-    formData.append('firstRowHeaders', document.getElementById('firstRowHeaders').checked);
+    // Validate table selection for update mode
+    if (selectedMode === 'update' && !tableSelect.value) {
+      displayError('Please select a table to update.');
+      return;
+    }
     
+    // Show processing state
+    uploadZone.style.display = 'none';
+    document.getElementById('modeSelectionCard').style.display = 'none';
+    processingCard.style.display = 'block';
+    
+    // Reset AI steps
+    document.querySelectorAll('.ai-step').forEach(step => {
+      step.classList.remove('active', 'completed');
+    });
+    
+    // Start upload
+    uploadFile(file);
+  }
+  
+  function setStepActive(stepNum) {
+    // Complete previous steps
+    for (let i = 1; i < stepNum; i++) {
+      const step = document.getElementById(`step${i}`);
+      if (step) {
+        step.classList.remove('active');
+        step.classList.add('completed');
+      }
+    }
+    // Set current step active
+    const currentStep = document.getElementById(`step${stepNum}`);
+    if (currentStep) {
+      currentStep.classList.add('active');
+      currentStep.classList.remove('completed');
+    }
+  }
+  
+  function setStepCompleted(stepNum) {
+    const step = document.getElementById(`step${stepNum}`);
+    if (step) {
+      step.classList.remove('active');
+      step.classList.add('completed');
+    }
+  }
+  
+  async function uploadFile(file) {
     try {
-      document.getElementById('previewBtn').disabled = true;
-      document.getElementById('previewBtn').innerHTML = '<i data-lucide="loader" style="width: 18px; height: 18px; animation: spin 1s linear infinite;"></i> Processing...';
+      // Step 1: Reading file
+      setStepActive(1);
+      updateProgress(10, 'Reading file structure...');
+      await sleep(300);
       
-      let endpoint = '/import/preview';
-      if (targetTable !== 'new') {
-        endpoint = `/tables/${targetTable}/import?preview=true`;
+      // Create form data
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('mode', selectedMode);
+      
+      if (selectedMode === 'update') {
+        formData.append('tableId', tableSelect.value);
       }
       
-      const response = await fetch(`/api/supplier${endpoint}`, {
+      setStepCompleted(1);
+      updateProgress(25, 'File structure analyzed');
+      
+      // Step 2: Detecting columns
+      setStepActive(2);
+      updateProgress(35, 'AI detecting column types...');
+      await sleep(400);
+      
+      setStepCompleted(2);
+      updateProgress(50, 'Column types detected');
+      
+      // Step 3: Smart mapping
+      setStepActive(3);
+      updateProgress(60, selectedMode === 'update' ? 'Mapping to existing columns...' : 'Smart mapping columns...');
+      
+      // Get auth token
+      const token = localStorage.getItem('supplierToken');
+      
+      // Send to server
+      const response = await fetch('/api/supplier/import', {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${API.token}`
-        },
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {},
         body: formData
       });
       
-      const result = await response.json();
+      setStepCompleted(3);
+      updateProgress(75, 'Columns mapped successfully');
       
-      if (!response.ok) {
-        throw new Error(result.message || 'Preview failed');
-      }
-      
-      previewData = result;
-      renderPreview(result);
-      
-      document.getElementById('importBtn').disabled = false;
-    } catch (err) {
-      showToast('Preview failed: ' + err.message, 'error');
-    } finally {
-      document.getElementById('previewBtn').disabled = false;
-      document.getElementById('previewBtn').innerHTML = '<i data-lucide="eye" style="width: 18px; height: 18px;"></i> Preview Import';
-      lucide.createIcons();
-    }
-  }
-  
-  function renderPreview(data) {
-    const previewCard = document.getElementById('previewCard');
-    previewCard.style.display = 'block';
-    
-    document.getElementById('previewInfo').textContent = 
-      `${data.totalRows || data.preview?.length || 0} rows found`;
-    
-    // Render column mapping
-    const sourceColumns = data.columns || data.headers || [];
-    updateColumnMappingUI(sourceColumns);
-    
-    // Populate key column dropdown
-    const keySelect = document.getElementById('keyColumn');
-    keySelect.innerHTML = '<option value="">Select column...</option>';
-    sourceColumns.forEach(col => {
-      const option = document.createElement('option');
-      option.value = col;
-      option.textContent = col;
-      keySelect.appendChild(option);
-    });
-    
-    // Render preview table
-    const previewRows = data.preview || data.rows?.slice(0, 10) || [];
-    
-    const thead = document.getElementById('previewHead');
-    thead.innerHTML = '<tr>' + sourceColumns.map(col => `<th>${col}</th>`).join('') + '</tr>';
-    
-    const tbody = document.getElementById('previewBody');
-    tbody.innerHTML = previewRows.map(row => {
-      return '<tr>' + sourceColumns.map(col => {
-        const value = row[col] ?? row.data?.[col] ?? '';
-        return `<td>${value}</td>`;
-      }).join('') + '</tr>';
-    }).join('');
-  }
-  
-  function updateColumnMappingUI(sourceColumns) {
-    const container = document.getElementById('mappingContainer');
-    const targetTable = document.getElementById('targetTable').value;
-    
-    if (targetTable === 'new') {
-      // For new table, auto-create columns from source
-      container.innerHTML = `
-        <p style="font-size: 13px; color: var(--text-secondary);">
-          A new table will be created with columns matching your file headers.
-        </p>
-      `;
-      return;
-    }
-    
-    container.innerHTML = sourceColumns.map(sourceCol => {
-      // Auto-match by name
-      const match = targetColumns.find(tc => 
-        tc.name.toLowerCase() === sourceCol.toLowerCase() ||
-        tc.key === sourceCol.toLowerCase().replace(/\s+/g, '_')
-      );
-      
-      return `
-        <div class="mapping-row">
-          <div style="font-weight: 500;">${sourceCol}</div>
-          <div class="mapping-arrow">→</div>
-          <select class="form-input form-select source-mapping" data-source="${sourceCol}" style="padding: 6px 10px;">
-            <option value="">Skip this column</option>
-            ${targetColumns.map(tc => `
-              <option value="${tc.key}" ${match?.key === tc.key ? 'selected' : ''}>${tc.name}</option>
-            `).join('')}
-          </select>
-          <span style="font-size: 12px; color: ${match ? 'var(--success)' : 'var(--text-secondary)'};">
-            ${match ? '✓ Auto-mapped' : 'Not mapped'}
-          </span>
-        </div>
-      `;
-    }).join('');
-  }
-  
-  function updateColumnMapping() {
-    if (previewData) {
-      const sourceColumns = previewData.columns || previewData.headers || [];
-      updateColumnMappingUI(sourceColumns);
-    }
-  }
-  
-  async function executeImport() {
-    if (!selectedFile) return;
-    
-    const targetTable = document.getElementById('targetTable').value;
-    if (!targetTable) {
-      showToast('Please select a target table', 'error');
-      return;
-    }
-    
-    const importMode = document.querySelector('input[name="importMode"]:checked').value;
-    const keyColumn = document.getElementById('keyColumn').value;
-    
-    if (importMode === 'update' && !keyColumn) {
-      showToast('Please select a key column for update mode', 'error');
-      return;
-    }
-    
-    // Get column mappings
-    const mappings = {};
-    document.querySelectorAll('.source-mapping').forEach(select => {
-      if (select.value) {
-        mappings[select.dataset.source] = select.value;
-      }
-    });
-    
-    const formData = new FormData();
-    formData.append('file', selectedFile);
-    formData.append('mode', importMode);
-    formData.append('firstRowHeaders', document.getElementById('firstRowHeaders').checked);
-    formData.append('columnMapping', JSON.stringify(mappings));
-    
-    if (keyColumn) {
-      formData.append('keyColumn', keyColumn);
-    }
-    
-    try {
-      document.getElementById('importBtn').disabled = true;
-      document.getElementById('importBtn').innerHTML = '<i data-lucide="loader" style="width: 18px; height: 18px; animation: spin 1s linear infinite;"></i> Importing...';
-      
-      let endpoint;
-      if (targetTable === 'new') {
-        const tableName = document.getElementById('newTableName').value.trim();
-        if (!tableName) {
-          showToast('Please enter a name for the new table', 'error');
-          return;
-        }
-        formData.append('tableName', tableName);
-        formData.append('tableDescription', document.getElementById('newTableDescription').value.trim());
-        endpoint = '/import';
-      } else {
-        endpoint = `/tables/${targetTable}/import`;
-      }
-      
-      const response = await fetch(`/api/supplier${endpoint}`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${API.token}`
-        },
-        body: formData
-      });
+      // Step 4: Importing
+      setStepActive(4);
+      updateProgress(85, selectedMode === 'update' ? 'Updating records...' : 'Importing records...');
       
       const result = await response.json();
       
-      if (!response.ok) {
-        throw new Error(result.message || 'Import failed');
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || result.message || 'Import failed');
       }
       
-      showToast(`Successfully imported ${result.created || result.imported || 0} records!`, 'success');
+      setStepCompleted(4);
+      updateProgress(100, selectedMode === 'update' ? 'Update complete!' : 'Import complete!');
       
-      // Redirect to the table
-      setTimeout(() => {
-        const tableId = result.tableId || targetTable;
-        if (tableId && tableId !== 'new') {
-          window.location.href = `/supplier/tables/${tableId}`;
-        } else {
-          window.location.href = '/supplier/tables';
-        }
-      }, 1500);
-    } catch (err) {
-      showToast('Import failed: ' + err.message, 'error');
-      document.getElementById('importBtn').disabled = false;
-      document.getElementById('importBtn').innerHTML = '<i data-lucide="upload" style="width: 18px; height: 18px;"></i> Import Data';
-      lucide.createIcons();
+      await sleep(500);
+      displaySuccess(result);
+      
+    } catch (error) {
+      console.error('Import error:', error);
+      displayError(error.message || 'An unexpected error occurred during import');
     }
   }
+  
+  function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+  
+  function updateProgress(percent, message) {
+    document.getElementById('progressFill').style.width = percent + '%';
+    document.getElementById('progressPercentage').textContent = percent + '%';
+    document.getElementById('statusText').textContent = message;
+  }
+  
+  function displaySuccess(result) {
+    processingCard.style.display = 'none';
+    successCard.style.display = 'block';
+    
+    // Update success message based on mode
+    const successTitle = document.querySelector('.success-card h2');
+    const successDesc = document.querySelector('.success-card > p');
+    
+    if (result.mode === 'update') {
+      successTitle.textContent = 'Update Complete!';
+      successDesc.textContent = 'Your table has been successfully updated with the new data';
+    } else {
+      successTitle.textContent = 'Import Complete!';
+      successDesc.textContent = 'Your data has been successfully imported and is ready to use';
+    }
+    
+    document.getElementById('rowsImported').textContent = 
+      (result.recordsImported || result.imported || result.summary?.created || 0).toLocaleString();
+    document.getElementById('columnsDetected').textContent = 
+      result.columns || result.columnCount || 0;
+    
+    const viewBtn = document.getElementById('viewTableBtn');
+    if (result.tableId) {
+      viewBtn.href = '/supplier/tables/' + result.tableId;
+    } else {
+      viewBtn.href = '/supplier/tables';
+    }
+  }
+  
+  function displayError(message) {
+    uploadZone.style.display = 'none';
+    document.getElementById('modeSelectionCard').style.display = 'none';
+    processingCard.style.display = 'none';
+    errorCard.style.display = 'block';
+    document.getElementById('errorDetails').textContent = message;
+  }
+  
+  window.resetPage = function() {
+    uploadZone.style.display = 'block';
+    document.getElementById('modeSelectionCard').style.display = 'block';
+    processingCard.style.display = 'none';
+    successCard.style.display = 'none';
+    errorCard.style.display = 'none';
+    fileInput.value = '';
+    document.getElementById('progressFill').style.width = '0%';
+    document.getElementById('progressPercentage').textContent = '0%';
+    document.getElementById('statusText').textContent = 'Uploading file...';
+    // Reset AI steps
+    document.querySelectorAll('.ai-step').forEach(step => {
+      step.classList.remove('active', 'completed');
+    });
+    // Reload tables in case new ones were created
+    loadTables();
+  };
+});
 </script>
 
 <%- include('partials/footer') %>

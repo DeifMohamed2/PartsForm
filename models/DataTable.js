@@ -194,6 +194,42 @@ dataTableSchema.methods.getSortedColumns = function () {
 };
 
 // Method to validate a record against column definitions
+// Helper function to normalize number values (handles European comma-decimal format)
+function normalizeNumber(value) {
+  if (value === undefined || value === null || value === '') return NaN;
+  
+  let strValue = String(value).trim();
+  
+  // Remove any quote characters
+  strValue = strValue.replace(/['"]/g, '');
+  
+  // Handle European format: check if comma is used as decimal separator
+  // If there's a comma but no dot, or comma comes after dot (like 1.234,56), it's European
+  const hasComma = strValue.includes(',');
+  const hasDot = strValue.includes('.');
+  
+  if (hasComma) {
+    if (!hasDot) {
+      // Only comma present - it's the decimal separator (European: 1234,56)
+      strValue = strValue.replace(',', '.');
+    } else {
+      // Both present - determine which is decimal
+      const lastCommaPos = strValue.lastIndexOf(',');
+      const lastDotPos = strValue.lastIndexOf('.');
+      
+      if (lastCommaPos > lastDotPos) {
+        // Comma is the decimal separator (European: 1.234,56 -> 1234.56)
+        strValue = strValue.replace(/\./g, '').replace(',', '.');
+      } else {
+        // Dot is the decimal separator (American: 1,234.56 -> 1234.56)
+        strValue = strValue.replace(/,/g, '');
+      }
+    }
+  }
+  
+  return parseFloat(strValue);
+}
+
 dataTableSchema.methods.validateRecord = function (record) {
   const errors = [];
   
@@ -214,10 +250,10 @@ dataTableSchema.methods.validateRecord = function (record) {
       case 'number':
       case 'integer':
       case 'decimal':
-        if (isNaN(Number(value))) {
+        const num = normalizeNumber(value);
+        if (isNaN(num)) {
           errors.push({ column: column.key, message: `${column.name} must be a valid number` });
         } else {
-          const num = Number(value);
           if (validation.min !== undefined && num < validation.min) {
             errors.push({ column: column.key, message: `${column.name} must be at least ${validation.min}` });
           }
@@ -301,10 +337,10 @@ dataTableSchema.methods.castRecord = function (record) {
     switch (column.type) {
       case 'number':
       case 'decimal':
-        casted[column.key] = parseFloat(value);
+        casted[column.key] = normalizeNumber(value);
         break;
       case 'integer':
-        casted[column.key] = parseInt(value, 10);
+        casted[column.key] = Math.round(normalizeNumber(value));
         break;
       case 'boolean':
         casted[column.key] = ['true', '1', 'yes', 'on'].includes(String(value).toLowerCase());

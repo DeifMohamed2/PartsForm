@@ -270,13 +270,24 @@ class ElasticsearchService {
         must.push({
           bool: {
             should: [
+              // Exact matches (highest priority)
               { term: { partNumber: { value: searchTerm, boost: 10.0 } } },
               { term: { partNumber: { value: searchTerm.toUpperCase(), boost: 10.0 } } },
+              // Vendor code match (supplier parts)
+              { term: { vendorCode: { value: searchTerm, boost: 9.0 } } },
+              { term: { vendorCode: { value: searchTerm.toUpperCase(), boost: 9.0 } } },
+              { prefix: { vendorCode: { value: searchTerm.toUpperCase(), boost: 6.0 } } },
+              // Part number prefix
               { prefix: { partNumber: { value: searchTerm.toUpperCase(), boost: 5.0 } } },
+              // Autocomplete matches
               { match: { 'partNumber.autocomplete': { query: searchTerm, boost: 3.0 } } },
+              { match: { 'vendorCode.text': { query: searchTerm, boost: 3.0 } } },
+              // Description and brand
               { match: { description: { query: searchTerm, boost: 2.0 } } },
               { match: { 'brand.text': { query: searchTerm, boost: 2.0 } } },
+              // Supplier name
               { match: { 'supplier.text': { query: searchTerm, boost: 1.5 } } },
+              { match: { 'supplierName.text': { query: searchTerm, boost: 1.5 } } },
             ],
             minimum_should_match: 1,
           },
@@ -310,6 +321,16 @@ class ElasticsearchService {
 
       if (filters.integration) {
         filter.push({ term: { integration: filters.integration } });
+      }
+
+      // Supplier ID filter (for supplier-specific data)
+      if (filters.supplierId) {
+        filter.push({ term: { supplierId: filters.supplierId.toString() } });
+      }
+
+      // Table ID filter
+      if (filters.tableId) {
+        filter.push({ term: { tableId: filters.tableId.toString() } });
       }
 
       if (filters.minPrice !== undefined || filters.maxPrice !== undefined) {
@@ -650,24 +671,37 @@ class ElasticsearchService {
       const body = documents.flatMap((doc) => [
         { index: { _index: this.indexName, _id: doc._id?.toString() || undefined } },
         {
+          // Core part fields
           partNumber: doc.partNumber,
+          vendorCode: doc.vendorCode, // Supplier's part code
           description: doc.description,
           brand: doc.brand,
           supplier: doc.supplier,
           price: doc.price,
           currency: doc.currency,
           quantity: doc.quantity,
-          minOrderQty: doc.minOrderQty,
+          minOrderQty: doc.minOrderQty || doc.minLot, // Consolidated: minLot = minOrderQty
           stock: doc.stock,
           stockCode: doc.stockCode,
           weight: doc.weight,
           volume: doc.volume,
           deliveryDays: doc.deliveryDays,
           category: doc.category,
+          // Integration fields (for API integrations)
           integration: doc.integration?.toString(),
           integrationName: doc.integrationName,
+          // Supplier data tracking fields
+          supplierId: doc.supplierId,
+          supplierName: doc.supplierName,
+          supplierCode: doc.supplierCode,
+          tableId: doc.tableId,
+          tableName: doc.tableName,
+          recordId: doc.recordId,
+          dataSource: doc.dataSource,
+          // File and date info
           fileName: doc.fileName,
           importedAt: doc.importedAt,
+          updatedAt: doc.updatedAt,
           createdAt: doc.createdAt,
         },
       ]);
@@ -1018,6 +1052,578 @@ class ElasticsearchService {
       console.error('❌ ES reindex error:', error.message);
       await this.finalizeIndexing(); // Ensure we restore settings
       return { indexed: totalIndexed, errors: totalErrors, error: error.message };
+    }
+  }
+
+  // ==================== SUPPLIER DATA INDEXING ====================
+
+  /**
+   * Update ES mapping to add supplier-specific fields (call once)
+   */
+  async updateMappingForSupplierData() {
+    if (!this.isAvailable) return;
+    
+    try {
+      await this.client.indices.putMapping({
+        index: this.indexName,
+        body: {
+          properties: {
+            // Supplier tracking fields
+            supplierId: { type: 'keyword' },
+            supplierName: { type: 'keyword', fields: { text: { type: 'text' } } },
+            supplierCode: { type: 'keyword' },
+            tableId: { type: 'keyword' },
+            tableName: { type: 'keyword' },
+            recordId: { type: 'keyword' },
+            dataSource: { type: 'keyword' }, // 'supplier_import', 'integration', 'manual'
+            // Vendor code - supplier's internal part identifier
+            vendorCode: { type: 'keyword', fields: { text: { type: 'text' } } },
+            updatedAt: { type: 'date' },
+          }
+        }
+      });
+      console.log('✅ ES mapping updated for supplier data');
+    } catch (error) {
+      // Ignore if mapping already exists
+      if (!error.message.includes('mapper_parsing_exception')) {
+        console.error('Error updating ES mapping:', error.message);
+      }
+    }
+  }
+
+  /**
+   * Index supplier data from a table import
+   * @param {Object} options - Indexing options
+   * @param {string} options.tableId - MongoDB ID of the data table
+   * @param {string} options.tableName - Name of the table
+   * @param {string} options.supplierId - MongoDB ID of the supplier
+   * @param {string} options.supplierName - Name of the supplier
+   * @param {string} options.supplierCode - Supplier code
+   * @param {Array} options.records - Array of records to index
+   * @param {Object} options.columnMapping - Map of column keys to ES fields
+   * @param {string} options.fileName - Original file name
+   * @param {boolean} options.replaceExisting - If true, delete existing table data first
+   */
+  async indexSupplierData({
+    tableId,
+    tableName,
+    supplierId,
+    supplierName,
+    supplierCode,
+    records,
+    columnMapping = {},
+    fileName,
+    replaceExisting = true,
+  }) {
+    if (!this.isAvailable) {
+      console.log('⚠️  Elasticsearch not available, skipping indexing');
+      return { indexed: 0, errors: 0, skipped: true };
+    }
+
+    if (!records || records.length === 0) {
+      return { indexed: 0, errors: 0 };
+    }
+
+    const startTime = Date.now();
+    console.log(`📊 Indexing ${records.length.toLocaleString()} supplier records to ES...`);
+
+    try {
+      // Ensure mapping is updated
+      await this.updateMappingForSupplierData();
+
+      // Delete existing records for this table if replacing
+      if (replaceExisting && tableId) {
+        const deleteResult = await this.deleteByTable(tableId);
+        if (deleteResult.deleted > 0) {
+          console.log(`🗑️  Removed ${deleteResult.deleted.toLocaleString()} existing records for table`);
+        }
+      }
+
+      // Prepare for bulk indexing
+      await this.prepareForBulkIndexing();
+
+      // Smart field mapping from supplier data to ES fields
+      // Note: minLot maps to minOrderQty (consolidated), oem/article map to partNumber as fallback
+      const fieldMap = {
+        // Part number fields - vendor_code is kept separate, others fill partNumber
+        'part_number': 'partNumber', 'partnumber': 'partNumber', 'sku': 'partNumber',
+        'oem_number': 'partNumber', 'oem': 'partNumber', // OEM goes to partNumber
+        'article_number': 'partNumber', 'article': 'partNumber', // Article goes to partNumber
+        'vendor_code': 'vendorCode', 'vendorcode': 'vendorCode', // Vendor code stays separate
+        // Description fields
+        'description': 'description', 'title': 'description', 'name': 'description',
+        'product_name': 'description', 'item_name': 'description',
+        // Brand fields
+        'brand': 'brand', 'make': 'brand', 'manufacturer': 'brand',
+        // Price fields
+        'price': 'price', 'priceaed': 'price', 'price_aed': 'price',
+        'unit_price': 'price', 'sell_price': 'price',
+        // Quantity fields
+        'quantity': 'quantity', 'qty': 'quantity', 'stock_qty': 'quantity',
+        'min_lot': 'minOrderQty', 'minlot': 'minOrderQty', 'min_order': 'minOrderQty', // All map to minOrderQty
+        // Stock fields
+        'stock': 'stock', 'availability': 'stock', 'in_stock': 'stock',
+        'stock_code': 'stockCode',
+        // Weight/Volume
+        'weight': 'weight', 'volume': 'volume',
+        // Delivery
+        'delivery': 'deliveryDays', 'delivery_days': 'deliveryDays', 'lead_time': 'deliveryDays',
+        // Category
+        'category': 'category', 'product_category': 'category',
+        ...columnMapping,
+      };
+
+      // Convert records to ES documents
+      const now = new Date();
+      const documents = records.map((record, index) => {
+        const data = record.data || record;
+        const doc = {
+          _id: record._id?.toString() || `${tableId}_${index}_${Date.now()}`,
+          // Supplier tracking
+          supplierId: supplierId?.toString(),
+          supplierName: supplierName,
+          supplierCode: supplierCode,
+          tableId: tableId?.toString(),
+          tableName: tableName,
+          recordId: record._id?.toString(),
+          dataSource: 'supplier_import',
+          // File info
+          fileName: fileName,
+          importedAt: now,
+          updatedAt: now,
+        };
+
+        // Map data fields to ES fields
+        for (const [key, value] of Object.entries(data)) {
+          if (value === null || value === undefined || value === '') continue;
+          
+          const lowerKey = key.toLowerCase().replace(/[^a-z0-9]/g, '_');
+          const esField = fieldMap[lowerKey] || fieldMap[key];
+          
+          if (esField) {
+            // Type conversion based on ES field
+            if (['price', 'weight', 'volume'].includes(esField)) {
+              const numVal = parseFloat(String(value).replace(',', '.'));
+              if (!isNaN(numVal)) doc[esField] = numVal;
+            } else if (['quantity', 'minOrderQty', 'deliveryDays'].includes(esField)) {
+              const intVal = parseInt(String(value).replace(/[^\d]/g, ''), 10);
+              if (!isNaN(intVal)) doc[esField] = intVal;
+            } else {
+              doc[esField] = String(value).trim();
+            }
+          }
+          
+          // Also store with original key if it's a known parts field
+          if (['partNumber', 'vendorCode', 'brand', 'description'].includes(esField)) {
+            // Already mapped above
+          }
+        }
+
+        // Use vendorCode as partNumber fallback if not set
+        if (!doc.partNumber && doc.vendorCode) {
+          doc.partNumber = doc.vendorCode;
+        }
+
+        // Fallback: use first text column as part number if still not mapped
+        if (!doc.partNumber) {
+          for (const [key, value] of Object.entries(data)) {
+            if (value && typeof value === 'string' && value.length > 0 && value.length < 100) {
+              doc.partNumber = String(value).trim().toUpperCase();
+              break;
+            }
+          }
+        }
+
+        // Set supplier name as supplier field for search
+        doc.supplier = supplierName || supplierCode;
+
+        return doc;
+      });
+
+      // Bulk index in batches
+      const batchSize = 5000;
+      let totalIndexed = 0;
+      let totalErrors = 0;
+
+      for (let i = 0; i < documents.length; i += batchSize) {
+        const batch = documents.slice(i, i + batchSize);
+        const result = await this.bulkIndex(batch);
+        totalIndexed += result.indexed || 0;
+        totalErrors += result.errors || 0;
+      }
+
+      // Finalize
+      await this.finalizeIndexing();
+      this.invalidateDocCountCache();
+
+      const duration = ((Date.now() - startTime) / 1000).toFixed(1);
+      const rate = Math.round(totalIndexed / parseFloat(duration));
+      console.log(`✅ Supplier data indexed: ${totalIndexed.toLocaleString()} docs in ${duration}s (${rate.toLocaleString()}/s)`);
+
+      return {
+        indexed: totalIndexed,
+        errors: totalErrors,
+        duration: parseFloat(duration),
+        rate,
+      };
+    } catch (error) {
+      console.error('❌ Error indexing supplier data:', error.message);
+      await this.finalizeIndexing();
+      return { indexed: 0, errors: records.length, error: error.message };
+    }
+  }
+
+  /**
+   * Delete all documents from a specific table
+   */
+  async deleteByTable(tableId) {
+    if (!this.isAvailable || !tableId) return { deleted: 0 };
+
+    try {
+      const response = await this.client.deleteByQuery({
+        index: this.indexName,
+        body: {
+          query: { term: { tableId: tableId.toString() } },
+        },
+        conflicts: 'proceed',
+        refresh: false,
+        wait_for_completion: true,
+        slices: 'auto',
+      });
+
+      this.invalidateDocCountCache();
+      return { deleted: response.deleted || 0 };
+    } catch (error) {
+      console.error('Error deleting by table:', error.message);
+      return { deleted: 0 };
+    }
+  }
+
+  /**
+   * Delete all documents from a specific supplier
+   */
+  async deleteBySupplier(supplierId) {
+    if (!this.isAvailable || !supplierId) return { deleted: 0 };
+
+    try {
+      const startTime = Date.now();
+      const response = await this.client.deleteByQuery({
+        index: this.indexName,
+        body: {
+          query: { term: { supplierId: supplierId.toString() } },
+        },
+        conflicts: 'proceed',
+        refresh: false,
+        wait_for_completion: true,
+        slices: 'auto',
+        scroll_size: 10000,
+      });
+
+      const duration = ((Date.now() - startTime) / 1000).toFixed(1);
+      console.log(`🗑️  ES: Deleted ${response.deleted?.toLocaleString() || 0} supplier docs in ${duration}s`);
+      this.invalidateDocCountCache();
+      return { deleted: response.deleted || 0 };
+    } catch (error) {
+      console.error('Error deleting by supplier:', error.message);
+      return { deleted: 0 };
+    }
+  }
+
+  /**
+   * Get stats for a specific supplier
+   */
+  async getSupplierStats(supplierId) {
+    if (!this.isAvailable || !supplierId) return null;
+
+    try {
+      const [countResponse, tablesResponse] = await Promise.all([
+        this.client.count({
+          index: this.indexName,
+          body: { query: { term: { supplierId: supplierId.toString() } } }
+        }),
+        this.client.search({
+          index: this.indexName,
+          body: {
+            size: 0,
+            query: { term: { supplierId: supplierId.toString() } },
+            aggs: {
+              tables: { terms: { field: 'tableId', size: 100 } },
+              brands: { terms: { field: 'brand', size: 50 } },
+              latestImport: { max: { field: 'importedAt' } },
+            }
+          }
+        })
+      ]);
+
+      return {
+        totalRecords: countResponse.count,
+        tables: tablesResponse.aggregations?.tables?.buckets?.length || 0,
+        brands: tablesResponse.aggregations?.brands?.buckets?.map(b => b.key) || [],
+        lastImport: tablesResponse.aggregations?.latestImport?.value_as_string,
+      };
+    } catch (error) {
+      console.error('Error getting supplier stats:', error.message);
+      return null;
+    }
+  }
+
+  /**
+   * Search parts from a specific supplier only
+   */
+  async searchSupplierParts(supplierId, query, filters = {}) {
+    if (!this.isAvailable) {
+      throw new Error('Elasticsearch is not available');
+    }
+
+    const limit = filters.limit || 50;
+    const skip = filters.skip || 0;
+
+    try {
+      const must = [
+        { term: { supplierId: supplierId.toString() } }
+      ];
+
+      if (query && query.trim()) {
+        must.push({
+          bool: {
+            should: [
+              { term: { partNumber: { value: query.trim().toUpperCase(), boost: 10 } } },
+              { prefix: { partNumber: { value: query.trim().toUpperCase(), boost: 5 } } },
+              { match: { 'partNumber.autocomplete': { query: query.trim(), boost: 3 } } },
+              { match: { description: { query: query.trim(), boost: 2 } } },
+              { match: { 'vendorCode.text': { query: query.trim(), boost: 2 } } },
+              { match: { 'brand.text': { query: query.trim(), boost: 1 } } },
+            ],
+            minimum_should_match: 1,
+          }
+        });
+      }
+
+      const filter = [];
+      if (filters.tableId) {
+        filter.push({ term: { tableId: filters.tableId.toString() } });
+      }
+      if (filters.brand) {
+        filter.push({ term: { brand: filters.brand } });
+      }
+
+      const response = await this.client.search({
+        index: this.indexName,
+        body: {
+          from: skip,
+          size: limit,
+          query: {
+            bool: {
+              must,
+              filter: filter.length > 0 ? filter : undefined,
+            }
+          },
+          sort: [
+            { _score: 'desc' },
+            { importedAt: 'desc' }
+          ],
+        }
+      });
+
+      return {
+        hits: response.hits.hits.map(hit => ({
+          _id: hit._id,
+          _score: hit._score,
+          ...hit._source,
+        })),
+        total: response.hits.total?.value || response.hits.total || 0,
+      };
+    } catch (error) {
+      console.error('Error searching supplier parts:', error.message);
+      throw error;
+    }
+  }
+
+  /**
+   * Re-index all records from a specific supplier table
+   * Useful for re-indexing after ES mapping updates
+   */
+  async reindexSupplierTable(tableId, DataTable, DataRecord, Supplier) {
+    if (!this.isAvailable) {
+      return { success: false, message: 'Elasticsearch not available' };
+    }
+
+    try {
+      const table = await DataTable.findById(tableId).populate('supplier');
+      if (!table) {
+        return { success: false, message: 'Table not found' };
+      }
+
+      const supplier = table.supplier;
+      const records = await DataRecord.find({ table: tableId, status: 'active' }).lean();
+
+      if (records.length === 0) {
+        return { success: true, indexed: 0, message: 'No records to index' };
+      }
+
+      // Build ES records
+      const esRecords = records.map(record => ({
+        _id: record._id.toString(),
+        data: record.data,
+      }));
+
+      // Build column mapping from table columns
+      const columnMapping = {};
+      for (const col of table.columns) {
+        columnMapping[col.key] = col.key;
+      }
+
+      const result = await this.indexSupplierData({
+        tableId: table._id.toString(),
+        tableName: table.name,
+        supplierId: supplier._id.toString(),
+        supplierName: supplier.name || supplier.username,
+        supplierCode: supplier.code || supplier.username,
+        records: esRecords,
+        columnMapping,
+        fileName: table.description || table.name,
+        replaceExisting: true,
+      });
+
+      return {
+        success: true,
+        ...result,
+        tableName: table.name,
+        supplierName: supplier.name || supplier.username,
+      };
+    } catch (error) {
+      console.error('Error reindexing supplier table:', error.message);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Re-index all supplier data from all tables
+   * Call this after ES mapping updates to ensure all data is properly indexed
+   */
+  async reindexAllSupplierData(DataTable, DataRecord, Supplier) {
+    if (!this.isAvailable) {
+      return { success: false, message: 'Elasticsearch not available' };
+    }
+
+    const startTime = Date.now();
+    console.log('🔄 Starting full re-index of all supplier data...');
+
+    try {
+      // Get all active tables
+      const tables = await DataTable.find({ status: 'active' }).populate('supplier').lean();
+      console.log(`📊 Found ${tables.length} tables to re-index`);
+
+      let totalIndexed = 0;
+      let totalErrors = 0;
+      const results = [];
+
+      for (const table of tables) {
+        try {
+          const records = await DataRecord.find({ table: table._id, status: 'active' }).lean();
+          
+          if (records.length === 0) {
+            results.push({ table: table.name, indexed: 0, skipped: true });
+            continue;
+          }
+
+          const esRecords = records.map(record => ({
+            _id: record._id.toString(),
+            data: record.data,
+          }));
+
+          const columnMapping = {};
+          for (const col of table.columns) {
+            columnMapping[col.key] = col.key;
+          }
+
+          const supplier = table.supplier || {};
+          const result = await this.indexSupplierData({
+            tableId: table._id.toString(),
+            tableName: table.name,
+            supplierId: supplier._id?.toString() || table.supplier?.toString(),
+            supplierName: supplier.name || supplier.username || 'Unknown',
+            supplierCode: supplier.code || supplier.username || 'unknown',
+            records: esRecords,
+            columnMapping,
+            fileName: table.description || table.name,
+            replaceExisting: true,
+          });
+
+          totalIndexed += result.indexed || 0;
+          totalErrors += result.errors || 0;
+          results.push({
+            table: table.name,
+            supplier: supplier.name || supplier.username,
+            indexed: result.indexed,
+            errors: result.errors,
+          });
+        } catch (tableError) {
+          console.error(`Error indexing table ${table.name}:`, tableError.message);
+          results.push({ table: table.name, error: tableError.message });
+          totalErrors++;
+        }
+      }
+
+      const duration = ((Date.now() - startTime) / 1000).toFixed(1);
+      console.log(`✅ Full re-index complete: ${totalIndexed.toLocaleString()} docs in ${duration}s`);
+
+      return {
+        success: true,
+        tablesProcessed: tables.length,
+        totalIndexed,
+        totalErrors,
+        duration: parseFloat(duration),
+        results,
+      };
+    } catch (error) {
+      console.error('Error in full re-index:', error.message);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Get diagnostic info for supplier data indexing
+   */
+  async getSupplierDataDiagnostics() {
+    if (!this.isAvailable) {
+      return { available: false, message: 'Elasticsearch not available' };
+    }
+
+    try {
+      const [totalCount, supplierDataCount, aggregations] = await Promise.all([
+        this.client.count({ index: this.indexName }),
+        this.client.count({
+          index: this.indexName,
+          body: { query: { exists: { field: 'supplierId' } } }
+        }),
+        this.client.search({
+          index: this.indexName,
+          body: {
+            size: 0,
+            aggs: {
+              suppliers: { terms: { field: 'supplierId', size: 100 } },
+              tables: { terms: { field: 'tableId', size: 100 } },
+              dataSources: { terms: { field: 'dataSource', size: 10 } },
+            }
+          }
+        })
+      ]);
+
+      return {
+        available: true,
+        totalDocuments: totalCount.count,
+        supplierDataCount: supplierDataCount.count,
+        integrationDataCount: totalCount.count - supplierDataCount.count,
+        uniqueSuppliers: aggregations.aggregations?.suppliers?.buckets?.length || 0,
+        uniqueTables: aggregations.aggregations?.tables?.buckets?.length || 0,
+        dataSources: aggregations.aggregations?.dataSources?.buckets?.map(b => ({
+          source: b.key,
+          count: b.doc_count,
+        })) || [],
+      };
+    } catch (error) {
+      return { available: true, error: error.message };
     }
   }
 }

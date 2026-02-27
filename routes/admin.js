@@ -83,6 +83,9 @@ const {
   getServerStatusApi,
   getServerHealthApi,
   getServerLogsApi,
+  // Elasticsearch
+  reindexSupplierData,
+  getEsDiagnostics,
 } = require('../controllers/adminController');
 
 // Import email inquiry controller
@@ -545,5 +548,14 @@ router.get('/server-status', requirePermission(PERMISSIONS.MANAGE_SETTINGS), get
 router.get('/api/server-status', requirePermission(PERMISSIONS.MANAGE_SETTINGS), getServerStatusApi);
 router.get('/api/server-status/health', requirePermission(PERMISSIONS.MANAGE_SETTINGS), getServerHealthApi);
 router.get('/api/server-status/logs', requirePermission(PERMISSIONS.MANAGE_SETTINGS), getServerLogsApi);
+
+// ==========================================
+// Elasticsearch Management (Super Admin Only)
+// ==========================================
+// Re-index all supplier data to Elasticsearch
+router.post('/api/reindex-supplier-data', requirePermission(PERMISSIONS.MANAGE_SETTINGS), reindexSupplierData);
+
+// Get Elasticsearch diagnostics for supplier data
+router.get('/api/es-diagnostics', requirePermission(PERMISSIONS.MANAGE_SETTINGS), getEsDiagnostics);
 
 module.exports = router;

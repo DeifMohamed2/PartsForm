@@ -4902,6 +4902,59 @@ const getSidebarCounts = async (req, res) => {
   }
 };
 
+/**
+ * Re-index all supplier data to Elasticsearch
+ * POST /api/admin/reindex-supplier-data
+ */
+const reindexSupplierData = async (req, res) => {
+  try {
+    const DataTable = require('../models/DataTable');
+    const DataRecord = require('../models/DataRecord');
+    const Supplier = require('../models/Supplier');
+
+    const result = await elasticsearchService.reindexAllSupplierData(DataTable, DataRecord, Supplier);
+
+    if (result.success) {
+      res.json({
+        success: true,
+        message: `Re-indexed ${result.totalIndexed.toLocaleString()} records from ${result.tablesProcessed} tables`,
+        ...result,
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        error: result.error || result.message,
+      });
+    }
+  } catch (error) {
+    console.error('Error re-indexing supplier data:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+};
+
+/**
+ * Get Elasticsearch supplier data diagnostics
+ * GET /api/admin/es-diagnostics
+ */
+const getEsDiagnostics = async (req, res) => {
+  try {
+    const diagnostics = await elasticsearchService.getSupplierDataDiagnostics();
+    res.json({
+      success: true,
+      diagnostics,
+    });
+  } catch (error) {
+    console.error('Error getting ES diagnostics:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+};
+
 // Export controller functions
 module.exports = {
   getAdminDashboard,
@@ -4981,4 +5034,7 @@ module.exports = {
   getLogsPage,
   getLogsApi,
   getErrorStatsApi,
+  // Elasticsearch supplier data
+  reindexSupplierData,
+  getEsDiagnostics,
 };

@@ -31,6 +31,215 @@
   <link rel="stylesheet" href="/css/supplierCSS/supplier-spreadsheet.css">
   <link rel="stylesheet" href="/css/supplierCSS/supplier-import.css">
   <link rel="stylesheet" href="/css/supplierCSS/supplier-pages.css">
+  
+  <style>
+    /* Enhanced Sidebar Styles */
+    .supplier-sidebar {
+      background: linear-gradient(180deg, #0c4a6e 0%, #082f49 100%);
+      border-right: none;
+    }
+    
+    .sidebar-header {
+      padding: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+    
+    .sidebar-logo img {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: white;
+      padding: 6px;
+    }
+    
+    .sidebar-logo-text {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: white;
+      letter-spacing: -0.02em;
+    }
+    
+    .sidebar-nav {
+      padding: 16px 12px;
+    }
+    
+    .nav-section {
+      margin-bottom: 24px;
+    }
+    
+    .nav-section-title {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: rgba(255, 255, 255, 0.5);
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+    
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      color: rgba(255, 255, 255, 0.75);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      border-radius: 10px;
+      transition: all 0.2s;
+      margin-bottom: 4px;
+    }
+    
+    .nav-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+    }
+    
+    .nav-item.active {
+      background: rgba(255, 255, 255, 0.15);
+      color: white;
+      font-weight: 600;
+    }
+    
+    .nav-item i, .nav-item svg {
+      width: 20px;
+      height: 20px;
+      opacity: 0.9;
+    }
+    
+    .nav-badge {
+      margin-left: auto;
+      background: rgba(14, 165, 233, 0.3);
+      color: #7dd3fc;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    
+    /* Enhanced Topbar */
+    .supplier-topbar {
+      background: white;
+      border-bottom: 1px solid var(--border);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .page-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .topbar-btn {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      border-radius: 10px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .topbar-btn:hover {
+      background: var(--bg-main);
+      color: var(--primary);
+    }
+    
+    .user-menu {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 12px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-left: 8px;
+    }
+    
+    .user-menu:hover {
+      background: var(--bg-main);
+    }
+    
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      color: white;
+      font-weight: 700;
+      font-size: 1rem;
+      border-radius: 10px;
+    }
+    
+    .user-info {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .user-name {
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--text);
+    }
+    
+    .user-company {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+    
+    /* Logout link at bottom */
+    .sidebar-footer {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 16px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .logout-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px;
+      background: rgba(239, 68, 68, 0.1);
+      color: #fca5a5;
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      border-radius: 10px;
+      transition: all 0.2s;
+    }
+    
+    .logout-btn:hover {
+      background: rgba(239, 68, 68, 0.2);
+      color: #fecaca;
+    }
+  </style>
 </head>
 <body>
   <div class="supplier-layout">
@@ -39,7 +248,7 @@
       <div class="sidebar-header">
         <a href="/supplier" class="sidebar-logo">
           <img src="/images/PARTSFORM-LOGO.png" alt="PARTSFORM">
-          <span class="sidebar-logo-text">Supplier Portal</span>
+          <span class="sidebar-logo-text">PARTSFORM</span>
         </a>
       </div>
       
@@ -79,6 +288,13 @@
           </a>
         </div>
       </nav>
+      
+      <div class="sidebar-footer">
+        <a href="/supplier/logout" class="logout-btn">
+          <i data-lucide="log-out" style="width: 18px; height: 18px;"></i>
+          Sign Out
+        </a>
+      </div>
     </aside>
     
     <!-- Main Content -->
@@ -86,18 +302,12 @@
       <!-- Topbar -->
       <header class="supplier-topbar">
         <div class="topbar-left">
-          <button class="topbar-btn" id="sidebarToggle" style="display: none;">
-            <i data-lucide="menu" style="width: 20px; height: 20px;"></i>
-          </button>
           <h1 class="page-title"><%= pageTitle || 'Dashboard' %></h1>
         </div>
         
         <div class="topbar-right">
-          <button class="topbar-btn" title="Refresh">
+          <button class="topbar-btn" title="Refresh" onclick="location.reload()">
             <i data-lucide="refresh-cw" style="width: 18px; height: 18px;"></i>
-          </button>
-          <button class="topbar-btn" title="Help">
-            <i data-lucide="help-circle" style="width: 18px; height: 18px;"></i>
           </button>
           
           <div class="user-menu" id="userMenu">
@@ -108,7 +318,6 @@
               <div class="user-name"><%= supplier ? supplier.contactName : 'Supplier' %></div>
               <div class="user-company"><%= supplier ? supplier.companyCode : '' %></div>
             </div>
-            <i data-lucide="chevron-down" style="width: 16px; height: 16px; color: var(--text-secondary);"></i>
           </div>
         </div>
       </header>

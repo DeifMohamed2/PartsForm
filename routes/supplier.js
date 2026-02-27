@@ -77,6 +77,8 @@ router.post('/tables/:tableId/records/:recordId/restore', requireSupplierAuth, r
 router.post('/tables/:tableId/records/:recordId/restore-version', requireSupplierAuth, requireSupplierPermission('write_data'), supplierDataController.restoreRecordVersion);
 
 // ==================== IMPORT/EXPORT ROUTES ====================
+// Automatic import - creates table from filename automatically
+router.post('/import', requireSupplierAuth, requireSupplierPermission('import_data'), upload.single('file'), supplierDataController.autoImportData);
 router.post('/tables/:tableId/import/preview', requireSupplierAuth, requireSupplierPermission('import_data'), upload.single('file'), supplierDataController.previewImport);
 router.post('/tables/:tableId/import', requireSupplierAuth, requireSupplierPermission('import_data'), upload.single('file'), supplierDataController.importData);
 router.get('/tables/:tableId/export', requireSupplierAuth, requireSupplierPermission('export_data'), supplierDataController.exportData);
@@ -93,6 +95,10 @@ router.post('/sftp/trigger-export', requireSupplierAuth, requireSupplierPermissi
 router.get('/audit-logs', requireSupplierAuth, requireSupplierPermission('view_audit_logs'), supplierDataController.getAuditLogs);
 router.get('/audit', requireSupplierAuth, supplierDataController.getAuditLogs); // Alias without permission for basic logs
 router.get('/exports', requireSupplierAuth, supplierDataController.getExportHistory);
+
+// ==================== FTP FILE ROUTES ====================
+router.get('/uploads', requireSupplierAuth, supplierDataController.getUploadedFiles);
+router.delete('/uploads/:filename', requireSupplierAuth, supplierDataController.deleteUploadedFile);
 
 // ==================== TEAM MANAGEMENT ROUTES ====================
 router.get('/team', requireSupplierAuth, requireSupplierPermission('manage_users'), supplierAuthController.getTeamMembers);
