@@ -96,6 +96,11 @@ exports.spreadsheet = async (req, res) => {
   try {
     const { tableId } = req.params;
     
+    // Validate tableId is a valid ObjectId
+    if (!tableId || tableId === 'new' || !/^[0-9a-fA-F]{24}$/.test(tableId)) {
+      return res.redirect('/supplier/tables');
+    }
+    
     const table = await DataTable.findOne({
       _id: tableId,
       supplier: req.supplier.getEffectiveSupplierId()
