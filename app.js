@@ -171,6 +171,8 @@ const buyerRoutes = require('./routes/buyer');
 const adminRoutes = require('./routes/admin');
 const authRoutes = require('./routes/auth');
 const partnerRoutes = require('./routes/partner');
+const supplierRoutes = require('./routes/supplier');
+const supplierViewRoutes = require('./routes/supplierViews');
 
 // Use routes
 app.use('/', landingRoutes);
@@ -178,6 +180,34 @@ app.use('/', authRoutes); // Auth routes at root level (/login, /register, /logo
 app.use('/buyer', buyerRoutes);
 app.use('/admin', adminRoutes);
 app.use('/partner', partnerRoutes);
+app.use('/api/supplier', supplierRoutes); // Supplier API routes
+app.use('/supplier', supplierViewRoutes); // Supplier portal views
+
+// 404 Handler - Catch all unmatched routes
+app.use((req, res, next) => {
+  logger.warn('404 Not Found', {
+    requestId: req.requestId,
+    url: req.originalUrl,
+    method: req.method,
+    ip: req.ip,
+  });
+  
+  if (req.xhr || req.headers.accept?.includes('application/json')) {
+    return res.status(404).json({
+      success: false,
+      message: 'Page not found',
+      requestId: req.requestId,
+    });
+  }
+  
+  res.status(404).render('error', {
+    title: '404 - Page Not Found',
+    error: 'Page Not Found',
+    requestId: req.requestId,
+    user: req.user || null,
+    userRole: req.user?.role || null,
+  });
+});
 
 // Error logging middleware (after routes)
 app.use(errorLoggerMiddleware);
@@ -217,6 +247,8 @@ app.use((err, req, res, next) => {
     title: 'Error',
     error: process.env.NODE_ENV === 'production' ? 'An error occurred' : err.message,
     requestId: req.requestId,
+    user: req.user || null,
+    userRole: req.user?.role || null,
   });
 });
 
@@ -267,6 +299,21 @@ server.listen(PORT, () => {
     console.log(`   ➜ Redis:    ⚠️  Redis connection failed (L1 cache only)`);
     logger.warn('Redis connection failed, using L1 cache only');
   });
+  
+  // FTP Server Status
+  if (process.env.ENABLE_FTP_SERVER === 'true') {
+    const supplierFtpService = require('./services/supplierFtpService');
+    supplierFtpService.start().then(() => {
+      const ftpPort = process.env.FTP_PORT || 2121;
+      console.log(`   ➜ FTP:      ✅ Supplier FTP server on port ${ftpPort}`);
+      logger.info('Supplier FTP server started', { port: ftpPort });
+    }).catch(err => {
+      console.log(`   ➜ FTP:      ❌ FTP server failed to start: ${err.message}`);
+      logger.error('FTP server failed to start', { error: err.message });
+    });
+  } else {
+    console.log(`   ➜ FTP:      ⚠️  FTP server disabled (ENABLE_FTP_SERVER not set)`);
+  }
   
   console.log(`   ➜ Logger:   ✅ Winston logger active`);
   console.log('');

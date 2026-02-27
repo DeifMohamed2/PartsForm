@@ -1,0 +1,818 @@
+<%- include('partials/header') %>
+<link rel="stylesheet" href="/css/adminCSS/admin-dashboard.css">
+<link rel="stylesheet" href="/css/adminCSS/admin-users.css">
+<style>
+  /* Supplier-specific styles */
+  .supplier-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.625rem;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  
+  .supplier-badge.pending {
+    background: rgba(245, 158, 11, 0.12);
+    color: #d97706;
+  }
+  
+  .supplier-badge.active {
+    background: rgba(16, 185, 129, 0.12);
+    color: #059669;
+  }
+  
+  .supplier-badge.suspended {
+    background: rgba(239, 68, 68, 0.12);
+    color: #dc2626;
+  }
+  
+  .supplier-badge.rejected {
+    background: rgba(107, 114, 128, 0.12);
+    color: #6b7280;
+  }
+  
+  .table-count-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.2rem 0.5rem;
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+  
+  .action-dropdown {
+    position: relative;
+  }
+  
+  .action-dropdown-menu {
+    position: absolute;
+    right: 0;
+    top: 100%;
+    background: white;
+    border: 1px solid var(--admin-border);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    min-width: 160px;
+    z-index: 100;
+    display: none;
+    overflow: hidden;
+  }
+  
+  .action-dropdown-menu.show {
+    display: block;
+  }
+  
+  .action-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 0.875rem;
+    font-size: 0.8rem;
+    color: var(--admin-text-primary);
+    cursor: pointer;
+    transition: background 0.15s;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+  }
+  
+  .action-dropdown-item:hover {
+    background: var(--admin-bg-hover);
+  }
+  
+  .action-dropdown-item.danger {
+    color: #ef4444;
+  }
+  
+  .action-dropdown-item.success {
+    color: #10b981;
+  }
+  
+  .action-dropdown-item i {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .bulk-actions-bar {
+    display: none;
+    padding: 0.875rem 1rem;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(139, 92, 246, 0.08));
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: 10px;
+    margin-bottom: 1rem;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .bulk-actions-bar.show {
+    display: flex;
+  }
+  
+  .bulk-actions-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .bulk-count {
+    font-weight: 600;
+    color: var(--admin-text-primary);
+  }
+  
+  .bulk-actions-right {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .supplier-company {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+  }
+  
+  .supplier-company-name {
+    font-weight: 600;
+    color: var(--admin-text-primary);
+  }
+  
+  .supplier-company-name a {
+    color: inherit;
+    text-decoration: none;
+  }
+  
+  .supplier-company-name a:hover {
+    color: var(--admin-primary);
+  }
+  
+  .supplier-contact {
+    font-size: 0.75rem;
+    color: var(--admin-text-muted);
+  }
+  
+  .last-login-info {
+    font-size: 0.75rem;
+    color: var(--admin-text-muted);
+  }
+  
+  .last-login-info.never {
+    color: #f59e0b;
+  }
+</style>
+</head>
+
+<body>
+  <div class="admin-wrapper">
+    <%- include('partials/sidebar', { activePage: 'suppliers' }) %>
+
+    <main class="admin-main">
+      <%- include('partials/topbar', { pageTitle: 'Suppliers' }) %>
+
+      <div class="admin-content">
+        <!-- Page Header -->
+        <div class="users-page-header">
+          <h2>Suppliers Management</h2>
+          <div class="users-header-actions">
+            <div class="users-search-container">
+              <i data-lucide="search" class="search-icon"></i>
+              <input type="text" id="suppliersSearch" placeholder="Search suppliers..." autocomplete="off" value="<%= filters.search %>">
+            </div>
+            <button class="admin-btn admin-btn-secondary" id="exportSuppliersBtn">
+              <i data-lucide="download"></i>
+              Export
+            </button>
+            <a href="/admin/suppliers/create" class="admin-btn admin-btn-primary">
+              <i data-lucide="plus"></i>
+              Create Supplier
+            </a>
+          </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-grid" style="margin-bottom: 1.5rem;">
+          <div class="stat-card module-themed">
+            <div class="stat-icon">
+              <i data-lucide="building-2"></i>
+            </div>
+            <div class="stat-content">
+              <div class="stat-value"><%= stats.total %></div>
+              <div class="stat-label">Total Suppliers</div>
+            </div>
+          </div>
+          <div class="stat-card green">
+            <div class="stat-icon">
+              <i data-lucide="check-circle"></i>
+            </div>
+            <div class="stat-content">
+              <div class="stat-value"><%= stats.active %></div>
+              <div class="stat-label">Active</div>
+            </div>
+          </div>
+          <div class="stat-card orange">
+            <div class="stat-icon">
+              <i data-lucide="clock"></i>
+            </div>
+            <div class="stat-content">
+              <div class="stat-value"><%= stats.pending %></div>
+              <div class="stat-label">Pending Approval</div>
+            </div>
+          </div>
+          <div class="stat-card red">
+            <div class="stat-icon">
+              <i data-lucide="ban"></i>
+            </div>
+            <div class="stat-content">
+              <div class="stat-value"><%= stats.suspended %></div>
+              <div class="stat-label">Suspended</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bulk Actions Bar -->
+        <div class="bulk-actions-bar" id="bulkActionsBar">
+          <div class="bulk-actions-left">
+            <span class="bulk-count"><span id="selectedCount">0</span> suppliers selected</span>
+            <button class="admin-btn admin-btn-sm" onclick="clearSelection()">Clear</button>
+          </div>
+          <div class="bulk-actions-right">
+            <button class="admin-btn admin-btn-success admin-btn-sm" onclick="bulkAction('active')">
+              <i data-lucide="check"></i> Activate
+            </button>
+            <button class="admin-btn admin-btn-warning admin-btn-sm" onclick="bulkAction('suspended')">
+              <i data-lucide="pause"></i> Suspend
+            </button>
+            <button class="admin-btn admin-btn-danger admin-btn-sm" onclick="bulkAction('rejected')">
+              <i data-lucide="x"></i> Reject
+            </button>
+          </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="users-filters">
+          <div class="filter-group">
+            <span class="filter-label">Status:</span>
+            <select class="filter-select" id="filterStatus">
+              <option value="all" <%= filters.status === 'all' ? 'selected' : '' %>>All Status</option>
+              <option value="pending" <%= filters.status === 'pending' ? 'selected' : '' %>>Pending</option>
+              <option value="active" <%= filters.status === 'active' ? 'selected' : '' %>>Active</option>
+              <option value="suspended" <%= filters.status === 'suspended' ? 'selected' : '' %>>Suspended</option>
+              <option value="rejected" <%= filters.status === 'rejected' ? 'selected' : '' %>>Rejected</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <span class="filter-label">Show:</span>
+            <select class="filter-select" id="filterLimit">
+              <option value="20" <%= pagination.limit === 20 ? 'selected' : '' %>>20 per page</option>
+              <option value="50" <%= pagination.limit === 50 ? 'selected' : '' %>>50 per page</option>
+              <option value="100" <%= pagination.limit === 100 ? 'selected' : '' %>>100 per page</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Suppliers Table -->
+        <div class="users-table-container">
+          <table class="users-table">
+            <thead>
+              <tr>
+                <th style="width: 40px;">
+                  <input type="checkbox" id="selectAll" onchange="toggleSelectAll()">
+                </th>
+                <th>Company</th>
+                <th>Email</th>
+                <th>Status</th>
+                <th>Data Tables</th>
+                <th>Last Login</th>
+                <th>Registered</th>
+                <th style="width: 80px;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="suppliersTableBody">
+              <% if (suppliers.length === 0) { %>
+              <tr>
+                <td colspan="8" style="text-align: center; padding: 3rem; color: var(--admin-text-muted);">
+                  <i data-lucide="building-2" style="width: 48px; height: 48px; margin-bottom: 1rem; opacity: 0.3;"></i>
+                  <p>No suppliers found</p>
+                </td>
+              </tr>
+              <% } else { %>
+              <% suppliers.forEach(function(supplier) { %>
+              <tr data-id="<%= supplier._id %>">
+                <td>
+                  <input type="checkbox" class="supplier-checkbox" value="<%= supplier._id %>" onchange="updateSelection()">
+                </td>
+                <td>
+                  <div class="supplier-company">
+                    <span class="supplier-company-name">
+                      <a href="/admin/suppliers/<%= supplier._id %>"><%= supplier.companyName %></a>
+                    </span>
+                    <span class="supplier-contact"><%= supplier.contactPerson || '-' %></span>
+                  </div>
+                </td>
+                <td><%= supplier.email %></td>
+                <td>
+                  <span class="supplier-badge <%= supplier.status %>">
+                    <% if (supplier.status === 'pending') { %>
+                    <i data-lucide="clock" style="width: 12px; height: 12px;"></i>
+                    <% } else if (supplier.status === 'active') { %>
+                    <i data-lucide="check" style="width: 12px; height: 12px;"></i>
+                    <% } else if (supplier.status === 'suspended') { %>
+                    <i data-lucide="ban" style="width: 12px; height: 12px;"></i>
+                    <% } else { %>
+                    <i data-lucide="x" style="width: 12px; height: 12px;"></i>
+                    <% } %>
+                    <%= supplier.status %>
+                  </span>
+                </td>
+                <td>
+                  <span class="table-count-badge">
+                    <i data-lucide="table" style="width: 12px; height: 12px;"></i>
+                    <%= supplier.tableCount || 0 %>
+                  </span>
+                </td>
+                <td>
+                  <% if (supplier.lastLogin) { %>
+                  <span class="last-login-info"><%= new Date(supplier.lastLogin).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></span>
+                  <% } else { %>
+                  <span class="last-login-info never">Never</span>
+                  <% } %>
+                </td>
+                <td>
+                  <span class="last-login-info"><%= new Date(supplier.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></span>
+                </td>
+                <td>
+                  <div class="action-dropdown">
+                    <button class="admin-btn admin-btn-sm admin-btn-ghost" onclick="toggleActionMenu(this)">
+                      <i data-lucide="more-vertical"></i>
+                    </button>
+                    <div class="action-dropdown-menu">
+                      <a href="/admin/suppliers/<%= supplier._id %>" class="action-dropdown-item">
+                        <i data-lucide="eye"></i> View Details
+                      </a>
+                      <% if (supplier.status === 'pending') { %>
+                      <button class="action-dropdown-item success" onclick="approveSupplier('<%= supplier._id %>')">
+                        <i data-lucide="check-circle"></i> Approve
+                      </button>
+                      <button class="action-dropdown-item danger" onclick="rejectSupplier('<%= supplier._id %>')">
+                        <i data-lucide="x-circle"></i> Reject
+                      </button>
+                      <% } else if (supplier.status === 'active') { %>
+                      <button class="action-dropdown-item danger" onclick="suspendSupplier('<%= supplier._id %>')">
+                        <i data-lucide="ban"></i> Suspend
+                      </button>
+                      <% } else if (supplier.status === 'suspended' || supplier.status === 'rejected') { %>
+                      <button class="action-dropdown-item success" onclick="reactivateSupplier('<%= supplier._id %>')">
+                        <i data-lucide="refresh-cw"></i> Reactivate
+                      </button>
+                      <% } %>
+                      <div style="height: 1px; background: var(--admin-border); margin: 0.25rem 0;"></div>
+                      <button class="action-dropdown-item danger" onclick="deleteSupplier('<%= supplier._id %>', '<%= supplier.companyName %>')">
+                        <i data-lucide="trash-2"></i> Delete
+                      </button>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              <% }); %>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <% if (pagination.totalPages > 1) { %>
+        <div class="pagination" style="display: flex; justify-content: center; gap: 0.5rem; margin-top: 1.5rem;">
+          <% if (pagination.hasPrev) { %>
+          <a href="?page=<%= pagination.page - 1 %>&status=<%= filters.status %>&search=<%= filters.search %>&limit=<%= pagination.limit %>" class="admin-btn admin-btn-sm admin-btn-secondary">
+            <i data-lucide="chevron-left"></i> Previous
+          </a>
+          <% } %>
+          <span style="display: flex; align-items: center; padding: 0 1rem; font-size: 0.85rem; color: var(--admin-text-muted);">
+            Page <%= pagination.page %> of <%= pagination.totalPages %>
+          </span>
+          <% if (pagination.hasNext) { %>
+          <a href="?page=<%= pagination.page + 1 %>&status=<%= filters.status %>&search=<%= filters.search %>&limit=<%= pagination.limit %>" class="admin-btn admin-btn-sm admin-btn-secondary">
+            Next <i data-lucide="chevron-right"></i>
+          </a>
+          <% } %>
+        </div>
+        <% } %>
+      </div>
+    </main>
+  </div>
+
+  <!-- Reason Modal -->
+  <div class="modal-overlay" id="reasonModal">
+    <div class="modal-container" style="max-width: 450px;">
+      <div class="modal-header">
+        <h3 id="reasonModalTitle">Reason Required</h3>
+        <button class="modal-close" onclick="closeReasonModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="reasonInput">Reason</label>
+          <textarea id="reasonInput" class="form-control" rows="3" placeholder="Enter reason..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="admin-btn admin-btn-secondary" onclick="closeReasonModal()">Cancel</button>
+        <button class="admin-btn admin-btn-primary" id="reasonConfirmBtn">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal-overlay" id="deleteModal">
+    <div class="modal-container" style="max-width: 450px;">
+      <div class="modal-header">
+        <h3>Delete Supplier</h3>
+        <button class="modal-close" onclick="closeDeleteModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete <strong id="deleteSupplierName"></strong>?</p>
+        <p style="font-size: 0.85rem; color: var(--admin-text-muted); margin-top: 0.5rem;">This action can be reversed. For permanent deletion, check the box below.</p>
+        <label style="display: flex; align-items: center; gap: 0.5rem; margin-top: 1rem; cursor: pointer;">
+          <input type="checkbox" id="permanentDelete">
+          <span style="font-size: 0.85rem; color: #ef4444;">Permanently delete (cannot be undone)</span>
+        </label>
+      </div>
+      <div class="modal-footer">
+        <button class="admin-btn admin-btn-secondary" onclick="closeDeleteModal()">Cancel</button>
+        <button class="admin-btn admin-btn-danger" id="confirmDeleteBtn">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <%- include('partials/footer') %>
+  
+  <script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+    
+    let selectedSuppliers = [];
+    let currentAction = null;
+    let currentSupplierId = null;
+    
+    // Search functionality
+    let searchTimeout;
+    document.getElementById('suppliersSearch').addEventListener('input', function(e) {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
+        applyFilters();
+      }, 500);
+    });
+    
+    // Filter changes
+    document.getElementById('filterStatus').addEventListener('change', applyFilters);
+    document.getElementById('filterLimit').addEventListener('change', applyFilters);
+    
+    function applyFilters() {
+      const status = document.getElementById('filterStatus').value;
+      const search = document.getElementById('suppliersSearch').value;
+      const limit = document.getElementById('filterLimit').value;
+      window.location.href = `/admin/suppliers?status=${status}&search=${encodeURIComponent(search)}&limit=${limit}`;
+    }
+    
+    // Export functionality
+    document.getElementById('exportSuppliersBtn').addEventListener('click', function() {
+      const status = document.getElementById('filterStatus').value;
+      window.location.href = `/admin/api/suppliers/export?status=${status}`;
+    });
+    
+    // Action menu toggle
+    function toggleActionMenu(btn) {
+      // Close all other menus
+      document.querySelectorAll('.action-dropdown-menu.show').forEach(menu => {
+        if (menu !== btn.nextElementSibling) {
+          menu.classList.remove('show');
+        }
+      });
+      btn.nextElementSibling.classList.toggle('show');
+    }
+    
+    // Close menus when clicking outside
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.action-dropdown')) {
+        document.querySelectorAll('.action-dropdown-menu.show').forEach(menu => {
+          menu.classList.remove('show');
+        });
+      }
+    });
+    
+    // Selection management
+    function toggleSelectAll() {
+      const selectAll = document.getElementById('selectAll');
+      const checkboxes = document.querySelectorAll('.supplier-checkbox');
+      checkboxes.forEach(cb => cb.checked = selectAll.checked);
+      updateSelection();
+    }
+    
+    function updateSelection() {
+      selectedSuppliers = Array.from(document.querySelectorAll('.supplier-checkbox:checked')).map(cb => cb.value);
+      const bulkBar = document.getElementById('bulkActionsBar');
+      const countSpan = document.getElementById('selectedCount');
+      
+      if (selectedSuppliers.length > 0) {
+        bulkBar.classList.add('show');
+        countSpan.textContent = selectedSuppliers.length;
+      } else {
+        bulkBar.classList.remove('show');
+      }
+    }
+    
+    function clearSelection() {
+      document.getElementById('selectAll').checked = false;
+      document.querySelectorAll('.supplier-checkbox').forEach(cb => cb.checked = false);
+      selectedSuppliers = [];
+      document.getElementById('bulkActionsBar').classList.remove('show');
+    }
+    
+    // Bulk actions
+    async function bulkAction(status) {
+      if (selectedSuppliers.length === 0) return;
+      
+      if (status === 'suspended' || status === 'rejected') {
+        currentAction = { type: 'bulk', status };
+        document.getElementById('reasonModalTitle').textContent = status === 'suspended' ? 'Suspension Reason' : 'Rejection Reason';
+        document.getElementById('reasonModal').classList.add('show');
+        return;
+      }
+      
+      await executeBulkAction(status);
+    }
+    
+    async function executeBulkAction(status, reason) {
+      try {
+        const response = await fetch('/admin/api/suppliers/bulk-status', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ supplierIds: selectedSuppliers, status, reason })
+        });
+        
+        const data = await response.json();
+        if (data.success) {
+          showToast(data.message, 'success');
+          setTimeout(() => location.reload(), 1000);
+        } else {
+          showToast(data.error || 'Failed to update suppliers', 'error');
+        }
+      } catch (error) {
+        showToast('An error occurred', 'error');
+      }
+    }
+    
+    // Individual actions
+    async function approveSupplier(id) {
+      try {
+        const response = await fetch(`/admin/api/suppliers/${id}/approve`, { method: 'PUT' });
+        const data = await response.json();
+        if (data.success) {
+          showToast('Supplier approved', 'success');
+          setTimeout(() => location.reload(), 1000);
+        } else {
+          showToast(data.error, 'error');
+        }
+      } catch (error) {
+        showToast('An error occurred', 'error');
+      }
+    }
+    
+    function rejectSupplier(id) {
+      currentAction = { type: 'single', action: 'reject', id };
+      document.getElementById('reasonModalTitle').textContent = 'Rejection Reason';
+      document.getElementById('reasonModal').classList.add('show');
+    }
+    
+    function suspendSupplier(id) {
+      currentAction = { type: 'single', action: 'suspend', id };
+      document.getElementById('reasonModalTitle').textContent = 'Suspension Reason';
+      document.getElementById('reasonModal').classList.add('show');
+    }
+    
+    async function reactivateSupplier(id) {
+      try {
+        const response = await fetch(`/admin/api/suppliers/${id}/reactivate`, { method: 'PUT' });
+        const data = await response.json();
+        if (data.success) {
+          showToast('Supplier reactivated', 'success');
+          setTimeout(() => location.reload(), 1000);
+        } else {
+          showToast(data.error, 'error');
+        }
+      } catch (error) {
+        showToast('An error occurred', 'error');
+      }
+    }
+    
+    function deleteSupplier(id, name) {
+      currentSupplierId = id;
+      document.getElementById('deleteSupplierName').textContent = name;
+      document.getElementById('permanentDelete').checked = false;
+      document.getElementById('deleteModal').classList.add('show');
+    }
+    
+    // Reason modal
+    function closeReasonModal() {
+      document.getElementById('reasonModal').classList.remove('show');
+      document.getElementById('reasonInput').value = '';
+      currentAction = null;
+    }
+    
+    document.getElementById('reasonConfirmBtn').addEventListener('click', async function() {
+      const reason = document.getElementById('reasonInput').value.trim();
+      
+      if (currentAction.type === 'bulk') {
+        await executeBulkAction(currentAction.status, reason);
+      } else if (currentAction.type === 'single') {
+        const endpoint = currentAction.action === 'reject' ? 'reject' : 'suspend';
+        try {
+          const response = await fetch(`/admin/api/suppliers/${currentAction.id}/${endpoint}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ reason })
+          });
+          const data = await response.json();
+          if (data.success) {
+            showToast(`Supplier ${endpoint === 'reject' ? 'rejected' : 'suspended'}`, 'success');
+            setTimeout(() => location.reload(), 1000);
+          } else {
+            showToast(data.error, 'error');
+          }
+        } catch (error) {
+          showToast('An error occurred', 'error');
+        }
+      }
+      
+      closeReasonModal();
+    });
+    
+    // Delete modal
+    function closeDeleteModal() {
+      document.getElementById('deleteModal').classList.remove('show');
+      currentSupplierId = null;
+    }
+    
+    document.getElementById('confirmDeleteBtn').addEventListener('click', async function() {
+      const permanent = document.getElementById('permanentDelete').checked;
+      
+      try {
+        const response = await fetch(`/admin/api/suppliers/${currentSupplierId}?permanent=${permanent}`, {
+          method: 'DELETE'
+        });
+        const data = await response.json();
+        if (data.success) {
+          showToast(data.message, 'success');
+          setTimeout(() => location.reload(), 1000);
+        } else {
+          showToast(data.error, 'error');
+        }
+      } catch (error) {
+        showToast('An error occurred', 'error');
+      }
+      
+      closeDeleteModal();
+    });
+    
+    // Toast notification
+    function showToast(message, type = 'info') {
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      toast.innerHTML = `
+        <i data-lucide="${type === 'success' ? 'check-circle' : type === 'error' ? 'x-circle' : 'info'}"></i>
+        <span>${message}</span>
+      `;
+      toast.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        padding: 1rem 1.5rem;
+        background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
+        color: white;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 9999;
+        animation: slideIn 0.3s ease;
+      `;
+      document.body.appendChild(toast);
+      lucide.createIcons();
+      
+      setTimeout(() => {
+        toast.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+    
+    // Modal overlay click to close
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+      overlay.addEventListener('click', function(e) {
+        if (e.target === this) {
+          this.classList.remove('show');
+        }
+      });
+    });
+  </script>
+  
+  <style>
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .modal-overlay.show {
+      display: flex;
+    }
+    
+    .modal-container {
+      background: white;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--admin-border);
+    }
+    
+    .modal-header h3 {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+    
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--admin-text-muted);
+    }
+    
+    .modal-body {
+      padding: 1.25rem;
+    }
+    
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      padding: 1rem 1.25rem;
+      border-top: 1px solid var(--admin-border);
+    }
+    
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+    }
+    
+    .form-control {
+      width: 100%;
+      padding: 0.625rem 0.875rem;
+      border: 1px solid var(--admin-border);
+      border-radius: 8px;
+      font-size: 0.875rem;
+      resize: vertical;
+    }
+    
+    .form-control:focus {
+      outline: none;
+      border-color: var(--admin-primary);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+    
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    
+    @keyframes slideOut {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(100%); opacity: 0; }
+    }
+  </style>
+</body>
+</html>

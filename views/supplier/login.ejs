@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Supplier Login | PARTSFORM</title>
+  <link rel="icon" type="image/png" href="/images/PARTSFORM-LOGO.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@0.294.0/dist/umd/lucide.min.js"></script>
+  <style>
+    :root {
+      --primary: #0c4a6e;
+      --primary-light: #0ea5e9;
+      --primary-dark: #082f49;
+      --danger: #ef4444;
+      --success: #10b981;
+      --bg: #f8fafc;
+      --text: #1e293b;
+      --text-secondary: #64748b;
+      --border: #e2e8f0;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 50%, var(--primary-light) 100%);
+    }
+    
+    .login-container {
+      display: flex;
+      width: 100%;
+      min-height: 100vh;
+    }
+    
+    .login-brand {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 48px;
+      color: white;
+    }
+    
+    .brand-logo {
+      width: 80px;
+      height: auto;
+      margin-bottom: 24px;
+    }
+    
+    .brand-title {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    
+    .brand-subtitle {
+      font-size: 18px;
+      opacity: 0.9;
+      margin-bottom: 48px;
+    }
+    
+    .brand-features {
+      max-width: 400px;
+    }
+    
+    .feature-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    
+    .feature-icon {
+      width: 40px;
+      height: 40px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    
+    .feature-text h4 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    
+    .feature-text p {
+      font-size: 14px;
+      opacity: 0.8;
+    }
+    
+    .login-form-container {
+      width: 480px;
+      background: white;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 48px;
+    }
+    
+    .form-header {
+      margin-bottom: 32px;
+    }
+    
+    .form-header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+    
+    .form-header p {
+      color: var(--text-secondary);
+    }
+    
+    .form-header.change-password h1 {
+      color: var(--primary);
+    }
+    
+    .form-header .first-login-notice {
+      margin-top: 16px;
+      padding: 12px 16px;
+      background: rgba(245, 158, 11, 0.1);
+      border-radius: 8px;
+      border-left: 3px solid #f59e0b;
+      font-size: 13px;
+      color: #92400e;
+    }
+    
+.form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+    
+    .form-input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 15px;
+      transition: all 0.2s;
+    }
+    
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(12, 74, 110, 0.1);
+    }
+    
+    .form-input.error {
+      border-color: var(--danger);
+    }
+    
+    .input-icon-wrapper {
+      position: relative;
+    }
+    
+    .input-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-secondary);
+    }
+    
+    .input-icon + .form-input {
+      padding-left: 44px;
+    }
+    
+    .password-toggle {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      cursor: pointer;
+    }
+    
+    .form-error {
+      color: var(--danger);
+      font-size: 13px;
+      margin-top: 6px;
+      display: none;
+    }
+    
+    .form-error.show {
+      display: block;
+    }
+    
+    .form-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+    
+    .remember-me {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      color: var(--text);
+      cursor: pointer;
+    }
+    
+    .forgot-password {
+      font-size: 14px;
+      color: var(--primary);
+      text-decoration: none;
+    }
+    
+    .forgot-password:hover {
+      text-decoration: underline;
+    }
+    
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+    
+    .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    
+    .btn-success {
+      background: var(--success);
+      color: white;
+    }
+    
+    .btn-success:hover {
+      background: #059669;
+    }
+    
+    .alert {
+      padding: 14px 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: none;
+      align-items: center;
+      gap: 12px;
+      font-size: 14px;
+    }
+    
+    .alert.show {
+      display: flex;
+    }
+    
+    .alert-error {
+      background: #fef2f2;
+      color: var(--danger);
+      border: 1px solid #fecaca;
+    }
+    
+    .alert-success {
+      background: #f0fdf4;
+      color: #16a34a;
+      border: 1px solid #bbf7d0;
+    }
+    
+    .password-requirements {
+      margin-top: 12px;
+      padding: 12px;
+      background: var(--bg);
+      border-radius: 8px;
+      font-size: 13px;
+    }
+    
+    .password-requirements h4 {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+    
+    .requirement {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+      color: var(--text-secondary);
+    }
+    
+    .requirement.valid {
+      color: var(--success);
+    }
+    
+    .requirement i {
+      width: 14px;
+      height: 14px;
+    }
+    
+    .contact-admin {
+      text-align: center;
+      margin-top: 32px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+    }
+    
+    .contact-admin p {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    @media (max-width: 900px) {
+      .login-brand {
+        display: none;
+      }
+      
+      .login-form-container {
+        width: 100%;
+        max-width: 480px;
+        margin: 0 auto;
+      }
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .spinner {
+      animation: spin 1s linear infinite;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-brand">
+      <img src="/images/PARTSFORM-LOGO.png" alt="PARTSFORM" class="brand-logo">
+      <h1 class="brand-title">Supplier Portal</h1>
+      <p class="brand-subtitle">Manage your data with ease</p>
+      
+      <div class="brand-features">
+        <div class="feature-item">
+          <div class="feature-icon">
+            <i data-lucide="table-2" style="width: 20px; height: 20px;"></i>
+          </div>
+          <div class="feature-text">
+            <h4>Excel-like Tables</h4>
+            <p>Edit your data in familiar spreadsheet format</p>
+          </div>
+        </div>
+        
+        <div class="feature-item">
+          <div class="feature-icon">
+            <i data-lucide="upload-cloud" style="width: 20px; height: 20px;"></i>
+          </div>
+          <div class="feature-text">
+            <h4>Easy Import/Export</h4>
+            <p>Import from Excel/CSV, export to multiple formats</p>
+          </div>
+        </div>
+        
+        <div class="feature-item">
+          <div class="feature-icon">
+            <i data-lucide="server" style="width: 20px; height: 20px;"></i>
+          </div>
+          <div class="feature-text">
+            <h4>FTP Integration</h4>
+            <p>Automated file uploads via FTP server</p>
+          </div>
+        </div>
+        
+        <div class="feature-item">
+          <div class="feature-icon">
+            <i data-lucide="history" style="width: 20px; height: 20px;"></i>
+          </div>
+          <div class="feature-text">
+            <h4>Version History</h4>
+            <p>Track changes and restore previous versions</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="login-form-container">
+      <!-- Login Form Section -->
+      <div id="loginSection">
+        <div class="form-header">
+          <h1>Welcome Back</h1>
+          <p>Sign in to your supplier account</p>
+        </div>
+        
+        <div class="alert alert-error" id="errorAlert">
+          <i data-lucide="alert-circle" style="width: 20px; height: 20px; flex-shrink: 0;"></i>
+          <span id="errorMessage"></span>
+        </div>
+        
+        <div class="alert alert-success" id="successAlert">
+          <i data-lucide="check-circle" style="width: 20px; height: 20px; flex-shrink: 0;"></i>
+          <span id="successMessage"></span>
+        </div>
+        
+        <form id="loginForm" onsubmit="handleLogin(event)">
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <div class="input-icon-wrapper">
+              <i data-lucide="mail" class="input-icon" style="width: 18px; height: 18px;"></i>
+              <input type="email" name="email" class="form-input" placeholder="you@company.com" required>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <div class="input-icon-wrapper">
+              <i data-lucide="lock" class="input-icon" style="width: 18px; height: 18px;"></i>
+              <input type="password" name="password" class="form-input" placeholder="Enter your password" required>
+              <button type="button" class="password-toggle" onclick="togglePassword(this)">
+                <i data-lucide="eye" style="width: 18px; height: 18px;"></i>
+              </button>
+            </div>
+          </div>
+          
+          <div class="form-row">
+            <label class="remember-me">
+              <input type="checkbox" name="remember">
+              Remember me
+            </label>
+            <a href="/supplier/forgot-password" class="forgot-password">Forgot password?</a>
+          </div>
+          
+          <button type="submit" class="btn btn-primary" id="loginBtn">
+            Sign In
+          </button>
+        </form>
+        
+        <div class="contact-admin">
+          <p>Don't have an account? Contact your administrator to request access.</p>
+        </div>
+      </div>
+      
+      <!-- Change Password Section (shown after first login) -->
+      <div id="changePasswordSection" style="display: none;">
+        <div class="form-header change-password">
+          <h1>Change Password</h1>
+          <p>Please set a new password for your account</p>
+          <div class="first-login-notice">
+            <strong>First Login:</strong> For security reasons, you must change your temporary password before continuing.
+          </div>
+        </div>
+        
+        <div class="alert alert-error" id="changeErrorAlert">
+          <i data-lucide="alert-circle" style="width: 20px; height: 20px; flex-shrink: 0;"></i>
+          <span id="changeErrorMessage"></span>
+        </div>
+        
+        <form id="changePasswordForm" onsubmit="handleChangePassword(event)">
+          <div class="form-group">
+            <label class="form-label">New Password</label>
+            <div class="input-icon-wrapper">
+              <i data-lucide="lock" class="input-icon" style="width: 18px; height: 18px;"></i>
+              <input type="password" name="newPassword" id="newPassword" class="form-input" placeholder="Enter new password" required minlength="8">
+              <button type="button" class="password-toggle" onclick="togglePassword(this)">
+                <i data-lucide="eye" style="width: 18px; height: 18px;"></i>
+              </button>
+            </div>
+            <div class="password-requirements">
+              <h4>Password Requirements</h4>
+              <div class="requirement" id="req-length">
+                <i data-lucide="circle" style="width: 14px; height: 14px;"></i>
+                <span>At least 8 characters</span>
+              </div>
+              <div class="requirement" id="req-uppercase">
+                <i data-lucide="circle" style="width: 14px; height: 14px;"></i>
+                <span>One uppercase letter</span>
+              </div>
+              <div class="requirement" id="req-lowercase">
+                <i data-lucide="circle" style="width: 14px; height: 14px;"></i>
+                <span>One lowercase letter</span>
+              </div>
+              <div class="requirement" id="req-number">
+                <i data-lucide="circle" style="width: 14px; height: 14px;"></i>
+                <span>One number</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Confirm New Password</label>
+            <div class="input-icon-wrapper">
+              <i data-lucide="lock" class="input-icon" style="width: 18px; height: 18px;"></i>
+              <input type="password" name="confirmPassword" id="confirmPassword" class="form-input" placeholder="Confirm new password" required>
+              <button type="button" class="password-toggle" onclick="togglePassword(this)">
+                <i data-lucide="eye" style="width: 18px; height: 18px;"></i>
+              </button>
+            </div>
+          </div>
+          
+          <button type="submit" class="btn btn-success" id="changePasswordBtn">
+            <i data-lucide="check" style="width: 18px; height: 18px;"></i>
+            Set New Password
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    lucide.createIcons();
+    
+    let tempToken = null;
+    
+    function togglePassword(btn) {
+      const input = btn.previousElementSibling;
+      const icon = btn.querySelector('i');
+      
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.setAttribute('data-lucide', 'eye-off');
+      } else {
+        input.type = 'password';
+        icon.setAttribute('data-lucide', 'eye');
+      }
+      lucide.createIcons();
+    }
+    
+    function showError(message, isChange = false) {
+      hideAlerts();
+      const id = isChange ? 'changeErrorMessage' : 'errorMessage';
+      const alertId = isChange ? 'changeErrorAlert' : 'errorAlert';
+      document.getElementById(id).textContent = message;
+      document.getElementById(alertId).classList.add('show');
+    }
+    
+    function showSuccess(message) {
+      hideAlerts();
+      document.getElementById('successMessage').textContent = message;
+      document.getElementById('successAlert').classList.add('show');
+    }
+    
+    function hideAlerts() {
+      document.getElementById('errorAlert').classList.remove('show');
+      document.getElementById('successAlert').classList.remove('show');
+      document.getElementById('changeErrorAlert').classList.remove('show');
+    }
+    
+    function showChangePasswordForm(token) {
+      tempToken = token;
+      document.getElementById('loginSection').style.display = 'none';
+      document.getElementById('changePasswordSection').style.display = 'block';
+      
+      // Add password validation listeners
+      const newPassword = document.getElementById('newPassword');
+      newPassword.addEventListener('input', validatePassword);
+    }
+    
+    function validatePassword() {
+      const password = document.getElementById('newPassword').value;
+      
+      const requirements = {
+        'req-length': password.length >= 8,
+        'req-uppercase': /[A-Z]/.test(password),
+        'req-lowercase': /[a-z]/.test(password),
+        'req-number': /[0-9]/.test(password)
+      };
+      
+      for (const [id, valid] of Object.entries(requirements)) {
+        const el = document.getElementById(id);
+        const icon = el.querySelector('i');
+        
+        if (valid) {
+          el.classList.add('valid');
+          icon.setAttribute('data-lucide', 'check-circle');
+        } else {
+          el.classList.remove('valid');
+          icon.setAttribute('data-lucide', 'circle');
+        }
+      }
+      
+      lucide.createIcons();
+      return Object.values(requirements).every(Boolean);
+    }
+    
+    async function handleLogin(e) {
+      e.preventDefault();
+      
+      const form = e.target;
+      const btn = document.getElementById('loginBtn');
+      
+      btn.disabled = true;
+      btn.innerHTML = '<i data-lucide="loader" class="spinner" style="width: 20px; height: 20px;"></i> Signing in...';
+      lucide.createIcons();
+      
+      try {
+        const response = await fetch('/api/supplier/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: form.email.value,
+            password: form.password.value
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(data.message || 'Login failed');
+        }
+        
+        // Check if password change required
+        if (data.requirePasswordChange && data.tempToken) {
+          showChangePasswordForm(data.tempToken);
+          return;
+        }
+        
+        // Normal login - store token
+        localStorage.setItem('supplierToken', data.token);
+        
+        showSuccess('Login successful! Redirecting...');
+        
+        setTimeout(() => {
+          window.location.href = '/supplier';
+        }, 1000);
+      } catch (err) {
+        showError(err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = 'Sign In';
+      }
+    }
+    
+    async function handleChangePassword(e) {
+      e.preventDefault();
+      
+      const newPassword = document.getElementById('newPassword').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      
+      // Validate passwords match
+      if (newPassword !== confirmPassword) {
+        showError('Passwords do not match', true);
+        return;
+      }
+      
+      // Validate password requirements
+      if (!validatePassword()) {
+        showError('Please meet all password requirements', true);
+        return;
+      }
+      
+      const btn = document.getElementById('changePasswordBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<i data-lucide="loader" class="spinner" style="width: 20px; height: 20px;"></i> Updating...';
+      lucide.createIcons();
+      
+      try {
+        const response = await fetch('/api/supplier/auth/change-password', {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${tempToken}`
+          },
+          body: JSON.stringify({ newPassword })
+        });
+        
+        const data = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(data.message || 'Failed to change password');
+        }
+        
+        // Store the new token
+        localStorage.setItem('supplierToken', data.token);
+        
+        // Show success and redirect
+        document.getElementById('changePasswordSection').innerHTML = `
+          <div style="text-align: center; padding: 32px 0;">
+            <div style="width: 64px; height: 64px; background: rgba(16, 185, 129, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px;">
+              <i data-lucide="check" style="width: 32px; height: 32px; color: #10b981;"></i>
+            </div>
+            <h2 style="font-size: 24px; font-weight: 700; margin-bottom: 8px; color: var(--text);">Password Updated!</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 24px;">Your password has been changed successfully.</p>
+            <p style="font-size: 14px; color: var(--text-secondary);">Redirecting to dashboard...</p>
+          </div>
+        `;
+        lucide.createIcons();
+        
+        setTimeout(() => {
+          window.location.href = '/supplier';
+        }, 2000);
+      } catch (err) {
+        showError(err.message, true);
+        btn.disabled = false;
+        btn.innerHTML = '<i data-lucide="check" style="width: 18px; height: 18px;"></i> Set New Password';
+        lucide.createIcons();
+      }
+    }
+    
+    // Check if already logged in
+    const token = localStorage.getItem('supplierToken');
+    if (token) {
+      fetch('/api/supplier/profile', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      }).then(res => {
+        if (res.ok) {
+          window.location.href = '/supplier';
+        } else {
+          localStorage.removeItem('supplierToken');
+        }
+      }).catch(() => {
+        localStorage.removeItem('supplierToken');
+      });
+    }
+  </script>
+</body>
+</html>

@@ -153,6 +153,31 @@ const {
   resyncAllPartnerStats,
 } = require('../controllers/referralController');
 
+// Import admin supplier controller
+const {
+  getSuppliersManagement,
+  getSupplierDetails,
+  getSupplierCreate,
+  getFtpSettings,
+  getSuppliersApi,
+  getSupplierStats,
+  createSupplier,
+  approveSupplier,
+  rejectSupplier,
+  suspendSupplier,
+  reactivateSupplier,
+  deleteSupplier,
+  getSupplierTables,
+  getSupplierExports,
+  getSupplierAuditLogs,
+  bulkUpdateStatus: bulkUpdateSupplierStatus,
+  getPendingCount: getPendingSuppliersCount,
+  exportSuppliers,
+  updateSupplierLimits,
+  updateSupplierFtp,
+  resetSupplierPassword
+} = require('../controllers/adminSupplierController');
+
 // Configure multer for file uploads (memory storage for parts)
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -479,6 +504,36 @@ router.post('/api/referrals/applications/:id/reject', requirePermission(PERMISSI
 
 // Utility endpoints
 router.post('/api/referrals/resync-stats', requirePermission(PERMISSIONS.WRITE), resyncAllPartnerStats);
+
+// ==========================================
+// Suppliers Management
+// ==========================================
+// Suppliers Pages
+router.get('/suppliers', requirePermission(PERMISSIONS.MANAGE_USERS), getSuppliersManagement);
+router.get('/suppliers/create', requirePermission(PERMISSIONS.MANAGE_USERS), getSupplierCreate);
+router.get('/suppliers/ftp-settings', requirePermission(PERMISSIONS.MANAGE_SETTINGS), getFtpSettings);
+router.get('/suppliers/:id', requirePermission(PERMISSIONS.MANAGE_USERS), getSupplierDetails);
+
+// Suppliers API endpoints
+router.get('/api/suppliers', requirePermission(PERMISSIONS.MANAGE_USERS), getSuppliersApi);
+router.get('/api/suppliers/stats', requirePermission(PERMISSIONS.MANAGE_USERS), getSupplierStats);
+router.get('/api/suppliers/pending-count', getPendingSuppliersCount);
+router.get('/api/suppliers/export', requirePermission(PERMISSIONS.MANAGE_USERS), exportSuppliers);
+router.post('/api/suppliers', requirePermission(PERMISSIONS.MANAGE_USERS), createSupplier);
+router.put('/api/suppliers/bulk-status', requirePermission(PERMISSIONS.MANAGE_USERS), bulkUpdateSupplierStatus);
+router.put('/api/suppliers/:id/approve', requirePermission(PERMISSIONS.MANAGE_USERS), approveSupplier);
+router.put('/api/suppliers/:id/reject', requirePermission(PERMISSIONS.MANAGE_USERS), rejectSupplier);
+router.put('/api/suppliers/:id/suspend', requirePermission(PERMISSIONS.MANAGE_USERS), suspendSupplier);
+router.put('/api/suppliers/:id/reactivate', requirePermission(PERMISSIONS.MANAGE_USERS), reactivateSupplier);
+router.put('/api/suppliers/:id/limits', requirePermission(PERMISSIONS.MANAGE_USERS), updateSupplierLimits);
+router.put('/api/suppliers/:id/ftp', requirePermission(PERMISSIONS.MANAGE_USERS), updateSupplierFtp);
+router.post('/api/suppliers/:id/reset-password', requirePermission(PERMISSIONS.MANAGE_USERS), resetSupplierPassword);
+router.delete('/api/suppliers/:id', requireAllPermissions(PERMISSIONS.DELETE, PERMISSIONS.MANAGE_USERS), deleteSupplier);
+
+// Supplier Data endpoints (view supplier's tables, exports, logs)
+router.get('/api/suppliers/:id/tables', requirePermission(PERMISSIONS.MANAGE_USERS), getSupplierTables);
+router.get('/api/suppliers/:id/exports', requirePermission(PERMISSIONS.MANAGE_USERS), getSupplierExports);
+router.get('/api/suppliers/:id/audit-logs', requirePermission(PERMISSIONS.MANAGE_USERS), getSupplierAuditLogs);
 
 // ==========================================
 // Server Status (Super Admin Only)

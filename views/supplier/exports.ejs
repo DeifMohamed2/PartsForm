@@ -1,0 +1,149 @@
+<%- include('partials/header', { currentPage: 'exports', pageTitle: 'Exports' }) %>
+
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">Export History</h3>
+    <div style="display: flex; gap: 12px;">
+      <button class="btn btn-secondary btn-sm" onclick="loadExports()">
+        <i data-lucide="refresh-cw" style="width: 16px; height: 16px;"></i>
+        Refresh
+      </button>
+    </div>
+  </div>
+  
+  <div id="exportsContainer">
+    <div class="loading">
+      <div class="spinner"></div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .export-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  
+  .export-row:last-child {
+    border-bottom: none;
+  }
+  
+  .export-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .export-icon.success {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--success);
+  }
+  
+  .export-icon.pending {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--warning);
+  }
+  
+  .export-icon.failed {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--danger);
+  }
+  
+  .export-info {
+    flex: 1;
+  }
+  
+  .export-name {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+  }
+  
+  .export-meta {
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+  
+  .export-status {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  
+  .export-status.completed { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+  .export-status.pending { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+  .export-status.failed { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', loadExports);
+  
+  async function loadExports() {
+    try {
+      const response = await API.get('/exports?limit=50');
+      const exports = response.exports || [];
+      
+      const container = document.getElementById('exportsContainer');
+      
+      if (exports.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <i data-lucide="file-text" class="empty-state-icon" style="width: 64px; height: 64px;"></i>
+            <div class="empty-state-title">No exports yet</div>
+            <div class="empty-state-description">Export data from your tables to see them here</div>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+      
+      container.innerHTML = exports.map(exp => {
+        let iconClass = 'success';
+        let icon = 'check-circle';
+        if (exp.status === 'pending' || exp.status === 'processing') {
+          iconClass = 'pending';
+          icon = 'clock';
+        } else if (exp.status === 'failed') {
+          iconClass = 'failed';
+          icon = 'x-circle';
+        }
+        
+        return `
+          <div class="export-row">
+            <div class="export-icon ${iconClass}">
+              <i data-lucide="${icon}" style="width: 24px; height: 24px;"></i>
+            </div>
+            <div class="export-info">
+              <div class="export-name">${exp.fileName || 'Export'}</div>
+              <div class="export-meta">
+                ${exp.format?.toUpperCase() || 'CSV'} · ${formatFileSize(exp.fileSize || 0)} · ${formatDateTime(exp.createdAt)}
+                ${exp.tableName ? ` · Table: ${exp.tableName}` : ''}
+              </div>
+            </div>
+            <span class="export-status ${exp.status}">${exp.status}</span>
+            ${exp.status === 'completed' ? `
+              <a href="/api/supplier/exports/${exp._id}/download" class="btn btn-primary btn-sm">
+                <i data-lucide="download" style="width: 16px; height: 16px;"></i>
+                Download
+              </a>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+      
+      lucide.createIcons();
+    } catch (err) {
+      console.error('Failed to load exports:', err);
+      showToast('Failed to load exports', 'error');
+    }
+  }
+</script>
+
+<%- include('partials/footer') %>

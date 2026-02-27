@@ -1,0 +1,756 @@
+<%- include('partials/header') %>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="/css/adminCSS/admin-dashboard.css">
+<link rel="stylesheet" href="/css/adminCSS/admin-users.css">
+<style>
+  .create-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+  
+  .create-header h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  
+  .create-header h1 i {
+    color: var(--admin-primary);
+  }
+  
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--admin-text-muted);
+    margin-bottom: 0.5rem;
+  }
+  
+  .breadcrumb a {
+    color: var(--admin-primary);
+    text-decoration: none;
+  }
+  
+  .breadcrumb a:hover {
+    text-decoration: underline;
+  }
+  
+  .form-card {
+    background: var(--admin-card-bg);
+    border-radius: 12px;
+    border: 1px solid var(--admin-border);
+    overflow: hidden;
+  }
+  
+  .form-section {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--admin-border);
+  }
+  
+  .form-section:last-child {
+    border-bottom: none;
+  }
+  
+  .form-section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+  }
+  
+  .form-section-header i {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(79, 70, 229, 0.1);
+    color: var(--admin-primary);
+    border-radius: 8px;
+    font-size: 1rem;
+  }
+  
+  .form-section-header h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+  
+  .form-section-header p {
+    font-size: 0.85rem;
+    color: var(--admin-text-muted);
+    margin-top: 0.25rem;
+  }
+  
+  .form-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+    margin-bottom: 1rem;
+  }
+  
+  .form-row.three-col {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .form-group.full-width {
+    grid-column: span 2;
+  }
+  
+  .form-group label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--admin-text-secondary);
+  }
+  
+  .form-group label .required {
+    color: #ef4444;
+    margin-left: 0.25rem;
+  }
+  
+  .form-control {
+    padding: 0.75rem 1rem;
+    font-size: 0.925rem;
+    border: 1px solid var(--admin-border);
+    border-radius: 8px;
+    background: var(--admin-bg);
+    color: var(--admin-text);
+    transition: all 0.2s;
+  }
+  
+  .form-control:focus {
+    outline: none;
+    border-color: var(--admin-primary);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+  }
+  
+  .form-control::placeholder {
+    color: var(--admin-text-muted);
+  }
+  
+  select.form-control {
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 1rem;
+    padding-right: 2.5rem;
+  }
+  
+  .form-help {
+    font-size: 0.8rem;
+    color: var(--admin-text-muted);
+  }
+  
+  .checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  
+  .checkbox-group input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .checkbox-label {
+    font-size: 0.925rem;
+    cursor: pointer;
+  }
+  
+  .ftp-preview {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: rgba(79, 70, 229, 0.05);
+    border-radius: 8px;
+    border: 1px dashed var(--admin-border);
+    display: none;
+  }
+  
+  .ftp-preview.active {
+    display: block;
+  }
+  
+  .ftp-preview h4 {
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    color: var(--admin-primary);
+  }
+  
+  .ftp-preview-row {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .ftp-preview-row .label {
+    color: var(--admin-text-muted);
+    min-width: 80px;
+  }
+  
+  .ftp-preview-row .value {
+    font-family: monospace;
+    color: var(--admin-text);
+  }
+  
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    padding: 1.5rem 2rem;
+    background: rgba(0, 0, 0, 0.02);
+    border-top: 1px solid var(--admin-border);
+  }
+  
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    font-size: 0.925rem;
+    font-weight: 500;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+  }
+  
+  .btn-secondary {
+    background: var(--admin-bg);
+    color: var(--admin-text);
+    border: 1px solid var(--admin-border);
+  }
+  
+  .btn-secondary:hover {
+    background: var(--admin-border);
+  }
+  
+  .btn-primary {
+    background: var(--admin-primary);
+    color: white;
+  }
+  
+  .btn-primary:hover {
+    background: #4338ca;
+  }
+  
+  .btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  
+  /* Credentials Modal */
+  .credentials-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.5);
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+  }
+  
+  .credentials-modal.active {
+    display: flex;
+  }
+  
+  .credentials-content {
+    background: var(--admin-card-bg);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 500px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  }
+  
+  .credentials-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--admin-border);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .credentials-header i {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    border-radius: 12px;
+    font-size: 1.25rem;
+  }
+  
+  .credentials-header h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+  
+  .credentials-header p {
+    font-size: 0.85rem;
+    color: var(--admin-text-muted);
+    margin-top: 0.25rem;
+  }
+  
+  .credentials-body {
+    padding: 1.5rem;
+  }
+  
+  .credential-item {
+    margin-bottom: 1.25rem;
+  }
+  
+  .credential-item:last-child {
+    margin-bottom: 0;
+  }
+  
+  .credential-item label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--admin-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+  }
+  
+  .credential-value {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: var(--admin-bg);
+    border: 1px solid var(--admin-border);
+    border-radius: 8px;
+    font-family: monospace;
+    font-size: 0.95rem;
+  }
+  
+  .credential-value code {
+    flex: 1;
+    word-break: break-all;
+  }
+  
+  .copy-btn {
+    padding: 0.5rem;
+    background: none;
+    border: none;
+    color: var(--admin-text-muted);
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s;
+  }
+  
+  .copy-btn:hover {
+    background: var(--admin-border);
+    color: var(--admin-primary);
+  }
+  
+  .copy-btn.copied {
+    color: #10b981;
+  }
+  
+  .credentials-warning {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: rgba(245, 158, 11, 0.1);
+    border-radius: 8px;
+    margin-top: 1.25rem;
+  }
+  
+  .credentials-warning i {
+    color: #f59e0b;
+    margin-top: 0.125rem;
+  }
+  
+  .credentials-warning p {
+    font-size: 0.85rem;
+    color: var(--admin-text-secondary);
+    line-height: 1.5;
+  }
+  
+  .credentials-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--admin-border);
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+  }
+
+  @media (max-width: 768px) {
+    .form-row {
+      grid-template-columns: 1fr;
+    }
+    
+    .form-row.three-col {
+      grid-template-columns: 1fr;
+    }
+    
+    .form-group.full-width {
+      grid-column: span 1;
+    }
+  }
+</style>
+</head>
+
+<body>
+  <div class="admin-wrapper">
+    <%- include('partials/sidebar', { activePage: 'suppliers' }) %>
+
+    <main class="admin-main">
+      <%- include('partials/topbar', { pageTitle: 'Create Supplier' }) %>
+
+      <div class="admin-content">
+        <div class="create-header">
+          <div>
+            <div class="breadcrumb">
+              <a href="/admin/suppliers">Suppliers</a>
+              <i class="fas fa-chevron-right"></i>
+              <span>Create New Supplier</span>
+            </div>
+            <h1><i class="fas fa-plus-circle"></i> Create Supplier Account</h1>
+          </div>
+        </div>
+
+    <form id="createSupplierForm" class="form-card">
+      <!-- Company Information -->
+      <div class="form-section">
+        <div class="form-section-header">
+          <i class="fas fa-building"></i>
+          <div>
+            <h3>Company Information</h3>
+            <p>Basic details about the supplier</p>
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label>Company Name <span class="required">*</span></label>
+            <input type="text" name="companyName" class="form-control" placeholder="Enter company name" required>
+          </div>
+          <div class="form-group">
+            <label>Company Code</label>
+            <input type="text" name="companyCode" class="form-control" placeholder="Auto-generated if empty" maxlength="20">
+            <span class="form-help">Leave empty to auto-generate</span>
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label>Country</label>
+            <select name="country" class="form-control">
+              <option value="">Select country</option>
+              <option value="US">United States</option>
+              <option value="UK">United Kingdom</option>
+              <option value="DE">Germany</option>
+              <option value="FR">France</option>
+              <option value="IT">Italy</option>
+              <option value="ES">Spain</option>
+              <option value="NL">Netherlands</option>
+              <option value="AE">United Arab Emirates</option>
+              <option value="SA">Saudi Arabia</option>
+              <option value="TR">Turkey</option>
+              <option value="CN">China</option>
+              <option value="JP">Japan</option>
+              <option value="IN">India</option>
+              <option value="AU">Australia</option>
+              <option value="CA">Canada</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Phone Number</label>
+            <input type="tel" name="phone" class="form-control" placeholder="+1 (555) 123-4567">
+          </div>
+        </div>
+      </div>
+
+      <!-- Contact & Login -->
+      <div class="form-section">
+        <div class="form-section-header">
+          <i class="fas fa-user-tie"></i>
+          <div>
+            <h3>Contact & Login</h3>
+            <p>Primary contact person credentials</p>
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label>Contact Name <span class="required">*</span></label>
+            <input type="text" name="contactName" class="form-control" placeholder="Full name" required>
+          </div>
+          <div class="form-group">
+            <label>Email Address <span class="required">*</span></label>
+            <input type="email" name="email" class="form-control" placeholder="contact@company.com" required>
+            <span class="form-help">Used for login</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quotas & FTP -->
+      <div class="form-section">
+        <div class="form-section-header">
+          <i class="fas fa-sliders-h"></i>
+          <div>
+            <h3>Quotas & Access</h3>
+            <p>Data limits and FTP configuration</p>
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label>Max Tables</label>
+            <input type="number" name="maxTables" class="form-control" value="10" min="1" max="100">
+          </div>
+          <div class="form-group">
+            <label>Max Records Per Table</label>
+            <input type="number" name="maxRecordsPerTable" class="form-control" value="50000" min="1000" max="1000000" step="1000">
+          </div>
+        </div>
+        
+        <div class="form-group" style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--admin-border);">
+          <div class="checkbox-group">
+            <input type="checkbox" id="enableFtp" name="enableFtp">
+            <label for="enableFtp" class="checkbox-label">Enable FTP access for automated data uploads</label>
+          </div>
+        </div>
+        
+        <div id="ftpPreview" class="ftp-preview">
+          <h4><i class="fas fa-info-circle"></i> FTP credentials will be generated</h4>
+          <div class="ftp-preview-row">
+            <span class="label">Host:</span>
+            <span class="value"><%= typeof ftpServerConfig !== 'undefined' ? ftpServerConfig.host : 'ftp.yourserver.com' %></span>
+          </div>
+          <div class="ftp-preview-row">
+            <span class="label">Port:</span>
+            <span class="value"><%= typeof ftpServerConfig !== 'undefined' ? ftpServerConfig.port : '21' %></span>
+          </div>
+          <p style="margin-top: 0.75rem; font-size: 0.8rem; color: var(--admin-text-muted);">
+            <i class="fas fa-shield-alt"></i> Credentials shown after creation
+          </p>
+        </div>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="form-actions">
+        <a href="/admin/suppliers" class="btn btn-secondary">
+          <i class="fas fa-times"></i> Cancel
+        </a>
+        <button type="submit" class="btn btn-primary" id="submitBtn">
+          <i class="fas fa-plus"></i> Create Supplier
+        </button>
+      </div>
+    </form>
+  </div>
+</main>
+
+<!-- Credentials Modal -->
+<div id="credentialsModal" class="credentials-modal">
+  <div class="credentials-content">
+    <div class="credentials-header">
+      <i class="fas fa-check-circle"></i>
+      <div>
+        <h3>Supplier Created Successfully</h3>
+        <p>Account credentials have been generated</p>
+      </div>
+    </div>
+    <div class="credentials-body">
+      <div class="credential-item">
+        <label>Login Email</label>
+        <div class="credential-value">
+          <code id="credEmail"></code>
+          <button type="button" class="copy-btn" data-copy="credEmail" title="Copy">
+            <i class="fas fa-copy"></i>
+          </button>
+        </div>
+      </div>
+      <div class="credential-item">
+        <label>Temporary Password</label>
+        <div class="credential-value">
+          <code id="credPassword"></code>
+          <button type="button" class="copy-btn" data-copy="credPassword" title="Copy">
+            <i class="fas fa-copy"></i>
+          </button>
+        </div>
+      </div>
+      <div id="ftpCredentials" style="display: none;">
+        <div class="credential-item">
+          <label>FTP Username</label>
+          <div class="credential-value">
+            <code id="credFtpUser"></code>
+            <button type="button" class="copy-btn" data-copy="credFtpUser" title="Copy">
+              <i class="fas fa-copy"></i>
+            </button>
+          </div>
+        </div>
+        <div class="credential-item">
+          <label>FTP Password</label>
+          <div class="credential-value">
+            <code id="credFtpPass"></code>
+            <button type="button" class="copy-btn" data-copy="credFtpPass" title="Copy">
+              <i class="fas fa-copy"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="credentials-warning">
+        <i class="fas fa-exclamation-triangle"></i>
+        <p>
+          <strong>Important:</strong> Please save these credentials securely and share them with the supplier.
+          The password will need to be changed on first login.
+        </p>
+      </div>
+    </div>
+    <div class="credentials-footer">
+      <button type="button" class="btn btn-secondary" onclick="copyAllCredentials()">
+        <i class="fas fa-clipboard"></i> Copy All
+      </button>
+      <a href="/admin/suppliers" class="btn btn-primary">
+        <i class="fas fa-arrow-right"></i> Go to Suppliers
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.getElementById('createSupplierForm');
+  const enableFtpCheckbox = document.getElementById('enableFtp');
+  const ftpPreview = document.getElementById('ftpPreview');
+  const submitBtn = document.getElementById('submitBtn');
+  
+  // Toggle FTP preview
+  enableFtpCheckbox.addEventListener('change', function() {
+    ftpPreview.classList.toggle('active', this.checked);
+  });
+  
+  // Form submission
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...';
+    
+    const formData = new FormData(form);
+    const data = {
+      companyName: formData.get('companyName'),
+      companyCode: formData.get('companyCode') || undefined,
+      email: formData.get('email'),
+      contactName: formData.get('contactName'),
+      phone: formData.get('phone') || undefined,
+      country: formData.get('country') || undefined,
+      quotas: {
+        maxTables: parseInt(formData.get('maxTables')) || 5,
+        maxRecordsPerTable: parseInt(formData.get('maxRecordsPerTable')) || 10000
+      },
+      ftpEnabled: enableFtpCheckbox.checked
+    };
+    
+    try {
+      const response = await fetch('/admin/api/suppliers', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        showCredentialsModal(result.data);
+      } else {
+        alert('Error: ' + (result.message || 'Failed to create supplier'));
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-plus"></i> Create Supplier';
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('An error occurred while creating the supplier');
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="fas fa-plus"></i> Create Supplier';
+    }
+  });
+});
+
+function showCredentialsModal(data) {
+  // API returns data.credentials with email, tempPassword, and optionally ftp
+  const creds = data.credentials || data;
+  document.getElementById('credEmail').textContent = creds.email || data.supplier?.email || '';
+  document.getElementById('credPassword').textContent = creds.tempPassword || '';
+  
+  if (creds.ftp) {
+    document.getElementById('ftpCredentials').style.display = 'block';
+    document.getElementById('credFtpUser').textContent = creds.ftp.username;
+    document.getElementById('credFtpPass').textContent = creds.ftp.password;
+  } else {
+    document.getElementById('ftpCredentials').style.display = 'none';
+  }
+  
+  document.getElementById('credentialsModal').classList.add('active');
+}
+
+// Copy button functionality
+document.querySelectorAll('.copy-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const targetId = this.dataset.copy;
+    const text = document.getElementById(targetId).textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      this.classList.add('copied');
+      this.innerHTML = '<i class="fas fa-check"></i>';
+      setTimeout(() => {
+        this.classList.remove('copied');
+        this.innerHTML = '<i class="fas fa-copy"></i>';
+      }, 2000);
+    });
+  });
+});
+
+function copyAllCredentials() {
+  const email = document.getElementById('credEmail').textContent;
+  const password = document.getElementById('credPassword').textContent;
+  let credentials = `Login Email: ${email}\nTemporary Password: ${password}`;
+  
+  const ftpSection = document.getElementById('ftpCredentials');
+  if (ftpSection.style.display !== 'none') {
+    const ftpUser = document.getElementById('credFtpUser').textContent;
+    const ftpPass = document.getElementById('credFtpPass').textContent;
+    credentials += `\n\nFTP Username: ${ftpUser}\nFTP Password: ${ftpPass}`;
+  }
+  
+  navigator.clipboard.writeText(credentials).then(() => {
+    const btn = event.target.closest('.btn');
+    btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+    setTimeout(() => {
+      btn.innerHTML = '<i class="fas fa-clipboard"></i> Copy All';
+    }, 2000);
+  });
+}
+</script>
+
+      </div>
+    </main>
+  </div>
+
+  <%- include('partials/footer') %>
+</body>
+</html>

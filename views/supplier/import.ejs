@@ -1,0 +1,517 @@
+<%- include('partials/header', { currentPage: 'import', pageTitle: 'Import Data' }) %>
+
+<div class="grid grid-2" style="gap: 24px;">
+  <!-- Upload Section -->
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">Upload File</h3>
+    </div>
+    
+    <div class="upload-zone" id="uploadZone">
+      <i data-lucide="upload-cloud" style="width: 48px; height: 48px; color: var(--primary); margin-bottom: 16px;"></i>
+      <h4 style="margin-bottom: 8px;">Drag and drop your file here</h4>
+      <p style="color: var(--text-secondary); margin-bottom: 16px;">or click to browse</p>
+      <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display: none;">
+      <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+        Select File
+      </button>
+      <p style="font-size: 12px; color: var(--text-secondary); margin-top: 16px;">
+        Supported formats: Excel (.xlsx, .xls), CSV
+      </p>
+    </div>
+    
+    <div id="fileInfo" style="display: none; margin-top: 20px;">
+      <div style="display: flex; align-items: center; gap: 12px; padding: 16px; background: var(--bg-main); border-radius: 8px;">
+        <i data-lucide="file-spreadsheet" style="width: 32px; height: 32px; color: var(--success);"></i>
+        <div style="flex: 1;">
+          <div style="font-weight: 600;" id="fileName"></div>
+          <div style="font-size: 13px; color: var(--text-secondary);" id="fileSize"></div>
+        </div>
+        <button class="btn btn-secondary btn-sm" onclick="clearFile()">
+          <i data-lucide="x" style="width: 16px; height: 16px;"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Options Section -->
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">Import Options</h3>
+    </div>
+    
+    <form id="importForm">
+      <div class="form-group">
+        <label class="form-label">Target Table *</label>
+        <select id="targetTable" class="form-input form-select" required>
+          <option value="">Select a table...</option>
+          <option value="new">+ Create New Table</option>
+        </select>
+      </div>
+      
+      <div id="newTableFields" style="display: none;">
+        <div class="form-group">
+          <label class="form-label">New Table Name *</label>
+          <input type="text" id="newTableName" class="form-input" placeholder="e.g., Parts Inventory">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea id="newTableDescription" class="form-input" rows="2" placeholder="What is this table for?"></textarea>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Import Mode</label>
+        <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 8px;">
+          <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer;">
+            <input type="radio" name="importMode" value="append" checked style="margin-top: 4px;">
+            <div>
+              <strong>Append</strong>
+              <p style="font-size: 13px; color: var(--text-secondary); margin: 0;">Add new records to existing data</p>
+            </div>
+          </label>
+          <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer;">
+            <input type="radio" name="importMode" value="replace" style="margin-top: 4px;">
+            <div>
+              <strong>Replace</strong>
+              <p style="font-size: 13px; color: var(--text-secondary); margin: 0;">Clear existing data and import fresh</p>
+            </div>
+          </label>
+          <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer;">
+            <input type="radio" name="importMode" value="update" style="margin-top: 4px;">
+            <div>
+              <strong>Update</strong>
+              <p style="font-size: 13px; color: var(--text-secondary); margin: 0;">Update existing records by key column</p>
+            </div>
+          </label>
+        </div>
+      </div>
+      
+      <div class="form-group" id="keyColumnGroup" style="display: none;">
+        <label class="form-label">Key Column (for matching)</label>
+        <select id="keyColumn" class="form-input form-select">
+          <option value="">Select after preview...</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+          <input type="checkbox" id="firstRowHeaders" checked>
+          <span>First row contains headers</span>
+        </label>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Preview Section -->
+<div class="card" id="previewCard" style="display: none; margin-top: 24px;">
+  <div class="card-header">
+    <h3 class="card-title">Preview</h3>
+    <span id="previewInfo" style="font-size: 13px; color: var(--text-secondary);"></span>
+  </div>
+  
+  <!-- Column Mapping -->
+  <div id="columnMapping" style="margin-bottom: 20px;">
+    <h4 style="font-size: 14px; margin-bottom: 12px;">Column Mapping</h4>
+    <div id="mappingContainer" style="display: grid; gap: 8px;"></div>
+  </div>
+  
+  <!-- Data Preview -->
+  <div style="overflow-x: auto;">
+    <table class="data-table" id="previewTable">
+      <thead id="previewHead"></thead>
+      <tbody id="previewBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Action Buttons -->
+<div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
+  <button class="btn btn-secondary" onclick="previewImport()" id="previewBtn" disabled>
+    <i data-lucide="eye" style="width: 18px; height: 18px;"></i>
+    Preview Import
+  </button>
+  <button class="btn btn-primary" onclick="executeImport()" id="importBtn" disabled>
+    <i data-lucide="upload" style="width: 18px; height: 18px;"></i>
+    Import Data
+  </button>
+</div>
+
+<style>
+  .upload-zone {
+    border: 2px dashed var(--border);
+    border-radius: 12px;
+    padding: 48px 24px;
+    text-align: center;
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+  
+  .upload-zone:hover, .upload-zone.dragover {
+    border-color: var(--primary);
+    background: rgba(12, 74, 110, 0.02);
+  }
+  
+  .mapping-row {
+    display: grid;
+    grid-template-columns: 200px 40px 200px 100px;
+    gap: 12px;
+    align-items: center;
+    padding: 8px 12px;
+    background: var(--bg-main);
+    border-radius: 6px;
+  }
+  
+  .mapping-arrow {
+    text-align: center;
+    color: var(--text-secondary);
+  }
+</style>
+
+<script>
+  let selectedFile = null;
+  let previewData = null;
+  let tables = [];
+  let targetColumns = [];
+  
+  document.addEventListener('DOMContentLoaded', async () => {
+    await loadTables();
+    setupDropZone();
+    setupEventListeners();
+  });
+  
+  async function loadTables() {
+    try {
+      const response = await API.get('/tables');
+      tables = response.tables || [];
+      
+      const select = document.getElementById('targetTable');
+      tables.forEach(table => {
+        const option = document.createElement('option');
+        option.value = table._id;
+        option.textContent = `${table.name} (${table.recordCount || 0} records)`;
+        select.appendChild(option);
+      });
+    } catch (err) {
+      console.error('Failed to load tables:', err);
+    }
+  }
+  
+  function setupDropZone() {
+    const zone = document.getElementById('uploadZone');
+    const fileInput = document.getElementById('fileInput');
+    
+    zone.addEventListener('click', () => fileInput.click());
+    
+    zone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      zone.classList.add('dragover');
+    });
+    
+    zone.addEventListener('dragleave', () => {
+      zone.classList.remove('dragover');
+    });
+    
+    zone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      zone.classList.remove('dragover');
+      
+      if (e.dataTransfer.files.length) {
+        handleFile(e.dataTransfer.files[0]);
+      }
+    });
+    
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length) {
+        handleFile(e.target.files[0]);
+      }
+    });
+  }
+  
+  function handleFile(file) {
+    const validTypes = ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 
+                       'application/vnd.ms-excel', 
+                       'text/csv',
+                       'application/csv'];
+    
+    if (!validTypes.includes(file.type) && !file.name.match(/\.(xlsx|xls|csv)$/i)) {
+      showToast('Please upload an Excel or CSV file', 'error');
+      return;
+    }
+    
+    selectedFile = file;
+    
+    document.getElementById('uploadZone').style.display = 'none';
+    document.getElementById('fileInfo').style.display = 'block';
+    document.getElementById('fileName').textContent = file.name;
+    document.getElementById('fileSize').textContent = formatFileSize(file.size);
+    document.getElementById('previewBtn').disabled = false;
+    
+    lucide.createIcons();
+  }
+  
+  function clearFile() {
+    selectedFile = null;
+    previewData = null;
+    
+    document.getElementById('uploadZone').style.display = 'block';
+    document.getElementById('fileInfo').style.display = 'none';
+    document.getElementById('previewCard').style.display = 'none';
+    document.getElementById('previewBtn').disabled = true;
+    document.getElementById('importBtn').disabled = true;
+    document.getElementById('fileInput').value = '';
+  }
+  
+  function setupEventListeners() {
+    // Target table change
+    document.getElementById('targetTable').addEventListener('change', async (e) => {
+      const newTableFields = document.getElementById('newTableFields');
+      if (e.target.value === 'new') {
+        newTableFields.style.display = 'block';
+        targetColumns = [];
+      } else if (e.target.value) {
+        newTableFields.style.display = 'none';
+        // Load table columns
+        try {
+          const response = await API.get(`/tables/${e.target.value}`);
+          targetColumns = response.table.columns || [];
+          updateColumnMapping();
+        } catch (err) {
+          console.error('Failed to load table columns:', err);
+        }
+      } else {
+        newTableFields.style.display = 'none';
+        targetColumns = [];
+      }
+    });
+    
+    // Import mode change
+    document.querySelectorAll('input[name="importMode"]').forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        document.getElementById('keyColumnGroup').style.display = 
+          e.target.value === 'update' ? 'block' : 'none';
+      });
+    });
+  }
+  
+  async function previewImport() {
+    if (!selectedFile) return;
+    
+    const targetTable = document.getElementById('targetTable').value;
+    if (!targetTable) {
+      showToast('Please select a target table', 'error');
+      return;
+    }
+    
+    const formData = new FormData();
+    formData.append('file', selectedFile);
+    formData.append('preview', 'true');
+    formData.append('firstRowHeaders', document.getElementById('firstRowHeaders').checked);
+    
+    try {
+      document.getElementById('previewBtn').disabled = true;
+      document.getElementById('previewBtn').innerHTML = '<i data-lucide="loader" style="width: 18px; height: 18px; animation: spin 1s linear infinite;"></i> Processing...';
+      
+      let endpoint = '/import/preview';
+      if (targetTable !== 'new') {
+        endpoint = `/tables/${targetTable}/import?preview=true`;
+      }
+      
+      const response = await fetch(`/api/supplier${endpoint}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${API.token}`
+        },
+        body: formData
+      });
+      
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.message || 'Preview failed');
+      }
+      
+      previewData = result;
+      renderPreview(result);
+      
+      document.getElementById('importBtn').disabled = false;
+    } catch (err) {
+      showToast('Preview failed: ' + err.message, 'error');
+    } finally {
+      document.getElementById('previewBtn').disabled = false;
+      document.getElementById('previewBtn').innerHTML = '<i data-lucide="eye" style="width: 18px; height: 18px;"></i> Preview Import';
+      lucide.createIcons();
+    }
+  }
+  
+  function renderPreview(data) {
+    const previewCard = document.getElementById('previewCard');
+    previewCard.style.display = 'block';
+    
+    document.getElementById('previewInfo').textContent = 
+      `${data.totalRows || data.preview?.length || 0} rows found`;
+    
+    // Render column mapping
+    const sourceColumns = data.columns || data.headers || [];
+    updateColumnMappingUI(sourceColumns);
+    
+    // Populate key column dropdown
+    const keySelect = document.getElementById('keyColumn');
+    keySelect.innerHTML = '<option value="">Select column...</option>';
+    sourceColumns.forEach(col => {
+      const option = document.createElement('option');
+      option.value = col;
+      option.textContent = col;
+      keySelect.appendChild(option);
+    });
+    
+    // Render preview table
+    const previewRows = data.preview || data.rows?.slice(0, 10) || [];
+    
+    const thead = document.getElementById('previewHead');
+    thead.innerHTML = '<tr>' + sourceColumns.map(col => `<th>${col}</th>`).join('') + '</tr>';
+    
+    const tbody = document.getElementById('previewBody');
+    tbody.innerHTML = previewRows.map(row => {
+      return '<tr>' + sourceColumns.map(col => {
+        const value = row[col] ?? row.data?.[col] ?? '';
+        return `<td>${value}</td>`;
+      }).join('') + '</tr>';
+    }).join('');
+  }
+  
+  function updateColumnMappingUI(sourceColumns) {
+    const container = document.getElementById('mappingContainer');
+    const targetTable = document.getElementById('targetTable').value;
+    
+    if (targetTable === 'new') {
+      // For new table, auto-create columns from source
+      container.innerHTML = `
+        <p style="font-size: 13px; color: var(--text-secondary);">
+          A new table will be created with columns matching your file headers.
+        </p>
+      `;
+      return;
+    }
+    
+    container.innerHTML = sourceColumns.map(sourceCol => {
+      // Auto-match by name
+      const match = targetColumns.find(tc => 
+        tc.name.toLowerCase() === sourceCol.toLowerCase() ||
+        tc.key === sourceCol.toLowerCase().replace(/\s+/g, '_')
+      );
+      
+      return `
+        <div class="mapping-row">
+          <div style="font-weight: 500;">${sourceCol}</div>
+          <div class="mapping-arrow">→</div>
+          <select class="form-input form-select source-mapping" data-source="${sourceCol}" style="padding: 6px 10px;">
+            <option value="">Skip this column</option>
+            ${targetColumns.map(tc => `
+              <option value="${tc.key}" ${match?.key === tc.key ? 'selected' : ''}>${tc.name}</option>
+            `).join('')}
+          </select>
+          <span style="font-size: 12px; color: ${match ? 'var(--success)' : 'var(--text-secondary)'};">
+            ${match ? '✓ Auto-mapped' : 'Not mapped'}
+          </span>
+        </div>
+      `;
+    }).join('');
+  }
+  
+  function updateColumnMapping() {
+    if (previewData) {
+      const sourceColumns = previewData.columns || previewData.headers || [];
+      updateColumnMappingUI(sourceColumns);
+    }
+  }
+  
+  async function executeImport() {
+    if (!selectedFile) return;
+    
+    const targetTable = document.getElementById('targetTable').value;
+    if (!targetTable) {
+      showToast('Please select a target table', 'error');
+      return;
+    }
+    
+    const importMode = document.querySelector('input[name="importMode"]:checked').value;
+    const keyColumn = document.getElementById('keyColumn').value;
+    
+    if (importMode === 'update' && !keyColumn) {
+      showToast('Please select a key column for update mode', 'error');
+      return;
+    }
+    
+    // Get column mappings
+    const mappings = {};
+    document.querySelectorAll('.source-mapping').forEach(select => {
+      if (select.value) {
+        mappings[select.dataset.source] = select.value;
+      }
+    });
+    
+    const formData = new FormData();
+    formData.append('file', selectedFile);
+    formData.append('mode', importMode);
+    formData.append('firstRowHeaders', document.getElementById('firstRowHeaders').checked);
+    formData.append('columnMapping', JSON.stringify(mappings));
+    
+    if (keyColumn) {
+      formData.append('keyColumn', keyColumn);
+    }
+    
+    try {
+      document.getElementById('importBtn').disabled = true;
+      document.getElementById('importBtn').innerHTML = '<i data-lucide="loader" style="width: 18px; height: 18px; animation: spin 1s linear infinite;"></i> Importing...';
+      
+      let endpoint;
+      if (targetTable === 'new') {
+        const tableName = document.getElementById('newTableName').value.trim();
+        if (!tableName) {
+          showToast('Please enter a name for the new table', 'error');
+          return;
+        }
+        formData.append('tableName', tableName);
+        formData.append('tableDescription', document.getElementById('newTableDescription').value.trim());
+        endpoint = '/import';
+      } else {
+        endpoint = `/tables/${targetTable}/import`;
+      }
+      
+      const response = await fetch(`/api/supplier${endpoint}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${API.token}`
+        },
+        body: formData
+      });
+      
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.message || 'Import failed');
+      }
+      
+      showToast(`Successfully imported ${result.created || result.imported || 0} records!`, 'success');
+      
+      // Redirect to the table
+      setTimeout(() => {
+        const tableId = result.tableId || targetTable;
+        if (tableId && tableId !== 'new') {
+          window.location.href = `/supplier/tables/${tableId}`;
+        } else {
+          window.location.href = '/supplier/tables';
+        }
+      }, 1500);
+    } catch (err) {
+      showToast('Import failed: ' + err.message, 'error');
+      document.getElementById('importBtn').disabled = false;
+      document.getElementById('importBtn').innerHTML = '<i data-lucide="upload" style="width: 18px; height: 18px;"></i> Import Data';
+      lucide.createIcons();
+    }
+  }
+</script>
+
+<%- include('partials/footer') %>

@@ -1421,7 +1421,7 @@ EXAMPLES:
 // No more sending data to AI for filtering - this was the source of errors
 
 // Constants for service configuration
-const PARSE_TIMEOUT = 12000; // 12 second timeout for AI parsing
+const PARSE_TIMEOUT = 3000; // 3 second timeout for AI parsing (local parsing is fallback)
 const MAX_BATCH_SIZE = 50; // Max items to send to AI for filtering at once
 
 /**
@@ -1459,25 +1459,30 @@ async function parseUserIntent(query) {
 
       const prompt = `${INTENT_PARSER_INSTRUCTION}\n${learningPrompt}\nUser query: "${query}"\n\nReturn ONLY valid JSON.`;
 
-      const response = await Promise.race([
-        ai.models.generateContent({
+      // Wrap entire Gemini operation (including text extraction) in timeout
+      const geminiOperation = async () => {
+        const response = await ai.models.generateContent({
           model: 'gemini-2.0-flash',
           contents: prompt,
           config: { temperature: 0.05, topP: 0.9, maxOutputTokens: 1024 },
-        }),
+        });
+        // Text extraction can also be slow - include it in timeout
+        let text = response.text
+          .trim()
+          .replace(/```json\n?/gi, '')
+          .replace(/```\n?/gi, '')
+          .trim();
+        const jsonMatch = text.match(/\{[\s\S]*\}/);
+        if (jsonMatch) text = jsonMatch[0];
+        return JSON.parse(text);
+      };
+
+      geminiParsed = await Promise.race([
+        geminiOperation(),
         new Promise((_, reject) =>
           setTimeout(() => reject(new Error('TIMEOUT')), PARSE_TIMEOUT),
         ),
       ]);
-
-      let text = response.text
-        .trim()
-        .replace(/```json\n?/gi, '')
-        .replace(/```\n?/gi, '')
-        .trim();
-      const jsonMatch = text.match(/\{[\s\S]*\}/);
-      if (jsonMatch) text = jsonMatch[0];
-      geminiParsed = JSON.parse(text);
     } catch (aiError) {
       console.warn(`⚠️ Gemini parsing skipped: ${aiError.message}`);
     }

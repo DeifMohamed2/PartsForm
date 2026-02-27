@@ -1,0 +1,277 @@
+<%- include('partials/header', { currentPage: 'api', pageTitle: 'API Access' }) %>
+
+<div class="grid grid-2" style="gap: 24px;">
+  <!-- API Keys -->
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">API Keys</h3>
+    </div>
+    
+    <p style="color: var(--text-secondary); margin-bottom: 20px;">
+      Use API keys to access your data programmatically. Keep your keys secure and never share them publicly.
+    </p>
+    
+    <div id="apiKeyContainer">
+      <div class="api-key-box" id="keyDisplay" style="display: none;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <i data-lucide="key" style="width: 24px; height: 24px; color: var(--primary);"></i>
+          <div style="flex: 1;">
+            <div style="font-weight: 600; margin-bottom: 4px;">Your API Key</div>
+            <code id="apiKeyValue" style="font-size: 12px; background: var(--bg-main); padding: 4px 8px; border-radius: 4px;">••••••••••••••••</code>
+          </div>
+          <button class="btn btn-secondary btn-sm" onclick="toggleKeyVisibility()">
+            <i data-lucide="eye" style="width: 16px; height: 16px;"></i>
+          </button>
+          <button class="btn btn-secondary btn-sm" onclick="copyApiKey()">
+            <i data-lucide="copy" style="width: 16px; height: 16px;"></i>
+          </button>
+        </div>
+        <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border);">
+          <button class="btn btn-danger btn-sm" onclick="revokeApiKey()">
+            <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
+            Revoke Key
+          </button>
+        </div>
+      </div>
+      
+      <div id="noKeyMessage">
+        <div style="text-align: center; padding: 40px;">
+          <i data-lucide="key" style="width: 48px; height: 48px; color: var(--text-secondary); margin-bottom: 16px;"></i>
+          <p style="color: var(--text-secondary); margin-bottom: 20px;">No API key generated yet</p>
+          <button class="btn btn-primary" onclick="generateApiKey()">
+            <i data-lucide="plus" style="width: 18px; height: 18px;"></i>
+            Generate API Key
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- API Documentation -->
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">Quick Start</h3>
+    </div>
+    
+    <div class="doc-section">
+      <h4 style="font-size: 14px; margin-bottom: 12px;">Authentication</h4>
+      <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px;">
+        Include your API key in the request header:
+      </p>
+      <pre style="background: var(--bg-main); padding: 12px; border-radius: 6px; font-size: 12px; overflow-x: auto;">X-API-Key: your_api_key_here</pre>
+    </div>
+    
+    <div class="doc-section" style="margin-top: 24px;">
+      <h4 style="font-size: 14px; margin-bottom: 12px;">Base URL</h4>
+      <pre style="background: var(--bg-main); padding: 12px; border-radius: 6px; font-size: 12px; overflow-x: auto;"><%= process.env.BASE_URL || 'https://your-domain.com' %>/api/supplier</pre>
+    </div>
+    
+    <div class="doc-section" style="margin-top: 24px;">
+      <h4 style="font-size: 14px; margin-bottom: 12px;">Example Request</h4>
+      <pre style="background: var(--bg-main); padding: 12px; border-radius: 6px; font-size: 12px; overflow-x: auto;">curl -H "X-API-Key: your_api_key" \
+     <%= process.env.BASE_URL || 'https://your-domain.com' %>/api/supplier/tables</pre>
+    </div>
+  </div>
+</div>
+
+<!-- API Endpoints -->
+<div class="card" style="margin-top: 24px;">
+  <div class="card-header">
+    <h3 class="card-title">API Endpoints</h3>
+  </div>
+  
+  <div class="endpoints-list">
+    <div class="endpoint-group">
+      <h4 style="font-size: 14px; font-weight: 600; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border);">Tables</h4>
+      
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <code>/tables</code>
+        <span class="desc">List all tables</span>
+      </div>
+      
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <code>/tables/:id</code>
+        <span class="desc">Get table details</span>
+      </div>
+      
+      <div class="endpoint">
+        <span class="method post">POST</span>
+        <code>/tables</code>
+        <span class="desc">Create a new table</span>
+      </div>
+      
+      <div class="endpoint">
+        <span class="method put">PUT</span>
+        <code>/tables/:id</code>
+        <span class="desc">Update a table</span>
+      </div>
+      
+      <div class="endpoint">
+        <span class="method delete">DELETE</span>
+        <code>/tables/:id</code>
+        <span class="desc">Delete a table</span>
+      </div>
+    </div>
+    
+    <div class="endpoint-group" style="margin-top: 24px;">
+      <h4 style="font-size: 14px; font-weight: 600; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border);">Records</h4>
+      
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <code>/tables/:id/records</code>
+        <span class="desc">List records in a table</span>
+      </div>
+      
+      <div class="endpoint">
+        <span class="method post">POST</span>
+        <code>/tables/:id/records</code>
+        <span class="desc">Create a new record</span>
+      </div>
+      
+      <div class="endpoint">
+        <span class="method put">PUT</span>
+        <code>/tables/:id/records/:recordId</code>
+        <span class="desc">Update a record</span>
+      </div>
+      
+      <div class="endpoint">
+        <span class="method delete">DELETE</span>
+        <code>/tables/:id/records/:recordId</code>
+        <span class="desc">Delete a record</span>
+      </div>
+      
+      <div class="endpoint">
+        <span class="method post">POST</span>
+        <code>/tables/:id/records/bulk</code>
+        <span class="desc">Bulk create records</span>
+      </div>
+    </div>
+    
+    <div class="endpoint-group" style="margin-top: 24px;">
+      <h4 style="font-size: 14px; font-weight: 600; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border);">Export</h4>
+      
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <code>/tables/:id/export?format=csv</code>
+        <span class="desc">Export table to CSV/XLSX/JSON</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .api-key-box {
+    background: var(--bg-main);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+  }
+  
+  .endpoint {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  
+  .endpoint:last-child {
+    border-bottom: none;
+  }
+  
+  .method {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    width: 60px;
+    text-align: center;
+  }
+  
+  .method.get { background: rgba(59, 130, 246, 0.1); color: var(--info); }
+  .method.post { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+  .method.put { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+  .method.delete { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+  
+  .endpoint code {
+    font-size: 13px;
+    font-weight: 500;
+    min-width: 240px;
+  }
+  
+  .endpoint .desc {
+    color: var(--text-secondary);
+    font-size: 13px;
+  }
+</style>
+
+<script>
+  let apiKey = null;
+  let keyVisible = false;
+  
+  document.addEventListener('DOMContentLoaded', loadApiKey);
+  
+  async function loadApiKey() {
+    try {
+      const response = await API.get('/auth/me');
+      if (response.supplier?.apiKey) {
+        apiKey = response.supplier.apiKey;
+        document.getElementById('keyDisplay').style.display = 'block';
+        document.getElementById('noKeyMessage').style.display = 'none';
+      }
+    } catch (err) {
+      console.error('Failed to load API key:', err);
+    }
+  }
+  
+  async function generateApiKey() {
+    try {
+      const response = await API.post('/auth/api-key', {});
+      apiKey = response.apiKey;
+      
+      document.getElementById('keyDisplay').style.display = 'block';
+      document.getElementById('noKeyMessage').style.display = 'none';
+      document.getElementById('apiKeyValue').textContent = apiKey;
+      keyVisible = true;
+      
+      showToast('API key generated! Make sure to copy it now.', 'success');
+      lucide.createIcons();
+    } catch (err) {
+      showToast('Failed to generate API key: ' + err.message, 'error');
+    }
+  }
+  
+  async function revokeApiKey() {
+    if (!confirm('Are you sure you want to revoke this API key? Any applications using it will stop working.')) {
+      return;
+    }
+    
+    try {
+      await API.delete('/auth/api-key');
+      apiKey = null;
+      
+      document.getElementById('keyDisplay').style.display = 'none';
+      document.getElementById('noKeyMessage').style.display = 'block';
+      
+      showToast('API key revoked', 'success');
+      lucide.createIcons();
+    } catch (err) {
+      showToast('Failed to revoke API key: ' + err.message, 'error');
+    }
+  }
+  
+  function toggleKeyVisibility() {
+    keyVisible = !keyVisible;
+    document.getElementById('apiKeyValue').textContent = keyVisible ? apiKey : '••••••••••••••••';
+  }
+  
+  function copyApiKey() {
+    navigator.clipboard.writeText(apiKey).then(() => {
+      showToast('API key copied to clipboard', 'success');
+    });
+  }
+</script>
+
+<%- include('partials/footer') %>

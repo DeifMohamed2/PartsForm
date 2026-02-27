@@ -3,6 +3,7 @@ const Buyer = require('../models/Buyer');
 const Admin = require('../models/Admin');
 const Order = require('../models/Order');
 const Ticket = require('../models/Ticket');
+const Supplier = require('../models/Supplier');
 
 // JWT Secret - Must match authController (loaded from environment)
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -647,6 +648,165 @@ const requireReferralPartnerAuth = async (req, res, next) => {
   }
 };
 
+/**
+ * Middleware to protect supplier routes - requires supplier authentication
+ */
+const requireSupplierAuth = async (req, res, next) => {
+  try {
+    // Get token from cookie or Authorization header
+    let token = req.cookies?.supplierToken;
+
+    if (!token && req.headers.authorization) {
+      const authHeader = req.headers.authorization;
+      if (authHeader.startsWith('Bearer ')) {
+        token = authHeader.substring(7);
+      }
+    }
+
+    // Also check for API key authentication
+    const apiKey = req.headers['x-api-key'];
+    if (apiKey && !token) {
+      const supplier = await Supplier.findByApiKey(apiKey);
+      if (!supplier) {
+        return res.status(401).json({
+          success: false,
+          message: 'Invalid API key',
+        });
+      }
+      req.supplier = supplier;
+      return next();
+    }
+
+    if (!token) {
+      if (req.xhr || req.headers.accept?.includes('application/json')) {
+        return res.status(401).json({
+          success: false,
+          message: 'Authentication required. Please login.',
+          redirectUrl: '/supplier/login',
+        });
+      }
+      return res.redirect('/supplier/login');
+    }
+
+    // Verify token
+    const decoded = jwt.verify(token, JWT_SECRET);
+
+    // Check if this is a temp token for password change
+    if (decoded.mustChangePassword) {
+      // This is a first-login token - only allow password change endpoint
+      const supplier = await Supplier.findById(decoded.id);
+      if (!supplier) {
+        return res.status(401).json({
+          success: false,
+          message: 'Invalid token',
+        });
+      }
+      req.supplier = supplier;
+      req.isPasswordChangeToken = true;
+      return next();
+    }
+
+    // Check if this is a supplier token
+    if (decoded.role !== 'supplier') {
+      if (req.xhr || req.headers.accept?.includes('application/json')) {
+        return res.status(403).json({
+          success: false,
+          message: 'Access denied. Supplier account required.',
+          redirectUrl: '/supplier/login',
+        });
+      }
+      return res.redirect('/supplier/login');
+    }
+
+    // Find supplier
+    const supplier = await Supplier.findById(decoded.id);
+
+    if (!supplier) {
+      res.cookie('supplierToken', '', { expires: new Date(0), httpOnly: true });
+
+      if (req.xhr || req.headers.accept?.includes('application/json')) {
+        return res.status(401).json({
+          success: false,
+          message: 'Supplier not found. Please login again.',
+          redirectUrl: '/supplier/login',
+        });
+      }
+      return res.redirect('/supplier/login');
+    }
+
+    // Check if account is active and approved
+    if (!supplier.isActive) {
+      res.cookie('supplierToken', '', { expires: new Date(0), httpOnly: true });
+
+      if (req.xhr || req.headers.accept?.includes('application/json')) {
+        return res.status(403).json({
+          success: false,
+          message: 'Your account has been deactivated.',
+        });
+      }
+      return res.redirect('/supplier/login?error=deactivated');
+    }
+
+    if (!supplier.isApproved) {
+      if (req.xhr || req.headers.accept?.includes('application/json')) {
+        return res.status(403).json({
+          success: false,
+          message: 'Your account is pending approval.',
+          code: 'PENDING_APPROVAL',
+        });
+      }
+      return res.redirect('/supplier/login?error=pending');
+    }
+
+    // Attach supplier to request
+    req.supplier = supplier;
+    req.userRole = 'supplier';
+    res.locals.supplier = supplier;
+    res.locals.userRole = 'supplier';
+
+    next();
+  } catch (error) {
+    res.cookie('supplierToken', '', { 
+      expires: new Date(0), 
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax'
+    });
+
+    if (req.xhr || req.headers.accept?.includes('application/json')) {
+      return res.status(401).json({
+        success: false,
+        message: 'Session expired. Please login again.',
+        redirectUrl: '/supplier/login',
+      });
+    }
+    return res.redirect('/supplier/login');
+  }
+};
+
+/**
+ * Middleware to check supplier permissions
+ */
+const requireSupplierPermission = (permission) => {
+  return async (req, res, next) => {
+    if (!req.supplier) {
+      return res.status(401).json({
+        success: false,
+        message: 'Authentication required',
+      });
+    }
+
+    if (!req.supplier.hasPermission(permission)) {
+      return res.status(403).json({
+        success: false,
+        message: `Permission denied. Required: ${permission}`,
+      });
+    }
+
+    next();
+  };
+};
+
 module.exports = {
   requireAuth,
   requireAdminAuth,
@@ -657,6 +817,8 @@ module.exports = {
   attachUser,
   adminHasPermission,
   requireReferralPartnerAuth,
+  requireSupplierAuth,
+  requireSupplierPermission,
   PERMISSIONS,
   ROLE_PERMISSIONS,
 };

@@ -1,0 +1,240 @@
+<%- include('partials/header', { currentPage: 'team', pageTitle: 'Team Members' }) %>
+
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">Team Members</h3>
+    <button class="btn btn-primary" onclick="openModal('inviteModal')">
+      <i data-lucide="user-plus" style="width: 18px; height: 18px;"></i>
+      Invite Member
+    </button>
+  </div>
+  
+  <div id="teamContainer">
+    <div class="loading">
+      <div class="spinner"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Invite Modal -->
+<div class="modal-overlay" id="inviteModal">
+  <div class="modal" style="max-width: 500px;">
+    <div class="modal-header">
+      <h3 class="modal-title">Invite Team Member</h3>
+      <button class="modal-close" onclick="closeModal('inviteModal')">
+        <i data-lucide="x" style="width: 20px; height: 20px;"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form id="inviteForm">
+        <div class="form-group">
+          <label class="form-label">Name *</label>
+          <input type="text" name="name" class="form-input" placeholder="Member name" required>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Email *</label>
+          <input type="email" name="email" class="form-input" placeholder="member@company.com" required>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Role</label>
+          <select name="role" class="form-input form-select">
+            <option value="editor">Editor - Can view and edit data</option>
+            <option value="viewer">Viewer - Can only view data</option>
+            <option value="admin">Admin - Full access</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Permissions</label>
+          <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 8px;">
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+              <input type="checkbox" name="permissions" value="read_data" checked>
+              View data
+            </label>
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+              <input type="checkbox" name="permissions" value="write_data" checked>
+              Edit data
+            </label>
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+              <input type="checkbox" name="permissions" value="import_data">
+              Import data
+            </label>
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+              <input type="checkbox" name="permissions" value="export_data">
+              Export data
+            </label>
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+              <input type="checkbox" name="permissions" value="manage_tables">
+              Manage tables
+            </label>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" onclick="closeModal('inviteModal')">Cancel</button>
+      <button type="button" class="btn btn-primary" onclick="inviteMember()">Send Invitation</button>
+    </div>
+  </div>
+</div>
+
+<style>
+  .member-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  
+  .member-row:last-child {
+    border-bottom: none;
+  }
+  
+  .member-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: var(--primary);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  
+  .member-info {
+    flex: 1;
+  }
+  
+  .member-name {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+  }
+  
+  .member-email {
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+  
+  .member-role {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    background: var(--bg-main);
+    color: var(--text-secondary);
+  }
+  
+  .member-role.admin { background: rgba(139, 92, 246, 0.1); color: #8b5cf6; }
+  .member-role.editor { background: rgba(59, 130, 246, 0.1); color: var(--info); }
+  .member-role.viewer { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', loadTeam);
+  
+  async function loadTeam() {
+    try {
+      const response = await API.get('/team');
+      const members = response.members || [];
+      
+      const container = document.getElementById('teamContainer');
+      
+      if (members.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <i data-lucide="users" class="empty-state-icon" style="width: 64px; height: 64px;"></i>
+            <div class="empty-state-title">No team members</div>
+            <div class="empty-state-description">Invite team members to collaborate on your data</div>
+            <button class="btn btn-primary" onclick="openModal('inviteModal')">
+              <i data-lucide="user-plus" style="width: 18px; height: 18px;"></i>
+              Invite Member
+            </button>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+      
+      container.innerHTML = members.map(member => `
+        <div class="member-row">
+          <div class="member-avatar">${member.contactName?.charAt(0).toUpperCase() || 'U'}</div>
+          <div class="member-info">
+            <div class="member-name">${member.contactName || 'Unknown'}</div>
+            <div class="member-email">${member.email}</div>
+          </div>
+          <span class="member-role ${member.role || 'editor'}">${member.role || 'Editor'}</span>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-secondary btn-sm" onclick="editMember('${member._id}')" title="Edit">
+              <i data-lucide="edit-2" style="width: 16px; height: 16px;"></i>
+            </button>
+            <button class="btn btn-danger btn-sm" onclick="removeMember('${member._id}', '${member.contactName}')" title="Remove">
+              <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
+            </button>
+          </div>
+        </div>
+      `).join('');
+      
+      lucide.createIcons();
+    } catch (err) {
+      console.error('Failed to load team:', err);
+      showToast('Failed to load team members', 'error');
+    }
+  }
+  
+  async function inviteMember() {
+    const form = document.getElementById('inviteForm');
+    const name = form.name.value.trim();
+    const email = form.email.value.trim();
+    const role = form.role.value;
+    const permissions = Array.from(form.querySelectorAll('input[name="permissions"]:checked')).map(cb => cb.value);
+    
+    if (!name || !email) {
+      showToast('Please fill in all required fields', 'error');
+      return;
+    }
+    
+    try {
+      await API.post('/team', {
+        contactName: name,
+        email,
+        role,
+        permissions
+      });
+      
+      showToast('Invitation sent successfully', 'success');
+      closeModal('inviteModal');
+      form.reset();
+      await loadTeam();
+    } catch (err) {
+      showToast('Failed to invite member: ' + err.message, 'error');
+    }
+  }
+  
+  function editMember(memberId) {
+    // TODO: Implement edit member modal
+    showToast('Edit member coming soon', 'warning');
+  }
+  
+  async function removeMember(memberId, name) {
+    if (!confirm(`Are you sure you want to remove ${name} from your team?`)) {
+      return;
+    }
+    
+    try {
+      await API.delete(`/team/${memberId}`);
+      showToast('Member removed from team', 'success');
+      await loadTeam();
+    } catch (err) {
+      showToast('Failed to remove member: ' + err.message, 'error');
+    }
+  }
+</script>
+
+<%- include('partials/footer') %>

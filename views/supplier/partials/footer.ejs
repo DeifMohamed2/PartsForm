@@ -1,0 +1,206 @@
+      </div><!-- End supplier-content -->
+    </main>
+  </div><!-- End supplier-layout -->
+  
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+  
+  <!-- User Dropdown Menu -->
+  <div class="modal-overlay" id="userDropdown">
+    <div class="modal" style="max-width: 280px; position: fixed; top: 80px; right: 24px;">
+      <div style="padding: 16px;">
+        <div style="display: flex; align-items: center; gap: 12px; padding-bottom: 16px; border-bottom: 1px solid var(--border); margin-bottom: 12px;">
+          <div class="user-avatar" style="width: 48px; height: 48px; font-size: 18px;">
+            <%= supplier ? supplier.companyName.charAt(0).toUpperCase() : 'S' %>
+          </div>
+          <div>
+            <div style="font-weight: 600; font-size: 15px;"><%= supplier ? supplier.contactName : 'Supplier' %></div>
+            <div style="font-size: 13px; color: var(--text-secondary);"><%= supplier ? supplier.email : '' %></div>
+          </div>
+        </div>
+        <a href="/supplier/settings" style="display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 6px; color: var(--text-primary); text-decoration: none; font-size: 14px;">
+          <i data-lucide="settings" style="width: 18px; height: 18px;"></i>
+          Account Settings
+        </a>
+        <a href="/supplier/team" style="display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 6px; color: var(--text-primary); text-decoration: none; font-size: 14px;">
+          <i data-lucide="users" style="width: 18px; height: 18px;"></i>
+          Manage Team
+        </a>
+        <hr style="margin: 12px 0; border: none; border-top: 1px solid var(--border);">
+        <a href="/supplier/logout" id="logoutBtn" style="display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 6px; color: var(--danger); text-decoration: none; font-size: 14px;">
+          <i data-lucide="log-out" style="width: 18px; height: 18px;"></i>
+          Sign Out
+        </a>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+    
+    // API Helper
+    const API = {
+      token: localStorage.getItem('supplierToken'),
+      
+      async request(endpoint, options = {}) {
+        const headers = {
+          'Content-Type': 'application/json',
+          ...options.headers
+        };
+        
+        if (this.token) {
+          headers['Authorization'] = `Bearer ${this.token}`;
+        }
+        
+        const response = await fetch(`/api/supplier${endpoint}`, {
+          ...options,
+          headers
+        });
+        
+        const data = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(data.message || 'Request failed');
+        }
+        
+        return data;
+      },
+      
+      get(endpoint) {
+        return this.request(endpoint);
+      },
+      
+      post(endpoint, body) {
+        return this.request(endpoint, {
+          method: 'POST',
+          body: JSON.stringify(body)
+        });
+      },
+      
+      put(endpoint, body) {
+        return this.request(endpoint, {
+          method: 'PUT',
+          body: JSON.stringify(body)
+        });
+      },
+      
+      delete(endpoint) {
+        return this.request(endpoint, {
+          method: 'DELETE'
+        });
+      }
+    };
+    
+    // Toast notifications
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      toast.innerHTML = `
+        <i data-lucide="${type === 'success' ? 'check-circle' : type === 'error' ? 'x-circle' : 'alert-triangle'}" style="width: 20px; height: 20px;"></i>
+        <span>${message}</span>
+      `;
+      container.appendChild(toast);
+      lucide.createIcons();
+      
+      setTimeout(() => {
+        toast.style.animation = 'slideIn 0.3s ease reverse';
+        setTimeout(() => toast.remove(), 300);
+      }, 4000);
+    }
+    
+    // Modal functions
+    function openModal(modalId) {
+      document.getElementById(modalId).classList.add('active');
+    }
+    
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove('active');
+    }
+    
+    // User menu
+    const userMenu = document.getElementById('userMenu');
+    const userDropdown = document.getElementById('userDropdown');
+    
+    userMenu?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      userDropdown.classList.toggle('active');
+    });
+    
+    userDropdown?.addEventListener('click', (e) => {
+      if (e.target === userDropdown) {
+        userDropdown.classList.remove('active');
+      }
+    });
+    
+    // Sidebar toggle for mobile
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebar = document.getElementById('sidebar');
+    
+    if (window.innerWidth <= 768 && sidebarToggle) {
+      sidebarToggle.style.display = 'flex';
+    }
+    
+    sidebarToggle?.addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+    });
+    
+    window.addEventListener('resize', () => {
+      if (sidebarToggle) {
+        sidebarToggle.style.display = window.innerWidth <= 768 ? 'flex' : 'none';
+      }
+      if (window.innerWidth > 768) {
+        sidebar?.classList.remove('open');
+      }
+    });
+    
+    // Logout
+    document.getElementById('logoutBtn')?.addEventListener('click', async (e) => {
+      e.preventDefault();
+      try {
+        await API.post('/auth/logout', {});
+      } catch (err) {
+        // Ignore errors
+      }
+      localStorage.removeItem('supplierToken');
+      window.location.href = '/supplier/login';
+    });
+    
+    // Format date helper
+    function formatDate(dateString) {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+    }
+    
+    function formatDateTime(dateString) {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+    
+    // Number formatting
+    function formatNumber(num) {
+      return new Intl.NumberFormat().format(num);
+    }
+    
+    // File size formatting
+    function formatFileSize(bytes) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+  </script>
+</body>
+</html>

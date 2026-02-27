@@ -9,6 +9,7 @@ const Ticket = require('../models/Ticket');
 const Admin = require('../models/Admin');
 const EmailInquiry = require('../models/EmailInquiry');
 const SystemSettings = require('../models/SystemSettings');
+const Supplier = require('../models/Supplier');
 const { clearSettingsCache } = require('../utils/priceMarkup');
 const ftpService = require('../services/ftpService');
 const syncService = require('../services/syncService');
@@ -4869,12 +4870,21 @@ const getSidebarCounts = async (req, res) => {
     // Count unread email inquiries
     const unreadInquiriesCount = await EmailInquiry.getUnreadCount();
 
+    // Count pending suppliers awaiting approval
+    let pendingSuppliersCount = 0;
+    try {
+      pendingSuppliersCount = await Supplier.countDocuments({ status: 'pending' });
+    } catch (e) {
+      // Supplier model may not exist in all installations
+    }
+
     res.json({
       success: true,
       counts: {
         newOrders: newOrdersCount,
         openTickets: openTicketsCount,
         unreadInquiries: unreadInquiriesCount,
+        pendingSuppliers: pendingSuppliersCount,
       },
     });
   } catch (error) {
@@ -4886,6 +4896,7 @@ const getSidebarCounts = async (req, res) => {
         newOrders: 0,
         openTickets: 0,
         unreadInquiries: 0,
+        pendingSuppliers: 0,
       },
     });
   }

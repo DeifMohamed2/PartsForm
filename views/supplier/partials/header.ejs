@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="PARTSFORM Supplier Portal - Data Management Platform">
+  <title><%= title || 'Supplier Portal | PARTSFORM' %></title>
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="/images/PARTSFORM-LOGO.png">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@0.294.0/dist/umd/lucide.min.js"></script>
+  
+  <!-- Handsontable for Excel-like tables -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.js"></script>
+  
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <!-- Supplier Portal CSS -->
+  <link rel="stylesheet" href="/css/supplierCSS/supplier-main.css">
+  <link rel="stylesheet" href="/css/supplierCSS/supplier-components.css">
+  <link rel="stylesheet" href="/css/supplierCSS/supplier-dashboard.css">
+  <link rel="stylesheet" href="/css/supplierCSS/supplier-spreadsheet.css">
+  <link rel="stylesheet" href="/css/supplierCSS/supplier-import.css">
+  <link rel="stylesheet" href="/css/supplierCSS/supplier-pages.css">
+</head>
+<body>
+  <div class="supplier-layout">
+    <!-- Sidebar -->
+    <aside class="supplier-sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <a href="/supplier" class="sidebar-logo">
+          <img src="/images/PARTSFORM-LOGO.png" alt="PARTSFORM">
+          <span class="sidebar-logo-text">Supplier Portal</span>
+        </a>
+      </div>
+      
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <span class="nav-section-title">Overview</span>
+          <a href="/supplier" class="nav-item <%= currentPage === 'dashboard' ? 'active' : '' %>">
+            <i data-lucide="layout-dashboard"></i>
+            Dashboard
+          </a>
+        </div>
+        
+        <div class="nav-section">
+          <span class="nav-section-title">Data Management</span>
+          <a href="/supplier/tables" class="nav-item <%= currentPage === 'tables' ? 'active' : '' %>">
+            <i data-lucide="table-2"></i>
+            My Tables
+            <% if (typeof tableCount !== 'undefined' && tableCount > 0) { %>
+              <span class="nav-badge"><%= tableCount %></span>
+            <% } %>
+          </a>
+          <a href="/supplier/import" class="nav-item <%= currentPage === 'import' ? 'active' : '' %>">
+            <i data-lucide="upload"></i>
+            Import Data
+          </a>
+          <a href="/supplier/exports" class="nav-item <%= currentPage === 'exports' ? 'active' : '' %>">
+            <i data-lucide="download"></i>
+            Exports
+          </a>
+        </div>
+        
+        <div class="nav-section">
+          <span class="nav-section-title">Integration</span>
+          <a href="/supplier/sftp" class="nav-item <%= currentPage === 'sftp' ? 'active' : '' %>">
+            <i data-lucide="server"></i>
+            SFTP Settings
+          </a>
+          <a href="/supplier/api" class="nav-item <%= currentPage === 'api' ? 'active' : '' %>">
+            <i data-lucide="code"></i>
+            API Access
+          </a>
+        </div>
+        
+        <div class="nav-section">
+          <span class="nav-section-title">Account</span>
+          <a href="/supplier/team" class="nav-item <%= currentPage === 'team' ? 'active' : '' %>">
+            <i data-lucide="users"></i>
+            Team Members
+          </a>
+          <a href="/supplier/audit" class="nav-item <%= currentPage === 'audit' ? 'active' : '' %>">
+            <i data-lucide="history"></i>
+            Audit Logs
+          </a>
+          <a href="/supplier/settings" class="nav-item <%= currentPage === 'settings' ? 'active' : '' %>">
+            <i data-lucide="settings"></i>
+            Settings
+          </a>
+        </div>
+      </nav>
+    </aside>
+    
+    <!-- Main Content -->
+    <main class="supplier-main">
+      <!-- Topbar -->
+      <header class="supplier-topbar">
+        <div class="topbar-left">
+          <button class="topbar-btn" id="sidebarToggle" style="display: none;">
+            <i data-lucide="menu" style="width: 20px; height: 20px;"></i>
+          </button>
+          <h1 class="page-title"><%= pageTitle || 'Dashboard' %></h1>
+        </div>
+        
+        <div class="topbar-right">
+          <button class="topbar-btn" title="Refresh">
+            <i data-lucide="refresh-cw" style="width: 18px; height: 18px;"></i>
+          </button>
+          <button class="topbar-btn" title="Help">
+            <i data-lucide="help-circle" style="width: 18px; height: 18px;"></i>
+          </button>
+          
+          <div class="user-menu" id="userMenu">
+            <div class="user-avatar">
+              <%= supplier ? supplier.companyName.charAt(0).toUpperCase() : 'S' %>
+            </div>
+            <div class="user-info">
+              <div class="user-name"><%= supplier ? supplier.contactName : 'Supplier' %></div>
+              <div class="user-company"><%= supplier ? supplier.companyCode : '' %></div>
+            </div>
+            <i data-lucide="chevron-down" style="width: 16px; height: 16px; color: var(--text-secondary);"></i>
+          </div>
+        </div>
+      </header>
+      
+      <!-- Page Content -->
+      <div class="supplier-content">

@@ -1,0 +1,314 @@
+<%- include('partials/header', { currentPage: 'dashboard', pageTitle: 'Dashboard' }) %>
+
+<!-- Stats Grid -->
+<div class="grid grid-4" style="margin-bottom: 24px;">
+  <div class="stat-card">
+    <div class="stat-icon blue">
+      <i data-lucide="table-2"></i>
+    </div>
+    <div class="stat-content">
+      <div class="stat-label">Total Tables</div>
+      <div class="stat-value" id="statTables">-</div>
+    </div>
+  </div>
+  
+  <div class="stat-card">
+    <div class="stat-icon green">
+      <i data-lucide="database"></i>
+    </div>
+    <div class="stat-content">
+      <div class="stat-label">Total Records</div>
+      <div class="stat-value" id="statRecords">-</div>
+    </div>
+  </div>
+  
+  <div class="stat-card">
+    <div class="stat-icon orange">
+      <i data-lucide="upload-cloud"></i>
+    </div>
+    <div class="stat-content">
+      <div class="stat-label">Exports This Month</div>
+      <div class="stat-value" id="statExports">-</div>
+    </div>
+  </div>
+  
+  <div class="stat-card">
+    <div class="stat-icon purple">
+      <i data-lucide="hard-drive"></i>
+    </div>
+    <div class="stat-content">
+      <div class="stat-label">Storage Used</div>
+      <div class="stat-value" id="statStorage">-</div>
+    </div>
+  </div>
+</div>
+
+<!-- Main Content Grid -->
+<div class="grid grid-2">
+  <!-- Recent Tables -->
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">My Tables</h3>
+      <a href="/supplier/tables/new" class="btn btn-primary btn-sm">
+        <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
+        Create Table
+      </a>
+    </div>
+    
+    <div id="tablesContainer">
+      <div class="loading">
+        <div class="spinner"></div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Recent Activity -->
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">Recent Activity</h3>
+      <a href="/supplier/audit" class="btn btn-secondary btn-sm">View All</a>
+    </div>
+    
+    <div id="activityContainer">
+      <div class="loading">
+        <div class="spinner"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">Quick Actions</h3>
+  </div>
+  
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+    <a href="/supplier/import" class="quick-action-card" style="display: flex; align-items: center; gap: 16px; padding: 20px; border: 1px solid var(--border); border-radius: 8px; text-decoration: none; color: inherit; transition: all 0.2s;">
+      <div class="stat-icon blue">
+        <i data-lucide="file-up"></i>
+      </div>
+      <div>
+        <div style="font-weight: 600; color: var(--text-primary);">Import Data</div>
+        <div style="font-size: 13px; color: var(--text-secondary);">Upload Excel or CSV files</div>
+      </div>
+    </a>
+    
+    <a href="/supplier/sftp" class="quick-action-card" style="display: flex; align-items: center; gap: 16px; padding: 20px; border: 1px solid var(--border); border-radius: 8px; text-decoration: none; color: inherit; transition: all 0.2s;">
+      <div class="stat-icon green">
+        <i data-lucide="server"></i>
+      </div>
+      <div>
+        <div style="font-weight: 600; color: var(--text-primary);">Configure SFTP</div>
+        <div style="font-size: 13px; color: var(--text-secondary);">Set up automated exports</div>
+      </div>
+    </a>
+    
+    <a href="/supplier/api" class="quick-action-card" style="display: flex; align-items: center; gap: 16px; padding: 20px; border: 1px solid var(--border); border-radius: 8px; text-decoration: none; color: inherit; transition: all 0.2s;">
+      <div class="stat-icon orange">
+        <i data-lucide="key"></i>
+      </div>
+      <div>
+        <div style="font-weight: 600; color: var(--text-primary);">API Keys</div>
+        <div style="font-size: 13px; color: var(--text-secondary);">Manage API access</div>
+      </div>
+    </a>
+    
+    <a href="/supplier/team" class="quick-action-card" style="display: flex; align-items: center; gap: 16px; padding: 20px; border: 1px solid var(--border); border-radius: 8px; text-decoration: none; color: inherit; transition: all 0.2s;">
+      <div class="stat-icon purple">
+        <i data-lucide="user-plus"></i>
+      </div>
+      <div>
+        <div style="font-weight: 600; color: var(--text-primary);">Invite Team</div>
+        <div style="font-size: 13px; color: var(--text-secondary);">Add team members</div>
+      </div>
+    </a>
+  </div>
+</div>
+
+<style>
+  .quick-action-card:hover {
+    border-color: var(--primary) !important;
+    box-shadow: 0 2px 8px rgba(12, 74, 110, 0.1);
+  }
+  
+  .table-row {
+    display: flex;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  
+  .table-row:last-child {
+    border-bottom: none;
+  }
+  
+  .table-info {
+    flex: 1;
+  }
+  
+  .table-name {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+  }
+  
+  .table-meta {
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+  
+  .activity-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  
+  .activity-item:last-child {
+    border-bottom: none;
+  }
+  
+  .activity-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  
+  .activity-content {
+    flex: 1;
+  }
+  
+  .activity-text {
+    font-size: 14px;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+  }
+  
+  .activity-time {
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    await loadDashboard();
+  });
+  
+  async function loadDashboard() {
+    try {
+      // Load tables
+      const tablesResponse = await API.get('/tables');
+      const tables = tablesResponse.tables || [];
+      
+      // Update stats
+      document.getElementById('statTables').textContent = tables.length;
+      
+      let totalRecords = 0;
+      tables.forEach(t => totalRecords += t.recordCount || 0);
+      document.getElementById('statRecords').textContent = formatNumber(totalRecords);
+      
+      // Render tables
+      const tablesContainer = document.getElementById('tablesContainer');
+      if (tables.length === 0) {
+        tablesContainer.innerHTML = `
+          <div class="empty-state">
+            <i data-lucide="table-2" class="empty-state-icon" style="width: 48px; height: 48px;"></i>
+            <div class="empty-state-title">No tables yet</div>
+            <div class="empty-state-description">Create your first table to start managing data</div>
+            <a href="/supplier/tables/new" class="btn btn-primary">Create Table</a>
+          </div>
+        `;
+      } else {
+        tablesContainer.innerHTML = tables.slice(0, 5).map(table => `
+          <div class="table-row">
+            <div class="table-info">
+              <div class="table-name">${table.name}</div>
+              <div class="table-meta">${table.recordCount || 0} records · ${table.columns?.length || 0} columns</div>
+            </div>
+            <a href="/supplier/tables/${table._id}" class="btn btn-secondary btn-sm">
+              <i data-lucide="edit-3" style="width: 14px; height: 14px;"></i>
+              Edit
+            </a>
+          </div>
+        `).join('');
+      }
+      
+      // Load activity
+      try {
+        const activityResponse = await API.get('/audit?limit=5');
+        const logs = activityResponse.logs || [];
+        
+        const activityContainer = document.getElementById('activityContainer');
+        if (logs.length === 0) {
+          activityContainer.innerHTML = `
+            <div style="text-align: center; padding: 30px; color: var(--text-secondary);">
+              No recent activity
+            </div>
+          `;
+        } else {
+          activityContainer.innerHTML = logs.map(log => {
+            let iconClass = 'blue';
+            let icon = 'activity';
+            
+            if (log.action.includes('create')) {
+              iconClass = 'green';
+              icon = 'plus-circle';
+            } else if (log.action.includes('update')) {
+              iconClass = 'orange';
+              icon = 'edit';
+            } else if (log.action.includes('delete')) {
+              iconClass = 'danger';
+              icon = 'trash-2';
+            } else if (log.action.includes('export')) {
+              iconClass = 'purple';
+              icon = 'download';
+            }
+            
+            return `
+              <div class="activity-item">
+                <div class="activity-icon stat-icon ${iconClass}">
+                  <i data-lucide="${icon}" style="width: 16px; height: 16px;"></i>
+                </div>
+                <div class="activity-content">
+                  <div class="activity-text">${log.action.replace(/_/g, ' ')}</div>
+                  <div class="activity-time">${formatDateTime(log.createdAt)}</div>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+      } catch (err) {
+        document.getElementById('activityContainer').innerHTML = `
+          <div style="text-align: center; padding: 30px; color: var(--text-secondary);">
+            No recent activity
+          </div>
+        `;
+      }
+      
+      // Load exports count
+      try {
+        const exportsResponse = await API.get('/exports?limit=100');
+        document.getElementById('statExports').textContent = exportsResponse.exports?.length || 0;
+      } catch (err) {
+        document.getElementById('statExports').textContent = '0';
+      }
+      
+      // Storage placeholder
+      document.getElementById('statStorage').textContent = '0 MB';
+      
+      lucide.createIcons();
+    } catch (err) {
+      console.error('Failed to load dashboard:', err);
+      showToast('Failed to load dashboard data', 'error');
+    }
+  }
+</script>
+
+<%- include('partials/footer') %>

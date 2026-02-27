@@ -71,6 +71,15 @@
         <span>Referrals</span>
         <span class="sidebar-nav-badge" style="background: linear-gradient(135deg, #10b981, #059669);">New</span>
       </a>
+      <% if (typeof userPermissions === 'undefined' || userPermissions.canManageUsers || userPermissions.isSuperAdmin) { %>
+      <a href="/admin/suppliers" class="sidebar-nav-item <%= typeof activePage !== 'undefined' && activePage === 'suppliers' ? 'active' : '' %>">
+        <i data-lucide="building-2"></i>
+        <span>Suppliers</span>
+        <% if (typeof sidebarCounts !== 'undefined' && sidebarCounts.pendingSuppliers > 0) { %>
+        <span class="sidebar-nav-badge" style="background: linear-gradient(135deg, #f59e0b, #d97706);" id="sidebarSuppliersBadge"><%= sidebarCounts.pendingSuppliers %></span>
+        <% } %>
+      </a>
+      <% } %>
     </div>
 
     <!-- System Section -->

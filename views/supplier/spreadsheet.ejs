@@ -1,0 +1,909 @@
+<%- include('partials/header', { currentPage: 'tables', pageTitle: 'Edit Table' }) %>
+
+<!-- Toolbar -->
+<div class="spreadsheet-toolbar">
+  <div class="toolbar-left">
+    <a href="/supplier/tables" class="btn btn-secondary btn-sm">
+      <i data-lucide="arrow-left" style="width: 16px; height: 16px;"></i>
+      Back
+    </a>
+    <div class="toolbar-divider"></div>
+    <h2 class="table-title" id="tableTitle">Loading...</h2>
+    <span class="record-count" id="recordCount"></span>
+  </div>
+  
+  <div class="toolbar-right">
+    <div class="toolbar-group">
+      <button class="toolbar-btn" onclick="undoChange()" title="Undo (Ctrl+Z)" id="undoBtn" disabled>
+        <i data-lucide="undo-2"></i>
+      </button>
+      <button class="toolbar-btn" onclick="redoChange()" title="Redo (Ctrl+Y)" id="redoBtn" disabled>
+        <i data-lucide="redo-2"></i>
+      </button>
+    </div>
+    
+    <div class="toolbar-divider"></div>
+    
+    <div class="toolbar-group">
+      <button class="toolbar-btn" onclick="addRow()" title="Add Row">
+        <i data-lucide="plus"></i>
+        Add Row
+      </button>
+      <button class="toolbar-btn danger" onclick="deleteSelectedRows()" title="Delete Selected">
+        <i data-lucide="trash-2"></i>
+      </button>
+    </div>
+    
+    <div class="toolbar-divider"></div>
+    
+    <div class="toolbar-group">
+      <button class="toolbar-btn" onclick="openImportModal()" title="Import">
+        <i data-lucide="upload"></i>
+        Import
+      </button>
+      <button class="toolbar-btn" onclick="exportData('xlsx')" title="Export">
+        <i data-lucide="download"></i>
+        Export
+      </button>
+    </div>
+    
+    <div class="toolbar-divider"></div>
+    
+    <button class="btn btn-primary btn-sm" onclick="saveAllChanges()" id="saveBtn" disabled>
+      <i data-lucide="save" style="width: 16px; height: 16px;"></i>
+      Save Changes
+      <span class="change-badge" id="changeBadge" style="display: none;">0</span>
+    </button>
+  </div>
+</div>
+
+<!-- Search/Filter Bar -->
+<div class="filter-bar">
+  <div class="filter-left">
+    <div style="position: relative;">
+      <i data-lucide="search" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: var(--text-secondary);"></i>
+      <input type="text" id="searchInput" placeholder="Search records..." class="form-input" style="padding-left: 36px; width: 240px; height: 36px; font-size: 13px;">
+    </div>
+    
+    <select id="columnFilter" class="form-input form-select" style="height: 36px; font-size: 13px; width: 160px;">
+      <option value="">Filter by column...</option>
+    </select>
+    
+    <input type="text" id="filterValue" placeholder="Filter value..." class="form-input" style="height: 36px; font-size: 13px; width: 180px; display: none;">
+    
+    <button class="btn btn-secondary btn-sm" onclick="applyFilter()" id="applyFilterBtn" style="display: none;">Apply</button>
+    <button class="btn btn-secondary btn-sm" onclick="clearFilter()" id="clearFilterBtn" style="display: none;">Clear</button>
+  </div>
+  
+  <div class="filter-right">
+    <span class="showing-text" id="showingText"></span>
+  </div>
+</div>
+
+<!-- Spreadsheet Container -->
+<div class="spreadsheet-container">
+  <div id="spreadsheet"></div>
+</div>
+
+<!-- Status Bar -->
+<div class="status-bar">
+  <div class="status-left">
+    <span id="selectionInfo">Ready</span>
+  </div>
+  <div class="status-right">
+    <span id="lastSaved">Not saved yet</span>
+    <span class="status-divider">|</span>
+    <span id="connectionStatus" class="status-connected">
+      <i data-lucide="wifi" style="width: 14px; height: 14px;"></i>
+      Connected
+    </span>
+  </div>
+</div>
+
+<!-- Import Modal -->
+<div class="modal-overlay" id="importModal">
+  <div class="modal" style="max-width: 600px;">
+    <div class="modal-header">
+      <h3 class="modal-title">Import Data</h3>
+      <button class="modal-close" onclick="closeModal('importModal')">
+        <i data-lucide="x" style="width: 20px; height: 20px;"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Select File (Excel or CSV)</label>
+        <input type="file" id="importFile" accept=".xlsx,.xls,.csv" class="form-input">
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Import Mode</label>
+        <select id="importMode" class="form-input form-select">
+          <option value="append">Append - Add new records to existing data</option>
+          <option value="replace">Replace - Clear existing data and import fresh</option>
+          <option value="update">Update - Update matching records by key column</option>
+        </select>
+      </div>
+      
+      <div class="form-group" id="keyColumnGroup" style="display: none;">
+        <label class="form-label">Key Column (for matching)</label>
+        <select id="keyColumn" class="form-input form-select"></select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" onclick="closeModal('importModal')">Cancel</button>
+      <button type="button" class="btn btn-primary" onclick="importData()">Import</button>
+    </div>
+  </div>
+</div>
+
+<!-- Version History Modal -->
+<div class="modal-overlay" id="historyModal">
+  <div class="modal" style="max-width: 700px;">
+    <div class="modal-header">
+      <h3 class="modal-title">Version History</h3>
+      <button class="modal-close" onclick="closeModal('historyModal')">
+        <i data-lucide="x" style="width: 20px; height: 20px;"></i>
+      </button>
+    </div>
+    <div class="modal-body" id="historyContent">
+      <div class="loading">
+        <div class="spinner"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .spreadsheet-toolbar {
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+  
+  .toolbar-left, .toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  .toolbar-divider {
+    width: 1px;
+    height: 24px;
+    background: var(--border);
+  }
+  
+  .toolbar-group {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  
+  .toolbar-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    background: white;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--text-primary);
+  }
+  
+  .toolbar-btn:hover:not(:disabled) {
+    background: var(--bg-main);
+    border-color: var(--primary);
+  }
+  
+  .toolbar-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  .toolbar-btn.danger:hover:not(:disabled) {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: var(--danger);
+    color: var(--danger);
+  }
+  
+  .toolbar-btn i {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .table-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+  }
+  
+  .record-count {
+    font-size: 13px;
+    color: var(--text-secondary);
+    background: var(--bg-main);
+    padding: 4px 10px;
+    border-radius: 12px;
+  }
+  
+  .change-badge {
+    background: white;
+    color: var(--primary);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 10px;
+    margin-left: 6px;
+  }
+  
+  .filter-bar {
+    background: var(--bg-main);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+  }
+  
+  .filter-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  .filter-right {
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+  
+  .spreadsheet-container {
+    flex: 1;
+    overflow: auto;
+    background: white;
+  }
+  
+  #spreadsheet {
+    width: 100%;
+    height: calc(100vh - 280px);
+    min-height: 400px;
+  }
+  
+  .status-bar {
+    background: var(--bg-card);
+    border-top: 1px solid var(--border);
+    padding: 8px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+  
+  .status-left, .status-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .status-divider {
+    color: var(--border);
+  }
+  
+  .status-connected {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--success);
+  }
+  
+  /* Handsontable customizations */
+  .handsontable {
+    font-family: 'Inter', sans-serif !important;
+    font-size: 13px !important;
+  }
+  
+  .handsontable th {
+    background: #f8fafc !important;
+    font-weight: 600 !important;
+    color: var(--text-secondary) !important;
+    border-color: #e2e8f0 !important;
+  }
+  
+  .handsontable td {
+    border-color: #e2e8f0 !important;
+  }
+  
+  .handsontable td.modified {
+    background: #fef3c7 !important;
+  }
+  
+  .handsontable td.new-row {
+    background: #d1fae5 !important;
+  }
+  
+  .handsontable td.error {
+    background: #fee2e2 !important;
+  }
+  
+  .handsontable .htInvalid {
+    background: #fee2e2 !important;
+  }
+  
+  .handsontable tr.deleted td {
+    text-decoration: line-through;
+    opacity: 0.5;
+  }
+  
+  /* Context menu styling */
+  .htContextMenu {
+    font-family: 'Inter', sans-serif !important;
+  }
+  
+  .htContextMenu td {
+    font-size: 13px !important;
+  }
+</style>
+
+<script>
+  let tableId = '<%= tableId %>';
+  let tableData = null;
+  let columns = [];
+  let records = [];
+  let hot = null;
+  let pendingChanges = {
+    created: [],
+    updated: [],
+    deleted: []
+  };
+  let undoStack = [];
+  let redoStack = [];
+  
+  document.addEventListener('DOMContentLoaded', async () => {
+    await loadTable();
+    setupEventListeners();
+  });
+  
+  async function loadTable() {
+    try {
+      // Load table definition
+      const tableResponse = await API.get(`/tables/${tableId}`);
+      tableData = tableResponse.table;
+      columns = tableData.columns || [];
+      
+      document.getElementById('tableTitle').textContent = tableData.name;
+      
+      // Load records
+      const recordsResponse = await API.get(`/tables/${tableId}/records?limit=10000`);
+      records = recordsResponse.records || [];
+      
+      updateRecordCount();
+      setupColumnFilter();
+      initSpreadsheet();
+    } catch (err) {
+      console.error('Failed to load table:', err);
+      showToast('Failed to load table data', 'error');
+    }
+  }
+  
+  function updateRecordCount() {
+    document.getElementById('recordCount').textContent = `${formatNumber(records.length)} records`;
+    document.getElementById('showingText').textContent = `Showing ${formatNumber(records.length)} records`;
+  }
+  
+  function setupColumnFilter() {
+    const select = document.getElementById('columnFilter');
+    columns.forEach(col => {
+      const option = document.createElement('option');
+      option.value = col.key;
+      option.textContent = col.name;
+      select.appendChild(option);
+    });
+    
+    select.addEventListener('change', () => {
+      const filterValue = document.getElementById('filterValue');
+      const applyBtn = document.getElementById('applyFilterBtn');
+      const clearBtn = document.getElementById('clearFilterBtn');
+      
+      if (select.value) {
+        filterValue.style.display = 'block';
+        applyBtn.style.display = 'block';
+      } else {
+        filterValue.style.display = 'none';
+        applyBtn.style.display = 'none';
+        clearBtn.style.display = 'none';
+        clearFilter();
+      }
+    });
+    
+    // Also populate key column select for import
+    const keySelect = document.getElementById('keyColumn');
+    columns.forEach(col => {
+      const option = document.createElement('option');
+      option.value = col.key;
+      option.textContent = col.name;
+      keySelect.appendChild(option);
+    });
+  }
+  
+  function initSpreadsheet() {
+    const container = document.getElementById('spreadsheet');
+    
+    // Prepare column headers and data
+    const colHeaders = columns.map(c => c.name);
+    const colKeys = columns.map(c => c.key);
+    
+    // Prepare data rows
+    const data = records.map(record => {
+      const row = { _id: record._id, _lockVersion: record.lockVersion };
+      colKeys.forEach(key => {
+        row[key] = record.data?.[key] ?? '';
+      });
+      return row;
+    });
+    
+    // Build column definitions for Handsontable
+    const hotColumns = columns.map(col => {
+      const def = {
+        data: col.key,
+        type: getHotType(col.type)
+      };
+      
+      if (col.type === 'select' && col.options) {
+        def.type = 'dropdown';
+        def.source = col.options;
+      }
+      
+      if (col.type === 'date') {
+        def.dateFormat = 'YYYY-MM-DD';
+      }
+      
+      return def;
+    });
+    
+    hot = new Handsontable(container, {
+      data: data,
+      colHeaders: colHeaders,
+      columns: hotColumns,
+      rowHeaders: true,
+      height: '100%',
+      width: '100%',
+      stretchH: 'all',
+      manualColumnResize: true,
+      manualRowResize: true,
+      contextMenu: {
+        items: {
+          'row_above': { name: 'Insert row above' },
+          'row_below': { name: 'Insert row below' },
+          '---------': {},
+          'remove_row': { name: 'Delete row' },
+          '---------2': {},
+          'copy': { name: 'Copy' },
+          'cut': { name: 'Cut' },
+          '---------3': {},
+          'view_history': {
+            name: 'View history',
+            callback: function(key, selection) {
+              const row = selection[0].start.row;
+              const record = hot.getSourceDataAtRow(row);
+              if (record._id) {
+                viewHistory(record._id);
+              }
+            }
+          }
+        }
+      },
+      licenseKey: 'non-commercial-and-evaluation',
+      afterChange: handleChange,
+      afterRemoveRow: handleRowRemove,
+      afterCreateRow: handleRowCreate,
+      afterSelection: handleSelection,
+      filters: true,
+      dropdownMenu: ['filter_by_value', 'filter_action_bar'],
+      columnSorting: true,
+      sortIndicator: true,
+      autoColumnSize: true,
+      minSpareRows: 0,
+      undo: false // We handle undo ourselves
+    });
+    
+    lucide.createIcons();
+  }
+  
+  function getHotType(colType) {
+    switch (colType) {
+      case 'number': return 'numeric';
+      case 'date': return 'date';
+      case 'boolean': return 'checkbox';
+      default: return 'text';
+    }
+  }
+  
+  function handleChange(changes, source) {
+    if (!changes || source === 'loadData') return;
+    
+    changes.forEach(([row, prop, oldValue, newValue]) => {
+      if (oldValue === newValue) return;
+      
+      const record = hot.getSourceDataAtRow(row);
+      const recordId = record._id;
+      
+      if (recordId) {
+        // Existing record - mark as updated
+        let existing = pendingChanges.updated.find(u => u.id === recordId);
+        if (!existing) {
+          existing = {
+            id: recordId,
+            lockVersion: record._lockVersion,
+            changes: {}
+          };
+          pendingChanges.updated.push(existing);
+        }
+        existing.changes[prop] = newValue;
+        
+        // Add to undo stack
+        undoStack.push({
+          type: 'change',
+          row,
+          prop,
+          oldValue,
+          newValue
+        });
+      } else {
+        // New record
+        let newRec = pendingChanges.created.find(c => c._tempRow === row);
+        if (!newRec) {
+          newRec = { _tempRow: row, data: {} };
+          pendingChanges.created.push(newRec);
+        }
+        newRec.data[prop] = newValue;
+      }
+    });
+    
+    updateChangeUI();
+  }
+  
+  function handleRowRemove(index, amount, physicalRows) {
+    physicalRows.forEach(row => {
+      const record = records[row];
+      if (record?._id) {
+        pendingChanges.deleted.push(record._id);
+        undoStack.push({
+          type: 'delete',
+          row,
+          record
+        });
+      }
+    });
+    updateChangeUI();
+  }
+  
+  function handleRowCreate(index, amount) {
+    // Mark new rows
+    for (let i = 0; i < amount; i++) {
+      const row = index + i;
+      for (let col = 0; col < columns.length; col++) {
+        hot.setCellMeta(row, col, 'className', 'new-row');
+      }
+    }
+    updateChangeUI();
+  }
+  
+  function handleSelection(row, col, row2, col2) {
+    const rowCount = Math.abs(row2 - row) + 1;
+    const colCount = Math.abs(col2 - col) + 1;
+    
+    if (rowCount === 1 && colCount === 1) {
+      document.getElementById('selectionInfo').textContent = `Cell: Row ${row + 1}, Column ${col + 1}`;
+    } else {
+      document.getElementById('selectionInfo').textContent = `Selected: ${rowCount} rows × ${colCount} columns`;
+    }
+  }
+  
+  function updateChangeUI() {
+    const totalChanges = pendingChanges.created.length + 
+                        pendingChanges.updated.length + 
+                        pendingChanges.deleted.length;
+    
+    const saveBtn = document.getElementById('saveBtn');
+    const badge = document.getElementById('changeBadge');
+    
+    saveBtn.disabled = totalChanges === 0;
+    
+    if (totalChanges > 0) {
+      badge.textContent = totalChanges;
+      badge.style.display = 'inline';
+    } else {
+      badge.style.display = 'none';
+    }
+    
+    // Undo/Redo buttons
+    document.getElementById('undoBtn').disabled = undoStack.length === 0;
+    document.getElementById('redoBtn').disabled = redoStack.length === 0;
+  }
+  
+  function addRow() {
+    const totalRows = hot.countRows();
+    hot.alter('insert_row_below', totalRows - 1, 1);
+  }
+  
+  function deleteSelectedRows() {
+    const selected = hot.getSelected();
+    if (!selected) {
+      showToast('Please select rows to delete', 'warning');
+      return;
+    }
+    
+    const rows = new Set();
+    selected.forEach(([r1, , r2]) => {
+      for (let r = Math.min(r1, r2); r <= Math.max(r1, r2); r++) {
+        rows.add(r);
+      }
+    });
+    
+    if (rows.size === 0) return;
+    
+    if (confirm(`Delete ${rows.size} selected row(s)?`)) {
+      // Remove in reverse order to maintain indices
+      const sortedRows = Array.from(rows).sort((a, b) => b - a);
+      sortedRows.forEach(row => {
+        hot.alter('remove_row', row, 1);
+      });
+    }
+  }
+  
+  function undoChange() {
+    if (undoStack.length === 0) return;
+    
+    const action = undoStack.pop();
+    redoStack.push(action);
+    
+    if (action.type === 'change') {
+      hot.setDataAtRowProp(action.row, action.prop, action.oldValue, 'undo');
+    }
+    
+    updateChangeUI();
+  }
+  
+  function redoChange() {
+    if (redoStack.length === 0) return;
+    
+    const action = redoStack.pop();
+    undoStack.push(action);
+    
+    if (action.type === 'change') {
+      hot.setDataAtRowProp(action.row, action.prop, action.newValue, 'redo');
+    }
+    
+    updateChangeUI();
+  }
+  
+  async function saveAllChanges() {
+    const saveBtn = document.getElementById('saveBtn');
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = '<i data-lucide="loader" style="width: 16px; height: 16px; animation: spin 1s linear infinite;"></i> Saving...';
+    
+    try {
+      // Create new records
+      for (const newRec of pendingChanges.created) {
+        await API.post(`/tables/${tableId}/records`, {
+          data: newRec.data
+        });
+      }
+      
+      // Update existing records
+      for (const update of pendingChanges.updated) {
+        await API.put(`/records/${update.id}`, {
+          data: update.changes,
+          lockVersion: update.lockVersion
+        });
+      }
+      
+      // Delete records
+      for (const deleteId of pendingChanges.deleted) {
+        await API.delete(`/records/${deleteId}`);
+      }
+      
+      // Clear pending changes
+      pendingChanges = { created: [], updated: [], deleted: [] };
+      undoStack = [];
+      redoStack = [];
+      
+      // Refresh data
+      await loadTable();
+      
+      showToast('All changes saved successfully', 'success');
+      document.getElementById('lastSaved').textContent = `Last saved: ${new Date().toLocaleTimeString()}`;
+    } catch (err) {
+      console.error('Save failed:', err);
+      if (err.message.includes('CONCURRENT_MODIFICATION')) {
+        showToast('Another user modified this data. Please refresh and try again.', 'error');
+      } else {
+        showToast('Failed to save: ' + err.message, 'error');
+      }
+    } finally {
+      saveBtn.innerHTML = '<i data-lucide="save" style="width: 16px; height: 16px;"></i> Save Changes <span class="change-badge" id="changeBadge" style="display: none;">0</span>';
+      updateChangeUI();
+      lucide.createIcons();
+    }
+  }
+  
+  async function exportData(format) {
+    try {
+      showToast('Generating export...', 'success');
+      const response = await API.post(`/tables/${tableId}/export`, { format });
+      
+      if (response.export?._id) {
+        window.location.href = `/api/supplier/exports/${response.export._id}/download`;
+      }
+      
+      showToast('Export complete', 'success');
+    } catch (err) {
+      showToast('Export failed: ' + err.message, 'error');
+    }
+  }
+  
+  function openImportModal() {
+    openModal('importModal');
+    
+    document.getElementById('importMode').addEventListener('change', (e) => {
+      document.getElementById('keyColumnGroup').style.display = 
+        e.target.value === 'update' ? 'block' : 'none';
+    });
+  }
+  
+  async function importData() {
+    const fileInput = document.getElementById('importFile');
+    const mode = document.getElementById('importMode').value;
+    const keyColumn = document.getElementById('keyColumn').value;
+    
+    if (!fileInput.files.length) {
+      showToast('Please select a file', 'error');
+      return;
+    }
+    
+    const file = fileInput.files[0];
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('mode', mode);
+    if (mode === 'update' && keyColumn) {
+      formData.append('keyColumn', keyColumn);
+    }
+    
+    try {
+      showToast('Importing data...', 'success');
+      
+      const response = await fetch(`/api/supplier/tables/${tableId}/import`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${API.token}`
+        },
+        body: formData
+      });
+      
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.message || 'Import failed');
+      }
+      
+      closeModal('importModal');
+      showToast(`Imported ${result.created || 0} records`, 'success');
+      await loadTable();
+    } catch (err) {
+      showToast('Import failed: ' + err.message, 'error');
+    }
+  }
+  
+  async function viewHistory(recordId) {
+    openModal('historyModal');
+    
+    try {
+      const response = await API.get(`/records/${recordId}/history`);
+      const versions = response.history || [];
+      
+      const container = document.getElementById('historyContent');
+      
+      if (versions.length === 0) {
+        container.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">No version history available</p>';
+        return;
+      }
+      
+      container.innerHTML = versions.map((v, i) => `
+        <div style="padding: 16px; border-bottom: 1px solid var(--border);">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+            <strong>Version ${versions.length - i}</strong>
+            <span style="color: var(--text-secondary); font-size: 13px;">${formatDateTime(v.modifiedAt)}</span>
+          </div>
+          <pre style="background: var(--bg-main); padding: 12px; border-radius: 6px; font-size: 12px; overflow: auto; max-height: 150px;">${JSON.stringify(v.data, null, 2)}</pre>
+          ${i < versions.length - 1 ? `
+            <button class="btn btn-secondary btn-sm" style="margin-top: 8px;" onclick="restoreVersion('${recordId}', ${i})">
+              Restore this version
+            </button>
+          ` : ''}
+        </div>
+      `).join('');
+    } catch (err) {
+      document.getElementById('historyContent').innerHTML = `<p style="color: var(--danger);">Failed to load history: ${err.message}</p>`;
+    }
+  }
+  
+  async function restoreVersion(recordId, versionIndex) {
+    if (!confirm('Restore this version? Current data will be overwritten.')) return;
+    
+    try {
+      await API.post(`/records/${recordId}/restore`, { versionIndex });
+      closeModal('historyModal');
+      showToast('Version restored successfully', 'success');
+      await loadTable();
+    } catch (err) {
+      showToast('Failed to restore version: ' + err.message, 'error');
+    }
+  }
+  
+  function applyFilter() {
+    const column = document.getElementById('columnFilter').value;
+    const value = document.getElementById('filterValue').value;
+    
+    if (!column || !value) return;
+    
+    const plugin = hot.getPlugin('filters');
+    plugin.clearConditions();
+    
+    const colIndex = columns.findIndex(c => c.key === column);
+    plugin.addCondition(colIndex, 'contains', [value]);
+    plugin.filter();
+    
+    document.getElementById('clearFilterBtn').style.display = 'block';
+  }
+  
+  function clearFilter() {
+    const plugin = hot.getPlugin('filters');
+    plugin.clearConditions();
+    plugin.filter();
+    
+    document.getElementById('columnFilter').value = '';
+    document.getElementById('filterValue').value = '';
+    document.getElementById('filterValue').style.display = 'none';
+    document.getElementById('applyFilterBtn').style.display = 'none';
+    document.getElementById('clearFilterBtn').style.display = 'none';
+  }
+  
+  function setupEventListeners() {
+    // Global search
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      const query = e.target.value.toLowerCase();
+      const plugin = hot.getPlugin('search');
+      plugin.query(query);
+      hot.render();
+    });
+    
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      if (e.ctrlKey || e.metaKey) {
+        if (e.key === 's') {
+          e.preventDefault();
+          if (!document.getElementById('saveBtn').disabled) {
+            saveAllChanges();
+          }
+        } else if (e.key === 'z' && !e.shiftKey) {
+          e.preventDefault();
+          undoChange();
+        } else if (e.key === 'y' || (e.key === 'z' && e.shiftKey)) {
+          e.preventDefault();
+          redoChange();
+        }
+      }
+    });
+  }
+</script>
+
+<%- include('partials/footer') %>

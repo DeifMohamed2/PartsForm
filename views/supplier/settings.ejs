@@ -1,0 +1,255 @@
+<%- include('partials/header', { currentPage: 'settings', pageTitle: 'Settings' }) %>
+
+<div class="grid grid-2" style="gap: 24px;">
+  <!-- Profile Settings -->
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">Profile Information</h3>
+    </div>
+    
+    <form id="profileForm">
+      <div class="form-group">
+        <label class="form-label">Company Name</label>
+        <input type="text" name="companyName" class="form-input" id="companyName">
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Company Code</label>
+        <input type="text" name="companyCode" class="form-input" id="companyCode" readonly style="background: var(--bg-main);">
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Contact Name</label>
+        <input type="text" name="contactName" class="form-input" id="contactName">
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input type="email" name="email" class="form-input" id="email" readonly style="background: var(--bg-main);">
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Phone Number</label>
+        <input type="tel" name="phone" class="form-input" id="phone">
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Website</label>
+        <input type="url" name="website" class="form-input" id="website" placeholder="https://">
+      </div>
+      
+      <button type="submit" class="btn btn-primary">
+        <i data-lucide="save" style="width: 18px; height: 18px;"></i>
+        Save Changes
+      </button>
+    </form>
+  </div>
+  
+  <!-- Security Settings -->
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">Security</h3>
+    </div>
+    
+    <form id="passwordForm">
+      <div class="form-group">
+        <label class="form-label">Current Password</label>
+        <input type="password" name="currentPassword" class="form-input" placeholder="Enter current password">
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">New Password</label>
+        <input type="password" name="newPassword" class="form-input" placeholder="Enter new password" minlength="8">
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Confirm New Password</label>
+        <input type="password" name="confirmPassword" class="form-input" placeholder="Confirm new password">
+      </div>
+      
+      <button type="submit" class="btn btn-primary">
+        <i data-lucide="lock" style="width: 18px; height: 18px;"></i>
+        Change Password
+      </button>
+    </form>
+    
+    <hr style="margin: 24px 0; border: none; border-top: 1px solid var(--border);">
+    
+    <div>
+      <h4 style="font-size: 14px; font-weight: 600; margin-bottom: 12px;">Two-Factor Authentication</h4>
+      <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;">
+        Add an extra layer of security to your account by enabling two-factor authentication.
+      </p>
+      <button class="btn btn-secondary" disabled>
+        <i data-lucide="smartphone" style="width: 18px; height: 18px;"></i>
+        Enable 2FA (Coming Soon)
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Account Usage -->
+<div class="card" style="margin-top: 24px;">
+  <div class="card-header">
+    <h3 class="card-title">Account Usage</h3>
+  </div>
+  
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px;">
+    <div>
+      <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 8px;">Tables</div>
+      <div style="font-size: 24px; font-weight: 700;" id="usageTables">0</div>
+      <div style="font-size: 12px; color: var(--text-secondary);">of unlimited</div>
+    </div>
+    
+    <div>
+      <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 8px;">Records</div>
+      <div style="font-size: 24px; font-weight: 700;" id="usageRecords">0</div>
+      <div style="font-size: 12px; color: var(--text-secondary);">of unlimited</div>
+    </div>
+    
+    <div>
+      <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 8px;">Team Members</div>
+      <div style="font-size: 24px; font-weight: 700;" id="usageTeam">0</div>
+      <div style="font-size: 12px; color: var(--text-secondary);">of unlimited</div>
+    </div>
+    
+    <div>
+      <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 8px;">API Requests Today</div>
+      <div style="font-size: 24px; font-weight: 700;" id="usageApi">0</div>
+      <div style="font-size: 12px; color: var(--text-secondary);">of unlimited</div>
+    </div>
+  </div>
+</div>
+
+<!-- Danger Zone -->
+<div class="card" style="margin-top: 24px; border-color: var(--danger);">
+  <div class="card-header">
+    <h3 class="card-title" style="color: var(--danger);">Danger Zone</h3>
+  </div>
+  
+  <div style="display: flex; justify-content: space-between; align-items: center;">
+    <div>
+      <div style="font-weight: 600; margin-bottom: 4px;">Delete Account</div>
+      <div style="font-size: 13px; color: var(--text-secondary);">
+        Permanently delete your account and all associated data. This action cannot be undone.
+      </div>
+    </div>
+    <button class="btn btn-danger" onclick="confirmDeleteAccount()">
+      <i data-lucide="trash-2" style="width: 18px; height: 18px;"></i>
+      Delete Account
+    </button>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    await loadProfile();
+    setupForms();
+  });
+  
+  async function loadProfile() {
+    try {
+      const response = await API.get('/auth/me');
+      const supplier = response.supplier;
+      
+      document.getElementById('companyName').value = supplier.companyName || '';
+      document.getElementById('companyCode').value = supplier.companyCode || '';
+      document.getElementById('contactName').value = supplier.contactName || '';
+      document.getElementById('email').value = supplier.email || '';
+      document.getElementById('phone').value = supplier.phone || '';
+      document.getElementById('website').value = supplier.website || '';
+      
+      // Load usage stats
+      try {
+        const dashboardResponse = await API.get('/dashboard');
+        document.getElementById('usageTables').textContent = dashboardResponse.stats?.tables || 0;
+        document.getElementById('usageRecords').textContent = formatNumber(dashboardResponse.stats?.records || 0);
+        document.getElementById('usageTeam').textContent = dashboardResponse.stats?.team || 0;
+        document.getElementById('usageApi').textContent = formatNumber(dashboardResponse.stats?.apiRequests || 0);
+      } catch (err) {
+        // Ignore stats errors
+      }
+    } catch (err) {
+      console.error('Failed to load profile:', err);
+      showToast('Failed to load profile', 'error');
+    }
+  }
+  
+  function setupForms() {
+    document.getElementById('profileForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const form = e.target;
+      
+      try {
+        await API.put('/auth/profile', {
+          companyName: form.companyName.value,
+          contactName: form.contactName.value,
+          phone: form.phone.value,
+          website: form.website.value
+        });
+        
+        showToast('Profile updated successfully', 'success');
+      } catch (err) {
+        showToast('Failed to update profile: ' + err.message, 'error');
+      }
+    });
+    
+    document.getElementById('passwordForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const form = e.target;
+      const currentPassword = form.currentPassword.value;
+      const newPassword = form.newPassword.value;
+      const confirmPassword = form.confirmPassword.value;
+      
+      if (!currentPassword || !newPassword) {
+        showToast('Please fill in all password fields', 'error');
+        return;
+      }
+      
+      if (newPassword !== confirmPassword) {
+        showToast('New passwords do not match', 'error');
+        return;
+      }
+      
+      if (newPassword.length < 8) {
+        showToast('New password must be at least 8 characters', 'error');
+        return;
+      }
+      
+      try {
+        await API.put('/auth/password', {
+          currentPassword,
+          newPassword
+        });
+        
+        showToast('Password changed successfully', 'success');
+        form.reset();
+      } catch (err) {
+        showToast('Failed to change password: ' + err.message, 'error');
+      }
+    });
+  }
+  
+  function confirmDeleteAccount() {
+    const confirmed = prompt('Type "DELETE" to confirm account deletion:');
+    
+    if (confirmed === 'DELETE') {
+      deleteAccount();
+    } else if (confirmed !== null) {
+      showToast('Account deletion cancelled - text did not match', 'warning');
+    }
+  }
+  
+  async function deleteAccount() {
+    try {
+      // This would call the delete account endpoint
+      showToast('Account deletion is restricted. Please contact support.', 'warning');
+    } catch (err) {
+      showToast('Failed to delete account: ' + err.message, 'error');
+    }
+  }
+</script>
+
+<%- include('partials/footer') %>

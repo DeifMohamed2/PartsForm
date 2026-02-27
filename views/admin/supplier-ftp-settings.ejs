@@ -1,0 +1,897 @@
+<%- include('partials/header') %>
+<link rel="stylesheet" href="/css/adminCSS/admin-dashboard.css">
+<link rel="stylesheet" href="/css/adminCSS/admin-users.css">
+<style>
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+  
+  .page-header h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  
+  .page-header h1 i {
+    color: var(--admin-primary);
+  }
+  
+  .page-description {
+    font-size: 0.9rem;
+    color: var(--admin-text-muted);
+    margin-top: 0.25rem;
+  }
+
+  .config-card {
+    background: var(--admin-card-bg);
+    border-radius: 12px;
+    border: 1px solid var(--admin-border);
+    margin-bottom: 1.5rem;
+  }
+  
+  .config-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--admin-border);
+  }
+  
+  .config-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  
+  .config-title i {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(79, 70, 229, 0.1);
+    color: var(--admin-primary);
+    border-radius: 10px;
+    font-size: 1rem;
+  }
+  
+  .config-title h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+  
+  .config-title p {
+    font-size: 0.8rem;
+    color: var(--admin-text-muted);
+    margin-top: 0.125rem;
+  }
+  
+  .config-body {
+    padding: 1.5rem;
+  }
+  
+  .server-info {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .info-item {
+    padding: 1rem;
+    background: var(--admin-bg);
+    border-radius: 8px;
+    text-align: center;
+  }
+  
+  .info-item .label {
+    font-size: 0.75rem;
+    color: var(--admin-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+  }
+  
+  .info-item .value {
+    font-size: 1rem;
+    font-weight: 600;
+    font-family: monospace;
+    color: var(--admin-text);
+  }
+  
+  .status-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+  
+  .status-indicator.online {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+  }
+  
+  .status-indicator.offline {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+  }
+  
+  .status-indicator .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+    animation: pulse 2s infinite;
+  }
+  
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+  
+  .form-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .form-group label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--admin-text-secondary);
+  }
+  
+  .form-control {
+    padding: 0.75rem 1rem;
+    font-size: 0.925rem;
+    border: 1px solid var(--admin-border);
+    border-radius: 8px;
+    background: var(--admin-bg);
+    color: var(--admin-text);
+    transition: all 0.2s;
+  }
+  
+  .form-control:focus {
+    outline: none;
+    border-color: var(--admin-primary);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+  }
+  
+  /* Stats Grid */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .stat-card {
+    background: var(--admin-card-bg);
+    border: 1px solid var(--admin-border);
+    border-radius: 12px;
+    padding: 1.25rem;
+    text-align: center;
+  }
+  
+  .stat-card .stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--admin-primary);
+    margin-bottom: 0.25rem;
+  }
+  
+  .stat-card .stat-label {
+    font-size: 0.8rem;
+    color: var(--admin-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  
+  /* Suppliers Table */
+  .table-container {
+    overflow-x: auto;
+  }
+  
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .data-table th,
+  .data-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--admin-border);
+  }
+  
+  .data-table th {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--admin-text-muted);
+    background: var(--admin-bg);
+  }
+  
+  .data-table tbody tr:hover {
+    background: rgba(79, 70, 229, 0.02);
+  }
+  
+  .supplier-info-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  
+  .supplier-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--admin-primary), #6366f1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+  
+  .supplier-name {
+    font-weight: 500;
+    color: var(--admin-text);
+  }
+  
+  .supplier-code {
+    font-size: 0.8rem;
+    color: var(--admin-text-muted);
+    font-family: monospace;
+  }
+  
+  .ftp-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+  
+  .ftp-status.enabled {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+  }
+  
+  .ftp-status.disabled {
+    background: rgba(107, 114, 128, 0.1);
+    color: #6b7280;
+  }
+  
+  .ftp-username {
+    font-family: monospace;
+    font-size: 0.85rem;
+    padding: 0.375rem 0.75rem;
+    background: var(--admin-bg);
+    border-radius: 6px;
+    color: var(--admin-text);
+  }
+  
+  .last-access {
+    font-size: 0.85rem;
+    color: var(--admin-text-muted);
+  }
+  
+  .last-access.never {
+    font-style: italic;
+  }
+  
+  .action-btns {
+    display: flex;
+    gap: 0.5rem;
+  }
+  
+  .btn-icon {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--admin-bg);
+    color: var(--admin-text-muted);
+  }
+  
+  .btn-icon:hover {
+    background: var(--admin-border);
+    color: var(--admin-text);
+  }
+  
+  .btn-icon.regenerate:hover {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+  }
+  
+  .btn-icon.toggle:hover {
+    background: rgba(79, 70, 229, 0.1);
+    color: var(--admin-primary);
+  }
+  
+  .empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: var(--admin-text-muted);
+  }
+  
+  .empty-state i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+  }
+  
+  .empty-state h3 {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+    color: var(--admin-text-secondary);
+  }
+  
+  /* Modal styling */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.5);
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+  }
+  
+  .modal-overlay.active {
+    display: flex;
+  }
+  
+  .modal-content {
+    background: var(--admin-card-bg);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 450px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  }
+  
+  .modal-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--admin-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .modal-header h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .modal-close {
+    background: none;
+    border: none;
+    font-size: 1.25rem;
+    color: var(--admin-text-muted);
+    cursor: pointer;
+    padding: 0.25rem;
+  }
+  
+  .modal-close:hover {
+    color: var(--admin-text);
+  }
+  
+  .modal-body {
+    padding: 1.5rem;
+  }
+  
+  .credential-box {
+    margin-bottom: 1rem;
+  }
+  
+  .credential-box:last-child {
+    margin-bottom: 0;
+  }
+  
+  .credential-box label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--admin-text-muted);
+    margin-bottom: 0.5rem;
+  }
+  
+  .credential-value {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: var(--admin-bg);
+    border: 1px solid var(--admin-border);
+    border-radius: 8px;
+    font-family: monospace;
+  }
+  
+  .credential-value code {
+    flex: 1;
+    word-break: break-all;
+  }
+  
+  .copy-btn {
+    padding: 0.375rem;
+    background: none;
+    border: none;
+    color: var(--admin-text-muted);
+    cursor: pointer;
+    border-radius: 4px;
+  }
+  
+  .copy-btn:hover {
+    background: var(--admin-border);
+    color: var(--admin-primary);
+  }
+  
+  .modal-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--admin-border);
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+  }
+  
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.25rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+  }
+  
+  .btn-secondary {
+    background: var(--admin-bg);
+    color: var(--admin-text);
+    border: 1px solid var(--admin-border);
+  }
+  
+  .btn-primary {
+    background: var(--admin-primary);
+    color: white;
+  }
+  
+  .btn-primary:hover {
+    background: #4338ca;
+  }
+  
+  .btn-warning {
+    background: rgba(245, 158, 11, 0.1);
+    color: #d97706;
+    border: 1px solid rgba(245, 158, 11, 0.2);
+  }
+  
+  .btn-warning:hover {
+    background: rgba(245, 158, 11, 0.2);
+  }
+  
+  .warning-text {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: rgba(245, 158, 11, 0.1);
+    border-radius: 8px;
+    margin-top: 1rem;
+  }
+  
+  .warning-text i {
+    color: #f59e0b;
+    margin-top: 0.125rem;
+  }
+  
+  .warning-text p {
+    font-size: 0.85rem;
+    color: var(--admin-text-secondary);
+    line-height: 1.4;
+  }
+
+  @media (max-width: 992px) {
+    .stats-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .server-info {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .stats-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .server-info {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+</head>
+
+<body>
+  <div class="admin-wrapper">
+    <%- include('partials/sidebar', { activePage: 'suppliers' }) %>
+
+    <main class="admin-main">
+      <%- include('partials/topbar', { pageTitle: 'FTP Settings' }) %>
+
+      <div class="admin-content">
+        <div class="page-header">
+          <div>
+            <h1><i class="fas fa-server"></i> FTP Server Settings</h1>
+            <p class="page-description">Manage FTP server configuration and supplier access</p>
+          </div>
+        </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value"><%= typeof stats !== 'undefined' ? stats.totalFtpEnabled : 0 %></div>
+        <div class="stat-label">FTP Enabled</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value"><%= typeof stats !== 'undefined' ? stats.activeToday : 0 %></div>
+        <div class="stat-label">Active Today</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value"><%= typeof stats !== 'undefined' ? stats.totalUploadsToday : 0 %></div>
+        <div class="stat-label">Uploads Today</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value"><%= typeof stats !== 'undefined' ? Math.round(stats.totalStorageUsed / 1024) : 0 %> GB</div>
+        <div class="stat-label">Storage Used</div>
+      </div>
+    </div>
+
+    <!-- Server Configuration -->
+    <div class="config-card">
+      <div class="config-header">
+        <div class="config-title">
+          <i class="fas fa-cog"></i>
+          <div>
+            <h3>Server Configuration</h3>
+            <p>FTP server connection details</p>
+          </div>
+        </div>
+        <div class="status-indicator <%= typeof serverStatus !== 'undefined' && serverStatus.online ? 'online' : 'offline' %>">
+          <span class="dot"></span>
+          <%= typeof serverStatus !== 'undefined' && serverStatus.online ? 'Online' : 'Offline' %>
+        </div>
+      </div>
+      <div class="config-body">
+        <div class="server-info">
+          <div class="info-item">
+            <div class="label">Host</div>
+            <div class="value"><%= typeof ftpConfig !== 'undefined' ? ftpConfig.host : 'ftp.yourserver.com' %></div>
+          </div>
+          <div class="info-item">
+            <div class="label">Port</div>
+            <div class="value"><%= typeof ftpConfig !== 'undefined' ? ftpConfig.port : '21' %></div>
+          </div>
+          <div class="info-item">
+            <div class="label">Mode</div>
+            <div class="value"><%= typeof ftpConfig !== 'undefined' ? ftpConfig.mode : 'Passive' %></div>
+          </div>
+          <div class="info-item">
+            <div class="label">TLS/SSL</div>
+            <div class="value"><%= typeof ftpConfig !== 'undefined' && ftpConfig.secure ? 'Enabled' : 'Disabled' %></div>
+          </div>
+        </div>
+        <p style="font-size: 0.85rem; color: var(--admin-text-muted);">
+          <i class="fas fa-info-circle"></i> 
+          To modify server settings, update the FTP configuration in your environment variables or server config file.
+        </p>
+      </div>
+    </div>
+
+    <!-- Supplier FTP Access Table -->
+    <div class="config-card">
+      <div class="config-header">
+        <div class="config-title">
+          <i class="fas fa-users"></i>
+          <div>
+            <h3>Supplier FTP Access</h3>
+            <p>Manage individual supplier FTP credentials</p>
+          </div>
+        </div>
+      </div>
+      <div class="table-container">
+        <% if (typeof suppliers !== 'undefined' && suppliers.length > 0) { %>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Supplier</th>
+              <th>FTP Status</th>
+              <th>Username</th>
+              <th>Directory</th>
+              <th>Last Access</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% suppliers.forEach(supplier => { %>
+            <tr data-supplier-id="<%= supplier._id %>">
+              <td>
+                <div class="supplier-info-cell">
+                  <div class="supplier-avatar">
+                    <%= supplier.companyName.substring(0, 2).toUpperCase() %>
+                  </div>
+                  <div>
+                    <div class="supplier-name"><%= supplier.companyName %></div>
+                    <div class="supplier-code"><%= supplier.companyCode %></div>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <span class="ftp-status <%= supplier.ftpAccess && supplier.ftpAccess.enabled ? 'enabled' : 'disabled' %>">
+                  <i class="fas fa-circle" style="font-size: 0.5rem;"></i>
+                  <%= supplier.ftpAccess && supplier.ftpAccess.enabled ? 'Enabled' : 'Disabled' %>
+                </span>
+              </td>
+              <td>
+                <% if (supplier.ftpAccess && supplier.ftpAccess.username) { %>
+                  <span class="ftp-username"><%= supplier.ftpAccess.username %></span>
+                <% } else { %>
+                  <span style="color: var(--admin-text-muted);">—</span>
+                <% } %>
+              </td>
+              <td>
+                <% if (supplier.ftpAccess && supplier.ftpAccess.directory) { %>
+                  <code style="font-size: 0.85rem;"><%= supplier.ftpAccess.directory %></code>
+                <% } else { %>
+                  <span style="color: var(--admin-text-muted);">—</span>
+                <% } %>
+              </td>
+              <td>
+                <% if (supplier.ftpAccess && supplier.ftpAccess.lastAccess) { %>
+                  <span class="last-access">
+                    <%= new Date(supplier.ftpAccess.lastAccess).toLocaleDateString() %>
+                    <%= new Date(supplier.ftpAccess.lastAccess).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) %>
+                  </span>
+                <% } else { %>
+                  <span class="last-access never">Never</span>
+                <% } %>
+              </td>
+              <td>
+                <div class="action-btns">
+                  <button type="button" class="btn-icon toggle" 
+                          onclick="toggleFtpAccess('<%= supplier._id %>', <%= !(supplier.ftpAccess && supplier.ftpAccess.enabled) %>)"
+                          title="<%= supplier.ftpAccess && supplier.ftpAccess.enabled ? 'Disable FTP' : 'Enable FTP' %>">
+                    <i class="fas fa-<%= supplier.ftpAccess && supplier.ftpAccess.enabled ? 'toggle-on' : 'toggle-off' %>"></i>
+                  </button>
+                  <% if (supplier.ftpAccess && supplier.ftpAccess.enabled) { %>
+                  <button type="button" class="btn-icon regenerate" 
+                          onclick="regenerateCredentials('<%= supplier._id %>', '<%= supplier.companyName %>')"
+                          title="Regenerate Password">
+                    <i class="fas fa-key"></i>
+                  </button>
+                  <% } %>
+                  <a href="/admin/suppliers/<%= supplier._id %>" class="btn-icon" title="View Details">
+                    <i class="fas fa-external-link-alt"></i>
+                  </a>
+                </div>
+              </td>
+            </tr>
+            <% }); %>
+          </tbody>
+        </table>
+        <% } else { %>
+        <div class="empty-state">
+          <i class="fas fa-server"></i>
+          <h3>No Suppliers Found</h3>
+          <p>Create suppliers with FTP access to see them here.</p>
+          <a href="/admin/suppliers/create" class="btn btn-primary" style="margin-top: 1rem;">
+            <i class="fas fa-plus"></i> Create Supplier
+          </a>
+        </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Regenerate Credentials Modal -->
+<div id="regenerateModal" class="modal-overlay">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3><i class="fas fa-key"></i> Regenerate FTP Password</h3>
+      <button type="button" class="modal-close" onclick="closeModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p>Generate a new FTP password for <strong id="modalSupplierName"></strong>?</p>
+      <div class="warning-text">
+        <i class="fas fa-exclamation-triangle"></i>
+        <p>This will invalidate the current FTP password. The supplier will need to update their FTP client with the new credentials.</p>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      <button type="button" class="btn btn-warning" id="confirmRegenerate">
+        <i class="fas fa-key"></i> Regenerate
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- New Credentials Modal -->
+<div id="newCredentialsModal" class="modal-overlay">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3><i class="fas fa-check-circle" style="color: #10b981;"></i> New Credentials Generated</h3>
+      <button type="button" class="modal-close" onclick="closeCredentialsModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="credential-box">
+        <label>FTP Username</label>
+        <div class="credential-value">
+          <code id="newFtpUsername"></code>
+          <button type="button" class="copy-btn" onclick="copyText('newFtpUsername')">
+            <i class="fas fa-copy"></i>
+          </button>
+        </div>
+      </div>
+      <div class="credential-box">
+        <label>FTP Password</label>
+        <div class="credential-value">
+          <code id="newFtpPassword"></code>
+          <button type="button" class="copy-btn" onclick="copyText('newFtpPassword')">
+            <i class="fas fa-copy"></i>
+          </button>
+        </div>
+      </div>
+      <div class="warning-text">
+        <i class="fas fa-info-circle" style="color: var(--admin-primary);"></i>
+        <p>Please save these credentials and share them securely with the supplier.</p>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-primary" onclick="closeCredentialsModal()">
+        <i class="fas fa-check"></i> Done
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+let currentSupplierId = null;
+
+function toggleFtpAccess(supplierId, enable) {
+  fetch(`/admin/api/suppliers/${supplierId}/ftp`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: enable ? 'enable' : 'disable' })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      if (enable && data.data.ftpCredentials) {
+        document.getElementById('newFtpUsername').textContent = data.data.ftpCredentials.username;
+        document.getElementById('newFtpPassword').textContent = data.data.ftpCredentials.password;
+        document.getElementById('newCredentialsModal').classList.add('active');
+      }
+      // Reload to update table
+      setTimeout(() => location.reload(), enable ? 0 : 500);
+    } else {
+      alert('Error: ' + (data.message || 'Failed to update FTP access'));
+    }
+  })
+  .catch(err => {
+    console.error('Error:', err);
+    alert('An error occurred');
+  });
+}
+
+function regenerateCredentials(supplierId, supplierName) {
+  currentSupplierId = supplierId;
+  document.getElementById('modalSupplierName').textContent = supplierName;
+  document.getElementById('regenerateModal').classList.add('active');
+}
+
+document.getElementById('confirmRegenerate').addEventListener('click', function() {
+  if (!currentSupplierId) return;
+  
+  this.disabled = true;
+  this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Regenerating...';
+  
+  fetch(`/admin/api/suppliers/${currentSupplierId}/ftp`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'regenerate' })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success && data.data.ftpCredentials) {
+      closeModal();
+      document.getElementById('newFtpUsername').textContent = data.data.ftpCredentials.username;
+      document.getElementById('newFtpPassword').textContent = data.data.ftpCredentials.password;
+      document.getElementById('newCredentialsModal').classList.add('active');
+    } else {
+      alert('Error: ' + (data.message || 'Failed to regenerate credentials'));
+    }
+  })
+  .catch(err => {
+    console.error('Error:', err);
+    alert('An error occurred');
+  })
+  .finally(() => {
+    document.getElementById('confirmRegenerate').disabled = false;
+    document.getElementById('confirmRegenerate').innerHTML = '<i class="fas fa-key"></i> Regenerate';
+  });
+});
+
+function closeModal() {
+  document.getElementById('regenerateModal').classList.remove('active');
+  currentSupplierId = null;
+}
+
+function closeCredentialsModal() {
+  document.getElementById('newCredentialsModal').classList.remove('active');
+  location.reload();
+}
+
+function copyText(elementId) {
+  const text = document.getElementById(elementId).textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = event.target.closest('.copy-btn');
+    btn.innerHTML = '<i class="fas fa-check"></i>';
+    setTimeout(() => {
+      btn.innerHTML = '<i class="fas fa-copy"></i>';
+    }, 2000);
+  });
+}
+
+// Close modals on outside click
+document.querySelectorAll('.modal-overlay').forEach(modal => {
+  modal.addEventListener('click', function(e) {
+    if (e.target === this) {
+      this.classList.remove('active');
+    }
+  });
+});
+</script>
+
+      </div>
+    </main>
+  </div>
+
+  <%- include('partials/footer') %>
+</body>
+</html>

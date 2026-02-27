@@ -39,6 +39,7 @@ async function initialize() {
 
 /**
  * Refresh the in-memory cache with recent learnings
+ * Uses timeouts to prevent blocking on slow MongoDB queries
  */
 async function refreshCache() {
   const now = Date.now();
@@ -49,16 +50,30 @@ async function refreshCache() {
     return; // Cache is still fresh
   }
 
+  // Mark as refreshing to prevent concurrent refreshes
+  if (learningCache._refreshing) {
+    return; // Already refreshing
+  }
+  learningCache._refreshing = true;
+
+  const QUERY_TIMEOUT = 2000; // 2 second timeout for each MongoDB query
+
   try {
-    // Load successful patterns
-    const successfulSearches = await SearchLearning.find({
-      'outcome.wasSuccessful': true,
-      successScore: { $gte: 50 },
-      usageCount: { $gte: 2 },
-    })
-      .sort({ successScore: -1, usageCount: -1 })
-      .limit(500)
-      .lean();
+    // Load successful patterns with timeout
+    const successfulSearches = await Promise.race([
+      SearchLearning.find({
+        'outcome.wasSuccessful': true,
+        successScore: { $gte: 50 },
+        usageCount: { $gte: 2 },
+      })
+        .sort({ successScore: -1, usageCount: -1 })
+        .limit(500)
+        .maxTimeMS(QUERY_TIMEOUT)
+        .lean(),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('DB_TIMEOUT')), QUERY_TIMEOUT)
+      ),
+    ]);
 
     // Build pattern cache
     learningCache.patterns.clear();
@@ -94,14 +109,20 @@ async function refreshCache() {
       }
     });
 
-    // Load failure patterns
-    const failedSearches = await SearchLearning.find({
-      'outcome.wasSuccessful': false,
-      'learning.betterAlternative.query': { $exists: true },
-    })
-      .sort({ createdAt: -1 })
-      .limit(200)
-      .lean();
+    // Load failure patterns with timeout
+    const failedSearches = await Promise.race([
+      SearchLearning.find({
+        'outcome.wasSuccessful': false,
+        'learning.betterAlternative.query': { $exists: true },
+      })
+        .sort({ createdAt: -1 })
+        .limit(200)
+        .maxTimeMS(QUERY_TIMEOUT)
+        .lean(),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('DB_TIMEOUT')), QUERY_TIMEOUT)
+      ),
+    ]);
 
     learningCache.failures.clear();
     failedSearches.forEach((search) => {
@@ -126,15 +147,28 @@ async function refreshCache() {
     );
   } catch (error) {
     console.error('Cache refresh error:', error.message);
+    // Set lastRefresh anyway to prevent constant retries on slow DB
+    learningCache.lastRefresh = now;
+  } finally {
+    learningCache._refreshing = false;
   }
 }
 
 /**
  * Get learned context for a query - called before AI processing
  * This enriches the AI's understanding with past learnings
+ * Non-blocking: will use cached data if refresh is slow
  */
 async function getLearnedContext(query) {
-  await refreshCache();
+  // Try to refresh cache but don't block on it - max 200ms wait
+  try {
+    await Promise.race([
+      refreshCache(),
+      new Promise((resolve) => setTimeout(resolve, 200)),
+    ]);
+  } catch {
+    // Ignore refresh errors - use existing cache
+  }
 
   const normalizedQuery = query.toLowerCase().trim();
   const words = normalizedQuery.split(/\s+/);
@@ -193,10 +227,13 @@ async function getLearnedContext(query) {
     context.hasPriorLearning = true;
   }
 
-  // Try database for more specific matches if cache didn't help
+  // Try database for more specific matches if cache didn't help (with 500ms timeout)
   if (!context.hasPriorLearning) {
     try {
-      const dbSuggestions = await SearchLearning.getSuggestions(query);
+      const dbSuggestions = await Promise.race([
+        SearchLearning.getSuggestions(query),
+        new Promise((resolve) => setTimeout(() => resolve([]), 500)), // 500ms timeout, return empty
+      ]);
       if (dbSuggestions.length > 0) {
         context.hints = dbSuggestions.map((s) => s.reason);
         context.betterAlternative = dbSuggestions[0].suggested;
