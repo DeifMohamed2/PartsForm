@@ -336,162 +336,138 @@
     left: 24px;
   }
 
-  /* Data Options */
-  .option-group {
-    padding: 16px 0;
+  /* Delete File Option - Simplified */
+  .delete-toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
   }
 
-  .option-label-main {
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: var(--supplier-text-secondary);
-    margin-bottom: 14px;
-  }
-
-  .data-options {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-  }
-
-  .data-option {
-    display: block;
-    padding: 14px;
-    border: 2px solid var(--supplier-border);
-    border-radius: var(--supplier-radius-md);
-    cursor: pointer;
-    transition: var(--supplier-transition-fast);
-    background: var(--supplier-bg-primary);
-  }
-
-  .data-option input {
-    display: none;
-  }
-
-  .data-option:hover {
-    border-color: var(--supplier-border-medium);
-    background: var(--supplier-bg-secondary);
-  }
-
-  .data-option.selected {
-    border-color: var(--supplier-accent);
-    background: var(--supplier-info-light);
-  }
-
-  .data-option.danger.selected {
-    border-color: var(--supplier-danger);
-    background: var(--supplier-danger-light);
-  }
-
-  .option-content {
+  .delete-toggle-info {
     display: flex;
     align-items: flex-start;
     gap: 12px;
-  }
-
-  .option-icon {
-    width: 36px;
-    height: 36px;
-    border-radius: var(--supplier-radius-md);
-    background: var(--supplier-bg-tertiary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-  }
-
-  .option-icon i {
-    width: 18px;
-    height: 18px;
-    color: var(--supplier-text-muted);
-  }
-
-  .data-option.selected .option-icon {
-    background: var(--supplier-accent);
-  }
-
-  .data-option.selected .option-icon i {
-    color: white;
-  }
-
-  .data-option.danger.selected .option-icon {
-    background: var(--supplier-danger);
-  }
-
-  .option-text {
     flex: 1;
   }
 
-  .option-text strong {
+  .delete-toggle-info > i {
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .delete-toggle-info div {
+    flex: 1;
+  }
+
+  .delete-toggle-info strong {
     display: block;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     font-weight: 600;
     color: var(--supplier-text-primary);
     margin-bottom: 2px;
   }
 
-  .option-text span {
-    font-size: 0.8rem;
+  .delete-toggle-info span {
+    font-size: 0.85rem;
     color: var(--supplier-text-muted);
     line-height: 1.4;
   }
 
-  /* Brand Selection */
-  .brand-select-wrapper {
+  /* Toggle Switch */
+  .switch {
+    position: relative;
+    width: 52px;
+    height: 28px;
+    flex-shrink: 0;
+  }
+
+  .switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--supplier-border);
+    transition: var(--supplier-transition-fast);
+    border-radius: 28px;
+  }
+
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 22px;
+    width: 22px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: var(--supplier-transition-fast);
+    border-radius: 50%;
+    box-shadow: var(--supplier-shadow-sm);
+  }
+
+  input:checked + .slider {
+    background-color: var(--supplier-danger);
+  }
+
+  input:checked + .slider:before {
+    transform: translateX(24px);
+  }
+
+  /* File Selector */
+  .file-selector {
     margin-top: 16px;
     padding: 16px;
-    background: var(--supplier-bg-secondary);
+    background: var(--supplier-danger-light);
     border-radius: var(--supplier-radius-md);
-    border: 1px solid var(--supplier-border);
+    border: 1px solid rgba(239, 68, 68, 0.2);
   }
 
-  .brand-checkboxes {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 8px;
-    max-height: 200px;
-    overflow-y: auto;
+  .file-select {
+    width: 100%;
+    padding: 12px 14px;
+    border: 2px solid var(--supplier-border);
+    border-radius: var(--supplier-radius-md);
+    font-size: 14px;
+    background: var(--supplier-bg-primary);
+    color: var(--supplier-text-primary);
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
   }
 
-  .brand-checkbox {
+  .file-select:focus {
+    outline: none;
+    border-color: var(--supplier-danger);
+  }
+
+  .file-info {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 8px 12px;
+    margin-top: 12px;
+    padding: 10px 14px;
     background: var(--supplier-bg-primary);
-    border: 1px solid var(--supplier-border);
     border-radius: var(--supplier-radius-sm);
-    cursor: pointer;
-    transition: var(--supplier-transition-fast);
-  }
-
-  .brand-checkbox:hover {
-    border-color: var(--supplier-accent);
-    background: var(--supplier-info-light);
-  }
-
-  .brand-checkbox input {
-    accent-color: var(--supplier-accent);
-  }
-
-  .brand-checkbox.checked {
-    border-color: var(--supplier-accent);
-    background: var(--supplier-info-light);
-  }
-
-  .brand-name {
     font-size: 0.85rem;
-    font-weight: 500;
-    color: var(--supplier-text-secondary);
-    flex: 1;
+    color: var(--supplier-danger);
   }
 
-  .brand-count {
-    font-size: 0.75rem;
-    color: var(--supplier-text-subtle);
-    background: var(--supplier-bg-tertiary);
-    padding: 2px 6px;
-    border-radius: 4px;
+  @media (max-width: 640px) {
+    .delete-toggle-row {
+      flex-direction: column;
+      align-items: flex-start;
+    }
   }
 
   /* Data Summary */
@@ -607,69 +583,38 @@
     </div>
   </div>
   
-  <!-- Data Management Options -->
+  <!-- Simple Import Options -->
   <div class="upload-options">
-    <h3 style="font-size: 0.95rem; font-weight: 600; color: #1e293b; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
-      <i data-lucide="settings-2" style="width: 18px; height: 18px; color: var(--primary);"></i>
-      Import Options
+    <h3 style="font-size: 0.95rem; font-weight: 600; color: var(--supplier-text-primary); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+      <i data-lucide="settings-2" style="width: 18px; height: 18px; color: var(--supplier-accent);"></i>
+      Before Importing
     </h3>
     
-    <div class="option-group">
-      <div class="option-label-main">Before importing, delete existing data:</div>
-      
-      <div class="data-options" id="dataOptions">
-        <label class="data-option selected" data-value="none">
-          <input type="radio" name="deleteOption" value="none" checked>
-          <div class="option-content">
-            <div class="option-icon"><i data-lucide="plus-circle"></i></div>
-            <div class="option-text">
-              <strong>Add to existing</strong>
-              <span>Keep all current data, add new parts</span>
-            </div>
+    <div class="delete-file-option">
+      <div class="delete-toggle-row">
+        <div class="delete-toggle-info">
+          <i data-lucide="trash-2" style="width: 20px; height: 20px; color: var(--supplier-danger);"></i>
+          <div>
+            <strong>Delete existing file data</strong>
+            <span>Remove all parts from a previously uploaded file before importing new data</span>
           </div>
-        </label>
-        
-        <label class="data-option" data-value="file">
-          <input type="radio" name="deleteOption" value="file">
-          <div class="option-content">
-            <div class="option-icon"><i data-lucide="file-x"></i></div>
-            <div class="option-text">
-              <strong>Replace same file</strong>
-              <span>Delete parts from previous upload of same filename</span>
-            </div>
-          </div>
-        </label>
-        
-        <label class="data-option" data-value="brand">
-          <input type="radio" name="deleteOption" value="brand">
-          <div class="option-content">
-            <div class="option-icon"><i data-lucide="tag"></i></div>
-            <div class="option-text">
-              <strong>Replace by brand</strong>
-              <span>Choose which brands to replace</span>
-            </div>
-          </div>
-        </label>
-        
-        <label class="data-option danger" data-value="all">
-          <input type="radio" name="deleteOption" value="all">
-          <div class="option-content">
-            <div class="option-icon"><i data-lucide="trash-2"></i></div>
-            <div class="option-text">
-              <strong>Replace all data</strong>
-              <span>Delete ALL your parts before import</span>
-            </div>
-          </div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="deleteFileToggle" onchange="toggleDeleteFile(this.checked)">
+          <span class="slider"></span>
         </label>
       </div>
       
-      <!-- Brand Selection (shown when "brand" option selected) -->
-      <div class="brand-select-wrapper" id="brandSelectWrapper" style="display: none;">
-        <label style="font-size: 0.85rem; color: #64748b; display: block; margin-bottom: 8px;">
-          Select brands to replace:
+      <div class="file-selector" id="fileSelectorWrapper" style="display: none;">
+        <label style="font-size: 0.85rem; color: var(--supplier-text-muted); display: block; margin-bottom: 10px;">
+          Select which file's data to delete:
         </label>
-        <div class="brand-checkboxes" id="brandCheckboxes">
-          <div style="padding: 20px; text-align: center; color: #94a3b8;">Loading brands...</div>
+        <select id="deleteFileSelect" class="file-select">
+          <option value="">-- Select a file --</option>
+        </select>
+        <div class="file-info" id="selectedFileInfo" style="display: none;">
+          <i data-lucide="alert-circle" style="width: 16px; height: 16px;"></i>
+          <span id="fileInfoText">This will delete all parts from the selected file.</span>
         </div>
       </div>
     </div>
@@ -714,8 +659,8 @@
 </div>
 
 <script>
-  let supplierBrands = [];
-  let selectedBrands = new Set();
+  let uploadedFiles = [];
+  let selectedDeleteFile = null;
 
   document.addEventListener('DOMContentLoaded', () => {
     lucide.createIcons();
@@ -748,23 +693,40 @@
       if (e.target.files[0]) handleFile(e.target.files[0]);
     });
 
-    // Data options selection
-    document.querySelectorAll('.data-option').forEach(option => {
-      option.addEventListener('click', () => {
-        document.querySelectorAll('.data-option').forEach(o => o.classList.remove('selected'));
-        option.classList.add('selected');
-        option.querySelector('input').checked = true;
-
-        const value = option.dataset.value;
-        const brandWrapper = document.getElementById('brandSelectWrapper');
-        brandWrapper.style.display = value === 'brand' ? 'block' : 'none';
-      });
+    // File selector change
+    document.getElementById('deleteFileSelect').addEventListener('change', (e) => {
+      selectedDeleteFile = e.target.value;
+      const fileInfo = document.getElementById('selectedFileInfo');
+      const fileInfoText = document.getElementById('fileInfoText');
+      
+      if (selectedDeleteFile) {
+        const file = uploadedFiles.find(f => f.fileName === selectedDeleteFile);
+        if (file) {
+          fileInfoText.textContent = `This will delete ${file.partsCount.toLocaleString()} parts from "${file.fileName}"`;
+          fileInfo.style.display = 'flex';
+        }
+      } else {
+        fileInfo.style.display = 'none';
+      }
+      lucide.createIcons();
     });
 
-    // Load data summary and brands
+    // Load data summary and files
     loadDataSummary();
-    loadBrands();
+    loadUploadedFiles();
   });
+
+  function toggleDeleteFile(enabled) {
+    const wrapper = document.getElementById('fileSelectorWrapper');
+    wrapper.style.display = enabled ? 'block' : 'none';
+    
+    if (!enabled) {
+      document.getElementById('deleteFileSelect').value = '';
+      selectedDeleteFile = null;
+      document.getElementById('selectedFileInfo').style.display = 'none';
+    }
+    lucide.createIcons();
+  }
 
   async function loadDataSummary() {
     try {
@@ -775,7 +737,7 @@
       
       if (!data.totalParts) {
         summaryDiv.innerHTML = `
-          <div style="padding: 16px; text-align: center; color: #64748b;">
+          <div style="padding: 16px; text-align: center; color: var(--supplier-text-muted);">
             <i data-lucide="inbox" style="width: 32px; height: 32px; margin-bottom: 8px; opacity: 0.5;"></i>
             <p>No parts uploaded yet</p>
           </div>
@@ -806,44 +768,35 @@
       `;
     } catch (err) {
       console.error('Error loading summary:', err);
-      document.getElementById('dataSummary').innerHTML = '<div style="color: #dc2626;">Error loading summary</div>';
+      document.getElementById('dataSummary').innerHTML = '<div style="color: var(--supplier-danger);">Error loading summary</div>';
     }
   }
 
-  async function loadBrands() {
+  async function loadUploadedFiles() {
     try {
-      const response = await fetch('/api/supplier/brands');
-      const data = await response.json();
-      supplierBrands = data.brands || [];
+      const response = await fetch('/api/supplier/files');
+      uploadedFiles = await response.json();
 
-      const container = document.getElementById('brandCheckboxes');
+      const select = document.getElementById('deleteFileSelect');
       
-      if (!supplierBrands.length) {
-        container.innerHTML = '<div style="padding: 12px; text-align: center; color: #94a3b8;">No brands yet</div>';
+      // Clear existing options except first
+      select.innerHTML = '<option value="">-- Select a file --</option>';
+      
+      if (!uploadedFiles.length) {
+        select.innerHTML = '<option value="">No files uploaded yet</option>';
+        select.disabled = true;
         return;
       }
 
-      container.innerHTML = supplierBrands.map(b => `
-        <label class="brand-checkbox" data-brand="${b.brand}">
-          <input type="checkbox" value="${b.brand}" onchange="toggleBrand('${b.brand}', this)">
-          <span class="brand-name">${escapeHtml(b.brand)}</span>
-          <span class="brand-count">${b.partsCount}</span>
-        </label>
-      `).join('');
+      select.disabled = false;
+      uploadedFiles.forEach(f => {
+        const opt = document.createElement('option');
+        opt.value = f.fileName;
+        opt.textContent = `${f.fileName} (${f.partsCount.toLocaleString()} parts)`;
+        select.appendChild(opt);
+      });
     } catch (err) {
-      console.error('Error loading brands:', err);
-      document.getElementById('brandCheckboxes').innerHTML = '<div style="color: #dc2626;">Error loading brands</div>';
-    }
-  }
-
-  function toggleBrand(brand, checkbox) {
-    const label = checkbox.closest('.brand-checkbox');
-    if (checkbox.checked) {
-      selectedBrands.add(brand);
-      label.classList.add('checked');
-    } else {
-      selectedBrands.delete(brand);
-      label.classList.remove('checked');
+      console.error('Error loading files:', err);
     }
   }
   
@@ -856,23 +809,18 @@
       return;
     }
 
-    // Get selected delete option
-    const deleteOption = document.querySelector('input[name="deleteOption"]:checked').value;
-
-    // Validate brand selection if brand option selected
-    if (deleteOption === 'brand' && selectedBrands.size === 0) {
-      alert('Please select at least one brand to replace.');
+    // Check if delete option is enabled and file is selected
+    const deleteEnabled = document.getElementById('deleteFileToggle').checked;
+    
+    if (deleteEnabled && !selectedDeleteFile) {
+      alert('Please select which file to delete, or turn off the delete option.');
       return;
     }
 
-    // Confirm dangerous operations
-    if (deleteOption === 'all') {
-      if (!confirm('⚠️ WARNING: This will DELETE ALL your existing parts before importing!\n\nAre you sure you want to continue?')) {
-        return;
-      }
-    } else if (deleteOption === 'brand') {
-      const brands = Array.from(selectedBrands).join(', ');
-      if (!confirm(`This will delete all parts from brands: ${brands}\n\nAre you sure?`)) {
+    // Confirm delete if enabled
+    if (deleteEnabled && selectedDeleteFile) {
+      const file_to_delete = uploadedFiles.find(f => f.fileName === selectedDeleteFile);
+      if (!confirm(`⚠️ This will DELETE ${file_to_delete.partsCount.toLocaleString()} parts from "${selectedDeleteFile}" before importing.\n\nAre you sure?`)) {
         return;
       }
     }
@@ -885,10 +833,13 @@
     try {
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('deleteOption', deleteOption);
       
-      if (deleteOption === 'brand') {
-        formData.append('brands', JSON.stringify(Array.from(selectedBrands)));
+      // If delete enabled, set the delete option
+      if (deleteEnabled && selectedDeleteFile) {
+        formData.append('deleteOption', 'specificFile');
+        formData.append('deleteFileName', selectedDeleteFile);
+      } else {
+        formData.append('deleteOption', 'none');
       }
       
       const response = await fetch('/api/supplier/parts/import', {
@@ -911,13 +862,19 @@
 
       // Show deleted count if any
       if (result.deleted > 0) {
-        const deletedInfo = document.createElement('div');
-        deletedInfo.className = 'success-stat';
-        deletedInfo.innerHTML = `
-          <div class="success-stat-value" style="color: #dc2626;">${result.deleted.toLocaleString()}</div>
-          <div class="success-stat-label">Parts Deleted</div>
-        `;
-        document.querySelector('.success-stats').appendChild(deletedInfo);
+        // Check if we already have a deleted stat
+        const existingDeleted = document.querySelector('.success-stat-deleted');
+        if (existingDeleted) {
+          existingDeleted.querySelector('.success-stat-value').textContent = result.deleted.toLocaleString();
+        } else {
+          const deletedInfo = document.createElement('div');
+          deletedInfo.className = 'success-stat success-stat-deleted';
+          deletedInfo.innerHTML = `
+            <div class="success-stat-value" style="color: var(--supplier-danger);">${result.deleted.toLocaleString()}</div>
+            <div class="success-stat-label">Parts Deleted</div>
+          `;
+          document.querySelector('.success-stats').appendChild(deletedInfo);
+        }
       }
       
       lucide.createIcons();
@@ -934,20 +891,20 @@
     document.getElementById('successCard').style.display = 'none';
     document.getElementById('fileInput').value = '';
 
-    // Reset options to default
-    document.querySelectorAll('.data-option').forEach(o => o.classList.remove('selected'));
-    document.querySelector('.data-option[data-value="none"]').classList.add('selected');
-    document.querySelector('input[name="deleteOption"][value="none"]').checked = true;
-    document.getElementById('brandSelectWrapper').style.display = 'none';
-    selectedBrands.clear();
-    document.querySelectorAll('.brand-checkbox').forEach(cb => {
-      cb.classList.remove('checked');
-      cb.querySelector('input').checked = false;
-    });
+    // Reset delete option
+    document.getElementById('deleteFileToggle').checked = false;
+    document.getElementById('fileSelectorWrapper').style.display = 'none';
+    document.getElementById('deleteFileSelect').value = '';
+    document.getElementById('selectedFileInfo').style.display = 'none';
+    selectedDeleteFile = null;
+
+    // Remove any added deleted stat
+    const existingDeleted = document.querySelector('.success-stat-deleted');
+    if (existingDeleted) existingDeleted.remove();
 
     // Reload summary
     loadDataSummary();
-    loadBrands();
+    loadUploadedFiles();
   }
 
   function escapeHtml(str) {

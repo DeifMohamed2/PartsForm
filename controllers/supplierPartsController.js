@@ -45,7 +45,7 @@ const getParts = async (req, res) => {
   try {
     const options = {
       page: parseInt(req.query.page) || 1,
-      limit: Math.min(parseInt(req.query.limit) || 50, 200),
+      limit: Math.min(parseInt(req.query.limit) || 250, 500),
       search: req.query.search || '',
       sortBy: req.query.sortBy || 'createdAt',
       sortOrder: req.query.sortOrder || 'desc',
@@ -252,6 +252,18 @@ const importParts = async (req, res) => {
         });
         deletedCount = result.deletedCount;
         logger.info(`Deleted ${deletedCount} parts for brands: ${brands.join(', ')}`);
+      }
+    } else if (deleteOption === 'specificFile') {
+      // Delete parts from specific chosen file
+      const deleteFileName = req.body.deleteFileName;
+      if (deleteFileName) {
+        const Part = require('../models/Part');
+        const result = await Part.deleteMany({ 
+          'source.supplierId': req.supplier._id,
+          'source.fileName': deleteFileName
+        });
+        deletedCount = result.deletedCount;
+        logger.info(`Deleted ${deletedCount} parts from file: ${deleteFileName}`);
       }
     } else if (deleteOption === 'file') {
       // Delete parts from same filename (handled in service)

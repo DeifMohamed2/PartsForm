@@ -22,61 +22,213 @@
   .toolbar-left {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 16px;
     flex: 1;
   }
 
-  .search-wrapper {
-    position: relative;
-    width: 320px;
+  /* Unified Search & Filter Bar */
+  .search-filter-bar {
+    display: flex;
+    align-items: stretch;
+    background: var(--supplier-bg-secondary);
+    border-radius: 12px;
+    border: 1px solid var(--supplier-border);
+    overflow: hidden;
+    transition: var(--supplier-transition-fast);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
   }
 
-  .search-wrapper i {
+  .search-filter-bar:focus-within {
+    border-color: var(--supplier-accent);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12), 0 4px 12px rgba(0,0,0,0.06);
+  }
+
+  .search-section {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    min-width: 320px;
+    position: relative;
+    background: var(--supplier-bg-primary);
+  }
+
+  .search-section .search-icon {
     position: absolute;
-    left: 12px;
-    top: 50%;
-    transform: translateY(-50%);
+    left: 16px;
     width: 18px;
     height: 18px;
     color: var(--supplier-text-muted);
+    pointer-events: none;
+    transition: var(--supplier-transition-fast);
+  }
+
+  .search-section:focus-within .search-icon {
+    color: var(--supplier-accent);
   }
 
   .search-input {
     width: 100%;
-    padding: 10px 12px 10px 40px;
-    border: 2px solid var(--supplier-border);
-    border-radius: var(--supplier-radius-md);
+    padding: 14px 40px 14px 48px;
+    border: none;
+    background: transparent;
     font-size: 14px;
-    transition: var(--supplier-transition-fast);
-    background: var(--supplier-bg-secondary);
+    font-weight: 500;
+    color: var(--supplier-text-primary);
+  }
+
+  .search-input::placeholder {
+    color: var(--supplier-text-muted);
+    font-weight: 400;
   }
 
   .search-input:focus {
     outline: none;
-    border-color: var(--supplier-accent);
-    background: var(--supplier-bg-primary);
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
   }
 
-  .filter-dropdown {
-    padding: 10px 14px;
-    border: 2px solid var(--supplier-border);
-    border-radius: var(--supplier-radius-md);
-    font-size: 14px;
-    background: var(--supplier-bg-secondary);
-    min-width: 160px;
+  .search-clear {
+    position: absolute;
+    right: 12px;
+    width: 20px;
+    height: 20px;
+    border: none;
+    background: var(--supplier-bg-tertiary);
+    color: var(--supplier-text-muted);
+    border-radius: 50%;
     cursor: pointer;
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 12px center;
-    padding-right: 36px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: var(--supplier-transition-fast);
+  }
+
+  .search-clear:hover {
+    background: var(--supplier-accent);
+    color: white;
+  }
+
+  .search-clear i {
+    width: 12px;
+    height: 12px;
+  }
+
+  .search-section.has-value .search-clear {
+    display: flex;
+  }
+
+  .search-results-badge {
+    position: absolute;
+    right: 44px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--supplier-accent);
+    background: var(--supplier-accent-light, rgba(59, 130, 246, 0.1));
+    padding: 3px 8px;
+    border-radius: 10px;
+    display: none;
+  }
+
+  .search-section.has-value .search-results-badge {
+    display: block;
+  }
+
+  /* Filter Divider */
+  .filter-divider {
+    width: 1px;
+    background: var(--supplier-border);
+    margin: 8px 0;
+  }
+
+  /* Filter Buttons */
+  .filter-section {
+    display: flex;
+    align-items: center;
+    gap: 0;
+  }
+
+  .filter-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 16px;
+    border: none;
+    background: transparent;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--supplier-text-secondary);
+    cursor: pointer;
+    transition: var(--supplier-transition-fast);
+    white-space: nowrap;
+    position: relative;
+  }
+
+  .filter-btn:hover {
+    background: var(--supplier-bg-tertiary);
     color: var(--supplier-text-primary);
   }
 
-  .filter-dropdown:focus {
-    outline: none;
-    border-color: var(--supplier-accent);
+  .filter-btn i {
+    width: 16px;
+    height: 16px;
+    opacity: 0.7;
+  }
+
+  .filter-btn.active {
+    background: var(--supplier-accent-light, rgba(59, 130, 246, 0.1));
+    color: var(--supplier-accent);
+  }
+
+  .filter-btn.active i {
+    opacity: 1;
+  }
+
+  .filter-btn .filter-value {
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .filter-btn .filter-clear-x {
+    width: 16px;
+    height: 16px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: var(--supplier-accent);
+    color: white;
+    border-radius: 50%;
+    margin-left: 4px;
+  }
+
+  .filter-btn .filter-clear-x i {
+    width: 10px;
+    height: 10px;
+    opacity: 1;
+  }
+
+  .filter-btn.active .filter-clear-x {
+    display: flex;
+  }
+
+  .filter-btn.active .filter-chevron {
+    display: none;
+  }
+
+  .filter-chevron {
+    width: 14px;
+    height: 14px;
+    opacity: 0.5;
+  }
+
+  /* Hidden selects for actual functionality */
+  .hidden-select {
+    position: absolute;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    cursor: pointer;
   }
 
   .toolbar-right {
@@ -218,18 +370,42 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     min-height: 24px;
-    cursor: cell;
   }
 
-  .cell-content:focus {
-    outline: 2px solid var(--supplier-accent);
-    outline-offset: -2px;
-    background: var(--supplier-bg-primary);
+  /* Editable cells - double-click to edit */
+  .cell-content.editable {
     cursor: text;
+    border-radius: 4px;
+    position: relative;
+    transition: background 0.15s;
+  }
+
+  .cell-content.editable:hover {
+    background: rgba(59, 130, 246, 0.08);
+  }
+
+  .cell-content.editable:hover::after {
+    content: '';
+    position: absolute;
+    right: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 14px;
+    height: 14px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%233b82f6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-size: contain;
+    opacity: 0.7;
   }
 
   .cell-content.readonly {
     cursor: default;
+  }
+
+  .cell-content.editing {
+    outline: 2px solid var(--supplier-accent);
+    outline-offset: -2px;
+    background: var(--supplier-bg-primary);
   }
 
   /* Specific Column Styles */
@@ -335,6 +511,19 @@
   }
 
   /* Action Buttons */
+  .col-actions {
+    width: 80px;
+    text-align: center;
+  }
+
+  .actions-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 4px;
+  }
+
   .action-btn {
     width: 28px;
     height: 28px;
@@ -350,6 +539,27 @@
   }
 
   .action-btn:hover {
+    background: var(--supplier-bg-tertiary);
+    color: var(--supplier-text-primary);
+  }
+
+  .action-btn.edit-btn:hover {
+    background: var(--supplier-info-light);
+    color: var(--supplier-accent);
+  }
+
+  .action-btn.delete-btn {
+    opacity: 0.4;
+    pointer-events: none;
+    transition: opacity 0.2s, background 0.2s, color 0.2s;
+  }
+
+  tr:hover .action-btn.delete-btn {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .action-btn.delete-btn:hover {
     background: var(--supplier-danger-light);
     color: var(--supplier-danger);
   }
@@ -357,6 +567,64 @@
   .action-btn i {
     width: 14px;
     height: 14px;
+  }
+
+  /* Editing hint tooltip */
+  .edit-hint {
+    position: fixed;
+    background: var(--supplier-bg-primary);
+    border: 1px solid var(--supplier-border);
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 12px;
+    color: var(--supplier-text-muted);
+    box-shadow: var(--supplier-shadow-md);
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .edit-hint.visible {
+    opacity: 1;
+  }
+
+  .edit-hint kbd {
+    background: var(--supplier-bg-tertiary);
+    border: 1px solid var(--supplier-border);
+    border-radius: 3px;
+    padding: 1px 5px;
+    font-family: inherit;
+    font-size: 11px;
+  }
+
+  /* Save feedback */
+  .save-indicator {
+    position: fixed;
+    top: 80px;
+    right: 24px;
+    padding: 12px 20px;
+    background: var(--supplier-success);
+    color: white;
+    border-radius: var(--supplier-radius-md);
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: var(--supplier-shadow-lg);
+    z-index: 300;
+    transform: translateX(200%);
+    transition: transform 0.3s ease;
+  }
+
+  .save-indicator.show {
+    transform: translateX(0);
+  }
+
+  .save-indicator i {
+    width: 18px;
+    height: 18px;
   }
 
   /* Footer / Pagination */
@@ -517,6 +785,102 @@
 
   .bulk-bar .btn-clear:hover {
     color: white;
+  }
+
+  /* Bulk Edit Modal */
+  .bulk-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 400;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s, visibility 0.2s;
+  }
+
+  .bulk-modal-overlay.open {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .bulk-modal {
+    background: var(--supplier-bg-primary);
+    border-radius: var(--supplier-radius-lg);
+    box-shadow: var(--supplier-shadow-xl);
+    width: 480px;
+    max-width: 90vw;
+    transform: translateY(20px);
+    transition: transform 0.2s;
+  }
+
+  .bulk-modal-overlay.open .bulk-modal {
+    transform: translateY(0);
+  }
+
+  .bulk-modal-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--supplier-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .bulk-modal-header h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--supplier-text-primary);
+  }
+
+  .bulk-modal-body {
+    padding: 24px;
+  }
+
+  .bulk-field {
+    margin-bottom: 20px;
+  }
+
+  .bulk-field label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--supplier-text-secondary);
+    margin-bottom: 8px;
+  }
+
+  .bulk-field select,
+  .bulk-field input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 2px solid var(--supplier-border);
+    border-radius: var(--supplier-radius-md);
+    font-size: 14px;
+    background: var(--supplier-bg-primary);
+    color: var(--supplier-text-primary);
+    transition: var(--supplier-transition-fast);
+  }
+
+  .bulk-field select:focus,
+  .bulk-field input:focus {
+    outline: none;
+    border-color: var(--supplier-accent);
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+  }
+
+  .bulk-field-hint {
+    font-size: 12px;
+    color: var(--supplier-text-muted);
+    margin-top: 6px;
+  }
+
+  .bulk-modal-footer {
+    padding: 16px 24px;
+    border-top: 1px solid var(--supplier-border);
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
   }
 
   /* Empty State */
@@ -721,12 +1085,29 @@
       width: 100%;
     }
 
-    .search-wrapper {
+    .search-filter-bar {
+      flex-direction: column;
       width: 100%;
     }
 
-    .filter-dropdown {
+    .search-section {
+      min-width: 100%;
+    }
+
+    .filter-divider {
       width: 100%;
+      height: 1px;
+      margin: 0;
+    }
+
+    .filter-section {
+      flex-direction: column;
+      width: 100%;
+    }
+
+    .filter-btn {
+      width: 100%;
+      justify-content: flex-start;
     }
 
     .quick-edit-panel {
@@ -739,16 +1120,46 @@
   <!-- Toolbar -->
   <div class="page-toolbar">
     <div class="toolbar-left">
-      <div class="search-wrapper">
-        <i data-lucide="search"></i>
-        <input type="text" class="search-input" id="searchInput" placeholder="Search parts by number, description, brand...">
+      <div class="search-filter-bar">
+        <!-- Search Section -->
+        <div class="search-section" id="searchSection">
+          <i data-lucide="search" class="search-icon"></i>
+          <input type="text" class="search-input" id="searchInput" 
+                 placeholder="Search parts..." 
+                 autocomplete="off" spellcheck="false">
+          <span class="search-results-badge" id="searchResultsBadge">0</span>
+          <button class="search-clear" id="clearSearch" title="Clear search">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+        
+        <div class="filter-divider"></div>
+        
+        <!-- Filter Section -->
+        <div class="filter-section">
+          <button class="filter-btn" id="brandFilterBtn">
+            <i data-lucide="tag"></i>
+            <span class="filter-value" id="brandFilterLabel">All Brands</span>
+            <i data-lucide="chevron-down" class="filter-chevron"></i>
+            <span class="filter-clear-x" id="clearBrandFilter"><i data-lucide="x"></i></span>
+            <select class="hidden-select" id="brandFilter">
+              <option value="">All Brands</option>
+            </select>
+          </button>
+          
+          <div class="filter-divider"></div>
+          
+          <button class="filter-btn" id="fileFilterBtn">
+            <i data-lucide="file-text"></i>
+            <span class="filter-value" id="fileFilterLabel">All Files</span>
+            <i data-lucide="chevron-down" class="filter-chevron"></i>
+            <span class="filter-clear-x" id="clearFileFilter"><i data-lucide="x"></i></span>
+            <select class="hidden-select" id="fileFilter">
+              <option value="">All Files</option>
+            </select>
+          </button>
+        </div>
       </div>
-      <select class="filter-dropdown" id="brandFilter">
-        <option value="">All Brands</option>
-      </select>
-      <select class="filter-dropdown" id="fileFilter">
-        <option value="">All Files</option>
-      </select>
     </div>
     <div class="toolbar-right">
       <button class="btn btn-secondary" id="exportBtn">
@@ -760,6 +1171,11 @@
         Import Parts
       </a>
     </div>
+  </div>
+
+  <!-- Edit Hint Tooltip -->
+  <div class="edit-hint" id="editHint">
+    <kbd>Double-click</kbd> to edit
   </div>
 
   <!-- Grid Container -->
@@ -791,7 +1207,7 @@
               Price <span class="sort-icon">↕</span>
             </th>
             <th class="col-minlot">Min Lot</th>
-            <th class="col-actions">Del</th>
+            <th class="col-actions">Actions</th>
           </tr>
         </thead>
         <tbody id="partsBody">
@@ -903,8 +1319,8 @@
       
       <div class="edit-row">
         <div class="edit-field">
-          <label>Delivery Days</label>
-          <input type="text" id="editDeliveryDays">
+          <label>Delivery Time</label>
+          <input type="text" id="editDeliveryTime" placeholder="e.g., 3/6">
         </div>
         <div class="edit-field">
           <label>Min Order Qty</label>
@@ -925,6 +1341,50 @@
       Save Changes
     </button>
   </div>
+</div>
+
+<!-- Bulk Edit Modal -->
+<div class="bulk-modal-overlay" id="bulkModalOverlay" onclick="closeBulkModal(event)">
+  <div class="bulk-modal" onclick="event.stopPropagation()">
+    <div class="bulk-modal-header">
+      <h3>Bulk Edit <span id="bulkEditCount">0</span> Parts</h3>
+      <button class="quick-edit-close" onclick="closeBulkModal()">
+        <i data-lucide="x" style="width: 18px; height: 18px;"></i>
+      </button>
+    </div>
+    <div class="bulk-modal-body">
+      <div class="bulk-field">
+        <label>Select Field to Update</label>
+        <select id="bulkFieldSelect">
+          <option value="">-- Choose a field --</option>
+          <option value="brand">Brand</option>
+          <option value="price">Price (AED)</option>
+          <option value="quantity">Quantity</option>
+          <option value="minOrderQty">Min Order Quantity</option>
+          <option value="deliveryTime">Delivery Time</option>
+          <option value="stockCode">Stock Code</option>
+        </select>
+      </div>
+      <div class="bulk-field" id="bulkValueField" style="display: none;">
+        <label id="bulkValueLabel">New Value</label>
+        <input type="text" id="bulkValueInput" placeholder="Enter new value">
+        <p class="bulk-field-hint">This value will be applied to all selected parts.</p>
+      </div>
+    </div>
+    <div class="bulk-modal-footer">
+      <button class="btn btn-secondary" onclick="closeBulkModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="applyBulkEdit()" id="applyBulkBtn" disabled>
+        <i data-lucide="check"></i>
+        Apply Changes
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Save Indicator -->
+<div class="save-indicator" id="saveIndicator">
+  <i data-lucide="check-circle"></i>
+  <span>Saved!</span>
 </div>
 
 <style>
@@ -951,9 +1411,83 @@
   });
 
   function setupEventListeners() {
-    document.getElementById('searchInput').addEventListener('input', debounce(loadParts, 300));
-    document.getElementById('brandFilter').addEventListener('change', () => { currentPage = 1; loadParts(); });
-    document.getElementById('fileFilter').addEventListener('change', () => { currentPage = 1; loadParts(); });
+    const searchInput = document.getElementById('searchInput');
+    const searchSection = document.getElementById('searchSection');
+    const clearSearch = document.getElementById('clearSearch');
+    const searchResultsBadge = document.getElementById('searchResultsBadge');
+    
+    // Search input handling
+    searchInput.addEventListener('input', (e) => {
+      searchSection.classList.toggle('has-value', e.target.value.length > 0);
+      debounce(loadParts, 300)();
+    });
+    
+    // Clear search button
+    clearSearch.addEventListener('click', (e) => {
+      e.stopPropagation();
+      searchInput.value = '';
+      searchSection.classList.remove('has-value');
+      searchInput.focus();
+      currentPage = 1;
+      loadParts();
+    });
+    
+    // Escape key clears search
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        searchInput.value = '';
+        searchSection.classList.remove('has-value');
+        currentPage = 1;
+        loadParts();
+      }
+    });
+    
+    // Brand filter
+    const brandFilter = document.getElementById('brandFilter');
+    const brandFilterBtn = document.getElementById('brandFilterBtn');
+    const brandFilterLabel = document.getElementById('brandFilterLabel');
+    const clearBrandFilter = document.getElementById('clearBrandFilter');
+    
+    brandFilter.addEventListener('change', () => { 
+      const hasValue = brandFilter.value !== '';
+      brandFilterBtn.classList.toggle('active', hasValue);
+      brandFilterLabel.textContent = hasValue ? brandFilter.options[brandFilter.selectedIndex].text : 'All Brands';
+      currentPage = 1; 
+      loadParts(); 
+    });
+    
+    clearBrandFilter.addEventListener('click', (e) => {
+      e.stopPropagation();
+      brandFilter.value = '';
+      brandFilterBtn.classList.remove('active');
+      brandFilterLabel.textContent = 'All Brands';
+      currentPage = 1;
+      loadParts();
+    });
+    
+    // File filter
+    const fileFilter = document.getElementById('fileFilter');
+    const fileFilterBtn = document.getElementById('fileFilterBtn');
+    const fileFilterLabel = document.getElementById('fileFilterLabel');
+    const clearFileFilter = document.getElementById('clearFileFilter');
+    
+    fileFilter.addEventListener('change', () => { 
+      const hasValue = fileFilter.value !== '';
+      fileFilterBtn.classList.toggle('active', hasValue);
+      fileFilterLabel.textContent = hasValue ? fileFilter.options[fileFilter.selectedIndex].text : 'All Files';
+      currentPage = 1; 
+      loadParts(); 
+    });
+    
+    clearFileFilter.addEventListener('click', (e) => {
+      e.stopPropagation();
+      fileFilter.value = '';
+      fileFilterBtn.classList.remove('active');
+      fileFilterLabel.textContent = 'All Files';
+      currentPage = 1;
+      loadParts();
+    });
+    
     document.getElementById('selectAll').addEventListener('change', toggleSelectAll);
     document.getElementById('prevPage').addEventListener('click', () => changePage(-1));
     document.getElementById('nextPage').addEventListener('click', () => changePage(1));
@@ -963,10 +1497,58 @@
       th.addEventListener('click', () => sortBy(th.dataset.sort));
     });
 
+    // Bulk edit field selector
+    document.getElementById('bulkFieldSelect').addEventListener('change', (e) => {
+      const valueField = document.getElementById('bulkValueField');
+      const valueInput = document.getElementById('bulkValueInput');
+      const applyBtn = document.getElementById('applyBulkBtn');
+      
+      if (e.target.value) {
+        valueField.style.display = 'block';
+        valueInput.type = ['price', 'quantity', 'minOrderQty'].includes(e.target.value) ? 'number' : 'text';
+        valueInput.placeholder = `Enter new ${e.target.options[e.target.selectedIndex].text}`;
+        document.getElementById('bulkValueLabel').textContent = e.target.options[e.target.selectedIndex].text;
+        applyBtn.disabled = false;
+      } else {
+        valueField.style.display = 'none';
+        applyBtn.disabled = true;
+      }
+    });
+
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         if (editingCell) finishInlineEdit(false);
         closeQuickEdit();
+        closeBulkModal();
+      }
+    });
+    
+    // Show edit hint on hover for editable cells
+    setupEditHint();
+  }
+
+  function setupEditHint() {
+    const hint = document.getElementById('editHint');
+    let hintTimeout;
+    
+    document.addEventListener('mouseover', (e) => {
+      const cell = e.target.closest('.cell-content.editable');
+      if (cell && !editingCell) {
+        clearTimeout(hintTimeout);
+        hintTimeout = setTimeout(() => {
+          const rect = cell.getBoundingClientRect();
+          hint.style.left = rect.left + 'px';
+          hint.style.top = (rect.bottom + 8) + 'px';
+          hint.classList.add('visible');
+        }, 600);
+      }
+    });
+    
+    document.addEventListener('mouseout', (e) => {
+      const cell = e.target.closest('.cell-content.editable');
+      if (cell) {
+        clearTimeout(hintTimeout);
+        hint.classList.remove('visible');
       }
     });
   }
@@ -1005,11 +1587,13 @@
     const search = document.getElementById('searchInput').value;
     const brand = document.getElementById('brandFilter').value;
     const fileName = document.getElementById('fileFilter').value;
+    const searchResultsBadge = document.getElementById('searchResultsBadge');
+    const searchSection = document.getElementById('searchSection');
 
     try {
       const params = new URLSearchParams({
         page: currentPage,
-        limit: 100,
+        limit: 500,
         sortBy: currentSort.field,
         sortOrder: currentSort.order
       });
@@ -1022,10 +1606,20 @@
       const data = await response.json();
 
       parts = data.results || [];
+      
+      // Update search results badge
+      if (search && search.trim()) {
+        searchResultsBadge.textContent = data.total || 0;
+        searchSection.classList.add('has-value');
+      } else {
+        searchSection.classList.remove('has-value');
+      }
+      
       renderParts();
       updatePagination(data);
     } catch (err) {
       console.error('Error loading parts:', err);
+      searchSection.classList.toggle('has-value', search && search.trim());
       showEmptyState('Error loading parts. Please refresh.');
     }
   }
@@ -1040,25 +1634,25 @@
 
     tbody.innerHTML = parts.map(part => `
       <tr data-id="${part._id}" class="${selectedParts.has(part._id) ? 'selected' : ''}">
-        <td class="col-checkbox">
+        <td class="col-checkbox" onclick="event.stopPropagation()">
           <input type="checkbox" class="row-checkbox" value="${part._id}"
                  ${selectedParts.has(part._id) ? 'checked' : ''}
-                 onchange="toggleSelect('${part._id}')">
+                 onchange="event.stopPropagation(); toggleSelect('${part._id}')">
         </td>
         <td class="col-partnumber">
-          <div class="cell-content readonly" ondblclick="openQuickEdit('${part._id}')">${escapeHtml(part.partNumber)}</div>
+          <div class="cell-content readonly">${escapeHtml(part.partNumber)}</div>
         </td>
         <td class="col-description">
-          <div class="cell-content" data-field="description" data-id="${part._id}"
-               onclick="startInlineEdit(this)" title="${escapeHtml(part.description || '')}">${escapeHtml(part.description || '-')}</div>
+          <div class="cell-content editable" data-field="description" data-id="${part._id}"
+               ondblclick="handleCellDoubleClick(this, event)" title="${escapeHtml(part.description || '')}">${escapeHtml(part.description || '-')}</div>
         </td>
         <td class="col-brand">
-          <div class="cell-content" data-field="brand" data-id="${part._id}"
-               onclick="startInlineEdit(this)">${escapeHtml(part.brand || '-')}</div>
+          <div class="cell-content editable" data-field="brand" data-id="${part._id}"
+               ondblclick="handleCellDoubleClick(this, event)">${escapeHtml(part.brand || '-')}</div>
         </td>
         <td class="col-quantity">
-          <div class="cell-content" data-field="quantity" data-id="${part._id}" data-type="number"
-               onclick="startInlineEdit(this)">${part.quantity || 0}</div>
+          <div class="cell-content editable" data-field="quantity" data-id="${part._id}" data-type="number"
+               ondblclick="handleCellDoubleClick(this, event)">${part.quantity || 0}</div>
         </td>
         <td class="col-weight">
           <div class="cell-content readonly">${part.weight ? part.weight.toFixed(3) : '-'}</div>
@@ -1068,30 +1662,48 @@
         </td>
         <td class="col-delivery">
           <div class="cell-content readonly">
-            ${part.deliveryDays ? `<span class="delivery-badge">${part.deliveryDays}</span>` : '-'}
+            ${part.deliveryTime || part.deliveryDays ? `<span class="delivery-badge">${part.deliveryTime || part.deliveryDays}</span>` : '-'}
           </div>
         </td>
         <td class="col-stock">
           <div class="cell-content readonly">
-            <span class="stock-badge ${part.stockCode || part.stock || 'default'}">${part.stockCode || part.stock || '-'}</span>
+            <span class="stock-badge">${part.stockCode || '-'}</span>
           </div>
         </td>
         <td class="col-price">
-          <div class="cell-content" data-field="price" data-id="${part._id}" data-type="number"
-               onclick="startInlineEdit(this)">${(part.price || 0).toFixed(2)}</div>
+          <div class="cell-content editable" data-field="price" data-id="${part._id}" data-type="number"
+               ondblclick="handleCellDoubleClick(this, event)">${(part.price || 0).toFixed(2)}</div>
         </td>
         <td class="col-minlot">
           <div class="cell-content readonly">${part.minOrderQty || 1}</div>
         </td>
         <td class="col-actions">
-          <button class="action-btn" onclick="deletePart('${part._id}')" title="Delete">
-            <i data-lucide="trash-2"></i>
-          </button>
+          <div class="actions-cell">
+            <button class="action-btn edit-btn" onclick="event.stopPropagation(); openQuickEdit('${part._id}')" title="Edit part details">
+              <i data-lucide="edit-2"></i>
+            </button>
+            <button class="action-btn delete-btn" onclick="deletePart('${part._id}', event)" title="Delete part">
+              <i data-lucide="trash-2"></i>
+            </button>
+          </div>
         </td>
       </tr>
     `).join('');
 
     lucide.createIcons();
+  }
+
+  function handleCellDoubleClick(cell, event) {
+    // Stop event bubbling to prevent accidental actions
+    event.stopPropagation();
+    event.preventDefault();
+    
+    // Hide edit hint
+    document.getElementById('editHint').classList.remove('visible');
+    
+    // Start editing
+    startInlineEdit(cell);
+    return false;
   }
 
   function showEmptyState(message) {
@@ -1124,6 +1736,7 @@
     const currentValue = cell.textContent.trim();
 
     editingCell = cell;
+    cell.classList.add('editing');
     cell.closest('tr').classList.add('editing');
 
     const input = document.createElement('input');
@@ -1155,7 +1768,7 @@
       } else if (e.key === 'Tab') {
         e.preventDefault();
         finishInlineEdit(true);
-        const cells = cell.closest('tr').querySelectorAll('.cell-content:not(.readonly)');
+        const cells = cell.closest('tr').querySelectorAll('.cell-content.editable');
         const idx = Array.from(cells).indexOf(cell);
         if (idx < cells.length - 1) {
           startInlineEdit(cells[idx + 1]);
@@ -1176,6 +1789,7 @@
     const newValue = input.value.trim();
 
     editingCell.closest('tr').classList.remove('editing');
+    editingCell.classList.remove('editing');
 
     if (save && newValue !== originalValue && newValue !== (originalValue === '-' ? '' : originalValue)) {
       try {
@@ -1194,6 +1808,9 @@
         if (part) part[field] = updates[field];
 
         editingCell.innerHTML = field === 'price' ? parseFloat(newValue || 0).toFixed(2) : (newValue || '-');
+        
+        // Show save indicator
+        showSaveIndicator();
       } catch (err) {
         console.error('Error saving:', err);
         editingCell.innerHTML = originalValue;
@@ -1205,10 +1822,21 @@
     const savedCell = editingCell;
     editingCell = null;
     
-    // Re-add the click handler and data attributes
+    // Re-add the double-click handler and data attributes
     savedCell.dataset.field = field;
     savedCell.dataset.id = id;
-    savedCell.onclick = () => startInlineEdit(savedCell);
+    savedCell.ondblclick = (e) => handleCellDoubleClick(savedCell, e);
+  }
+
+  function showSaveIndicator(message = 'Changes saved') {
+    const indicator = document.getElementById('saveIndicator');
+    const textEl = indicator.querySelector('span');
+    if (textEl) textEl.textContent = message;
+    indicator.classList.add('show');
+    lucide.createIcons();
+    setTimeout(() => {
+      indicator.classList.remove('show');
+    }, 2000);
   }
 
   async function openQuickEdit(id) {
@@ -1224,7 +1852,7 @@
       document.getElementById('editQuantity').value = part.quantity || 0;
       document.getElementById('editWeight').value = part.weight || '';
       document.getElementById('editVolume').value = part.volume || '';
-      document.getElementById('editDeliveryDays').value = part.deliveryDays || '';
+      document.getElementById('editDeliveryTime').value = part.deliveryTime || '';
       document.getElementById('editMinOrderQty').value = part.minOrderQty || 1;
       document.getElementById('editStockCode').value = part.stockCode || '';
 
@@ -1243,6 +1871,11 @@
 
   async function saveQuickEdit() {
     const id = document.getElementById('editPartId').value;
+    const deliveryTimeVal = document.getElementById('editDeliveryTime').value || '';
+    // Extract first number for deliveryDays (for filtering)
+    const deliveryMatch = deliveryTimeVal.match(/(\d+)/);
+    const deliveryDays = deliveryMatch ? parseInt(deliveryMatch[1], 10) : null;
+    
     const updates = {
       description: document.getElementById('editDescription').value,
       brand: document.getElementById('editBrand').value,
@@ -1250,7 +1883,8 @@
       quantity: parseInt(document.getElementById('editQuantity').value) || 0,
       weight: parseFloat(document.getElementById('editWeight').value) || null,
       volume: parseFloat(document.getElementById('editVolume').value) || null,
-      deliveryDays: document.getElementById('editDeliveryDays').value || null,
+      deliveryTime: deliveryTimeVal,
+      deliveryDays: deliveryDays,
       minOrderQty: parseInt(document.getElementById('editMinOrderQty').value) || 1,
       stockCode: document.getElementById('editStockCode').value
     };
@@ -1311,19 +1945,42 @@
   }
 
   function openBulkEdit() {
-    const field = prompt('Which field to update? (price, quantity, brand)');
-    if (!field) return;
-
-    const value = prompt(`Enter new value for ${field}:`);
-    if (value === null) return;
-
-    bulkUpdate(field, value);
+    document.getElementById('bulkEditCount').textContent = selectedParts.size;
+    document.getElementById('bulkFieldSelect').value = '';
+    document.getElementById('bulkValueInput').value = '';
+    document.getElementById('bulkValueField').style.display = 'none';
+    document.getElementById('applyBulkBtn').disabled = true;
+    document.getElementById('bulkModalOverlay').classList.add('open');
+    lucide.createIcons();
   }
 
-  async function bulkUpdate(field, value) {
+  function closeBulkModal(event) {
+    if (event && event.target !== event.currentTarget) return;
+    document.getElementById('bulkModalOverlay').classList.remove('open');
+  }
+
+  async function applyBulkEdit() {
+    const field = document.getElementById('bulkFieldSelect').value;
+    const value = document.getElementById('bulkValueInput').value.trim();
+
+    if (!field || value === '') {
+      alert('Please select a field and enter a value.');
+      return;
+    }
+
     try {
       const updates = {};
-      updates[field] = ['price', 'quantity'].includes(field) ? parseFloat(value) : value;
+      
+      if (field === 'deliveryTime') {
+        // Store original format and extract days for filtering
+        updates.deliveryTime = value;
+        const deliveryMatch = value.match(/(\d+)/);
+        updates.deliveryDays = deliveryMatch ? parseInt(deliveryMatch[1], 10) : null;
+      } else if (['price', 'quantity', 'minOrderQty'].includes(field)) {
+        updates[field] = parseFloat(value);
+      } else {
+        updates[field] = value;
+      }
 
       await fetch('/api/supplier/parts/bulk', {
         method: 'PUT',
@@ -1334,8 +1991,10 @@
         })
       });
 
+      closeBulkModal();
       clearSelection();
       loadParts();
+      showSaveIndicator();
     } catch (err) {
       alert('Error updating parts: ' + err.message);
     }
@@ -1358,12 +2017,20 @@
     }
   }
 
-  async function deletePart(id) {
-    if (!confirm('Delete this part?')) return;
+  async function deletePart(id, event) {
+    // Stop event propagation to prevent any other handlers
+    if (event) {
+      event.stopPropagation();
+      event.preventDefault();
+    }
+    
+    // Double confirmation for safety
+    if (!confirm('Are you sure you want to delete this part?\n\nThis action cannot be undone.')) return;
 
     try {
       await fetch(`/api/supplier/parts/${id}`, { method: 'DELETE' });
       loadParts();
+      showSaveIndicator('Part deleted');
     } catch (err) {
       alert('Error deleting part: ' + err.message);
     }

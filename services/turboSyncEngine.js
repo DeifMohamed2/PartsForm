@@ -189,6 +189,7 @@ const ES_INDEX_MAPPING = {
       weightUnit: { type: 'keyword' },
       volume: { type: 'float' },
       deliveryDays: { type: 'integer' },
+      deliveryTime: { type: 'keyword' },
       category: { type: 'keyword' },
       subcategory: { type: 'keyword' },
       integration: { type: 'keyword' },
@@ -1134,6 +1135,14 @@ async function transformToNDJSON_NodeFallback(downloadDir, files, integration, o
             if (match) stockCodeValue = match[1];
           }
 
+          // Parse delivery time - preserve original format like "3/6"
+          let deliveryRaw = (cols[colMap.deliveryDays] || '').replace(/['"]/g, '').trim();
+          // Clean Excel formula wrapper ="..."
+          deliveryRaw = deliveryRaw.replace(/^="*(.+?)"*$/g, '$1').replace(/[=""]/g, '').trim();
+          const deliveryTime = deliveryRaw || '';
+          const deliveryMatch = deliveryRaw.match(/(\d+)/);
+          const deliveryDays = deliveryMatch ? parseInt(deliveryMatch[1], 10) : 0;
+
           const doc = {
             partNumber,
             description: (cols[colMap.description] || '').replace(/['"]/g, ''),
@@ -1148,7 +1157,8 @@ async function transformToNDJSON_NodeFallback(downloadDir, files, integration, o
             weight: parseFloat(cols[colMap.weight]) || 0,
             weightUnit: (cols[colMap.weightUnit] || 'kg').replace(/['"]/g, ''),
             volume: parseFloat(cols[colMap.volume]) || 0,
-            deliveryDays: parseInt(cols[colMap.deliveryDays]) || 0,
+            deliveryDays,
+            deliveryTime,
             category: (cols[colMap.category] || '').replace(/['"]/g, ''),
             subcategory: (cols[colMap.subcategory] || '').replace(/['"]/g, ''),
             integration: integrationId,

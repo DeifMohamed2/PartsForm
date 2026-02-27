@@ -136,6 +136,42 @@ class SupplierPartsService {
   }
 
   /**
+   * Clean Excel formula wrapper from values like ="3/6" or =""3/6""
+   */
+  cleanExcelValue(value) {
+    if (!value || typeof value !== 'string') return value;
+    
+    let cleaned = value.trim();
+    
+    // Remove Excel formula wrapper: ="value" or =""value"" or =value
+    // Pattern handles: ="3/6" or =""3/6"" or ="AB4" etc
+    cleaned = cleaned
+      .replace(/^="*(.+?)"*$/g, '$1')  // Remove ="..." wrapper
+      .replace(/^""(.+?)""$/g, '$1')    // Remove double quotes
+      .replace(/^"(.+?)"$/g, '$1')      // Remove single quotes
+      .replace(/^'/g, '');              // Remove leading apostrophe (Excel text prefix)
+    
+    return cleaned.trim();
+  }
+
+  /**
+   * Parse delivery time - preserves original format like "3/6" while extracting min days
+   */
+  parseDeliveryTime(value) {
+    const cleaned = this.cleanExcelValue(value);
+    if (!cleaned) return { deliveryTime: '', deliveryDays: null };
+    
+    // Store original format (like "3/6")
+    const deliveryTime = cleaned;
+    
+    // Extract first number for filtering (e.g., "3/6" -> 3, "1-3" -> 1, "5" -> 5)
+    const match = cleaned.match(/(\d+)/);
+    const deliveryDays = match ? parseInt(match[1], 10) : null;
+    
+    return { deliveryTime, deliveryDays };
+  }
+
+  /**
    * Map raw data to Part schema
    */
   mapToPart(rawRow, columnMapping = {}) {
@@ -150,7 +186,7 @@ class SupplierPartsService {
       currency: ['currency', 'curr', 'ccy'],
       weight: ['weight', 'wt', 'mass', 'kg', 'lbs'],
       volume: ['volume', 'vol', 'cbm', 'cubic'],
-      deliveryDays: ['delivery_days', 'delivery days', 'lead_time', 'lead time', 'days', 'eta', 'delivery'],
+      deliveryTime: ['delivery', 'delivery_days', 'delivery days', 'lead_time', 'lead time', 'days', 'eta'],
       category: ['category', 'cat', 'type', 'group', 'classification'],
       minOrderQty: ['min_order_qty', 'min order qty', 'moq', 'minimum_qty', 'min_qty', 'min_lot', 'min lot', 'minlot'],
       stockCode: ['stock', 'stock_code', 'stock code', 'warehouse', 'location', 'wh']
@@ -187,9 +223,20 @@ class SupplierPartsService {
       }
 
       if (value !== null && value !== undefined && value !== '') {
-        // Type conversion
-        if (['price', 'quantity', 'weight', 'volume', 'deliveryDays', 'minOrderQty'].includes(field)) {
-          let strValue = String(value).trim();
+        // Special handling for delivery time - preserves "3/6" format
+        if (field === 'deliveryTime') {
+          const { deliveryTime, deliveryDays } = this.parseDeliveryTime(value);
+          if (deliveryTime) part.deliveryTime = deliveryTime;
+          if (deliveryDays !== null) part.deliveryDays = deliveryDays;
+        }
+        // Special handling for stockCode - clean Excel wrapper
+        else if (field === 'stockCode') {
+          const cleaned = this.cleanExcelValue(value);
+          if (cleaned) part.stockCode = cleaned;
+        }
+        // Numeric fields
+        else if (['price', 'quantity', 'weight', 'volume', 'minOrderQty'].includes(field)) {
+          let strValue = this.cleanExcelValue(String(value));
           // Handle European decimal format (comma as decimal separator)
           // If there's a comma but no period, replace comma with period
           if (strValue.includes(',') && !strValue.includes('.')) {
@@ -197,8 +244,10 @@ class SupplierPartsService {
           }
           const numValue = parseFloat(strValue.replace(/[^0-9.-]/g, ''));
           if (!isNaN(numValue)) part[field] = numValue;
-        } else {
-          part[field] = String(value).trim();
+        }
+        // String fields
+        else {
+          part[field] = this.cleanExcelValue(String(value));
         }
       }
     });
@@ -369,8 +418,11 @@ class SupplierPartsService {
         currency: part.currency,
         quantity: part.quantity,
         stock: part.stock,
+        stockCode: part.stockCode,
         weight: part.weight,
+        volume: part.volume,
         deliveryDays: part.deliveryDays,
+        deliveryTime: part.deliveryTime,
         category: part.category,
         sourceType: 'supplier_upload',
         sourceSupplierId: supplier._id.toString(),
@@ -433,6 +485,11 @@ class SupplierPartsService {
           currency: part.currency,
           quantity: part.quantity,
           stock: part.stock,
+          stockCode: part.stockCode,
+          deliveryDays: part.deliveryDays,
+          deliveryTime: part.deliveryTime,
+          weight: part.weight,
+          volume: part.volume,
           sourceType: 'supplier_upload',
           sourceSupplierId: supplier._id.toString(),
           updatedAt: new Date()
@@ -517,8 +574,11 @@ class SupplierPartsService {
             currency: part.currency,
             quantity: part.quantity,
             stock: part.stock,
+            stockCode: part.stockCode,
             weight: part.weight,
+            volume: part.volume,
             deliveryDays: part.deliveryDays,
+            deliveryTime: part.deliveryTime,
             category: part.category,
             sourceType: 'supplier_upload',
             sourceSupplierId: supplierId.toString(),

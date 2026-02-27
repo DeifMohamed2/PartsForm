@@ -138,10 +138,18 @@ class CSVParserService {
 
     // Parse delivery days from format like "0/0" or "1-3"
     const parseDelivery = (val) => {
-      if (!val) return null;
-      const str = String(val).replace(/[=""]/g, '').trim();
+      if (!val) return { deliveryTime: '', deliveryDays: null };
+      // Clean Excel formula wrapper ="..."
+      const str = String(val).replace(/^="*(.+?)"*$/g, '$1').replace(/[=""]/g, '').trim();
+      if (!str) return { deliveryTime: '', deliveryDays: null };
+      
+      // Store original format
+      const deliveryTime = str;
+      // Extract first number for filtering
       const match = str.match(/(\d+)/);
-      return match ? parseInt(match[1], 10) : null;
+      const deliveryDays = match ? parseInt(match[1], 10) : null;
+      
+      return { deliveryTime, deliveryDays };
     };
 
     // Parse weight (handle European format with comma)
@@ -151,6 +159,9 @@ class CSVParserService {
       const parsed = parseFloat(str);
       return isNaN(parsed) ? null : parsed;
     };
+
+    // Parse delivery info
+    const deliveryInfo = parseDelivery(findValue(deliveryFields));
 
     return {
       partNumber,
@@ -162,7 +173,8 @@ class CSVParserService {
       quantity: this.parseQuantity(findValue(quantityFields)),
       weight: parseWeight(findValue(weightFields)),
       volume: parseWeight(findValue(volumeFields)),
-      deliveryDays: parseDelivery(findValue(deliveryFields)),
+      deliveryDays: deliveryInfo.deliveryDays,
+      deliveryTime: deliveryInfo.deliveryTime,
       stockCode: findValue(stockCodeFields),
       minOrderQty: this.parseQuantity(findValue(minLotFields)) || 1,
     };

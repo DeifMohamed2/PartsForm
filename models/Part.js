@@ -81,6 +81,11 @@ const partSchema = new mongoose.Schema({
     min: 0,
     default: null
   },
+  deliveryTime: {
+    type: String,
+    trim: true,
+    default: ''
+  },
 
   // Categorization
   category: {
@@ -667,7 +672,7 @@ partSchema.statics.updateSupplierPart = async function (partId, supplierId, upda
 
   // Apply updates
   Object.keys(updates).forEach(key => {
-    if (['partNumber', 'description', 'brand', 'price', 'quantity', 'currency', 'stock', 'weight', 'deliveryDays', 'category'].includes(key)) {
+    if (['partNumber', 'description', 'brand', 'price', 'quantity', 'currency', 'stock', 'stockCode', 'weight', 'deliveryDays', 'deliveryTime', 'category'].includes(key)) {
       part[key] = updates[key];
     }
   });

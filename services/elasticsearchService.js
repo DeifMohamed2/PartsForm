@@ -177,6 +177,7 @@ class ElasticsearchService {
                 weight: { type: 'float' },
                 volume: { type: 'float' },
                 deliveryDays: { type: 'integer' },
+                deliveryTime: { type: 'keyword' },
                 category: { type: 'keyword' },
                 integration: { type: 'keyword' },
                 integrationName: { type: 'keyword' },
@@ -686,6 +687,7 @@ class ElasticsearchService {
           weight: doc.weight,
           volume: doc.volume,
           deliveryDays: doc.deliveryDays,
+          deliveryTime: doc.deliveryTime,
           category: doc.category,
           // Integration fields (for API integrations)
           integration: doc.integration?.toString(),
@@ -959,7 +961,7 @@ class ElasticsearchService {
       
       // Use cursor to stream from MongoDB (memory efficient)
       const cursor = Part.find({ integration: integrationId })
-        .select('partNumber description brand supplier price currency quantity minOrderQty stock stockCode weight volume deliveryDays category integration integrationName fileName importedAt createdAt')
+        .select('partNumber description brand supplier price currency quantity minOrderQty stock stockCode weight volume deliveryDays deliveryTime category integration integrationName fileName importedAt createdAt')
         .lean()
         .cursor({ batchSize: REINDEX_BATCH_SIZE });
       
@@ -981,6 +983,7 @@ class ElasticsearchService {
           weight: doc.weight,
           volume: doc.volume,
           deliveryDays: doc.deliveryDays,
+          deliveryTime: doc.deliveryTime,
           category: doc.category,
           integration: doc.integration?.toString(),
           integrationName: doc.integrationName,
