@@ -68,6 +68,26 @@ const auditLogSchema = new mongoose.Schema(
         'admin.supplier_reject',
         'admin.supplier_suspend',
         'admin.quota_update',
+        'admin.supplier_create',
+        'admin.supplier_delete',
+        'admin.supplier_reactivate',
+        'admin.ftp_update',
+        'admin.password_reset',
+        
+        // Legacy admin actions (for backwards compatibility)
+        'supplier_created',
+        'supplier_approved',
+        'supplier_rejected',
+        'supplier_suspended',
+        'supplier_reactivated',
+        'supplier_deleted',
+        
+        // FTP operations
+        'ftp.login',
+        'ftp.upload',
+        'ftp.delete',
+        'ftp.download',
+        'ftp.auto_import',
         
         // Version operations
         'version.restore',
