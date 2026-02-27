@@ -567,62 +567,6 @@ const firstLoginChangePassword = async (req, res) => {
 };
 
 /**
- * Generate API key
- */
-const generateApiKey = async (req, res) => {
-  try {
-    const supplier = await Supplier.findById(req.supplier.getEffectiveSupplierId());
-    
-    const apiKey = supplier.generateApiKey();
-    await supplier.save();
-
-    // Audit log
-    await AuditLog.log({
-      actor: { type: 'supplier', id: req.supplier._id, name: req.supplier.contactName },
-      action: 'supplier.api_key_generate',
-      supplier: supplier._id,
-      status: 'success',
-    });
-
-    res.json({
-      success: true,
-      message: 'API key generated. Store it securely - you won\'t be able to see it again.',
-      apiKey, // Only show once
-    });
-  } catch (error) {
-    logger.error('Generate API key error:', error.message);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to generate API key',
-    });
-  }
-};
-
-/**
- * Revoke API key
- */
-const revokeApiKey = async (req, res) => {
-  try {
-    const supplier = await Supplier.findById(req.supplier.getEffectiveSupplierId());
-    
-    supplier.apiKey = undefined;
-    supplier.apiKeyCreatedAt = undefined;
-    await supplier.save();
-
-    res.json({
-      success: true,
-      message: 'API key revoked',
-    });
-  } catch (error) {
-    logger.error('Revoke API key error:', error.message);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to revoke API key',
-    });
-  }
-};
-
-/**
  * Get dashboard data
  */
 const getDashboard = async (req, res) => {
@@ -894,8 +838,6 @@ module.exports = {
   updateProfile,
   changePassword,
   firstLoginChangePassword,
-  generateApiKey,
-  revokeApiKey,
   getDashboard,
   getTeamMembers,
   inviteTeamMember,

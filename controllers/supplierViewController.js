@@ -148,28 +148,6 @@ exports.import = async (req, res) => {
   }
 };
 
-// SFTP settings
-exports.sftp = async (req, res) => {
-  try {
-    const tableCount = await DataTable.countDocuments({ 
-      supplier: req.supplier.getEffectiveSupplierId() 
-    });
-    
-    res.render('supplier/sftp', {
-      title: 'SFTP Settings | Supplier Portal',
-      supplier: req.supplier,
-      tableCount
-    });
-  } catch (err) {
-    console.error('SFTP view error:', err);
-    res.render('supplier/sftp', {
-      title: 'SFTP Settings | Supplier Portal',
-      supplier: req.supplier,
-      tableCount: 0
-    });
-  }
-};
-
 // Exports history
 exports.exports = async (req, res) => {
   try {
@@ -184,24 +162,6 @@ exports.exports = async (req, res) => {
     });
   } catch (err) {
     console.error('Exports view error:', err);
-    res.redirect('/supplier');
-  }
-};
-
-// API settings
-exports.api = async (req, res) => {
-  try {
-    const tableCount = await DataTable.countDocuments({ 
-      supplier: req.supplier.getEffectiveSupplierId() 
-    });
-    
-    res.render('supplier/api', {
-      title: 'API Access | Supplier Portal',
-      supplier: req.supplier,
-      tableCount
-    });
-  } catch (err) {
-    console.error('API view error:', err);
     res.redirect('/supplier');
   }
 };

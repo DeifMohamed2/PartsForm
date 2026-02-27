@@ -44,8 +44,6 @@ router.get('/auth/me', requireSupplierAuth, supplierAuthController.getProfile);
 router.get('/profile', requireSupplierAuth, supplierAuthController.getProfile); // Alias
 router.put('/auth/profile', requireSupplierAuth, supplierAuthController.updateProfile);
 router.put('/auth/password', requireSupplierAuth, supplierAuthController.changePassword);
-router.post('/auth/api-key', requireSupplierAuth, requireSupplierPermission('manage_sftp'), supplierAuthController.generateApiKey);
-router.delete('/auth/api-key', requireSupplierAuth, requireSupplierPermission('manage_sftp'), supplierAuthController.revokeApiKey);
 
 // ==================== DASHBOARD ====================
 router.get('/dashboard', requireSupplierAuth, supplierAuthController.getDashboard);
@@ -84,12 +82,6 @@ router.post('/tables/:tableId/import', requireSupplierAuth, requireSupplierPermi
 router.get('/tables/:tableId/export', requireSupplierAuth, requireSupplierPermission('export_data'), supplierDataController.exportData);
 router.post('/tables/:tableId/export', requireSupplierAuth, requireSupplierPermission('export_data'), supplierDataController.exportData);
 router.get('/exports/:exportId/download', requireSupplierAuth, supplierDataController.downloadExport);
-
-// ==================== SFTP ROUTES ====================
-router.post('/sftp/test', requireSupplierAuth, requireSupplierPermission('manage_sftp'), supplierDataController.testSFTPConnection);
-router.put('/sftp/config', requireSupplierAuth, requireSupplierPermission('manage_sftp'), supplierDataController.updateSFTPConfig);
-router.post('/tables/:tableId/sftp/export', requireSupplierAuth, requireSupplierPermission('export_data'), supplierDataController.exportToSFTP);
-router.post('/sftp/trigger-export', requireSupplierAuth, requireSupplierPermission('export_data'), supplierDataController.triggerScheduledExport);
 
 // ==================== AUDIT & HISTORY ROUTES ====================
 router.get('/audit-logs', requireSupplierAuth, requireSupplierPermission('view_audit_logs'), supplierDataController.getAuditLogs);

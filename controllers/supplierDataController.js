@@ -1,12 +1,11 @@
 /**
  * Supplier Data Controller
  * Handles all API endpoints for supplier data management
- * Supports table CRUD, record CRUD, import/export, SFTP operations
+ * Supports table CRUD, record CRUD, import/export operations
  */
 const supplierDataService = require('../services/supplierDataService');
 const supplierDataImportService = require('../services/supplierDataImportService');
 const sftpExportService = require('../services/sftpExportService');
-const supplierExportScheduler = require('../services/supplierExportScheduler');
 const elasticsearchService = require('../services/elasticsearchService');
 const DataTable = require('../models/DataTable');
 const DataRecord = require('../models/DataRecord');
@@ -1639,184 +1638,6 @@ const exportData = async (req, res) => {
   }
 };
 
-// ==================== SFTP OPERATIONS ====================
-
-/**
- * Test SFTP connection
- */
-const testSFTPConnection = async (req, res) => {
-  try {
-    const { host, port, username, password, remotePath } = req.body;
-    
-    if (!host || !username) {
-      return res.status(400).json({
-        success: false,
-        message: 'SFTP host and username are required',
-      });
-    }
-    
-    const result = await sftpExportService.testConnection({
-      host,
-      port: port || 22,
-      username,
-      password,
-      remotePath: remotePath || '/',
-    });
-    
-    res.json({
-      success: result.success,
-      message: result.message,
-    });
-  } catch (error) {
-    logger.error('SFTP test error:', error.message);
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
-  }
-};
-
-/**
- * Update SFTP configuration
- */
-const updateSFTPConfig = async (req, res) => {
-  try {
-    const supplier = await Supplier.findById(req.supplier.getEffectiveSupplierId());
-    if (!supplier) {
-      return res.status(404).json({ success: false, message: 'Supplier not found' });
-    }
-    
-    const { enabled, host, port, username, password, remotePath, exportSchedule } = req.body;
-    
-    supplier.sftpConfig = {
-      ...supplier.sftpConfig,
-      enabled: enabled !== undefined ? enabled : supplier.sftpConfig.enabled,
-      host: host || supplier.sftpConfig.host,
-      port: port || supplier.sftpConfig.port,
-      username: username || supplier.sftpConfig.username,
-      remotePath: remotePath || supplier.sftpConfig.remotePath,
-    };
-    
-    if (password) {
-      supplier.sftpConfig.password = password;
-    }
-    
-    if (exportSchedule) {
-      supplier.sftpConfig.exportSchedule = {
-        ...supplier.sftpConfig.exportSchedule,
-        ...exportSchedule,
-      };
-    }
-    
-    await supplier.save();
-    
-    // Audit log
-    await AuditLog.log({
-      actor: supplierDataService.buildActorInfo(req.supplier),
-      action: 'sftp.config_update',
-      resource: { type: 'supplier', id: supplier._id, name: supplier.companyName },
-      supplier: supplier._id,
-      status: 'success',
-    });
-    
-    res.json({
-      success: true,
-      message: 'SFTP configuration updated',
-      sftpConfig: {
-        enabled: supplier.sftpConfig.enabled,
-        host: supplier.sftpConfig.host,
-        port: supplier.sftpConfig.port,
-        username: supplier.sftpConfig.username,
-        remotePath: supplier.sftpConfig.remotePath,
-        exportSchedule: supplier.sftpConfig.exportSchedule,
-      },
-    });
-  } catch (error) {
-    logger.error('Update SFTP config error:', error.message);
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
-  }
-};
-
-/**
- * Export to SFTP
- */
-const exportToSFTP = async (req, res) => {
-  try {
-    const { tableId } = req.params;
-    const { format = 'csv' } = req.body;
-    
-    // Verify table ownership
-    const table = await DataTable.findById(tableId);
-    if (!table) {
-      return res.status(404).json({ success: false, message: 'Table not found' });
-    }
-    
-    if (table.supplier.toString() !== req.supplier.getEffectiveSupplierId().toString()) {
-      return res.status(403).json({ success: false, message: 'Access denied' });
-    }
-    
-    // Get supplier with SFTP config
-    const supplier = await Supplier.findById(req.supplier.getEffectiveSupplierId())
-      .select('+sftpConfig.password');
-    
-    if (!supplier.sftpConfig?.enabled) {
-      return res.status(400).json({
-        success: false,
-        message: 'SFTP is not configured',
-      });
-    }
-    
-    const result = await sftpExportService.exportAndUpload({
-      table,
-      supplier,
-      sftpConfig: supplier.sftpConfig,
-      format,
-      triggeredBy: supplierDataService.buildActorInfo(req.supplier),
-    });
-    
-    res.json({
-      success: true,
-      message: 'Export to SFTP completed',
-      ...result,
-    });
-  } catch (error) {
-    logger.error('Export to SFTP error:', error.message);
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
-  }
-};
-
-/**
- * Trigger scheduled export manually
- */
-const triggerScheduledExport = async (req, res) => {
-  try {
-    const { tableIds } = req.body;
-    
-    const result = await supplierExportScheduler.triggerExport(
-      req.supplier.getEffectiveSupplierId(),
-      tableIds
-    );
-    
-    res.json({
-      success: true,
-      message: 'Export triggered',
-      ...result,
-    });
-  } catch (error) {
-    logger.error('Trigger export error:', error.message);
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
-  }
-};
-
 // ==================== AUDIT & HISTORY ====================
 
 /**
@@ -2153,11 +1974,6 @@ module.exports = {
   autoImportData,
   exportData,
   downloadExport,
-  // SFTP operations
-  testSFTPConnection,
-  updateSFTPConfig,
-  exportToSFTP,
-  triggerScheduledExport,
   // Audit & History
   getAuditLogs,
   getExportHistory,
