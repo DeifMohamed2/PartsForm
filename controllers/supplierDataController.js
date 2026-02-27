@@ -119,9 +119,10 @@ const createTable = async (req, res) => {
     });
   } catch (error) {
     logger.error('Create table error:', error.message);
-    res.status(error.message.includes('limit') ? 403 : 500).json({
+    logger.error('Create table error stack:', error.stack);
+    res.status(error.message?.includes('limit') ? 403 : 500).json({
       success: false,
-      message: error.message,
+      message: error.message || 'Unknown error creating table',
     });
   }
 };
