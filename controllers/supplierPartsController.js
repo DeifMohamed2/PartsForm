@@ -214,6 +214,50 @@ const bulkDeleteParts = async (req, res) => {
   }
 };
 
+/**
+ * Delete ALL parts for supplier
+ * DELETE /api/supplier/parts/delete-all
+ */
+const deleteAllParts = async (req, res) => {
+  try {
+    const Part = require('../models/Part');
+    const AuditLog = require('../models/AuditLog');
+    
+    // Delete all parts for this supplier
+    const result = await Part.deleteMany({ 
+      'source.supplierId': req.supplier._id 
+    });
+    
+    // Log the action
+    await AuditLog.log({
+      actor: { 
+        type: 'supplier', 
+        id: req.supplier._id, 
+        name: req.supplier.contactName 
+      },
+      action: 'parts.delete_all',
+      resource: { type: 'parts', name: 'All parts' },
+      supplier: req.supplier._id,
+      status: 'success',
+      changes: { deletedCount: result.deletedCount }
+    });
+    
+    logger.info(`Deleted ALL ${result.deletedCount} parts for supplier ${req.supplier._id}`);
+    
+    res.json({
+      success: true,
+      message: `Successfully deleted all parts`,
+      deletedCount: result.deletedCount
+    });
+  } catch (error) {
+    logger.error('Delete all parts error:', error.message);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to delete all parts' 
+    });
+  }
+};
+
 // ==================== IMPORT/EXPORT ====================
 
 /**
@@ -260,7 +304,7 @@ const importParts = async (req, res) => {
         const Part = require('../models/Part');
         const result = await Part.deleteMany({ 
           'source.supplierId': req.supplier._id,
-          'source.fileName': deleteFileName
+          fileName: deleteFileName
         });
         deletedCount = result.deletedCount;
         logger.info(`Deleted ${deletedCount} parts from file: ${deleteFileName}`);
@@ -486,6 +530,7 @@ module.exports = {
   getPart,
   updatePart,
   deletePart,
+  deleteAllParts,
   
   // Bulk operations
   bulkUpdateParts,

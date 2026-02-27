@@ -57,6 +57,7 @@ router.post('/parts/preview', requireSupplierAuth, upload.single('file'), suppli
 // Bulk operations
 router.put('/parts/bulk', requireSupplierAuth, requireSupplierPermission('write_data'), supplierPartsController.bulkUpdateParts);
 router.delete('/parts/bulk', requireSupplierAuth, requireSupplierPermission('delete_data'), supplierPartsController.bulkDeleteParts);
+router.delete('/parts/delete-all', requireSupplierAuth, requireSupplierPermission('delete_data'), supplierPartsController.deleteAllParts);
 
 // Single part operations
 router.get('/parts/:partId', requireSupplierAuth, supplierPartsController.getPart);
