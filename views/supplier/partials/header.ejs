@@ -262,21 +262,21 @@
         </div>
         
         <div class="nav-section">
-          <span class="nav-section-title">Data Management</span>
-          <a href="/supplier/tables" class="nav-item <%= currentPage === 'tables' ? 'active' : '' %>">
-            <i data-lucide="table-2"></i>
-            My Tables
-            <% if (typeof tableCount !== 'undefined' && tableCount > 0) { %>
-              <span class="nav-badge"><%= tableCount %></span>
+          <span class="nav-section-title">Parts Management</span>
+          <a href="/supplier/parts" class="nav-item <%= currentPage === 'parts' ? 'active' : '' %>">
+            <i data-lucide="boxes"></i>
+            My Parts
+            <% if (typeof partsCount !== 'undefined' && partsCount > 0) { %>
+              <span class="nav-badge"><%= partsCount > 1000 ? Math.floor(partsCount/1000) + 'k' : partsCount %></span>
             <% } %>
           </a>
           <a href="/supplier/import" class="nav-item <%= currentPage === 'import' ? 'active' : '' %>">
             <i data-lucide="upload"></i>
-            Import Data
+            Upload Parts
           </a>
-          <a href="/supplier/exports" class="nav-item <%= currentPage === 'exports' ? 'active' : '' %>">
-            <i data-lucide="download"></i>
-            Exports
+          <a href="/supplier/files" class="nav-item <%= currentPage === 'files' ? 'active' : '' %>">
+            <i data-lucide="folder-open"></i>
+            Import Files
           </a>
         </div>
         

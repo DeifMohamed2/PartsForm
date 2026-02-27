@@ -4,7 +4,7 @@
  */
 
 const Supplier = require('../models/Supplier');
-const DataTable = require('../models/DataTable');
+const Part = require('../models/Part');
 const jwt = require('jsonwebtoken');
 
 // Helper to verify supplier from cookie/session
@@ -28,6 +28,18 @@ const getSupplierFromRequest = async (req) => {
   }
 };
 
+// Helper to get parts count for sidebar
+const getPartsCount = async (supplierId) => {
+  try {
+    return await Part.countDocuments({
+      'source.type': 'supplier_upload',
+      'source.supplierId': supplierId
+    });
+  } catch (err) {
+    return 0;
+  }
+};
+
 // Middleware to check supplier auth for views
 exports.requireAuth = async (req, res, next) => {
   const supplier = await getSupplierFromRequest(req);
@@ -43,21 +55,19 @@ exports.requireAuth = async (req, res, next) => {
 // Dashboard
 exports.dashboard = async (req, res) => {
   try {
-    const tableCount = await DataTable.countDocuments({ 
-      supplier: req.supplier.getEffectiveSupplierId() 
-    });
+    const partsCount = await getPartsCount(req.supplier._id);
     
     res.render('supplier/dashboard', {
       title: 'Dashboard | Supplier Portal',
       supplier: req.supplier,
-      tableCount
+      partsCount
     });
   } catch (err) {
     console.error('Dashboard error:', err);
     res.render('supplier/dashboard', {
       title: 'Dashboard | Supplier Portal',
       supplier: req.supplier,
-      tableCount: 0
+      partsCount: 0
     });
   }
 };
@@ -69,135 +79,58 @@ exports.login = (req, res) => {
   });
 };
 
-// Tables list
-exports.tables = async (req, res) => {
+// Parts list
+exports.parts = async (req, res) => {
   try {
-    const tableCount = await DataTable.countDocuments({ 
-      supplier: req.supplier.getEffectiveSupplierId() 
-    });
+    const partsCount = await getPartsCount(req.supplier._id);
     
-    res.render('supplier/tables', {
-      title: 'My Tables | Supplier Portal',
+    res.render('supplier/parts', {
+      title: 'My Parts | Supplier Portal',
       supplier: req.supplier,
-      tableCount
+      partsCount
     });
   } catch (err) {
-    console.error('Tables view error:', err);
-    res.render('supplier/tables', {
-      title: 'My Tables | Supplier Portal',
+    console.error('Parts view error:', err);
+    res.render('supplier/parts', {
+      title: 'My Parts | Supplier Portal',
       supplier: req.supplier,
-      tableCount: 0
+      partsCount: 0
     });
-  }
-};
-
-// Spreadsheet view (table editor)
-exports.spreadsheet = async (req, res) => {
-  try {
-    const { tableId } = req.params;
-    
-    // Validate tableId is a valid ObjectId
-    if (!tableId || tableId === 'new' || !/^[0-9a-fA-F]{24}$/.test(tableId)) {
-      return res.redirect('/supplier/tables');
-    }
-    
-    const table = await DataTable.findOne({
-      _id: tableId,
-      supplier: req.supplier.getEffectiveSupplierId()
-    });
-    
-    if (!table) {
-      return res.redirect('/supplier/tables');
-    }
-    
-    const tableCount = await DataTable.countDocuments({ 
-      supplier: req.supplier.getEffectiveSupplierId() 
-    });
-    
-    res.render('supplier/spreadsheet', {
-      title: `${table.name} | Supplier Portal`,
-      supplier: req.supplier,
-      tableCount,
-      tableId
-    });
-  } catch (err) {
-    console.error('Spreadsheet view error:', err);
-    res.redirect('/supplier/tables');
   }
 };
 
 // Import page
 exports.import = async (req, res) => {
   try {
-    const tableCount = await DataTable.countDocuments({ 
-      supplier: req.supplier.getEffectiveSupplierId() 
-    });
+    const partsCount = await getPartsCount(req.supplier._id);
     
     res.render('supplier/import', {
-      title: 'Import Data | Supplier Portal',
+      title: 'Upload Parts | Supplier Portal',
       supplier: req.supplier,
-      tableCount
+      partsCount
     });
   } catch (err) {
     console.error('Import view error:', err);
     res.render('supplier/import', {
-      title: 'Import Data | Supplier Portal',
+      title: 'Upload Parts | Supplier Portal',
       supplier: req.supplier,
-      tableCount: 0
+      partsCount: 0
     });
   }
 };
 
-// Exports history
-exports.exports = async (req, res) => {
+// Files list
+exports.files = async (req, res) => {
   try {
-    const tableCount = await DataTable.countDocuments({ 
-      supplier: req.supplier.getEffectiveSupplierId() 
-    });
+    const partsCount = await getPartsCount(req.supplier._id);
     
-    res.render('supplier/exports', {
-      title: 'Exports | Supplier Portal',
+    res.render('supplier/files', {
+      title: 'Import Files | Supplier Portal',
       supplier: req.supplier,
-      tableCount
+      partsCount
     });
   } catch (err) {
-    console.error('Exports view error:', err);
-    res.redirect('/supplier');
-  }
-};
-
-// Team management
-exports.team = async (req, res) => {
-  try {
-    const tableCount = await DataTable.countDocuments({ 
-      supplier: req.supplier.getEffectiveSupplierId() 
-    });
-    
-    res.render('supplier/team', {
-      title: 'Team Members | Supplier Portal',
-      supplier: req.supplier,
-      tableCount
-    });
-  } catch (err) {
-    console.error('Team view error:', err);
-    res.redirect('/supplier');
-  }
-};
-
-// Audit logs
-exports.audit = async (req, res) => {
-  try {
-    const tableCount = await DataTable.countDocuments({ 
-      supplier: req.supplier.getEffectiveSupplierId() 
-    });
-    
-    res.render('supplier/audit', {
-      title: 'Audit Logs | Supplier Portal',
-      supplier: req.supplier,
-      tableCount
-    });
-  } catch (err) {
-    console.error('Audit view error:', err);
+    console.error('Files view error:', err);
     res.redirect('/supplier');
   }
 };
@@ -205,14 +138,12 @@ exports.audit = async (req, res) => {
 // Settings
 exports.settings = async (req, res) => {
   try {
-    const tableCount = await DataTable.countDocuments({ 
-      supplier: req.supplier.getEffectiveSupplierId() 
-    });
+    const partsCount = await getPartsCount(req.supplier._id);
     
     res.render('supplier/settings', {
       title: 'Settings | Supplier Portal',
       supplier: req.supplier,
-      tableCount
+      partsCount
     });
   } catch (err) {
     console.error('Settings view error:', err);

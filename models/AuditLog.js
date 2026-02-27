@@ -40,6 +40,14 @@ const auditLogSchema = new mongoose.Schema(
         'record.bulk_update',
         'record.bulk_delete',
         
+        // Parts operations (supplier uploads)
+        'parts.import',
+        'parts.update',
+        'parts.delete',
+        'parts.bulk_update',
+        'parts.bulk_delete',
+        'parts.export',
+        
         // Import/Export operations
         'import.start',
         'import.complete',
@@ -103,7 +111,7 @@ const auditLogSchema = new mongoose.Schema(
     resource: {
       type: {
         type: String,
-        enum: ['table', 'record', 'supplier', 'export', 'import', 'sftp', 'system'],
+        enum: ['table', 'record', 'supplier', 'export', 'import', 'sftp', 'system', 'parts', 'part'],
       },
       id: { type: mongoose.Schema.Types.ObjectId },
       name: { type: String },

@@ -1,0 +1,383 @@
+/**
+ * Supplier Parts Controller
+ * Handles all API endpoints for supplier parts management
+ * - Parts CRUD operations
+ * - File import/export
+ * - Bulk operations
+ * - Dashboard stats
+ */
+const supplierPartsService = require('../services/supplierPartsService');
+const Part = require('../models/Part');
+const logger = require('../utils/logger');
+
+// ==================== DASHBOARD ====================
+
+/**
+ * Get dashboard statistics
+ * GET /api/supplier/dashboard
+ */
+const getDashboard = async (req, res) => {
+  try {
+    const stats = await supplierPartsService.getStats(req.supplier._id);
+    const files = await supplierPartsService.getImportFiles(req.supplier._id);
+    
+    res.json({
+      success: true,
+      ...stats,
+      files
+    });
+  } catch (error) {
+    logger.error('Dashboard error:', error.message);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to load dashboard' 
+    });
+  }
+};
+
+// ==================== PARTS CRUD ====================
+
+/**
+ * Get parts list with pagination
+ * GET /api/supplier/parts
+ */
+const getParts = async (req, res) => {
+  try {
+    const options = {
+      page: parseInt(req.query.page) || 1,
+      limit: Math.min(parseInt(req.query.limit) || 50, 200),
+      search: req.query.search || '',
+      sortBy: req.query.sortBy || 'createdAt',
+      sortOrder: req.query.sortOrder || 'desc',
+      filters: {
+        brand: req.query.brand,
+        minPrice: req.query.minPrice,
+        maxPrice: req.query.maxPrice,
+        inStock: req.query.inStock === 'true',
+        fileName: req.query.fileName
+      }
+    };
+    
+    const result = await supplierPartsService.getParts(req.supplier._id, options);
+    
+    res.json({
+      success: true,
+      ...result
+    });
+  } catch (error) {
+    logger.error('Get parts error:', error.message);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to load parts' 
+    });
+  }
+};
+
+/**
+ * Get single part
+ * GET /api/supplier/parts/:partId
+ */
+const getPart = async (req, res) => {
+  try {
+    const part = await supplierPartsService.getPart(req.supplier._id, req.params.partId);
+    
+    res.json({
+      success: true,
+      ...part
+    });
+  } catch (error) {
+    logger.error('Get part error:', error.message);
+    res.status(404).json({ 
+      success: false, 
+      message: error.message || 'Part not found' 
+    });
+  }
+};
+
+/**
+ * Update part
+ * PUT /api/supplier/parts/:partId
+ */
+const updatePart = async (req, res) => {
+  try {
+    const allowedUpdates = ['description', 'brand', 'price', 'quantity', 'currency', 
+                           'stock', 'weight', 'deliveryDays', 'category'];
+    const updates = {};
+    
+    allowedUpdates.forEach(field => {
+      if (req.body[field] !== undefined) {
+        updates[field] = req.body[field];
+      }
+    });
+    
+    const part = await supplierPartsService.updatePart(req.supplier, req.params.partId, updates);
+    
+    res.json({
+      success: true,
+      message: 'Part updated successfully',
+      part
+    });
+  } catch (error) {
+    logger.error('Update part error:', error.message);
+    res.status(500).json({ 
+      success: false, 
+      message: error.message || 'Failed to update part' 
+    });
+  }
+};
+
+/**
+ * Delete part
+ * DELETE /api/supplier/parts/:partId
+ */
+const deletePart = async (req, res) => {
+  try {
+    const result = await supplierPartsService.deleteParts(req.supplier, {
+      partIds: [req.params.partId]
+    });
+    
+    res.json({
+      success: true,
+      message: 'Part deleted successfully',
+      deleted: result.deleted
+    });
+  } catch (error) {
+    logger.error('Delete part error:', error.message);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to delete part' 
+    });
+  }
+};
+
+// ==================== BULK OPERATIONS ====================
+
+/**
+ * Bulk update parts
+ * PUT /api/supplier/parts/bulk
+ */
+const bulkUpdateParts = async (req, res) => {
+  try {
+    const { partIds, updates } = req.body;
+    
+    if (!partIds || !partIds.length) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'No parts selected' 
+      });
+    }
+    
+    const result = await supplierPartsService.bulkUpdateParts(req.supplier, partIds, updates);
+    
+    res.json({
+      success: true,
+      message: `${result.updated} parts updated`,
+      ...result
+    });
+  } catch (error) {
+    logger.error('Bulk update error:', error.message);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to update parts' 
+    });
+  }
+};
+
+/**
+ * Bulk delete parts
+ * DELETE /api/supplier/parts/bulk
+ */
+const bulkDeleteParts = async (req, res) => {
+  try {
+    const { partIds } = req.body;
+    
+    if (!partIds || !partIds.length) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'No parts selected' 
+      });
+    }
+    
+    const result = await supplierPartsService.deleteParts(req.supplier, { partIds });
+    
+    res.json({
+      success: true,
+      message: `${result.deleted} parts deleted`,
+      ...result
+    });
+  } catch (error) {
+    logger.error('Bulk delete error:', error.message);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to delete parts' 
+    });
+  }
+};
+
+// ==================== IMPORT/EXPORT ====================
+
+/**
+ * Import parts from file
+ * POST /api/supplier/parts/import
+ */
+const importParts = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'No file uploaded' 
+      });
+    }
+    
+    const options = {
+      replaceExisting: req.body.replaceExisting === 'true'
+    };
+    
+    const result = await supplierPartsService.importFromFile(
+      req.supplier,
+      req.file.buffer,
+      req.file.originalname,
+      options
+    );
+    
+    res.json({
+      success: true,
+      message: `Successfully imported ${result.imported} parts`,
+      ...result
+    });
+  } catch (error) {
+    logger.error('Import error:', error.message);
+    res.status(500).json({ 
+      success: false, 
+      message: error.message || 'Import failed' 
+    });
+  }
+};
+
+/**
+ * Export parts to Excel
+ * GET /api/supplier/parts/export
+ */
+const exportParts = async (req, res) => {
+  try {
+    const options = {
+      fileName: req.query.fileName
+    };
+    
+    const { buffer, count } = await supplierPartsService.exportToExcel(req.supplier._id, options);
+    
+    const exportFileName = options.fileName 
+      ? `parts_${options.fileName.replace(/\.[^/.]+$/, '')}_export.xlsx`
+      : `parts_export_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="${exportFileName}"`);
+    res.send(buffer);
+    
+  } catch (error) {
+    logger.error('Export error:', error.message);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Export failed' 
+    });
+  }
+};
+
+/**
+ * Preview import file
+ * POST /api/supplier/parts/preview
+ */
+const previewImport = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'No file uploaded' 
+      });
+    }
+    
+    const preview = await supplierPartsService.previewFile(
+      req.file.buffer,
+      req.file.originalname,
+      10
+    );
+    
+    res.json({
+      success: true,
+      ...preview
+    });
+  } catch (error) {
+    logger.error('Preview error:', error.message);
+    res.status(500).json({ 
+      success: false, 
+      message: error.message || 'Preview failed' 
+    });
+  }
+};
+
+// ==================== FILES ====================
+
+/**
+ * Get list of imported files
+ * GET /api/supplier/files
+ */
+const getFiles = async (req, res) => {
+  try {
+    const files = await supplierPartsService.getImportFiles(req.supplier._id);
+    res.json(files);
+  } catch (error) {
+    logger.error('Get files error:', error.message);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to load files' 
+    });
+  }
+};
+
+/**
+ * Delete all parts from a file
+ * DELETE /api/supplier/files/:fileName
+ */
+const deleteFile = async (req, res) => {
+  try {
+    const fileName = decodeURIComponent(req.params.fileName);
+    
+    const result = await supplierPartsService.deleteParts(req.supplier, { fileName });
+    
+    res.json({
+      success: true,
+      message: `Deleted ${result.deleted} parts from ${fileName}`,
+      ...result
+    });
+  } catch (error) {
+    logger.error('Delete file error:', error.message);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to delete file' 
+    });
+  }
+};
+
+module.exports = {
+  // Dashboard
+  getDashboard,
+  
+  // Parts CRUD
+  getParts,
+  getPart,
+  updatePart,
+  deletePart,
+  
+  // Bulk operations
+  bulkUpdateParts,
+  bulkDeleteParts,
+  
+  // Import/Export
+  importParts,
+  exportParts,
+  previewImport,
+  
+  // Files
+  getFiles,
+  deleteFile
+};

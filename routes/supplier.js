@@ -1,12 +1,12 @@
 /**
  * Supplier Routes
- * API endpoints for supplier data management portal
+ * API endpoints for supplier parts management portal
  */
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const { requireSupplierAuth, requireSupplierPermission } = require('../middleware/auth');
-const supplierDataController = require('../controllers/supplierDataController');
+const supplierPartsController = require('../controllers/supplierPartsController');
 const supplierAuthController = require('../controllers/supplierAuthController');
 
 // Configure multer for file uploads (50MB limit)
@@ -41,56 +41,31 @@ router.post('/auth/change-password', requireSupplierAuth, supplierAuthController
 // ==================== AUTH ROUTES (Protected) ====================
 router.post('/auth/logout', requireSupplierAuth, supplierAuthController.logout);
 router.get('/auth/me', requireSupplierAuth, supplierAuthController.getProfile);
-router.get('/profile', requireSupplierAuth, supplierAuthController.getProfile); // Alias
+router.get('/profile', requireSupplierAuth, supplierAuthController.getProfile);
 router.put('/auth/profile', requireSupplierAuth, supplierAuthController.updateProfile);
 router.put('/auth/password', requireSupplierAuth, supplierAuthController.changePassword);
 
 // ==================== DASHBOARD ====================
-router.get('/dashboard', requireSupplierAuth, supplierAuthController.getDashboard);
+router.get('/dashboard', requireSupplierAuth, supplierPartsController.getDashboard);
 
-// ==================== TABLE ROUTES ====================
-router.get('/tables', requireSupplierAuth, supplierDataController.getTables);
-router.post('/tables', requireSupplierAuth, requireSupplierPermission('manage_tables'), supplierDataController.createTable);
-router.get('/tables/:tableId', requireSupplierAuth, supplierDataController.getTable);
-router.put('/tables/:tableId', requireSupplierAuth, requireSupplierPermission('manage_tables'), supplierDataController.updateTable);
-router.put('/tables/:tableId/columns', requireSupplierAuth, requireSupplierPermission('manage_tables'), supplierDataController.updateTableColumns);
-router.post('/tables/:tableId/archive', requireSupplierAuth, requireSupplierPermission('manage_tables'), supplierDataController.archiveTable);
-router.delete('/tables/:tableId', requireSupplierAuth, requireSupplierPermission('delete_data'), supplierDataController.deleteTable);
-
-// ==================== RECORD ROUTES ====================
-router.get('/tables/:tableId/records', requireSupplierAuth, supplierDataController.getRecords);
-router.post('/tables/:tableId/records', requireSupplierAuth, requireSupplierPermission('write_data'), supplierDataController.createRecord);
-router.get('/tables/:tableId/records/:recordId', requireSupplierAuth, supplierDataController.getRecord);
-router.put('/tables/:tableId/records/:recordId', requireSupplierAuth, requireSupplierPermission('write_data'), supplierDataController.updateRecord);
-router.delete('/tables/:tableId/records/:recordId', requireSupplierAuth, requireSupplierPermission('delete_data'), supplierDataController.deleteRecord);
+// ==================== PARTS ROUTES ====================
+router.get('/parts', requireSupplierAuth, supplierPartsController.getParts);
+router.get('/parts/export', requireSupplierAuth, requireSupplierPermission('export_data'), supplierPartsController.exportParts);
+router.post('/parts/import', requireSupplierAuth, requireSupplierPermission('import_data'), upload.single('file'), supplierPartsController.importParts);
+router.post('/parts/preview', requireSupplierAuth, upload.single('file'), supplierPartsController.previewImport);
 
 // Bulk operations
-router.post('/tables/:tableId/records/bulk', requireSupplierAuth, requireSupplierPermission('write_data'), supplierDataController.bulkCreateRecords);
-router.put('/tables/:tableId/records/bulk', requireSupplierAuth, requireSupplierPermission('write_data'), supplierDataController.bulkUpdateRecords);
-router.delete('/tables/:tableId/records/bulk', requireSupplierAuth, requireSupplierPermission('delete_data'), supplierDataController.bulkDeleteRecords);
+router.put('/parts/bulk', requireSupplierAuth, requireSupplierPermission('write_data'), supplierPartsController.bulkUpdateParts);
+router.delete('/parts/bulk', requireSupplierAuth, requireSupplierPermission('delete_data'), supplierPartsController.bulkDeleteParts);
 
-// Version history
-router.get('/tables/:tableId/records/:recordId/history', requireSupplierAuth, supplierDataController.getRecordHistory);
-router.post('/tables/:tableId/records/:recordId/restore', requireSupplierAuth, requireSupplierPermission('write_data'), supplierDataController.restoreRecord);
-router.post('/tables/:tableId/records/:recordId/restore-version', requireSupplierAuth, requireSupplierPermission('write_data'), supplierDataController.restoreRecordVersion);
+// Single part operations
+router.get('/parts/:partId', requireSupplierAuth, supplierPartsController.getPart);
+router.put('/parts/:partId', requireSupplierAuth, requireSupplierPermission('write_data'), supplierPartsController.updatePart);
+router.delete('/parts/:partId', requireSupplierAuth, requireSupplierPermission('delete_data'), supplierPartsController.deletePart);
 
-// ==================== IMPORT/EXPORT ROUTES ====================
-// Automatic import - creates table from filename automatically
-router.post('/import', requireSupplierAuth, requireSupplierPermission('import_data'), upload.single('file'), supplierDataController.autoImportData);
-router.post('/tables/:tableId/import/preview', requireSupplierAuth, requireSupplierPermission('import_data'), upload.single('file'), supplierDataController.previewImport);
-router.post('/tables/:tableId/import', requireSupplierAuth, requireSupplierPermission('import_data'), upload.single('file'), supplierDataController.importData);
-router.get('/tables/:tableId/export', requireSupplierAuth, requireSupplierPermission('export_data'), supplierDataController.exportData);
-router.post('/tables/:tableId/export', requireSupplierAuth, requireSupplierPermission('export_data'), supplierDataController.exportData);
-router.get('/exports/:exportId/download', requireSupplierAuth, supplierDataController.downloadExport);
-
-// ==================== AUDIT & HISTORY ROUTES ====================
-router.get('/audit-logs', requireSupplierAuth, requireSupplierPermission('view_audit_logs'), supplierDataController.getAuditLogs);
-router.get('/audit', requireSupplierAuth, supplierDataController.getAuditLogs); // Alias without permission for basic logs
-router.get('/exports', requireSupplierAuth, supplierDataController.getExportHistory);
-
-// ==================== FTP FILE ROUTES ====================
-router.get('/uploads', requireSupplierAuth, supplierDataController.getUploadedFiles);
-router.delete('/uploads/:filename', requireSupplierAuth, supplierDataController.deleteUploadedFile);
+// ==================== FILES ROUTES ====================
+router.get('/files', requireSupplierAuth, supplierPartsController.getFiles);
+router.delete('/files/:fileName', requireSupplierAuth, requireSupplierPermission('delete_data'), supplierPartsController.deleteFile);
 
 // ==================== TEAM MANAGEMENT ROUTES ====================
 router.get('/team', requireSupplierAuth, requireSupplierPermission('manage_users'), supplierAuthController.getTeamMembers);

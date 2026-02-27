@@ -300,7 +300,7 @@ server.listen(PORT, () => {
     logger.warn('Redis connection failed, using L1 cache only');
   });
   
-  // FTP Server Status
+  // FTP Server Status (for supplier FTP access if enabled)
   if (process.env.ENABLE_FTP_SERVER === 'true') {
     const supplierFtpService = require('./services/supplierFtpService');
     supplierFtpService.start().then(() => {
@@ -313,6 +313,16 @@ server.listen(PORT, () => {
     });
   } else {
     console.log(`   ➜ FTP:      ⚠️  FTP server disabled (ENABLE_FTP_SERVER not set)`);
+  }
+  
+  // Parts FTP Export Scheduler (daily export at 9PM)
+  if (process.env.ENABLE_FTP_EXPORT !== 'false') {
+    const partsFtpExportService = require('./services/partsFtpExportService');
+    partsFtpExportService.startScheduler();
+    console.log(`   ➜ Export:   ✅ Parts FTP export scheduler active (daily 9PM)`);
+    logger.info('Parts FTP export scheduler started');
+  } else {
+    console.log(`   ➜ Export:   ⚠️  Parts FTP export disabled`);
   }
   
   console.log(`   ➜ Logger:   ✅ Winston logger active`);

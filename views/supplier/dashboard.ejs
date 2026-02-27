@@ -4,72 +4,68 @@
 <div class="grid grid-4" style="margin-bottom: 24px;">
   <div class="stat-card">
     <div class="stat-icon blue">
-      <i data-lucide="table-2"></i>
+      <i data-lucide="boxes"></i>
     </div>
     <div class="stat-content">
-      <div class="stat-label">Total Tables</div>
-      <div class="stat-value" id="statTables">-</div>
+      <div class="stat-label">Total Parts</div>
+      <div class="stat-value" id="statParts">-</div>
     </div>
   </div>
   
   <div class="stat-card">
     <div class="stat-icon green">
-      <i data-lucide="database"></i>
+      <i data-lucide="check-circle"></i>
     </div>
     <div class="stat-content">
-      <div class="stat-label">Total Records</div>
-      <div class="stat-value" id="statRecords">-</div>
+      <div class="stat-label">In Stock</div>
+      <div class="stat-value" id="statInStock">-</div>
     </div>
   </div>
   
   <div class="stat-card">
     <div class="stat-icon orange">
-      <i data-lucide="upload-cloud"></i>
+      <i data-lucide="tags"></i>
     </div>
     <div class="stat-content">
-      <div class="stat-label">Exports This Month</div>
-      <div class="stat-value" id="statExports">-</div>
+      <div class="stat-label">Unique Brands</div>
+      <div class="stat-value" id="statBrands">-</div>
     </div>
   </div>
   
   <div class="stat-card">
     <div class="stat-icon purple">
-      <i data-lucide="hard-drive"></i>
+      <i data-lucide="file-spreadsheet"></i>
     </div>
     <div class="stat-content">
-      <div class="stat-label">Storage Used</div>
-      <div class="stat-value" id="statStorage">-</div>
+      <div class="stat-label">Import Files</div>
+      <div class="stat-value" id="statFiles">-</div>
     </div>
   </div>
 </div>
 
 <!-- Main Content Grid -->
 <div class="grid grid-2">
-  <!-- Recent Tables -->
+  <!-- Recent Uploads -->
   <div class="card">
     <div class="card-header">
-      <h3 class="card-title">My Tables</h3>
-      <a href="/supplier/tables/new" class="btn btn-primary btn-sm">
-        <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
-        Create Table
-      </a>
+      <h3 class="card-title">Recent Import Files</h3>
+      <a href="/supplier/files" class="btn btn-secondary btn-sm">View All</a>
     </div>
     
-    <div id="tablesContainer">
+    <div id="filesContainer">
       <div class="loading">
         <div class="spinner"></div>
       </div>
     </div>
   </div>
   
-  <!-- Recent Activity -->
+  <!-- Quick Stats -->
   <div class="card">
     <div class="card-header">
-      <h3 class="card-title">Recent Activity</h3>
-      <a href="/supplier/audit" class="btn btn-secondary btn-sm">View All</a>
+      <h3 class="card-title">Inventory Summary</h3>
     </div>
     
-    <div id="activityContainer">
+    <div id="summaryContainer" style="padding: 16px 0;">
       <div class="loading">
         <div class="spinner"></div>
       </div>
@@ -78,236 +74,297 @@
 </div>
 
 <!-- Quick Actions -->
-<div class="card">
+<div class="card" style="margin-top: 24px;">
   <div class="card-header">
     <h3 class="card-title">Quick Actions</h3>
   </div>
   
-  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
-    <a href="/supplier/import" class="quick-action-card" style="display: flex; align-items: center; gap: 16px; padding: 20px; border: 1px solid var(--border); border-radius: 8px; text-decoration: none; color: inherit; transition: all 0.2s;">
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px;">
+    <a href="/supplier/import" class="quick-action-card">
       <div class="stat-icon blue">
-        <i data-lucide="file-up"></i>
+        <i data-lucide="upload-cloud"></i>
       </div>
       <div>
-        <div style="font-weight: 600; color: var(--text-primary);">Import Data</div>
-        <div style="font-size: 13px; color: var(--text-secondary);">Upload Excel or CSV files</div>
+        <div style="font-weight: 600; color: var(--text-primary);">Upload Parts</div>
+        <div style="font-size: 13px; color: var(--text-secondary);">Import Excel or CSV files</div>
       </div>
     </a>
     
-    <a href="/supplier/sftp" class="quick-action-card" style="display: flex; align-items: center; gap: 16px; padding: 20px; border: 1px solid var(--border); border-radius: 8px; text-decoration: none; color: inherit; transition: all 0.2s;">
+    <a href="/supplier/parts" class="quick-action-card">
       <div class="stat-icon green">
-        <i data-lucide="server"></i>
+        <i data-lucide="edit-3"></i>
       </div>
       <div>
-        <div style="font-weight: 600; color: var(--text-primary);">Configure SFTP</div>
-        <div style="font-size: 13px; color: var(--text-secondary);">Set up automated exports</div>
+        <div style="font-weight: 600; color: var(--text-primary);">Edit Parts</div>
+        <div style="font-size: 13px; color: var(--text-secondary);">Update prices, quantities & more</div>
       </div>
     </a>
     
-    <a href="/supplier/api" class="quick-action-card" style="display: flex; align-items: center; gap: 16px; padding: 20px; border: 1px solid var(--border); border-radius: 8px; text-decoration: none; color: inherit; transition: all 0.2s;">
+    <a href="/api/supplier/parts/export" class="quick-action-card" download>
       <div class="stat-icon orange">
-        <i data-lucide="key"></i>
+        <i data-lucide="download"></i>
       </div>
       <div>
-        <div style="font-weight: 600; color: var(--text-primary);">API Keys</div>
-        <div style="font-size: 13px; color: var(--text-secondary);">Manage API access</div>
+        <div style="font-weight: 600; color: var(--text-primary);">Export Parts</div>
+        <div style="font-size: 13px; color: var(--text-secondary);">Download your parts as Excel</div>
       </div>
     </a>
     
-    <a href="/supplier/team" class="quick-action-card" style="display: flex; align-items: center; gap: 16px; padding: 20px; border: 1px solid var(--border); border-radius: 8px; text-decoration: none; color: inherit; transition: all 0.2s;">
+    <a href="/supplier/settings" class="quick-action-card">
       <div class="stat-icon purple">
-        <i data-lucide="user-plus"></i>
+        <i data-lucide="settings"></i>
       </div>
       <div>
-        <div style="font-weight: 600; color: var(--text-primary);">Invite Team</div>
-        <div style="font-size: 13px; color: var(--text-secondary);">Add team members</div>
+        <div style="font-weight: 600; color: var(--text-primary);">Account Settings</div>
+        <div style="font-size: 13px; color: var(--text-secondary);">Manage your profile</div>
       </div>
     </a>
   </div>
 </div>
 
 <style>
-  .quick-action-card:hover {
-    border-color: var(--primary) !important;
-    box-shadow: 0 2px 8px rgba(12, 74, 110, 0.1);
+  .quick-action-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.2s;
+    background: white;
   }
   
-  .table-row {
+  .quick-action-card:hover {
+    border-color: var(--primary);
+    box-shadow: 0 4px 12px rgba(12, 74, 110, 0.1);
+    transform: translateY(-2px);
+  }
+  
+  .file-row {
     display: flex;
     align-items: center;
     padding: 12px 0;
     border-bottom: 1px solid var(--border);
   }
   
-  .table-row:last-child {
+  .file-row:last-child {
     border-bottom: none;
   }
   
-  .table-info {
-    flex: 1;
-  }
-  
-  .table-name {
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: 4px;
-  }
-  
-  .table-meta {
-    font-size: 13px;
-    color: var(--text-secondary);
-  }
-  
-  .activity-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    padding: 12px 0;
-    border-bottom: 1px solid var(--border);
-  }
-  
-  .activity-item:last-child {
-    border-bottom: none;
-  }
-  
-  .activity-icon {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
+  .file-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
+    margin-right: 12px;
     flex-shrink: 0;
   }
   
-  .activity-content {
-    flex: 1;
+  .file-icon.excel {
+    background: rgba(34, 197, 94, 0.1);
+    color: #22c55e;
   }
   
-  .activity-text {
-    font-size: 14px;
+  .file-icon.csv {
+    background: rgba(14, 165, 233, 0.1);
+    color: #0ea5e9;
+  }
+  
+  .file-info {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .file-name {
+    font-weight: 600;
     color: var(--text-primary);
     margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   
-  .activity-time {
+  .file-meta {
     font-size: 12px;
     color: var(--text-secondary);
+  }
+  
+  .file-count {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--primary);
+    background: rgba(14, 165, 233, 0.1);
+    padding: 4px 10px;
+    border-radius: 6px;
+  }
+  
+  .summary-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  
+  .summary-item:last-child {
+    border-bottom: none;
+  }
+  
+  .summary-label {
+    color: var(--text-secondary);
+    font-size: 14px;
+  }
+  
+  .summary-value {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 15px;
+  }
+  
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-secondary);
+  }
+  
+  .empty-state i {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+  }
+  
+  .empty-state h4 {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
   }
 </style>
 
 <script>
   document.addEventListener('DOMContentLoaded', async () => {
-    await loadDashboard();
-  });
-  
-  async function loadDashboard() {
+    lucide.createIcons();
+    
     try {
-      // Load tables
-      const tablesResponse = await API.get('/tables');
-      const tables = tablesResponse.tables || [];
+      // Fetch dashboard stats
+      const response = await fetch('/api/supplier/dashboard', {
+        headers: { 'Content-Type': 'application/json' }
+      });
+      
+      if (!response.ok) throw new Error('Failed to load dashboard');
+      
+      const data = await response.json();
       
       // Update stats
-      document.getElementById('statTables').textContent = tables.length;
+      document.getElementById('statParts').textContent = formatNumber(data.totalParts || 0);
+      document.getElementById('statInStock').textContent = formatNumber(data.inStockCount || 0);
+      document.getElementById('statBrands').textContent = formatNumber(data.uniqueBrands || 0);
+      document.getElementById('statFiles').textContent = formatNumber(data.files?.length || 0);
       
-      let totalRecords = 0;
-      tables.forEach(t => totalRecords += t.recordCount || 0);
-      document.getElementById('statRecords').textContent = formatNumber(totalRecords);
+      // Render files list
+      renderFiles(data.files || []);
       
-      // Render tables
-      const tablesContainer = document.getElementById('tablesContainer');
-      if (tables.length === 0) {
-        tablesContainer.innerHTML = `
-          <div class="empty-state">
-            <i data-lucide="table-2" class="empty-state-icon" style="width: 48px; height: 48px;"></i>
-            <div class="empty-state-title">No tables yet</div>
-            <div class="empty-state-description">Create your first table to start managing data</div>
-            <a href="/supplier/tables/new" class="btn btn-primary">Create Table</a>
-          </div>
-        `;
-      } else {
-        tablesContainer.innerHTML = tables.slice(0, 5).map(table => `
-          <div class="table-row">
-            <div class="table-info">
-              <div class="table-name">${table.name}</div>
-              <div class="table-meta">${table.recordCount || 0} records · ${table.columns?.length || 0} columns</div>
-            </div>
-            <a href="/supplier/tables/${table._id}" class="btn btn-secondary btn-sm">
-              <i data-lucide="edit-3" style="width: 14px; height: 14px;"></i>
-              Edit
-            </a>
-          </div>
-        `).join('');
-      }
+      // Render summary
+      renderSummary(data);
       
-      // Load activity
-      try {
-        const activityResponse = await API.get('/audit?limit=5');
-        const logs = activityResponse.logs || [];
-        
-        const activityContainer = document.getElementById('activityContainer');
-        if (logs.length === 0) {
-          activityContainer.innerHTML = `
-            <div style="text-align: center; padding: 30px; color: var(--text-secondary);">
-              No recent activity
-            </div>
-          `;
-        } else {
-          activityContainer.innerHTML = logs.map(log => {
-            let iconClass = 'blue';
-            let icon = 'activity';
-            
-            if (log.action.includes('create')) {
-              iconClass = 'green';
-              icon = 'plus-circle';
-            } else if (log.action.includes('update')) {
-              iconClass = 'orange';
-              icon = 'edit';
-            } else if (log.action.includes('delete')) {
-              iconClass = 'danger';
-              icon = 'trash-2';
-            } else if (log.action.includes('export')) {
-              iconClass = 'purple';
-              icon = 'download';
-            }
-            
-            return `
-              <div class="activity-item">
-                <div class="activity-icon stat-icon ${iconClass}">
-                  <i data-lucide="${icon}" style="width: 16px; height: 16px;"></i>
-                </div>
-                <div class="activity-content">
-                  <div class="activity-text">${log.action.replace(/_/g, ' ')}</div>
-                  <div class="activity-time">${formatDateTime(log.createdAt)}</div>
-                </div>
-              </div>
-            `;
-          }).join('');
-        }
-      } catch (err) {
-        document.getElementById('activityContainer').innerHTML = `
-          <div style="text-align: center; padding: 30px; color: var(--text-secondary);">
-            No recent activity
-          </div>
-        `;
-      }
-      
-      // Load exports count
-      try {
-        const exportsResponse = await API.get('/exports?limit=100');
-        document.getElementById('statExports').textContent = exportsResponse.exports?.length || 0;
-      } catch (err) {
-        document.getElementById('statExports').textContent = '0';
-      }
-      
-      // Storage placeholder
-      document.getElementById('statStorage').textContent = '0 MB';
-      
-      lucide.createIcons();
     } catch (err) {
-      console.error('Failed to load dashboard:', err);
-      showToast('Failed to load dashboard data', 'error');
+      console.error('Dashboard error:', err);
+      document.getElementById('filesContainer').innerHTML = `
+        <div class="empty-state">
+          <i data-lucide="alert-circle"></i>
+          <h4>Error loading data</h4>
+          <p>Please refresh the page</p>
+        </div>
+      `;
+      lucide.createIcons();
     }
+  });
+  
+  function renderFiles(files) {
+    const container = document.getElementById('filesContainer');
+    
+    if (!files.length) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <i data-lucide="folder-open"></i>
+          <h4>No files uploaded yet</h4>
+          <p>Upload your first parts file to get started</p>
+          <a href="/supplier/import" class="btn btn-primary" style="margin-top: 16px;">
+            <i data-lucide="upload" style="width: 16px; height: 16px;"></i>
+            Upload Parts
+          </a>
+        </div>
+      `;
+      lucide.createIcons();
+      return;
+    }
+    
+    container.innerHTML = files.slice(0, 5).map(file => {
+      const ext = file.fileName?.split('.').pop()?.toLowerCase() || 'file';
+      const iconClass = ext === 'csv' ? 'csv' : 'excel';
+      const icon = ext === 'csv' ? 'file-text' : 'file-spreadsheet';
+      
+      return `
+        <div class="file-row">
+          <div class="file-icon ${iconClass}">
+            <i data-lucide="${icon}" style="width: 20px; height: 20px;"></i>
+          </div>
+          <div class="file-info">
+            <div class="file-name">${file.fileName || 'Unknown File'}</div>
+            <div class="file-meta">${formatDate(file.importedAt)}</div>
+          </div>
+          <div class="file-count">${formatNumber(file.partsCount)} parts</div>
+        </div>
+      `;
+    }).join('');
+    
+    lucide.createIcons();
+  }
+  
+  function renderSummary(data) {
+    const container = document.getElementById('summaryContainer');
+    
+    container.innerHTML = `
+      <div class="summary-item">
+        <span class="summary-label">Total Parts Value</span>
+        <span class="summary-value">AED ${formatNumber(data.totalValue || 0)}</span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">Average Price</span>
+        <span class="summary-value">AED ${(data.avgPrice || 0).toFixed(2)}</span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">In Stock</span>
+        <span class="summary-value" style="color: #22c55e;">${formatNumber(data.inStockCount || 0)} parts</span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">Out of Stock</span>
+        <span class="summary-value" style="color: #ef4444;">${formatNumber(data.outOfStockCount || 0)} parts</span>
+      </div>
+    `;
+  }
+  
+  function formatNumber(num) {
+    if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+    if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+    return num.toLocaleString();
+  }
+  
+  function formatDate(dateStr) {
+    if (!dateStr) return 'N/A';
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diff = now - date;
+    
+    if (diff < 3600000) return 'Just now';
+    if (diff < 86400000) return Math.floor(diff / 3600000) + ' hours ago';
+    if (diff < 604800000) return Math.floor(diff / 86400000) + ' days ago';
+    
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   }
 </script>
 

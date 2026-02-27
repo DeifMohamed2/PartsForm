@@ -98,7 +98,40 @@ const partSchema = new mongoose.Schema({
     trim: true
   }],
 
-  // Source Information
+  // Source Information - Tracks where the part came from
+  source: {
+    type: {
+      type: String,
+      enum: ['integration', 'supplier_upload', 'api', 'manual'],
+      default: 'integration',
+      index: true
+    },
+    // For integration sources (APM sync, etc.)
+    integration: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Integration'
+    },
+    integrationName: {
+      type: String,
+      trim: true
+    },
+    // For supplier upload sources
+    supplierId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Supplier',
+      index: true
+    },
+    supplierName: {
+      type: String,
+      trim: true
+    },
+    supplierCode: {
+      type: String,
+      trim: true
+    }
+  },
+  
+  // Legacy source fields (for backward compatibility)
   integration: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Integration'
@@ -123,6 +156,12 @@ const partSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   },
+  
+  // Last modified by (for supplier edits)
+  lastModifiedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Supplier'
+  },
 
   // Search & Indexing
   searchText: {
@@ -143,6 +182,10 @@ partSchema.index({ partNumber: 1, fileName: 1 });
 partSchema.index({ partNumber: 1, integration: 1 });
 partSchema.index({ brand: 1, supplier: 1 });
 partSchema.index({ price: 1, quantity: 1 });
+
+// Source-based indexes
+partSchema.index({ 'source.type': 1, 'source.supplierId': 1 });
+partSchema.index({ 'source.supplierId': 1, createdAt: -1 });
 
 // Standalone integration index for FAST deletion (critical for sync cleanup)
 partSchema.index({ integration: 1 });
@@ -454,6 +497,203 @@ partSchema.statics.deleteByIntegrationFile = async function (integrationId, file
     }
   );
   console.log(`🗑️  Deleted ${result.deletedCount.toLocaleString()} parts for file ${fileName}`);
+  return result.deletedCount;
+};
+
+// ==================== SUPPLIER PARTS METHODS ====================
+
+/**
+ * Get parts for a specific supplier
+ */
+partSchema.statics.getSupplierParts = async function (supplierId, options = {}) {
+  const {
+    page = 1,
+    limit = 50,
+    sortBy = 'createdAt',
+    sortOrder = 'desc',
+    search = '',
+    filters = {}
+  } = options;
+
+  const skip = (page - 1) * limit;
+  const query = { 
+    'source.type': 'supplier_upload',
+    'source.supplierId': supplierId 
+  };
+
+  // Text search
+  if (search && search.trim()) {
+    const escapedSearch = search.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    query.$or = [
+      { partNumber: { $regex: escapedSearch, $options: 'i' } },
+      { description: { $regex: escapedSearch, $options: 'i' } },
+      { brand: { $regex: escapedSearch, $options: 'i' } }
+    ];
+  }
+
+  // Apply filters
+  if (filters.brand) query.brand = { $regex: filters.brand, $options: 'i' };
+  if (filters.minPrice) query.price = { ...query.price, $gte: parseFloat(filters.minPrice) };
+  if (filters.maxPrice) query.price = { ...query.price, $lte: parseFloat(filters.maxPrice) };
+  if (filters.inStock) query.quantity = { $gt: 0 };
+  if (filters.fileName) query.fileName = filters.fileName;
+
+  const sort = { [sortBy]: sortOrder === 'asc' ? 1 : -1 };
+
+  const [results, total] = await Promise.all([
+    this.find(query).sort(sort).skip(skip).limit(limit).lean(),
+    this.countDocuments(query)
+  ]);
+
+  return {
+    results,
+    total,
+    page,
+    limit,
+    totalPages: Math.ceil(total / limit),
+    hasMore: skip + results.length < total
+  };
+};
+
+/**
+ * Get stats for supplier's parts
+ */
+partSchema.statics.getSupplierStats = async function (supplierId) {
+  // Convert to ObjectId for aggregation
+  const supplierObjectId = new mongoose.Types.ObjectId(supplierId);
+  
+  const stats = await this.aggregate([
+    { 
+      $match: { 
+        'source.type': 'supplier_upload',
+        'source.supplierId': supplierObjectId 
+      } 
+    },
+    {
+      $group: {
+        _id: null,
+        totalParts: { $sum: 1 },
+        avgPrice: { $avg: '$price' },
+        totalValue: { $sum: { $multiply: ['$price', '$quantity'] } },
+        brands: { $addToSet: '$brand' },
+        inStock: { $sum: { $cond: [{ $gt: ['$quantity', 0] }, 1, 0] } }
+      }
+    }
+  ]);
+
+  // Get file breakdown
+  const fileStats = await this.aggregate([
+    { 
+      $match: { 
+        'source.type': 'supplier_upload',
+        'source.supplierId': supplierObjectId 
+      } 
+    },
+    {
+      $group: {
+        _id: '$fileName',
+        count: { $sum: 1 },
+        lastUpdated: { $max: '$lastUpdated' }
+      }
+    },
+    { $sort: { lastUpdated: -1 } }
+  ]);
+
+  const base = stats[0] || { totalParts: 0, avgPrice: 0, totalValue: 0, brands: [], inStock: 0 };
+  
+  return {
+    totalParts: base.totalParts,
+    avgPrice: Math.round(base.avgPrice * 100) / 100,
+    totalValue: Math.round(base.totalValue * 100) / 100,
+    uniqueBrands: base.brands.filter(b => b).length,
+    inStockCount: base.inStock,
+    outOfStockCount: base.totalParts - base.inStock,
+    files: fileStats.map(f => ({
+      fileName: f._id || 'Unknown',
+      count: f.count,
+      lastUpdated: f.lastUpdated
+    }))
+  };
+};
+
+/**
+ * Bulk import parts for a supplier
+ */
+partSchema.statics.bulkImportSupplierParts = async function (records, options = {}) {
+  const { supplierId, supplierName, supplierCode, fileName } = options;
+  
+  const now = new Date();
+  const documents = records.map(record => ({
+    ...record,
+    source: {
+      type: 'supplier_upload',
+      supplierId,
+      supplierName,
+      supplierCode
+    },
+    fileName,
+    importedAt: now,
+    lastUpdated: now,
+    createdAt: now
+  }));
+
+  const batchSize = 5000;
+  let inserted = 0;
+
+  for (let i = 0; i < documents.length; i += batchSize) {
+    const batch = documents.slice(i, i + batchSize);
+    try {
+      const result = await this.insertMany(batch, { ordered: false });
+      inserted += result.length;
+    } catch (error) {
+      if (error.insertedDocs) inserted += error.insertedDocs.length;
+    }
+  }
+
+  return { inserted, total: records.length };
+};
+
+/**
+ * Update supplier part with version tracking
+ */
+partSchema.statics.updateSupplierPart = async function (partId, supplierId, updates, modifiedBy) {
+  const part = await this.findOne({
+    _id: partId,
+    'source.type': 'supplier_upload',
+    'source.supplierId': supplierId
+  });
+
+  if (!part) throw new Error('Part not found or access denied');
+
+  // Apply updates
+  Object.keys(updates).forEach(key => {
+    if (['partNumber', 'description', 'brand', 'price', 'quantity', 'currency', 'stock', 'weight', 'deliveryDays', 'category'].includes(key)) {
+      part[key] = updates[key];
+    }
+  });
+
+  part.lastUpdated = new Date();
+  part.lastModifiedBy = modifiedBy;
+  
+  await part.save();
+  return part;
+};
+
+/**
+ * Delete parts for a supplier (by file or all)
+ */
+partSchema.statics.deleteSupplierParts = async function (supplierId, options = {}) {
+  const { fileName, partIds } = options;
+  
+  const query = {
+    'source.type': 'supplier_upload',
+    'source.supplierId': supplierId
+  };
+
+  if (fileName) query.fileName = fileName;
+  if (partIds && partIds.length) query._id = { $in: partIds };
+
+  const result = await this.deleteMany(query);
   return result.deletedCount;
 };
 

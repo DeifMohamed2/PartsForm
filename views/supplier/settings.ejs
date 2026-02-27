@@ -96,27 +96,27 @@
   
   <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px;">
     <div>
-      <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 8px;">Tables</div>
-      <div style="font-size: 24px; font-weight: 700;" id="usageTables">0</div>
-      <div style="font-size: 12px; color: var(--text-secondary);">of unlimited</div>
+      <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 8px;">Total Parts</div>
+      <div style="font-size: 24px; font-weight: 700;" id="usageParts">0</div>
+      <div style="font-size: 12px; color: var(--text-secondary);">uploaded</div>
     </div>
     
     <div>
-      <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 8px;">Records</div>
-      <div style="font-size: 24px; font-weight: 700;" id="usageRecords">0</div>
-      <div style="font-size: 12px; color: var(--text-secondary);">of unlimited</div>
+      <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 8px;">Import Files</div>
+      <div style="font-size: 24px; font-weight: 700;" id="usageFiles">0</div>
+      <div style="font-size: 12px; color: var(--text-secondary);">active</div>
     </div>
     
     <div>
-      <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 8px;">Team Members</div>
-      <div style="font-size: 24px; font-weight: 700;" id="usageTeam">0</div>
-      <div style="font-size: 12px; color: var(--text-secondary);">of unlimited</div>
+      <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 8px;">Unique Brands</div>
+      <div style="font-size: 24px; font-weight: 700;" id="usageBrands">0</div>
+      <div style="font-size: 12px; color: var(--text-secondary);">in catalog</div>
     </div>
     
     <div>
-      <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 8px;">API Requests Today</div>
-      <div style="font-size: 24px; font-weight: 700;" id="usageApi">0</div>
-      <div style="font-size: 12px; color: var(--text-secondary);">of unlimited</div>
+      <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 8px;">In Stock</div>
+      <div style="font-size: 24px; font-weight: 700;" id="usageInStock">0</div>
+      <div style="font-size: 12px; color: var(--text-secondary);">available</div>
     </div>
   </div>
 </div>
@@ -162,10 +162,10 @@
       // Load usage stats
       try {
         const dashboardResponse = await API.get('/dashboard');
-        document.getElementById('usageTables').textContent = dashboardResponse.stats?.tables || 0;
-        document.getElementById('usageRecords').textContent = formatNumber(dashboardResponse.stats?.records || 0);
-        document.getElementById('usageTeam').textContent = dashboardResponse.stats?.team || 0;
-        document.getElementById('usageApi').textContent = formatNumber(dashboardResponse.stats?.apiRequests || 0);
+        document.getElementById('usageParts').textContent = formatNumber(dashboardResponse.totalParts || 0);
+        document.getElementById('usageFiles').textContent = dashboardResponse.files?.length || 0;
+        document.getElementById('usageBrands').textContent = dashboardResponse.uniqueBrands || 0;
+        document.getElementById('usageInStock').textContent = formatNumber(dashboardResponse.inStockCount || 0);
       } catch (err) {
         // Ignore stats errors
       }

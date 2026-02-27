@@ -1,0 +1,424 @@
+<%- include('partials/header', { currentPage: 'files', pageTitle: 'Import Files' }) %>
+
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">Imported Files</h3>
+    <a href="/supplier/import" class="btn btn-primary">
+      <i data-lucide="upload" style="width: 16px; height: 16px;"></i>
+      Upload New File
+    </a>
+  </div>
+  
+  <div id="filesContainer">
+    <div class="loading">
+      <div class="spinner"></div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .file-list {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .file-item {
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid var(--border);
+    transition: all 0.2s;
+  }
+  
+  .file-item:last-child {
+    border-bottom: none;
+  }
+  
+  .file-item:hover {
+    background: rgba(14, 165, 233, 0.03);
+  }
+  
+  .file-icon-wrapper {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 20px;
+    flex-shrink: 0;
+  }
+  
+  .file-icon-wrapper.excel {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+  }
+  
+  .file-icon-wrapper.csv {
+    background: linear-gradient(135deg, #0ea5e9, #0284c7);
+  }
+  
+  .file-icon-wrapper svg {
+    width: 28px;
+    height: 28px;
+    color: white;
+  }
+  
+  .file-details {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .file-name {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 1rem;
+    margin-bottom: 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .file-meta {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  
+  .file-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+  }
+  
+  .file-meta-item svg {
+    width: 14px;
+    height: 14px;
+  }
+  
+  .file-stats {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-right: 20px;
+  }
+  
+  .file-stat {
+    text-align: center;
+    padding: 10px 20px;
+    background: var(--bg-main);
+    border-radius: 10px;
+  }
+  
+  .file-stat-value {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--primary);
+  }
+  
+  .file-stat-label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-top: 2px;
+  }
+  
+  .file-actions {
+    display: flex;
+    gap: 8px;
+  }
+  
+  .file-action-btn {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border);
+    background: white;
+    border-radius: 10px;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: all 0.2s;
+  }
+  
+  .file-action-btn:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: rgba(14, 165, 233, 0.05);
+  }
+  
+  .file-action-btn.delete:hover {
+    border-color: #ef4444;
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.05);
+  }
+  
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-secondary);
+  }
+  
+  .empty-state i {
+    width: 64px;
+    height: 64px;
+    margin-bottom: 20px;
+    opacity: 0.3;
+  }
+  
+  .empty-state h3 {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+    font-size: 1.1rem;
+  }
+  
+  .empty-state p {
+    margin-bottom: 24px;
+  }
+  
+  /* Delete confirmation modal */
+  .modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .modal.active {
+    display: flex;
+  }
+  
+  .modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+  }
+  
+  .modal-content {
+    position: relative;
+    background: white;
+    border-radius: 16px;
+    padding: 32px;
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+  }
+  
+  .modal-icon {
+    width: 64px;
+    height: 64px;
+    background: rgba(239, 68, 68, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+  }
+  
+  .modal-icon svg {
+    width: 32px;
+    height: 32px;
+    color: #ef4444;
+  }
+  
+  .modal h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  
+  .modal p {
+    color: var(--text-secondary);
+    margin-bottom: 24px;
+  }
+  
+  .modal-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+  }
+</style>
+
+<div class="modal" id="deleteModal">
+  <div class="modal-backdrop" onclick="closeModal()"></div>
+  <div class="modal-content">
+    <div class="modal-icon">
+      <i data-lucide="trash-2"></i>
+    </div>
+    <h3>Delete File?</h3>
+    <p>All <span id="deleteCount">0</span> parts from "<span id="deleteFileName"></span>" will be permanently deleted.</p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-danger" onclick="confirmDelete()">Delete Parts</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let pendingDeleteFile = null;
+  
+  document.addEventListener('DOMContentLoaded', async () => {
+    lucide.createIcons();
+    await loadFiles();
+  });
+  
+  async function loadFiles() {
+    try {
+      const response = await fetch('/api/supplier/files');
+      const files = await response.json();
+      
+      renderFiles(files);
+    } catch (err) {
+      console.error('Error loading files:', err);
+      document.getElementById('filesContainer').innerHTML = `
+        <div class="empty-state">
+          <i data-lucide="alert-circle"></i>
+          <h3>Error loading files</h3>
+          <p>Please refresh the page</p>
+        </div>
+      `;
+      lucide.createIcons();
+    }
+  }
+  
+  function renderFiles(files) {
+    const container = document.getElementById('filesContainer');
+    
+    if (!files || !files.length) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <i data-lucide="folder-open"></i>
+          <h3>No files uploaded yet</h3>
+          <p>Upload your first parts file to get started</p>
+          <a href="/supplier/import" class="btn btn-primary">
+            <i data-lucide="upload" style="width: 16px; height: 16px;"></i>
+            Upload Parts
+          </a>
+        </div>
+      `;
+      lucide.createIcons();
+      return;
+    }
+    
+    container.innerHTML = `
+      <div class="file-list">
+        ${files.map(file => {
+          const ext = file.fileName?.split('.').pop()?.toLowerCase() || 'file';
+          const iconClass = ext === 'csv' ? 'csv' : 'excel';
+          const icon = ext === 'csv' ? 'file-text' : 'file-spreadsheet';
+          
+          return `
+            <div class="file-item">
+              <div class="file-icon-wrapper ${iconClass}">
+                <i data-lucide="${icon}"></i>
+              </div>
+              <div class="file-details">
+                <div class="file-name">${escapeHtml(file.fileName)}</div>
+                <div class="file-meta">
+                  <div class="file-meta-item">
+                    <i data-lucide="calendar"></i>
+                    Imported ${formatDate(file.importedAt)}
+                  </div>
+                  <div class="file-meta-item">
+                    <i data-lucide="clock"></i>
+                    Updated ${formatDate(file.lastUpdated)}
+                  </div>
+                </div>
+              </div>
+              <div class="file-stats">
+                <div class="file-stat">
+                  <div class="file-stat-value">${formatNumber(file.partsCount)}</div>
+                  <div class="file-stat-label">Parts</div>
+                </div>
+              </div>
+              <div class="file-actions">
+                <button class="file-action-btn" onclick="viewParts('${escapeHtml(file.fileName)}')" title="View Parts">
+                  <i data-lucide="eye" style="width: 18px; height: 18px;"></i>
+                </button>
+                <button class="file-action-btn" onclick="exportFile('${escapeHtml(file.fileName)}')" title="Export">
+                  <i data-lucide="download" style="width: 18px; height: 18px;"></i>
+                </button>
+                <button class="file-action-btn delete" onclick="deleteFile('${escapeHtml(file.fileName)}', ${file.partsCount})" title="Delete">
+                  <i data-lucide="trash-2" style="width: 18px; height: 18px;"></i>
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+    
+    lucide.createIcons();
+  }
+  
+  function viewParts(fileName) {
+    window.location.href = `/supplier/parts?file=${encodeURIComponent(fileName)}`;
+  }
+  
+  function exportFile(fileName) {
+    window.location.href = `/api/supplier/parts/export?fileName=${encodeURIComponent(fileName)}`;
+  }
+  
+  function deleteFile(fileName, count) {
+    pendingDeleteFile = fileName;
+    document.getElementById('deleteFileName').textContent = fileName;
+    document.getElementById('deleteCount').textContent = count.toLocaleString();
+    document.getElementById('deleteModal').classList.add('active');
+    lucide.createIcons();
+  }
+  
+  async function confirmDelete() {
+    if (!pendingDeleteFile) return;
+    
+    try {
+      const response = await fetch(`/api/supplier/files/${encodeURIComponent(pendingDeleteFile)}`, {
+        method: 'DELETE'
+      });
+      
+      if (!response.ok) throw new Error('Delete failed');
+      
+      closeModal();
+      await loadFiles();
+    } catch (err) {
+      alert('Error deleting file: ' + err.message);
+    }
+  }
+  
+  function closeModal() {
+    document.getElementById('deleteModal').classList.remove('active');
+    pendingDeleteFile = null;
+  }
+  
+  function formatNumber(num) {
+    if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+    if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+    return num?.toLocaleString() || '0';
+  }
+  
+  function formatDate(dateStr) {
+    if (!dateStr) return 'N/A';
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diff = now - date;
+    
+    if (diff < 60000) return 'just now';
+    if (diff < 3600000) return Math.floor(diff / 60000) + 'm ago';
+    if (diff < 86400000) return Math.floor(diff / 3600000) + 'h ago';
+    if (diff < 604800000) return Math.floor(diff / 86400000) + 'd ago';
+    
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+  
+  function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>"']/g, m => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[m]));
+  }
+</script>
+
+<%- include('partials/footer') %>

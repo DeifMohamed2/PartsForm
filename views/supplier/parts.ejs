@@ -1,0 +1,887 @@
+<%- include('partials/header', { currentPage: 'parts', pageTitle: 'My Parts' }) %>
+
+<!-- Page Header -->
+<div class="page-header">
+  <div class="page-header-left">
+    <div class="search-box">
+      <i data-lucide="search"></i>
+      <input type="text" id="searchInput" placeholder="Search parts by number, description, brand...">
+    </div>
+    <select id="fileFilter" class="filter-select">
+      <option value="">All Import Files</option>
+    </select>
+  </div>
+  
+  <div class="page-header-right">
+    <button class="btn btn-secondary" id="exportBtn">
+      <i data-lucide="download" style="width: 16px; height: 16px;"></i>
+      Export
+    </button>
+    <a href="/supplier/import" class="btn btn-primary">
+      <i data-lucide="upload" style="width: 16px; height: 16px;"></i>
+      Upload Parts
+    </a>
+  </div>
+</div>
+
+<!-- Parts Table -->
+<div class="card">
+  <div class="table-container">
+    <table class="data-table" id="partsTable">
+      <thead>
+        <tr>
+          <th class="checkbox-col">
+            <input type="checkbox" id="selectAll">
+          </th>
+          <th class="sortable" data-sort="partNumber">Part Number</th>
+          <th class="sortable" data-sort="description">Description</th>
+          <th class="sortable" data-sort="brand">Brand</th>
+          <th class="sortable" data-sort="price">Price</th>
+          <th class="sortable" data-sort="quantity">Qty</th>
+          <th class="sortable" data-sort="stock">Stock</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="partsBody">
+        <tr>
+          <td colspan="8" class="loading-row">
+            <div class="spinner"></div>
+            <span>Loading parts...</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  
+  <!-- Pagination -->
+  <div class="table-footer">
+    <div class="pagination-info">
+      Showing <span id="showingFrom">0</span>-<span id="showingTo">0</span> of <span id="totalParts">0</span> parts
+    </div>
+    <div class="pagination">
+      <button class="btn btn-sm" id="prevPage" disabled>
+        <i data-lucide="chevron-left" style="width: 16px; height: 16px;"></i>
+      </button>
+      <span class="page-info">Page <span id="currentPage">1</span> of <span id="totalPages">1</span></span>
+      <button class="btn btn-sm" id="nextPage" disabled>
+        <i data-lucide="chevron-right" style="width: 16px; height: 16px;"></i>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Bulk Actions Bar (hidden by default) -->
+<div class="bulk-actions-bar" id="bulkActionsBar" style="display: none;">
+  <span class="selected-count"><span id="selectedCount">0</span> parts selected</span>
+  <div class="bulk-buttons">
+    <button class="btn btn-sm" onclick="bulkEditPrice()">
+      <i data-lucide="dollar-sign" style="width: 14px; height: 14px;"></i>
+      Update Price
+    </button>
+    <button class="btn btn-sm" onclick="bulkEditQuantity()">
+      <i data-lucide="package" style="width: 14px; height: 14px;"></i>
+      Update Quantity
+    </button>
+    <button class="btn btn-sm btn-danger" onclick="bulkDelete()">
+      <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+      Delete
+    </button>
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal" id="editModal">
+  <div class="modal-backdrop" onclick="closeModal()"></div>
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Edit Part</h3>
+      <button class="modal-close" onclick="closeModal()">
+        <i data-lucide="x"></i>
+      </button>
+    </div>
+    <form id="editForm">
+      <input type="hidden" id="editPartId">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Part Number</label>
+          <input type="text" id="editPartNumber" readonly class="readonly">
+        </div>
+        <div class="form-group">
+          <label>Brand</label>
+          <input type="text" id="editBrand">
+        </div>
+        <div class="form-group full-width">
+          <label>Description</label>
+          <textarea id="editDescription" rows="2"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Price</label>
+          <div class="input-group">
+            <span class="input-addon">AED</span>
+            <input type="number" id="editPrice" step="0.01" min="0">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Quantity</label>
+          <input type="number" id="editQuantity" min="0">
+        </div>
+        <div class="form-group">
+          <label>Weight (kg)</label>
+          <input type="number" id="editWeight" step="0.01" min="0">
+        </div>
+        <div class="form-group">
+          <label>Delivery Days</label>
+          <input type="number" id="editDeliveryDays" min="0">
+        </div>
+        <div class="form-group">
+          <label>Category</label>
+          <input type="text" id="editCategory">
+        </div>
+        <div class="form-group">
+          <label>Stock Status</label>
+          <select id="editStock">
+            <option value="in-stock">In Stock</option>
+            <option value="low-stock">Low Stock</option>
+            <option value="out-of-stock">Out of Stock</option>
+            <option value="on-order">On Order</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<style>
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  
+  .page-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    min-width: 300px;
+  }
+  
+  .search-box {
+    position: relative;
+    flex: 1;
+    max-width: 400px;
+  }
+  
+  .search-box i {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    color: var(--text-secondary);
+  }
+  
+  .search-box input {
+    width: 100%;
+    padding: 10px 12px 10px 40px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+  }
+  
+  .filter-select {
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+    min-width: 180px;
+    background: white;
+  }
+  
+  .page-header-right {
+    display: flex;
+    gap: 8px;
+  }
+  
+  .table-container {
+    overflow-x: auto;
+  }
+  
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  
+  .data-table th {
+    text-align: left;
+    padding: 12px 16px;
+    background: var(--bg-main);
+    font-weight: 600;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  
+  .data-table th.sortable {
+    cursor: pointer;
+  }
+  
+  .data-table th.sortable:hover {
+    color: var(--primary);
+  }
+  
+  .data-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  
+  .data-table tbody tr:hover {
+    background: rgba(14, 165, 233, 0.03);
+  }
+  
+  .checkbox-col {
+    width: 40px;
+    text-align: center !important;
+  }
+  
+  .part-number {
+    font-weight: 600;
+    color: var(--primary);
+  }
+  
+  .description-cell {
+    max-width: 250px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .price-cell {
+    font-weight: 600;
+  }
+  
+  .stock-badge {
+    display: inline-flex;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  
+  .stock-badge.in-stock {
+    background: rgba(34, 197, 94, 0.1);
+    color: #22c55e;
+  }
+  
+  .stock-badge.low-stock {
+    background: rgba(234, 179, 8, 0.1);
+    color: #ca8a04;
+  }
+  
+  .stock-badge.out-of-stock {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+  }
+  
+  .stock-badge.on-order {
+    background: rgba(14, 165, 233, 0.1);
+    color: #0ea5e9;
+  }
+  
+  .action-btn {
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: all 0.2s;
+  }
+  
+  .action-btn:hover {
+    background: var(--bg-main);
+    color: var(--primary);
+  }
+  
+  .action-btn.delete:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+  }
+  
+  .table-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    border-top: 1px solid var(--border);
+  }
+  
+  .pagination {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .page-info {
+    padding: 0 12px;
+    font-size: 14px;
+    color: var(--text-secondary);
+  }
+  
+  .bulk-actions-bar {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--text-primary);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    z-index: 100;
+  }
+  
+  .bulk-buttons {
+    display: flex;
+    gap: 8px;
+  }
+  
+  .bulk-actions-bar .btn {
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    border: none;
+  }
+  
+  .bulk-actions-bar .btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+  }
+  
+  .bulk-actions-bar .btn-danger:hover {
+    background: #ef4444;
+  }
+  
+  /* Modal */
+  .modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .modal.active {
+    display: flex;
+  }
+  
+  .modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+  }
+  
+  .modal-content {
+    position: relative;
+    background: white;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  }
+  
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  
+  .modal-header h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+  
+  .modal-close {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    color: var(--text-secondary);
+  }
+  
+  .modal-close:hover {
+    background: var(--bg-main);
+  }
+  
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    padding: 24px;
+  }
+  
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  
+  .form-group.full-width {
+    grid-column: 1 / -1;
+  }
+  
+  .form-group label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+  }
+  
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+  }
+  
+  .form-group input.readonly {
+    background: var(--bg-main);
+    color: var(--text-secondary);
+  }
+  
+  .input-group {
+    display: flex;
+  }
+  
+  .input-addon {
+    padding: 10px 12px;
+    background: var(--bg-main);
+    border: 1px solid var(--border);
+    border-right: none;
+    border-radius: 8px 0 0 8px;
+    font-size: 14px;
+    color: var(--text-secondary);
+  }
+  
+  .input-group input {
+    border-radius: 0 8px 8px 0;
+    flex: 1;
+  }
+  
+  .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 16px 24px;
+    border-top: 1px solid var(--border);
+    background: var(--bg-main);
+  }
+  
+  .loading-row {
+    text-align: center;
+    padding: 40px !important;
+    color: var(--text-secondary);
+  }
+  
+  .loading-row .spinner {
+    margin: 0 auto 12px;
+  }
+  
+  .empty-row {
+    text-align: center;
+    padding: 60px !important;
+    color: var(--text-secondary);
+  }
+  
+  .empty-row i {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 16px;
+    opacity: 0.3;
+  }
+</style>
+
+<script>
+  let currentPage = 1;
+  let totalPages = 1;
+  let selectedParts = new Set();
+  let currentSort = { field: 'createdAt', order: 'desc' };
+  
+  document.addEventListener('DOMContentLoaded', async () => {
+    lucide.createIcons();
+    
+    // Load import files for filter
+    await loadFileFilters();
+    
+    // Check for URL parameter to filter by file
+    const urlParams = new URLSearchParams(window.location.search);
+    const fileParam = urlParams.get('file');
+    if (fileParam) {
+      const fileSelect = document.getElementById('fileFilter');
+      // Set the filter if the file exists in options
+      for (let i = 0; i < fileSelect.options.length; i++) {
+        if (fileSelect.options[i].value === fileParam) {
+          fileSelect.value = fileParam;
+          break;
+        }
+      }
+    }
+    
+    // Load parts
+    await loadParts();
+    
+    // Event listeners
+    document.getElementById('searchInput').addEventListener('input', debounce(loadParts, 300));
+    document.getElementById('fileFilter').addEventListener('change', loadParts);
+    document.getElementById('selectAll').addEventListener('change', toggleSelectAll);
+    document.getElementById('prevPage').addEventListener('click', () => changePage(-1));
+    document.getElementById('nextPage').addEventListener('click', () => changePage(1));
+    document.getElementById('exportBtn').addEventListener('click', exportParts);
+    document.getElementById('editForm').addEventListener('submit', savePart);
+    
+    // Sortable headers
+    document.querySelectorAll('.sortable').forEach(th => {
+      th.addEventListener('click', () => sortBy(th.dataset.sort));
+    });
+  });
+  
+  async function loadFileFilters() {
+    try {
+      const response = await fetch('/api/supplier/files');
+      const files = await response.json();
+      
+      const select = document.getElementById('fileFilter');
+      files.forEach(file => {
+        const option = document.createElement('option');
+        option.value = file.fileName;
+        option.textContent = `${file.fileName} (${file.partsCount})`;
+        select.appendChild(option);
+      });
+    } catch (err) {
+      console.error('Error loading file filters:', err);
+    }
+  }
+  
+  async function loadParts() {
+    const search = document.getElementById('searchInput').value;
+    const fileName = document.getElementById('fileFilter').value;
+    
+    try {
+      const params = new URLSearchParams({
+        page: currentPage,
+        limit: 50,
+        sortBy: currentSort.field,
+        sortOrder: currentSort.order
+      });
+      
+      if (search) params.append('search', search);
+      if (fileName) params.append('fileName', fileName);
+      
+      const response = await fetch(`/api/supplier/parts?${params}`);
+      const data = await response.json();
+      
+      renderParts(data.results || []);
+      updatePagination(data);
+      
+    } catch (err) {
+      console.error('Error loading parts:', err);
+      document.getElementById('partsBody').innerHTML = `
+        <tr><td colspan="8" class="empty-row">
+          <i data-lucide="alert-circle"></i>
+          <p>Error loading parts. Please refresh.</p>
+        </td></tr>
+      `;
+      lucide.createIcons();
+    }
+  }
+  
+  function renderParts(parts) {
+    const tbody = document.getElementById('partsBody');
+    
+    if (!parts.length) {
+      tbody.innerHTML = `
+        <tr><td colspan="8" class="empty-row">
+          <i data-lucide="inbox"></i>
+          <h4 style="margin: 16px 0 8px; font-weight: 600; color: var(--text-primary);">No parts found</h4>
+          <p>Upload your first file to get started</p>
+          <a href="/supplier/import" class="btn btn-primary" style="margin-top: 16px;">
+            Upload Parts
+          </a>
+        </td></tr>
+      `;
+      lucide.createIcons();
+      return;
+    }
+    
+    tbody.innerHTML = parts.map(part => `
+      <tr data-id="${part._id}">
+        <td class="checkbox-col">
+          <input type="checkbox" class="part-checkbox" value="${part._id}" 
+                 ${selectedParts.has(part._id) ? 'checked' : ''}
+                 onchange="toggleSelect('${part._id}')">
+        </td>
+        <td><span class="part-number">${escapeHtml(part.partNumber)}</span></td>
+        <td class="description-cell" title="${escapeHtml(part.description || '')}">${escapeHtml(part.description || '-')}</td>
+        <td>${escapeHtml(part.brand || '-')}</td>
+        <td class="price-cell">${part.currency || 'AED'} ${(part.price || 0).toFixed(2)}</td>
+        <td>${part.quantity || 0}</td>
+        <td><span class="stock-badge ${part.stock || 'unknown'}">${formatStock(part.stock)}</span></td>
+        <td>
+          <button class="action-btn" onclick="editPart('${part._id}')" title="Edit">
+            <i data-lucide="edit-2" style="width: 16px; height: 16px;"></i>
+          </button>
+          <button class="action-btn delete" onclick="deletePart('${part._id}')" title="Delete">
+            <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
+          </button>
+        </td>
+      </tr>
+    `).join('');
+    
+    lucide.createIcons();
+  }
+  
+  function updatePagination(data) {
+    currentPage = data.page || 1;
+    totalPages = data.totalPages || 1;
+    const total = data.total || 0;
+    const limit = data.limit || 50;
+    
+    document.getElementById('currentPage').textContent = currentPage;
+    document.getElementById('totalPages').textContent = totalPages;
+    document.getElementById('totalParts').textContent = total;
+    document.getElementById('showingFrom').textContent = total ? ((currentPage - 1) * limit) + 1 : 0;
+    document.getElementById('showingTo').textContent = Math.min(currentPage * limit, total);
+    
+    document.getElementById('prevPage').disabled = currentPage <= 1;
+    document.getElementById('nextPage').disabled = currentPage >= totalPages;
+  }
+  
+  function changePage(delta) {
+    currentPage += delta;
+    loadParts();
+  }
+  
+  function sortBy(field) {
+    if (currentSort.field === field) {
+      currentSort.order = currentSort.order === 'asc' ? 'desc' : 'asc';
+    } else {
+      currentSort.field = field;
+      currentSort.order = 'asc';
+    }
+    currentPage = 1;
+    loadParts();
+  }
+  
+  function toggleSelect(id) {
+    if (selectedParts.has(id)) {
+      selectedParts.delete(id);
+    } else {
+      selectedParts.add(id);
+    }
+    updateBulkActions();
+  }
+  
+  function toggleSelectAll(e) {
+    const checkboxes = document.querySelectorAll('.part-checkbox');
+    checkboxes.forEach(cb => {
+      cb.checked = e.target.checked;
+      if (e.target.checked) {
+        selectedParts.add(cb.value);
+      } else {
+        selectedParts.delete(cb.value);
+      }
+    });
+    updateBulkActions();
+  }
+  
+  function updateBulkActions() {
+    const bar = document.getElementById('bulkActionsBar');
+    document.getElementById('selectedCount').textContent = selectedParts.size;
+    bar.style.display = selectedParts.size > 0 ? 'flex' : 'none';
+  }
+  
+  async function editPart(id) {
+    try {
+      const response = await fetch(`/api/supplier/parts/${id}`);
+      const part = await response.json();
+      
+      document.getElementById('editPartId').value = id;
+      document.getElementById('editPartNumber').value = part.partNumber || '';
+      document.getElementById('editDescription').value = part.description || '';
+      document.getElementById('editBrand').value = part.brand || '';
+      document.getElementById('editPrice').value = part.price || 0;
+      document.getElementById('editQuantity').value = part.quantity || 0;
+      document.getElementById('editWeight').value = part.weight || '';
+      document.getElementById('editDeliveryDays').value = part.deliveryDays || '';
+      document.getElementById('editCategory').value = part.category || '';
+      document.getElementById('editStock').value = part.stock || 'unknown';
+      
+      document.getElementById('editModal').classList.add('active');
+      lucide.createIcons();
+    } catch (err) {
+      alert('Error loading part: ' + err.message);
+    }
+  }
+  
+  async function savePart(e) {
+    e.preventDefault();
+    
+    const id = document.getElementById('editPartId').value;
+    const updates = {
+      description: document.getElementById('editDescription').value,
+      brand: document.getElementById('editBrand').value,
+      price: parseFloat(document.getElementById('editPrice').value) || 0,
+      quantity: parseInt(document.getElementById('editQuantity').value) || 0,
+      weight: parseFloat(document.getElementById('editWeight').value) || null,
+      deliveryDays: parseInt(document.getElementById('editDeliveryDays').value) || null,
+      category: document.getElementById('editCategory').value,
+      stock: document.getElementById('editStock').value
+    };
+    
+    try {
+      const response = await fetch(`/api/supplier/parts/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates)
+      });
+      
+      if (!response.ok) throw new Error('Update failed');
+      
+      closeModal();
+      loadParts();
+    } catch (err) {
+      alert('Error saving part: ' + err.message);
+    }
+  }
+  
+  async function deletePart(id) {
+    if (!confirm('Are you sure you want to delete this part?')) return;
+    
+    try {
+      await fetch(`/api/supplier/parts/${id}`, { method: 'DELETE' });
+      loadParts();
+    } catch (err) {
+      alert('Error deleting part: ' + err.message);
+    }
+  }
+  
+  async function bulkDelete() {
+    if (!confirm(`Delete ${selectedParts.size} parts? This cannot be undone.`)) return;
+    
+    try {
+      await fetch('/api/supplier/parts/bulk', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ partIds: Array.from(selectedParts) })
+      });
+      
+      selectedParts.clear();
+      updateBulkActions();
+      loadParts();
+    } catch (err) {
+      alert('Error deleting parts: ' + err.message);
+    }
+  }
+  
+  async function bulkEditPrice() {
+    const newPrice = prompt('Enter new price for selected parts:');
+    if (!newPrice) return;
+    
+    try {
+      await fetch('/api/supplier/parts/bulk', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          partIds: Array.from(selectedParts),
+          updates: { price: parseFloat(newPrice) }
+        })
+      });
+      
+      loadParts();
+    } catch (err) {
+      alert('Error updating parts: ' + err.message);
+    }
+  }
+  
+  async function bulkEditQuantity() {
+    const newQty = prompt('Enter new quantity for selected parts:');
+    if (!newQty) return;
+    
+    try {
+      await fetch('/api/supplier/parts/bulk', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          partIds: Array.from(selectedParts),
+          updates: { quantity: parseInt(newQty) }
+        })
+      });
+      
+      loadParts();
+    } catch (err) {
+      alert('Error updating parts: ' + err.message);
+    }
+  }
+  
+  async function exportParts() {
+    window.location.href = '/api/supplier/parts/export';
+  }
+  
+  function closeModal() {
+    document.getElementById('editModal').classList.remove('active');
+  }
+  
+  function formatStock(stock) {
+    const labels = {
+      'in-stock': 'In Stock',
+      'low-stock': 'Low Stock',
+      'out-of-stock': 'Out of Stock',
+      'on-order': 'On Order',
+      'unknown': 'Unknown'
+    };
+    return labels[stock] || stock || 'Unknown';
+  }
+  
+  function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>"']/g, m => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[m]));
+  }
+  
+  function debounce(fn, delay) {
+    let timeout;
+    return (...args) => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => fn(...args), delay);
+    };
+  }
+</script>
+
+<%- include('partials/footer') %>
