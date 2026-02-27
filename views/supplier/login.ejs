@@ -327,9 +327,15 @@
       color: var(--success);
     }
     
-    .requirement i {
+    .requirement.valid svg {
+      stroke: var(--success);
+    }
+    
+    .requirement i,
+    .requirement svg {
       width: 14px;
       height: 14px;
+      flex-shrink: 0;
     }
     
     .contact-admin {
@@ -598,14 +604,28 @@
       
       for (const [id, valid] of Object.entries(requirements)) {
         const el = document.getElementById(id);
-        const icon = el.querySelector('i');
+        // Find either i element or svg element (Lucide replaces i with svg)
+        let icon = el.querySelector('i') || el.querySelector('svg');
         
         if (valid) {
           el.classList.add('valid');
-          icon.setAttribute('data-lucide', 'check-circle');
+          // Replace icon with a new one
+          if (icon) {
+            const newIcon = document.createElement('i');
+            newIcon.setAttribute('data-lucide', 'check-circle');
+            newIcon.style.width = '14px';
+            newIcon.style.height = '14px';
+            icon.replaceWith(newIcon);
+          }
         } else {
           el.classList.remove('valid');
-          icon.setAttribute('data-lucide', 'circle');
+          if (icon) {
+            const newIcon = document.createElement('i');
+            newIcon.setAttribute('data-lucide', 'circle');
+            newIcon.style.width = '14px';
+            newIcon.style.height = '14px';
+            icon.replaceWith(newIcon);
+          }
         }
       }
       
