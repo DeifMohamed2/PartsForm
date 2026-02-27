@@ -14,6 +14,8 @@ async function createAndEnableFTP() {
     const passwordHash = await bcrypt.hash("Test123456", 10);
     supplier = await Supplier.create({
       companyName: "Test FTP Supplier",
+      companyCode: "TESTFTP",
+      contactName: "Test Contact",
       email: "testftp@partsform.com",
       password: passwordHash,
       phone: "+1234567890",
