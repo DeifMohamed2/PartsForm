@@ -34,20 +34,62 @@ class SupplierPartsService {
   }
 
   /**
-   * Parse CSV file
+   * Parse CSV file with auto-detection of delimiter
    */
   async parseCSV(buffer) {
     return new Promise((resolve, reject) => {
+      const content = buffer.toString('utf8');
+      
+      // Auto-detect delimiter by checking first line
+      const firstLine = content.split('\n')[0] || '';
+      let delimiter = ',';
+      
+      // Count potential delimiters in first line
+      const semicolonCount = (firstLine.match(/;/g) || []).length;
+      const commaCount = (firstLine.match(/,/g) || []).length;
+      const tabCount = (firstLine.match(/\t/g) || []).length;
+      
+      if (semicolonCount > commaCount && semicolonCount > tabCount) {
+        delimiter = ';';
+      } else if (tabCount > commaCount && tabCount > semicolonCount) {
+        delimiter = '\t';
+      }
+      
+      logger.info(`CSV delimiter auto-detected: "${delimiter === '\t' ? 'TAB' : delimiter}"`);
+      
       const records = [];
       const parser = csv.parse({
         columns: true,
         skip_empty_lines: true,
         trim: true,
-        relax_column_count: true
+        relax_column_count: true,
+        relax_quotes: true,
+        delimiter: delimiter,
+        quote: '"',
+        escape: '"',
+        skip_records_with_error: true,
+        on_record: (record) => {
+          // Clean up any special Excel formatting like ="value"
+          const cleaned = {};
+          for (const [key, value] of Object.entries(record)) {
+            let cleanValue = value;
+            if (typeof cleanValue === 'string') {
+              // Remove Excel formula wrapper ="..."
+              cleanValue = cleanValue.replace(/^="?(.*)"?$/g, '$1');
+              // Remove leading apostrophes (Excel text prefix)
+              cleanValue = cleanValue.replace(/^'/, '');
+            }
+            cleaned[key] = cleanValue;
+          }
+          return cleaned;
+        }
       });
 
       parser.on('data', (row) => records.push(row));
-      parser.on('error', reject);
+      parser.on('error', (err) => {
+        logger.warn('CSV parse warning:', err.message);
+        // Don't reject on parse errors, try to continue
+      });
       parser.on('end', () => {
         const headers = records.length > 0 ? Object.keys(records[0]) : [];
         resolve({ headers, rows: records });
@@ -99,17 +141,17 @@ class SupplierPartsService {
   mapToPart(rawRow, columnMapping = {}) {
     // Default column mapping (common variations)
     const defaultMapping = {
-      partNumber: ['part_number', 'partnumber', 'part', 'pn', 'part_no', 'part no', 'part#', 'sku', 'item_number', 'item number', 'item', 'code'],
+      partNumber: ['part_number', 'partnumber', 'part', 'pn', 'part_no', 'part no', 'part#', 'sku', 'item_number', 'item number', 'item', 'code', 'vendor_code', 'vendor code', 'article', 'article_number'],
       description: ['description', 'desc', 'name', 'title', 'product_name', 'product name', 'item_description', 'item description'],
-      brand: ['brand', 'manufacturer', 'mfr', 'make', 'vendor', 'oem'],
-      supplier: ['supplier', 'seller', 'source'],
-      price: ['price', 'unit_price', 'unit price', 'cost', 'rate', 'amount', 'selling_price', 'selling price'],
+      brand: ['brand', 'manufacturer', 'mfr', 'make', 'oem'],
+      supplier: ['supplier', 'seller', 'source', 'vendor'],
+      price: ['price', 'unit_price', 'unit price', 'cost', 'rate', 'amount', 'selling_price', 'selling price', 'price_aed', 'price aed'],
       quantity: ['quantity', 'qty', 'stock', 'available', 'inventory', 'on_hand', 'on hand', 'stock_qty'],
       currency: ['currency', 'curr', 'ccy'],
       weight: ['weight', 'wt', 'mass', 'kg', 'lbs'],
-      deliveryDays: ['delivery_days', 'delivery days', 'lead_time', 'lead time', 'days', 'eta'],
+      deliveryDays: ['delivery_days', 'delivery days', 'lead_time', 'lead time', 'days', 'eta', 'delivery'],
       category: ['category', 'cat', 'type', 'group', 'classification'],
-      minOrderQty: ['min_order_qty', 'min order qty', 'moq', 'minimum_qty', 'min_qty']
+      minOrderQty: ['min_order_qty', 'min order qty', 'moq', 'minimum_qty', 'min_qty', 'min_lot', 'min lot', 'minlot']
     };
 
     const part = {};
@@ -145,7 +187,13 @@ class SupplierPartsService {
       if (value !== null && value !== undefined && value !== '') {
         // Type conversion
         if (['price', 'quantity', 'weight', 'deliveryDays', 'minOrderQty'].includes(field)) {
-          const numValue = parseFloat(String(value).replace(/[^0-9.-]/g, ''));
+          let strValue = String(value).trim();
+          // Handle European decimal format (comma as decimal separator)
+          // If there's a comma but no period, replace comma with period
+          if (strValue.includes(',') && !strValue.includes('.')) {
+            strValue = strValue.replace(',', '.');
+          }
+          const numValue = parseFloat(strValue.replace(/[^0-9.-]/g, ''));
           if (!isNaN(numValue)) part[field] = numValue;
         } else {
           part[field] = String(value).trim();
