@@ -146,12 +146,14 @@ class SupplierPartsService {
       brand: ['brand', 'manufacturer', 'mfr', 'make', 'oem'],
       supplier: ['supplier', 'seller', 'source', 'vendor'],
       price: ['price', 'unit_price', 'unit price', 'cost', 'rate', 'amount', 'selling_price', 'selling price', 'price_aed', 'price aed'],
-      quantity: ['quantity', 'qty', 'stock', 'available', 'inventory', 'on_hand', 'on hand', 'stock_qty'],
+      quantity: ['quantity', 'qty', 'available', 'inventory', 'on_hand', 'on hand', 'stock_qty'],
       currency: ['currency', 'curr', 'ccy'],
       weight: ['weight', 'wt', 'mass', 'kg', 'lbs'],
+      volume: ['volume', 'vol', 'cbm', 'cubic'],
       deliveryDays: ['delivery_days', 'delivery days', 'lead_time', 'lead time', 'days', 'eta', 'delivery'],
       category: ['category', 'cat', 'type', 'group', 'classification'],
-      minOrderQty: ['min_order_qty', 'min order qty', 'moq', 'minimum_qty', 'min_qty', 'min_lot', 'min lot', 'minlot']
+      minOrderQty: ['min_order_qty', 'min order qty', 'moq', 'minimum_qty', 'min_qty', 'min_lot', 'min lot', 'minlot'],
+      stockCode: ['stock', 'stock_code', 'stock code', 'warehouse', 'location', 'wh']
     };
 
     const part = {};
@@ -186,7 +188,7 @@ class SupplierPartsService {
 
       if (value !== null && value !== undefined && value !== '') {
         // Type conversion
-        if (['price', 'quantity', 'weight', 'deliveryDays', 'minOrderQty'].includes(field)) {
+        if (['price', 'quantity', 'weight', 'volume', 'deliveryDays', 'minOrderQty'].includes(field)) {
           let strValue = String(value).trim();
           // Handle European decimal format (comma as decimal separator)
           // If there's a comma but no period, replace comma with period
@@ -644,6 +646,131 @@ class SupplierPartsService {
       lastUpdated: f.lastUpdated
     }));
   }
-}
 
+  /**
+   * Get distinct brands for supplier
+   */
+  async getSupplierBrands(supplierId) {
+    const supplierObjectId = new mongoose.Types.ObjectId(supplierId);
+    
+    const brands = await Part.aggregate([
+      { 
+        $match: { 
+          'source.type': 'supplier_upload',
+          'source.supplierId': supplierObjectId,
+          brand: { $exists: true, $ne: '' }
+        } 
+      },
+      {
+        $group: {
+          _id: '$brand',
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { _id: 1 } }
+    ]);
+
+    return brands.map(b => ({
+      brand: b._id,
+      partsCount: b.count
+    }));
+  }
+
+  /**
+   * Delete parts by criteria
+   */
+  async deletePartsByCriteria(supplierId, criteria = {}) {
+    const supplierObjectId = new mongoose.Types.ObjectId(supplierId);
+    
+    const filter = {
+      'source.type': 'supplier_upload',
+      'source.supplierId': supplierObjectId
+    };
+
+    if (criteria.brand) {
+      filter.brand = criteria.brand;
+    }
+    if (criteria.fileName) {
+      filter.fileName = criteria.fileName;
+    }
+    if (criteria.partIds && criteria.partIds.length > 0) {
+      filter._id = { $in: criteria.partIds.map(id => new mongoose.Types.ObjectId(id)) };
+    }
+
+    // Get parts to delete for ES cleanup
+    const partsToDelete = await Part.find(filter).select('_id');
+    const partIds = partsToDelete.map(p => p._id.toString());
+
+    // Delete from MongoDB
+    const result = await Part.deleteMany(filter);
+
+    // Delete from Elasticsearch
+    if (partIds.length > 0 && this.esClient) {
+      try {
+        await this.esClient.deleteByQuery({
+          index: 'parts',
+          body: {
+            query: {
+              terms: { _id: partIds }
+            }
+          }
+        });
+      } catch (err) {
+        logger.error('Error deleting from ES:', err);
+      }
+    }
+
+    return { deleted: result.deletedCount };
+  }
+
+  /**
+   * Get import summary for data management UI
+   */
+  async getImportSummary(supplierId) {
+    const supplierObjectId = new mongoose.Types.ObjectId(supplierId);
+    
+    const summary = await Part.aggregate([
+      { 
+        $match: { 
+          'source.type': 'supplier_upload',
+          'source.supplierId': supplierObjectId 
+        } 
+      },
+      {
+        $facet: {
+          byBrand: [
+            { $group: { _id: '$brand', count: { $sum: 1 } } },
+            { $sort: { count: -1 } },
+            { $limit: 20 }
+          ],
+          byFile: [
+            { $group: { 
+              _id: '$fileName', 
+              count: { $sum: 1 },
+              lastImport: { $max: '$importedAt' }
+            }},
+            { $sort: { lastImport: -1 } }
+          ],
+          totals: [
+            { $group: { 
+              _id: null, 
+              totalParts: { $sum: 1 },
+              uniqueBrands: { $addToSet: '$brand' },
+              uniqueFiles: { $addToSet: '$fileName' }
+            }}
+          ]
+        }
+      }
+    ]);
+
+    const result = summary[0];
+    return {
+      byBrand: result.byBrand.map(b => ({ brand: b._id || 'Unknown', count: b.count })),
+      byFile: result.byFile.map(f => ({ fileName: f._id, count: f.count, lastImport: f.lastImport })),
+      totalParts: result.totals[0]?.totalParts || 0,
+      uniqueBrands: result.totals[0]?.uniqueBrands?.length || 0,
+      uniqueFiles: result.totals[0]?.uniqueFiles?.length || 0
+    };
+  }
+}
 module.exports = new SupplierPartsService();

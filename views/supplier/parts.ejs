@@ -1,306 +1,343 @@
 <%- include('partials/header', { currentPage: 'parts', pageTitle: 'My Parts' }) %>
 
-<!-- Page Header -->
-<div class="page-header">
-  <div class="page-header-left">
-    <div class="search-box">
-      <i data-lucide="search"></i>
-      <input type="text" id="searchInput" placeholder="Search parts by number, description, brand...">
-    </div>
-    <select id="fileFilter" class="filter-select">
-      <option value="">All Import Files</option>
-    </select>
-  </div>
-  
-  <div class="page-header-right">
-    <button class="btn btn-secondary" id="exportBtn">
-      <i data-lucide="download" style="width: 16px; height: 16px;"></i>
-      Export
-    </button>
-    <a href="/supplier/import" class="btn btn-primary">
-      <i data-lucide="upload" style="width: 16px; height: 16px;"></i>
-      Upload Parts
-    </a>
-  </div>
-</div>
-
-<!-- Parts Table -->
-<div class="card">
-  <div class="table-container">
-    <table class="data-table" id="partsTable">
-      <thead>
-        <tr>
-          <th class="checkbox-col">
-            <input type="checkbox" id="selectAll">
-          </th>
-          <th class="sortable" data-sort="partNumber">Part Number</th>
-          <th class="sortable" data-sort="description">Description</th>
-          <th class="sortable" data-sort="brand">Brand</th>
-          <th class="sortable" data-sort="price">Price</th>
-          <th class="sortable" data-sort="quantity">Qty</th>
-          <th class="sortable" data-sort="stock">Stock</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody id="partsBody">
-        <tr>
-          <td colspan="8" class="loading-row">
-            <div class="spinner"></div>
-            <span>Loading parts...</span>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-  
-  <!-- Pagination -->
-  <div class="table-footer">
-    <div class="pagination-info">
-      Showing <span id="showingFrom">0</span>-<span id="showingTo">0</span> of <span id="totalParts">0</span> parts
-    </div>
-    <div class="pagination">
-      <button class="btn btn-sm" id="prevPage" disabled>
-        <i data-lucide="chevron-left" style="width: 16px; height: 16px;"></i>
-      </button>
-      <span class="page-info">Page <span id="currentPage">1</span> of <span id="totalPages">1</span></span>
-      <button class="btn btn-sm" id="nextPage" disabled>
-        <i data-lucide="chevron-right" style="width: 16px; height: 16px;"></i>
-      </button>
-    </div>
-  </div>
-</div>
-
-<!-- Bulk Actions Bar (hidden by default) -->
-<div class="bulk-actions-bar" id="bulkActionsBar" style="display: none;">
-  <span class="selected-count"><span id="selectedCount">0</span> parts selected</span>
-  <div class="bulk-buttons">
-    <button class="btn btn-sm" onclick="bulkEditPrice()">
-      <i data-lucide="dollar-sign" style="width: 14px; height: 14px;"></i>
-      Update Price
-    </button>
-    <button class="btn btn-sm" onclick="bulkEditQuantity()">
-      <i data-lucide="package" style="width: 14px; height: 14px;"></i>
-      Update Quantity
-    </button>
-    <button class="btn btn-sm btn-danger" onclick="bulkDelete()">
-      <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
-      Delete
-    </button>
-  </div>
-</div>
-
-<!-- Edit Modal -->
-<div class="modal" id="editModal">
-  <div class="modal-backdrop" onclick="closeModal()"></div>
-  <div class="modal-content">
-    <div class="modal-header">
-      <h3>Edit Part</h3>
-      <button class="modal-close" onclick="closeModal()">
-        <i data-lucide="x"></i>
-      </button>
-    </div>
-    <form id="editForm">
-      <input type="hidden" id="editPartId">
-      <div class="form-grid">
-        <div class="form-group">
-          <label>Part Number</label>
-          <input type="text" id="editPartNumber" readonly class="readonly">
-        </div>
-        <div class="form-group">
-          <label>Brand</label>
-          <input type="text" id="editBrand">
-        </div>
-        <div class="form-group full-width">
-          <label>Description</label>
-          <textarea id="editDescription" rows="2"></textarea>
-        </div>
-        <div class="form-group">
-          <label>Price</label>
-          <div class="input-group">
-            <span class="input-addon">AED</span>
-            <input type="number" id="editPrice" step="0.01" min="0">
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Quantity</label>
-          <input type="number" id="editQuantity" min="0">
-        </div>
-        <div class="form-group">
-          <label>Weight (kg)</label>
-          <input type="number" id="editWeight" step="0.01" min="0">
-        </div>
-        <div class="form-group">
-          <label>Delivery Days</label>
-          <input type="number" id="editDeliveryDays" min="0">
-        </div>
-        <div class="form-group">
-          <label>Category</label>
-          <input type="text" id="editCategory">
-        </div>
-        <div class="form-group">
-          <label>Stock Status</label>
-          <select id="editStock">
-            <option value="in-stock">In Stock</option>
-            <option value="low-stock">Low Stock</option>
-            <option value="out-of-stock">Out of Stock</option>
-            <option value="on-order">On Order</option>
-          </select>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-        <button type="submit" class="btn btn-primary">Save Changes</button>
-      </div>
-    </form>
-  </div>
-</div>
-
 <style>
-  .page-header {
+  /* Modern Excel-like Parts Grid - Using Supplier Design System */
+  .parts-page {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 80px);
+    overflow: hidden;
+  }
+
+  .page-toolbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 24px;
-    gap: 16px;
-    flex-wrap: wrap;
+    padding: var(--supplier-space-sm) var(--supplier-space-lg);
+    background: var(--supplier-bg-primary);
+    border-bottom: 1px solid var(--supplier-border);
+    flex-shrink: 0;
   }
-  
-  .page-header-left {
+
+  .toolbar-left {
     display: flex;
     align-items: center;
     gap: 12px;
     flex: 1;
-    min-width: 300px;
   }
-  
-  .search-box {
+
+  .search-wrapper {
     position: relative;
-    flex: 1;
-    max-width: 400px;
+    width: 320px;
   }
-  
-  .search-box i {
+
+  .search-wrapper i {
     position: absolute;
     left: 12px;
     top: 50%;
     transform: translateY(-50%);
     width: 18px;
     height: 18px;
-    color: var(--text-secondary);
+    color: var(--supplier-text-muted);
   }
-  
-  .search-box input {
+
+  .search-input {
     width: 100%;
     padding: 10px 12px 10px 40px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
+    border: 2px solid var(--supplier-border);
+    border-radius: var(--supplier-radius-md);
     font-size: 14px;
+    transition: var(--supplier-transition-fast);
+    background: var(--supplier-bg-secondary);
   }
-  
-  .filter-select {
-    padding: 10px 12px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
+
+  .search-input:focus {
+    outline: none;
+    border-color: var(--supplier-accent);
+    background: var(--supplier-bg-primary);
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+  }
+
+  .filter-dropdown {
+    padding: 10px 14px;
+    border: 2px solid var(--supplier-border);
+    border-radius: var(--supplier-radius-md);
     font-size: 14px;
-    min-width: 180px;
-    background: white;
+    background: var(--supplier-bg-secondary);
+    min-width: 160px;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+    color: var(--supplier-text-primary);
   }
-  
-  .page-header-right {
+
+  .filter-dropdown:focus {
+    outline: none;
+    border-color: var(--supplier-accent);
+  }
+
+  .toolbar-right {
     display: flex;
+    gap: 10px;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
     gap: 8px;
+    padding: 10px 18px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: var(--supplier-radius-md);
+    border: none;
+    cursor: pointer;
+    transition: var(--supplier-transition-fast);
+    text-decoration: none;
   }
-  
-  .table-container {
-    overflow-x: auto;
+
+  .btn i {
+    width: 18px;
+    height: 18px;
   }
-  
-  .data-table {
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--supplier-accent), var(--supplier-accent-dark));
+    color: white;
+    box-shadow: var(--supplier-shadow-sm);
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--supplier-shadow-md);
+  }
+
+  .btn-secondary {
+    background: var(--supplier-bg-primary);
+    color: var(--supplier-text-secondary);
+    border: 2px solid var(--supplier-border);
+  }
+
+  .btn-secondary:hover {
+    background: var(--supplier-bg-secondary);
+    border-color: var(--supplier-border-medium);
+  }
+
+  /* Grid Container */
+  .grid-container {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    background: var(--supplier-bg-secondary);
+  }
+
+  .grid-wrapper {
+    flex: 1;
+    overflow: auto;
+    background: var(--supplier-bg-primary);
+    margin: var(--supplier-space-sm);
+    border-radius: var(--supplier-radius-lg);
+    border: 1px solid var(--supplier-border);
+    box-shadow: var(--supplier-shadow-sm);
+  }
+
+  /* Excel-like Table */
+  .excel-grid {
     width: 100%;
     border-collapse: collapse;
-    font-size: 14px;
+    font-size: 13px;
   }
-  
-  .data-table th {
-    text-align: left;
-    padding: 12px 16px;
-    background: var(--bg-main);
+
+  .excel-grid thead {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .excel-grid th {
+    background: linear-gradient(180deg, var(--supplier-bg-secondary) 0%, var(--supplier-bg-tertiary) 100%);
+    border: 1px solid var(--supplier-border);
+    padding: 10px 12px;
     font-weight: 600;
-    color: var(--text-secondary);
-    border-bottom: 1px solid var(--border);
+    color: var(--supplier-text-secondary);
+    text-align: left;
     white-space: nowrap;
+    user-select: none;
   }
-  
-  .data-table th.sortable {
+
+  .excel-grid th.sortable {
     cursor: pointer;
   }
-  
-  .data-table th.sortable:hover {
-    color: var(--primary);
+
+  .excel-grid th.sortable:hover {
+    background: var(--supplier-bg-tertiary);
   }
-  
-  .data-table td {
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--border);
+
+  .excel-grid th.sorted {
+    color: var(--supplier-accent);
+    background: var(--supplier-info-light);
+  }
+
+  .sort-icon {
+    display: inline-block;
+    margin-left: 6px;
+    opacity: 0.5;
+  }
+
+  .excel-grid th.sorted .sort-icon {
+    opacity: 1;
+  }
+
+  .excel-grid td {
+    border: 1px solid var(--supplier-border);
+    padding: 0;
     vertical-align: middle;
+    height: 40px;
+    position: relative;
   }
-  
-  .data-table tbody tr:hover {
-    background: rgba(14, 165, 233, 0.03);
+
+  .excel-grid tbody tr:hover td {
+    background: var(--supplier-warning-light);
   }
-  
-  .checkbox-col {
-    width: 40px;
-    text-align: center !important;
+
+  .excel-grid tbody tr.selected td {
+    background: var(--supplier-info-light);
   }
-  
-  .part-number {
-    font-weight: 600;
-    color: var(--primary);
+
+  .excel-grid tbody tr.editing td {
+    background: var(--supplier-warning-light);
   }
-  
-  .description-cell {
-    max-width: 250px;
-    white-space: nowrap;
+
+  /* Cell Content */
+  .cell-content {
+    padding: 8px 12px;
     overflow: hidden;
     text-overflow: ellipsis;
+    white-space: nowrap;
+    min-height: 24px;
+    cursor: cell;
   }
-  
-  .price-cell {
+
+  .cell-content:focus {
+    outline: 2px solid var(--supplier-accent);
+    outline-offset: -2px;
+    background: var(--supplier-bg-primary);
+    cursor: text;
+  }
+
+  .cell-content.readonly {
+    cursor: default;
+  }
+
+  /* Specific Column Styles */
+  .col-checkbox {
+    width: 40px;
+    text-align: center;
+  }
+
+  .col-checkbox input {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: var(--supplier-accent);
+  }
+
+  .col-partnumber {
+    min-width: 140px;
     font-weight: 600;
+    color: var(--supplier-accent);
   }
-  
-  .stock-badge {
-    display: inline-flex;
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 12px;
+
+  .col-description {
+    min-width: 250px;
+    max-width: 400px;
+  }
+
+  .col-brand {
+    min-width: 120px;
     font-weight: 500;
   }
-  
-  .stock-badge.in-stock {
-    background: rgba(34, 197, 94, 0.1);
-    color: #22c55e;
+
+  .col-quantity {
+    min-width: 80px;
+    text-align: right;
   }
-  
-  .stock-badge.low-stock {
-    background: rgba(234, 179, 8, 0.1);
-    color: #ca8a04;
+
+  .col-weight {
+    min-width: 80px;
+    text-align: right;
+    color: var(--supplier-text-muted);
+    font-size: 12px;
   }
-  
-  .stock-badge.out-of-stock {
-    background: rgba(239, 68, 68, 0.1);
-    color: #ef4444;
+
+  .col-volume {
+    min-width: 80px;
+    text-align: right;
+    color: var(--supplier-text-muted);
+    font-size: 12px;
   }
-  
-  .stock-badge.on-order {
-    background: rgba(14, 165, 233, 0.1);
-    color: #0ea5e9;
+
+  .col-delivery {
+    min-width: 80px;
+    text-align: center;
   }
-  
+
+  .col-stock {
+    min-width: 80px;
+    text-align: center;
+  }
+
+  .col-price {
+    min-width: 100px;
+    text-align: right;
+    font-weight: 600;
+  }
+
+  .col-minlot {
+    min-width: 70px;
+    text-align: center;
+    color: var(--supplier-text-muted);
+  }
+
+  .col-actions {
+    width: 60px;
+    text-align: center;
+  }
+
+  /* Stock Badge */
+  .stock-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  .stock-badge.AB4 { background: var(--supplier-success-light); color: var(--supplier-success); }
+  .stock-badge.in-stock { background: var(--supplier-success-light); color: var(--supplier-success); }
+  .stock-badge.low-stock { background: var(--supplier-warning-light); color: var(--supplier-warning); }
+  .stock-badge.out-of-stock { background: var(--supplier-danger-light); color: var(--supplier-danger); }
+  .stock-badge.default { background: var(--supplier-bg-tertiary); color: var(--supplier-text-muted); }
+
+  /* Delivery Badge */
+  .delivery-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 500;
+    background: var(--supplier-info-light);
+    color: var(--supplier-accent-dark);
+  }
+
+  /* Action Buttons */
   .action-btn {
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -308,407 +345,943 @@
     background: transparent;
     border-radius: 6px;
     cursor: pointer;
-    color: var(--text-secondary);
-    transition: all 0.2s;
+    color: var(--supplier-text-subtle);
+    transition: var(--supplier-transition-fast);
   }
-  
+
   .action-btn:hover {
-    background: var(--bg-main);
-    color: var(--primary);
+    background: var(--supplier-danger-light);
+    color: var(--supplier-danger);
   }
-  
-  .action-btn.delete:hover {
-    background: rgba(239, 68, 68, 0.1);
-    color: #ef4444;
+
+  .action-btn i {
+    width: 14px;
+    height: 14px;
   }
-  
-  .table-footer {
+
+  /* Footer / Pagination */
+  .grid-footer {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 16px;
-    border-top: 1px solid var(--border);
+    padding: 12px var(--supplier-space-lg);
+    background: var(--supplier-bg-primary);
+    border-top: 1px solid var(--supplier-border);
+    flex-shrink: 0;
   }
-  
+
+  .footer-stats {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    font-size: 13px;
+    color: var(--supplier-text-muted);
+  }
+
+  .stat-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .stat-item strong {
+    color: var(--supplier-text-primary);
+    font-weight: 600;
+  }
+
   .pagination {
     display: flex;
     align-items: center;
     gap: 8px;
   }
-  
-  .page-info {
-    padding: 0 12px;
-    font-size: 14px;
-    color: var(--text-secondary);
+
+  .pagination button {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--supplier-bg-primary);
+    border: 1px solid var(--supplier-border);
+    border-radius: 8px;
+    cursor: pointer;
+    color: var(--supplier-text-muted);
+    transition: var(--supplier-transition-fast);
   }
-  
-  .bulk-actions-bar {
+
+  .pagination button:hover:not(:disabled) {
+    background: var(--supplier-bg-secondary);
+    border-color: var(--supplier-accent);
+    color: var(--supplier-accent);
+  }
+
+  .pagination button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .pagination .page-text {
+    padding: 0 12px;
+    font-size: 13px;
+    color: var(--supplier-text-muted);
+  }
+
+  .pagination .page-text strong {
+    color: var(--supplier-text-primary);
+  }
+
+  /* Bulk Actions Floating Bar */
+  .bulk-bar {
     position: fixed;
     bottom: 24px;
     left: 50%;
-    transform: translateX(-50%);
-    background: var(--text-primary);
-    color: white;
-    padding: 12px 20px;
-    border-radius: 12px;
+    transform: translateX(-50%) translateY(100px);
     display: flex;
     align-items: center;
-    gap: 20px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    gap: 16px;
+    padding: 14px 24px;
+    background: var(--supplier-primary-dark);
+    border-radius: var(--supplier-radius-lg);
+    box-shadow: var(--supplier-shadow-xl);
     z-index: 100;
+    transition: transform 0.3s ease;
   }
-  
-  .bulk-buttons {
+
+  .bulk-bar.visible {
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .bulk-bar .selected-text {
+    color: white;
+    font-weight: 600;
     display: flex;
+    align-items: center;
     gap: 8px;
   }
-  
-  .bulk-actions-bar .btn {
-    background: rgba(255, 255, 255, 0.15);
-    color: white;
+
+  .bulk-bar .count-badge {
+    background: var(--supplier-accent);
+    padding: 2px 10px;
+    border-radius: 10px;
+    font-size: 12px;
+  }
+
+  .bulk-bar .bulk-actions {
+    display: flex;
+    gap: 8px;
+    border-left: 1px solid rgba(255, 255, 255, 0.2);
+    padding-left: 16px;
+  }
+
+  .bulk-bar button {
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 8px;
     border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: var(--supplier-transition-fast);
   }
-  
-  .bulk-actions-bar .btn:hover {
-    background: rgba(255, 255, 255, 0.25);
+
+  .bulk-bar button i {
+    width: 14px;
+    height: 14px;
   }
-  
-  .bulk-actions-bar .btn-danger:hover {
-    background: #ef4444;
+
+  .bulk-bar .btn-bulk-edit {
+    background: var(--supplier-primary-light);
+    color: white;
   }
-  
-  /* Modal */
-  .modal {
-    display: none;
-    position: fixed;
-    inset: 0;
-    z-index: 1000;
+
+  .bulk-bar .btn-bulk-edit:hover {
+    background: var(--supplier-primary);
+  }
+
+  .bulk-bar .btn-bulk-delete {
+    background: rgba(239, 68, 68, 0.2);
+    color: #fecaca;
+  }
+
+  .bulk-bar .btn-bulk-delete:hover {
+    background: rgba(239, 68, 68, 0.3);
+  }
+
+  .bulk-bar .btn-clear {
+    background: transparent;
+    color: rgba(255, 255, 255, 0.6);
+    padding: 8px;
+  }
+
+  .bulk-bar .btn-clear:hover {
+    color: white;
+  }
+
+  /* Empty State */
+  .empty-state {
+    display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    padding: 80px 40px;
+    text-align: center;
   }
-  
-  .modal.active {
+
+  .empty-icon {
+    width: 80px;
+    height: 80px;
+    background: var(--supplier-bg-tertiary);
+    border-radius: 50%;
     display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 24px;
   }
-  
-  .modal-backdrop {
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.5);
+
+  .empty-icon i {
+    width: 40px;
+    height: 40px;
+    color: var(--supplier-text-subtle);
   }
-  
-  .modal-content {
-    position: relative;
-    background: white;
-    border-radius: 16px;
+
+  .empty-state h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--supplier-text-primary);
+    margin-bottom: 8px;
+  }
+
+  .empty-state p {
+    color: var(--supplier-text-muted);
+    margin-bottom: 24px;
+  }
+
+  /* Inline Edit Input */
+  .inline-edit-input {
     width: 100%;
-    max-width: 600px;
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    height: 100%;
+    padding: 8px 12px;
+    border: none;
+    background: var(--supplier-bg-primary);
+    font-size: 13px;
+    font-family: inherit;
+    outline: 2px solid var(--supplier-accent);
+    outline-offset: -2px;
+    box-sizing: border-box;
   }
-  
-  .modal-header {
+
+  .inline-edit-input:focus {
+    outline: 2px solid var(--supplier-accent);
+  }
+
+  /* Quick Edit Panel */
+  .quick-edit-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 400px;
+    background: var(--supplier-bg-primary);
+    box-shadow: var(--supplier-shadow-xl);
+    z-index: 200;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .quick-edit-panel.open {
+    transform: translateX(0);
+  }
+
+  .quick-edit-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 199;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+  }
+
+  .quick-edit-overlay.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .quick-edit-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 20px 24px;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--supplier-border);
+    background: var(--supplier-bg-secondary);
   }
-  
-  .modal-header h3 {
-    font-size: 1.1rem;
+
+  .quick-edit-header h3 {
+    font-size: 1rem;
     font-weight: 700;
+    color: var(--supplier-text-primary);
   }
-  
-  .modal-close {
-    width: 36px;
-    height: 36px;
+
+  .quick-edit-close {
+    width: 32px;
+    height: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: none;
     background: transparent;
+    border: none;
     border-radius: 8px;
     cursor: pointer;
-    color: var(--text-secondary);
+    color: var(--supplier-text-muted);
+    transition: var(--supplier-transition-fast);
   }
-  
-  .modal-close:hover {
-    background: var(--bg-main);
+
+  .quick-edit-close:hover {
+    background: var(--supplier-danger-light);
+    color: var(--supplier-danger);
   }
-  
-  .form-grid {
+
+  .quick-edit-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+  }
+
+  .edit-field {
+    margin-bottom: 20px;
+  }
+
+  .edit-field label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--supplier-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+  }
+
+  .edit-field input,
+  .edit-field textarea,
+  .edit-field select {
+    width: 100%;
+    padding: 12px 14px;
+    border: 2px solid var(--supplier-border);
+    border-radius: var(--supplier-radius-md);
+    font-size: 14px;
+    transition: var(--supplier-transition-fast);
+    background: var(--supplier-bg-primary);
+    color: var(--supplier-text-primary);
+  }
+
+  .edit-field input:focus,
+  .edit-field textarea:focus,
+  .edit-field select:focus {
+    outline: none;
+    border-color: var(--supplier-accent);
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+  }
+
+  .edit-field input:disabled {
+    background: var(--supplier-bg-tertiary);
+    color: var(--supplier-text-muted);
+  }
+
+  .edit-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 16px;
-    padding: 24px;
   }
-  
-  .form-group {
+
+  .quick-edit-footer {
+    padding: 20px 24px;
+    border-top: 1px solid var(--supplier-border);
     display: flex;
-    flex-direction: column;
-    gap: 6px;
+    gap: 12px;
   }
-  
-  .form-group.full-width {
-    grid-column: 1 / -1;
-  }
-  
-  .form-group label {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text-secondary);
-  }
-  
-  .form-group input,
-  .form-group select,
-  .form-group textarea {
-    padding: 10px 12px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    font-size: 14px;
-  }
-  
-  .form-group input.readonly {
-    background: var(--bg-main);
-    color: var(--text-secondary);
-  }
-  
-  .input-group {
-    display: flex;
-  }
-  
-  .input-addon {
-    padding: 10px 12px;
-    background: var(--bg-main);
-    border: 1px solid var(--border);
-    border-right: none;
-    border-radius: 8px 0 0 8px;
-    font-size: 14px;
-    color: var(--text-secondary);
-  }
-  
-  .input-group input {
-    border-radius: 0 8px 8px 0;
+
+  .quick-edit-footer .btn {
     flex: 1;
+    justify-content: center;
   }
-  
-  .modal-footer {
-    display: flex;
-    justify-content: flex-end;
-    gap: 8px;
-    padding: 16px 24px;
-    border-top: 1px solid var(--border);
-    background: var(--bg-main);
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .page-toolbar {
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .toolbar-left {
+      flex-direction: column;
+      width: 100%;
+    }
+
+    .search-wrapper {
+      width: 100%;
+    }
+
+    .filter-dropdown {
+      width: 100%;
+    }
+
+    .quick-edit-panel {
+      width: 100%;
+    }
   }
-  
-  .loading-row {
-    text-align: center;
-    padding: 40px !important;
-    color: var(--text-secondary);
-  }
-  
-  .loading-row .spinner {
-    margin: 0 auto 12px;
-  }
-  
-  .empty-row {
-    text-align: center;
-    padding: 60px !important;
-    color: var(--text-secondary);
-  }
-  
-  .empty-row i {
-    width: 48px;
-    height: 48px;
-    margin-bottom: 16px;
-    opacity: 0.3;
+</style>
+
+<div class="parts-page">
+  <!-- Toolbar -->
+  <div class="page-toolbar">
+    <div class="toolbar-left">
+      <div class="search-wrapper">
+        <i data-lucide="search"></i>
+        <input type="text" class="search-input" id="searchInput" placeholder="Search parts by number, description, brand...">
+      </div>
+      <select class="filter-dropdown" id="brandFilter">
+        <option value="">All Brands</option>
+      </select>
+      <select class="filter-dropdown" id="fileFilter">
+        <option value="">All Files</option>
+      </select>
+    </div>
+    <div class="toolbar-right">
+      <button class="btn btn-secondary" id="exportBtn">
+        <i data-lucide="download"></i>
+        Export
+      </button>
+      <a href="/supplier/import" class="btn btn-primary">
+        <i data-lucide="upload"></i>
+        Import Parts
+      </a>
+    </div>
+  </div>
+
+  <!-- Grid Container -->
+  <div class="grid-container">
+    <div class="grid-wrapper" id="gridWrapper">
+      <table class="excel-grid" id="partsGrid">
+        <thead>
+          <tr>
+            <th class="col-checkbox">
+              <input type="checkbox" id="selectAll" title="Select all">
+            </th>
+            <th class="col-partnumber sortable" data-sort="partNumber">
+              Part Number <span class="sort-icon">↕</span>
+            </th>
+            <th class="col-description sortable" data-sort="description">
+              Description <span class="sort-icon">↕</span>
+            </th>
+            <th class="col-brand sortable" data-sort="brand">
+              Brand <span class="sort-icon">↕</span>
+            </th>
+            <th class="col-quantity sortable" data-sort="quantity">
+              Qty <span class="sort-icon">↕</span>
+            </th>
+            <th class="col-weight">Weight</th>
+            <th class="col-volume">Volume</th>
+            <th class="col-delivery">Delivery</th>
+            <th class="col-stock">Stock</th>
+            <th class="col-price sortable" data-sort="price">
+              Price <span class="sort-icon">↕</span>
+            </th>
+            <th class="col-minlot">Min Lot</th>
+            <th class="col-actions">Del</th>
+          </tr>
+        </thead>
+        <tbody id="partsBody">
+          <tr>
+            <td colspan="12">
+              <div class="empty-state">
+                <div class="spinner" style="width:40px;height:40px;border:4px solid #e2e8f0;border-top-color:#0ea5e9;border-radius:50%;animation:spin 1s linear infinite;"></div>
+                <p style="margin-top: 16px;">Loading parts...</p>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="grid-footer">
+    <div class="footer-stats">
+      <div class="stat-item">
+        Showing <strong><span id="showingFrom">0</span></strong> to <strong><span id="showingTo">0</span></strong>
+      </div>
+      <div class="stat-item">
+        of <strong><span id="totalParts">0</span></strong> parts
+      </div>
+    </div>
+    <div class="pagination">
+      <button id="prevPage" disabled title="Previous page">
+        <i data-lucide="chevron-left" style="width: 16px; height: 16px;"></i>
+      </button>
+      <span class="page-text">Page <strong><span id="currentPage">1</span></strong> of <strong><span id="totalPages">1</span></strong></span>
+      <button id="nextPage" disabled title="Next page">
+        <i data-lucide="chevron-right" style="width: 16px; height: 16px;"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Bulk Actions Bar -->
+  <div class="bulk-bar" id="bulkBar">
+    <div class="selected-text">
+      <span class="count-badge"><span id="selectedCount">0</span></span>
+      parts selected
+    </div>
+    <div class="bulk-actions">
+      <button class="btn-bulk-edit" onclick="openBulkEdit()">
+        <i data-lucide="edit-3"></i>
+        Bulk Edit
+      </button>
+      <button class="btn-bulk-delete" onclick="bulkDelete()">
+        <i data-lucide="trash-2"></i>
+        Delete
+      </button>
+      <button class="btn-clear" onclick="clearSelection()" title="Clear selection">
+        <i data-lucide="x"></i>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Quick Edit Side Panel -->
+<div class="quick-edit-overlay" id="quickEditOverlay" onclick="closeQuickEdit()"></div>
+<div class="quick-edit-panel" id="quickEditPanel">
+  <div class="quick-edit-header">
+    <h3>Edit Part</h3>
+    <button class="quick-edit-close" onclick="closeQuickEdit()">
+      <i data-lucide="x" style="width: 18px; height: 18px;"></i>
+    </button>
+  </div>
+  <div class="quick-edit-body">
+    <form id="quickEditForm">
+      <input type="hidden" id="editPartId">
+      
+      <div class="edit-field">
+        <label>Part Number</label>
+        <input type="text" id="editPartNumber" disabled>
+      </div>
+      
+      <div class="edit-field">
+        <label>Description</label>
+        <textarea id="editDescription" rows="2"></textarea>
+      </div>
+      
+      <div class="edit-field">
+        <label>Brand</label>
+        <input type="text" id="editBrand">
+      </div>
+      
+      <div class="edit-row">
+        <div class="edit-field">
+          <label>Price (AED)</label>
+          <input type="number" id="editPrice" step="0.01" min="0">
+        </div>
+        <div class="edit-field">
+          <label>Quantity</label>
+          <input type="number" id="editQuantity" min="0">
+        </div>
+      </div>
+      
+      <div class="edit-row">
+        <div class="edit-field">
+          <label>Weight (kg)</label>
+          <input type="number" id="editWeight" step="0.001" min="0">
+        </div>
+        <div class="edit-field">
+          <label>Volume</label>
+          <input type="number" id="editVolume" step="0.001" min="0">
+        </div>
+      </div>
+      
+      <div class="edit-row">
+        <div class="edit-field">
+          <label>Delivery Days</label>
+          <input type="text" id="editDeliveryDays">
+        </div>
+        <div class="edit-field">
+          <label>Min Order Qty</label>
+          <input type="number" id="editMinOrderQty" min="1">
+        </div>
+      </div>
+      
+      <div class="edit-field">
+        <label>Stock Code</label>
+        <input type="text" id="editStockCode">
+      </div>
+    </form>
+  </div>
+  <div class="quick-edit-footer">
+    <button type="button" class="btn btn-secondary" onclick="closeQuickEdit()">Cancel</button>
+    <button type="submit" class="btn btn-primary" onclick="saveQuickEdit()">
+      <i data-lucide="check"></i>
+      Save Changes
+    </button>
+  </div>
+</div>
+
+<style>
+  @keyframes spin {
+    to { transform: rotate(360deg); }
   }
 </style>
 
 <script>
+  // State
+  let parts = [];
   let currentPage = 1;
   let totalPages = 1;
   let selectedParts = new Set();
   let currentSort = { field: 'createdAt', order: 'desc' };
-  
+  let editingCell = null;
+
+  // Initialize
   document.addEventListener('DOMContentLoaded', async () => {
     lucide.createIcons();
-    
-    // Load import files for filter
-    await loadFileFilters();
-    
-    // Check for URL parameter to filter by file
-    const urlParams = new URLSearchParams(window.location.search);
-    const fileParam = urlParams.get('file');
-    if (fileParam) {
-      const fileSelect = document.getElementById('fileFilter');
-      // Set the filter if the file exists in options
-      for (let i = 0; i < fileSelect.options.length; i++) {
-        if (fileSelect.options[i].value === fileParam) {
-          fileSelect.value = fileParam;
-          break;
-        }
-      }
-    }
-    
-    // Load parts
+    await loadFilters();
     await loadParts();
-    
-    // Event listeners
+    setupEventListeners();
+  });
+
+  function setupEventListeners() {
     document.getElementById('searchInput').addEventListener('input', debounce(loadParts, 300));
-    document.getElementById('fileFilter').addEventListener('change', loadParts);
+    document.getElementById('brandFilter').addEventListener('change', () => { currentPage = 1; loadParts(); });
+    document.getElementById('fileFilter').addEventListener('change', () => { currentPage = 1; loadParts(); });
     document.getElementById('selectAll').addEventListener('change', toggleSelectAll);
     document.getElementById('prevPage').addEventListener('click', () => changePage(-1));
     document.getElementById('nextPage').addEventListener('click', () => changePage(1));
     document.getElementById('exportBtn').addEventListener('click', exportParts);
-    document.getElementById('editForm').addEventListener('submit', savePart);
     
-    // Sortable headers
     document.querySelectorAll('.sortable').forEach(th => {
       th.addEventListener('click', () => sortBy(th.dataset.sort));
     });
-  });
-  
-  async function loadFileFilters() {
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        if (editingCell) finishInlineEdit(false);
+        closeQuickEdit();
+      }
+    });
+  }
+
+  async function loadFilters() {
     try {
-      const response = await fetch('/api/supplier/files');
-      const files = await response.json();
+      const [brandsRes, filesRes] = await Promise.all([
+        fetch('/api/supplier/brands'),
+        fetch('/api/supplier/files')
+      ]);
       
-      const select = document.getElementById('fileFilter');
-      files.forEach(file => {
-        const option = document.createElement('option');
-        option.value = file.fileName;
-        option.textContent = `${file.fileName} (${file.partsCount})`;
-        select.appendChild(option);
+      const brandsData = await brandsRes.json();
+      const files = await filesRes.json();
+      
+      const brandSelect = document.getElementById('brandFilter');
+      (brandsData.brands || []).forEach(b => {
+        const opt = document.createElement('option');
+        opt.value = b.brand;
+        opt.textContent = `${b.brand} (${b.partsCount})`;
+        brandSelect.appendChild(opt);
+      });
+
+      const fileSelect = document.getElementById('fileFilter');
+      files.forEach(f => {
+        const opt = document.createElement('option');
+        opt.value = f.fileName;
+        opt.textContent = `${f.fileName} (${f.partsCount})`;
+        fileSelect.appendChild(opt);
       });
     } catch (err) {
-      console.error('Error loading file filters:', err);
+      console.error('Error loading filters:', err);
     }
   }
-  
+
   async function loadParts() {
     const search = document.getElementById('searchInput').value;
+    const brand = document.getElementById('brandFilter').value;
     const fileName = document.getElementById('fileFilter').value;
-    
+
     try {
       const params = new URLSearchParams({
         page: currentPage,
-        limit: 50,
+        limit: 100,
         sortBy: currentSort.field,
         sortOrder: currentSort.order
       });
-      
+
       if (search) params.append('search', search);
+      if (brand) params.append('brand', brand);
       if (fileName) params.append('fileName', fileName);
-      
+
       const response = await fetch(`/api/supplier/parts?${params}`);
       const data = await response.json();
-      
-      renderParts(data.results || []);
+
+      parts = data.results || [];
+      renderParts();
       updatePagination(data);
-      
     } catch (err) {
       console.error('Error loading parts:', err);
-      document.getElementById('partsBody').innerHTML = `
-        <tr><td colspan="8" class="empty-row">
-          <i data-lucide="alert-circle"></i>
-          <p>Error loading parts. Please refresh.</p>
-        </td></tr>
-      `;
-      lucide.createIcons();
+      showEmptyState('Error loading parts. Please refresh.');
     }
   }
-  
-  function renderParts(parts) {
+
+  function renderParts() {
     const tbody = document.getElementById('partsBody');
-    
+
     if (!parts.length) {
-      tbody.innerHTML = `
-        <tr><td colspan="8" class="empty-row">
-          <i data-lucide="inbox"></i>
-          <h4 style="margin: 16px 0 8px; font-weight: 600; color: var(--text-primary);">No parts found</h4>
-          <p>Upload your first file to get started</p>
-          <a href="/supplier/import" class="btn btn-primary" style="margin-top: 16px;">
-            Upload Parts
-          </a>
-        </td></tr>
-      `;
-      lucide.createIcons();
+      showEmptyState();
       return;
     }
-    
+
     tbody.innerHTML = parts.map(part => `
-      <tr data-id="${part._id}">
-        <td class="checkbox-col">
-          <input type="checkbox" class="part-checkbox" value="${part._id}" 
+      <tr data-id="${part._id}" class="${selectedParts.has(part._id) ? 'selected' : ''}">
+        <td class="col-checkbox">
+          <input type="checkbox" class="row-checkbox" value="${part._id}"
                  ${selectedParts.has(part._id) ? 'checked' : ''}
                  onchange="toggleSelect('${part._id}')">
         </td>
-        <td><span class="part-number">${escapeHtml(part.partNumber)}</span></td>
-        <td class="description-cell" title="${escapeHtml(part.description || '')}">${escapeHtml(part.description || '-')}</td>
-        <td>${escapeHtml(part.brand || '-')}</td>
-        <td class="price-cell">${part.currency || 'AED'} ${(part.price || 0).toFixed(2)}</td>
-        <td>${part.quantity || 0}</td>
-        <td><span class="stock-badge ${part.stock || 'unknown'}">${formatStock(part.stock)}</span></td>
-        <td>
-          <button class="action-btn" onclick="editPart('${part._id}')" title="Edit">
-            <i data-lucide="edit-2" style="width: 16px; height: 16px;"></i>
-          </button>
-          <button class="action-btn delete" onclick="deletePart('${part._id}')" title="Delete">
-            <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
+        <td class="col-partnumber">
+          <div class="cell-content readonly" ondblclick="openQuickEdit('${part._id}')">${escapeHtml(part.partNumber)}</div>
+        </td>
+        <td class="col-description">
+          <div class="cell-content" data-field="description" data-id="${part._id}"
+               onclick="startInlineEdit(this)" title="${escapeHtml(part.description || '')}">${escapeHtml(part.description || '-')}</div>
+        </td>
+        <td class="col-brand">
+          <div class="cell-content" data-field="brand" data-id="${part._id}"
+               onclick="startInlineEdit(this)">${escapeHtml(part.brand || '-')}</div>
+        </td>
+        <td class="col-quantity">
+          <div class="cell-content" data-field="quantity" data-id="${part._id}" data-type="number"
+               onclick="startInlineEdit(this)">${part.quantity || 0}</div>
+        </td>
+        <td class="col-weight">
+          <div class="cell-content readonly">${part.weight ? part.weight.toFixed(3) : '-'}</div>
+        </td>
+        <td class="col-volume">
+          <div class="cell-content readonly">${part.volume ? part.volume.toFixed(3) : '-'}</div>
+        </td>
+        <td class="col-delivery">
+          <div class="cell-content readonly">
+            ${part.deliveryDays ? `<span class="delivery-badge">${part.deliveryDays}</span>` : '-'}
+          </div>
+        </td>
+        <td class="col-stock">
+          <div class="cell-content readonly">
+            <span class="stock-badge ${part.stockCode || part.stock || 'default'}">${part.stockCode || part.stock || '-'}</span>
+          </div>
+        </td>
+        <td class="col-price">
+          <div class="cell-content" data-field="price" data-id="${part._id}" data-type="number"
+               onclick="startInlineEdit(this)">${(part.price || 0).toFixed(2)}</div>
+        </td>
+        <td class="col-minlot">
+          <div class="cell-content readonly">${part.minOrderQty || 1}</div>
+        </td>
+        <td class="col-actions">
+          <button class="action-btn" onclick="deletePart('${part._id}')" title="Delete">
+            <i data-lucide="trash-2"></i>
           </button>
         </td>
       </tr>
     `).join('');
-    
+
     lucide.createIcons();
   }
-  
-  function updatePagination(data) {
-    currentPage = data.page || 1;
-    totalPages = data.totalPages || 1;
-    const total = data.total || 0;
-    const limit = data.limit || 50;
-    
-    document.getElementById('currentPage').textContent = currentPage;
-    document.getElementById('totalPages').textContent = totalPages;
-    document.getElementById('totalParts').textContent = total;
-    document.getElementById('showingFrom').textContent = total ? ((currentPage - 1) * limit) + 1 : 0;
-    document.getElementById('showingTo').textContent = Math.min(currentPage * limit, total);
-    
-    document.getElementById('prevPage').disabled = currentPage <= 1;
-    document.getElementById('nextPage').disabled = currentPage >= totalPages;
+
+  function showEmptyState(message) {
+    const tbody = document.getElementById('partsBody');
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="12">
+          <div class="empty-state">
+            <div class="empty-icon">
+              <i data-lucide="inbox"></i>
+            </div>
+            <h3>${message || 'No parts found'}</h3>
+            <p>${message ? '' : 'Upload your first file to get started'}</p>
+            ${!message ? '<a href="/supplier/import" class="btn btn-primary"><i data-lucide="upload"></i> Import Parts</a>' : ''}
+          </div>
+        </td>
+      </tr>
+    `;
+    lucide.createIcons();
   }
-  
-  function changePage(delta) {
-    currentPage += delta;
-    loadParts();
-  }
-  
-  function sortBy(field) {
-    if (currentSort.field === field) {
-      currentSort.order = currentSort.order === 'asc' ? 'desc' : 'asc';
-    } else {
-      currentSort.field = field;
-      currentSort.order = 'asc';
+
+  function startInlineEdit(cell) {
+    if (editingCell && editingCell !== cell) {
+      finishInlineEdit(true);
     }
-    currentPage = 1;
-    loadParts();
+
+    const field = cell.dataset.field;
+    const id = cell.dataset.id;
+    const type = cell.dataset.type || 'text';
+    const currentValue = cell.textContent.trim();
+
+    editingCell = cell;
+    cell.closest('tr').classList.add('editing');
+
+    const input = document.createElement('input');
+    input.type = type === 'number' ? 'number' : 'text';
+    input.className = 'inline-edit-input';
+    input.value = currentValue === '-' ? '' : currentValue;
+    input.dataset.originalValue = currentValue;
+    input.dataset.field = field;
+    input.dataset.id = id;
+
+    if (type === 'number') {
+      input.step = field === 'price' ? '0.01' : '1';
+      input.min = '0';
+    }
+
+    cell.innerHTML = '';
+    cell.appendChild(input);
+    input.focus();
+    input.select();
+
+    input.addEventListener('blur', () => finishInlineEdit(true));
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        finishInlineEdit(true);
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        finishInlineEdit(false);
+      } else if (e.key === 'Tab') {
+        e.preventDefault();
+        finishInlineEdit(true);
+        const cells = cell.closest('tr').querySelectorAll('.cell-content:not(.readonly)');
+        const idx = Array.from(cells).indexOf(cell);
+        if (idx < cells.length - 1) {
+          startInlineEdit(cells[idx + 1]);
+        }
+      }
+    });
   }
-  
+
+  async function finishInlineEdit(save) {
+    if (!editingCell) return;
+
+    const input = editingCell.querySelector('input');
+    if (!input) return;
+
+    const field = input.dataset.field;
+    const id = input.dataset.id;
+    const originalValue = input.dataset.originalValue;
+    const newValue = input.value.trim();
+
+    editingCell.closest('tr').classList.remove('editing');
+
+    if (save && newValue !== originalValue && newValue !== (originalValue === '-' ? '' : originalValue)) {
+      try {
+        const updates = {};
+        updates[field] = field === 'price' || field === 'quantity' ? parseFloat(newValue) || 0 : newValue;
+
+        const response = await fetch(`/api/supplier/parts/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updates)
+        });
+
+        if (!response.ok) throw new Error('Update failed');
+
+        const part = parts.find(p => p._id === id);
+        if (part) part[field] = updates[field];
+
+        editingCell.innerHTML = field === 'price' ? parseFloat(newValue || 0).toFixed(2) : (newValue || '-');
+      } catch (err) {
+        console.error('Error saving:', err);
+        editingCell.innerHTML = originalValue;
+      }
+    } else {
+      editingCell.innerHTML = originalValue;
+    }
+
+    const savedCell = editingCell;
+    editingCell = null;
+    
+    // Re-add the click handler and data attributes
+    savedCell.dataset.field = field;
+    savedCell.dataset.id = id;
+    savedCell.onclick = () => startInlineEdit(savedCell);
+  }
+
+  async function openQuickEdit(id) {
+    try {
+      const response = await fetch(`/api/supplier/parts/${id}`);
+      const part = await response.json();
+
+      document.getElementById('editPartId').value = id;
+      document.getElementById('editPartNumber').value = part.partNumber || '';
+      document.getElementById('editDescription').value = part.description || '';
+      document.getElementById('editBrand').value = part.brand || '';
+      document.getElementById('editPrice').value = part.price || 0;
+      document.getElementById('editQuantity').value = part.quantity || 0;
+      document.getElementById('editWeight').value = part.weight || '';
+      document.getElementById('editVolume').value = part.volume || '';
+      document.getElementById('editDeliveryDays').value = part.deliveryDays || '';
+      document.getElementById('editMinOrderQty').value = part.minOrderQty || 1;
+      document.getElementById('editStockCode').value = part.stockCode || '';
+
+      document.getElementById('quickEditPanel').classList.add('open');
+      document.getElementById('quickEditOverlay').classList.add('open');
+      lucide.createIcons();
+    } catch (err) {
+      alert('Error loading part: ' + err.message);
+    }
+  }
+
+  function closeQuickEdit() {
+    document.getElementById('quickEditPanel').classList.remove('open');
+    document.getElementById('quickEditOverlay').classList.remove('open');
+  }
+
+  async function saveQuickEdit() {
+    const id = document.getElementById('editPartId').value;
+    const updates = {
+      description: document.getElementById('editDescription').value,
+      brand: document.getElementById('editBrand').value,
+      price: parseFloat(document.getElementById('editPrice').value) || 0,
+      quantity: parseInt(document.getElementById('editQuantity').value) || 0,
+      weight: parseFloat(document.getElementById('editWeight').value) || null,
+      volume: parseFloat(document.getElementById('editVolume').value) || null,
+      deliveryDays: document.getElementById('editDeliveryDays').value || null,
+      minOrderQty: parseInt(document.getElementById('editMinOrderQty').value) || 1,
+      stockCode: document.getElementById('editStockCode').value
+    };
+
+    try {
+      const response = await fetch(`/api/supplier/parts/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates)
+      });
+
+      if (!response.ok) throw new Error('Update failed');
+
+      closeQuickEdit();
+      loadParts();
+    } catch (err) {
+      alert('Error saving part: ' + err.message);
+    }
+  }
+
   function toggleSelect(id) {
     if (selectedParts.has(id)) {
       selectedParts.delete(id);
     } else {
       selectedParts.add(id);
     }
-    updateBulkActions();
+    updateSelectionUI();
   }
-  
+
   function toggleSelectAll(e) {
-    const checkboxes = document.querySelectorAll('.part-checkbox');
+    const checkboxes = document.querySelectorAll('.row-checkbox');
     checkboxes.forEach(cb => {
       cb.checked = e.target.checked;
       if (e.target.checked) {
@@ -717,72 +1290,77 @@
         selectedParts.delete(cb.value);
       }
     });
-    updateBulkActions();
+    updateSelectionUI();
   }
-  
-  function updateBulkActions() {
-    const bar = document.getElementById('bulkActionsBar');
+
+  function clearSelection() {
+    selectedParts.clear();
+    document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = false);
+    document.getElementById('selectAll').checked = false;
+    updateSelectionUI();
+  }
+
+  function updateSelectionUI() {
     document.getElementById('selectedCount').textContent = selectedParts.size;
-    bar.style.display = selectedParts.size > 0 ? 'flex' : 'none';
+    document.getElementById('bulkBar').classList.toggle('visible', selectedParts.size > 0);
+
+    document.querySelectorAll('#partsBody tr').forEach(row => {
+      const id = row.dataset.id;
+      row.classList.toggle('selected', selectedParts.has(id));
+    });
   }
-  
-  async function editPart(id) {
-    try {
-      const response = await fetch(`/api/supplier/parts/${id}`);
-      const part = await response.json();
-      
-      document.getElementById('editPartId').value = id;
-      document.getElementById('editPartNumber').value = part.partNumber || '';
-      document.getElementById('editDescription').value = part.description || '';
-      document.getElementById('editBrand').value = part.brand || '';
-      document.getElementById('editPrice').value = part.price || 0;
-      document.getElementById('editQuantity').value = part.quantity || 0;
-      document.getElementById('editWeight').value = part.weight || '';
-      document.getElementById('editDeliveryDays').value = part.deliveryDays || '';
-      document.getElementById('editCategory').value = part.category || '';
-      document.getElementById('editStock').value = part.stock || 'unknown';
-      
-      document.getElementById('editModal').classList.add('active');
-      lucide.createIcons();
-    } catch (err) {
-      alert('Error loading part: ' + err.message);
-    }
+
+  function openBulkEdit() {
+    const field = prompt('Which field to update? (price, quantity, brand)');
+    if (!field) return;
+
+    const value = prompt(`Enter new value for ${field}:`);
+    if (value === null) return;
+
+    bulkUpdate(field, value);
   }
-  
-  async function savePart(e) {
-    e.preventDefault();
-    
-    const id = document.getElementById('editPartId').value;
-    const updates = {
-      description: document.getElementById('editDescription').value,
-      brand: document.getElementById('editBrand').value,
-      price: parseFloat(document.getElementById('editPrice').value) || 0,
-      quantity: parseInt(document.getElementById('editQuantity').value) || 0,
-      weight: parseFloat(document.getElementById('editWeight').value) || null,
-      deliveryDays: parseInt(document.getElementById('editDeliveryDays').value) || null,
-      category: document.getElementById('editCategory').value,
-      stock: document.getElementById('editStock').value
-    };
-    
+
+  async function bulkUpdate(field, value) {
     try {
-      const response = await fetch(`/api/supplier/parts/${id}`, {
+      const updates = {};
+      updates[field] = ['price', 'quantity'].includes(field) ? parseFloat(value) : value;
+
+      await fetch('/api/supplier/parts/bulk', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updates)
+        body: JSON.stringify({
+          partIds: Array.from(selectedParts),
+          updates
+        })
       });
-      
-      if (!response.ok) throw new Error('Update failed');
-      
-      closeModal();
+
+      clearSelection();
       loadParts();
     } catch (err) {
-      alert('Error saving part: ' + err.message);
+      alert('Error updating parts: ' + err.message);
     }
   }
-  
+
+  async function bulkDelete() {
+    if (!confirm(`Delete ${selectedParts.size} parts? This cannot be undone.`)) return;
+
+    try {
+      await fetch('/api/supplier/parts/bulk', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ partIds: Array.from(selectedParts) })
+      });
+
+      clearSelection();
+      loadParts();
+    } catch (err) {
+      alert('Error deleting parts: ' + err.message);
+    }
+  }
+
   async function deletePart(id) {
-    if (!confirm('Are you sure you want to delete this part?')) return;
-    
+    if (!confirm('Delete this part?')) return;
+
     try {
       await fetch(`/api/supplier/parts/${id}`, { method: 'DELETE' });
       loadParts();
@@ -790,91 +1368,58 @@
       alert('Error deleting part: ' + err.message);
     }
   }
-  
-  async function bulkDelete() {
-    if (!confirm(`Delete ${selectedParts.size} parts? This cannot be undone.`)) return;
-    
-    try {
-      await fetch('/api/supplier/parts/bulk', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ partIds: Array.from(selectedParts) })
-      });
-      
-      selectedParts.clear();
-      updateBulkActions();
-      loadParts();
-    } catch (err) {
-      alert('Error deleting parts: ' + err.message);
+
+  function sortBy(field) {
+    document.querySelectorAll('.sortable').forEach(th => th.classList.remove('sorted'));
+
+    if (currentSort.field === field) {
+      currentSort.order = currentSort.order === 'asc' ? 'desc' : 'asc';
+    } else {
+      currentSort.field = field;
+      currentSort.order = 'asc';
     }
+
+    document.querySelector(`.sortable[data-sort="${field}"]`).classList.add('sorted');
+    currentPage = 1;
+    loadParts();
   }
-  
-  async function bulkEditPrice() {
-    const newPrice = prompt('Enter new price for selected parts:');
-    if (!newPrice) return;
-    
-    try {
-      await fetch('/api/supplier/parts/bulk', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          partIds: Array.from(selectedParts),
-          updates: { price: parseFloat(newPrice) }
-        })
-      });
-      
-      loadParts();
-    } catch (err) {
-      alert('Error updating parts: ' + err.message);
-    }
+
+  function updatePagination(data) {
+    currentPage = data.page || 1;
+    totalPages = data.totalPages || 1;
+    const total = data.total || 0;
+    const limit = data.limit || 100;
+
+    document.getElementById('currentPage').textContent = currentPage;
+    document.getElementById('totalPages').textContent = totalPages;
+    document.getElementById('totalParts').textContent = total.toLocaleString();
+    document.getElementById('showingFrom').textContent = total ? ((currentPage - 1) * limit) + 1 : 0;
+    document.getElementById('showingTo').textContent = Math.min(currentPage * limit, total);
+
+    document.getElementById('prevPage').disabled = currentPage <= 1;
+    document.getElementById('nextPage').disabled = currentPage >= totalPages;
   }
-  
-  async function bulkEditQuantity() {
-    const newQty = prompt('Enter new quantity for selected parts:');
-    if (!newQty) return;
-    
-    try {
-      await fetch('/api/supplier/parts/bulk', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          partIds: Array.from(selectedParts),
-          updates: { quantity: parseInt(newQty) }
-        })
-      });
-      
-      loadParts();
-    } catch (err) {
-      alert('Error updating parts: ' + err.message);
-    }
+
+  function changePage(delta) {
+    currentPage += delta;
+    loadParts();
+    document.getElementById('gridWrapper').scrollTop = 0;
   }
-  
-  async function exportParts() {
-    window.location.href = '/api/supplier/parts/export';
+
+  function exportParts() {
+    const fileName = document.getElementById('fileFilter').value;
+    const params = new URLSearchParams();
+    if (fileName) params.append('fileName', fileName);
+    window.location.href = `/api/supplier/parts/export?${params}`;
   }
-  
-  function closeModal() {
-    document.getElementById('editModal').classList.remove('active');
-  }
-  
-  function formatStock(stock) {
-    const labels = {
-      'in-stock': 'In Stock',
-      'low-stock': 'Low Stock',
-      'out-of-stock': 'Out of Stock',
-      'on-order': 'On Order',
-      'unknown': 'Unknown'
-    };
-    return labels[stock] || stock || 'Unknown';
-  }
-  
+
   function escapeHtml(str) {
     if (!str) return '';
-    return str.replace(/[&<>"']/g, m => ({
+    return String(str).replace(/[&<>"']/g, m => ({
       '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
     }[m]));
   }
-  
+
   function debounce(fn, delay) {
     let timeout;
     return (...args) => {

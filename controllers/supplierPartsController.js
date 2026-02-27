@@ -229,8 +229,37 @@ const importParts = async (req, res) => {
       });
     }
     
+    const deleteOption = req.body.deleteOption || 'none';
+    let deletedCount = 0;
+    
+    // Handle data deletion based on option
+    if (deleteOption === 'all') {
+      // Delete all supplier parts
+      const Part = require('../models/Part');
+      const result = await Part.deleteMany({ 
+        'source.supplierId': req.supplier._id 
+      });
+      deletedCount = result.deletedCount;
+      logger.info(`Deleted all ${deletedCount} parts for supplier ${req.supplier._id}`);
+    } else if (deleteOption === 'brand') {
+      // Delete parts by brand
+      const brands = JSON.parse(req.body.brands || '[]');
+      if (brands.length) {
+        const Part = require('../models/Part');
+        const result = await Part.deleteMany({ 
+          'source.supplierId': req.supplier._id,
+          brand: { $in: brands }
+        });
+        deletedCount = result.deletedCount;
+        logger.info(`Deleted ${deletedCount} parts for brands: ${brands.join(', ')}`);
+      }
+    } else if (deleteOption === 'file') {
+      // Delete parts from same filename (handled in service)
+    }
+    
     const options = {
-      replaceExisting: req.body.replaceExisting === 'true'
+      replaceExisting: deleteOption === 'file',
+      deleteOption
     };
     
     const result = await supplierPartsService.importFromFile(
@@ -243,6 +272,7 @@ const importParts = async (req, res) => {
     res.json({
       success: true,
       message: `Successfully imported ${result.imported} parts`,
+      deleted: deletedCount + (result.deleted || 0),
       ...result
     });
   } catch (error) {
@@ -358,6 +388,83 @@ const deleteFile = async (req, res) => {
   }
 };
 
+// ==================== DATA MANAGEMENT ====================
+
+/**
+ * Get supplier's brands
+ * GET /api/supplier/brands
+ */
+const getBrands = async (req, res) => {
+  try {
+    const brands = await supplierPartsService.getSupplierBrands(req.supplier._id);
+    res.json({
+      success: true,
+      brands
+    });
+  } catch (error) {
+    logger.error('Get brands error:', error.message);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to load brands' 
+    });
+  }
+};
+
+/**
+ * Get import summary for data management
+ * GET /api/supplier/import-summary
+ */
+const getImportSummary = async (req, res) => {
+  try {
+    const summary = await supplierPartsService.getImportSummary(req.supplier._id);
+    res.json({
+      success: true,
+      ...summary
+    });
+  } catch (error) {
+    logger.error('Get import summary error:', error.message);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to load import summary' 
+    });
+  }
+};
+
+/**
+ * Delete parts by criteria (brand, file, etc)
+ * DELETE /api/supplier/parts/criteria
+ */
+const deletePartsByCriteria = async (req, res) => {
+  try {
+    const { brand, fileName, deleteAll } = req.body;
+    
+    if (!brand && !fileName && !deleteAll) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Please specify deletion criteria (brand, fileName, or deleteAll)' 
+      });
+    }
+    
+    const criteria = {};
+    if (brand) criteria.brand = brand;
+    if (fileName) criteria.fileName = fileName;
+    
+    const result = await supplierPartsService.deletePartsByCriteria(req.supplier._id, criteria);
+    
+    res.json({
+      success: true,
+      message: `Deleted ${result.deleted} parts`,
+      ...result
+    });
+  } catch (error) {
+    logger.error('Delete by criteria error:', error.message);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to delete parts' 
+    });
+  }
+};
+
 module.exports = {
   // Dashboard
   getDashboard,
@@ -379,5 +486,10 @@ module.exports = {
   
   // Files
   getFiles,
-  deleteFile
+  deleteFile,
+  
+  // Data Management
+  getBrands,
+  getImportSummary,
+  deletePartsByCriteria
 };

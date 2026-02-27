@@ -67,6 +67,11 @@ router.delete('/parts/:partId', requireSupplierAuth, requireSupplierPermission('
 router.get('/files', requireSupplierAuth, supplierPartsController.getFiles);
 router.delete('/files/:fileName', requireSupplierAuth, requireSupplierPermission('delete_data'), supplierPartsController.deleteFile);
 
+// ==================== DATA MANAGEMENT ROUTES ====================
+router.get('/brands', requireSupplierAuth, supplierPartsController.getBrands);
+router.get('/import-summary', requireSupplierAuth, supplierPartsController.getImportSummary);
+router.delete('/parts/criteria', requireSupplierAuth, requireSupplierPermission('delete_data'), supplierPartsController.deletePartsByCriteria);
+
 // ==================== TEAM MANAGEMENT ROUTES ====================
 router.get('/team', requireSupplierAuth, requireSupplierPermission('manage_users'), supplierAuthController.getTeamMembers);
 router.post('/team', requireSupplierAuth, requireSupplierPermission('manage_users'), supplierAuthController.inviteTeamMember);
