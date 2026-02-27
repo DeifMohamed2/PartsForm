@@ -118,15 +118,15 @@ const createTable = async (req, res) => {
       table,
     });
   } catch (error) {
-    logger.error('Create table error:', error);
-    logger.error('Create table error type:', typeof error);
-    logger.error('Create table error name:', error?.name);
-    logger.error('Create table error message:', error?.message);
-    logger.error('Create table error stack:', error?.stack);
-    logger.error('Create table error keys:', error ? Object.keys(error) : 'null');
-    res.status(error?.message?.includes('limit') ? 403 : 500).json({
+    // Handle both Error objects and string errors
+    const errorMessage = error?.message || (typeof error === 'string' ? error : String(error));
+    const errorStack = error?.stack || (new Error(errorMessage)).stack;
+    logger.error('Create table error:', errorMessage);
+    logger.error('Create table error full:', error);
+    logger.error('Create table error stack:', errorStack);
+    res.status(errorMessage?.includes?.('limit') ? 403 : 500).json({
       success: false,
-      message: error?.message || String(error) || 'Unknown error creating table',
+      message: errorMessage || 'Unknown error creating table',
     });
   }
 };

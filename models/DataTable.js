@@ -163,7 +163,7 @@ dataTableSchema.index({ supplier: 1, status: 1 });
 dataTableSchema.index({ 'settings.sftpExport.enabled': 1 });
 
 // Pre-save: Generate slug from name if not provided
-dataTableSchema.pre('save', function (next) {
+dataTableSchema.pre('save', function () {
   if (this.isModified('name') && !this.slug) {
     this.slug = this.name
       .toLowerCase()
@@ -181,8 +181,6 @@ dataTableSchema.pre('save', function (next) {
       col.updatedAt = new Date();
     });
   }
-  
-  next();
 });
 
 // Method to get column by key
