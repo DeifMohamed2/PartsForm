@@ -370,6 +370,25 @@ class SupplierFileSystem {
 
   get(fileName) {
     const filePath = path.join(this.root, this.cwd, fileName);
+    const stat = fsSync.statSync(filePath);
+    
+    // Return a stat-like object with methods as ftp-srv expects
+    return {
+      name: path.basename(filePath),
+      isDirectory: () => stat.isDirectory(),
+      isFile: () => stat.isFile(),
+      size: stat.size,
+      mtime: stat.mtime,
+      atime: stat.atime,
+      ctime: stat.ctime,
+      mode: stat.mode,
+      uid: stat.uid || 0,
+      gid: stat.gid || 0,
+    };
+  }
+
+  read(fileName) {
+    const filePath = path.join(this.root, this.cwd, fileName);
     return fsSync.createReadStream(filePath);
   }
 
