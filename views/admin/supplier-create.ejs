@@ -260,12 +260,11 @@
     position: fixed;
     inset: 0;
     z-index: 1000;
-    background: rgba(0, 0, 0, 0.6);
+    background: rgba(15, 23, 42, 0.75);
     align-items: center;
     justify-content: center;
-    backdrop-filter: blur(8px);
-    padding: 1rem;
-    animation: modalFadeIn 0.3s ease;
+    padding: 1.5rem;
+    animation: modalFadeIn 0.25s ease;
   }
   
   @keyframes modalFadeIn {
@@ -274,8 +273,14 @@
   }
   
   @keyframes modalSlideIn {
-    from { transform: scale(0.9) translateY(20px); opacity: 0; }
+    from { transform: scale(0.95) translateY(10px); opacity: 0; }
     to { transform: scale(1) translateY(0); opacity: 1; }
+  }
+  
+  @keyframes checkBounce {
+    0% { transform: scale(0); }
+    50% { transform: scale(1.15); }
+    100% { transform: scale(1); }
   }
   
   .credentials-modal.active {
@@ -283,25 +288,24 @@
   }
   
   .credentials-content {
-    background: var(--admin-card-bg);
-    border-radius: 20px;
+    background: #ffffff;
+    border-radius: 16px;
     width: 100%;
-    max-width: 520px;
-    box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.35);
-    animation: modalSlideIn 0.4s ease;
+    max-width: 480px;
+    box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(0, 0, 0, 0.05);
+    animation: modalSlideIn 0.35s ease;
     overflow: hidden;
   }
   
   .credentials-header {
-    padding: 2rem 2rem 1.5rem;
+    padding: 2.5rem 2rem 1.75rem;
     text-align: center;
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(79, 70, 229, 0.05));
-    border-bottom: 1px solid var(--admin-border);
+    background: #ffffff;
   }
   
   .credentials-header .success-icon {
-    width: 72px;
-    height: 72px;
+    width: 80px;
+    height: 80px;
     margin: 0 auto 1.25rem;
     display: flex;
     align-items: center;
@@ -309,36 +313,35 @@
     background: linear-gradient(135deg, #10b981 0%, #059669 100%);
     color: white;
     border-radius: 50%;
-    font-size: 2rem;
-    box-shadow: 0 8px 24px -8px rgba(16, 185, 129, 0.5);
-    animation: successPulse 2s ease infinite;
-  }
-  
-  @keyframes successPulse {
-    0%, 100% { box-shadow: 0 8px 24px -8px rgba(16, 185, 129, 0.5); }
-    50% { box-shadow: 0 8px 32px -4px rgba(16, 185, 129, 0.7); }
+    font-size: 2.25rem;
+    box-shadow: 0 10px 30px -10px rgba(16, 185, 129, 0.6);
+    animation: checkBounce 0.5s ease 0.2s both;
   }
   
   .credentials-header h3 {
     font-size: 1.5rem;
     font-weight: 700;
     margin-bottom: 0.5rem;
-    color: var(--admin-text);
+    color: #1e293b;
   }
   
   .credentials-header p {
     font-size: 0.9rem;
-    color: var(--admin-text-muted);
+    color: #64748b;
+    margin-bottom: 1rem;
   }
   
   .credentials-body {
-    padding: 1.5rem 2rem;
-    max-height: 55vh;
-    overflow-y: auto;
+    padding: 0 2rem 1.5rem;
+    background: #ffffff;
   }
   
   .cred-section {
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.25rem;
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 1.25rem;
+    border: 1px solid #e2e8f0;
   }
   
   .cred-section:last-child {
@@ -349,42 +352,39 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    font-size: 0.75rem;
-    font-weight: 600;
+    font-size: 0.7rem;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--admin-primary);
-    margin-bottom: 0.75rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 2px solid rgba(79, 70, 229, 0.15);
+    letter-spacing: 0.1em;
+    color: #475569;
+    margin-bottom: 1rem;
   }
   
   .cred-section-title i {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
+    color: #4f46e5;
   }
   
   .credential-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.75rem;
-  }
-  
-  .credential-grid.single {
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
   }
   
   .credential-item {
-    background: var(--admin-bg);
-    border: 1px solid var(--admin-border);
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
     border-radius: 10px;
-    padding: 0.875rem 1rem;
-    position: relative;
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     transition: all 0.2s;
   }
   
   .credential-item:hover {
-    border-color: var(--admin-primary);
-    box-shadow: 0 4px 12px -4px rgba(79, 70, 229, 0.15);
+    border-color: #4f46e5;
+    box-shadow: 0 2px 8px -2px rgba(79, 70, 229, 0.15);
   }
   
   .credential-item.full-width {
@@ -395,116 +395,123 @@
     display: block;
     font-size: 0.7rem;
     font-weight: 600;
-    color: var(--admin-text-muted);
+    color: #94a3b8;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    margin-bottom: 0.4rem;
+    margin-bottom: 0.35rem;
   }
   
   .credential-value {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
-    font-size: 0.9rem;
-    color: var(--admin-text);
-    font-weight: 500;
+    gap: 0.75rem;
+    flex: 1;
+  }
+  
+  .credential-value .cred-text {
+    flex: 1;
   }
   
   .credential-value code {
-    flex: 1;
-    word-break: break-all;
+    font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+    font-size: 0.95rem;
+    color: #1e293b;
+    font-weight: 600;
     background: none;
     padding: 0;
+    word-break: break-all;
   }
   
   .copy-btn {
-    width: 28px;
-    height: 28px;
+    width: 36px;
+    height: 36px;
     padding: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(79, 70, 229, 0.1);
-    border: none;
-    color: var(--admin-primary);
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    color: #64748b;
     cursor: pointer;
-    border-radius: 6px;
+    border-radius: 8px;
     transition: all 0.2s;
     flex-shrink: 0;
   }
   
   .copy-btn:hover {
-    background: var(--admin-primary);
+    background: #4f46e5;
+    border-color: #4f46e5;
     color: white;
-    transform: scale(1.05);
   }
   
   .copy-btn.copied {
     background: #10b981;
+    border-color: #10b981;
     color: white;
   }
   
   .credentials-warning {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     gap: 0.75rem;
-    padding: 1rem 1.25rem;
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(245, 158, 11, 0.05));
-    border-radius: 12px;
-    border: 1px solid rgba(245, 158, 11, 0.2);
-    margin-top: 1rem;
+    padding: 0.875rem 1rem;
+    background: #fef3c7;
+    border-radius: 10px;
+    margin-top: 0.5rem;
   }
   
   .credentials-warning i {
-    color: #f59e0b;
-    font-size: 1.1rem;
-    margin-top: 0.1rem;
+    color: #d97706;
+    font-size: 1rem;
   }
   
   .credentials-warning p {
-    font-size: 0.85rem;
-    color: var(--admin-text-secondary);
-    line-height: 1.55;
+    font-size: 0.8rem;
+    color: #92400e;
+    line-height: 1.4;
+    margin: 0;
   }
   
   .credentials-warning strong {
-    color: #d97706;
-  }
-  
-  .credentials-footer {
-    padding: 1.25rem 2rem;
-    background: rgba(0, 0, 0, 0.02);
-    border-top: 1px solid var(--admin-border);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 1rem;
-  }
-  
-  .credentials-footer .btn {
-    padding: 0.875rem 1.5rem;
     font-weight: 600;
   }
   
+  .credentials-footer {
+    padding: 1.5rem 2rem;
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  
+  .credentials-footer .btn {
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    border-radius: 10px;
+  }
+  
   .credentials-footer .btn-secondary {
-    background: white;
-    border: 2px solid var(--admin-border);
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    color: #475569;
   }
   
   .credentials-footer .btn-secondary:hover {
-    border-color: var(--admin-primary);
-    color: var(--admin-primary);
+    background: #f1f5f9;
+    border-color: #cbd5e1;
   }
   
   .credentials-footer .btn-primary {
-    background: linear-gradient(135deg, var(--admin-primary) 0%, #4338ca 100%);
-    box-shadow: 0 4px 12px -4px rgba(79, 70, 229, 0.4);
+    background: #4f46e5;
+    color: white;
+    border: none;
   }
   
   .credentials-footer .btn-primary:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 6px 16px -4px rgba(79, 70, 229, 0.5);
+    background: #4338ca;
   }
   
   /* Company info badge */
@@ -512,17 +519,17 @@
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    background: rgba(79, 70, 229, 0.08);
-    border-radius: 20px;
-    font-size: 0.85rem;
-    font-weight: 500;
-    color: var(--admin-primary);
-    margin-top: 0.75rem;
+    padding: 0.5rem 1.25rem;
+    background: #f1f5f9;
+    border-radius: 100px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #334155;
   }
   
   .supplier-info-badge i {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
+    color: #4f46e5;
   }
 
   @media (max-width: 768px) {
@@ -711,27 +718,27 @@
       <!-- Login Credentials Section -->
       <div class="cred-section">
         <div class="cred-section-title">
-          <i class="fas fa-sign-in-alt"></i>
-          Portal Login Credentials
+          <i class="fas fa-key"></i>
+          Login Credentials
         </div>
         <div class="credential-grid">
-          <div class="credential-item full-width">
-            <label>Login Email</label>
-            <div class="credential-value">
+          <div class="credential-item">
+            <div class="cred-text">
+              <label>Email</label>
               <code id="credEmail">-</code>
-              <button type="button" class="copy-btn" data-copy="credEmail" title="Copy Email">
-                <i class="fas fa-copy"></i>
-              </button>
             </div>
+            <button type="button" class="copy-btn" data-copy="credEmail" title="Copy">
+              <i class="fas fa-copy"></i>
+            </button>
           </div>
-          <div class="credential-item full-width">
-            <label>Temporary Password</label>
-            <div class="credential-value">
+          <div class="credential-item">
+            <div class="cred-text">
+              <label>Temporary Password</label>
               <code id="credPassword">-</code>
-              <button type="button" class="copy-btn" data-copy="credPassword" title="Copy Password">
-                <i class="fas fa-copy"></i>
-              </button>
             </div>
+            <button type="button" class="copy-btn" data-copy="credPassword" title="Copy">
+              <i class="fas fa-copy"></i>
+            </button>
           </div>
         </div>
       </div>
@@ -740,70 +747,52 @@
       <div class="cred-section" id="ftpCredentials" style="display: none;">
         <div class="cred-section-title">
           <i class="fas fa-server"></i>
-          FTP Access Credentials
+          FTP Access
         </div>
         <div class="credential-grid">
-          <div class="credential-item full-width">
-            <label>FTP Server</label>
-            <div class="credential-value">
-              <code>ftp.partsform.com</code>
-              <button type="button" class="copy-btn" onclick="copyText('ftp.partsform.com', this)" title="Copy Server">
-                <i class="fas fa-copy"></i>
-              </button>
+          <div class="credential-item">
+            <div class="cred-text">
+              <label>Server</label>
+              <code>ftp.partsform.com:21</code>
             </div>
+            <button type="button" class="copy-btn" onclick="copyText('ftp.partsform.com', this)" title="Copy">
+              <i class="fas fa-copy"></i>
+            </button>
           </div>
           <div class="credential-item">
-            <label>FTP Port</label>
-            <div class="credential-value">
-              <code>21</code>
-              <button type="button" class="copy-btn" onclick="copyText('21', this)" title="Copy Port">
-                <i class="fas fa-copy"></i>
-              </button>
-            </div>
-          </div>
-          <div class="credential-item">
-            <label>Protocol</label>
-            <div class="credential-value">
-              <code>FTP (Plain)</code>
-            </div>
-          </div>
-          <div class="credential-item">
-            <label>FTP Username</label>
-            <div class="credential-value">
+            <div class="cred-text">
+              <label>Username</label>
               <code id="credFtpUser">-</code>
-              <button type="button" class="copy-btn" data-copy="credFtpUser" title="Copy Username">
-                <i class="fas fa-copy"></i>
-              </button>
             </div>
+            <button type="button" class="copy-btn" data-copy="credFtpUser" title="Copy">
+              <i class="fas fa-copy"></i>
+            </button>
           </div>
           <div class="credential-item">
-            <label>FTP Password</label>
-            <div class="credential-value">
+            <div class="cred-text">
+              <label>Password</label>
               <code id="credFtpPass">-</code>
-              <button type="button" class="copy-btn" data-copy="credFtpPass" title="Copy Password">
-                <i class="fas fa-copy"></i>
-              </button>
             </div>
+            <button type="button" class="copy-btn" data-copy="credFtpPass" title="Copy">
+              <i class="fas fa-copy"></i>
+            </button>
           </div>
         </div>
       </div>
       
       <!-- Warning Box -->
       <div class="credentials-warning">
-        <i class="fas fa-shield-alt"></i>
-        <p>
-          <strong>Save these credentials!</strong> The temporary password must be changed on first login.
-          Share these details securely with the supplier.
-        </p>
+        <i class="fas fa-exclamation-circle"></i>
+        <p><strong>Important:</strong> Save these credentials. Password must be changed on first login.</p>
       </div>
     </div>
     
     <div class="credentials-footer">
       <button type="button" class="btn btn-secondary" onclick="copyAllCredentials()">
-        <i class="fas fa-clipboard-list"></i> Copy All
+        <i class="fas fa-copy"></i> Copy All
       </button>
       <a href="/admin/suppliers" class="btn btn-primary">
-        Go to Suppliers <i class="fas fa-arrow-right"></i>
+        Done <i class="fas fa-check"></i>
       </a>
     </div>
   </div>
