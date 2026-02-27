@@ -396,17 +396,28 @@ const approveSupplier = async (req, res) => {
     
     // Log the action
     await AuditLog.create({
-      supplier: supplier._id,
-      user: null,
-      action: 'supplier_approved',
-      resource: 'supplier',
-      resourceId: supplier._id,
-      details: {
-        approvedBy: req.user.email,
-        adminId: req.user._id
+      actor: {
+        type: 'admin',
+        id: req.user._id,
+        name: `${req.user.firstName} ${req.user.lastName}`,
+        email: req.user.email,
+        role: req.user.role
       },
-      ipAddress: req.ip,
-      userAgent: req.headers['user-agent']
+      action: 'admin.supplier_approve',
+      resource: {
+        type: 'supplier',
+        id: supplier._id,
+        name: supplier.companyName
+      },
+      supplier: supplier._id,
+      details: {},
+      request: {
+        ipAddress: req.ip,
+        userAgent: req.headers['user-agent'],
+        endpoint: req.originalUrl,
+        method: req.method
+      },
+      status: 'success'
     });
     
     res.json({ 
@@ -449,18 +460,28 @@ const rejectSupplier = async (req, res) => {
     
     // Log the action
     await AuditLog.create({
-      supplier: supplier._id,
-      user: null,
-      action: 'supplier_rejected',
-      resource: 'supplier',
-      resourceId: supplier._id,
-      details: {
-        rejectedBy: req.user.email,
-        adminId: req.user._id,
-        reason: supplier.rejectionReason
+      actor: {
+        type: 'admin',
+        id: req.user._id,
+        name: `${req.user.firstName} ${req.user.lastName}`,
+        email: req.user.email,
+        role: req.user.role
       },
-      ipAddress: req.ip,
-      userAgent: req.headers['user-agent']
+      action: 'admin.supplier_reject',
+      resource: {
+        type: 'supplier',
+        id: supplier._id,
+        name: supplier.companyName
+      },
+      supplier: supplier._id,
+      details: { reason: supplier.rejectionReason },
+      request: {
+        ipAddress: req.ip,
+        userAgent: req.headers['user-agent'],
+        endpoint: req.originalUrl,
+        method: req.method
+      },
+      status: 'success'
     });
     
     res.json({ 
@@ -500,18 +521,28 @@ const suspendSupplier = async (req, res) => {
     
     // Log the action
     await AuditLog.create({
-      supplier: supplier._id,
-      user: null,
-      action: 'supplier_suspended',
-      resource: 'supplier',
-      resourceId: supplier._id,
-      details: {
-        suspendedBy: req.user.email,
-        adminId: req.user._id,
-        reason: supplier.suspensionReason
+      actor: {
+        type: 'admin',
+        id: req.user._id,
+        name: `${req.user.firstName} ${req.user.lastName}`,
+        email: req.user.email,
+        role: req.user.role
       },
-      ipAddress: req.ip,
-      userAgent: req.headers['user-agent']
+      action: 'admin.supplier_suspend',
+      resource: {
+        type: 'supplier',
+        id: supplier._id,
+        name: supplier.companyName
+      },
+      supplier: supplier._id,
+      details: { reason: supplier.suspensionReason },
+      request: {
+        ipAddress: req.ip,
+        userAgent: req.headers['user-agent'],
+        endpoint: req.originalUrl,
+        method: req.method
+      },
+      status: 'success'
     });
     
     res.json({ 
@@ -549,18 +580,28 @@ const reactivateSupplier = async (req, res) => {
     
     // Log the action
     await AuditLog.create({
-      supplier: supplier._id,
-      user: null,
-      action: 'supplier_reactivated',
-      resource: 'supplier',
-      resourceId: supplier._id,
-      details: {
-        reactivatedBy: req.user.email,
-        adminId: req.user._id,
-        previousStatus: supplier.status
+      actor: {
+        type: 'admin',
+        id: req.user._id,
+        name: `${req.user.firstName} ${req.user.lastName}`,
+        email: req.user.email,
+        role: req.user.role
       },
-      ipAddress: req.ip,
-      userAgent: req.headers['user-agent']
+      action: 'admin.supplier_reactivate',
+      resource: {
+        type: 'supplier',
+        id: supplier._id,
+        name: supplier.companyName
+      },
+      supplier: supplier._id,
+      details: {},
+      request: {
+        ipAddress: req.ip,
+        userAgent: req.headers['user-agent'],
+        endpoint: req.originalUrl,
+        method: req.method
+      },
+      status: 'success'
     });
     
     res.json({ 
@@ -614,18 +655,28 @@ const deleteSupplier = async (req, res) => {
       
       // Log the action
       await AuditLog.create({
-        supplier: supplier._id,
-        user: null,
-        action: 'supplier_deleted',
-        resource: 'supplier',
-        resourceId: supplier._id,
-        details: {
-          deletedBy: req.user.email,
-          adminId: req.user._id,
-          permanent: false
+        actor: {
+          type: 'admin',
+          id: req.user._id,
+          name: `${req.user.firstName} ${req.user.lastName}`,
+          email: req.user.email,
+          role: req.user.role
         },
-        ipAddress: req.ip,
-        userAgent: req.headers['user-agent']
+        action: 'admin.supplier_delete',
+        resource: {
+          type: 'supplier',
+          id: supplier._id,
+          name: supplier.companyName
+        },
+        supplier: supplier._id,
+        details: { permanent: false },
+        request: {
+          ipAddress: req.ip,
+          userAgent: req.headers['user-agent'],
+          endpoint: req.originalUrl,
+          method: req.method
+        },
+        status: 'success'
       });
       
       res.json({ 
@@ -803,20 +854,31 @@ const bulkUpdateStatus = async (req, res) => {
     
     // Log bulk action
     await AuditLog.create({
-      supplier: null,
-      user: null,
-      action: 'bulk_status_update',
-      resource: 'supplier',
-      resourceId: null,
+      actor: {
+        type: 'admin',
+        id: req.user._id,
+        name: `${req.user.firstName} ${req.user.lastName}`,
+        email: req.user.email,
+        role: req.user.role
+      },
+      action: 'admin.supplier_suspend',
+      resource: {
+        type: 'supplier',
+        id: null,
+        name: 'Bulk Update'
+      },
       details: {
-        updatedBy: req.user.email,
-        adminId: req.user._id,
         supplierCount: supplierIds.length,
         newStatus: status,
         reason
       },
-      ipAddress: req.ip,
-      userAgent: req.headers['user-agent']
+      request: {
+        ipAddress: req.ip,
+        userAgent: req.headers['user-agent'],
+        endpoint: req.originalUrl,
+        method: req.method
+      },
+      status: 'success'
     });
     
     res.json({
@@ -914,18 +976,28 @@ const updateSupplierLimits = async (req, res) => {
     
     // Log the action
     await AuditLog.create({
-      supplier: supplier._id,
-      user: null,
-      action: 'limits_updated',
-      resource: 'supplier',
-      resourceId: supplier._id,
-      details: {
-        updatedBy: req.user.email,
-        adminId: req.user._id,
-        newLimits: supplier.limits
+      actor: {
+        type: 'admin',
+        id: req.user._id,
+        name: `${req.user.firstName} ${req.user.lastName}`,
+        email: req.user.email,
+        role: req.user.role
       },
-      ipAddress: req.ip,
-      userAgent: req.headers['user-agent']
+      action: 'admin.quota_update',
+      resource: {
+        type: 'supplier',
+        id: supplier._id,
+        name: supplier.companyName
+      },
+      supplier: supplier._id,
+      details: { newLimits: supplier.limits },
+      request: {
+        ipAddress: req.ip,
+        userAgent: req.headers['user-agent'],
+        endpoint: req.originalUrl,
+        method: req.method
+      },
+      status: 'success'
     });
     
     res.json({
@@ -1032,20 +1104,32 @@ const createSupplier = async (req, res) => {
 
     // Log the action
     await AuditLog.create({
+      actor: {
+        type: 'admin',
+        id: req.user._id,
+        name: `${req.user.firstName} ${req.user.lastName}`,
+        email: req.user.email,
+        role: req.user.role
+      },
+      action: 'admin.supplier_create',
+      resource: {
+        type: 'supplier',
+        id: supplier._id,
+        name: supplier.companyName
+      },
       supplier: supplier._id,
-      user: null,
-      action: 'supplier_created',
-      resource: 'supplier',
-      resourceId: supplier._id,
       details: {
-        createdBy: req.user.email,
-        adminId: req.user._id,
         companyName,
         email: email.toLowerCase(),
         ftpEnabled: !!ftpEnabled
       },
-      ipAddress: req.ip,
-      userAgent: req.headers['user-agent']
+      request: {
+        ipAddress: req.ip,
+        userAgent: req.headers['user-agent'],
+        endpoint: req.originalUrl,
+        method: req.method
+      },
+      status: 'success'
     });
 
     // Prepare credentials to return (and optionally send via email)
@@ -1150,18 +1234,31 @@ const updateSupplierFtp = async (req, res) => {
 
       // Log the action
       await AuditLog.create({
+        actor: {
+          type: 'admin',
+          id: req.user._id,
+          name: `${req.user.firstName} ${req.user.lastName}`,
+          email: req.user.email,
+          role: req.user.role
+        },
+        action: 'admin.ftp_update',
+        resource: {
+          type: 'supplier',
+          id: supplier._id,
+          name: supplier.companyName
+        },
         supplier: supplier._id,
-        user: null,
-        action: action === 'enable' ? 'ftp_enabled' : 'ftp_password_regenerated',
-        resource: 'supplier',
-        resourceId: supplier._id,
         details: {
-          updatedBy: req.user.email,
-          adminId: req.user._id,
+          ftpAction: action === 'enable' ? 'enabled' : 'regenerated',
           ftpUsername
         },
-        ipAddress: req.ip,
-        userAgent: req.headers['user-agent']
+        request: {
+          ipAddress: req.ip,
+          userAgent: req.headers['user-agent'],
+          endpoint: req.originalUrl,
+          method: req.method
+        },
+        status: 'success'
       });
 
       return res.json({
@@ -1185,17 +1282,28 @@ const updateSupplierFtp = async (req, res) => {
       await supplier.save();
 
       await AuditLog.create({
-        supplier: supplier._id,
-        user: null,
-        action: 'ftp_disabled',
-        resource: 'supplier',
-        resourceId: supplier._id,
-        details: {
-          updatedBy: req.user.email,
-          adminId: req.user._id
+        actor: {
+          type: 'admin',
+          id: req.user._id,
+          name: `${req.user.firstName} ${req.user.lastName}`,
+          email: req.user.email,
+          role: req.user.role
         },
-        ipAddress: req.ip,
-        userAgent: req.headers['user-agent']
+        action: 'admin.ftp_update',
+        resource: {
+          type: 'supplier',
+          id: supplier._id,
+          name: supplier.companyName
+        },
+        supplier: supplier._id,
+        details: { ftpAction: 'disabled' },
+        request: {
+          ipAddress: req.ip,
+          userAgent: req.headers['user-agent'],
+          endpoint: req.originalUrl,
+          method: req.method
+        },
+        status: 'success'
       });
 
       return res.json({
@@ -1229,18 +1337,31 @@ const updateSupplierFtp = async (req, res) => {
 
       // Log the action
       await AuditLog.create({
+        actor: {
+          type: 'admin',
+          id: req.user._id,
+          name: `${req.user.firstName} ${req.user.lastName}`,
+          email: req.user.email,
+          role: req.user.role
+        },
+        action: 'admin.ftp_update',
+        resource: {
+          type: 'supplier',
+          id: supplier._id,
+          name: supplier.companyName
+        },
         supplier: supplier._id,
-        user: null,
-        action: 'ftp_credentials_generated',
-        resource: 'supplier',
-        resourceId: supplier._id,
         details: {
-          updatedBy: req.user.email,
-          adminId: req.user._id,
+          ftpAction: 'credentials_generated',
           ftpUsername
         },
-        ipAddress: req.ip,
-        userAgent: req.headers['user-agent']
+        request: {
+          ipAddress: req.ip,
+          userAgent: req.headers['user-agent'],
+          endpoint: req.originalUrl,
+          method: req.method
+        },
+        status: 'success'
       });
 
       return res.json({
@@ -1301,17 +1422,28 @@ const resetSupplierPassword = async (req, res) => {
 
     // Log the action
     await AuditLog.create({
-      supplier: supplier._id,
-      user: null,
-      action: 'password_reset',
-      resource: 'supplier',
-      resourceId: supplier._id,
-      details: {
-        resetBy: req.user.email,
-        adminId: req.user._id
+      actor: {
+        type: 'admin',
+        id: req.user._id,
+        name: `${req.user.firstName} ${req.user.lastName}`,
+        email: req.user.email,
+        role: req.user.role
       },
-      ipAddress: req.ip,
-      userAgent: req.headers['user-agent']
+      action: 'admin.password_reset',
+      resource: {
+        type: 'supplier',
+        id: supplier._id,
+        name: supplier.companyName
+      },
+      supplier: supplier._id,
+      details: {},
+      request: {
+        ipAddress: req.ip,
+        userAgent: req.headers['user-agent'],
+        endpoint: req.originalUrl,
+        method: req.method
+      },
+      status: 'success'
     });
 
     // TODO: Send password reset email if requested
