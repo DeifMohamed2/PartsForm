@@ -379,12 +379,19 @@ class SupplierFileSystem {
     try {
       const files = await fs.readdir(fullPath, { withFileTypes: true });
       
-      return files.map(file => ({
-        name: file.name,
-        isDirectory: file.isDirectory(),
-        size: file.isDirectory() ? 0 : fsSync.statSync(path.join(fullPath, file.name)).size,
-        mtime: fsSync.statSync(path.join(fullPath, file.name)).mtime,
-      }));
+      return files.map(file => {
+        const filePath = path.join(fullPath, file.name);
+        const stat = fsSync.statSync(filePath);
+        return {
+          name: file.name,
+          isDirectory: () => stat.isDirectory(),
+          size: stat.size,
+          mtime: stat.mtime,
+          mode: stat.mode,
+          uid: stat.uid || 0,
+          gid: stat.gid || 0,
+        };
+      });
     } catch (error) {
       return [];
     }
