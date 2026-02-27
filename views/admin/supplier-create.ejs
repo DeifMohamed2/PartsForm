@@ -254,16 +254,28 @@
     cursor: not-allowed;
   }
   
-  /* Credentials Modal */
+  /* Enhanced Credentials Modal */
   .credentials-modal {
     display: none;
     position: fixed;
     inset: 0;
     z-index: 1000;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.6);
     align-items: center;
     justify-content: center;
-    backdrop-filter: blur(4px);
+    backdrop-filter: blur(8px);
+    padding: 1rem;
+    animation: modalFadeIn 0.3s ease;
+  }
+  
+  @keyframes modalFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  @keyframes modalSlideIn {
+    from { transform: scale(0.9) translateY(20px); opacity: 0; }
+    to { transform: scale(1) translateY(0); opacity: 1; }
   }
   
   .credentials-modal.active {
@@ -272,128 +284,245 @@
   
   .credentials-content {
     background: var(--admin-card-bg);
-    border-radius: 16px;
+    border-radius: 20px;
     width: 100%;
-    max-width: 500px;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    max-width: 520px;
+    box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.35);
+    animation: modalSlideIn 0.4s ease;
+    overflow: hidden;
   }
   
   .credentials-header {
-    padding: 1.5rem;
+    padding: 2rem 2rem 1.5rem;
+    text-align: center;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(79, 70, 229, 0.05));
     border-bottom: 1px solid var(--admin-border);
-    display: flex;
-    align-items: center;
-    gap: 1rem;
   }
   
-  .credentials-header i {
-    width: 48px;
-    height: 48px;
+  .credentials-header .success-icon {
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 1.25rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(16, 185, 129, 0.1);
-    color: #10b981;
-    border-radius: 12px;
-    font-size: 1.25rem;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    border-radius: 50%;
+    font-size: 2rem;
+    box-shadow: 0 8px 24px -8px rgba(16, 185, 129, 0.5);
+    animation: successPulse 2s ease infinite;
+  }
+  
+  @keyframes successPulse {
+    0%, 100% { box-shadow: 0 8px 24px -8px rgba(16, 185, 129, 0.5); }
+    50% { box-shadow: 0 8px 32px -4px rgba(16, 185, 129, 0.7); }
   }
   
   .credentials-header h3 {
-    font-size: 1.25rem;
-    font-weight: 600;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--admin-text);
   }
   
   .credentials-header p {
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     color: var(--admin-text-muted);
-    margin-top: 0.25rem;
   }
   
   .credentials-body {
-    padding: 1.5rem;
+    padding: 1.5rem 2rem;
+    max-height: 55vh;
+    overflow-y: auto;
+  }
+  
+  .cred-section {
+    margin-bottom: 1.5rem;
+  }
+  
+  .cred-section:last-child {
+    margin-bottom: 0;
+  }
+  
+  .cred-section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--admin-primary);
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid rgba(79, 70, 229, 0.15);
+  }
+  
+  .cred-section-title i {
+    font-size: 0.85rem;
+  }
+  
+  .credential-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+  
+  .credential-grid.single {
+    grid-template-columns: 1fr;
   }
   
   .credential-item {
-    margin-bottom: 1.25rem;
+    background: var(--admin-bg);
+    border: 1px solid var(--admin-border);
+    border-radius: 10px;
+    padding: 0.875rem 1rem;
+    position: relative;
+    transition: all 0.2s;
   }
   
-  .credential-item:last-child {
-    margin-bottom: 0;
+  .credential-item:hover {
+    border-color: var(--admin-primary);
+    box-shadow: 0 4px 12px -4px rgba(79, 70, 229, 0.15);
+  }
+  
+  .credential-item.full-width {
+    grid-column: span 2;
   }
   
   .credential-item label {
     display: block;
-    font-size: 0.8rem;
-    font-weight: 500;
+    font-size: 0.7rem;
+    font-weight: 600;
     color: var(--admin-text-muted);
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.4rem;
   }
   
   .credential-value {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.75rem 1rem;
-    background: var(--admin-bg);
-    border: 1px solid var(--admin-border);
-    border-radius: 8px;
-    font-family: monospace;
-    font-size: 0.95rem;
+    font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+    font-size: 0.9rem;
+    color: var(--admin-text);
+    font-weight: 500;
   }
   
   .credential-value code {
     flex: 1;
     word-break: break-all;
+    background: none;
+    padding: 0;
   }
   
   .copy-btn {
-    padding: 0.5rem;
-    background: none;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(79, 70, 229, 0.1);
     border: none;
-    color: var(--admin-text-muted);
+    color: var(--admin-primary);
     cursor: pointer;
-    border-radius: 4px;
+    border-radius: 6px;
     transition: all 0.2s;
+    flex-shrink: 0;
   }
   
   .copy-btn:hover {
-    background: var(--admin-border);
-    color: var(--admin-primary);
+    background: var(--admin-primary);
+    color: white;
+    transform: scale(1.05);
   }
   
   .copy-btn.copied {
-    color: #10b981;
+    background: #10b981;
+    color: white;
   }
   
   .credentials-warning {
     display: flex;
     align-items: flex-start;
     gap: 0.75rem;
-    padding: 1rem;
-    background: rgba(245, 158, 11, 0.1);
-    border-radius: 8px;
-    margin-top: 1.25rem;
+    padding: 1rem 1.25rem;
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(245, 158, 11, 0.05));
+    border-radius: 12px;
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    margin-top: 1rem;
   }
   
   .credentials-warning i {
     color: #f59e0b;
-    margin-top: 0.125rem;
+    font-size: 1.1rem;
+    margin-top: 0.1rem;
   }
   
   .credentials-warning p {
     font-size: 0.85rem;
     color: var(--admin-text-secondary);
-    line-height: 1.5;
+    line-height: 1.55;
+  }
+  
+  .credentials-warning strong {
+    color: #d97706;
   }
   
   .credentials-footer {
-    padding: 1rem 1.5rem;
+    padding: 1.25rem 2rem;
+    background: rgba(0, 0, 0, 0.02);
     border-top: 1px solid var(--admin-border);
     display: flex;
-    justify-content: flex-end;
-    gap: 0.75rem;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .credentials-footer .btn {
+    padding: 0.875rem 1.5rem;
+    font-weight: 600;
+  }
+  
+  .credentials-footer .btn-secondary {
+    background: white;
+    border: 2px solid var(--admin-border);
+  }
+  
+  .credentials-footer .btn-secondary:hover {
+    border-color: var(--admin-primary);
+    color: var(--admin-primary);
+  }
+  
+  .credentials-footer .btn-primary {
+    background: linear-gradient(135deg, var(--admin-primary) 0%, #4338ca 100%);
+    box-shadow: 0 4px 12px -4px rgba(79, 70, 229, 0.4);
+  }
+  
+  .credentials-footer .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px -4px rgba(79, 70, 229, 0.5);
+  }
+  
+  /* Company info badge */
+  .supplier-info-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: rgba(79, 70, 229, 0.08);
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--admin-primary);
+    margin-top: 0.75rem;
+  }
+  
+  .supplier-info-badge i {
+    font-size: 0.9rem;
   }
 
   @media (max-width: 768px) {
@@ -563,69 +692,118 @@
   </div>
 </main>
 
-<!-- Credentials Modal -->
+<!-- Enhanced Credentials Modal -->
 <div id="credentialsModal" class="credentials-modal">
   <div class="credentials-content">
     <div class="credentials-header">
-      <i class="fas fa-check-circle"></i>
-      <div>
-        <h3>Supplier Created Successfully</h3>
-        <p>Account credentials have been generated</p>
+      <div class="success-icon">
+        <i class="fas fa-check"></i>
+      </div>
+      <h3>Supplier Created Successfully!</h3>
+      <p>The account has been set up and is ready to use</p>
+      <div class="supplier-info-badge" id="supplierInfoBadge">
+        <i class="fas fa-building"></i>
+        <span id="credCompanyName">-</span>
       </div>
     </div>
+    
     <div class="credentials-body">
-      <div class="credential-item">
-        <label>Login Email</label>
-        <div class="credential-value">
-          <code id="credEmail"></code>
-          <button type="button" class="copy-btn" data-copy="credEmail" title="Copy">
-            <i class="fas fa-copy"></i>
-          </button>
+      <!-- Login Credentials Section -->
+      <div class="cred-section">
+        <div class="cred-section-title">
+          <i class="fas fa-sign-in-alt"></i>
+          Portal Login Credentials
         </div>
-      </div>
-      <div class="credential-item">
-        <label>Temporary Password</label>
-        <div class="credential-value">
-          <code id="credPassword"></code>
-          <button type="button" class="copy-btn" data-copy="credPassword" title="Copy">
-            <i class="fas fa-copy"></i>
-          </button>
-        </div>
-      </div>
-      <div id="ftpCredentials" style="display: none;">
-        <div class="credential-item">
-          <label>FTP Username</label>
-          <div class="credential-value">
-            <code id="credFtpUser"></code>
-            <button type="button" class="copy-btn" data-copy="credFtpUser" title="Copy">
-              <i class="fas fa-copy"></i>
-            </button>
+        <div class="credential-grid">
+          <div class="credential-item full-width">
+            <label>Login Email</label>
+            <div class="credential-value">
+              <code id="credEmail">-</code>
+              <button type="button" class="copy-btn" data-copy="credEmail" title="Copy Email">
+                <i class="fas fa-copy"></i>
+              </button>
+            </div>
           </div>
-        </div>
-        <div class="credential-item">
-          <label>FTP Password</label>
-          <div class="credential-value">
-            <code id="credFtpPass"></code>
-            <button type="button" class="copy-btn" data-copy="credFtpPass" title="Copy">
-              <i class="fas fa-copy"></i>
-            </button>
+          <div class="credential-item full-width">
+            <label>Temporary Password</label>
+            <div class="credential-value">
+              <code id="credPassword">-</code>
+              <button type="button" class="copy-btn" data-copy="credPassword" title="Copy Password">
+                <i class="fas fa-copy"></i>
+              </button>
+            </div>
           </div>
         </div>
       </div>
+      
+      <!-- FTP Credentials Section (Hidden by default) -->
+      <div class="cred-section" id="ftpCredentials" style="display: none;">
+        <div class="cred-section-title">
+          <i class="fas fa-server"></i>
+          FTP Access Credentials
+        </div>
+        <div class="credential-grid">
+          <div class="credential-item full-width">
+            <label>FTP Server</label>
+            <div class="credential-value">
+              <code>ftp.partsform.com</code>
+              <button type="button" class="copy-btn" onclick="copyText('ftp.partsform.com', this)" title="Copy Server">
+                <i class="fas fa-copy"></i>
+              </button>
+            </div>
+          </div>
+          <div class="credential-item">
+            <label>FTP Port</label>
+            <div class="credential-value">
+              <code>21</code>
+              <button type="button" class="copy-btn" onclick="copyText('21', this)" title="Copy Port">
+                <i class="fas fa-copy"></i>
+              </button>
+            </div>
+          </div>
+          <div class="credential-item">
+            <label>Protocol</label>
+            <div class="credential-value">
+              <code>FTP (Plain)</code>
+            </div>
+          </div>
+          <div class="credential-item">
+            <label>FTP Username</label>
+            <div class="credential-value">
+              <code id="credFtpUser">-</code>
+              <button type="button" class="copy-btn" data-copy="credFtpUser" title="Copy Username">
+                <i class="fas fa-copy"></i>
+              </button>
+            </div>
+          </div>
+          <div class="credential-item">
+            <label>FTP Password</label>
+            <div class="credential-value">
+              <code id="credFtpPass">-</code>
+              <button type="button" class="copy-btn" data-copy="credFtpPass" title="Copy Password">
+                <i class="fas fa-copy"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Warning Box -->
       <div class="credentials-warning">
-        <i class="fas fa-exclamation-triangle"></i>
+        <i class="fas fa-shield-alt"></i>
         <p>
-          <strong>Important:</strong> Please save these credentials securely and share them with the supplier.
-          The password will need to be changed on first login.
+          <strong>Save these credentials!</strong> The temporary password must be changed on first login.
+          Share these details securely with the supplier.
         </p>
       </div>
     </div>
+    
     <div class="credentials-footer">
       <button type="button" class="btn btn-secondary" onclick="copyAllCredentials()">
-        <i class="fas fa-clipboard"></i> Copy All
+        <i class="fas fa-clipboard-list"></i> Copy All
       </button>
       <a href="/admin/suppliers" class="btn btn-primary">
-        <i class="fas fa-arrow-right"></i> Go to Suppliers
+        Go to Suppliers <i class="fas fa-arrow-right"></i>
       </a>
     </div>
   </div>
@@ -695,9 +873,16 @@ document.addEventListener('DOMContentLoaded', function() {
 function showCredentialsModal(data) {
   // API returns data.credentials with email, tempPassword, and optionally ftp
   const creds = data.credentials || data;
-  document.getElementById('credEmail').textContent = creds.email || data.supplier?.email || '';
+  const supplier = data.supplier || {};
+  
+  // Set company name
+  document.getElementById('credCompanyName').textContent = supplier.companyName || 'New Supplier';
+  
+  // Set login credentials
+  document.getElementById('credEmail').textContent = creds.email || supplier.email || '';
   document.getElementById('credPassword').textContent = creds.tempPassword || '';
   
+  // Set FTP credentials if enabled
   if (creds.ftp) {
     document.getElementById('ftpCredentials').style.display = 'block';
     document.getElementById('credFtpUser').textContent = creds.ftp.username;
@@ -709,10 +894,23 @@ function showCredentialsModal(data) {
   document.getElementById('credentialsModal').classList.add('active');
 }
 
+// Helper function for copying static text
+function copyText(text, btn) {
+  navigator.clipboard.writeText(text).then(() => {
+    btn.classList.add('copied');
+    btn.innerHTML = '<i class="fas fa-check"></i>';
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      btn.innerHTML = '<i class="fas fa-copy"></i>';
+    }, 2000);
+  });
+}
+
 // Copy button functionality
-document.querySelectorAll('.copy-btn').forEach(btn => {
+document.querySelectorAll('.copy-btn[data-copy]').forEach(btn => {
   btn.addEventListener('click', function() {
     const targetId = this.dataset.copy;
+    if (!targetId) return;
     const text = document.getElementById(targetId).textContent;
     navigator.clipboard.writeText(text).then(() => {
       this.classList.add('copied');
@@ -726,23 +924,43 @@ document.querySelectorAll('.copy-btn').forEach(btn => {
 });
 
 function copyAllCredentials() {
+  const companyName = document.getElementById('credCompanyName').textContent;
   const email = document.getElementById('credEmail').textContent;
   const password = document.getElementById('credPassword').textContent;
-  let credentials = `Login Email: ${email}\nTemporary Password: ${password}`;
+  
+  let credentials = `=== ${companyName} - Supplier Credentials ===\n\n`;
+  credentials += `📧 PORTAL LOGIN\n`;
+  credentials += `Login URL: https://partsform.com/supplier/login\n`;
+  credentials += `Email: ${email}\n`;
+  credentials += `Temporary Password: ${password}\n`;
   
   const ftpSection = document.getElementById('ftpCredentials');
   if (ftpSection.style.display !== 'none') {
     const ftpUser = document.getElementById('credFtpUser').textContent;
     const ftpPass = document.getElementById('credFtpPass').textContent;
-    credentials += `\n\nFTP Username: ${ftpUser}\nFTP Password: ${ftpPass}`;
+    credentials += `\n📁 FTP ACCESS\n`;
+    credentials += `Server: ftp.partsform.com\n`;
+    credentials += `Port: 21\n`;
+    credentials += `Protocol: FTP (Plain)\n`;
+    credentials += `Username: ${ftpUser}\n`;
+    credentials += `Password: ${ftpPass}\n`;
   }
+  
+  credentials += `\n⚠️ Note: Password must be changed on first login.`;
   
   navigator.clipboard.writeText(credentials).then(() => {
     const btn = event.target.closest('.btn');
+    const originalText = btn.innerHTML;
     btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+    btn.style.background = '#10b981';
+    btn.style.color = 'white';
+    btn.style.borderColor = '#10b981';
     setTimeout(() => {
-      btn.innerHTML = '<i class="fas fa-clipboard"></i> Copy All';
-    }, 2000);
+      btn.innerHTML = '<i class="fas fa-clipboard-list"></i> Copy All';
+      btn.style.background = '';
+      btn.style.color = '';
+      btn.style.borderColor = '';
+    }, 2500);
   });
 }
 </script>
