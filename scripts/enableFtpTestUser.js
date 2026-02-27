@@ -10,53 +10,69 @@ async function createAndEnableFTP() {
   // Check if test supplier exists
   let supplier = await Supplier.findOne({ email: "testftp@partsform.com" }).select("+password");
   
+  const webPassword = "Test123456";
+  const ftpPassword = "TestFTP123";
+  const hashedWebPassword = await bcrypt.hash(webPassword, 12);
+  const hashedFtpPassword = crypto.createHash("sha256").update(ftpPassword).digest("hex");
+  
   if (!supplier) {
     // Create a test supplier with FTP access in correct format
-    const passwordHash = await bcrypt.hash("Test123456", 10);
-    supplier = await Supplier.create({
+    // Use updateOne to avoid pre-save hook double-hashing
+    supplier = new Supplier({
       companyName: "Test FTP Supplier",
       companyCode: "TESTFTP",
       contactName: "Test Contact",
       email: "testftp@partsform.com",
-      password: passwordHash,
       phone: "+1234567890",
       isApproved: true,
       isActive: true,
-      ftpAccess: {
-        enabled: true,
-        username: "testftp",
-        password: "TestFTP123", // Will be hashed by pre-save hook
-        createdAt: new Date()
-      }
     });
+    await supplier.save();
+    
+    // Update with direct hashed values to avoid double-hashing
+    await Supplier.updateOne(
+      { _id: supplier._id },
+      {
+        password: hashedWebPassword,
+        ftpAccess: {
+          enabled: true,
+          username: "testftp",
+          password: hashedFtpPassword,
+          createdAt: new Date()
+        }
+      }
+    );
     console.log("Created new test supplier");
   } else {
-    // Update existing supplier with proper ftpAccess structure
-    supplier.isActive = true;
-    supplier.isApproved = true;
-    supplier.ftpAccess = {
-      enabled: true,
-      username: "testftp",
-      password: crypto.createHash("sha256").update("TestFTP123").digest("hex"),
-      createdAt: new Date()
-    };
-    // Update password for web login if needed
-    if (!supplier.password) {
-      supplier.password = await bcrypt.hash("Test123456", 10);
-    }
-    await supplier.save();
-    console.log("Updated existing supplier FTP access");
+    // Update existing supplier with proper credentials using updateOne
+    await Supplier.updateOne(
+      { _id: supplier._id },
+      { 
+        isActive: true,
+        isApproved: true,
+        password: hashedWebPassword,
+        ftpAccess: {
+          enabled: true,
+          username: "testftp",
+          password: hashedFtpPassword,
+          createdAt: new Date()
+        }
+      }
+    );
+    console.log("Updated existing supplier credentials");
   }
   
-  console.log("Supplier Details:");
-  console.log("  Email:", supplier.email);
-  console.log("  Web Password: Test123456");
   console.log("");
-  console.log("FTP enabled for:", supplier.companyName);
-  console.log("  FTP Server: ftp.partsform.com");
-  console.log("  FTP Port: 21");
-  console.log("  FTP Username: testftp");
-  console.log("  FTP Password: TestFTP123");
+  console.log("=== Test Supplier Credentials ===");
+  console.log("Web Login (https://partsform.com/supplier/login):");
+  console.log("  Email:", "testftp@partsform.com");
+  console.log("  Password:", webPassword);
+  console.log("");
+  console.log("FTP Access (ftp.partsform.com):");
+  console.log("  Host: ftp.partsform.com");
+  console.log("  Port: 21");
+  console.log("  Username: testftp");
+  console.log("  Password:", ftpPassword);
   
   await mongoose.disconnect();
 }
