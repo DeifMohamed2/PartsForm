@@ -164,7 +164,7 @@ partSchema.index({
 });
 
 // Pre-save middleware to generate search text
-partSchema.pre('save', function (next) {
+partSchema.pre('save', function () {
   // Create searchable text field
   this.searchText = [
     this.partNumber,
@@ -185,7 +185,6 @@ partSchema.pre('save', function (next) {
   }
 
   this.lastUpdated = new Date();
-  next();
 });
 
 // Post-save middleware for automatic Elasticsearch indexing

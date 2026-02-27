@@ -118,12 +118,8 @@ const createTable = async (req, res) => {
       table,
     });
   } catch (error) {
-    // Handle both Error objects and string errors
     const errorMessage = error?.message || (typeof error === 'string' ? error : String(error));
-    const errorStack = error?.stack || (new Error(errorMessage)).stack;
     logger.error('Create table error:', errorMessage);
-    logger.error('Create table error full:', error);
-    logger.error('Create table error stack:', errorStack);
     res.status(errorMessage?.includes?.('limit') ? 403 : 500).json({
       success: false,
       message: errorMessage || 'Unknown error creating table',

@@ -90,7 +90,7 @@ dataRecordSchema.index({ table: 1, updatedAt: -1 });
 dataRecordSchema.index({ 'data.$**': 'text' });
 
 // Pre-save: Update version and create history entry
-dataRecordSchema.pre('save', function (next) {
+dataRecordSchema.pre('save', function () {
   if (this.isNew) {
     this.versionHistory = [{
       version: 1,
@@ -130,8 +130,6 @@ dataRecordSchema.pre('save', function (next) {
       });
     }
   }
-  
-  next();
 });
 
 // Virtual for display-friendly version info
