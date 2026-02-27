@@ -181,6 +181,9 @@ class ElasticsearchService {
                 category: { type: 'keyword' },
                 integration: { type: 'keyword' },
                 integrationName: { type: 'keyword' },
+                sourceType: { type: 'keyword' },
+                sourceSupplierId: { type: 'keyword' },
+                sourceSupplierName: { type: 'keyword' },
                 fileName: { type: 'keyword' },
                 importedAt: { type: 'date' },
                 createdAt: { type: 'date' },
@@ -1310,13 +1313,14 @@ class ElasticsearchService {
 
     try {
       const startTime = Date.now();
+      // Delete by sourceSupplierId (for supplier uploaded parts)
       const response = await this.client.deleteByQuery({
         index: this.indexName,
         body: {
-          query: { term: { supplierId: supplierId.toString() } },
+          query: { term: { sourceSupplierId: supplierId.toString() } },
         },
         conflicts: 'proceed',
-        refresh: false,
+        refresh: true, // Refresh immediately so deletions are visible
         wait_for_completion: true,
         slices: 'auto',
         scroll_size: 10000,
@@ -1329,6 +1333,64 @@ class ElasticsearchService {
     } catch (error) {
       console.error('Error deleting by supplier:', error.message);
       return { deleted: 0 };
+    }
+  }
+
+  /**
+   * Delete all documents from a specific supplier's file
+   */
+  async deleteBySupplierFile(supplierId, fileName) {
+    if (!this.isAvailable || !supplierId || !fileName) return { deleted: 0 };
+
+    try {
+      const startTime = Date.now();
+      const response = await this.client.deleteByQuery({
+        index: this.indexName,
+        body: {
+          query: {
+            bool: {
+              must: [
+                { term: { sourceSupplierId: supplierId.toString() } },
+                { term: { fileName: fileName } }
+              ]
+            }
+          },
+        },
+        conflicts: 'proceed',
+        refresh: true,
+        wait_for_completion: true,
+        slices: 'auto',
+      });
+
+      const duration = ((Date.now() - startTime) / 1000).toFixed(1);
+      console.log(`🗑️  ES: Deleted ${response.deleted?.toLocaleString() || 0} docs for file "${fileName}" in ${duration}s`);
+      this.invalidateDocCountCache();
+      return { deleted: response.deleted || 0 };
+    } catch (error) {
+      console.error('Error deleting by supplier file:', error.message);
+      return { deleted: 0 };
+    }
+  }
+
+  /**
+   * Delete a single document by ID
+   */
+  async deleteDocument(docId) {
+    if (!this.isAvailable || !docId) return false;
+
+    try {
+      await this.client.delete({
+        index: this.indexName,
+        id: docId.toString(),
+        refresh: true
+      });
+      return true;
+    } catch (error) {
+      // Ignore 404 errors (doc already deleted)
+      if (error.meta?.statusCode !== 404) {
+        console.error('Error deleting document:', error.message);
+      }
+      return false;
     }
   }
 

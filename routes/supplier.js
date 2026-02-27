@@ -72,6 +72,7 @@ router.delete('/files/:fileName', requireSupplierAuth, requireSupplierPermission
 router.get('/brands', requireSupplierAuth, supplierPartsController.getBrands);
 router.get('/import-summary', requireSupplierAuth, supplierPartsController.getImportSummary);
 router.delete('/parts/criteria', requireSupplierAuth, requireSupplierPermission('delete_data'), supplierPartsController.deletePartsByCriteria);
+router.post('/parts/reindex', requireSupplierAuth, requireSupplierPermission('write_data'), supplierPartsController.reindexParts);
 
 // ==================== TEAM MANAGEMENT ROUTES ====================
 router.get('/team', requireSupplierAuth, requireSupplierPermission('manage_users'), supplierAuthController.getTeamMembers);

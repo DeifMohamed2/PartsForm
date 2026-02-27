@@ -222,11 +222,20 @@ const deleteAllParts = async (req, res) => {
   try {
     const Part = require('../models/Part');
     const AuditLog = require('../models/AuditLog');
+    const elasticsearchService = require('../services/elasticsearchService');
     
-    // Delete all parts for this supplier
+    // Delete all parts for this supplier from MongoDB
     const result = await Part.deleteMany({ 
       'source.supplierId': req.supplier._id 
     });
+    
+    // Delete all parts for this supplier from Elasticsearch
+    try {
+      const esResult = await elasticsearchService.deleteBySupplier(req.supplier._id);
+      logger.info(`Deleted ${esResult.deleted} parts from Elasticsearch for supplier ${req.supplier._id}`);
+    } catch (esErr) {
+      logger.error('ES delete error during delete all:', esErr.message);
+    }
     
     // Log the action
     await AuditLog.log({
@@ -275,15 +284,18 @@ const importParts = async (req, res) => {
     
     const deleteOption = req.body.deleteOption || 'none';
     let deletedCount = 0;
+    const elasticsearchService = require('../services/elasticsearchService');
     
     // Handle data deletion based on option
     if (deleteOption === 'all') {
-      // Delete all supplier parts
+      // Delete all supplier parts from MongoDB
       const Part = require('../models/Part');
       const result = await Part.deleteMany({ 
         'source.supplierId': req.supplier._id 
       });
       deletedCount = result.deletedCount;
+      // Also delete from Elasticsearch
+      await elasticsearchService.deleteBySupplier(req.supplier._id);
       logger.info(`Deleted all ${deletedCount} parts for supplier ${req.supplier._id}`);
     } else if (deleteOption === 'brand') {
       // Delete parts by brand
@@ -295,6 +307,7 @@ const importParts = async (req, res) => {
           brand: { $in: brands }
         });
         deletedCount = result.deletedCount;
+        // TODO: Delete from ES by brand (would need to implement)
         logger.info(`Deleted ${deletedCount} parts for brands: ${brands.join(', ')}`);
       }
     } else if (deleteOption === 'specificFile') {
@@ -307,6 +320,8 @@ const importParts = async (req, res) => {
           fileName: deleteFileName
         });
         deletedCount = result.deletedCount;
+        // Also delete from Elasticsearch
+        await elasticsearchService.deleteBySupplierFile(req.supplier._id, deleteFileName);
         logger.info(`Deleted ${deletedCount} parts from file: ${deleteFileName}`);
       }
     } else if (deleteOption === 'file') {
@@ -521,6 +536,38 @@ const deletePartsByCriteria = async (req, res) => {
   }
 };
 
+/**
+ * Re-sync Elasticsearch index with MongoDB
+ * POST /api/supplier/parts/reindex
+ * This clears ES data for the supplier and re-indexes from MongoDB
+ */
+const reindexParts = async (req, res) => {
+  try {
+    const elasticsearchService = require('../services/elasticsearchService');
+    
+    // First, delete all ES data for this supplier
+    const deleteResult = await elasticsearchService.deleteBySupplier(req.supplier._id);
+    logger.info(`Cleared ${deleteResult.deleted} ES documents for supplier ${req.supplier._id}`);
+    
+    // Then re-index from MongoDB
+    const indexResult = await supplierPartsService.indexSupplierParts(req.supplier._id);
+    logger.info(`Re-indexed ${indexResult.indexed} parts to ES for supplier ${req.supplier._id}`);
+    
+    res.json({
+      success: true,
+      message: `Re-indexed ${indexResult.indexed} parts`,
+      deleted: deleteResult.deleted,
+      indexed: indexResult.indexed
+    });
+  } catch (error) {
+    logger.error('Reindex error:', error.message);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to reindex parts' 
+    });
+  }
+};
+
 module.exports = {
   // Dashboard
   getDashboard,
@@ -548,5 +595,6 @@ module.exports = {
   // Data Management
   getBrands,
   getImportSummary,
-  deletePartsByCriteria
+  deletePartsByCriteria,
+  reindexParts
 };

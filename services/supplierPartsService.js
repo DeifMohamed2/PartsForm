@@ -273,6 +273,8 @@ class SupplierPartsService {
       // If replacing, delete existing parts from this file
       if (replaceExisting) {
         await Part.deleteSupplierParts(supplier._id, { fileName: filename });
+        // Also delete from Elasticsearch
+        await elasticsearchService.deleteBySupplierFile(supplier._id, filename);
       }
 
       // Map and validate rows
@@ -521,9 +523,13 @@ class SupplierPartsService {
 
     // Remove from Elasticsearch
     try {
-      if (partIds && partIds.length) {
+      if (fileName) {
+        // Delete all parts from this file in ES
+        await elasticsearchService.deleteBySupplierFile(supplier._id, fileName);
+      } else if (partIds && partIds.length) {
+        // Delete individual parts from ES
         for (const id of partIds) {
-          await elasticsearchService.deletePart(id);
+          await elasticsearchService.deleteDocument(id);
         }
       }
     } catch (err) {
