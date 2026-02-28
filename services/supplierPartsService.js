@@ -282,8 +282,8 @@ class SupplierPartsService {
         
         // Delete from MongoDB
         await Part.deleteSupplierParts(supplier._id, { fileName: filename });
-        // Also delete from Elasticsearch (pass IDs for legacy support)
-        await elasticsearchService.deleteBySupplierFile(supplier._id, filename, docIdsToDelete);
+        // Also delete from Elasticsearch (pass IDs and supplier name for legacy cleanup)
+        await elasticsearchService.deleteBySupplierFile(supplier._id, filename, docIdsToDelete, supplier.companyName || supplier.name);
       }
 
       // Map and validate rows
@@ -546,11 +546,11 @@ class SupplierPartsService {
     // Delete from MongoDB
     const deletedCount = await Part.deleteSupplierParts(supplier._id, { partIds, fileName });
 
-    // Remove from Elasticsearch (pass doc IDs for legacy support)
+    // Remove from Elasticsearch (pass doc IDs and supplier name for legacy support)
     try {
       if (fileName) {
         // Delete all parts from this file in ES
-        await elasticsearchService.deleteBySupplierFile(supplier._id, fileName, docIdsToDelete);
+        await elasticsearchService.deleteBySupplierFile(supplier._id, fileName, docIdsToDelete, supplier.companyName || supplier.name);
       } else if (partIds && partIds.length) {
         // Delete individual parts from ES
         for (const id of partIds) {

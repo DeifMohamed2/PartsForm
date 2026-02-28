@@ -1313,7 +1313,7 @@ class ElasticsearchService {
    * Delete all documents from a specific supplier
    * Handles both new format (sourceSupplierId) and legacy format (delete by document IDs)
    */
-  async deleteBySupplier(supplierId, supplierDocIds = null) {
+  async deleteBySupplier(supplierId, supplierDocIds = null, supplierName = null) {
     if (!this.isAvailable || !supplierId) return { deleted: 0 };
 
     try {
@@ -1352,6 +1352,33 @@ class ElasticsearchService {
           totalDeleted += response2.deleted || 0;
         }
       }
+      
+      // Third try: Clean up any legacy orphans by supplier name (no sourceSupplierId)
+      if (supplierName) {
+        const response3 = await this.client.deleteByQuery({
+          index: this.indexName,
+          body: {
+            query: {
+              bool: {
+                must: [
+                  { term: { supplier: supplierName } }
+                ],
+                must_not: [
+                  { exists: { field: 'sourceSupplierId' } }
+                ]
+              }
+            },
+          },
+          conflicts: 'proceed',
+          refresh: true,
+          wait_for_completion: true,
+          slices: 'auto',
+        });
+        if (response3.deleted > 0) {
+          console.log(`🗑️  ES: Cleaned up ${response3.deleted} legacy orphan docs for supplier "${supplierName}"`);
+        }
+        totalDeleted += response3.deleted || 0;
+      }
 
       const duration = ((Date.now() - startTime) / 1000).toFixed(1);
       console.log(`🗑️  ES: Deleted ${totalDeleted.toLocaleString()} supplier docs in ${duration}s`);
@@ -1367,7 +1394,7 @@ class ElasticsearchService {
    * Delete all documents from a specific supplier's file
    * Handles both new format (sourceSupplierId+fileName) and legacy format (fileName only)
    */
-  async deleteBySupplierFile(supplierId, fileName, supplierDocIds = null) {
+  async deleteBySupplierFile(supplierId, fileName, supplierDocIds = null, supplierName = null) {
     if (!this.isAvailable || !fileName) return { deleted: 0 };
 
     try {
@@ -1412,6 +1439,35 @@ class ElasticsearchService {
           });
           totalDeleted += response2.deleted || 0;
         }
+      }
+      
+      // Third try: Delete any legacy orphans by fileName + supplier name (no sourceSupplierId)
+      // This catches any legacy docs that weren't covered by the above queries
+      if (supplierName) {
+        const response3 = await this.client.deleteByQuery({
+          index: this.indexName,
+          body: {
+            query: {
+              bool: {
+                must: [
+                  { term: { fileName: fileName } },
+                  { term: { supplier: supplierName } }
+                ],
+                must_not: [
+                  { exists: { field: 'sourceSupplierId' } }
+                ]
+              }
+            },
+          },
+          conflicts: 'proceed',
+          refresh: true,
+          wait_for_completion: true,
+          slices: 'auto',
+        });
+        if (response3.deleted > 0) {
+          console.log(`🗑️  ES: Cleaned up ${response3.deleted} legacy orphan docs`);
+        }
+        totalDeleted += response3.deleted || 0;
       }
 
       const duration = ((Date.now() - startTime) / 1000).toFixed(1);

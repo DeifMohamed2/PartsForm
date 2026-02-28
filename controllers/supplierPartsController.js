@@ -238,9 +238,9 @@ const deleteAllParts = async (req, res) => {
       'source.supplierId': req.supplier._id 
     });
     
-    // Delete all parts for this supplier from Elasticsearch (pass IDs for legacy support)
+    // Delete all parts for this supplier from Elasticsearch (pass IDs and name for legacy support)
     try {
-      const esResult = await elasticsearchService.deleteBySupplier(req.supplier._id, docIdsToDelete);
+      const esResult = await elasticsearchService.deleteBySupplier(req.supplier._id, docIdsToDelete, req.supplier.companyName || req.supplier.name);
       logger.info(`Deleted ${esResult.deleted} parts from Elasticsearch for supplier ${req.supplier._id}`);
     } catch (esErr) {
       logger.error('ES delete error during delete all:', esErr.message);
@@ -310,8 +310,8 @@ const importParts = async (req, res) => {
       });
       deletedCount = result.deletedCount;
       
-      // Also delete from Elasticsearch (pass IDs for legacy support)
-      await elasticsearchService.deleteBySupplier(req.supplier._id, docIdsToDelete);
+      // Also delete from Elasticsearch (pass IDs and name for legacy support)
+      await elasticsearchService.deleteBySupplier(req.supplier._id, docIdsToDelete, req.supplier.companyName || req.supplier.name);
       logger.info(`Deleted all ${deletedCount} parts for supplier ${req.supplier._id}`);
     } else if (deleteOption === 'brand') {
       // Delete parts by brand
@@ -353,8 +353,8 @@ const importParts = async (req, res) => {
         });
         deletedCount = result.deletedCount;
         
-        // Also delete from Elasticsearch (pass IDs for legacy support)
-        await elasticsearchService.deleteBySupplierFile(req.supplier._id, deleteFileName, docIdsToDelete);
+        // Also delete from Elasticsearch (pass IDs and supplier name for legacy support)
+        await elasticsearchService.deleteBySupplierFile(req.supplier._id, deleteFileName, docIdsToDelete, req.supplier.companyName || req.supplier.name);
         logger.info(`Deleted ${deletedCount} parts from file: ${deleteFileName}`);
       }
     } else if (deleteOption === 'file') {
@@ -588,8 +588,8 @@ const reindexParts = async (req, res) => {
     
     logger.info(`Found ${docIds.length} parts in MongoDB to reindex for supplier ${req.supplier._id}`);
     
-    // Delete all ES data for this supplier (pass IDs for legacy support)
-    const deleteResult = await elasticsearchService.deleteBySupplier(req.supplier._id, docIds);
+    // Delete all ES data for this supplier (pass IDs and name for legacy support)
+    const deleteResult = await elasticsearchService.deleteBySupplier(req.supplier._id, docIds, req.supplier.companyName || req.supplier.name);
     logger.info(`Cleared ${deleteResult.deleted} ES documents for supplier ${req.supplier._id}`);
     
     // Then re-index from MongoDB
