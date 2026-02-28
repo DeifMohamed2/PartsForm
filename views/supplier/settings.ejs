@@ -121,23 +121,40 @@
   </div>
 </div>
 
-<!-- Danger Zone -->
-<div class="card" style="margin-top: 24px; border-color: var(--danger);">
+<!-- Need Help Section -->
+<div class="card" style="margin-top: 24px;">
   <div class="card-header">
-    <h3 class="card-title" style="color: var(--danger);">Danger Zone</h3>
+    <h3 class="card-title">Need Help?</h3>
   </div>
   
-  <div style="display: flex; justify-content: space-between; align-items: center;">
-    <div>
-      <div style="font-weight: 600; margin-bottom: 4px;">Delete Account</div>
-      <div style="font-size: 13px; color: var(--text-secondary);">
-        Permanently delete your account and all associated data. This action cannot be undone.
+  <div style="display: flex; gap: 24px; flex-wrap: wrap;">
+    <div style="flex: 1; min-width: 200px;">
+      <div style="font-weight: 600; margin-bottom: 8px;">
+        <i data-lucide="mail" style="width: 18px; height: 18px; vertical-align: -4px; margin-right: 8px;"></i>
+        Contact Support
       </div>
+      <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px;">
+        Have questions or need assistance? Our support team is here to help.
+      </p>
+      <a href="mailto:support@partsform.com" class="btn btn-secondary">
+        <i data-lucide="send" style="width: 16px; height: 16px;"></i>
+        Email Support
+      </a>
     </div>
-    <button class="btn btn-danger" onclick="confirmDeleteAccount()">
-      <i data-lucide="trash-2" style="width: 18px; height: 18px;"></i>
-      Delete Account
-    </button>
+    
+    <div style="flex: 1; min-width: 200px;">
+      <div style="font-weight: 600; margin-bottom: 8px;">
+        <i data-lucide="book-open" style="width: 18px; height: 18px; vertical-align: -4px; margin-right: 8px;"></i>
+        Documentation
+      </div>
+      <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px;">
+        Learn how to get the most out of your supplier portal.
+      </p>
+      <button class="btn btn-secondary" disabled>
+        <i data-lucide="external-link" style="width: 16px; height: 16px;"></i>
+        View Docs (Coming Soon)
+      </button>
+    </div>
   </div>
 </div>
 
@@ -230,25 +247,6 @@
         showToast('Failed to change password: ' + err.message, 'error');
       }
     });
-  }
-  
-  function confirmDeleteAccount() {
-    const confirmed = prompt('Type "DELETE" to confirm account deletion:');
-    
-    if (confirmed === 'DELETE') {
-      deleteAccount();
-    } else if (confirmed !== null) {
-      showToast('Account deletion cancelled - text did not match', 'warning');
-    }
-  }
-  
-  async function deleteAccount() {
-    try {
-      // This would call the delete account endpoint
-      showToast('Account deletion is restricted. Please contact support.', 'warning');
-    } catch (err) {
-      showToast('Failed to delete account: ' + err.message, 'error');
-    }
   }
 </script>
 

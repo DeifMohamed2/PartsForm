@@ -541,7 +541,13 @@ partSchema.statics.getSupplierParts = async function (supplierId, options = {}) 
   if (filters.minPrice) query.price = { ...query.price, $gte: parseFloat(filters.minPrice) };
   if (filters.maxPrice) query.price = { ...query.price, $lte: parseFloat(filters.maxPrice) };
   if (filters.inStock) query.quantity = { $gt: 0 };
-  if (filters.fileName) query.fileName = filters.fileName;
+  
+  // Support both single fileName and multiple fileNames
+  if (filters.fileNames && Array.isArray(filters.fileNames) && filters.fileNames.length > 0) {
+    query.fileName = { $in: filters.fileNames };
+  } else if (filters.fileName) {
+    query.fileName = filters.fileName;
+  }
 
   const sort = { [sortBy]: sortOrder === 'asc' ? 1 : -1 };
 

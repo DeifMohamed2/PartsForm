@@ -43,6 +43,12 @@ const getDashboard = async (req, res) => {
  */
 const getParts = async (req, res) => {
   try {
+    // Handle multiple fileName params (multi-select filter)
+    let fileNames = req.query.fileName;
+    if (fileNames && !Array.isArray(fileNames)) {
+      fileNames = [fileNames];
+    }
+    
     const options = {
       page: parseInt(req.query.page) || 1,
       limit: Math.min(parseInt(req.query.limit) || 250, 500),
@@ -54,7 +60,7 @@ const getParts = async (req, res) => {
         minPrice: req.query.minPrice,
         maxPrice: req.query.maxPrice,
         inStock: req.query.inStock === 'true',
-        fileName: req.query.fileName
+        fileNames: fileNames // Now supports array
       }
     };
     
@@ -394,14 +400,20 @@ const importParts = async (req, res) => {
  */
 const exportParts = async (req, res) => {
   try {
+    // Handle multiple fileName params (multi-select filter)
+    let fileNames = req.query.fileName;
+    if (fileNames && !Array.isArray(fileNames)) {
+      fileNames = [fileNames];
+    }
+    
     const options = {
-      fileName: req.query.fileName
+      fileNames: fileNames
     };
     
     const { buffer, count } = await supplierPartsService.exportToExcel(req.supplier._id, options);
     
-    const exportFileName = options.fileName 
-      ? `parts_${options.fileName.replace(/\.[^/.]+$/, '')}_export.xlsx`
+    const exportFileName = fileNames && fileNames.length === 1
+      ? `parts_${fileNames[0].replace(/\.[^/.]+$/, '')}_export.xlsx`
       : `parts_export_${new Date().toISOString().slice(0, 10)}.xlsx`;
     
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');

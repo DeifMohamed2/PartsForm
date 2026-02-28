@@ -632,13 +632,19 @@ class SupplierPartsService {
    * Export parts to Excel
    */
   async exportToExcel(supplierId, options = {}) {
-    const { fileName } = options;
+    const { fileNames, fileName } = options;
     
     const query = {
       'source.type': 'supplier_upload',
       'source.supplierId': supplierId
     };
-    if (fileName) query.fileName = fileName;
+    
+    // Support both multiple fileNames and single fileName
+    if (fileNames && Array.isArray(fileNames) && fileNames.length > 0) {
+      query.fileName = { $in: fileNames };
+    } else if (fileName) {
+      query.fileName = fileName;
+    }
 
     const parts = await Part.find(query).lean();
 

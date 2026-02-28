@@ -177,100 +177,450 @@
   .empty-state p {
     margin-bottom: 24px;
   }
-  
-  /* Delete confirmation modal */
-  .modal {
-    display: none;
+
+  /* ===== Sweet Alert Style Modal ===== */
+  .swal-overlay {
     position: fixed;
-    inset: 0;
-    z-index: 1000;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    display: flex;
     align-items: center;
     justify-content: center;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.25s ease;
   }
   
-  .modal.active {
-    display: flex;
+  .swal-overlay.show {
+    opacity: 1;
+    visibility: visible;
   }
   
-  .modal-backdrop {
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.5);
-  }
-  
-  .modal-content {
-    position: relative;
-    background: white;
-    border-radius: 16px;
+  .swal-modal {
+    background: #fff;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 420px;
+    margin: 20px;
     padding: 32px;
-    max-width: 400px;
-    width: 90%;
     text-align: center;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    transform: scale(0.8) translateY(20px);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
   
-  .modal-icon {
-    width: 64px;
-    height: 64px;
-    background: rgba(239, 68, 68, 0.1);
+  .swal-overlay.show .swal-modal {
+    transform: scale(1) translateY(0);
+  }
+  
+  .swal-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 24px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 auto 20px;
   }
   
-  .modal-icon svg {
-    width: 32px;
-    height: 32px;
-    color: #ef4444;
+  .swal-icon.warning {
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
+    border: 4px solid #f59e0b;
   }
   
-  .modal h3 {
-    font-size: 1.25rem;
+  .swal-icon.warning svg {
+    width: 40px;
+    height: 40px;
+    color: #d97706;
+  }
+  
+  .swal-icon.danger {
+    background: linear-gradient(135deg, #fee2e2, #fecaca);
+    border: 4px solid #ef4444;
+  }
+  
+  .swal-icon.danger svg {
+    width: 40px;
+    height: 40px;
+    color: #dc2626;
+  }
+  
+  .swal-icon.success {
+    background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+    border: 4px solid #22c55e;
+  }
+  
+  .swal-icon.success svg {
+    width: 40px;
+    height: 40px;
+    color: #16a34a;
+  }
+  
+  .swal-icon.loading {
+    background: #f1f5f9;
+    border: 4px solid transparent;
+    border-top-color: #3b82f6;
+    animation: swal-spin 0.8s linear infinite;
+  }
+  
+  @keyframes swal-spin {
+    to { transform: rotate(360deg); }
+  }
+  
+  .swal-title {
+    font-size: 1.5rem;
     font-weight: 700;
-    margin-bottom: 8px;
+    color: #1e293b;
+    margin-bottom: 12px;
   }
   
-  .modal p {
-    color: var(--text-secondary);
+  .swal-text {
+    font-size: 0.95rem;
+    color: #64748b;
+    line-height: 1.6;
     margin-bottom: 24px;
   }
   
-  .modal-actions {
+  .swal-file-info {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 20px;
+    text-align: left;
+  }
+  
+  .swal-file-name {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #1e293b;
+    margin-bottom: 12px;
+    word-break: break-all;
+  }
+  
+  .swal-file-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  
+  .swal-file-stat {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    color: #64748b;
+    background: white;
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+  }
+  
+  .swal-file-stat svg {
+    width: 14px;
+    height: 14px;
+  }
+  
+  .swal-warning-box {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    text-align: left;
+  }
+  
+  .swal-warning-box svg {
+    width: 20px;
+    height: 20px;
+    color: #dc2626;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  
+  .swal-warning-box p {
+    font-size: 0.85rem;
+    color: #991b1b;
+    margin: 0;
+    line-height: 1.5;
+  }
+  
+  .swal-confirm-input {
+    margin-bottom: 24px;
+    text-align: left;
+  }
+  
+  .swal-confirm-input label {
+    display: block;
+    font-size: 0.85rem;
+    color: #64748b;
+    margin-bottom: 8px;
+  }
+  
+  .swal-confirm-input label strong {
+    color: #dc2626;
+    font-family: monospace;
+    letter-spacing: 1px;
+  }
+  
+  .swal-confirm-input input {
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    text-align: center;
+    transition: all 0.2s;
+    box-sizing: border-box;
+  }
+  
+  .swal-confirm-input input:focus {
+    outline: none;
+    border-color: #ef4444;
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
+  }
+  
+  .swal-confirm-input input.valid {
+    border-color: #22c55e;
+    background: #f0fdf4;
+    box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.1);
+  }
+  
+  .swal-buttons {
     display: flex;
     gap: 12px;
     justify-content: center;
   }
+  
+  .swal-btn {
+    padding: 14px 28px;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .swal-btn svg {
+    width: 18px;
+    height: 18px;
+  }
+  
+  .swal-btn-cancel {
+    background: #f1f5f9;
+    color: #475569;
+  }
+  
+  .swal-btn-cancel:hover {
+    background: #e2e8f0;
+  }
+  
+  .swal-btn-danger {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+  }
+  
+  .swal-btn-danger:hover:not(:disabled) {
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+  }
+  
+  .swal-btn-danger:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+  
+  /* Progress Steps */
+  .swal-progress-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    text-align: left;
+    margin-top: 24px;
+  }
+  
+  .swal-step {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    background: #f8fafc;
+    border-radius: 10px;
+    color: #94a3b8;
+    transition: all 0.3s;
+  }
+  
+  .swal-step svg {
+    width: 18px;
+    height: 18px;
+  }
+  
+  .swal-step-text {
+    flex: 1;
+    font-size: 0.9rem;
+  }
+  
+  .swal-step-check {
+    display: none;
+    color: #22c55e;
+  }
+  
+  .swal-step.active {
+    background: #eff6ff;
+    color: #3b82f6;
+  }
+  
+  .swal-step.done {
+    background: #f0fdf4;
+    color: #16a34a;
+  }
+  
+  .swal-step.done .swal-step-check {
+    display: block;
+  }
 </style>
 
-<div class="modal" id="deleteModal">
-  <div class="modal-backdrop" onclick="closeModal()"></div>
-  <div class="modal-content">
-    <div class="modal-icon">
+<!-- Delete Confirmation Modal -->
+<div class="swal-overlay" id="deleteOverlay">
+  <div class="swal-modal">
+    <div class="swal-icon danger">
       <i data-lucide="trash-2"></i>
     </div>
-    <h3>Delete File?</h3>
-    <p>All <span id="deleteCount">0</span> parts from "<span id="deleteFileName"></span>" will be permanently deleted.</p>
-    <div class="modal-actions">
-      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-      <button class="btn btn-danger" onclick="confirmDelete()">Delete Parts</button>
+    <h2 class="swal-title">Delete File?</h2>
+    
+    <div class="swal-file-info">
+      <div class="swal-file-name" id="deleteFileName">filename.csv</div>
+      <div class="swal-file-stats">
+        <div class="swal-file-stat">
+          <i data-lucide="package"></i>
+          <span><strong id="deleteCount">0</strong> parts</span>
+        </div>
+        <div class="swal-file-stat">
+          <i data-lucide="database"></i>
+          <span>Database</span>
+        </div>
+        <div class="swal-file-stat">
+          <i data-lucide="search"></i>
+          <span>Search Index</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="swal-warning-box">
+      <i data-lucide="alert-triangle"></i>
+      <p>This action <strong>cannot be undone</strong>. All parts from this file will be permanently deleted from the database and search index.</p>
+    </div>
+    
+    <div class="swal-confirm-input">
+      <label>Type <strong>DELETE</strong> to confirm:</label>
+      <input type="text" id="deleteConfirmInput" placeholder="DELETE" autocomplete="off" spellcheck="false">
+    </div>
+    
+    <div class="swal-buttons">
+      <button class="swal-btn swal-btn-cancel" onclick="closeDeleteModal()">
+        <i data-lucide="x"></i>
+        Cancel
+      </button>
+      <button class="swal-btn swal-btn-danger" id="confirmDeleteBtn" onclick="confirmDelete()" disabled>
+        <i data-lucide="trash-2"></i>
+        Delete File
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Progress Modal -->
+<div class="swal-overlay" id="progressOverlay">
+  <div class="swal-modal">
+    <div class="swal-icon loading" id="progressIcon"></div>
+    <h2 class="swal-title" id="progressTitle">Deleting...</h2>
+    <p class="swal-text" id="progressText">Please wait while we remove all data</p>
+    
+    <div class="swal-progress-steps">
+      <div class="swal-step" id="step1">
+        <i data-lucide="database"></i>
+        <span class="swal-step-text">Removing from database</span>
+        <i data-lucide="check" class="swal-step-check"></i>
+      </div>
+      <div class="swal-step" id="step2">
+        <i data-lucide="search"></i>
+        <span class="swal-step-text">Cleaning search index</span>
+        <i data-lucide="check" class="swal-step-check"></i>
+      </div>
+      <div class="swal-step" id="step3">
+        <i data-lucide="check-circle"></i>
+        <span class="swal-step-text">Finalizing cleanup</span>
+        <i data-lucide="check" class="swal-step-check"></i>
+      </div>
     </div>
   </div>
 </div>
 
 <script>
   let pendingDeleteFile = null;
+  let pendingDeleteCount = 0;
   
   document.addEventListener('DOMContentLoaded', async () => {
     lucide.createIcons();
     await loadFiles();
+    setupDeleteConfirmation();
   });
+  
+  function setupDeleteConfirmation() {
+    const input = document.getElementById('deleteConfirmInput');
+    const btn = document.getElementById('confirmDeleteBtn');
+    
+    input.addEventListener('input', (e) => {
+      const isValid = e.target.value.toUpperCase() === 'DELETE';
+      btn.disabled = !isValid;
+      e.target.classList.toggle('valid', isValid);
+    });
+    
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && e.target.value.toUpperCase() === 'DELETE') {
+        confirmDelete();
+      }
+    });
+    
+    // Close on escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeDeleteModal();
+      }
+    });
+    
+    // Close on backdrop click
+    document.getElementById('deleteOverlay').addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) {
+        closeDeleteModal();
+      }
+    });
+  }
   
   async function loadFiles() {
     try {
       const response = await fetch('/api/supplier/files');
       const files = await response.json();
-      
       renderFiles(files);
     } catch (err) {
       console.error('Error loading files:', err);
@@ -342,7 +692,7 @@
                 <button class="file-action-btn" onclick="exportFile('${escapeHtml(file.fileName)}')" title="Export">
                   <i data-lucide="download" style="width: 18px; height: 18px;"></i>
                 </button>
-                <button class="file-action-btn delete" onclick="deleteFile('${escapeHtml(file.fileName)}', ${file.partsCount})" title="Delete">
+                <button class="file-action-btn delete" onclick="openDeleteModal('${escapeHtml(file.fileName)}', ${file.partsCount})" title="Delete">
                   <i data-lucide="trash-2" style="width: 18px; height: 18px;"></i>
                 </button>
               </div>
@@ -363,34 +713,115 @@
     window.location.href = `/api/supplier/parts/export?fileName=${encodeURIComponent(fileName)}`;
   }
   
-  function deleteFile(fileName, count) {
+  function openDeleteModal(fileName, count) {
     pendingDeleteFile = fileName;
+    pendingDeleteCount = count;
+    
+    // Update modal content
     document.getElementById('deleteFileName').textContent = fileName;
     document.getElementById('deleteCount').textContent = count.toLocaleString();
-    document.getElementById('deleteModal').classList.add('active');
+    document.getElementById('deleteConfirmInput').value = '';
+    document.getElementById('deleteConfirmInput').classList.remove('valid');
+    document.getElementById('confirmDeleteBtn').disabled = true;
+    
+    // Show modal
+    document.getElementById('deleteOverlay').classList.add('show');
     lucide.createIcons();
+    
+    // Focus input after animation
+    setTimeout(() => {
+      document.getElementById('deleteConfirmInput').focus();
+    }, 200);
+  }
+  
+  function closeDeleteModal() {
+    document.getElementById('deleteOverlay').classList.remove('show');
+    pendingDeleteFile = null;
+    pendingDeleteCount = 0;
   }
   
   async function confirmDelete() {
     if (!pendingDeleteFile) return;
     
+    const confirmInput = document.getElementById('deleteConfirmInput');
+    if (confirmInput.value.toUpperCase() !== 'DELETE') return;
+    
+    // Close delete modal and show progress
+    document.getElementById('deleteOverlay').classList.remove('show');
+    
+    // Reset progress modal
+    document.getElementById('progressIcon').className = 'swal-icon loading';
+    document.getElementById('progressTitle').textContent = 'Deleting...';
+    document.getElementById('progressText').textContent = 'Please wait while we remove all data';
+    document.querySelectorAll('.swal-step').forEach(s => {
+      s.classList.remove('active', 'done');
+    });
+    
+    // Show progress modal
+    const progressOverlay = document.getElementById('progressOverlay');
+    progressOverlay.classList.add('show');
+    lucide.createIcons();
+    
     try {
+      // Step 1: Database
+      document.getElementById('step1').classList.add('active');
+      await sleep(400);
+      
+      // Make the actual delete call
       const response = await fetch(`/api/supplier/files/${encodeURIComponent(pendingDeleteFile)}`, {
         method: 'DELETE'
       });
       
+      document.getElementById('step1').classList.remove('active');
+      document.getElementById('step1').classList.add('done');
+      lucide.createIcons();
+      
+      // Step 2: Search index
+      document.getElementById('step2').classList.add('active');
+      await sleep(600);
+      document.getElementById('step2').classList.remove('active');
+      document.getElementById('step2').classList.add('done');
+      lucide.createIcons();
+      
+      // Step 3: Finalize
+      document.getElementById('step3').classList.add('active');
+      await sleep(400);
+      document.getElementById('step3').classList.remove('active');
+      document.getElementById('step3').classList.add('done');
+      lucide.createIcons();
+      
       if (!response.ok) throw new Error('Delete failed');
       
-      closeModal();
+      // Show success state
+      document.getElementById('progressIcon').className = 'swal-icon success';
+      document.getElementById('progressIcon').innerHTML = '<i data-lucide="check"></i>';
+      document.getElementById('progressTitle').textContent = 'Deleted Successfully!';
+      document.getElementById('progressText').textContent = 'All data has been removed';
+      lucide.createIcons();
+      
+      // Wait then close and reload
+      await sleep(1000);
+      progressOverlay.classList.remove('show');
       await loadFiles();
+      
     } catch (err) {
-      alert('Error deleting file: ' + err.message);
+      // Show error
+      document.getElementById('progressIcon').className = 'swal-icon danger';
+      document.getElementById('progressIcon').innerHTML = '<i data-lucide="x"></i>';
+      document.getElementById('progressTitle').textContent = 'Delete Failed';
+      document.getElementById('progressText').textContent = err.message;
+      lucide.createIcons();
+      
+      await sleep(2000);
+      progressOverlay.classList.remove('show');
     }
+    
+    pendingDeleteFile = null;
+    pendingDeleteCount = 0;
   }
   
-  function closeModal() {
-    document.getElementById('deleteModal').classList.remove('active');
-    pendingDeleteFile = null;
+  function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
   
   function formatNumber(num) {
