@@ -367,6 +367,139 @@
     font-size: 13px;
   }
 
+  /* ===== File Filter Dropdown (Rebuilt) ===== */
+  .file-filter-wrapper {
+    position: relative;
+  }
+  
+  .file-filter-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    width: 320px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+    z-index: 99999;
+    display: none;
+  }
+  
+  .file-filter-menu.show {
+    display: block;
+  }
+  
+  .ff-search-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    border-bottom: 1px solid #e2e8f0;
+    background: #f8fafc;
+    border-radius: 12px 12px 0 0;
+  }
+  
+  .ff-search-box input {
+    flex: 1;
+    border: none;
+    background: none;
+    font-size: 14px;
+    outline: none;
+    color: #1e293b;
+  }
+  
+  .ff-search-box input::placeholder {
+    color: #94a3b8;
+  }
+  
+  .ff-actions {
+    display: flex;
+    gap: 8px;
+    padding: 10px 12px;
+    background: #f1f5f9;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  
+  .ff-action-btn {
+    flex: 1;
+    padding: 8px 12px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  
+  .ff-action-btn:hover {
+    background: #eff6ff;
+    border-color: #3b82f6;
+    color: #3b82f6;
+  }
+  
+  .ff-list {
+    max-height: 260px;
+    overflow-y: auto;
+    padding: 8px;
+  }
+  
+  .ff-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s;
+    user-select: none;
+  }
+  
+  .ff-item:hover {
+    background: #f1f5f9;
+  }
+  
+  .ff-item.selected {
+    background: #eff6ff;
+  }
+  
+  .ff-item input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #3b82f6;
+    cursor: pointer;
+    flex-shrink: 0;
+    margin: 0;
+  }
+  
+  .ff-item-info {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .ff-item-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: #1e293b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .ff-item-count {
+    font-size: 11px;
+    color: #94a3b8;
+    margin-top: 2px;
+  }
+  
+  .ff-loading, .ff-empty {
+    padding: 24px;
+    text-align: center;
+    color: #94a3b8;
+    font-size: 13px;
+  }
+
   /* Hidden selects for actual functionality */
   .hidden-select {
     position: absolute;
@@ -1296,25 +1429,25 @@
           
           <div class="filter-divider"></div>
           
-          <!-- Multi-Select Files Dropdown -->
-          <div class="filter-dropdown-container" id="fileFilterContainer">
+          <!-- Multi-Select Files Dropdown - Rebuilt -->
+          <div class="file-filter-wrapper" id="fileFilterWrapper">
             <button class="filter-btn" id="fileFilterBtn" type="button">
               <i data-lucide="folder"></i>
               <span class="filter-value" id="fileFilterLabel">All Files</span>
               <span class="filter-count-badge" id="fileFilterCount" style="display: none;">0</span>
               <i data-lucide="chevron-down" class="filter-chevron"></i>
-              <span class="filter-clear-x" id="clearFileFilter"><i data-lucide="x"></i></span>
             </button>
-            <div class="filter-dropdown" id="fileFilterDropdown">
-              <div class="filter-dropdown-header">
-                <input type="text" class="filter-search" id="fileFilterSearch" placeholder="Search files...">
+            <div class="file-filter-menu" id="fileFilterMenu">
+              <div class="ff-search-box">
+                <i data-lucide="search" style="width:16px;height:16px;color:#94a3b8;"></i>
+                <input type="text" id="ffSearch" placeholder="Search files..." autocomplete="off">
               </div>
-              <div class="filter-dropdown-actions">
-                <button type="button" class="filter-action-btn" onclick="selectAllFiles()">Select All</button>
-                <button type="button" class="filter-action-btn" onclick="clearFileSelection()">Clear</button>
+              <div class="ff-actions">
+                <button type="button" class="ff-action-btn" id="ffSelectAll">Select All</button>
+                <button type="button" class="ff-action-btn" id="ffClear">Clear</button>
               </div>
-              <div class="filter-dropdown-list" id="fileFilterList">
-                <!-- Files will be populated here -->
+              <div class="ff-list" id="ffList">
+                <div class="ff-loading">Loading files...</div>
               </div>
             </div>
           </div>
@@ -1576,7 +1709,7 @@
     const fileParam = urlParams.get('file');
     if (fileParam) {
       selectedFiles.add(fileParam);
-      updateFileFilterUI();
+      updateFFUI();
     }
     
     await loadParts();
@@ -1638,48 +1771,8 @@
       loadParts();
     });
     
-    // Multi-select File filter
-    const fileFilterBtn = document.getElementById('fileFilterBtn');
-    const fileDropdown = document.getElementById('fileFilterDropdown');
-    const fileSearch = document.getElementById('fileFilterSearch');
-    
-    // Toggle dropdown on button click
-    fileFilterBtn.addEventListener('click', function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      
-      // Check if clear button was clicked
-      if (e.target.closest('#clearFileFilter')) {
-        clearFileSelection();
-        fileDropdown.classList.remove('open');
-        return;
-      }
-      
-      // Toggle dropdown
-      const isOpen = fileDropdown.classList.contains('open');
-      fileDropdown.classList.toggle('open');
-      
-      if (!isOpen) {
-        setTimeout(() => fileSearch.focus(), 100);
-      }
-    });
-    
-    // Search within dropdown
-    fileSearch.addEventListener('input', function(e) {
-      filterFileList(e.target.value);
-    });
-    
-    // Close dropdown on outside click
-    document.addEventListener('click', function(e) {
-      if (!e.target.closest('#fileFilterContainer')) {
-        fileDropdown.classList.remove('open');
-      }
-    });
-    
-    // Prevent dropdown from closing when clicking inside it
-    fileDropdown.addEventListener('click', function(e) {
-      e.stopPropagation();
-    });
+    // ===== File Filter (Rebuilt) =====
+    setupFileFilter();
 
     document.getElementById('selectAll').addEventListener('change', toggleSelectAll);
     document.getElementById('prevPage').addEventListener('click', () => changePage(-1));
@@ -1764,107 +1857,130 @@
         brandSelect.appendChild(opt);
       });
 
-      // Store files for multi-select
-      allFiles = files;
-      renderFileFilterList(files);
+      // Store files for file filter
+      allFiles = files || [];
+      renderFFList(allFiles);
     } catch (err) {
       console.error('Error loading filters:', err);
     }
   }
   
-  function renderFileFilterList(files) {
-    const list = document.getElementById('fileFilterList');
+  // ===== File Filter Functions (Rebuilt) =====
+  function setupFileFilter() {
+    const btn = document.getElementById('fileFilterBtn');
+    const menu = document.getElementById('fileFilterMenu');
+    const search = document.getElementById('ffSearch');
+    const selectAllBtn = document.getElementById('ffSelectAll');
+    const clearBtn = document.getElementById('ffClear');
+    
+    // Toggle dropdown
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const isOpen = menu.classList.contains('show');
+      menu.classList.toggle('show');
+      if (!isOpen) {
+        search.value = '';
+        search.focus();
+        renderFFList(allFiles);
+      }
+    });
+    
+    // Search files
+    search.addEventListener('input', (e) => {
+      const term = e.target.value.toLowerCase().trim();
+      const filtered = term 
+        ? allFiles.filter(f => f.fileName.toLowerCase().includes(term))
+        : allFiles;
+      renderFFList(filtered);
+    });
+    
+    // Select all
+    selectAllBtn.addEventListener('click', () => {
+      allFiles.forEach(f => selectedFiles.add(f.fileName));
+      renderFFList(allFiles);
+      updateFFUI();
+      currentPage = 1;
+      loadParts();
+    });
+    
+    // Clear selection
+    clearBtn.addEventListener('click', () => {
+      selectedFiles.clear();
+      renderFFList(allFiles);
+      updateFFUI();
+      currentPage = 1;
+      loadParts();
+    });
+    
+    // Close on outside click
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('#fileFilterWrapper')) {
+        menu.classList.remove('show');
+      }
+    });
+    
+    // Handle clicks inside list (event delegation)
+    document.getElementById('ffList').addEventListener('click', (e) => {
+      const item = e.target.closest('.ff-item');
+      if (item) {
+        const fileName = item.dataset.file;
+        if (selectedFiles.has(fileName)) {
+          selectedFiles.delete(fileName);
+        } else {
+          selectedFiles.add(fileName);
+        }
+        // Update this item's checkbox
+        const checkbox = item.querySelector('input[type="checkbox"]');
+        if (checkbox) checkbox.checked = selectedFiles.has(fileName);
+        item.classList.toggle('selected', selectedFiles.has(fileName));
+        updateFFUI();
+        currentPage = 1;
+        loadParts();
+      }
+    });
+  }
+  
+  function renderFFList(files) {
+    const list = document.getElementById('ffList');
     
     if (!files || !files.length) {
-      list.innerHTML = '<div class="filter-dropdown-empty">No files found</div>';
+      list.innerHTML = '<div class="ff-empty">No files found</div>';
       return;
     }
     
     list.innerHTML = files.map(f => `
-      <label class="filter-dropdown-item ${selectedFiles.has(f.fileName) ? 'selected' : ''}" data-filename="${escapeHtml(f.fileName)}">
-        <input type="checkbox" 
-               value="${escapeHtml(f.fileName)}" 
-               ${selectedFiles.has(f.fileName) ? 'checked' : ''}
-               onchange="toggleFileSelection('${escapeHtml(f.fileName)}')">
-        <div class="filter-item-content">
-          <div class="filter-item-name">${escapeHtml(f.fileName)}</div>
-          <div class="filter-item-count">${f.partsCount?.toLocaleString() || 0} parts</div>
+      <div class="ff-item ${selectedFiles.has(f.fileName) ? 'selected' : ''}" data-file="${escapeHtml(f.fileName)}">
+        <input type="checkbox" ${selectedFiles.has(f.fileName) ? 'checked' : ''}>
+        <div class="ff-item-info">
+          <div class="ff-item-name">${escapeHtml(f.fileName)}</div>
+          <div class="ff-item-count">${(f.partsCount || 0).toLocaleString()} parts</div>
         </div>
-      </label>
+      </div>
     `).join('');
   }
   
-  function filterFileList(searchTerm) {
-    const term = searchTerm.toLowerCase().trim();
-    const filtered = term 
-      ? allFiles.filter(f => f.fileName.toLowerCase().includes(term))
-      : allFiles;
-    renderFileFilterList(filtered);
-  }
-  
-  function toggleFileSelection(fileName) {
-    if (selectedFiles.has(fileName)) {
-      selectedFiles.delete(fileName);
-    } else {
-      selectedFiles.add(fileName);
-    }
-    updateFileFilterUI();
-    currentPage = 1;
-    loadParts();
-  }
-  
-  function selectAllFiles() {
-    allFiles.forEach(f => selectedFiles.add(f.fileName));
-    renderFileFilterList(allFiles);
-    updateFileFilterUI();
-    currentPage = 1;
-    loadParts();
-  }
-  
-  function clearFileSelection() {
-    selectedFiles.clear();
-    renderFileFilterList(allFiles);
-    updateFileFilterUI();
-    currentPage = 1;
-    loadParts();
-  }
-  
-  function updateFileFilterUI() {
+  function updateFFUI() {
     const btn = document.getElementById('fileFilterBtn');
     const label = document.getElementById('fileFilterLabel');
     const countBadge = document.getElementById('fileFilterCount');
-    const clearBtn = document.getElementById('clearFileFilter');
     
     if (selectedFiles.size === 0) {
       btn.classList.remove('active');
       label.textContent = 'All Files';
       countBadge.style.display = 'none';
-      clearBtn.style.display = 'none';
     } else if (selectedFiles.size === 1) {
       btn.classList.add('active');
-      label.textContent = [...selectedFiles][0];
+      const fileName = [...selectedFiles][0];
+      // Truncate long names
+      label.textContent = fileName.length > 20 ? fileName.substring(0, 17) + '...' : fileName;
       countBadge.style.display = 'none';
-      clearBtn.style.display = 'flex';
     } else {
       btn.classList.add('active');
       label.textContent = 'Files';
       countBadge.textContent = selectedFiles.size;
       countBadge.style.display = 'inline';
-      clearBtn.style.display = 'flex';
     }
-    
-    // Update item styles in dropdown
-    document.querySelectorAll('.filter-dropdown-item').forEach(item => {
-      const fileName = item.dataset.filename;
-      const checkbox = item.querySelector('input[type="checkbox"]');
-      if (selectedFiles.has(fileName)) {
-        item.classList.add('selected');
-        if (checkbox) checkbox.checked = true;
-      } else {
-        item.classList.remove('selected');
-        if (checkbox) checkbox.checked = false;
-      }
-    });
   }
 
   async function loadParts() {
