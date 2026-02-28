@@ -695,7 +695,7 @@ class ElasticsearchService {
           // Integration fields (for API integrations)
           integration: doc.integration?.toString(),
           integrationName: doc.integrationName,
-          // Supplier data tracking fields
+          // Supplier data tracking fields (legacy)
           supplierId: doc.supplierId,
           supplierName: doc.supplierName,
           supplierCode: doc.supplierCode,
@@ -703,6 +703,10 @@ class ElasticsearchService {
           tableName: doc.tableName,
           recordId: doc.recordId,
           dataSource: doc.dataSource,
+          // Supplier upload tracking fields (NEW - for supplier portal uploads)
+          sourceSupplierId: doc.sourceSupplierId,
+          sourceType: doc.sourceType,
+          sourceSupplierName: doc.sourceSupplierName,
           // File and date info
           fileName: doc.fileName,
           importedAt: doc.importedAt,
@@ -1307,29 +1311,52 @@ class ElasticsearchService {
 
   /**
    * Delete all documents from a specific supplier
+   * Handles both new format (sourceSupplierId) and legacy format (delete by document IDs)
    */
-  async deleteBySupplier(supplierId) {
+  async deleteBySupplier(supplierId, supplierDocIds = null) {
     if (!this.isAvailable || !supplierId) return { deleted: 0 };
 
     try {
       const startTime = Date.now();
-      // Delete by sourceSupplierId (for supplier uploaded parts)
-      const response = await this.client.deleteByQuery({
+      let totalDeleted = 0;
+      
+      // First try: Delete by sourceSupplierId (new format)
+      const response1 = await this.client.deleteByQuery({
         index: this.indexName,
         body: {
           query: { term: { sourceSupplierId: supplierId.toString() } },
         },
         conflicts: 'proceed',
-        refresh: true, // Refresh immediately so deletions are visible
+        refresh: true,
         wait_for_completion: true,
         slices: 'auto',
         scroll_size: 10000,
       });
+      totalDeleted += response1.deleted || 0;
+      
+      // Second try: If we have document IDs from MongoDB, delete those too (legacy docs)
+      if (supplierDocIds && supplierDocIds.length > 0) {
+        // Delete in batches of 10000
+        const batchSize = 10000;
+        for (let i = 0; i < supplierDocIds.length; i += batchSize) {
+          const batch = supplierDocIds.slice(i, i + batchSize).map(id => id.toString());
+          const response2 = await this.client.deleteByQuery({
+            index: this.indexName,
+            body: {
+              query: { ids: { values: batch } },
+            },
+            conflicts: 'proceed',
+            refresh: true,
+            wait_for_completion: true,
+          });
+          totalDeleted += response2.deleted || 0;
+        }
+      }
 
       const duration = ((Date.now() - startTime) / 1000).toFixed(1);
-      console.log(`🗑️  ES: Deleted ${response.deleted?.toLocaleString() || 0} supplier docs in ${duration}s`);
+      console.log(`🗑️  ES: Deleted ${totalDeleted.toLocaleString()} supplier docs in ${duration}s`);
       this.invalidateDocCountCache();
-      return { deleted: response.deleted || 0 };
+      return { deleted: totalDeleted };
     } catch (error) {
       console.error('Error deleting by supplier:', error.message);
       return { deleted: 0 };
@@ -1338,34 +1365,59 @@ class ElasticsearchService {
 
   /**
    * Delete all documents from a specific supplier's file
+   * Handles both new format (sourceSupplierId+fileName) and legacy format (fileName only)
    */
-  async deleteBySupplierFile(supplierId, fileName) {
-    if (!this.isAvailable || !supplierId || !fileName) return { deleted: 0 };
+  async deleteBySupplierFile(supplierId, fileName, supplierDocIds = null) {
+    if (!this.isAvailable || !fileName) return { deleted: 0 };
 
     try {
       const startTime = Date.now();
-      const response = await this.client.deleteByQuery({
-        index: this.indexName,
-        body: {
-          query: {
-            bool: {
-              must: [
-                { term: { sourceSupplierId: supplierId.toString() } },
-                { term: { fileName: fileName } }
-              ]
-            }
+      let totalDeleted = 0;
+      
+      // First try: Delete by sourceSupplierId + fileName (new format)
+      if (supplierId) {
+        const response1 = await this.client.deleteByQuery({
+          index: this.indexName,
+          body: {
+            query: {
+              bool: {
+                must: [
+                  { term: { sourceSupplierId: supplierId.toString() } },
+                  { term: { fileName: fileName } }
+                ]
+              }
+            },
           },
-        },
-        conflicts: 'proceed',
-        refresh: true,
-        wait_for_completion: true,
-        slices: 'auto',
-      });
+          conflicts: 'proceed',
+          refresh: true,
+          wait_for_completion: true,
+          slices: 'auto',
+        });
+        totalDeleted += response1.deleted || 0;
+      }
+      
+      // Second try: If we have document IDs, delete by IDs (most reliable for legacy)
+      if (supplierDocIds && supplierDocIds.length > 0) {
+        const batchSize = 10000;
+        for (let i = 0; i < supplierDocIds.length; i += batchSize) {
+          const batch = supplierDocIds.slice(i, i + batchSize).map(id => id.toString());
+          const response2 = await this.client.deleteByQuery({
+            index: this.indexName,
+            body: {
+              query: { ids: { values: batch } },
+            },
+            conflicts: 'proceed',
+            refresh: true,
+            wait_for_completion: true,
+          });
+          totalDeleted += response2.deleted || 0;
+        }
+      }
 
       const duration = ((Date.now() - startTime) / 1000).toFixed(1);
-      console.log(`🗑️  ES: Deleted ${response.deleted?.toLocaleString() || 0} docs for file "${fileName}" in ${duration}s`);
+      console.log(`🗑️  ES: Deleted ${totalDeleted.toLocaleString()} docs for file "${fileName}" in ${duration}s`);
       this.invalidateDocCountCache();
-      return { deleted: response.deleted || 0 };
+      return { deleted: totalDeleted };
     } catch (error) {
       console.error('Error deleting by supplier file:', error.message);
       return { deleted: 0 };

@@ -224,14 +224,23 @@ const deleteAllParts = async (req, res) => {
     const AuditLog = require('../models/AuditLog');
     const elasticsearchService = require('../services/elasticsearchService');
     
+    // IMPORTANT: Get all document IDs BEFORE deleting from MongoDB
+    // This is needed to delete legacy ES documents that don't have sourceSupplierId
+    const partsToDelete = await Part.find({
+      'source.supplierId': req.supplier._id
+    }, '_id').lean();
+    const docIdsToDelete = partsToDelete.map(p => p._id);
+    
+    logger.info(`Found ${docIdsToDelete.length} parts to delete for supplier ${req.supplier._id}`);
+    
     // Delete all parts for this supplier from MongoDB
     const result = await Part.deleteMany({ 
       'source.supplierId': req.supplier._id 
     });
     
-    // Delete all parts for this supplier from Elasticsearch
+    // Delete all parts for this supplier from Elasticsearch (pass IDs for legacy support)
     try {
-      const esResult = await elasticsearchService.deleteBySupplier(req.supplier._id);
+      const esResult = await elasticsearchService.deleteBySupplier(req.supplier._id, docIdsToDelete);
       logger.info(`Deleted ${esResult.deleted} parts from Elasticsearch for supplier ${req.supplier._id}`);
     } catch (esErr) {
       logger.error('ES delete error during delete all:', esErr.message);
@@ -285,43 +294,67 @@ const importParts = async (req, res) => {
     const deleteOption = req.body.deleteOption || 'none';
     let deletedCount = 0;
     const elasticsearchService = require('../services/elasticsearchService');
+    const Part = require('../models/Part');
     
     // Handle data deletion based on option
     if (deleteOption === 'all') {
+      // Get document IDs BEFORE deleting (for ES legacy support)
+      const partsToDelete = await Part.find({
+        'source.supplierId': req.supplier._id
+      }, '_id').lean();
+      const docIdsToDelete = partsToDelete.map(p => p._id);
+      
       // Delete all supplier parts from MongoDB
-      const Part = require('../models/Part');
       const result = await Part.deleteMany({ 
         'source.supplierId': req.supplier._id 
       });
       deletedCount = result.deletedCount;
-      // Also delete from Elasticsearch
-      await elasticsearchService.deleteBySupplier(req.supplier._id);
+      
+      // Also delete from Elasticsearch (pass IDs for legacy support)
+      await elasticsearchService.deleteBySupplier(req.supplier._id, docIdsToDelete);
       logger.info(`Deleted all ${deletedCount} parts for supplier ${req.supplier._id}`);
     } else if (deleteOption === 'brand') {
       // Delete parts by brand
       const brands = JSON.parse(req.body.brands || '[]');
       if (brands.length) {
-        const Part = require('../models/Part');
+        // Get IDs before deleting
+        const partsToDelete = await Part.find({
+          'source.supplierId': req.supplier._id,
+          brand: { $in: brands }
+        }, '_id').lean();
+        const docIdsToDelete = partsToDelete.map(p => p._id);
+        
         const result = await Part.deleteMany({ 
           'source.supplierId': req.supplier._id,
           brand: { $in: brands }
         });
         deletedCount = result.deletedCount;
-        // TODO: Delete from ES by brand (would need to implement)
+        
+        // Delete from ES by IDs
+        for (const id of docIdsToDelete) {
+          await elasticsearchService.deleteDocument(id);
+        }
         logger.info(`Deleted ${deletedCount} parts for brands: ${brands.join(', ')}`);
       }
     } else if (deleteOption === 'specificFile') {
       // Delete parts from specific chosen file
       const deleteFileName = req.body.deleteFileName;
       if (deleteFileName) {
-        const Part = require('../models/Part');
+        // Get IDs before deleting (for ES legacy support)
+        const partsToDelete = await Part.find({
+          'source.supplierId': req.supplier._id,
+          fileName: deleteFileName
+        }, '_id').lean();
+        const docIdsToDelete = partsToDelete.map(p => p._id);
+        
         const result = await Part.deleteMany({ 
           'source.supplierId': req.supplier._id,
           fileName: deleteFileName
         });
         deletedCount = result.deletedCount;
-        // Also delete from Elasticsearch
-        await elasticsearchService.deleteBySupplierFile(req.supplier._id, deleteFileName);
+        
+        // Also delete from Elasticsearch (pass IDs for legacy support)
+        await elasticsearchService.deleteBySupplierFile(req.supplier._id, deleteFileName, docIdsToDelete);
         logger.info(`Deleted ${deletedCount} parts from file: ${deleteFileName}`);
       }
     } else if (deleteOption === 'file') {
@@ -544,9 +577,19 @@ const deletePartsByCriteria = async (req, res) => {
 const reindexParts = async (req, res) => {
   try {
     const elasticsearchService = require('../services/elasticsearchService');
+    const Part = require('../models/Part');
     
-    // First, delete all ES data for this supplier
-    const deleteResult = await elasticsearchService.deleteBySupplier(req.supplier._id);
+    // Get all document IDs from MongoDB (for deleting legacy ES docs)
+    const partsInMongo = await Part.find({
+      'source.type': 'supplier_upload',
+      'source.supplierId': req.supplier._id
+    }, '_id').lean();
+    const docIds = partsInMongo.map(p => p._id);
+    
+    logger.info(`Found ${docIds.length} parts in MongoDB to reindex for supplier ${req.supplier._id}`);
+    
+    // Delete all ES data for this supplier (pass IDs for legacy support)
+    const deleteResult = await elasticsearchService.deleteBySupplier(req.supplier._id, docIds);
     logger.info(`Cleared ${deleteResult.deleted} ES documents for supplier ${req.supplier._id}`);
     
     // Then re-index from MongoDB

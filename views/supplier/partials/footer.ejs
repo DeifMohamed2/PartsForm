@@ -164,6 +164,7 @@
         // Ignore errors
       }
       localStorage.removeItem('supplierToken');
+      document.cookie = 'supplierToken=; path=/; max-age=0';
       window.location.href = '/supplier/login';
     });
     

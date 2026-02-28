@@ -272,9 +272,18 @@ class SupplierPartsService {
 
       // If replacing, delete existing parts from this file
       if (replaceExisting) {
+        // IMPORTANT: Get document IDs BEFORE deleting from MongoDB (for ES legacy support)
+        const partsToDelete = await Part.find({
+          'source.type': 'supplier_upload',
+          'source.supplierId': supplier._id,
+          fileName: filename
+        }, '_id').lean();
+        const docIdsToDelete = partsToDelete.map(p => p._id);
+        
+        // Delete from MongoDB
         await Part.deleteSupplierParts(supplier._id, { fileName: filename });
-        // Also delete from Elasticsearch
-        await elasticsearchService.deleteBySupplierFile(supplier._id, filename);
+        // Also delete from Elasticsearch (pass IDs for legacy support)
+        await elasticsearchService.deleteBySupplierFile(supplier._id, filename, docIdsToDelete);
       }
 
       // Map and validate rows
@@ -519,13 +528,29 @@ class SupplierPartsService {
   async deleteParts(supplier, options = {}) {
     const { partIds, fileName } = options;
     
+    // IMPORTANT: Get document IDs BEFORE deleting from MongoDB
+    // This is needed to delete legacy ES documents that don't have sourceSupplierId
+    let docIdsToDelete = [];
+    if (partIds && partIds.length) {
+      docIdsToDelete = partIds;
+    } else if (fileName) {
+      // Get IDs of all parts from this file
+      const partsToDelete = await Part.find({
+        'source.type': 'supplier_upload',
+        'source.supplierId': supplier._id,
+        fileName: fileName
+      }, '_id').lean();
+      docIdsToDelete = partsToDelete.map(p => p._id);
+    }
+
+    // Delete from MongoDB
     const deletedCount = await Part.deleteSupplierParts(supplier._id, { partIds, fileName });
 
-    // Remove from Elasticsearch
+    // Remove from Elasticsearch (pass doc IDs for legacy support)
     try {
       if (fileName) {
         // Delete all parts from this file in ES
-        await elasticsearchService.deleteBySupplierFile(supplier._id, fileName);
+        await elasticsearchService.deleteBySupplierFile(supplier._id, fileName, docIdsToDelete);
       } else if (partIds && partIds.length) {
         // Delete individual parts from ES
         for (const id of partIds) {

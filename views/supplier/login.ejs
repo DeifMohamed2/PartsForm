@@ -665,8 +665,10 @@
           return;
         }
         
-        // Normal login - store token
+        // Normal login - store token in both localStorage and cookie
         localStorage.setItem('supplierToken', data.token);
+        // Set cookie for server-side auth (30 days expiry, secure in production)
+        document.cookie = `supplierToken=${data.token}; path=/; max-age=${30 * 24 * 60 * 60}; SameSite=Lax`;
         
         showSuccess('Login successful! Redirecting...');
         
@@ -722,6 +724,7 @@
         
         // Store the new token
         localStorage.setItem('supplierToken', data.token);
+        document.cookie = `supplierToken=${data.token}; path=/; max-age=${30 * 24 * 60 * 60}; SameSite=Lax`;
         
         // Show success and redirect
         document.getElementById('changePasswordSection').innerHTML = `
@@ -754,12 +757,17 @@
         headers: { 'Authorization': `Bearer ${token}` }
       }).then(res => {
         if (res.ok) {
+          // Ensure cookie is set before redirecting
+          document.cookie = `supplierToken=${token}; path=/; max-age=${30 * 24 * 60 * 60}; SameSite=Lax`;
           window.location.href = '/supplier';
         } else {
+          // Clear invalid token from both localStorage and cookie
           localStorage.removeItem('supplierToken');
+          document.cookie = 'supplierToken=; path=/; max-age=0';
         }
       }).catch(() => {
         localStorage.removeItem('supplierToken');
+        document.cookie = 'supplierToken=; path=/; max-age=0';
       });
     }
   </script>
