@@ -803,6 +803,33 @@ const getOrderDetails = async (req, res) => {
         .render('error', { title: 'Error', error: 'Order not found' });
     }
 
+    // Lookup source info from Parts collection based on part numbers
+    const partNumbers = [...new Set(order.items?.map(item => item.partNumber).filter(Boolean))];
+    const partsWithSource = await Part.find(
+      { code: { $in: partNumbers } },
+      { code: 1, source: 1, integrationName: 1, fileName: 1 }
+    ).populate('source.supplierId', 'code companyName email phone').lean();
+    
+    // Create a map of partNumber -> source info
+    const partSourceMap = {};
+    for (const part of partsWithSource) {
+      partSourceMap[part.code] = {
+        sourceType: part.source?.type || 'unknown',
+        integrationName: part.source?.integrationName || part.integrationName || '',
+        fileName: part.fileName || '',
+        sourceSupplier: part.source?.supplierId ? {
+          id: part.source.supplierId._id,
+          code: part.source.supplierId.code || part.source.supplierCode || '',
+          name: part.source.supplierId.companyName || part.source.supplierName || '',
+          email: part.source.supplierId.email || '',
+          phone: part.source.supplierId.phone || ''
+        } : (part.source?.supplierCode ? {
+          code: part.source.supplierCode,
+          name: part.source.supplierName || ''
+        } : null)
+      };
+    }
+
     // Transform for view - full order details
     const orderData = {
       id: order.orderNumber,
@@ -829,19 +856,27 @@ const getOrderDetails = async (req, res) => {
       totalWeight: order.totalWeight || 0,
       notes: order.notes || '',
 
-      // Items with full details
+      // Items with full details - source info from Parts lookup
       items:
-        order.items?.map((item) => ({
-          partNumber: item.partNumber,
-          description: item.description || item.partNumber,
-          brand: item.brand || 'N/A',
-          supplier: item.supplier || 'N/A',
-          price: item.price || 0,
-          currency: item.currency || 'AED',
-          weight: item.weight || 0,
-          stock: item.stock || 'N/A',
-          addedAt: item.addedAt,
-        })) || [],
+        order.items?.map((item) => {
+          const sourceInfo = partSourceMap[item.partNumber] || {};
+          return {
+            partNumber: item.partNumber,
+            description: item.description || item.partNumber,
+            brand: item.brand || 'N/A',
+            supplier: item.supplier || 'N/A',
+            price: item.price || 0,
+            currency: item.currency || 'AED',
+            weight: item.weight || 0,
+            stock: item.stock || 'N/A',
+            addedAt: item.addedAt,
+            // Source tracking from Parts collection
+            sourceType: sourceInfo.sourceType || 'unknown',
+            integrationName: sourceInfo.integrationName || '',
+            fileName: sourceInfo.fileName || '',
+            sourceSupplier: sourceInfo.sourceSupplier || null,
+          };
+        }) || [],
 
       // Payment info
       payment: {
@@ -1127,7 +1162,7 @@ const createOrder = async (req, res) => {
     const shippingCost = parseFloat(payment?.shippingCost) || 0;
     const total = subtotal + processingFee + tax + shippingCost;
 
-    // Create order items
+    // Create order items (source info is looked up from Parts collection at display time)
     const orderItems = items.map((item) => ({
       partNumber: item.partNumber,
       description: item.description || item.partNumber,
