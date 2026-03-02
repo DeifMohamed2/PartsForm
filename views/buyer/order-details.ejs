@@ -30,7 +30,7 @@
                 <i data-lucide="printer"></i>
                 <span><%= t('orders.details.print') %></span>
               </button>
-              <button class="order-details-action-btn secondary" id="btn-download-invoice" style="display: none;">
+              <button class="order-details-action-btn secondary hidden" id="btn-download-invoice">
                 <i data-lucide="download"></i>
                 <span><%= t('orders.details.downloadInvoice') %></span>
               </button>
@@ -49,7 +49,7 @@
           </div>
 
           <!-- Order Content (hidden initially) -->
-          <div id="order-content" style="display: none;">
+          <div id="order-content" class="hidden">
             <!-- Order Info Grid -->
             <div class="order-details-grid">
               <!-- Left Column - Order Items -->
@@ -65,9 +65,9 @@
                       <thead>
                         <tr>
                           <th><%= t('orders.details.partDetails') %></th>
-                          <th style="text-align: center;"><%= t('orders.details.weight') %></th>
-                          <th style="text-align: center;"><%= t('orders.details.stock') %></th>
-                          <th style="text-align: right;"><%= t('orders.details.price') %></th>
+                          <th class="text-center"><%= t('orders.details.weight') %></th>
+                          <th class="text-center"><%= t('orders.details.stock') %></th>
+                          <th class="text-right"><%= t('orders.details.price') %></th>
                         </tr>
                       </thead>
                       <tbody id="order-items-tbody">
@@ -103,7 +103,7 @@
               <!-- Right Column - Order Summary -->
               <div>
                 <div class="order-summary-card">
-                  <h3 class="order-details-section-title" style="margin-bottom: 1.5rem;">
+                  <h3 class="order-details-section-title">
                     <i data-lucide="receipt"></i>
                     <span><%= t('orders.details.orderSummary') %></span>
                   </h3>
@@ -113,7 +113,7 @@
                 </div>
 
                 <!-- Shipping Information (if available) -->
-                <div class="order-details-section" id="shipping-section" style="display: none;">
+                <div class="order-details-section hidden" id="shipping-section">
                   <h2 class="order-details-section-title">
                     <i data-lucide="truck"></i>
                     <span><%= t('orders.details.shippingInfo') %></span>
@@ -127,15 +127,13 @@
           </div>
 
           <!-- Error State -->
-          <div class="order-details-section" id="order-error" style="display: none;">
-            <div style="text-align: center; padding: 3rem 2rem;">
-              <div
-                style="width: 80px; height: 80px; margin: 0 auto 1.5rem; background: #fee2e2; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                <i data-lucide="alert-circle" style="width: 40px; height: 40px; color: #dc2626;"></i>
+          <div class="order-details-section hidden" id="order-error">
+            <div class="order-error-container">
+              <div class="order-error-icon-wrapper">
+                <i data-lucide="alert-circle" class="order-error-icon"></i>
               </div>
-              <h2 style="font-size: 1.5rem; font-weight: 700; color: #1a2b3d; margin-bottom: 0.5rem;"><%= t('orders.details.errorTitle') %>
-              </h2>
-              <p style="color: #64748b; margin-bottom: 2rem;"><%= t('orders.details.errorText') %></p>
+              <h2 class="order-error-title"><%= t('orders.details.errorTitle') %></h2>
+              <p class="order-error-message"><%= t('orders.details.errorText') %></p>
               <a href="/buyer/orders" class="order-details-action-btn primary">
                 <i data-lucide="arrow-left"></i>
                 <span><%= t('orders.details.backToOrders') %></span>

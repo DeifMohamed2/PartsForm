@@ -42,7 +42,7 @@
                 <i data-lucide="camera"></i>
               </button>
               <!-- Hidden file input for avatar upload -->
-              <input type="file" id="avatarInput" accept="image/jpeg,image/jpg,image/png,image/webp,image/gif" style="display: none;">
+              <input type="file" id="avatarInput" accept="image/jpeg,image/jpg,image/png,image/webp,image/gif" class="hidden">
             </div>
             <h2 class="profile-name" id="profileName"><%= buyer.fullName %></h2>
             <p class="profile-email" id="profileEmail"><%= buyer.email %></p>
@@ -219,7 +219,7 @@
       <p><%= t('profile.choosePhoto') %></p>
     </div>
     <div class="avatar-upload-area" id="avatarUploadArea">
-      <div class="upload-preview" id="uploadPreview" style="display: none;">
+      <div class="upload-preview hidden" id="uploadPreview">
         <img src="" alt="Preview" id="previewImage">
       </div>
       <div class="upload-placeholder" id="uploadPlaceholder">
@@ -235,7 +235,7 @@
         <span><%= t('profile.uploadPhotoBtn') %></span>
       </button>
     </div>
-    <div class="upload-progress" id="uploadProgress" style="display: none;">
+    <div class="upload-progress hidden" id="uploadProgress">
       <div class="progress-bar">
         <div class="progress-fill" id="progressFill"></div>
       </div>

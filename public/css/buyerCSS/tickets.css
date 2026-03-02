@@ -8,7 +8,7 @@
    ==================================== */
 .tickets-page {
     min-height: 100vh;
-    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    background: var(--washi);
     padding-top: 0;
     position: relative;
 }
@@ -22,9 +22,9 @@
     background: rgba(255, 255, 255, 0.98) !important;
     backdrop-filter: blur(20px) saturate(180%) !important;
     -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
-    border-bottom: 1px solid rgba(59, 130, 246, 0.2) !important;
-    box-shadow: 0 4px 20px rgba(43, 82, 120, 0.08),
-        0 2px 8px rgba(59, 130, 246, 0.05) !important;
+    border-bottom: 1px solid rgba(64, 84, 94, 0.2) !important;
+    box-shadow: 0 4px 20px rgba(43, 43, 43, 0.08),
+        0 2px 8px rgba(64, 84, 94, 0.05) !important;
 }
 
 /* ====================================
@@ -34,10 +34,10 @@
     padding: 8rem 0 4rem;
     position: relative;
     overflow: hidden;
-    background: linear-gradient(135deg, #1a2b3d 0%, #2b5278 50%, #1e3a54 100%);
+    background: var(--kurogane);
     margin-top: 0;
     border-radius: 0 0 20px 20px;
-    box-shadow: 0 10px 30px rgba(43, 82, 120, 0.2);
+    box-shadow: 0 10px 30px rgba(43, 43, 43, 0.2);
 }
 
 /* Background overlay */
@@ -48,8 +48,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-image: url('https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80'),
-        linear-gradient(135deg, #1a2b3d 0%, #2b5278 100%);
+    background-image: url('https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80');
     background-size: cover;
     background-position: center;
     background-blend-mode: overlay;
@@ -71,7 +70,7 @@
     }
 }
 
-/* Gradient overlay */
+/* Solid overlay */
 .tickets-hero::after {
     content: '';
     position: absolute;
@@ -79,31 +78,9 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: radial-gradient(circle at 15% 30%,
-            rgba(59, 130, 246, 0.25) 0%,
-            transparent 50%),
-        radial-gradient(circle at 85% 70%,
-            rgba(16, 185, 129, 0.2) 0%,
-            transparent 50%),
-        linear-gradient(180deg,
-            rgba(26, 43, 61, 0.3) 0%,
-            rgba(43, 82, 120, 0.6) 50%,
-            rgba(30, 58, 84, 0.8) 100%);
+    background: rgba(26, 43, 61, 0.5);
     z-index: 1;
     pointer-events: none;
-    animation: gradientMove 15s ease-in-out infinite;
-}
-
-@keyframes gradientMove {
-
-    0%,
-    100% {
-        opacity: 1;
-    }
-
-    50% {
-        opacity: 0.9;
-    }
 }
 
 .tickets-hero-content {
@@ -124,7 +101,7 @@
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.25);
-    border-radius: 1rem;
+    border-radius: var(--radius-sm);
     color: #ffffff;
     font-weight: 500;
     font-size: 0.85rem;
@@ -225,7 +202,7 @@
 }
 
 .stat-icon.open {
-    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    background: #fef3c7;
 }
 
 .stat-icon.open i {
@@ -235,7 +212,7 @@
 }
 
 .stat-icon.in-progress {
-    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    background: #dbeafe;
 }
 
 .stat-icon.in-progress i {
@@ -245,7 +222,7 @@
 }
 
 .stat-icon.resolved {
-    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+    background: #d1fae5;
 }
 
 .stat-icon.resolved i {
@@ -263,13 +240,13 @@
 .stat-value {
     font-size: 1.75rem;
     font-weight: 700;
-    color: #1a2b3d;
+    color: var(--kurogane);
     line-height: 1;
 }
 
 .stat-label {
     font-size: 0.85rem;
-    color: #64748b;
+    color: var(--namari);
     font-weight: 500;
 }
 
@@ -279,7 +256,7 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.875rem 1.75rem;
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    background: var(--kintsugi);
     color: white;
     border: none;
     border-radius: 10px;
@@ -288,12 +265,12 @@
     cursor: pointer;
     transition: all 0.3s ease;
     text-decoration: none;
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 4px 12px rgba(64, 84, 94, 0.3);
 }
 
 .btn-create-ticket:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+    box-shadow: 0 6px 20px rgba(64, 84, 94, 0.4);
 }
 
 .btn-create-ticket i {
@@ -325,7 +302,7 @@
 .filter-label {
     font-size: 0.85rem;
     font-weight: 600;
-    color: #475569;
+    color: var(--namari);
 }
 
 .filter-select,
@@ -334,17 +311,17 @@
     border: 1px solid #e2e8f0;
     border-radius: 8px;
     font-size: 0.95rem;
-    color: #1a2b3d;
-    background: #f8fafc;
+    color: var(--kurogane);
+    background: var(--washi);
     transition: all 0.2s ease;
 }
 
 .filter-select:focus,
 .filter-input:focus {
     outline: none;
-    border-color: #3b82f6;
+    border-color: var(--sei);
     background: white;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    box-shadow: 0 0 0 3px rgba(149, 175, 192, 0.1);
 }
 
 .filter-actions {
@@ -368,7 +345,7 @@
 }
 
 .btn-filter {
-    background: #3b82f6;
+    background: var(--aitetsu);
     color: white;
 }
 
@@ -378,12 +355,12 @@
 
 .btn-reset {
     background: #f1f5f9;
-    color: #64748b;
+    color: var(--namari);
 }
 
 .btn-reset:hover {
     background: #e2e8f0;
-    color: #475569;
+    color: var(--namari);
 }
 
 .btn-filter i,
@@ -413,7 +390,7 @@
 .ticket-card:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-    border-color: #3b82f6;
+    border-color: var(--sei);
 }
 
 .ticket-card-header {
@@ -430,21 +407,21 @@
 .ticket-id {
     font-size: 0.85rem;
     font-weight: 600;
-    color: #3b82f6;
+    color: var(--aitetsu);
     margin-bottom: 0.5rem;
 }
 
 .ticket-subject {
     font-size: 1.1rem;
     font-weight: 600;
-    color: #1a2b3d;
+    color: var(--kurogane);
     margin-bottom: 0.5rem;
     line-height: 1.4;
 }
 
 .ticket-order {
     font-size: 0.85rem;
-    color: #64748b;
+    color: var(--namari);
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -496,7 +473,7 @@
 
 .ticket-priority-badge.low {
     background: #f1f5f9;
-    color: #64748b;
+    color: var(--namari);
 }
 
 .ticket-priority-badge.medium {
@@ -523,10 +500,10 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.5rem 1rem;
-    background: #f8fafc;
+    background: var(--washi);
     border-radius: 8px;
     font-size: 0.85rem;
-    color: #475569;
+    color: var(--namari);
     font-weight: 500;
 }
 
@@ -547,7 +524,7 @@
     display: flex;
     gap: 1.5rem;
     font-size: 0.85rem;
-    color: #64748b;
+    color: var(--namari);
 }
 
 .ticket-meta-item {
@@ -566,19 +543,19 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.5rem 1rem;
-    background: #f8fafc;
+    background: var(--washi);
     border: 1px solid #e2e8f0;
     border-radius: 8px;
-    color: #3b82f6;
+    color: var(--aitetsu);
     font-weight: 600;
     font-size: 0.85rem;
     transition: all 0.2s ease;
 }
 
 .ticket-action:hover {
-    background: #3b82f6;
+    background: var(--aitetsu);
     color: white;
-    border-color: #3b82f6;
+    border-color: var(--aitetsu);
 }
 
 .ticket-action i {
@@ -601,7 +578,7 @@
     width: 80px;
     height: 80px;
     margin: 0 auto 1.5rem;
-    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+    background: #f1f5f9;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -611,19 +588,19 @@
 .tickets-empty-icon i {
     width: 40px;
     height: 40px;
-    color: #94a3b8;
+    color: var(--suzu);
 }
 
 .tickets-empty-title {
     font-size: 1.5rem;
     font-weight: 700;
-    color: #1a2b3d;
+    color: var(--kurogane);
     margin-bottom: 0.75rem;
 }
 
 .tickets-empty-text {
     font-size: 1rem;
-    color: #64748b;
+    color: var(--namari);
     margin-bottom: 2rem;
     max-width: 400px;
     margin-left: auto;
@@ -635,7 +612,7 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.875rem 1.75rem;
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    background: var(--kintsugi);
     color: white;
     border: none;
     border-radius: 10px;
@@ -644,12 +621,12 @@
     cursor: pointer;
     transition: all 0.3s ease;
     text-decoration: none;
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 4px 12px rgba(64, 84, 94, 0.3);
 }
 
 .btn-empty-action:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+    box-shadow: 0 6px 20px rgba(64, 84, 94, 0.4);
 }
 
 .btn-empty-action i {

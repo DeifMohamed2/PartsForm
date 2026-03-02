@@ -102,12 +102,12 @@
                 </div>
 
                 <!-- Addresses List -->
-                <div class="shipping-addresses" id="shipping-addresses" style="display: none;">
+                <div class="shipping-addresses hidden" id="shipping-addresses">
                   <!-- Addresses will be populated by JavaScript -->
                 </div>
 
                 <!-- No Addresses State -->
-                <div class="no-addresses" id="no-addresses" style="display: none;">
+                <div class="no-addresses hidden" id="no-addresses">
                   <div class="no-addresses-icon">
                     <i data-lucide="map-pin-off"></i>
                   </div>
@@ -120,7 +120,7 @@
                 </div>
 
                 <!-- Add New Address Link -->
-                <div class="add-address-section" id="add-address-section" style="display: none;">
+                <div class="add-address-section hidden" id="add-address-section">
                   <a href="/buyer/delivery" class="add-address-link">
                     <i data-lucide="plus-circle"></i>
                     <span>Add New Address</span>
@@ -136,7 +136,7 @@
               </div>
 
               <!-- Step 2: Payment Type Selection -->
-              <div class="checkout-section" id="step-2" style="display: none;">
+              <div class="checkout-section hidden" id="step-2">
                 <div class="section-header">
                   <h2 class="section-title">
                     <i data-lucide="wallet"></i>
@@ -210,7 +210,7 @@
               </div>
 
               <!-- Step 3: Payment Method Selection -->
-              <div class="checkout-section" id="step-3" style="display: none;">
+              <div class="checkout-section hidden" id="step-3">
                 <div class="section-header">
                   <h2 class="section-title">
                     <i data-lucide="credit-card"></i>
@@ -365,7 +365,7 @@
               </div>
 
               <!-- Step 4: Confirmation -->
-              <div class="checkout-section" id="step-4" style="display: none;">
+              <div class="checkout-section hidden" id="step-4">
                 <div class="section-header">
                   <h2 class="section-title">
                     <i data-lucide="check-circle"></i>
@@ -480,7 +480,7 @@
                 </div>
 
                 <!-- Summary Content (hidden until loaded) -->
-                <div id="summary-content" style="display: none;">
+                <div id="summary-content" class="hidden">
                   <div class="summary-items" id="summary-items">
                     <!-- Items will be populated by JavaScript -->
                   </div>
@@ -500,7 +500,7 @@
                       <span class="summary-label"><%= t('checkout.summary.totalWeight') %></span>
                       <span class="summary-value" id="summary-weight">0.000 kg</span>
                     </div>
-                    <div class="summary-row fee" id="summary-fee-row" style="display: none;">
+                    <div class="summary-row fee hidden" id="summary-fee-row">
                       <span class="summary-label"><%= t('checkout.summary.processingFee') %></span>
                       <span class="summary-value" id="summary-fee">0.00 د.إ</span>
                     </div>
@@ -514,13 +514,13 @@
                   </div>
 
                   <!-- Referral Discount Section (auto-applied from registration) -->
-                  <div class="referral-code-section" id="referral-section" style="display: none;">
+                  <div class="referral-code-section hidden" id="referral-section">
                     <div class="referral-code-header">
                       <i data-lucide="gift"></i>
                       <span><%= t('checkout.summary.referralDiscount') %></span>
                     </div>
-                    <div class="referral-code-status" id="referral-status" style="display: none;">
-                      <div class="referral-success registration-referral" id="referral-success" style="display: none;">
+                    <div class="referral-code-status hidden" id="referral-status">
+                      <div class="referral-success registration-referral hidden" id="referral-success">
                         <i data-lucide="check-circle"></i>
                         <div class="referral-success-info">
                           <span class="referral-partner-name" id="referral-partner-name"></span>
@@ -531,7 +531,7 @@
                   </div>
 
                   <!-- Referral Discount Row (shown when code applied) -->
-                  <div class="summary-row discount" id="summary-referral-row" style="display: none;">
+                  <div class="summary-row discount hidden" id="summary-referral-row">
                     <span class="summary-label"><%= t('checkout.summary.referralDiscountLabel') %></span>
                     <span class="summary-value discount-value" id="summary-referral-discount">-0.00 د.إ</span>
                   </div>
@@ -549,7 +549,7 @@
     </div>
 
     <!-- Success Modal -->
-    <div class="success-modal" id="success-modal" style="display: none;">
+    <div class="success-modal hidden" id="success-modal">
       <div class="success-backdrop"></div>
       <div class="success-content">
         <div class="success-animation">

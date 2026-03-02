@@ -402,58 +402,6 @@
       });
     }
 
-    // ====================================
-    // SCROLL TO TOP BUTTON (Optional Enhancement)
-    // ====================================
-    const scrollToTopBtn = document.createElement('button');
-    scrollToTopBtn.innerHTML = '<i data-lucide="arrow-up"></i>';
-    scrollToTopBtn.className = 'scroll-to-top';
-    scrollToTopBtn.style.cssText = `
-    position: fixed;
-    bottom: 2rem;
-    right: 2rem;
-    width: 48px;
-    height: 48px;
-    background: linear-gradient(135deg, #2B5278 0%, #3B82F6 100%);
-    color: white;
-    border: none;
-    border-radius: 50%;
-    cursor: pointer;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 12px rgba(43, 82, 120, 0.3);
-    transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
-    z-index: 999;
-  `;
-
-    document.body.appendChild(scrollToTopBtn);
-
-    window.addEventListener('scroll', () => {
-      if (window.scrollY > 300) {
-        scrollToTopBtn.style.display = 'flex';
-      } else {
-        scrollToTopBtn.style.display = 'none';
-      }
-    });
-
-    scrollToTopBtn.addEventListener('click', () => {
-      window.scrollTo({
-        top: 0,
-        behavior: 'smooth',
-      });
-    });
-
-    scrollToTopBtn.addEventListener('mouseenter', () => {
-      scrollToTopBtn.style.transform = 'translateY(-4px) scale(1.1)';
-      scrollToTopBtn.style.boxShadow = '0 8px 24px rgba(43, 82, 120, 0.4)';
-    });
-
-    scrollToTopBtn.addEventListener('mouseleave', () => {
-      scrollToTopBtn.style.transform = 'translateY(0) scale(1)';
-      scrollToTopBtn.style.boxShadow = '0 4px 12px rgba(43, 82, 120, 0.3)';
-    });
-
     // Reinitialize Lucide for dynamic elements
     if (typeof lucide !== 'undefined') {
       lucide.createIcons();

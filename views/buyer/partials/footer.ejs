@@ -1,117 +1,51 @@
     <!-- ====================================
-         FOOTER
+         FOOTER — Minimal Bar
          ==================================== -->
     <footer class="footer">
-        <div class="container">
-            <div class="footer-grid">
-                <!-- Company Info -->
-                <div class="footer-column">
-                    <div class="footer-logo">
-                        <div class="footer-logo-icon">
-                            <span>PF</span>
-                        </div>
-                        <div class="footer-logo-text">
-                            <h3>PARTS<span style="color: #3B82F6;">FORM</span></h3>
-                            <p><%= t('footer.tagline') %></p>
-                        </div>
-                    </div>
-                    <p class="footer-description">
-                        <%= t('footer.description') %>
-                    </p>
-                    <div class="footer-contact">
-                        <div class="footer-contact-item">
-                            <i data-lucide="mail"></i>
-                            <span>sales@partsform.com</span>
-                        </div>
-                        <div class="footer-contact-item">
-                            <i data-lucide="phone"></i>
-                            <span>+1 (555) 123-4567</span>
-                        </div>
-                        <div class="footer-contact-item">
-                            <i data-lucide="map-pin"></i>
-                            <span>San Francisco, CA</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Platform Links -->
-                <div class="footer-column">
-                    <h4 class="footer-heading"><%= t('footer.platform') %></h4>
-                    <ul class="footer-links">
-                        <li><a href="/buyer"><%= t('footer.main') %></a></li>
-                        <li><a href="/buyer/orders"><%= t('nav.myOrders') %></a></li>
-                        <li><a href="/buyer/payment"><%= t('nav.payment') %></a></li>
-                        <li><a href="/buyer/delivery"><%= t('nav.delivery') %></a></li>
-                    </ul>
-                </div>
-
-                <!-- Categories Links -->
-                <div class="footer-column">
-                    <h4 class="footer-heading"><%= t('footer.sectors') %></h4>
-                    <ul class="footer-links">
-                        <li><a href="/buyer/search/automotive"><%= t('nav.searchDropdown.automotive.title') %></a></li>
-                        <li><a href="/buyer/search/automotive"><%= t('footer.oemParts') %></a></li>
-                        <li><a href="/buyer/search/automotive"><%= t('footer.aftermarketParts') %></a></li>
-                        <li><a href="/buyer/search/automotive"><%= t('footer.performanceParts') %></a></li>
-                    </ul>
-                </div>
-
-                <!-- Company Links -->
-                <div class="footer-column">
-                    <h4 class="footer-heading"><%= t('footer.company') %></h4>
-                    <ul class="footer-links">
-                        <li><a href="/buyer/contacts"><%= t('nav.contacts') %></a></li>
-                        <li><a href="/buyer/support"><%= t('footer.support') %></a></li>
-                        <li><a href="/buyer/about"><%= t('footer.aboutUs') %></a></li>
-                        <li><a href="/buyer/help"><%= t('footer.helpCenter') %></a></li>
-                    </ul>
-                </div>
-
-                <!-- Resources Links -->
-                <div class="footer-column">
-                    <h4 class="footer-heading"><%= t('footer.resources') %></h4>
-                    <ul class="footer-links">
-                        <li><a href="/buyer/docs"><%= t('footer.documentation') %></a></li>
-                        <li><a href="/buyer/api"><%= t('footer.apiReference') %></a></li>
-                        <li><a href="/buyer/blog"><%= t('footer.blog') %></a></li>
-                        <li><a href="/buyer/faq"><%= t('footer.faq') %></a></li>
-                    </ul>
-                </div>
+        <div class="footer-bar">
+            <div class="footer-bar-left">
+                <img src="/images/brand/logo-dark.png" alt="PARTSFORM" class="footer-logo-img">
             </div>
-
-            <div class="footer-bottom">
-                <div class="footer-bottom-left">
-                    <p>&copy; <%= new Date().getFullYear() %> PARTSFORM. <%= t('footer.copyright') %></p>
-                    <div class="footer-legal">
-                        <a href="#privacy"><%= t('footer.privacyPolicy') %></a>
-                        <span class="footer-divider">•</span>
-                        <a href="#terms"><%= t('footer.termsOfService') %></a>
-                        <span class="footer-divider">•</span>
-                        <a href="#cookies"><%= t('footer.cookiePolicy') %></a>
-                    </div>
-                </div>
-                <div class="footer-social">
-                    <a href="#" class="social-link" aria-label="LinkedIn">
-                        <i data-lucide="linkedin"></i>
-                    </a>
-                    <a href="#" class="social-link" aria-label="Twitter">
-                        <i data-lucide="twitter"></i>
-                    </a>
-                    <a href="#" class="social-link" aria-label="GitHub">
-                        <i data-lucide="github"></i>
-                    </a>
-                    <a href="#" class="social-link" aria-label="Instagram">
-                        <i data-lucide="instagram"></i>
-                    </a>
-                </div>
+            <div class="footer-bar-center">
+                <span class="footer-copyright">&copy; <%= new Date().getFullYear() %> PARTSFORM</span>
+                <span class="footer-dot">&middot;</span>
+                <a href="#privacy" class="footer-link"><%= t('footer.privacyPolicy') %></a>
+                <span class="footer-dot">&middot;</span>
+                <a href="#terms" class="footer-link"><%= t('footer.termsOfService') %></a>
+                <span class="footer-dot">&middot;</span>
+                <a href="mailto:sales@partsform.com" class="footer-link">sales@partsform.com</a>
+            </div>
+            <div class="footer-bar-right">
+                <a href="#" class="footer-social-icon" aria-label="LinkedIn"><i data-lucide="linkedin"></i></a>
+                <a href="#" class="footer-social-icon" aria-label="Twitter"><i data-lucide="twitter"></i></a>
+                <a href="#" class="footer-social-icon" aria-label="GitHub"><i data-lucide="github"></i></a>
+                <a href="#" class="footer-social-icon" aria-label="Instagram"><i data-lucide="instagram"></i></a>
             </div>
         </div>
     </footer>
+
+    <!-- Scroll to top — fixed, separate from footer -->
+    <button type="button" class="scroll-top-fixed hidden" id="footer-scroll-top" aria-label="Scroll to top">
+        <i data-lucide="arrow-up"></i>
+    </button>
+
     <script>
-      // Initialize Lucide icons after page load
       document.addEventListener('DOMContentLoaded', function() {
         if (typeof lucide !== 'undefined') {
           lucide.createIcons();
+        }
+        var scrollTopBtn = document.getElementById('footer-scroll-top');
+        if (scrollTopBtn) {
+          scrollTopBtn.addEventListener('click', function() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          });
+          window.addEventListener('scroll', function() {
+            if (window.scrollY > 400) {
+              scrollTopBtn.classList.remove('hidden');
+            } else {
+              scrollTopBtn.classList.add('hidden');
+            }
+          });
         }
       });
     </script>

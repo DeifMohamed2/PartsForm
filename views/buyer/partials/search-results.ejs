@@ -1,5 +1,5 @@
 <!-- Results Section -->
-<div class="search2-results-section">
+<div class="search2-results-section hidden" id="search2-results-section">
   <div class="container search-results-container">
     <!-- Backdrop for Filters Sidebar -->
     <div class="filters-backdrop" id="filters-backdrop"></div>
@@ -18,7 +18,7 @@
 
       <div class="filters-content">
         <!-- Active Filters Summary -->
-        <div class="active-filters-bar" id="active-filters-bar" style="display: none;">
+        <div class="active-filters-bar hidden" id="active-filters-bar">
           <div class="active-filters-list" id="active-filters-list"></div>
           <button class="clear-active-filters" id="clear-active-filters">
             <i data-lucide="x"></i>
@@ -27,7 +27,7 @@
         </div>
 
         <!-- Dynamic Filter Stats Banner -->
-        <div class="filter-stats-banner" id="filter-stats-banner" style="display: none;">
+        <div class="filter-stats-banner hidden" id="filter-stats-banner">
           <div class="filter-stats-header">
             <i data-lucide="bar-chart-3"></i>
             <span><%= t('searchResults.filters.filterByResults') %></span>
@@ -116,7 +116,7 @@
           <div class="filter-search-box">
             <i data-lucide="search"></i>
             <input type="text" id="brand-filter-search" placeholder="<%= t('searchResults.filters.searchBrands') %>">
-            <button class="filter-search-clear" id="brand-search-clear" style="display: none;">
+            <button class="filter-search-clear hidden" id="brand-search-clear">
               <i data-lucide="x"></i>
             </button>
           </div>
@@ -129,7 +129,7 @@
             </label>
             <!-- Dynamic brand options will be inserted here -->
           </div>
-          <div class="filter-show-more" id="brand-show-more" style="display: none;">
+          <div class="filter-show-more hidden" id="brand-show-more">
             <button class="show-more-btn" data-target="brand">
               <span><%= t('searchResults.filters.showMore') %></span>
               <i data-lucide="chevron-down"></i>
@@ -279,15 +279,15 @@
     <!-- Main Content Area -->
     <div class="search-results-main">
       <!-- Results Header -->
-      <div class="results-header" id="results-header" style="display: none;">
+      <div class="results-header hidden" id="results-header">
         <div class="results-header-left">
         <p class="results-count">
           <%= t('searchResults.header.found') %> <strong id="results-count">0</strong> <%= t('searchResults.header.partsMatching') %>
-          <span class="results-page-info" id="results-page-info" style="display: none;"></span>
+          <span class="results-page-info hidden" id="results-page-info"></span>
         </p>
         <p class="results-subtitle">
           <span id="selection-status"><%= t('searchResults.header.selectItems') %></span>
-          <span class="selected-badge" id="selected-badge" style="display: none;">
+          <span class="selected-badge hidden" id="selected-badge">
             <i data-lucide="shopping-cart"></i>
             <span id="selected-items-count">0</span> <%= t('searchResults.header.selected') %>
           </span>
@@ -311,7 +311,7 @@
       </div>
 
       <!-- Quick Sort & Filter Bar -->
-      <div class="quick-sort-bar" id="quick-sort-bar" style="display: none;">
+      <div class="quick-sort-bar hidden" id="quick-sort-bar">
         <div class="quick-sort-left">
           <span class="quick-sort-label"><%= t('searchResults.sort.sortBy') %></span>
           <div class="quick-sort-buttons">
@@ -350,7 +350,7 @@
       </div>
 
       <!-- Results Table -->
-      <div class="results-table-container" id="results-table-container" style="display: none;">
+      <div class="results-table-container hidden" id="results-table-container">
         <div class="table-wrapper">
           <table class="results-table" id="results-table">
             <thead>
@@ -376,7 +376,7 @@
         </div>
 
         <!-- Pagination Controls -->
-        <div class="results-pagination" id="results-pagination" style="display: none;">
+        <div class="results-pagination hidden" id="results-pagination">
           <!-- Populated by JS -->
         </div>
 
@@ -395,8 +395,8 @@
         </div>
       </div>
 
-      <!-- Empty State -->
-      <div class="empty-state" id="empty-state">
+      <!-- Empty State — Minimal -->
+      <div class="empty-state empty-state-minimal" id="empty-state">
         <div class="empty-state-icon-wrapper">
           <i data-lucide="search" class="empty-state-icon"></i>
         </div>
@@ -404,57 +404,10 @@
         <p class="empty-state-description">
           <%= t('searchResults.emptyState.description') %>
         </p>
-
-        <!-- Popular Searches -->
-        <div class="popular-searches">
-          <h4 class="popular-searches-title"><%= t('searchResults.emptyState.popularSearches') %></h4>
-          <div class="popular-chips">
-            <button class="popular-chip" data-search="8471474">
-              <i data-lucide="trending-up"></i>
-              8471474
-            </button>
-            <button class="popular-chip" data-search="brake pads">
-              <i data-lucide="disc"></i>
-              <%= t('searchResults.emptyState.brakePads') %>
-            </button>
-            <button class="popular-chip" data-search="oil filter">
-              <i data-lucide="filter"></i>
-              <%= t('searchResults.emptyState.oilFilter') %>
-            </button>
-            <button class="popular-chip" data-search="alternator">
-              <i data-lucide="zap"></i>
-              <%= t('searchResults.emptyState.alternator') %>
-            </button>
-            <button class="popular-chip" data-search="water pump">
-              <i data-lucide="droplets"></i>
-              <%= t('searchResults.emptyState.waterPump') %>
-            </button>
-          </div>
-        </div>
-
-        <!-- Feature Highlights -->
-        <div class="empty-state-features">
-          <div class="feature-item">
-            <i data-lucide="shield-check"></i>
-            <span><%= t('searchResults.emptyState.verifiedSuppliers') %></span>
-          </div>
-          <div class="feature-item">
-            <i data-lucide="globe"></i>
-            <span><%= t('searchResults.emptyState.globalNetwork') %></span>
-          </div>
-          <div class="feature-item">
-            <i data-lucide="zap"></i>
-            <span><%= t('searchResults.emptyState.fastDelivery') %></span>
-          </div>
-          <div class="feature-item">
-            <i data-lucide="award"></i>
-            <span><%= t('searchResults.emptyState.qualityGuaranteed') %></span>
-          </div>
-        </div>
       </div>
 
       <!-- No Results State -->
-      <div class="empty-state" id="no-results-state" style="display: none;">
+      <div class="empty-state hidden" id="no-results-state">
         <div class="empty-state-icon-wrapper">
           <i data-lucide="package-x" class="empty-state-icon"></i>
         </div>
@@ -517,7 +470,7 @@
       <!-- Step 1: Upload Area -->
       <div class="ai-excel-step" id="excel-step-upload">
         <!-- Upload Error Banner -->
-        <div class="ai-upload-error" id="upload-error-banner" style="display: none;">
+        <div class="ai-upload-error hidden" id="upload-error-banner">
           <div class="upload-error-icon">
             <i data-lucide="alert-triangle"></i>
           </div>
@@ -572,7 +525,7 @@
       </div>
 
       <!-- Step 2: AI Analyzing -->
-      <div class="ai-excel-step" id="excel-step-analyzing" style="display: none;">
+      <div class="ai-excel-step hidden" id="excel-step-analyzing">
         <div class="ai-analyzing-container">
           <div class="ai-analyzing-visual">
             <div class="ai-brain-pulse">
@@ -616,7 +569,7 @@
       </div>
 
       <!-- Step 3: AI Results Preview -->
-      <div class="ai-excel-step" id="excel-step-results" style="display: none;">
+      <div class="ai-excel-step hidden" id="excel-step-results">
         <!-- AI Summary Banner -->
         <div class="ai-results-summary">
           <div class="ai-summary-icon">
@@ -641,7 +594,7 @@
             </div>
             <div class="quality-text" id="quality-text"><%= t('searchResults.excel.qualityGood') %></div>
           </div>
-          <div class="quality-issues" id="quality-issues" style="display: none;">
+          <div class="quality-issues hidden" id="quality-issues">
             <i data-lucide="alert-circle"></i>
             <span id="quality-issues-text"></span>
           </div>
@@ -655,7 +608,7 @@
               <span class="checkbox-custom"></span>
               <span class="checkbox-label"><%= t('searchResults.excel.selectAll') %></span>
             </label>
-            <label class="select-all-checkbox select-first-option" id="select-first-1000-label" style="display: none;">
+            <label class="select-all-checkbox select-first-option hidden" id="select-first-1000-label">
               <input type="checkbox" id="select-first-1000">
               <span class="checkbox-custom"></span>
               <span class="checkbox-label"><%= t('searchResults.excel.selectFirst1000') %></span>
@@ -678,7 +631,7 @@
         </div>
 
         <!-- AI Suggestions -->
-        <div class="ai-suggestions" id="ai-suggestions" style="display: none;">
+        <div class="ai-suggestions hidden" id="ai-suggestions">
           <div class="suggestions-header">
             <i data-lucide="lightbulb"></i>
             <span><%= t('searchResults.excel.aiSuggestions') %></span>
@@ -689,7 +642,7 @@
       </div>
 
       <!-- Step 4: Search Results with Recommendations -->
-      <div class="ai-excel-step" id="excel-step-search-results" style="display: none;">
+      <div class="ai-excel-step hidden" id="excel-step-search-results">
         <!-- Analytics Summary -->
         <div class="excel-analytics" id="excel-analytics">
           <div class="analytics-header">
@@ -728,7 +681,7 @@
               </div>
               <div class="stat-percent stat-percent-not-found" id="stat-percent-not-found">0%</div>
             </div>
-            <div class="stat-card stat-duplicates" id="stat-duplicates-card" style="display: none;">
+            <div class="stat-card stat-duplicates hidden" id="stat-duplicates-card">
               <div class="stat-icon">
                 <i data-lucide="copy"></i>
               </div>
@@ -747,12 +700,12 @@
               <span class="success-rate-value" id="success-rate-value">0%</span>
             </div>
             <div class="success-rate-bar">
-              <div class="success-rate-fill" id="success-rate-fill" style="width: 0%;"></div>
+              <div class="success-rate-fill" id="success-rate-fill"></div>
             </div>
           </div>
           
           <!-- Not Found Parts List -->
-          <div class="not-found-section" id="not-found-section" style="display: none;">
+          <div class="not-found-section hidden" id="not-found-section">
             <div class="not-found-header">
               <i data-lucide="alert-triangle"></i>
               <span><%= t('searchResults.excel.partsNotFound') %></span>
@@ -766,7 +719,7 @@
           </div>
           
           <!-- Duplicates Warning -->
-          <div class="duplicates-section" id="duplicates-section" style="display: none;">
+          <div class="duplicates-section hidden" id="duplicates-section">
             <div class="duplicates-header">
               <i data-lucide="info"></i>
               <span><%= t('searchResults.excel.duplicatesDetected') %></span>
@@ -803,7 +756,7 @@
     <!-- Modal Footer -->
     <div class="modal-footer ai-excel-footer">
       <div class="footer-left">
-        <button class="btn-secondary" id="excel-reset-btn" style="display: none;">
+        <button class="btn-secondary hidden" id="excel-reset-btn">
           <i data-lucide="rotate-ccw"></i>
           <span><%= t('searchResults.excel.uploadNewFile') %></span>
         </button>
@@ -812,12 +765,12 @@
         <button class="btn-secondary" id="excel-cancel-btn">
           <%= t('common.cancel') %>
         </button>
-        <button class="btn-primary ai-search-btn" id="excel-search-btn" style="display: none;">
+        <button class="btn-primary ai-search-btn hidden" id="excel-search-btn">
           <i data-lucide="search"></i>
           <span><%= t('searchResults.excel.searchParts') %></span>
           <span class="search-count" id="excel-search-count">0</span>
         </button>
-        <button class="btn-primary ai-cart-btn" id="excel-add-cart-btn" style="display: none;">
+        <button class="btn-primary ai-cart-btn hidden" id="excel-add-cart-btn">
           <i data-lucide="shopping-cart"></i>
           <span><%= t('searchResults.excel.addToCartBtn') %></span>
           <span class="cart-count" id="excel-cart-count">0</span>
@@ -848,875 +801,10 @@
           <p><%= t('searchResults.recentSearches.empty') %></p>
         </div>
       </div>
-      <button class="btn-clear-history" id="clear-search-history" style="display: none;">
+      <button class="btn-clear-history hidden" id="clear-search-history">
         <i data-lucide="trash-2"></i>
         <%= t('searchResults.recentSearches.clearHistory') %>
       </button>
     </div>
   </div>
 </div>
-
-<style>
-/* Additional styles for enhanced filter sidebar */
-.filter-search {
-  position: relative;
-  margin-bottom: 0.75rem;
-}
-
-.filter-search i {
-  position: absolute;
-  left: 0.875rem;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 16px;
-  height: 16px;
-  color: var(--text-muted);
-}
-
-.filter-search input {
-  width: 100%;
-  padding: 0.75rem 1rem 0.75rem 2.5rem;
-  background: var(--bg-secondary);
-  border: 1.5px solid var(--border-color);
-  border-radius: 0.5rem;
-  font-family: 'Inter', sans-serif;
-  font-size: 0.875rem;
-  color: var(--text-primary);
-  outline: none;
-  transition: all 0.2s ease;
-}
-
-.filter-search input:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.filter-tags.scrollable {
-  max-height: 200px;
-  overflow-y: auto;
-  padding-right: 0.5rem;
-}
-
-.filter-tags.scrollable::-webkit-scrollbar {
-  width: 4px;
-}
-
-.filter-tags.scrollable::-webkit-scrollbar-track {
-  background: var(--bg-secondary);
-  border-radius: 2px;
-}
-
-.filter-tags.scrollable::-webkit-scrollbar-thumb {
-  background: var(--border-color);
-  border-radius: 2px;
-}
-
-.filter-tag i {
-  width: 14px;
-  height: 14px;
-  margin-right: 4px;
-}
-
-.stock-indicator {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  display: inline-block;
-  margin-right: 6px;
-}
-
-.stock-indicator.green {
-  background: #22c55e;
-  box-shadow: 0 0 6px rgba(34, 197, 94, 0.5);
-}
-
-.stock-indicator.yellow {
-  background: #f59e0b;
-  box-shadow: 0 0 6px rgba(245, 158, 11, 0.5);
-}
-
-.stock-indicator.red {
-  background: #ef4444;
-  box-shadow: 0 0 6px rgba(239, 68, 68, 0.5);
-}
-
-.filter-toggle {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  cursor: pointer;
-}
-
-.filter-toggle input {
-  display: none;
-}
-
-.filter-toggle .toggle-slider {
-  position: relative;
-  width: 44px;
-  height: 24px;
-  background: var(--border-color);
-  border-radius: 12px;
-  transition: all 0.3s ease;
-  flex-shrink: 0;
-}
-
-.filter-toggle .toggle-slider::before {
-  content: '';
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 20px;
-  height: 20px;
-  background: #fff;
-  border-radius: 50%;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
-}
-
-.filter-toggle input:checked + .toggle-slider {
-  background: var(--primary);
-}
-
-.filter-toggle input:checked + .toggle-slider::before {
-  transform: translateX(20px);
-}
-
-.filter-toggle .toggle-label {
-  font-family: 'Inter', sans-serif;
-  font-size: 0.875rem;
-  color: var(--text-secondary);
-}
-
-.active-filters-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.75rem 1rem;
-  background: rgba(59, 130, 246, 0.05);
-  border: 1px solid rgba(59, 130, 246, 0.15);
-  border-radius: 0.5rem;
-  margin-bottom: 1.5rem;
-}
-
-.active-filters-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.active-filter-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  padding: 0.375rem 0.75rem;
-  background: var(--primary);
-  border-radius: 1rem;
-  font-family: 'Inter', sans-serif;
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: #fff;
-}
-
-.active-filter-chip button {
-  width: 14px;
-  height: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.2);
-  border: none;
-  border-radius: 50%;
-  color: #fff;
-  cursor: pointer;
-  margin-left: 0.25rem;
-}
-
-.clear-active-filters {
-  display: flex;
-  align-items: center;
-  gap: 0.375rem;
-  padding: 0.375rem 0.75rem;
-  background: transparent;
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  border-radius: 0.375rem;
-  font-family: 'Inter', sans-serif;
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: #ef4444;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.clear-active-filters:hover {
-  background: rgba(239, 68, 68, 0.1);
-}
-
-.clear-active-filters i {
-  width: 12px;
-  height: 12px;
-}
-
-.filter-group-title {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.filter-group-title i {
-  width: 16px;
-  height: 16px;
-  color: var(--primary);
-}
-
-.results-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.results-header-left {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.results-header-right {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.filter-toggle-btn {
-  display: none;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.25rem;
-  background: var(--bg-secondary);
-  border: 1.5px solid var(--border-color);
-  border-radius: 0.5rem;
-  font-family: 'Inter', sans-serif;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.filter-toggle-btn:hover {
-  border-color: var(--primary);
-  color: var(--primary);
-}
-
-.filter-toggle-btn i {
-  width: 16px;
-  height: 16px;
-}
-
-.results-footer-left {
-  display: flex;
-  gap: 1rem;
-}
-
-.no-results-actions {
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-  margin-top: 2rem;
-}
-
-.btn-try-again,
-.btn-contact-support {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.875rem 1.5rem;
-  border-radius: 0.5rem;
-  font-family: 'Inter', sans-serif;
-  font-size: 0.9375rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.btn-try-again {
-  background: var(--primary);
-  border: none;
-  color: #fff;
-}
-
-.btn-try-again:hover {
-  background: var(--primary-dark);
-  transform: translateY(-2px);
-}
-
-.btn-contact-support {
-  background: transparent;
-  border: 1.5px solid var(--border-color);
-  color: var(--text-primary);
-}
-
-.btn-contact-support:hover {
-  border-color: var(--primary);
-  color: var(--primary);
-}
-
-.btn-try-again i,
-.btn-contact-support i {
-  width: 18px;
-  height: 18px;
-}
-
-.no-results-suggestions {
-  margin-top: 2rem;
-  text-align: left;
-  max-width: 400px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.no-results-suggestions h4 {
-  font-family: 'Inter', sans-serif;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: 0.75rem;
-}
-
-.no-results-suggestions ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.no-results-suggestions li {
-  padding: 0.5rem 0;
-  padding-left: 1.5rem;
-  position: relative;
-  font-family: 'Inter', sans-serif;
-  font-size: 0.875rem;
-  color: var(--text-secondary);
-}
-
-.no-results-suggestions li::before {
-  content: '•';
-  position: absolute;
-  left: 0;
-  color: var(--primary);
-}
-
-.modal-sm {
-  max-width: 480px;
-}
-
-.recent-searches-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.recent-search-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.875rem 1rem;
-  background: var(--bg-secondary);
-  border-radius: 0.5rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.recent-search-item:hover {
-  background: rgba(59, 130, 246, 0.08);
-}
-
-.recent-search-item-content {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.recent-search-item-content i {
-  width: 16px;
-  height: 16px;
-  color: var(--text-muted);
-}
-
-.recent-search-item-text {
-  font-family: 'Inter', sans-serif;
-  font-size: 0.9375rem;
-  color: var(--text-primary);
-}
-
-.recent-search-item-time {
-  font-family: 'Inter', sans-serif;
-  font-size: 0.75rem;
-  color: var(--text-muted);
-}
-
-.recent-search-empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 2rem;
-  text-align: center;
-}
-
-.recent-search-empty i {
-  width: 32px;
-  height: 32px;
-  color: var(--text-muted);
-}
-
-.recent-search-empty p {
-  font-family: 'Inter', sans-serif;
-  font-size: 0.9375rem;
-  color: var(--text-muted);
-  margin: 0;
-}
-
-/* Excel Recent Search Styles */
-.recent-search-excel {
-  padding: 0 !important;
-  background: transparent !important;
-  flex-direction: column;
-  gap: 0;
-}
-
-.recent-search-excel-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.875rem 1rem;
-  background: linear-gradient(135deg, rgba(34, 197, 94, 0.08) 0%, rgba(59, 130, 246, 0.08) 100%);
-  border-radius: 0.5rem 0.5rem 0 0;
-  border-bottom: 1px solid var(--border-color);
-}
-
-.recent-search-excel-header .recent-search-item-content {
-  gap: 0.75rem;
-}
-
-.recent-search-excel-header .recent-search-item-content i {
-  color: #22c55e;
-}
-
-.recent-search-excel-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.recent-search-all-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  padding: 0.375rem 0.75rem;
-  background: var(--primary);
-  border: none;
-  border-radius: 0.375rem;
-  font-family: 'Inter', sans-serif;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: white;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.recent-search-all-btn:hover {
-  background: var(--primary-dark);
-  transform: translateY(-1px);
-}
-
-.recent-search-all-btn i {
-  width: 12px;
-  height: 12px;
-}
-
-.recent-search-parts-list {
-  display: flex;
-  flex-direction: column;
-  max-height: 200px;
-  overflow-y: auto;
-  background: var(--bg-secondary);
-  border-radius: 0 0 0.5rem 0.5rem;
-}
-
-.recent-search-parts-list::-webkit-scrollbar {
-  width: 4px;
-}
-
-.recent-search-parts-list::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.recent-search-parts-list::-webkit-scrollbar-thumb {
-  background: var(--border-color);
-  border-radius: 2px;
-}
-
-.recent-part-number {
-  display: flex;
-  align-items: center;
-  gap: 0.625rem;
-  padding: 0.625rem 1rem;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.recent-part-number:last-child {
-  border-bottom: none;
-}
-
-.recent-part-number:hover {
-  background: rgba(59, 130, 246, 0.06);
-}
-
-.recent-part-number i {
-  width: 14px;
-  height: 14px;
-  color: var(--text-muted);
-  flex-shrink: 0;
-}
-
-.recent-part-number span {
-  flex: 1;
-  font-family: 'JetBrains Mono', 'Fira Code', monospace;
-  font-size: 0.8125rem;
-  color: var(--text-primary);
-  font-weight: 500;
-}
-
-.recent-part-search-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  background: transparent;
-  border: 1px solid var(--border-color);
-  border-radius: 0.25rem;
-  color: var(--text-muted);
-  cursor: pointer;
-  transition: all 0.15s ease;
-  opacity: 0;
-}
-
-.recent-part-number:hover .recent-part-search-btn {
-  opacity: 1;
-}
-
-.recent-part-search-btn:hover {
-  background: var(--primary);
-  border-color: var(--primary);
-  color: white;
-}
-
-.recent-part-search-btn i {
-  width: 12px;
-  height: 12px;
-  color: inherit;
-}
-
-.btn-clear-history {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  width: 100%;
-  padding: 0.875rem;
-  background: transparent;
-  border: 1.5px solid rgba(239, 68, 68, 0.3);
-  border-radius: 0.5rem;
-  font-family: 'Inter', sans-serif;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: #ef4444;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  margin-top: 1rem;
-}
-
-.btn-clear-history:hover {
-  background: rgba(239, 68, 68, 0.1);
-}
-
-.btn-clear-history i {
-  width: 16px;
-  height: 16px;
-}
-
-/* Make modal wider for Excel searches */
-.modal-container.modal-sm {
-  max-width: 480px;
-}
-
-@media (max-width: 1199px) {
-  .filter-toggle-btn {
-    display: flex;
-  }
-}
-
-@media (max-width: 767px) {
-  .results-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
-  }
-  
-  .results-header-right {
-    width: 100%;
-    justify-content: space-between;
-  }
-  
-  .results-footer-left {
-    flex-direction: column;
-    width: 100%;
-  }
-  
-  .btn-add-to-cart {
-    width: 100%;
-    justify-content: center;
-  }
-  
-  .no-results-actions {
-    flex-direction: column;
-  }
-  
-  .btn-try-again,
-  .btn-contact-support {
-    width: 100%;
-    justify-content: center;
-  }
-}
-
-/* ====================================
-   QUICK SORT BAR STYLES
-   ==================================== */
-.quick-sort-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 0.875rem 1.25rem;
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.04) 0%, rgba(99, 102, 241, 0.04) 100%);
-  border: 1px solid rgba(59, 130, 246, 0.12);
-  border-radius: 0.75rem;
-  margin-bottom: 1rem;
-  flex-wrap: wrap;
-}
-
-.quick-sort-left {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-}
-
-.quick-sort-label {
-  font-family: 'Inter', sans-serif;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.quick-sort-buttons {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.quick-sort-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  padding: 0.5rem 0.875rem;
-  background: white;
-  border: 1.5px solid var(--border-color);
-  border-radius: 2rem;
-  font-family: 'Inter', sans-serif;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: var(--text-secondary);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-}
-
-.quick-sort-btn i {
-  width: 14px;
-  height: 14px;
-}
-
-.quick-sort-btn:hover {
-  border-color: var(--primary);
-  color: var(--primary);
-  background: rgba(59, 130, 246, 0.04);
-}
-
-.quick-sort-btn.active {
-  background: var(--primary);
-  border-color: var(--primary);
-  color: white;
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.25);
-}
-
-.quick-sort-btn.active:hover {
-  background: var(--primary-dark);
-  border-color: var(--primary-dark);
-  color: white;
-}
-
-.quick-sort-right {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.quick-filter-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  padding: 0.5rem 0.875rem;
-  background: white;
-  border: 1.5px solid var(--border-color);
-  border-radius: 2rem;
-  font-family: 'Inter', sans-serif;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: var(--text-secondary);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-}
-
-.quick-filter-btn i {
-  width: 14px;
-  height: 14px;
-}
-
-.quick-filter-btn .stock-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #22c55e;
-  box-shadow: 0 0 6px rgba(34, 197, 94, 0.4);
-}
-
-.quick-filter-btn:hover {
-  border-color: var(--primary);
-  color: var(--primary);
-  background: rgba(59, 130, 246, 0.04);
-}
-
-.quick-filter-btn.active {
-  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
-  border-color: #22c55e;
-  color: white;
-  box-shadow: 0 2px 8px rgba(34, 197, 94, 0.25);
-}
-
-.quick-filter-btn.active .stock-dot {
-  background: white;
-  box-shadow: none;
-}
-
-.quick-filter-btn.active:hover {
-  background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
-}
-
-/* Low Stock button active state */
-.quick-filter-btn[data-filter="low-stock"].active {
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-  border-color: #f59e0b;
-}
-
-.quick-filter-btn[data-filter="low-stock"].active:hover {
-  background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
-}
-
-/* ====================================
-   ENHANCED FILTERS SIDEBAR STYLES
-   ==================================== */
-.filters-sidebar {
-  width: 420px;
-  min-width: 420px;
-}
-
-@media (max-width: 1199px) {
-  .filters-sidebar {
-    width: 400px;
-    max-width: 90vw;
-  }
-}
-
-/* Dynamic brand tags from data */
-.filter-tags-dynamic {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  max-height: 180px;
-  overflow-y: auto;
-  padding-right: 0.5rem;
-}
-
-.filter-tags-dynamic::-webkit-scrollbar {
-  width: 4px;
-}
-
-.filter-tags-dynamic::-webkit-scrollbar-track {
-  background: var(--bg-secondary);
-  border-radius: 2px;
-}
-
-.filter-tags-dynamic::-webkit-scrollbar-thumb {
-  background: var(--border-color);
-  border-radius: 2px;
-}
-
-/* Quick Sort responsive */
-@media (max-width: 991px) {
-  .quick-sort-bar {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.75rem;
-  }
-  
-  .quick-sort-left,
-  .quick-sort-right {
-    width: 100%;
-  }
-  
-  .quick-sort-buttons {
-    width: 100%;
-  }
-}
-
-@media (max-width: 575px) {
-  .quick-sort-btn span {
-    display: none;
-  }
-  
-  .quick-sort-btn {
-    padding: 0.625rem;
-  }
-  
-  .quick-sort-btn i {
-    width: 16px;
-    height: 16px;
-  }
-  
-  .quick-filter-btn span {
-    display: none;
-  }
-  
-  .quick-filter-btn {
-    padding: 0.625rem;
-  }
-}
-</style>

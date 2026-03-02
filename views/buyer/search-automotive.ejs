@@ -44,7 +44,7 @@
             <div class="search2-input-group">
               <i data-lucide="search" class="search2-icon"></i>
               <input type="text" class="search2-input" id="search2-input" placeholder="<%= t('search.placeholder') %>" autocomplete="off">
-              <button class="search2-clear-btn" id="search2-clear" style="display: none;">
+              <button class="search2-clear-btn hidden" id="search2-clear">
                 <i data-lucide="x"></i>
               </button>
             </div>
@@ -54,7 +54,7 @@
               <i data-lucide="arrow-right"></i>
             </button>
 
-            <button class="search2-reset-btn" id="search2-reset-btn" style="display: none;">
+            <button class="search2-reset-btn hidden" id="search2-reset-btn">
               <i data-lucide="rotate-ccw"></i>
               <span><%= t('search.resetBtn') %></span>
             </button>
@@ -75,7 +75,7 @@
             <i data-lucide="sparkles"></i>
             <span><%= t('search.aiSmartFilter') %></span>
           </button>
-          <button class="quick-action-btn" id="advanced-filter-trigger" style="display: none;">
+          <button class="quick-action-btn hidden" id="advanced-filter-trigger">
             <i data-lucide="sliders-horizontal"></i>
             <span><%= t('search.advancedFilters') %></span>
           </button>
@@ -86,6 +86,25 @@
 
   <!-- Results Section -->
   <%- include('partials/search-results') %>
+
+  <!-- Pre-Search Placeholder — Visible before any search -->
+  <div class="search2-placeholder" id="search2-placeholder">
+    <div class="placeholder-content">
+      <div class="placeholder-icon-ring">
+        <div class="placeholder-icon-inner">
+          <i data-lucide="search"></i>
+        </div>
+        <div class="placeholder-ring-pulse"></div>
+      </div>
+      <h3 class="placeholder-title"><%= t('searchResults.emptyState.title') %></h3>
+      <p class="placeholder-description"><%= t('searchResults.emptyState.description') %></p>
+      <div class="placeholder-hints">
+        <span class="placeholder-hint-chip">
+          <i data-lucide="hash"></i> <%= t('search.placeholder') %>
+        </span>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- Quick Search Modal -->
@@ -150,7 +169,7 @@
       </div>
 
       <!-- AI Response Section -->
-      <div class="ai-response-section" id="ai-response-section" style="display: none;">
+      <div class="ai-response-section hidden" id="ai-response-section">
         <div class="ai-response-header">
           <div class="ai-thinking-indicator" id="ai-thinking">
             <div class="thinking-dots">
@@ -160,14 +179,14 @@
             </div>
             <span class="thinking-text"><%= t('search.aiFilter.analyzing') %></span>
           </div>
-          <div class="ai-response-title" id="ai-response-title" style="display: none;">
+          <div class="ai-response-title hidden" id="ai-response-title">
             <i data-lucide="check-circle"></i>
             <span><%= t('search.aiFilter.foundFilters') %></span>
           </div>
         </div>
 
         <!-- AI Generated Filters Preview -->
-        <div class="ai-filters-preview" id="ai-filters-preview" style="display: none;">
+        <div class="ai-filters-preview hidden" id="ai-filters-preview">
           <div class="ai-filters-grid" id="ai-filters-grid">
             <!-- Dynamic filter cards will be inserted here -->
           </div>

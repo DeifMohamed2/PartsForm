@@ -1,0 +1,713 @@
+/* ================================================
+   PARTSFORM BRAND SYSTEM — V1.2026
+   Shibui (渋い) — Silent Strength
+   
+   The Heritage of Metal. The Velocity of Code.
+   ================================================ */
+
+/* ================================================
+   @FONT-FACE — Self-hosted Brand Fonts
+   ================================================ */
+
+/* --- QUANTICO (Display / Headlines — ALL CAPS ONLY) --- */
+@font-face {
+  font-family: 'Quantico';
+  src: url('/fonts/Quantico/Quantico-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Quantico';
+  src: url('/fonts/Quantico/Quantico-Italic.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Quantico';
+  src: url('/fonts/Quantico/Quantico-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Quantico';
+  src: url('/fonts/Quantico/Quantico-BoldItalic.ttf') format('truetype');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* --- ANTARTIDA (Body / UI / Data — Sentence/Title Case) --- */
+@font-face {
+  font-family: 'Antartida';
+  src: url('/fonts/Antartida/Antartida-Light.otf') format('opentype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Antartida';
+  src: url('/fonts/Antartida/Antartida-LightItalic.otf') format('opentype');
+  font-weight: 300;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Antartida';
+  src: url('/fonts/Antartida/Antartida-Medium.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Antartida';
+  src: url('/fonts/Antartida/Antartida-MediumItalic.otf') format('opentype');
+  font-weight: 500;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Antartida';
+  src: url('/fonts/Antartida/Antartida-Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Antartida';
+  src: url('/fonts/Antartida/Antartida-BoldItalic.otf') format('opentype');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Antartida';
+  src: url('/fonts/Antartida/Antartida-Black.otf') format('opentype');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Antartida';
+  src: url('/fonts/Antartida/Antartida-BlackItalic.otf') format('opentype');
+  font-weight: 900;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* --- NOTO KUFI ARABIC (Arabic Display — Bold/Black weights) --- */
+@font-face {
+  font-family: 'Noto Kufi Arabic';
+  src: url('/fonts/NotoKufiArabic/NotoKufiArabic-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Noto Kufi Arabic';
+  src: url('/fonts/NotoKufiArabic/NotoKufiArabic-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Noto Kufi Arabic';
+  src: url('/fonts/NotoKufiArabic/NotoKufiArabic-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Noto Kufi Arabic';
+  src: url('/fonts/NotoKufiArabic/NotoKufiArabic-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Noto Kufi Arabic';
+  src: url('/fonts/NotoKufiArabic/NotoKufiArabic-Black.ttf') format('truetype');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* --- MARKAZI TEXT (Arabic Body / UI — Regular/Medium) --- */
+@font-face {
+  font-family: 'Markazi Text';
+  src: url('/fonts/MarkaziText/MarkaziText-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Markazi Text';
+  src: url('/fonts/MarkaziText/MarkaziText-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Markazi Text';
+  src: url('/fonts/MarkaziText/MarkaziText-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Markazi Text';
+  src: url('/fonts/MarkaziText/MarkaziText-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ================================================
+   DESIGN TOKENS — The Atmosphere
+   ================================================ */
+:root {
+  /* === FOUNDATION === */
+  --kurogane:       #2B2B2B;  /* Iron — Primary text, dark UI */
+  --washi:          #F8FAFC;  /* Paper — Main background */
+
+  /* === INDUSTRIAL METALS === */
+  --suzu:           #D1D5DB;  /* Tin — Borders, grids, dividers */
+  --aitetsu:        #40545E;  /* Indigo Iron — Headers, footers, dark sections */
+  --namari:         #8E9CA6;  /* Lead — Secondary text, disabled UI */
+
+  /* === DATA / GLASS === */
+  --moya:           #829AB1;  /* Mist — Charts, data backgrounds */
+  --sei:            #95AFC0;  /* Pure Blue — Hover, focus, highlights */
+
+  /* === ACCENT (STRICT — primary CTA only) === */
+  --kintsugi:       #D4AF37;  /* Gold — ONLY Buy/Checkout/primary CTA */
+  --kintsugi-hover: #BF9D2F;
+  --kintsugi-active: #A8892A;
+  --kintsugi-light: rgba(212, 175, 55, 0.08);
+  --kintsugi-border: rgba(212, 175, 55, 0.3);
+
+  /* === SEMANTIC ALIASES === */
+  --color-text-primary:    var(--kurogane);
+  --color-text-secondary:  var(--namari);
+  --color-text-disabled:   var(--suzu);
+  --color-text-inverse:    var(--washi);
+
+  --color-bg-primary:      var(--washi);
+  --color-bg-card:         #FFFFFF;
+  --color-bg-elevated:     #FFFFFF;
+  --color-bg-section:      var(--aitetsu);
+  --color-bg-subtle:       #F1F5F9;
+
+  --color-border:          var(--suzu);
+  --color-border-light:    rgba(209, 213, 219, 0.5);
+  --color-border-strong:   var(--aitetsu);
+
+  --color-hover:           var(--sei);
+  --color-focus:           var(--sei);
+  --color-focus-ring:      rgba(149, 175, 192, 0.3);
+
+  --color-action-primary:  var(--kintsugi);
+  --color-action-secondary: var(--aitetsu);
+
+  /* === STATUS COLORS === */
+  --color-success:         #22C55E;
+  --color-success-bg:      rgba(34, 197, 94, 0.08);
+  --color-success-text:    #16A34A;
+  --color-warning:         #F59E0B;
+  --color-warning-bg:      rgba(245, 158, 11, 0.08);
+  --color-warning-text:    #D97706;
+  --color-error:           #DC2626;
+  --color-error-bg:        rgba(220, 38, 38, 0.08);
+  --color-error-text:      #DC2626;
+  --color-info:            var(--sei);
+  --color-info-bg:         rgba(149, 175, 192, 0.08);
+  --color-info-text:       var(--aitetsu);
+
+  /* === TYPOGRAPHY === */
+  --font-display:    'Quantico', sans-serif;
+  --font-body:       'Antartida', sans-serif;
+  --font-display-ar: 'Noto Kufi Arabic', sans-serif;
+  --font-body-ar:    'Markazi Text', serif;
+
+  /* === TYPE SCALE === */
+  --text-hero:   clamp(2.5rem, 5vw, 4rem);
+  --text-h1:     clamp(1.75rem, 3vw, 2.5rem);
+  --text-h2:     clamp(1.25rem, 2vw, 1.75rem);
+  --text-h3:     clamp(1rem, 1.5vw, 1.25rem);
+  --text-body:   1rem;
+  --text-small:  0.875rem;
+  --text-xs:     0.75rem;
+  --text-2xs:    0.6875rem;
+
+  /* === SPACING === */
+  --space-2xs: 0.25rem;
+  --space-xs:  0.5rem;
+  --space-sm:  0.75rem;
+  --space-md:  1rem;
+  --space-lg:  1.5rem;
+  --space-xl:  2rem;
+  --space-2xl: 3rem;
+  --space-3xl: 4rem;
+
+  /* === BORDERS === */
+  --radius-none: 0;
+  --radius-xs:   0.125rem;
+  --radius-sm:   0.25rem;
+  --radius-md:   0.375rem;
+  --radius-lg:   0.5rem;
+
+  /* === SHADOWS (minimal, industrial) === */
+  --shadow-xs:  0 1px 2px rgba(43, 43, 43, 0.04);
+  --shadow-sm:  0 1px 3px rgba(43, 43, 43, 0.06);
+  --shadow-md:  0 4px 12px rgba(43, 43, 43, 0.08);
+  --shadow-lg:  0 8px 24px rgba(43, 43, 43, 0.10);
+  --shadow-xl:  0 16px 40px rgba(43, 43, 43, 0.12);
+
+  /* === TRANSITIONS === */
+  --transition-base: all 0.2s ease;
+  --transition-fast: all 0.1s ease;
+  --transition-slow: all 0.4s ease;
+
+  /* === Z-INDEX SCALE === */
+  --z-dropdown: 1000;
+  --z-sticky:   1100;
+  --z-fixed:    1200;
+  --z-modal-bg: 1300;
+  --z-modal:    1400;
+  --z-popover:  1500;
+  --z-tooltip:  1600;
+  --z-nav:      10000;
+
+  /* === BACKWARD COMPATIBILITY — mapped to old variable names === */
+  --background:          var(--washi);
+  --foreground:          var(--kurogane);
+  --card:                var(--color-bg-card);
+  --card-foreground:     var(--kurogane);
+  --primary:             var(--aitetsu);
+  --primary-foreground:  var(--washi);
+  --secondary:           var(--color-bg-subtle);
+  --secondary-foreground: var(--aitetsu);
+  --muted:               var(--color-bg-subtle);
+  --muted-foreground:    var(--namari);
+  --accent:              var(--kintsugi-light);
+  --accent-foreground:   var(--kurogane);
+  --destructive:         var(--color-error);
+  --border:              var(--color-border);
+  --input-background:    var(--washi);
+  --ring:                var(--color-focus-ring);
+  --radius:              var(--radius-sm);
+  --text-primary:        var(--kurogane);
+  --text-secondary:      var(--namari);
+  --text-muted:          var(--namari);
+  --bg-primary:           var(--color-bg-card);
+  --border-color:         var(--color-border);
+  --text-subtle:         var(--suzu);
+  --shadow-sm-compat:    var(--shadow-sm);
+  --shadow-md-compat:    var(--shadow-md);
+  --shadow-lg-compat:    var(--shadow-lg);
+  --shadow-xl-compat:    var(--shadow-xl);
+  --transition-base-compat: var(--transition-base);
+  --transition-fast-compat: var(--transition-fast);
+
+  /* Buyer-main compat */
+  --buyer-primary:       var(--aitetsu);
+  --buyer-primary-dark:  #2F3F49;
+  --buyer-primary-light: var(--namari);
+  --buyer-accent:        var(--kintsugi);
+  --buyer-accent-dark:   var(--kintsugi-hover);
+  --buyer-accent-light:  var(--kintsugi-light);
+  --buyer-bg-primary:    var(--color-bg-card);
+  --buyer-bg-secondary:  var(--washi);
+  --buyer-bg-tertiary:   var(--color-bg-subtle);
+  --buyer-bg-accent:     var(--kintsugi-light);
+  --buyer-text-primary:  var(--kurogane);
+  --buyer-text-secondary: var(--namari);
+  --buyer-text-muted:    var(--namari);
+  --buyer-text-subtle:   var(--suzu);
+  --buyer-border:        var(--color-border);
+  --buyer-border-light:  var(--color-border-light);
+  --buyer-border-medium: var(--color-border);
+  --buyer-shadow-sm:     var(--shadow-sm);
+  --buyer-shadow-md:     var(--shadow-md);
+  --buyer-shadow-lg:     var(--shadow-lg);
+  --buyer-shadow-xl:     var(--shadow-xl);
+  --buyer-shadow-hover:  var(--shadow-lg);
+  --buyer-radius-sm:     var(--radius-sm);
+  --buyer-radius-md:     var(--radius-md);
+  --buyer-radius-lg:     var(--radius-lg);
+  --buyer-radius-xl:     var(--radius-lg);
+  --buyer-transition:    var(--transition-base);
+  --buyer-transition-fast: var(--transition-fast);
+  --buyer-space-xs:      var(--space-xs);
+  --buyer-space-sm:      var(--space-md);
+  --buyer-space-md:      var(--space-lg);
+  --buyer-space-lg:      var(--space-xl);
+  --buyer-space-xl:      var(--space-2xl);
+  --buyer-space-2xl:     var(--space-3xl);
+}
+
+/* ================================================
+   GLOBAL RESET — Industrial Foundation
+   ================================================ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-body);
+  font-weight: 500;
+  color: var(--kurogane);
+  background-color: var(--washi);
+  line-height: 1.6;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ================================================
+   TYPOGRAPHY — The Stamped Metal & Clean Data
+   ================================================ */
+
+h1, h2, h3, h4, h5, h6,
+.heading,
+.section-title,
+.page-title,
+.hero-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--kurogane);
+  line-height: 1.2;
+}
+
+h1 { font-size: var(--text-h1); }
+h2 { font-size: var(--text-h2); }
+h3 { font-size: var(--text-h3); }
+h4 { font-size: var(--text-body); }
+
+p, span, label, li, td, th, input, textarea, select, button, a {
+  font-family: var(--font-body);
+}
+
+/* ================================================
+   RTL / Arabic Typography
+   ================================================ */
+.rtl-mode {
+  font-family: var(--font-body-ar);
+}
+
+.rtl-mode h1,
+.rtl-mode h2,
+.rtl-mode h3,
+.rtl-mode h4,
+.rtl-mode h5,
+.rtl-mode h6,
+.rtl-mode .heading,
+.rtl-mode .section-title,
+.rtl-mode .page-title,
+.rtl-mode .hero-title {
+  font-family: var(--font-display-ar);
+  font-weight: 700;
+  text-transform: none;
+}
+
+.rtl-mode p,
+.rtl-mode span,
+.rtl-mode label,
+.rtl-mode li,
+.rtl-mode td,
+.rtl-mode th,
+.rtl-mode input,
+.rtl-mode textarea,
+.rtl-mode select,
+.rtl-mode button,
+.rtl-mode a {
+  font-family: var(--font-body-ar);
+}
+
+/* ================================================
+   UTILITY CLASSES
+   ================================================ */
+
+/* Visibility */
+.hidden       { display: none !important; }
+.visible      { display: block !important; }
+.invisible    { visibility: hidden !important; }
+.sr-only      { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+
+/* Text alignment */
+.text-center  { text-align: center; }
+.text-right   { text-align: right; }
+.text-left    { text-align: left; }
+
+/* Font families */
+.font-display { font-family: var(--font-display); text-transform: uppercase; letter-spacing: 0.04em; }
+.font-body    { font-family: var(--font-body); }
+
+/* Text colors */
+.text-kurogane { color: var(--kurogane); }
+.text-namari   { color: var(--namari); }
+.text-aitetsu  { color: var(--aitetsu); }
+.text-kintsugi { color: var(--kintsugi); }
+.text-washi    { color: var(--washi); }
+
+/* Spacing utilities */
+.mb-0   { margin-bottom: 0; }
+.mb-xs  { margin-bottom: var(--space-xs); }
+.mb-sm  { margin-bottom: var(--space-sm); }
+.mb-md  { margin-bottom: var(--space-md); }
+.mb-lg  { margin-bottom: var(--space-lg); }
+.mb-xl  { margin-bottom: var(--space-xl); }
+.mb-2xl { margin-bottom: var(--space-2xl); }
+
+.mt-0   { margin-top: 0; }
+.mt-xs  { margin-top: var(--space-xs); }
+.mt-sm  { margin-top: var(--space-sm); }
+.mt-md  { margin-top: var(--space-md); }
+.mt-lg  { margin-top: var(--space-lg); }
+.mt-xl  { margin-top: var(--space-xl); }
+
+.p-0   { padding: 0; }
+.p-xs  { padding: var(--space-xs); }
+.p-sm  { padding: var(--space-sm); }
+.p-md  { padding: var(--space-md); }
+.p-lg  { padding: var(--space-lg); }
+.p-xl  { padding: var(--space-xl); }
+
+/* ================================================
+   BRAND BUTTON SYSTEM — The Action Hierarchy
+   ================================================ */
+
+/* Primary Action (Gold) — ONLY for Buy/Checkout/primary CTA */
+.btn-brand-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  background: var(--kintsugi);
+  color: var(--kurogane);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: var(--text-small);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.75rem 1.5rem;
+  cursor: pointer;
+  transition: var(--transition-base);
+  text-decoration: none;
+  line-height: 1;
+}
+.btn-brand-primary:hover {
+  background: var(--kintsugi-hover);
+  transform: translateY(-1px);
+}
+.btn-brand-primary:active {
+  background: var(--kintsugi-active);
+  transform: translateY(0);
+}
+
+/* Secondary Action (Wireframe) */
+.btn-brand-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  background: transparent;
+  color: var(--aitetsu);
+  border: 1px solid var(--suzu);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: var(--text-small);
+  padding: 0.75rem 1.5rem;
+  cursor: pointer;
+  transition: var(--transition-base);
+  text-decoration: none;
+  line-height: 1;
+}
+.btn-brand-secondary:hover {
+  border-color: var(--sei);
+  color: var(--kurogane);
+  background: rgba(149, 175, 192, 0.06);
+}
+
+/* Ghost Action (Text link) */
+.btn-brand-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  background: none;
+  color: var(--namari);
+  border: none;
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: var(--text-small);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  transition: var(--transition-base);
+  padding: 0.5rem 0;
+}
+.btn-brand-ghost:hover {
+  color: var(--kurogane);
+}
+
+/* ================================================
+   BRAND CARD — Wireframe Module
+   ================================================ */
+.brand-card {
+  background: var(--color-bg-card);
+  border: 1px solid var(--suzu);
+  border-radius: var(--radius-sm);
+  padding: var(--space-lg);
+  transition: var(--transition-base);
+}
+.brand-card:hover {
+  border-color: var(--sei);
+}
+
+/* ================================================
+   BRAND BADGE SYSTEM — Status Tags
+   ================================================ */
+.brand-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.25rem 0.625rem;
+  border-radius: var(--radius-sm);
+  line-height: 1.4;
+}
+.brand-badge-success { background: var(--color-success-bg); color: var(--color-success-text); }
+.brand-badge-warning { background: var(--color-warning-bg); color: var(--color-warning-text); }
+.brand-badge-error   { background: var(--color-error-bg);   color: var(--color-error-text); }
+.brand-badge-info    { background: var(--color-info-bg);    color: var(--color-info-text); }
+.brand-badge-neutral { background: rgba(209, 213, 219, 0.3); color: var(--aitetsu); }
+
+/* ================================================
+   BRAND TABLE — Industrial Data Grid
+   ================================================ */
+.brand-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-body);
+}
+.brand-table th {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--namari);
+  border-bottom: 2px solid var(--suzu);
+  padding: var(--space-sm) var(--space-md);
+  text-align: left;
+}
+.brand-table td {
+  font-weight: 500;
+  font-size: var(--text-small);
+  color: var(--kurogane);
+  border-bottom: 1px solid var(--color-border-light);
+  padding: var(--space-sm) var(--space-md);
+}
+.brand-table tr:hover td {
+  background: rgba(149, 175, 192, 0.04);
+}
+
+/* ================================================
+   BRAND FORM INPUT — Precision Controls
+   ================================================ */
+.brand-input {
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: var(--text-body);
+  color: var(--kurogane);
+  background: var(--color-bg-card);
+  border: 1px solid var(--suzu);
+  border-radius: var(--radius-sm);
+  padding: 0.625rem 0.875rem;
+  transition: var(--transition-base);
+  width: 100%;
+  outline: none;
+}
+.brand-input:focus {
+  border-color: var(--sei);
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
+}
+.brand-input::placeholder {
+  color: var(--namari);
+  font-weight: 300;
+}
+
+/* ================================================
+   BLUEPRINT GRID BACKGROUND
+   ================================================ */
+.blueprint-bg {
+  background-color: var(--washi);
+  background-image:
+    linear-gradient(var(--color-border-light) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-border-light) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* ================================================
+   CHAMFERED CORNER — Brand Detail
+   ================================================ */
+.chamfered {
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%);
+}
+
+/* ================================================
+   IFRAME RESET
+   ================================================ */
+.iframe-reset {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* ================================================
+   LOADING BAR — System Verifying
+   ================================================ */
+@keyframes brand-scan {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.brand-loader {
+  width: 100%;
+  height: 2px;
+  background: var(--suzu);
+  overflow: hidden;
+  border-radius: 1px;
+}
+.brand-loader::after {
+  content: '';
+  display: block;
+  width: 40%;
+  height: 100%;
+  background: var(--kintsugi);
+  animation: brand-scan 1.5s ease-in-out infinite;
+}

@@ -345,13 +345,13 @@
     // Autocomplete
     document.addEventListener('click', handleOutsideClick);
 
-    // Popular searches
-    document.querySelectorAll('.popular-chip').forEach((chip) => {
-      chip.addEventListener('click', function () {
-        const searchTerm = this.dataset.search;
-        elements.searchInput.value = searchTerm;
+    // Popular searches & category cards
+    document.addEventListener('click', function (e) {
+      const chip = e.target.closest('.popular-chip, .empty-category-card');
+      if (chip && chip.dataset.search) {
+        elements.searchInput.value = chip.dataset.search;
         performSearch();
-      });
+      }
     });
 
     // Sort
@@ -968,6 +968,13 @@
     // Hide quick sort bar
     hideQuickSortBar();
 
+    // Hide entire results section when resetting
+    const resultsSection = document.getElementById('search2-results-section');
+    if (resultsSection) {
+      resultsSection.classList.add('hidden');
+      resultsSection.classList.remove('results-visible');
+    }
+
     // Hide results
     elements.resultsHeader.style.display = 'none';
     elements.resultsTableContainer.style.display = 'none';
@@ -1127,6 +1134,13 @@
     const startIndex = (state.currentPage - 1) * state.resultsPerPage;
     const endIndex = Math.min(startIndex + state.resultsPerPage, totalResults);
     const pageResults = results.slice(startIndex, endIndex);
+
+    // Show results section when displaying results
+    const resultsSection = document.getElementById('search2-results-section');
+    if (resultsSection) {
+      resultsSection.classList.remove('hidden');
+      resultsSection.classList.add('results-visible');
+    }
 
     hideEmptyState();
     hideNoResults();
@@ -1440,6 +1454,13 @@
   }
 
   function showNoResults() {
+    // Show results section even when no results (user has searched)
+    const resultsSection = document.getElementById('search2-results-section');
+    if (resultsSection) {
+      resultsSection.classList.remove('hidden');
+      resultsSection.classList.add('results-visible');
+    }
+
     // Show reset button
     if (elements.resetBtn) {
       elements.resetBtn.style.display = 'flex';
@@ -1463,6 +1484,13 @@
   }
 
   function showEmptyState() {
+    // Hide entire results section when showing empty state
+    const resultsSection = document.getElementById('search2-results-section');
+    if (resultsSection) {
+      resultsSection.classList.add('hidden');
+      resultsSection.classList.remove('results-visible');
+    }
+
     elements.resultsHeader.style.display = 'none';
     const tableContainer = document.getElementById('results-table-container');
     if (tableContainer) tableContainer.style.display = 'none';

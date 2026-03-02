@@ -8,7 +8,7 @@
    ==================================== */
 .ticket-details-page {
     min-height: 100vh;
-    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    background: var(--washi);
     padding-top: 0;
 }
 
@@ -20,18 +20,18 @@
     width: 100% !important;
     background: rgba(255, 255, 255, 0.98) !important;
     backdrop-filter: blur(20px) saturate(180%) !important;
-    border-bottom: 1px solid rgba(59, 130, 246, 0.2) !important;
-    box-shadow: 0 4px 20px rgba(43, 82, 120, 0.08) !important;
+    border-bottom: 1px solid rgba(64, 84, 94, 0.2) !important;
+    box-shadow: 0 4px 20px rgba(43, 43, 43, 0.08) !important;
 }
 
 /* ====================================
    TICKET HEADER BAR
    ==================================== */
 .ticket-header-bar {
-    background: linear-gradient(135deg, #1a2b3d 0%, #2b5278 100%);
+    background: var(--kurogane);
     padding: 7rem 0 2rem;
     margin-top: 0;
-    box-shadow: 0 4px 20px rgba(43, 82, 120, 0.15);
+    box-shadow: 0 4px 20px rgba(43, 43, 43, 0.15);
 }
 
 .ticket-header-content {
@@ -177,7 +177,7 @@
 .info-card-title {
     font-size: 1.1rem;
     font-weight: 700;
-    color: #1a2b3d;
+    color: var(--kurogane);
     margin: 0;
 }
 
@@ -197,14 +197,14 @@
 .info-label {
     font-size: 0.85rem;
     font-weight: 600;
-    color: #64748b;
+    color: var(--namari);
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
 .info-value {
     font-size: 0.95rem;
-    color: #1a2b3d;
+    color: var(--kurogane);
     font-weight: 500;
     display: flex;
     align-items: center;
@@ -214,7 +214,7 @@
 .info-value i {
     width: 16px;
     height: 16px;
-    color: #3b82f6;
+    color: var(--aitetsu);
 }
 
 .info-value.priority {
@@ -232,8 +232,8 @@
     border: 2px solid #e2e8f0;
     border-radius: 8px;
     font-size: 0.9rem;
-    color: #1a2b3d;
-    background: #f8fafc;
+    color: var(--kurogane);
+    background: var(--washi);
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -241,9 +241,9 @@
 
 .status-select:focus {
     outline: none;
-    border-color: #3b82f6;
+    border-color: var(--sei);
     background: white;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    box-shadow: 0 0 0 3px rgba(149, 175, 192, 0.1);
 }
 
 /* ====================================
@@ -272,7 +272,7 @@
     width: 48px;
     height: 48px;
     border-radius: 12px;
-    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    background: #dbeafe;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -281,19 +281,19 @@
 .chat-header-icon i {
     width: 24px;
     height: 24px;
-    color: #3b82f6;
+    color: var(--aitetsu);
 }
 
 .chat-title {
     font-size: 1.25rem;
     font-weight: 700;
-    color: #1a2b3d;
+    color: var(--kurogane);
     margin: 0 0 0.25rem 0;
 }
 
 .chat-subtitle {
     font-size: 0.85rem;
-    color: #64748b;
+    color: var(--namari);
     margin: 0;
 }
 
@@ -307,7 +307,7 @@
     display: flex;
     flex-direction: column;
     gap: 1.25rem;
-    background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+    background: var(--washi);
 }
 
 .message {
@@ -348,13 +348,13 @@
 
 /* Admin/Support avatar */
 .message.admin .message-avatar {
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    background: var(--aitetsu);
     color: white;
 }
 
 /* Customer/Buyer avatar */
 .message.customer .message-avatar {
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    background: var(--aitetsu);
     color: white;
 }
 
@@ -377,12 +377,12 @@
 .message-sender {
     font-weight: 600;
     font-size: 0.85rem;
-    color: #1a2b3d;
+    color: var(--kurogane);
 }
 
 .message-time {
     font-size: 0.75rem;
-    color: #94a3b8;
+    color: var(--suzu);
 }
 
 .message-bubble {
@@ -397,7 +397,7 @@
 /* Admin/Support bubble */
 .message.admin .message-bubble {
     background: white;
-    color: #1a2b3d;
+    color: var(--kurogane);
     border: 1px solid #e2e8f0;
     border-top-left-radius: 4px;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
@@ -405,11 +405,11 @@
 
 /* Customer/Buyer bubble - on the right */
 .message.customer .message-bubble {
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    background: var(--aitetsu);
     color: white;
     border: none;
     border-bottom-right-radius: 4px;
-    box-shadow: 0 2px 12px rgba(59, 130, 246, 0.18);
+    box-shadow: 0 2px 12px rgba(64, 84, 94, 0.18);
 }
 
 .message-attachments {
@@ -428,7 +428,7 @@
     border: 1px solid rgba(51, 65, 85, 0.2);
     border-radius: 10px;
     font-size: 0.875rem;
-    color: #1a2b3d;
+    color: var(--kurogane);
     text-decoration: none;
     transition: all 0.2s ease;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
@@ -445,7 +445,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(145deg, #3c6dbb, #2e63e0);
+    background: #3c6dbb;
     border-radius: 8px;
     color: #ffffff;
     flex-shrink: 0;
@@ -478,7 +478,7 @@
 
 .attachment-meta {
     font-size: 0.7rem;
-    color: #64748b;
+    color: var(--namari);
     font-weight: 500;
 }
 
@@ -499,7 +499,7 @@
 .attachment-download i {
     width: 14px;
     height: 14px;
-    color: #475569;
+    color: var(--namari);
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -511,7 +511,7 @@
 }
 
 .message.customer .attachment-icon {
-    background: linear-gradient(145deg, #3c6dbb, #2e63e0    );
+    background: #3c6dbb;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     color: #ffffff  !important;
 }
@@ -525,30 +525,30 @@
 }
 
 .message.customer .attachment-meta {
-    color: #64748b;
+    color: var(--namari);
 }
 
 .message.customer .attachment-download {
-    background: #f8fafc;
+    background: var(--washi);
     border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .message.customer .attachment-download i {
-    color: #475569;
+    color: var(--namari);
 }
 
 .attachment-item:hover {
     background: white;
-    border-color: #3b82f6;
+    border-color: var(--sei);
     transform: translateY(-1px);
-    box-shadow: 0 3px 10px rgba(59, 130, 246, 0.2);
+    box-shadow: 0 3px 10px rgba(149, 175, 192, 0.2);
 }
 
 .attachment-item:hover .attachment-download {
-    background: linear-gradient(145deg, #3b82f6, #2563eb);
+    background: var(--aitetsu);
     border-color: transparent;
     transform: scale(1.1);
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    box-shadow: 0 4px 12px rgba(64, 84, 94, 0.4);
 }
 
 .attachment-item:hover .attachment-download i {
@@ -557,12 +557,12 @@
 }
 
 .message.customer .attachment-item:hover {
-    background: #f8fafc;
+    background: var(--washi);
     border-color: #334155;
 }
 
 .message.customer .attachment-item:hover .attachment-download {
-    background: linear-gradient(145deg, #475569, #334155);
+    background: var(--namari);
     border-color: transparent;
     transform: scale(1.1);
     box-shadow: 0 4px 12px rgba(51, 65, 85, 0.4);
@@ -593,16 +593,16 @@
     align-items: flex-end;
     gap: 0.5rem;
     padding: 0.75rem 1rem;
-    background: #f8fafc;
+    background: var(--washi);
     border: 2px solid #e2e8f0;
     border-radius: 12px;
     transition: all 0.2s ease;
 }
 
 .chat-input-wrapper:focus-within {
-    border-color: #3b82f6;
+    border-color: var(--sei);
     background: white;
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    box-shadow: 0 0 0 4px rgba(149, 175, 192, 0.1);
 }
 
 .chat-input {
@@ -610,7 +610,7 @@
     border: none;
     background: transparent;
     font-size: 0.95rem;
-    color: #1a2b3d;
+    color: var(--kurogane);
     resize: none;
     max-height: 120px;
     font-family: inherit;
@@ -626,7 +626,7 @@
     border-radius: 8px;
     border: none;
     background: transparent;
-    color: #64748b;
+    color: var(--namari);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -636,7 +636,7 @@
 
 .btn-attach:hover {
     background: #e2e8f0;
-    color: #3b82f6;
+    color: var(--aitetsu);
 }
 
 .btn-attach i {
@@ -646,7 +646,7 @@
 
 .btn-send {
     padding: 0.875rem 1.75rem;
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    background: var(--kintsugi);
     color: white;
     border: none;
     border-radius: 12px;
@@ -657,12 +657,12 @@
     align-items: center;
     gap: 0.5rem;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 4px 12px rgba(64, 84, 94, 0.3);
 }
 
 .btn-send:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+    box-shadow: 0 6px 20px rgba(64, 84, 94, 0.4);
 }
 
 .btn-send i {
@@ -751,7 +751,7 @@
    FILE PREVIEW CONTAINER
    ==================================== */
 .file-preview-container {
-    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    background: var(--washi);
     border: 2px dashed #cbd5e1;
     border-radius: 12px;
     padding: 1rem;
@@ -760,8 +760,8 @@
 }
 
 .file-preview-container.uploading {
-    border-color: #3b82f6;
-    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    border-color: var(--sei);
+    background: #eff6ff;
 }
 
 .file-preview-header {
@@ -785,7 +785,7 @@
 .file-preview-title i {
     width: 16px;
     height: 16px;
-    color: #3b82f6;
+    color: var(--aitetsu);
 }
 
 .file-preview-clear {
@@ -831,14 +831,7 @@
 
 .file-preview-container.uploading .file-preview-item {
     border-color: #93c5fd;
-    background: linear-gradient(90deg, white, #eff6ff, white);
-    background-size: 200% 100%;
-    animation: shimmer 1.5s infinite;
-}
-
-@keyframes shimmer {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
+    background: #eff6ff;
 }
 
 .file-thumbnail {
@@ -856,7 +849,7 @@
     width: 44px;
     height: 44px;
     border-radius: 8px;
-    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    background: var(--aitetsu);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -888,7 +881,7 @@
 
 .file-preview-info .file-size {
     font-size: 0.75rem;
-    color: #64748b;
+    color: var(--namari);
 }
 
 .file-status {
@@ -910,7 +903,7 @@
     width: 20px;
     height: 20px;
     border: 2px solid #e2e8f0;
-    border-top-color: #3b82f6;
+    border-top-color: var(--aitetsu);
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
 }
@@ -921,7 +914,7 @@
 
 /* Send button states */
 .btn-send.sending {
-    background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
+    background: var(--aitetsu) !important;
     cursor: not-allowed;
 }
 

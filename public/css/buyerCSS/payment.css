@@ -8,7 +8,7 @@
    ==================================== */
 .payment-page {
     min-height: 100vh;
-    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    background: var(--washi);
     padding-top: 6rem;
 }
 
@@ -23,8 +23,8 @@
     background: rgba(255, 255, 255, 0.98) !important;
     backdrop-filter: blur(20px) saturate(180%) !important;
     -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
-    border-bottom: 1px solid rgba(59, 130, 246, 0.2) !important;
-    box-shadow: 0 4px 20px rgba(43, 82, 120, 0.08), 0 2px 8px rgba(59, 130, 246, 0.05) !important;
+    border-bottom: 1px solid rgba(64, 84, 94, 0.2) !important;
+    box-shadow: 0 4px 20px rgba(43, 43, 43, 0.08), 0 2px 8px rgba(64, 84, 94, 0.05) !important;
 }
 
 .payment-page .nav-dropdown-menu {
@@ -41,9 +41,7 @@
    HEADER BAR
    ==================================== */
 .payment-header-bar {
-    background: linear-gradient(180deg,
-            rgba(241, 245, 249, 0.8),
-            rgba(248, 250, 252, 0.8));
+    background: rgba(241, 245, 249, 0.95);
     padding: 2rem 0;
     border-bottom: 1px solid #e2e8f0;
     margin-bottom: 2rem;
@@ -65,7 +63,7 @@
 .payment-header-title {
     font-size: 2rem;
     font-weight: 700;
-    color: #1a2b3d;
+    color: var(--kurogane);
     margin-bottom: 0.5rem;
     display: flex;
     align-items: center;
@@ -75,12 +73,12 @@
 .payment-header-title i {
     width: 32px;
     height: 32px;
-    color: #3b82f6;
+    color: var(--aitetsu);
 }
 
 .payment-header-subtitle {
     font-size: 1rem;
-    color: #64748b;
+    color: var(--namari);
 }
 
 .payment-header-right {
@@ -94,7 +92,7 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.875rem 1.75rem;
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    background: #10b981;
     color: white;
     border: none;
     border-radius: 12px;
@@ -130,7 +128,7 @@
 .section-title {
     font-size: 1.5rem;
     font-weight: 700;
-    color: #1a2b3d;
+    color: var(--kurogane);
     display: flex;
     align-items: center;
     gap: 0.75rem;
@@ -139,7 +137,7 @@
 .section-title i {
     width: 28px;
     height: 28px;
-    color: #3b82f6;
+    color: var(--aitetsu);
 }
 
 /* ====================================
@@ -169,13 +167,13 @@
 }
 
 .balance-card:hover {
-    border-color: #3b82f6;
-    box-shadow: 0 8px 24px rgba(59, 130, 246, 0.15);
+    border-color: var(--sei);
+    box-shadow: 0 8px 24px rgba(149, 175, 192, 0.15);
     transform: translateY(-4px);
 }
 
 .balance-card.main-balance {
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    background: var(--aitetsu);
     border-color: #2563eb;
     color: white;
 }
@@ -216,7 +214,7 @@
 }
 
 .balance-card:not(.main-balance) .balance-icon i {
-    color: #3b82f6;
+    color: var(--aitetsu);
 }
 
 .balance-icon.pending i {
@@ -234,7 +232,7 @@
 }
 
 .balance-card:not(.main-balance) .balance-label {
-    color: #64748b;
+    color: var(--namari);
 }
 
 .balance-amount {
@@ -245,7 +243,7 @@
 }
 
 .balance-amount.secondary {
-    color: #1a2b3d;
+    color: var(--kurogane);
     font-size: 2rem;
 }
 
@@ -264,7 +262,7 @@
 }
 
 .balance-card:not(.main-balance) .balance-note {
-    color: #64748b;
+    color: var(--namari);
 }
 
 /* ====================================
@@ -290,9 +288,9 @@
 }
 
 .btn-add-method:hover {
-    background: #3b82f6;
+    background: var(--aitetsu);
     color: white;
-    border-color: #3b82f6;
+    border-color: var(--aitetsu);
 }
 
 .btn-add-method i {
@@ -317,14 +315,14 @@
 }
 
 .payment-method-card:hover {
-    border-color: #3b82f6;
-    box-shadow: 0 8px 24px rgba(59, 130, 246, 0.15);
+    border-color: var(--sei);
+    box-shadow: 0 8px 24px rgba(149, 175, 192, 0.15);
     transform: translateY(-4px);
 }
 
 .payment-method-card.default {
     border-color: #10b981;
-    background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+    background: #ffffff;
 }
 
 .method-card-header {
@@ -343,7 +341,7 @@
 .method-type-icon {
     width: 48px;
     height: 48px;
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    background: var(--aitetsu);
     border-radius: 10px;
     display: flex;
     align-items: center;
@@ -359,7 +357,7 @@
 .method-type-name {
     font-size: 1rem;
     font-weight: 700;
-    color: #1a2b3d;
+    color: var(--kurogane);
 }
 
 .default-badge {
@@ -387,7 +385,7 @@
 .method-card-number {
     font-size: 1.1rem;
     font-weight: 600;
-    color: #1a2b3d;
+    color: var(--kurogane);
     margin-bottom: 0.5rem;
     font-family: 'Courier New', monospace;
     letter-spacing: 0.05em;
@@ -395,7 +393,7 @@
 
 .method-card-expiry {
     font-size: 0.875rem;
-    color: #64748b;
+    color: var(--namari);
 }
 
 .method-card-footer {
@@ -432,9 +430,9 @@
 }
 
 .btn-method-action.edit:hover {
-    background: #3b82f6;
+    background: var(--aitetsu);
     color: white;
-    border-color: #3b82f6;
+    border-color: var(--aitetsu);
 }
 
 .btn-method-action.delete {
@@ -484,7 +482,7 @@
     width: 100px;
     height: 100px;
     margin: 0 auto 1.5rem;
-    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+    background: #f1f5f9;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -494,19 +492,19 @@
 .empty-icon i {
     width: 50px;
     height: 50px;
-    color: #94a3b8;
+    color: var(--suzu);
 }
 
 .empty-title {
     font-size: 1.5rem;
     font-weight: 700;
-    color: #1a2b3d;
+    color: var(--kurogane);
     margin-bottom: 0.75rem;
 }
 
 .empty-text {
     font-size: 1rem;
-    color: #64748b;
+    color: var(--namari);
     margin-bottom: 2rem;
 }
 
@@ -515,20 +513,20 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.875rem 1.75rem;
-    background: #3b82f6;
+    background: var(--aitetsu);
     color: white;
     border: none;
     border-radius: 12px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 4px 12px rgba(64, 84, 94, 0.3);
 }
 
 .btn-empty-action:hover {
     background: #2563eb;
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+    box-shadow: 0 6px 20px rgba(64, 84, 94, 0.4);
 }
 
 .btn-empty-action i {
@@ -552,7 +550,7 @@
 .filter-btn {
     padding: 0.625rem 1.25rem;
     background: white;
-    color: #64748b;
+    color: var(--namari);
     border: 1px solid #e2e8f0;
     border-radius: 10px;
     font-weight: 600;
@@ -562,14 +560,14 @@
 }
 
 .filter-btn:hover {
-    background: #f8fafc;
+    background: var(--washi);
     border-color: #cbd5e1;
 }
 
 .filter-btn.active {
-    background: #3b82f6;
+    background: var(--aitetsu);
     color: white;
-    border-color: #3b82f6;
+    border-color: var(--aitetsu);
 }
 
 .transactions-card {
@@ -590,7 +588,7 @@
 }
 
 .transactions-table thead {
-    background: #f8fafc;
+    background: var(--washi);
     border-bottom: 2px solid #e2e8f0;
 }
 
@@ -599,7 +597,7 @@
     text-align: left;
     font-size: 0.875rem;
     font-weight: 700;
-    color: #475569;
+    color: var(--namari);
     text-transform: uppercase;
     letter-spacing: 0.05em;
 }
@@ -610,7 +608,7 @@
 }
 
 .transactions-table tbody tr:hover {
-    background: #f8fafc;
+    background: var(--washi);
 }
 
 .transactions-table tbody tr:last-child {
@@ -620,11 +618,11 @@
 .transactions-table td {
     padding: 1.25rem 1.5rem;
     font-size: 0.9375rem;
-    color: #1a2b3d;
+    color: var(--kurogane);
 }
 
 .transaction-date {
-    color: #64748b;
+    color: var(--namari);
     font-size: 0.875rem;
 }
 
@@ -711,9 +709,9 @@
 }
 
 .btn-view-transaction:hover {
-    background: #3b82f6;
+    background: var(--aitetsu);
     color: white;
-    border-color: #3b82f6;
+    border-color: var(--aitetsu);
 }
 
 .btn-view-transaction i {
@@ -768,7 +766,7 @@
     transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     z-index: 10004;
     scrollbar-width: thin;
-    scrollbar-color: rgba(59, 130, 246, 0.3) transparent;
+    scrollbar-color: rgba(64, 84, 94, 0.3) transparent;
 }
 
 .payment-modal-container::-webkit-scrollbar {
@@ -780,12 +778,12 @@
 }
 
 .payment-modal-container::-webkit-scrollbar-thumb {
-    background: rgba(59, 130, 246, 0.3);
+    background: rgba(64, 84, 94, 0.3);
     border-radius: 10px;
 }
 
 .payment-modal-container::-webkit-scrollbar-thumb:hover {
-    background: rgba(59, 130, 246, 0.5);
+    background: rgba(64, 84, 94, 0.5);
 }
 
 body.modal-open {
@@ -829,13 +827,13 @@ body.modal-open {
 }
 
 .modal-header {
-    background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%);
+    background: var(--washi);
     margin: -2.5rem -2.5rem 2.5rem -2.5rem;
     padding: 2.5rem 2.5rem 2rem 2.5rem;
     border-radius: 20px 20px 0 0;
     position: relative;
     overflow: hidden;
-    border-bottom: 1px solid rgba(59, 130, 246, 0.1);
+    border-bottom: 1px solid rgba(64, 84, 94, 0.1);
 }
 
 .modal-header::before {
@@ -845,12 +843,7 @@ body.modal-open {
     left: 0;
     right: 0;
     height: 3px;
-    background: linear-gradient(90deg,
-            transparent 0%,
-            #3b82f6 25%,
-            #2563eb 50%,
-            #3b82f6 75%,
-            transparent 100%);
+    background: var(--aitetsu);
 }
 
 .modal-header::after {
@@ -860,7 +853,7 @@ body.modal-open {
     right: -100px;
     width: 200px;
     height: 200px;
-    background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, transparent 70%);
+    background: transparent;
     border-radius: 50%;
     pointer-events: none;
 }
@@ -875,9 +868,9 @@ body.modal-open {
     border-radius: 14px;
     margin-bottom: 1.25rem;
     box-shadow:
-        0 4px 12px rgba(59, 130, 246, 0.12),
+        0 4px 12px rgba(64, 84, 94, 0.12),
         0 2px 4px rgba(0, 0, 0, 0.04);
-    border: 1.5px solid rgba(59, 130, 246, 0.15);
+    border: 1.5px solid rgba(64, 84, 94, 0.15);
     position: relative;
     transition: all 0.3s ease;
 }
@@ -885,7 +878,7 @@ body.modal-open {
 .modal-icon i {
     width: 28px;
     height: 28px;
-    color: #3b82f6;
+    color: var(--aitetsu);
     stroke-width: 2px;
 }
 
@@ -900,7 +893,7 @@ body.modal-open {
 
 .modal-subtitle {
     font-size: 0.9375rem;
-    color: #64748b;
+    color: var(--namari);
     font-weight: 500;
     line-height: 1.5;
     max-width: 90%;
@@ -935,7 +928,7 @@ body.modal-open {
 .form-label {
     font-size: 0.9rem;
     font-weight: 600;
-    color: #1a2b3d;
+    color: var(--kurogane);
     margin-bottom: 0.5rem;
 }
 
@@ -945,7 +938,7 @@ body.modal-open {
     border: 2px solid #e2e8f0;
     border-radius: 10px;
     font-size: 0.95rem;
-    color: #1a2b3d;
+    color: var(--kurogane);
     background: white;
     transition: all 0.3s ease;
     font-family: inherit;
@@ -954,8 +947,8 @@ body.modal-open {
 .form-input:focus,
 .form-select:focus {
     outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    border-color: var(--sei);
+    box-shadow: 0 0 0 3px rgba(149, 175, 192, 0.1);
 }
 
 .amount-input-wrapper {
@@ -969,7 +962,7 @@ body.modal-open {
     transform: translateY(-50%);
     font-size: 1.25rem;
     font-weight: 700;
-    color: #64748b;
+    color: var(--namari);
     pointer-events: none;
 }
 
@@ -988,8 +981,8 @@ body.modal-open {
 
 .quick-amount-btn {
     padding: 0.75rem;
-    background: #f8fafc;
-    color: #475569;
+    background: var(--washi);
+    color: var(--namari);
     border: 1px solid #e2e8f0;
     border-radius: 10px;
     font-weight: 600;
@@ -1000,14 +993,14 @@ body.modal-open {
 
 .quick-amount-btn:hover {
     background: #eff6ff;
-    color: #3b82f6;
+    color: var(--aitetsu);
     border-color: #bfdbfe;
 }
 
 .quick-amount-btn.active {
-    background: #3b82f6;
+    background: var(--aitetsu);
     color: white;
-    border-color: #3b82f6;
+    border-color: var(--aitetsu);
 }
 
 .checkbox-label {
@@ -1016,7 +1009,7 @@ body.modal-open {
     gap: 0.75rem;
     cursor: pointer;
     font-size: 0.95rem;
-    color: #475569;
+    color: var(--namari);
     user-select: none;
 }
 
@@ -1024,7 +1017,7 @@ body.modal-open {
     width: 20px;
     height: 20px;
     cursor: pointer;
-    accent-color: #3b82f6;
+    accent-color: var(--aitetsu);
 }
 
 .form-actions {
@@ -1051,24 +1044,24 @@ body.modal-open {
 
 .btn-cancel {
     background: white;
-    color: #64748b;
+    color: var(--namari);
     border: 2px solid #e2e8f0;
 }
 
 .btn-cancel:hover {
-    background: #f8fafc;
+    background: var(--washi);
     border-color: #cbd5e1;
 }
 
 .btn-save {
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    background: var(--aitetsu);
     color: white;
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 4px 12px rgba(64, 84, 94, 0.3);
 }
 
 .btn-save:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+    box-shadow: 0 6px 20px rgba(64, 84, 94, 0.4);
 }
 
 .btn-cancel i,

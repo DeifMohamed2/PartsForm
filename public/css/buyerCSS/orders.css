@@ -8,7 +8,7 @@
    ==================================== */
 .orders-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  background: var(--washi);
   padding-top: 6rem;
 }
 
@@ -23,8 +23,8 @@
   background: rgba(255, 255, 255, 0.98) !important;
   backdrop-filter: blur(20px) saturate(180%) !important;
   -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
-  border-bottom: 1px solid rgba(59, 130, 246, 0.2) !important;
-  box-shadow: 0 4px 20px rgba(43, 82, 120, 0.08), 0 2px 8px rgba(59, 130, 246, 0.05) !important;
+  border-bottom: 1px solid rgba(149, 175, 192, 0.2) !important;
+  box-shadow: 0 4px 20px rgba(43, 43, 43, 0.08), 0 2px 8px rgba(149, 175, 192, 0.05) !important;
   overflow: visible !important;
 }
 
@@ -35,11 +35,11 @@
 
 /* Ensure navbar links are visible */
 .orders-page .nav-link {
-  color: #1a2b3d !important;
+  color: var(--kurogane) !important;
 }
 
 .orders-page .nav-link.active {
-  color: #3b82f6 !important;
+  color: var(--aitetsu) !important;
 }
 
 /* Ensure logo is visible */
@@ -58,9 +58,7 @@
    HEADER BAR
    ==================================== */
 .orders-header-bar {
-  background: linear-gradient(180deg,
-      rgba(241, 245, 249, 0.8),
-      rgba(248, 250, 252, 0.8));
+  background: rgba(241, 245, 249, 0.95);
   padding: 2rem 0;
   border-bottom: 1px solid #e2e8f0;
   margin-bottom: 2rem;
@@ -82,7 +80,7 @@
 .orders-header-title {
   font-size: 2rem;
   font-weight: 700;
-  color: #1a2b3d;
+  color: var(--kurogane);
   margin-bottom: 0.5rem;
   display: flex;
   align-items: center;
@@ -92,12 +90,12 @@
 .orders-header-title i {
   width: 32px;
   height: 32px;
-  color: #3b82f6;
+  color: var(--aitetsu);
 }
 
 .orders-header-subtitle {
   font-size: 1rem;
-  color: #64748b;
+  color: var(--namari);
 }
 
 .orders-header-right {
@@ -167,13 +165,13 @@
 .stat-card-value {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #1a2b3d;
+  color: var(--kurogane);
   line-height: 1.2;
 }
 
 .stat-card-label {
   font-size: 0.875rem;
-  color: #64748b;
+  color: var(--namari);
 }
 
 /* ====================================
@@ -204,7 +202,7 @@
   display: block;
   font-size: 0.875rem;
   font-weight: 600;
-  color: #1a2b3d;
+  color: var(--kurogane);
   margin-bottom: 0.5rem;
 }
 
@@ -215,7 +213,7 @@
   border: 2px solid #e2e8f0;
   border-radius: 10px;
   font-size: 0.95rem;
-  color: #1a2b3d;
+  color: var(--kurogane);
   background: white;
   transition: all 0.3s ease;
   font-family: inherit;
@@ -224,8 +222,8 @@
 .filter-input:focus,
 .filter-select:focus {
   outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: var(--sei);
+  box-shadow: 0 0 0 3px rgba(149, 175, 192, 0.15);
 }
 
 .filter-select {
@@ -258,24 +256,24 @@
 }
 
 .btn-filter {
-  background: #3b82f6;
+  background: var(--kintsugi);
   color: white;
-  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+  box-shadow: 0 2px 4px rgba(64, 84, 94, 0.15);
 }
 
 .btn-filter:hover {
   background: #2563eb;
-  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 4px 8px rgba(64, 84, 94, 0.2);
 }
 
 .btn-reset {
   background: white;
-  color: #64748b;
+  color: var(--namari);
   border: 2px solid #e2e8f0;
 }
 
 .btn-reset:hover {
-  background: #f8fafc;
+  background: var(--washi);
   border-color: #cbd5e1;
 }
 
@@ -317,7 +315,7 @@
 }
 
 .orders-table thead {
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  background: var(--washi);
   border-bottom: 2px solid #e2e8f0;
 }
 
@@ -326,11 +324,11 @@
   text-align: left;
   font-size: 0.875rem;
   font-weight: 600;
-  color: #1a2b3d;
+  color: var(--kurogane);
   text-transform: none;
   letter-spacing: 0;
   white-space: nowrap;
-  background: #f8fafc;
+  background: var(--washi);
 }
 
 .orders-table th.sortable {
@@ -342,7 +340,7 @@
 }
 
 .orders-table th.sortable:hover {
-  color: #3b82f6;
+  color: var(--aitetsu);
 }
 
 .orders-table th.sortable::after {
@@ -361,13 +359,13 @@
 .orders-table th.sort-asc::after {
   content: '↑';
   opacity: 1;
-  color: #3b82f6;
+  color: var(--aitetsu);
 }
 
 .orders-table th.sort-desc::after {
   content: '↓';
   opacity: 1;
-  color: #3b82f6;
+  color: var(--aitetsu);
 }
 
 .orders-table tbody tr {
@@ -376,7 +374,7 @@
 }
 
 .orders-table tbody tr:hover {
-  background: #f8fafc;
+  background: var(--washi);
 }
 
 .orders-table tbody tr:last-child {
@@ -386,14 +384,14 @@
 .orders-table td {
   padding: 1.25rem 1.5rem;
   font-size: 0.95rem;
-  color: #1a2b3d;
+  color: var(--kurogane);
   vertical-align: middle;
 }
 
 /* Order Number */
 .order-number {
   font-weight: 600;
-  color: #3b82f6;
+  color: var(--aitetsu);
   font-family: 'Courier New', monospace;
   font-size: 0.9rem;
 }
@@ -415,14 +413,14 @@
 
 /* Order Date */
 .order-date {
-  color: #64748b;
+  color: var(--namari);
   white-space: nowrap;
 }
 
 .order-date-time {
   display: block;
   font-size: 0.85rem;
-  color: #94a3b8;
+  color: var(--suzu);
   margin-top: 0.25rem;
 }
 
@@ -484,12 +482,12 @@
 
 .order-items-count {
   font-weight: 600;
-  color: #1a2b3d;
+  color: var(--kurogane);
 }
 
 .order-items-preview {
   font-size: 0.85rem;
-  color: #64748b;
+  color: var(--namari);
   margin-top: 0.25rem;
 }
 
@@ -497,12 +495,12 @@
 .order-amount {
   font-weight: 700;
   font-size: 1.1rem;
-  color: #1a2b3d;
+  color: var(--kurogane);
 }
 
 .order-amount-currency {
   font-size: 0.85rem;
-  color: #64748b;
+  color: var(--namari);
   font-weight: 400;
   margin-left: 0.25rem;
 }
@@ -536,9 +534,9 @@
 }
 
 .btn-action.view:hover {
-  background: #3b82f6;
+  background: var(--aitetsu);
   color: white;
-  border-color: #3b82f6;
+  border-color: var(--aitetsu);
 }
 
 .btn-action.track {
@@ -586,7 +584,7 @@
   width: 120px;
   height: 120px;
   margin: 0 auto 2rem;
-  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  background: #f1f5f9;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -596,19 +594,19 @@
 .orders-empty-icon i {
   width: 60px;
   height: 60px;
-  color: #94a3b8;
+  color: var(--suzu);
 }
 
 .orders-empty-title {
   font-size: 1.75rem;
   font-weight: 700;
-  color: #1a2b3d;
+  color: var(--kurogane);
   margin-bottom: 1rem;
 }
 
 .orders-empty-text {
   font-size: 1.1rem;
-  color: #64748b;
+  color: var(--namari);
   margin-bottom: 2.5rem;
   max-width: 500px;
   margin-left: auto;
@@ -637,19 +635,19 @@
 }
 
 .btn-empty-action.primary {
-  background: #3b82f6;
+  background: var(--kintsugi);
   color: white;
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 2px 8px rgba(64, 84, 94, 0.2);
 }
 
 .btn-empty-action.primary:hover {
   background: #2563eb;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+  box-shadow: 0 4px 12px rgba(64, 84, 94, 0.3);
 }
 
 .btn-empty-action.secondary {
   background: white;
-  color: #3b82f6;
+  color: var(--aitetsu);
   border: 2px solid #bfdbfe;
 }
 
@@ -681,7 +679,7 @@
   font-weight: 600;
   border: 2px solid #e2e8f0;
   background: white;
-  color: #1a2b3d;
+  color: var(--kurogane);
   cursor: pointer;
   transition: all 0.2s ease;
   display: inline-flex;
@@ -692,9 +690,9 @@
 }
 
 .pagination-btn:hover:not(:disabled) {
-  border-color: #3b82f6;
-  color: #3b82f6;
-  background: #eff6ff;
+  border-color: var(--aitetsu);
+  color: var(--aitetsu);
+  background: rgba(64, 84, 94, 0.08);
 }
 
 .pagination-btn:disabled {
@@ -703,14 +701,14 @@
 }
 
 .pagination-btn.active {
-  background: #3b82f6;
+  background: var(--aitetsu);
   color: white;
-  border-color: #3b82f6;
+  border-color: var(--aitetsu);
 }
 
 .pagination-info {
   font-size: 0.95rem;
-  color: #64748b;
+  color: var(--namari);
   margin: 0 1rem;
 }
 
@@ -750,7 +748,7 @@
   .orders-table td::before {
     content: attr(data-label);
     font-weight: 700;
-    color: #64748b;
+    color: var(--namari);
     text-transform: uppercase;
     font-size: 0.75rem;
     letter-spacing: 0.5px;
@@ -832,7 +830,7 @@
   width: 48px;
   height: 48px;
   border: 4px solid #e2e8f0;
-  border-top-color: #3b82f6;
+  border-top-color: var(--aitetsu);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
   margin: 0 auto 1rem;
@@ -845,6 +843,6 @@
 }
 
 .loading-text {
-  color: #64748b;
+  color: var(--namari);
   font-size: 1rem;
 }
