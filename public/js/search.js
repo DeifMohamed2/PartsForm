@@ -256,7 +256,7 @@
         
         // Show reset button
         if (elements.resetBtn) {
-          elements.resetBtn.style.display = 'flex';
+          elements.resetBtn.classList.remove('hidden');
         }
         
         // Update search input with the query
@@ -309,7 +309,7 @@
         populateFiltersFromResults(aiResults);
         
         if (elements.resetBtn) {
-          elements.resetBtn.style.display = 'flex';
+          elements.resetBtn.classList.remove('hidden');
         }
         
         if (elements.searchInput && aiQuery) {
@@ -534,13 +534,17 @@
   }
 
   function performSingleSearch(query) {
-    // Show loading state
-    if (elements.resultsHeader) elements.resultsHeader.style.display = 'flex';
-    if (elements.resultsTableContainer)
-      elements.resultsTableContainer.style.display = 'block';
-    if (elements.emptyState) elements.emptyState.style.display = 'none';
-    if (elements.noResultsState) elements.noResultsState.style.display = 'none';
-    if (elements.resetBtn) elements.resetBtn.style.display = 'inline-flex';
+    // Show results section and loading state (must remove 'hidden' class - it uses !important)
+    const resultsSection = document.getElementById('search2-results-section');
+    if (resultsSection) {
+      resultsSection.classList.remove('hidden');
+      resultsSection.classList.add('results-visible');
+    }
+    if (elements.resultsHeader) elements.resultsHeader.classList.remove('hidden');
+    if (elements.resultsTableContainer) elements.resultsTableContainer.classList.remove('hidden');
+    if (elements.emptyState) elements.emptyState.classList.add('hidden');
+    if (elements.noResultsState) elements.noResultsState.classList.add('hidden');
+    if (elements.resetBtn) elements.resetBtn.classList.remove('hidden');
 
     // Clear table and show loading
     if (elements.resultsTableBody) {
@@ -663,13 +667,17 @@
 
     console.log('Multi-part search:', partNumbers.length, 'parts');
 
-    // Show loading state
-    if (elements.resultsHeader) elements.resultsHeader.style.display = 'flex';
-    if (elements.resultsTableContainer)
-      elements.resultsTableContainer.style.display = 'block';
-    if (elements.emptyState) elements.emptyState.style.display = 'none';
-    if (elements.noResultsState) elements.noResultsState.style.display = 'none';
-    if (elements.resetBtn) elements.resetBtn.style.display = 'inline-flex';
+    // Show loading state (use classList - .hidden has display:none !important)
+    const resultsSection = document.getElementById('search2-results-section');
+    if (resultsSection) {
+      resultsSection.classList.remove('hidden');
+      resultsSection.classList.add('results-visible');
+    }
+    if (elements.resultsHeader) elements.resultsHeader.classList.remove('hidden');
+    if (elements.resultsTableContainer) elements.resultsTableContainer.classList.remove('hidden');
+    if (elements.emptyState) elements.emptyState.classList.add('hidden');
+    if (elements.noResultsState) elements.noResultsState.classList.add('hidden');
+    if (elements.resetBtn) elements.resetBtn.classList.remove('hidden');
 
     // Clear table and show loading
     if (elements.resultsTableBody) {
@@ -796,13 +804,17 @@
     elements.searchInput.value = partNumbers.slice(0, 5).join(', ') + 
       (partNumbers.length > 5 ? ` ... +${partNumbers.length - 5} more` : '');
 
-    // Show loading state
-    if (elements.resultsHeader) elements.resultsHeader.style.display = 'flex';
-    if (elements.resultsTableContainer)
-      elements.resultsTableContainer.style.display = 'block';
-    if (elements.emptyState) elements.emptyState.style.display = 'none';
-    if (elements.noResultsState) elements.noResultsState.style.display = 'none';
-    if (elements.resetBtn) elements.resetBtn.style.display = 'inline-flex';
+    // Show loading state (use classList - .hidden has display:none !important)
+    const resultsSection = document.getElementById('search2-results-section');
+    if (resultsSection) {
+      resultsSection.classList.remove('hidden');
+      resultsSection.classList.add('results-visible');
+    }
+    if (elements.resultsHeader) elements.resultsHeader.classList.remove('hidden');
+    if (elements.resultsTableContainer) elements.resultsTableContainer.classList.remove('hidden');
+    if (elements.emptyState) elements.emptyState.classList.add('hidden');
+    if (elements.noResultsState) elements.noResultsState.classList.add('hidden');
+    if (elements.resetBtn) elements.resetBtn.classList.remove('hidden');
 
     if (elements.resultsTableBody) {
       elements.resultsTableBody.innerHTML =
@@ -957,7 +969,7 @@
     // Clear search input
     elements.searchInput.value = '';
     elements.clearBtn.style.display = 'none';
-    elements.resetBtn.style.display = 'none';
+    elements.resetBtn.classList.add('hidden');
 
     // Hide autocomplete
     hideAutocomplete();
@@ -975,18 +987,18 @@
       resultsSection.classList.remove('results-visible');
     }
 
-    // Hide results
-    elements.resultsHeader.style.display = 'none';
-    elements.resultsTableContainer.style.display = 'none';
-    elements.noResultsState.style.display = 'none';
+    // Hide results (use classList - .hidden has display:none !important)
+    elements.resultsHeader.classList.add('hidden');
+    elements.resultsTableContainer.classList.add('hidden');
+    elements.noResultsState.classList.add('hidden');
 
     // Hide advanced filter trigger when resetting
     if (elements.advancedFilterTrigger) {
-      elements.advancedFilterTrigger.style.display = 'none';
+      elements.advancedFilterTrigger.classList.add('hidden');
     }
 
     // Show empty state
-    elements.emptyState.style.display = 'block';
+    elements.emptyState.classList.remove('hidden');
 
     // Clear state
     state.searchQuery = '';
@@ -1152,7 +1164,7 @@
 
     // Show advanced filter trigger when results are displayed
     if (elements.advancedFilterTrigger) {
-      elements.advancedFilterTrigger.style.display = 'flex';
+      elements.advancedFilterTrigger.classList.remove('hidden');
     }
 
     // Update count — show total and page range
@@ -1163,15 +1175,15 @@
       pageInfoEl.textContent = `Showing ${startIndex + 1}–${endIndex} of ${totalResults}`;
       pageInfoEl.style.display = totalResults > state.resultsPerPage ? 'inline' : 'none';
     }
-    elements.resultsHeader.style.display = 'flex';
+    elements.resultsHeader.classList.remove('hidden');
     elements.resultsGrid ? (elements.resultsGrid.style.display = 'none') : null;
 
-    // Show table container
+    // Show table container (remove 'hidden' - it uses display:none !important)
     const tableContainer = document.getElementById('results-table-container');
     const tableBody = document.getElementById('results-table-body');
 
     if (tableContainer && tableBody) {
-      tableContainer.style.display = 'block';
+      tableContainer.classList.remove('hidden');
 
       // Get user's preferred currency for price conversion
       const preferredCurrency = window.getPreferredCurrency ? window.getPreferredCurrency() : 'USD';
@@ -1291,11 +1303,11 @@
     if (!container) return;
 
     if (totalPages <= 1) {
-      container.style.display = 'none';
+      container.classList.add('hidden');
       return;
     }
 
-    container.style.display = 'flex';
+    container.classList.remove('hidden');
     const page = state.currentPage;
 
     // Build page buttons — show max 7 buttons with ellipsis
@@ -1468,19 +1480,19 @@
 
     // Show advanced filter trigger even on no results (user is searching)
     if (elements.advancedFilterTrigger) {
-      elements.advancedFilterTrigger.style.display = 'flex';
+      elements.advancedFilterTrigger.classList.remove('hidden');
     }
 
-    elements.resultsHeader.style.display = 'none';
+    elements.resultsHeader.classList.add('hidden');
     const tableContainer = document.getElementById('results-table-container');
-    if (tableContainer) tableContainer.style.display = 'none';
-    elements.emptyState.style.display = 'none';
-    elements.noResultsState.style.display = 'flex';
+    if (tableContainer) tableContainer.classList.add('hidden');
+    elements.emptyState.classList.add('hidden');
+    elements.noResultsState.classList.remove('hidden');
     elements.noResultsQuery.textContent = state.searchQuery;
   }
 
   function hideNoResults() {
-    elements.noResultsState.style.display = 'none';
+    elements.noResultsState.classList.add('hidden');
   }
 
   function showEmptyState() {
@@ -1491,15 +1503,15 @@
       resultsSection.classList.remove('results-visible');
     }
 
-    elements.resultsHeader.style.display = 'none';
+    elements.resultsHeader.classList.add('hidden');
     const tableContainer = document.getElementById('results-table-container');
-    if (tableContainer) tableContainer.style.display = 'none';
-    elements.noResultsState.style.display = 'none';
-    elements.emptyState.style.display = 'flex';
+    if (tableContainer) tableContainer.classList.add('hidden');
+    elements.noResultsState.classList.add('hidden');
+    elements.emptyState.classList.remove('hidden');
   }
 
   function hideEmptyState() {
-    elements.emptyState.style.display = 'none';
+    elements.emptyState.classList.add('hidden');
   }
 
   // ====================================
