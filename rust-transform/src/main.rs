@@ -48,7 +48,7 @@ struct PartRecord<'a> {
     weight_unit: &'a str,
     volume: f64,
     delivery_time: String,
-    delivery_days: i64,
+    delivery_days: String,
     category: &'a str,
     subcategory: &'a str,
     integration: &'a str,
@@ -77,7 +77,7 @@ struct PartRecordES<'a> {
     weight_unit: &'a str,
     volume: f64,
     delivery_time: String,
-    delivery_days: i64,
+    delivery_days: String,
     category: &'a str,
     subcategory: &'a str,
     integration: &'a str,
@@ -342,22 +342,18 @@ fn parse_i64(s: &str) -> i64 {
     num_str.parse::<i64>().unwrap_or(0)
 }
 
-/// Parse delivery field - preserve original format (e.g. "3/6", "7/14"), extract first number for delivery_days.
+/// Parse delivery field - preserve original format as STRING (e.g. "10", "45", "3/6", "7/14").
 /// Cleans Excel formula wrapper like ="3/6" or ="=""3/6""".
-fn parse_delivery(raw: &str) -> (String, i64) {
+fn parse_delivery(raw: &str) -> String {
     if raw.is_empty() {
-        return (String::new(), 0);
+        return String::new();
     }
     let trimmed = raw.trim().trim_matches(|c: char| c == '"' || c == '\'');
-    // Strip Excel formula: ="3/6" or =""3/6"" -> 3/6
-    let cleaned = if trimmed.starts_with('=') {
-        let inner = trimmed.trim_start_matches('=').trim_matches('"').trim();
-        inner.to_string()
+    if trimmed.starts_with('=') {
+        trimmed.trim_start_matches('=').trim_matches('"').trim().to_string()
     } else {
         trimmed.to_string()
-    };
-    let delivery_days = parse_i64(&cleaned);
-    (cleaned, delivery_days)
+    }
 }
 
 // =============================================================================
@@ -585,8 +581,7 @@ fn process_file(
         let min_order_raw = parse_i64(get_field(&csv_record, col_map.min_order_qty));
         let min_order_qty = if min_order_raw < 1 { 1 } else { min_order_raw };
 
-        let (delivery_time, delivery_days) =
-            parse_delivery(get_field(&csv_record, col_map.delivery_days));
+        let delivery_str = parse_delivery(get_field(&csv_record, col_map.delivery_days));
 
         let doc = PartRecord {
             part_number,
@@ -602,8 +597,8 @@ fn process_file(
             weight: parse_f64(get_field(&csv_record, col_map.weight)),
             weight_unit,
             volume: parse_f64(get_field(&csv_record, col_map.volume)),
-            delivery_time: delivery_time.clone(),
-            delivery_days,
+            delivery_time: delivery_str.clone(),
+            delivery_days: delivery_str.clone(),
             category: get_field(&csv_record, col_map.category),
             subcategory: get_field(&csv_record, col_map.subcategory),
             integration: integration_id,
@@ -628,7 +623,7 @@ fn process_file(
             weight_unit,
             volume: doc.volume,
             delivery_time: doc.delivery_time.clone(),
-            delivery_days: doc.delivery_days,
+            delivery_days: doc.delivery_days.clone(),
             category: doc.category,
             subcategory: doc.subcategory,
             integration: integration_id,

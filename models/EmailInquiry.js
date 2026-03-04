@@ -35,7 +35,7 @@ const extractedPartSchema = new mongoose.Schema({
       default: 'AED',
     },
     quantity: Number,
-    deliveryDays: Number,
+    deliveryDays: mongoose.Schema.Types.Mixed,
     selected: {
       type: Boolean,
       default: false,
@@ -53,7 +53,7 @@ const extractedPartSchema = new mongoose.Schema({
     price: Number,
     currency: String,
     quantity: Number,
-    deliveryDays: Number,
+    deliveryDays: mongoose.Schema.Types.Mixed,
     reason: String,
   },
 });

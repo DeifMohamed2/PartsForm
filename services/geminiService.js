@@ -2923,7 +2923,8 @@ function filterDataWithAI(parts, parsedIntent, originalQuery) {
     const beforeCount = filtered.length;
     filtered = filtered.filter((p) => {
       if (!p.deliveryDays) return true; // Include if delivery not specified
-      return p.deliveryDays <= maxDays;
+      const days = parseInt(String(p.deliveryDays).replace(/[^\d]/g, ''), 10);
+      return !isNaN(days) && days <= maxDays;
     });
     filtersApplied.delivery = `≤ ${maxDays} days (${beforeCount} → ${filtered.length})`;
   }
@@ -3770,8 +3771,9 @@ async function recommendBestParts(searchResults, requestedParts) {
           }
 
           // Faster delivery is better
-          if (opt.deliveryDays) {
-            score += Math.max(0, 15 - opt.deliveryDays);
+          const optDays = parseInt(String(opt.deliveryDays || '').replace(/[^\d]/g, ''), 10);
+          if (!isNaN(optDays)) {
+            score += Math.max(0, 15 - optDays);
           }
 
           // Known brands get bonus
@@ -3849,9 +3851,10 @@ function generateRecommendationReason(part, requestedQty) {
     reasons.push(`Best price: $${part.price.toFixed(2)}`);
   }
 
-  if (part.deliveryDays && part.deliveryDays <= 3) {
+  const days = parseInt(String(part.deliveryDays || '').replace(/[^\d]/g, ''), 10);
+  if (!isNaN(days) && days <= 3) {
     reasons.push('Express delivery');
-  } else if (part.deliveryDays && part.deliveryDays <= 7) {
+  } else if (!isNaN(days) && days <= 7) {
     reasons.push('Fast delivery');
   }
 

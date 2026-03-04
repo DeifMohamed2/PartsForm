@@ -77,9 +77,9 @@ const partSchema = new mongoose.Schema({
     default: null
   },
   deliveryDays: {
-    type: Number,
-    min: 0,
-    default: null
+    type: String,
+    trim: true,
+    default: ''
   },
   deliveryTime: {
     type: String,

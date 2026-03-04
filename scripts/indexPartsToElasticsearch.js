@@ -125,7 +125,7 @@ async function createIndex(client) {
               stock: { type: 'keyword' },
               weight: { type: 'float' },
               weightUnit: { type: 'keyword' },
-              deliveryDays: { type: 'integer' },
+              deliveryDays: { type: 'keyword' },
               tags: { type: 'keyword' },
               integrationName: { type: 'keyword' },
               importedAt: { type: 'date' },

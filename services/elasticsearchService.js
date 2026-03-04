@@ -25,7 +25,8 @@ class ElasticsearchService {
   }
 
   /**
-   * Check if Elasticsearch has indexed documents (with caching)
+   * Check if Elasticsearch has indexed documents (with caching).
+   * Uses fast search with size:0 instead of count() for speed on large indices.
    */
   async hasDocuments() {
     if (!this.isAvailable) return false;
@@ -37,10 +38,18 @@ class ElasticsearchService {
     }
 
     try {
-      const count = await this.client.count({ index: this.indexName });
-      this._cachedDocCount = count.count;
+      // Fast check: search with size 0, terminate_after 1 - much faster than count on large indices
+      const resp = await this.client.search(
+        {
+          index: this.indexName,
+          body: { size: 0, query: { match_all: {} }, terminate_after: 1 },
+        },
+        { requestTimeout: 5000 }
+      );
+      const hasAny = (resp.hits?.total?.value ?? resp.hits?.total) > 0;
+      this._cachedDocCount = hasAny ? 1 : 0;
       this._docCountCacheTime = now;
-      return count.count > 0;
+      return hasAny;
     } catch {
       return false;
     }
@@ -94,6 +103,29 @@ class ElasticsearchService {
       logger.warn('Falling back to MongoDB for search', { service: 'elasticsearch' });
       this.isAvailable = false;
       return false;
+    }
+  }
+
+  /**
+   * Delete and recreate index - use when mapping has changed (e.g. deliveryDays integer→keyword).
+   * WARNING: All indexed data will be lost. Re-sync or re-import to repopulate.
+   */
+  async deleteAndRecreateIndex() {
+    if (!this.isAvailable) {
+      throw new Error('Elasticsearch is not available');
+    }
+    try {
+      const exists = await this.client.indices.exists({ index: this.indexName });
+      if (exists) {
+        await this.client.indices.delete({ index: this.indexName });
+        logger.info(`Deleted ES index: ${this.indexName}`);
+      }
+      this.invalidateDocCountCache();
+      await this.createIndex();
+      return true;
+    } catch (error) {
+      logger.error('deleteAndRecreateIndex failed:', error.message);
+      throw error;
     }
   }
 
@@ -176,7 +208,7 @@ class ElasticsearchService {
                 stockCode: { type: 'keyword' },
                 weight: { type: 'float' },
                 volume: { type: 'float' },
-                deliveryDays: { type: 'integer' },
+                deliveryDays: { type: 'keyword' },
                 deliveryTime: { type: 'keyword' },
                 category: { type: 'keyword' },
                 integration: { type: 'keyword' },
@@ -409,43 +441,34 @@ class ElasticsearchService {
       
       // Use field collapsing instead of terms aggregation to avoid fielddata memory issues
       // This is much more memory-efficient for large datasets
-      const response = await this.client.search({
-        index: this.indexName,
-        body: {
-          query: {
-            bool: {
-              should: [
-                // Prefix match - case insensitive
-                { prefix: { partNumber: { value: searchTerm, case_insensitive: true } } },
-                // Prefix match - uppercase
-                { prefix: { partNumber: { value: searchTerm.toUpperCase() } } },
-              ],
-              minimum_should_match: 1,
+      const response = await this.client.search(
+        {
+          index: this.indexName,
+          body: {
+            query: {
+              bool: {
+                should: [
+                  { prefix: { partNumber: { value: searchTerm, case_insensitive: true } } },
+                  { prefix: { partNumber: { value: searchTerm.toUpperCase() } } },
+                ],
+                minimum_should_match: 1,
+              },
             },
+            collapse: { field: 'partNumber' },
+            sort: [{ partNumber: { order: 'asc' } }],
+            size: limit,
+            _source: ['partNumber', 'brand'],
+            track_total_hits: false,
           },
-          // Use field collapsing to get unique part numbers - avoids fielddata
-          collapse: {
-            field: 'partNumber',
-            inner_hits: {
-              name: 'count_hits',
-              size: 0, // We just need the count
-            },
-          },
-          sort: [{ partNumber: { order: 'asc' } }],
-          size: limit,
-          _source: ['partNumber', 'brand'],
-          // Limit track_total_hits to reduce memory
-          track_total_hits: false,
+          request_cache: true,
         },
-        // Reduce request timeout and add circuit breaker friendly settings
-        request_cache: true,
-      });
+        { requestTimeout: 10000 }
+      );
 
-      // Extract unique part numbers from collapsed hits
       return response.hits.hits.map((hit) => ({
         partNumber: hit._source.partNumber,
         brand: hit._source.brand || '',
-        count: hit.inner_hits?.count_hits?.hits?.total?.value || 1,
+        count: 1,
       }));
     } catch (error) {
       console.error('Autocomplete error:', error.message);
@@ -661,6 +684,63 @@ class ElasticsearchService {
   }
 
   /**
+   * Sanitize document for ES indexing - ensure types match mapping (float, integer, keyword, date)
+   */
+  _sanitizeDocForES(doc) {
+    const toFloat = (v) => {
+      if (v == null || v === '' || v === 'N/A' || v === 'TBD') return null;
+      const n = parseFloat(String(v).replace(',', '.').replace(/[^\d.-]/g, ''));
+      return isNaN(n) ? null : n;
+    };
+    const toInt = (v) => {
+      if (v == null || v === '' || v === 'N/A' || v === 'TBD') return null;
+      const n = parseInt(String(v).replace(/[^\d]/g, ''), 10);
+      return isNaN(n) ? null : n;
+    };
+    const toDate = (v) => {
+      if (!v) return null;
+      const d = new Date(v);
+      return isNaN(d.getTime()) ? null : d.toISOString();
+    };
+    const toStr = (v) => (v != null && v !== '' ? String(v).trim() : null);
+
+    return {
+      partNumber: toStr(doc.partNumber) || '',
+      vendorCode: toStr(doc.vendorCode),
+      description: toStr(doc.description),
+      brand: toStr(doc.brand),
+      supplier: toStr(doc.supplier),
+      price: toFloat(doc.price) ?? 0,
+      currency: toStr(doc.currency) || 'AED',
+      quantity: toInt(doc.quantity) ?? 0,
+      minOrderQty: toInt(doc.minOrderQty ?? doc.minLot) ?? 1,
+      stock: toStr(doc.stock),
+      stockCode: toStr(doc.stockCode),
+      weight: toFloat(doc.weight) ?? 0,
+      volume: toFloat(doc.volume) ?? 0,
+      deliveryDays: toStr(doc.deliveryDays),
+      deliveryTime: toStr(doc.deliveryTime),
+      category: toStr(doc.category),
+      integration: doc.integration ? String(doc.integration) : null,
+      integrationName: toStr(doc.integrationName),
+      supplierId: doc.supplierId ? String(doc.supplierId) : null,
+      supplierName: toStr(doc.supplierName),
+      supplierCode: toStr(doc.supplierCode),
+      tableId: doc.tableId ? String(doc.tableId) : null,
+      tableName: toStr(doc.tableName),
+      recordId: doc.recordId ? String(doc.recordId) : null,
+      dataSource: toStr(doc.dataSource),
+      sourceSupplierId: doc.sourceSupplierId ? String(doc.sourceSupplierId) : null,
+      sourceType: toStr(doc.sourceType),
+      sourceSupplierName: toStr(doc.sourceSupplierName),
+      fileName: toStr(doc.fileName),
+      importedAt: toDate(doc.importedAt),
+      updatedAt: toDate(doc.updatedAt),
+      createdAt: toDate(doc.createdAt),
+    };
+  }
+
+  /**
    * Bulk index documents with retry logic for 429 errors
    */
   async bulkIndex(documents, retryCount = 0) {
@@ -672,58 +752,34 @@ class ElasticsearchService {
     }
 
     try {
-      const body = documents.flatMap((doc) => [
-        { index: { _index: this.indexName, _id: doc._id?.toString() || undefined } },
-        {
-          // Core part fields
-          partNumber: doc.partNumber,
-          vendorCode: doc.vendorCode, // Supplier's part code
-          description: doc.description,
-          brand: doc.brand,
-          supplier: doc.supplier,
-          price: doc.price,
-          currency: doc.currency,
-          quantity: doc.quantity,
-          minOrderQty: doc.minOrderQty || doc.minLot, // Consolidated: minLot = minOrderQty
-          stock: doc.stock,
-          stockCode: doc.stockCode,
-          weight: doc.weight,
-          volume: doc.volume,
-          deliveryDays: doc.deliveryDays,
-          deliveryTime: doc.deliveryTime,
-          category: doc.category,
-          // Integration fields (for API integrations)
-          integration: doc.integration?.toString(),
-          integrationName: doc.integrationName,
-          // Supplier data tracking fields (legacy)
-          supplierId: doc.supplierId,
-          supplierName: doc.supplierName,
-          supplierCode: doc.supplierCode,
-          tableId: doc.tableId,
-          tableName: doc.tableName,
-          recordId: doc.recordId,
-          dataSource: doc.dataSource,
-          // Supplier upload tracking fields (NEW - for supplier portal uploads)
-          sourceSupplierId: doc.sourceSupplierId,
-          sourceType: doc.sourceType,
-          sourceSupplierName: doc.sourceSupplierName,
-          // File and date info
-          fileName: doc.fileName,
-          importedAt: doc.importedAt,
-          updatedAt: doc.updatedAt,
-          createdAt: doc.createdAt,
-        },
-      ]);
+      const body = documents.flatMap((doc) => {
+        const sanitized = this._sanitizeDocForES(doc);
+        if (!sanitized.partNumber || String(sanitized.partNumber).trim() === '') return [];
+        return [
+          { index: { _index: this.indexName, _id: doc._id?.toString() || undefined } },
+          sanitized,
+        ];
+      });
+      if (body.length === 0) return { indexed: 0, errors: 0 };
 
       const startTime = Date.now();
       const response = await this.client.bulk({ body, refresh: false });
       const indexTime = Date.now() - startTime;
 
       const errors = response.items.filter((item) => item.index?.error);
-      const indexed = documents.length - errors.length;
+      const sentCount = body.length / 2;
+      const indexed = sentCount - errors.length;
 
-      if (errors.length > 0 && !this.productionMode) {
+      if (errors.length > 0) {
         console.error(`⚠️  ${errors.length} ES index errors`);
+        const first = errors[0]?.index?.error;
+        if (first) {
+          const msg = first.reason || first.caused_by?.reason || JSON.stringify(first).slice(0, 300);
+          console.error(`   First error: ${msg}`);
+          if (first.caused_by) {
+            console.error(`   Caused by: ${first.caused_by.type} - ${first.caused_by.reason}`);
+          }
+        }
       }
 
       // In production, only log periodically (every 50k docs or 30 seconds)
@@ -1211,19 +1267,18 @@ class ElasticsearchService {
           const esField = fieldMap[lowerKey] || fieldMap[key];
           
           if (esField) {
-            // Special handling: delivery - preserve original format (e.g. "3/6") in deliveryTime, extract number for deliveryDays
+            // Special handling: delivery - store as STRING exactly from source (e.g. "10", "45", "3/6")
             if (['delivery', 'delivery_days', 'lead_time'].includes(lowerKey)) {
               let raw = String(value).trim().replace(/^["']|["']$/g, '');
               raw = raw.replace(/^="*(.+?)"*$/g, '$1').trim();
               if (raw) {
                 doc.deliveryTime = raw;
-                const match = raw.match(/(\d+)/);
-                doc.deliveryDays = match ? parseInt(match[1], 10) : null;
+                doc.deliveryDays = raw;
               }
             } else if (['price', 'weight', 'volume'].includes(esField)) {
               const numVal = parseFloat(String(value).replace(',', '.'));
               if (!isNaN(numVal)) doc[esField] = numVal;
-            } else if (['quantity', 'minOrderQty', 'deliveryDays'].includes(esField)) {
+            } else if (['quantity', 'minOrderQty'].includes(esField)) {
               const intVal = parseInt(String(value).replace(/[^\d]/g, ''), 10);
               if (!isNaN(intVal)) doc[esField] = intVal;
             } else {

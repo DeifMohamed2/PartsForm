@@ -203,7 +203,7 @@ class QuotationGeneratorService {
             </span>
           `}
         </td>
-        <td style="padding: 16px 12px; border-bottom: 1px solid #e2e8f0; text-align: center; color: #475569; font-size: 14px;" class="dark-border dark-text-muted">${item.deliveryDays}d</td>
+        <td style="padding: 16px 12px; border-bottom: 1px solid #e2e8f0; text-align: center; color: #475569; font-size: 14px;" class="dark-border dark-text-muted">${item.deliveryTime || item.deliveryDays || 'TBD'}</td>
       </tr>
     `).join('');
 
@@ -531,7 +531,7 @@ ${index + 1}. ${item.partNumber}
    Unit Price: ${formatCurrency(item.unitPrice)}
    Line Total: ${formatCurrency(item.lineTotal)}
    Status: ${item.availability}
-   Delivery: ${item.deliveryDays} days
+   Delivery: ${item.deliveryTime || item.deliveryDays || 'TBD'}
 `;
       });
 

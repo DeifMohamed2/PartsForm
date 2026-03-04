@@ -188,7 +188,7 @@ const ES_INDEX_MAPPING = {
       weight: { type: 'float' },
       weightUnit: { type: 'keyword' },
       volume: { type: 'float' },
-      deliveryDays: { type: 'integer' },
+      deliveryDays: { type: 'keyword' },
       deliveryTime: { type: 'keyword' },
       category: { type: 'keyword' },
       subcategory: { type: 'keyword' },
@@ -1135,12 +1135,10 @@ async function transformToNDJSON_NodeFallback(downloadDir, files, integration, o
             if (match) stockCodeValue = match[1];
           }
 
-          // Parse delivery time - preserve original format like "3/6" or "7/14"
+          // Parse delivery - store as STRING exactly from source (e.g. "10", "45", "3/6", "7/14")
           let deliveryRaw = (cols[colMap.deliveryDays] || '').trim().replace(/^["']|["']$/g, '');
           deliveryRaw = deliveryRaw.replace(/^="*(.+?)"*$/g, '$1').trim();
-          const deliveryTime = deliveryRaw || '';
-          const deliveryMatch = deliveryRaw.match(/(\d+)/);
-          const deliveryDays = deliveryMatch ? parseInt(deliveryMatch[1], 10) : 0;
+          const deliveryStr = deliveryRaw || '';
 
           const doc = {
             partNumber,
@@ -1156,8 +1154,8 @@ async function transformToNDJSON_NodeFallback(downloadDir, files, integration, o
             weight: parseFloat(cols[colMap.weight]) || 0,
             weightUnit: (cols[colMap.weightUnit] || 'kg').replace(/['"]/g, ''),
             volume: parseFloat(cols[colMap.volume]) || 0,
-            deliveryDays,
-            deliveryTime,
+            deliveryDays: deliveryStr,
+            deliveryTime: deliveryStr,
             category: (cols[colMap.category] || '').replace(/['"]/g, ''),
             subcategory: (cols[colMap.subcategory] || '').replace(/['"]/g, ''),
             integration: integrationId,

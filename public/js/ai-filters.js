@@ -1456,9 +1456,10 @@
   }
 
   function getDeliveryClass(product) {
-    if (!product.deliveryDays) return '';
-    if (product.deliveryDays <= 7) return 'delivery-fast';
-    if (product.deliveryDays <= 30) return 'delivery-medium';
+    const days = parseInt(String(product.deliveryDays || '').replace(/[^\d]/g, ''), 10);
+    if (isNaN(days)) return '';
+    if (days <= 7) return 'delivery-fast';
+    if (days <= 30) return 'delivery-medium';
     return 'delivery-slow';
   }
 
@@ -1495,8 +1496,8 @@
       reasons.push('Lowest price among results');
     }
     if (badges.includes('fastest-delivery')) {
-      const days = product.deliveryDays || '?';
-      reasons.push(`Fastest delivery (${days} days)`);
+      const delivery = product.deliveryTime || product.deliveryDays || '?';
+      reasons.push(`Fastest delivery (${delivery})`);
     }
     if (badges.includes('highest-stock')) {
       reasons.push(

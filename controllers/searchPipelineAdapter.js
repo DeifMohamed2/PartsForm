@@ -299,14 +299,17 @@ function generateAIInsights(results) {
     
     // Find best in each category
     const cheapest = [...top].sort((a, b) => (a.price || Infinity) - (b.price || Infinity))[0];
-    const fastestDelivery = [...top].sort((a, b) => (a.deliveryDays || 999) - (b.deliveryDays || 999))[0];
+    const parseDays = (p) => parseInt(String(p?.deliveryDays || '').replace(/[^\d]/g, ''), 10) || 999;
+    const fastestDelivery = [...top].sort((a, b) => parseDays(a) - parseDays(b))[0];
     const highestStock = [...top].sort((a, b) => (b.quantity || 0) - (a.quantity || 0))[0];
     
     // Price vs delivery tradeoff
-    if (cheapest._id !== fastestDelivery._id && cheapest.price > 0 && fastestDelivery.deliveryDays < 999) {
+    const fastestDays = parseInt(String(fastestDelivery.deliveryDays || '').replace(/[^\d]/g, ''), 10);
+    if (cheapest._id !== fastestDelivery._id && cheapest.price > 0 && !isNaN(fastestDays) && fastestDays < 999) {
       const priceDiff = Math.abs(cheapest.price - (fastestDelivery.price || 0));
       const priceDiffPercent = Math.round((priceDiff / cheapest.price) * 100);
-      const deliveryDiff = (cheapest.deliveryDays || 0) - (fastestDelivery.deliveryDays || 0);
+      const cheapestDays = parseInt(String(cheapest.deliveryDays || '').replace(/[^\d]/g, ''), 10) || 0;
+      const deliveryDiff = cheapestDays - fastestDays;
       
       if (priceDiffPercent > 5 && deliveryDiff > 0) {
         insights.push({

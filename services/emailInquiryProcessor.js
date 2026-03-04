@@ -564,7 +564,8 @@ Remember: Respond with ONLY valid JSON, no markdown formatting, no code blocks.`
       reasons.push(`$${part.price.toFixed(2)}`);
     }
     
-    if (part.deliveryDays <= 3) {
+    const days = parseInt(part.deliveryDays, 10);
+    if (!isNaN(days) && days <= 3) {
       reasons.push('Fast delivery');
     }
     

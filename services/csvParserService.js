@@ -138,19 +138,12 @@ class CSVParserService {
 
     // Parse delivery days from format like "0/0" or "1-3"
     const parseDelivery = (val) => {
-      if (!val) return { deliveryTime: '', deliveryDays: null };
-      // Clean Excel formula wrapper ="3/6" or ="=""3/6""" - preserve original format
+      if (!val) return { deliveryTime: '', deliveryDays: '' };
+      // Clean Excel formula wrapper ="3/6" or ="=""3/6""" - preserve original format as STRING
       let str = String(val).trim().replace(/^["']|["']$/g, '');
       str = str.replace(/^="*(.+?)"*$/g, '$1').trim();
-      if (!str) return { deliveryTime: '', deliveryDays: null };
-      
-      // Store original format
-      const deliveryTime = str;
-      // Extract first number for filtering
-      const match = str.match(/(\d+)/);
-      const deliveryDays = match ? parseInt(match[1], 10) : null;
-      
-      return { deliveryTime, deliveryDays };
+      if (!str) return { deliveryTime: '', deliveryDays: '' };
+      return { deliveryTime: str, deliveryDays: str };
     };
 
     // Parse weight (handle European format with comma)

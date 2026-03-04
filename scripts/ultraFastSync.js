@@ -209,12 +209,12 @@ async function mergeCSVFiles(csvPaths, integration) {
       const partNumber = (cols[colMap.partNumber] || '').replace(/['"]/g, '').trim();
       if (!partNumber) continue;
       
-      // Parse delivery - preserve original format (e.g. "3/6", "7/14")
+      // Parse delivery - store as STRING exactly from source (e.g. "10", "45", "3/6", "7/14")
       let deliveryRaw = (colMap.delivery >= 0 ? (cols[colMap.delivery] || '') : '').trim().replace(/^["']|["']$/g, '');
       deliveryRaw = deliveryRaw.replace(/^="*(.+?)"*$/g, '$1').trim();
-      const deliveryTime = deliveryRaw ? `"${deliveryRaw.replace(/"/g, '""')}"` : '""';
-      const deliveryMatch = deliveryRaw.match(/(\d+)/);
-      const deliveryDays = deliveryMatch ? parseInt(deliveryMatch[1], 10) : 0;
+      const deliveryStr = deliveryRaw || '';
+      const deliveryTime = deliveryStr ? `"${deliveryStr.replace(/"/g, '""')}"` : '""';
+      const deliveryDays = deliveryStr ? `"${deliveryStr.replace(/"/g, '""')}"` : '""';
       
       // Build CSV row
       const row = [
@@ -372,9 +372,9 @@ async function nodeBulkImport(csvPath, totalRows, integration) {
       // Convert types
       if (['price', 'weight', 'volume'].includes(h)) {
         doc[h] = parseFloat(val) || 0;
-      } else if (['quantity', 'minOrderQty', 'deliveryDays'].includes(h)) {
+      } else if (['quantity', 'minOrderQty'].includes(h)) {
         doc[h] = parseInt(val) || 0;
-      } else if (h === 'deliveryTime') {
+      } else if (h === 'deliveryTime' || h === 'deliveryDays') {
         doc[h] = (val || '').replace(/^["']|["']$/g, '').trim();
       } else {
         doc[h] = val;

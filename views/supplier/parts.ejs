@@ -2556,10 +2556,6 @@
   async function saveQuickEdit() {
     const id = document.getElementById('editPartId').value;
     const deliveryTimeVal = document.getElementById('editDeliveryTime').value || '';
-    // Extract first number for deliveryDays (for filtering)
-    const deliveryMatch = deliveryTimeVal.match(/(\d+)/);
-    const deliveryDays = deliveryMatch ? parseInt(deliveryMatch[1], 10) : null;
-    
     const updates = {
       description: document.getElementById('editDescription').value,
       brand: document.getElementById('editBrand').value,
@@ -2568,7 +2564,7 @@
       weight: parseFloat(document.getElementById('editWeight').value) || null,
       volume: parseFloat(document.getElementById('editVolume').value) || null,
       deliveryTime: deliveryTimeVal,
-      deliveryDays: deliveryDays,
+      deliveryDays: deliveryTimeVal,
       minOrderQty: parseInt(document.getElementById('editMinOrderQty').value) || 1,
       stockCode: document.getElementById('editStockCode').value
     };
@@ -2656,10 +2652,8 @@
       const updates = {};
       
       if (field === 'deliveryTime') {
-        // Store original format and extract days for filtering
         updates.deliveryTime = value;
-        const deliveryMatch = value.match(/(\d+)/);
-        updates.deliveryDays = deliveryMatch ? parseInt(deliveryMatch[1], 10) : null;
+        updates.deliveryDays = value;
       } else if (['price', 'quantity', 'minOrderQty'].includes(field)) {
         updates[field] = parseFloat(value);
       } else {

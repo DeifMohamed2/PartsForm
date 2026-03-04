@@ -159,16 +159,8 @@ class SupplierPartsService {
    */
   parseDeliveryTime(value) {
     const cleaned = this.cleanExcelValue(value);
-    if (!cleaned) return { deliveryTime: '', deliveryDays: null };
-    
-    // Store original format (like "3/6")
-    const deliveryTime = cleaned;
-    
-    // Extract first number for filtering (e.g., "3/6" -> 3, "1-3" -> 1, "5" -> 5)
-    const match = cleaned.match(/(\d+)/);
-    const deliveryDays = match ? parseInt(match[1], 10) : null;
-    
-    return { deliveryTime, deliveryDays };
+    if (!cleaned) return { deliveryTime: '', deliveryDays: '' };
+    return { deliveryTime: cleaned, deliveryDays: cleaned };
   }
 
   /**
@@ -227,7 +219,7 @@ class SupplierPartsService {
         if (field === 'deliveryTime') {
           const { deliveryTime, deliveryDays } = this.parseDeliveryTime(value);
           if (deliveryTime) part.deliveryTime = deliveryTime;
-          if (deliveryDays !== null) part.deliveryDays = deliveryDays;
+          if (deliveryDays) part.deliveryDays = deliveryDays;
         }
         // Special handling for stockCode - clean Excel wrapper
         else if (field === 'stockCode') {
@@ -604,6 +596,7 @@ class SupplierPartsService {
             price: part.price,
             currency: part.currency,
             quantity: part.quantity,
+            minOrderQty: part.minOrderQty ?? 1,
             stock: part.stock,
             stockCode: part.stockCode,
             weight: part.weight,

@@ -71,34 +71,23 @@ const searchParts = async (req, res) => {
     let total = 0;
     let source = 'mongodb';
 
-    // Use cached check - much faster than calling getStats() every time
-    const useElasticsearch = await elasticsearchService.hasDocuments();
-
-    // Use Elasticsearch if available AND has data
-    if (useElasticsearch) {
+    // Try Elasticsearch when available (skip slow hasDocuments - try ES first)
+    if (elasticsearchService.isAvailable) {
       try {
         const esResult = await elasticsearchService.searchByExactPartNumber(
           partNumber,
-          {
-            limit: limitNum,
-            skip,
-            sortBy,
-            sortOrder,
-          },
+          { limit: limitNum, skip, sortBy, sortOrder },
         );
         results = esResult.results;
         total = esResult.total;
         source = 'elasticsearch';
       } catch (esError) {
-        console.error(
-          'Elasticsearch search failed, falling back to MongoDB:',
-          esError.message,
-        );
+        console.error('Elasticsearch search failed, falling back to MongoDB:', esError.message);
       }
     }
 
-    // Fallback to MongoDB if Elasticsearch didn't work
-    if (results.length === 0 && source === 'mongodb') {
+    // Fallback to MongoDB when ES unavailable or returned no results
+    if (results.length === 0) {
       // EXACT part number match only (case-insensitive)
       const mongoQuery = {
         partNumber: {
@@ -206,26 +195,31 @@ const autocomplete = async (req, res) => {
     }
 
     let suggestions;
-    // Use cached check for speed
-    const useElasticsearch = await elasticsearchService.hasDocuments();
-
-    if (useElasticsearch) {
-      suggestions = await elasticsearchService.autocomplete(
-        query,
-        parseInt(limit, 10),
-      );
-    } else {
+    // Use ES when available (skip slow hasDocuments - try ES first, fallback to MongoDB on error)
+    if (elasticsearchService.isAvailable) {
+      try {
+        suggestions = await elasticsearchService.autocomplete(
+          query,
+          parseInt(limit, 10),
+        );
+      } catch (esErr) {
+        // Fallback to MongoDB on ES error
+        suggestions = null;
+      }
+    }
+    if (suggestions == null) {
       // MongoDB fallback - Part Number Prefix Match Only
       const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
       // Aggregate to get unique part numbers that START WITH the query
+      // Use hint for partNumber index, timeout 8s to avoid blocking
       const results = await Part.aggregate([
         {
           $match: {
-            // Only match part numbers that START with the query (prefix match)
             partNumber: { $regex: `^${escapedQuery}`, $options: 'i' },
           },
         },
+        { $limit: 5000 },
         {
           $group: {
             _id: '$partNumber',
@@ -235,7 +229,7 @@ const autocomplete = async (req, res) => {
         },
         { $sort: { _id: 1 } },
         { $limit: parseInt(limit, 10) },
-      ]);
+      ]).hint({ partNumber: 1, supplier: 1 }).maxTimeMS(8000);
 
       suggestions = results.map((r) => ({
         partNumber: r._id,
@@ -263,11 +257,12 @@ const getFilterOptions = async (req, res) => {
     const { q: query } = req.query;
 
     let filterOptions;
-    // Use cached check for speed
-    const useElasticsearch = await elasticsearchService.hasDocuments();
-
-    if (useElasticsearch) {
-      filterOptions = await elasticsearchService.getFilterOptions(query || '');
+    if (elasticsearchService.isAvailable) {
+      try {
+        filterOptions = await elasticsearchService.getFilterOptions(query || '');
+      } catch {
+        filterOptions = await Part.getFilterOptions(query || '');
+      }
     } else {
       filterOptions = await Part.getFilterOptions(query || '');
     }

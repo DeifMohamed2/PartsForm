@@ -107,7 +107,7 @@ const getPart = async (req, res) => {
 const updatePart = async (req, res) => {
   try {
     const allowedUpdates = ['description', 'brand', 'price', 'quantity', 'currency', 
-                           'stock', 'weight', 'deliveryDays', 'category'];
+                           'stock', 'weight', 'deliveryDays', 'deliveryTime', 'category'];
     const updates = {};
     
     allowedUpdates.forEach(field => {
