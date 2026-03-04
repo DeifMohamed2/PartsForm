@@ -14,7 +14,8 @@
         const savedCart = localStorage.getItem('partsform_shopping_cart');
         if (savedCart) {
           const cartData = JSON.parse(savedCart);
-          const itemCount = cartData.items?.length || 0;
+          const items = cartData.items || [];
+          const itemCount = items.reduce((s, i) => s + (i.quantity || 1), 0);
           if (itemCount > 0) {
             cartBadge.textContent = itemCount;
             cartBadge.classList.remove('hidden');

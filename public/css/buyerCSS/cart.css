@@ -392,15 +392,36 @@
 .cart-table-wrapper {
   background: white;
   overflow-x: auto;
+  overflow-y: visible;
   border-radius: 0 0 var(--buyer-radius-lg) var(--buyer-radius-lg);
   margin-bottom: 1.5rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  -webkit-overflow-scrolling: touch;
+}
+
+.cart-table-wrapper::-webkit-scrollbar {
+  height: 8px;
+}
+
+.cart-table-wrapper::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.cart-table-wrapper::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.cart-table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
 .cart-table {
   width: 100%;
+  min-width: 1400px;
   border-collapse: collapse;
-  font-size: 0.875rem;
+  font-size: 0.9375rem;
 }
 
 .cart-table thead {
@@ -411,7 +432,7 @@
 }
 
 .cart-table th {
-  padding: 1rem 0.75rem;
+  padding: 1.125rem 1rem;
   text-align: left;
   font-weight: 700;
   color: #1e293b;
@@ -423,9 +444,10 @@
 }
 
 .cart-table td {
-  padding: 1.25rem 0.75rem;
+  padding: 1.25rem 1rem;
   border-bottom: 1px solid #f1f5f9;
   vertical-align: middle;
+  font-size: 0.9375rem;
 }
 
 .cart-table tbody tr {
@@ -442,22 +464,78 @@
   box-shadow: 0 0 0 2px var(--aitetsu) inset;
 }
 
-/* Table Column Widths */
-.th-checkbox { width: 50px; text-align: center; }
-.th-brand { min-width: 100px; }
+/* Table Column Widths - Pro layout with more details */
+.th-checkbox { width: 52px; text-align: center; }
+.th-brand { min-width: 120px; }
 .th-part-number { min-width: 140px; }
-.th-description { min-width: 250px; }
-.th-terms { min-width: 80px; }
-.th-weight { min-width: 90px; }
-.th-stock { min-width: 80px; }
+.th-description { min-width: 200px; }
+.th-terms { min-width: 90px; }
+.th-stock { min-width: 90px; }
+.th-weight { min-width: 85px; }
 .th-aircraft { min-width: 90px; }
-.th-qty { min-width: 80px; }
+.th-qty { min-width: 130px; }
 .th-packing { min-width: 120px; }
-.th-price { min-width: 100px; }
-.th-amount { min-width: 110px; }
+.th-price { min-width: 110px; }
+.th-amount { min-width: 120px; }
 .th-reference { min-width: 130px; }
 .th-date { min-width: 110px; }
-.th-actions { width: 60px; }
+.th-actions { width: 56px; text-align: center; }
+
+/* Quantity controls - inline +/- with input */
+.qty-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f8fafc;
+}
+
+.qty-controls .qty-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f1f5f9;
+  border: none;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.qty-controls .qty-btn:hover {
+  background: var(--aitetsu);
+  color: white;
+}
+
+.qty-controls .qty-input {
+  width: 48px;
+  height: 32px;
+  border: none;
+  border-left: 1px solid #e2e8f0;
+  border-right: 1px solid #e2e8f0;
+  text-align: center;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  background: white;
+  -moz-appearance: textfield;
+}
+
+.qty-controls .qty-input::-webkit-outer-spin-button,
+.qty-controls .qty-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.terms-text,
+.weight-text {
+  font-size: 0.875rem;
+  color: #475569;
+}
 
 /* Checkbox Styling */
 .cart-checkbox {

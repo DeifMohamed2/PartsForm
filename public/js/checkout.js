@@ -235,26 +235,34 @@
       return;
     }
 
-    itemsContainer.innerHTML = cartItems.map(item => `
+    itemsContainer.innerHTML = cartItems.map(item => {
+      const qty = item.quantity || 1;
+      const lineTotal = (parseFloat(item.price) || 0) * qty;
+      return `
       <div class="summary-item">
         <div class="summary-item-info">
-          <div class="summary-item-title">${escapeHtml(item.code || item.partNumber || 'N/A')}</div>
+          <div class="summary-item-title">${qty > 1 ? qty + ' × ' : ''}${escapeHtml(item.code || item.partNumber || 'N/A')}</div>
           <div class="summary-item-desc">${escapeHtml(item.description || 'Industrial Part')}</div>
           <div class="summary-item-brand"><i data-lucide="tag"></i><span>${escapeHtml(item.brand || 'N/A')}</span></div>
         </div>
-        <div class="summary-item-price">${formatCurrency(item.price)}</div>
+        <div class="summary-item-price">${formatCurrency(lineTotal)}</div>
       </div>
-    `).join('');
+    `;
+    }).join('');
 
     // Update totals
-    const totalWeight = cartItems.reduce((sum, item) => sum + (parseFloat(item.weight) || 0), 0);
-    
+    const totalWeight = cartItems.reduce(
+      (sum, item) => sum + (parseFloat(item.weight) || 0) * (item.quantity || 1),
+      0
+    );
+    const totalPcs = cartItems.reduce((s, i) => s + (i.quantity || 1), 0);
+
     const subtotalEl = document.getElementById('summary-subtotal');
     const itemsCountEl = document.getElementById('summary-items-count');
     const weightEl = document.getElementById('summary-weight');
 
     if (subtotalEl) subtotalEl.textContent = formatCurrency(orderTotal);
-    if (itemsCountEl) itemsCountEl.textContent = `${cartItems.length} PCS`;
+    if (itemsCountEl) itemsCountEl.textContent = `${totalPcs} PCS`;
     if (weightEl) weightEl.textContent = `${totalWeight.toFixed(3)} kg`;
 
     updateFeeAndTotal();
@@ -591,19 +599,28 @@
       : feeConfig?.value || 0;
 
     try {
+      // Expand items with quantity for API (each qty = separate line item)
+      const expandedItems = [];
+      cartItems.forEach(item => {
+        const qty = item.quantity || 1;
+        for (let i = 0; i < qty; i++) {
+          expandedItems.push({
+            _id: item._id || null,
+            code: item.code || item.partNumber,
+            partNumber: item.code || item.partNumber,
+            brand: item.brand,
+            description: item.description,
+            supplier: item.supplier,
+            price: item.price,
+            weight: item.weight,
+            stock: item.stock,
+            currency: item.currency || 'AED'
+          });
+        }
+      });
+
       const orderData = {
-        items: cartItems.map(item => ({
-          _id: item._id || null,
-          code: item.code || item.partNumber,
-          partNumber: item.code || item.partNumber,
-          brand: item.brand,
-          description: item.description,
-          supplier: item.supplier,
-          price: item.price,
-          weight: item.weight,
-          stock: item.stock,
-          currency: item.currency || 'AED'
-        })),
+        items: expandedItems,
         paymentType: selectedPaymentType,
         paymentMethod: selectedPaymentMethod,
         fee: fee,
@@ -766,9 +783,12 @@
     
     // Load cart from localStorage (no API call)
     cartItems = loadCartFromStorage();
-    orderTotal = cartItems.reduce((sum, item) => sum + (parseFloat(item.price) || 0), 0);
-    
-    console.log('[Checkout] Loaded', cartItems.length, 'items from cart, total:', orderTotal);
+    orderTotal = cartItems.reduce(
+      (sum, item) => sum + (parseFloat(item.price) || 0) * (item.quantity || 1),
+      0
+    );
+
+    console.log('[Checkout] Loaded', cartItems.length, 'line items, total:', orderTotal);
 
     // Render order summary immediately
     renderOrderSummary();

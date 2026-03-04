@@ -158,8 +158,26 @@
           return;
         }
 
+        const rawItems = Array.isArray(parsed.items) ? parsed.items : [];
+        // Migrate: ensure quantity, and merge duplicates (old carts had separate items per unit)
+        const withQty = rawItems.map((i) => ({
+          ...i,
+          quantity: i.quantity != null ? parseInt(i.quantity, 10) : 1,
+        }));
+        // Group identical parts by match key (migrate old carts with duplicate rows)
+        const merged = new Map();
+        withQty.forEach((item) => {
+          const key = getItemMatchKey(item);
+          if (merged.has(key)) {
+            const existing = merged.get(key);
+            existing.quantity = (existing.quantity || 1) + (item.quantity || 1);
+          } else {
+            merged.set(key, { ...item, id: item.id || generateItemId() });
+          }
+        });
+        const items = Array.from(merged.values());
         cartState = {
-          items: Array.isArray(parsed.items) ? parsed.items : [],
+          items,
           selectedItems: new Set(Array.isArray(parsed.selectedItems) ? parsed.selectedItems : []),
           createdAt: parsed.createdAt || new Date().toISOString(),
           expiresAt: parsed.expiresAt || calculateExpiryDate(),
@@ -208,17 +226,27 @@
   // ====================================
   // CART OPERATIONS
   // ====================================
+  // Generate unique key for matching same part (for quantity grouping)
+  function getItemMatchKey(item) {
+    const code = (item.code || item.partNumber || 'N/A').trim();
+    const brand = (item.brand || 'N/A').trim();
+    const price = parseFloat(item.price) || 0;
+    const supplier = (item.supplier || '').trim();
+    const stock = (item.stock || 'N/A').trim();
+    if (item._id) return `_id:${item._id}`;
+    return `${code}|${brand}|${price}|${supplier}|${stock}`;
+  }
+
   function addToCart(item) {
     // CRITICAL: Always read fresh from localStorage before adding
-    // This prevents stale state issues when cart is cleared from another page
     const freshData = getFreshCartData();
     cartState.items = freshData.items;
     cartState.selectedItems = new Set(freshData.selectedItems);
     cartState.createdAt = freshData.createdAt;
     cartState.expiresAt = freshData.expiresAt;
 
-    // Each part is added as a separate item - NO grouping by code/brand
     const quantity = parseInt(item.quantity) || 1;
+    const matchKey = getItemMatchKey(item);
 
     // 🧠 Record for AI learning
     if (window.aiLearning) {
@@ -227,11 +255,20 @@
       );
     }
 
-    for (let i = 0; i < quantity; i++) {
-      // Add as new individual item - store all fields from search results
+    // Find existing item with same part (for quantity grouping)
+    const existingIndex = cartState.items.findIndex(
+      (i) => getItemMatchKey(i) === matchKey
+    );
+
+    if (existingIndex !== -1) {
+      // Same part: add to quantity
+      const existing = cartState.items[existingIndex];
+      existing.quantity = (existing.quantity || 1) + quantity;
+    } else {
+      // New part: add as new item with quantity
       const cartItem = {
         id: generateItemId(),
-        _id: item._id || null, // MongoDB ID for reliable server validation
+        _id: item._id || null,
         code: item.code || item.partNumber || 'N/A',
         brand: item.brand || 'N/A',
         description: item.description || '',
@@ -246,8 +283,8 @@
         dateCreated: new Date().toISOString(),
         category: item.category || 'general',
         addPacking: false,
+        quantity: quantity,
       };
-
       cartState.items.push(cartItem);
     }
 
@@ -457,10 +494,9 @@
       tr.classList.add('selected');
     }
 
-    // Each item is individual - no quantity grouping
-    const amount = item.price;
-    
-    // Get proper stock display - use as-is if valid, otherwise show the raw value
+    const qty = item.quantity || 1;
+    const amount = (parseFloat(item.price) || 0) * qty;
+
     const stockDisplay = getStockDisplay(item.stock);
     const stockClass = getStockClass(item.stock);
 
@@ -479,11 +515,21 @@
       <td class="th-description">
         <span class="part-description">${escapeHtml(item.description)}</span>
       </td>
+      <td class="th-terms">
+        <span class="terms-text">${escapeHtml(item.terms || 'N/A')}</span>
+      </td>
       <td class="th-stock">
         <span class="stock-code-badge">${escapeHtml(stockDisplay)}</span>
       </td>
+      <td class="th-weight">
+        <span class="weight-text">${item.weight ? parseFloat(item.weight).toFixed(2) + ' kg' : 'N/A'}</span>
+      </td>
       <td class="th-qty">
-        <span class="qty-display">1</span>
+        <div class="qty-controls">
+          <button type="button" class="qty-btn qty-minus" data-item-id="${item.id}" aria-label="Decrease">−</button>
+          <input type="number" class="qty-input" data-item-id="${item.id}" value="${qty}" min="1" max="999">
+          <button type="button" class="qty-btn qty-plus" data-item-id="${item.id}" aria-label="Increase">+</button>
+        </div>
       </td>
       <td class="th-price">
         <span class="price-display">${formatPrice(item.price)}</span>
@@ -492,30 +538,50 @@
         <span class="amount-display">${formatPrice(amount)}</span>
       </td>
       <td class="th-actions">
-        <button class="btn-remove-item" data-item-id="${
-          item.id
-        }" title="Remove item">
+        <button class="btn-remove-item" data-item-id="${item.id}" title="Remove item">
           <i data-lucide="trash-2"></i>
         </button>
       </td>
     `;
 
-    // Attach event listeners
     attachItemEventListeners(tr, item.id);
 
     return tr;
   }
 
   function attachItemEventListeners(row, itemId) {
-    // Checkbox
     const checkbox = row.querySelector('.item-checkbox');
-    checkbox.addEventListener('change', () => toggleItemSelection(itemId));
+    if (checkbox) checkbox.addEventListener('change', () => toggleItemSelection(itemId));
 
-    // Remove button
     const removeBtn = row.querySelector('.btn-remove-item');
-    removeBtn.addEventListener('click', () => removeFromCart(itemId));
+    if (removeBtn) removeBtn.addEventListener('click', () => removeFromCart(itemId));
 
-    // Re-create lucide icons
+    // Quantity controls
+    const qtyInput = row.querySelector('.qty-input');
+    const qtyMinus = row.querySelector('.qty-minus');
+    const qtyPlus = row.querySelector('.qty-plus');
+
+    const updateQty = (newQty) => {
+      const num = Math.max(1, Math.min(999, parseInt(newQty, 10) || 1));
+      const item = cartState.items.find((i) => i.id === itemId);
+      if (item) {
+        item.quantity = num;
+        if (qtyInput) qtyInput.value = num;
+        const amountEl = row.querySelector('.amount-display');
+        if (amountEl) amountEl.textContent = formatPrice((item.price || 0) * num);
+        saveCartToStorage();
+        updateCartSummary();
+        updateCartBadge();
+      }
+    };
+
+    if (qtyInput) {
+      qtyInput.addEventListener('change', () => updateQty(qtyInput.value));
+      qtyInput.addEventListener('blur', () => updateQty(qtyInput.value));
+    }
+    if (qtyMinus) qtyMinus.addEventListener('click', () => updateQty((parseInt(qtyInput?.value, 10) || 1) - 1));
+    if (qtyPlus) qtyPlus.addEventListener('click', () => updateQty((parseInt(qtyInput?.value, 10) || 1) + 1));
+
     if (typeof lucide !== 'undefined') {
       lucide.createIcons({ nameAttr: 'data-lucide' });
     }
@@ -600,14 +666,16 @@
   }
 
   function calculateTotals() {
-    // Each item is individual - count each item as 1
-    const totalItems = cartState.items.length;
+    const totalItems = cartState.items.reduce(
+      (sum, item) => sum + (item.quantity || 1),
+      0,
+    );
     const totalAmount = cartState.items.reduce(
-      (sum, item) => sum + (parseFloat(item.price) || 0),
+      (sum, item) => sum + (parseFloat(item.price) || 0) * (item.quantity || 1),
       0,
     );
     const totalWeight = cartState.items.reduce(
-      (sum, item) => sum + (parseFloat(item.weight) || 0),
+      (sum, item) => sum + (parseFloat(item.weight) || 0) * (item.quantity || 1),
       0,
     );
 
@@ -620,7 +688,7 @@
   function updateCartBadge() {
     const cartBadge = document.getElementById('cart-badge');
     if (cartBadge) {
-      const itemCount = cartState.items.length;
+      const itemCount = cartState.items.reduce((s, i) => s + (i.quantity || 1), 0);
       if (itemCount > 0) {
         cartBadge.textContent = itemCount;
         cartBadge.classList.remove('hidden');
@@ -968,10 +1036,23 @@
   // ====================================
   // PUBLIC API (FOR OTHER PAGES)
   // ====================================
+  // Expand items with quantity for checkout/API (each qty = separate line)
+  function getCartItemsExpanded() {
+    const expanded = [];
+    cartState.items.forEach((item) => {
+      const qty = item.quantity || 1;
+      for (let i = 0; i < qty; i++) {
+        expanded.push({ ...item, quantity: 1 });
+      }
+    });
+    return expanded;
+  }
+
   window.PartsFormCart = {
     addToCart: addToCart,
-    getCartCount: () => cartState.items.length,
+    getCartCount: () => cartState.items.reduce((s, i) => s + (i.quantity || 1), 0),
     getCartItems: () => [...cartState.items],
+    getCartItemsExpanded: getCartItemsExpanded,
     updateBadge: updateCartBadge,
   };
 
