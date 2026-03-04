@@ -245,7 +245,7 @@
   // ====================================
   function openQuotationModal() {
     const cartItems = window.PartsFormCart ? window.PartsFormCart.getCartItems() : [];
-    
+
     if (cartItems.length === 0) {
       showAlert('info', 'Empty Cart', 'Add items to your cart before creating a quotation');
       return;
@@ -254,24 +254,33 @@
     quotationState.items = cartItems;
     generateQuotationNumber();
     updateQuotationPreview();
-    
-    DOM.quotationModal.style.display = 'flex';
+
+    if (DOM.quotationModal) {
+      DOM.quotationModal.classList.remove('hidden');
+      DOM.quotationModal.classList.add('active');
+    }
     document.body.style.overflow = 'hidden';
-    
-    // Recreate icons
+
     if (typeof lucide !== 'undefined') {
       lucide.createIcons();
     }
   }
 
   function closeQuotationModal() {
-    DOM.quotationModal.style.display = 'none';
+    if (DOM.quotationModal) {
+      DOM.quotationModal.classList.add('hidden');
+      DOM.quotationModal.classList.remove('active');
+    }
     document.body.style.overflow = '';
   }
 
   function closePreviewModal() {
-    DOM.previewModal.style.display = 'none';
-    DOM.previewFrame.src = 'about:blank';
+    if (DOM.previewModal) {
+      DOM.previewModal.classList.add('hidden');
+      DOM.previewModal.classList.remove('active');
+    }
+    if (DOM.previewFrame) DOM.previewFrame.src = 'about:blank';
+    // Keep body overflow hidden - quotation modal may still be open
   }
 
   // ====================================
@@ -308,7 +317,8 @@
     if (!DOM.cropperModal || !DOM.cropperImage) return;
 
     DOM.cropperImage.src = imageUrl;
-    DOM.cropperModal.style.display = 'flex';
+    DOM.cropperModal.classList.remove('hidden');
+    DOM.cropperModal.classList.add('active');
     
     // Destroy existing cropper if any
     if (cropperInstance) {
@@ -359,7 +369,8 @@
 
   function closeCropperModal() {
     if (DOM.cropperModal) {
-      DOM.cropperModal.style.display = 'none';
+      DOM.cropperModal.classList.add('hidden');
+      DOM.cropperModal.classList.remove('active');
     }
     
     if (cropperInstance) {
@@ -611,10 +622,14 @@
   function showQuotationPreview() {
     collectFormData();
     const htmlContent = generateQuotationHTML();
-    
+
     DOM.previewFrame.srcdoc = htmlContent;
-    DOM.previewModal.style.display = 'flex';
-    
+    if (DOM.previewModal) {
+      DOM.previewModal.classList.remove('hidden');
+      DOM.previewModal.classList.add('active');
+    }
+    document.body.style.overflow = 'hidden';
+
     if (typeof lucide !== 'undefined') {
       lucide.createIcons();
     }

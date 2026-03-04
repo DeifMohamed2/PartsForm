@@ -1135,10 +1135,9 @@ async function transformToNDJSON_NodeFallback(downloadDir, files, integration, o
             if (match) stockCodeValue = match[1];
           }
 
-          // Parse delivery time - preserve original format like "3/6"
-          let deliveryRaw = (cols[colMap.deliveryDays] || '').replace(/['"]/g, '').trim();
-          // Clean Excel formula wrapper ="..."
-          deliveryRaw = deliveryRaw.replace(/^="*(.+?)"*$/g, '$1').replace(/[=""]/g, '').trim();
+          // Parse delivery time - preserve original format like "3/6" or "7/14"
+          let deliveryRaw = (cols[colMap.deliveryDays] || '').trim().replace(/^["']|["']$/g, '');
+          deliveryRaw = deliveryRaw.replace(/^="*(.+?)"*$/g, '$1').trim();
           const deliveryTime = deliveryRaw || '';
           const deliveryMatch = deliveryRaw.match(/(\d+)/);
           const deliveryDays = deliveryMatch ? parseInt(deliveryMatch[1], 10) : 0;

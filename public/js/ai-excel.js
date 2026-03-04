@@ -1145,7 +1145,7 @@
                   <div class="option-details">
                     ${recommended.brand ? `<span>${escapeHtml(recommended.brand)}</span>` : ''}
                     <span>${recommended.quantity || 0} in stock</span>
-                    ${recommended.deliveryDays ? `<span>${recommended.deliveryDays} days delivery</span>` : ''}
+                    ${recommended.deliveryTime || (recommended.deliveryDays != null ? String(recommended.deliveryDays) : '') ? `<span>${recommended.deliveryTime || recommended.deliveryDays} delivery</span>` : ''}
                   </div>
                   ${recommended.reason ? `<div class="option-reason">${escapeHtml(recommended.reason)}</div>` : ''}
                 </div>

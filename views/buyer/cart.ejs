@@ -101,32 +101,29 @@
               </table>
             </div>
 
-            <!-- Cart Summary -->
-            <div class="cart-summary">
-              <div class="cart-summary-left">
-                <div class="cart-summary-info">
-                  <p class="summary-text">
-                    <i data-lucide="shopping-cart" class="summary-icon"></i>
+            <!-- Cart Summary - Compact & Structured -->
+            <div class="cart-summary cart-summary-pro">
+              <div class="cart-summary-main">
+                <div class="summary-stats">
+                  <span class="summary-stat">
                     <strong id="total-items-count">0</strong> <%= t('cart.summary.pcs') %>
-                    <span class="summary-separator">•</span>
+                  </span>
+                  <span class="summary-stat-sep">•</span>
+                  <span class="summary-stat">
                     <%= t('cart.summary.total') %> <strong id="total-amount-text">0.00</strong> <span class="cart-currency-label">AED</span>
-                  </p>
-                  <p class="summary-note">
-                    <i data-lucide="clock" class="summary-icon-small"></i>
-                    <%= t('cart.summary.note') %>
-                    <span id="cart-expiry-text"><%= t('cart.summary.timeRemaining') %> --</span>
-                  </p>
+                  </span>
                 </div>
+                <p class="summary-expiry">
+                  <i data-lucide="clock"></i>
+                  <span id="cart-expiry-text">--</span>
+                </p>
               </div>
-              <div class="cart-summary-right">
-                <div class="cart-total">
-                  <span class="total-label"><%= t('cart.summary.total') %></span>
-                  <div class="total-details">
-                    <span class="total-items"><strong id="total-items">0</strong> <%= t('cart.summary.pcs') %></span>
-                    <span class="total-amount"><strong id="total-amount">0.00</strong> <span class="cart-currency-label">AED</span></span>
-                  </div>
+              <div class="cart-summary-actions">
+                <div class="summary-total-box">
+                  <span class="summary-total-label"><%= t('cart.summary.total') %></span>
+                  <span class="summary-total-value"><strong id="total-items">0</strong> <%= t('cart.summary.pcs') %> · <strong id="total-amount">0.00</strong> <span class="cart-currency-label">AED</span></span>
                 </div>
-                <button class="btn-checkout" id="checkout-btn" disabled>
+                <button class="btn-checkout btn-checkout-pro" id="checkout-btn" disabled>
                   <span><%= t('cart.checkout') %></span>
                   <i data-lucide="arrow-right"></i>
                 </button>

@@ -1298,7 +1298,7 @@
                       <td class="col-desc"><span class="desc-text" title="${escapeHtml(product.description || '')}">${escapeHtml(truncateText(product.description || 'No description', 30))}</span></td>
                       <td class="col-qty">${product.quantity || product.stock || 0}</td>
                       <td class="col-price"><strong>${product.price ? `$${(Number(product.price) / 3.67).toFixed(2)}` : '—'}</strong></td>
-                      <td class="col-delivery">${product.deliveryDays ? `${product.deliveryDays}d` : '—'}</td>
+                      <td class="col-delivery">${product.deliveryTime || (product.deliveryDays != null ? String(product.deliveryDays) : '') || '—'}</td>
                       <td class="col-stock">
                         <span class="stock-dot ${getStockStatus(product)}"></span>
                         ${getStockLabel(product)}

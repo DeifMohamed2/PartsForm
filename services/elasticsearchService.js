@@ -1211,8 +1211,16 @@ class ElasticsearchService {
           const esField = fieldMap[lowerKey] || fieldMap[key];
           
           if (esField) {
-            // Type conversion based on ES field
-            if (['price', 'weight', 'volume'].includes(esField)) {
+            // Special handling: delivery - preserve original format (e.g. "3/6") in deliveryTime, extract number for deliveryDays
+            if (['delivery', 'delivery_days', 'lead_time'].includes(lowerKey)) {
+              let raw = String(value).trim().replace(/^["']|["']$/g, '');
+              raw = raw.replace(/^="*(.+?)"*$/g, '$1').trim();
+              if (raw) {
+                doc.deliveryTime = raw;
+                const match = raw.match(/(\d+)/);
+                doc.deliveryDays = match ? parseInt(match[1], 10) : null;
+              }
+            } else if (['price', 'weight', 'volume'].includes(esField)) {
               const numVal = parseFloat(String(value).replace(',', '.'));
               if (!isNaN(numVal)) doc[esField] = numVal;
             } else if (['quantity', 'minOrderQty', 'deliveryDays'].includes(esField)) {

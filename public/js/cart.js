@@ -596,13 +596,10 @@
     const totals = calculateTotals();
     const convertedAmount = totals.totalAmount * exchangeRate;
 
-    if (DOM.totalItemsCount)
-      DOM.totalItemsCount.textContent = totals.totalItems;
+    if (DOM.totalItemsCount) DOM.totalItemsCount.textContent = totals.totalItems;
     if (DOM.totalItems) DOM.totalItems.textContent = totals.totalItems;
-    if (DOM.totalAmount)
-      DOM.totalAmount.textContent = convertedAmount.toFixed(2);
-    if (DOM.totalAmountText)
-      DOM.totalAmountText.textContent = convertedAmount.toFixed(2);
+    if (DOM.totalAmount) DOM.totalAmount.textContent = convertedAmount.toFixed(2);
+    if (DOM.totalAmountText) DOM.totalAmountText.textContent = convertedAmount.toFixed(2);
     if (DOM.totalWeight)
       DOM.totalWeight.textContent = totals.totalWeight.toFixed(3);
     if (DOM.totalWeightText)
@@ -950,21 +947,20 @@
   let confirmCallback = null;
 
   function showConfirmDialog(title, message, onConfirm) {
+    if (!DOM.confirmModal || !DOM.confirmOk) return;
     confirmCallback = onConfirm;
-    DOM.confirmTitle.textContent = title;
-    DOM.confirmMessage.textContent = message;
-    DOM.confirmModal.style.display = 'flex';
+    if (DOM.confirmTitle) DOM.confirmTitle.textContent = title;
+    if (DOM.confirmMessage) DOM.confirmMessage.textContent = message;
+    DOM.confirmModal.classList.remove('hidden');
+    DOM.confirmModal.classList.add('active');
+    document.body.style.overflow = 'hidden';
 
-    // Re-create icons
     if (typeof lucide !== 'undefined') {
       lucide.createIcons({ nameAttr: 'data-lucide' });
     }
 
-    // Attach one-time confirm handler
     const handleConfirm = () => {
-      if (confirmCallback) {
-        confirmCallback();
-      }
+      if (confirmCallback) confirmCallback();
       hideConfirmDialog();
       DOM.confirmOk.removeEventListener('click', handleConfirm);
     };
@@ -973,7 +969,11 @@
   }
 
   function hideConfirmDialog() {
-    DOM.confirmModal.style.display = 'none';
+    if (DOM.confirmModal) {
+      DOM.confirmModal.classList.add('hidden');
+      DOM.confirmModal.classList.remove('active');
+    }
+    document.body.style.overflow = '';
     confirmCallback = null;
   }
 

@@ -1004,7 +1004,10 @@
     elements.resultsTableContainer.classList.add('hidden');
     elements.noResultsState.classList.add('hidden');
 
-    // Advanced filter trigger stays visible (full-page overlay)
+    // Hide advanced filter trigger when resetting (only show when results exist)
+    if (elements.advancedFilterTrigger) {
+      elements.advancedFilterTrigger.classList.add('hidden');
+    }
 
     // Show empty state
     elements.emptyState.classList.remove('hidden');
@@ -1211,12 +1214,8 @@
               ? `${part.weight} kg`
               : part.weight
             : 'N/A';
-          const deliveryDays = part.deliveryDays || part.delivery;
-          const delivery = deliveryDays
-            ? typeof deliveryDays === 'number'
-              ? `${deliveryDays} days`
-              : deliveryDays
-            : 'N/A';
+          // Display delivery exactly as stored (deliveryTime e.g. "3/6" or deliveryDays e.g. 7)
+          const delivery = part.deliveryTime || (part.deliveryDays != null ? String(part.deliveryDays) : '') || part.delivery || 'N/A';
 
           // Get stock code (e.g., AD2, ST1, etc.)
           const stockCode = part.stockCode || 'N/A';
@@ -1487,9 +1486,9 @@
       elements.resetBtn.style.display = 'flex';
     }
 
-    // Show advanced filter trigger even on no results (user is searching)
+    // Hide advanced filter trigger when no results (only show when results exist)
     if (elements.advancedFilterTrigger) {
-      elements.advancedFilterTrigger.classList.remove('hidden');
+      elements.advancedFilterTrigger.classList.add('hidden');
     }
 
     elements.resultsHeader.classList.add('hidden');
@@ -3636,7 +3635,7 @@
       brand: partData.brand || 'N/A',
       description: partData.description || 'N/A',
       supplier: partData.supplier || partData.integrationName || 'N/A',
-      terms: partData.deliveryDays ? `${partData.deliveryDays} days` : (partData.terms || 'N/A'),
+      terms: partData.deliveryTime || (partData.deliveryDays != null ? String(partData.deliveryDays) : '') || partData.terms || 'N/A',
       weight: parseFloat(partData.weight) || 0,
       stock: stockValue,
       aircraftType: partData.aircraftType || partData.category || 'N/A',
@@ -3709,7 +3708,7 @@
           brand: partData.brand || 'N/A',
           description: partData.description || 'N/A',
           supplier: partData.supplier || partData.integrationName || 'N/A',
-          terms: partData.deliveryDays ? `${partData.deliveryDays} days` : (partData.terms || 'N/A'),
+          terms: partData.deliveryTime || (partData.deliveryDays != null ? String(partData.deliveryDays) : '') || partData.terms || 'N/A',
           weight: parseFloat(partData.weight) || 0,
           stock: stockValue,
           aircraftType: partData.aircraftType || partData.category || 'N/A',

@@ -165,8 +165,8 @@ async function mergeCSVFiles(csvPaths, integration) {
   // Create write stream
   const writeStream = fs.createWriteStream(mergedPath);
   
-  // Standard header for parts collection
-  const header = 'partNumber,description,brand,supplier,price,currency,quantity,minOrderQty,stock,stockCode,weight,volume,deliveryDays,category,integration,integrationName,fileName,importedAt\n';
+  // Standard header for parts collection (deliveryTime = original format e.g. "3/6", deliveryDays = number for filtering)
+  const header = 'partNumber,description,brand,supplier,price,currency,quantity,minOrderQty,stock,stockCode,weight,volume,deliveryTime,deliveryDays,category,integration,integrationName,fileName,importedAt\n';
   writeStream.write(header);
   
   let totalRows = 0;
@@ -195,6 +195,7 @@ async function mergeCSVFiles(csvPaths, integration) {
       currency: headers.findIndex(h => h.includes('currency') || h.includes('curr')),
       quantity: headers.findIndex(h => h.includes('quantity') || h.includes('qty') || h.includes('stock')),
       weight: headers.findIndex(h => h.includes('weight')),
+      delivery: headers.findIndex(h => h.includes('delivery') || h.includes('lead_time') || h.includes('leadtime')),
       category: headers.findIndex(h => h.includes('category') || h.includes('cat')),
     };
     
@@ -207,6 +208,13 @@ async function mergeCSVFiles(csvPaths, integration) {
       
       const partNumber = (cols[colMap.partNumber] || '').replace(/['"]/g, '').trim();
       if (!partNumber) continue;
+      
+      // Parse delivery - preserve original format (e.g. "3/6", "7/14")
+      let deliveryRaw = (colMap.delivery >= 0 ? (cols[colMap.delivery] || '') : '').trim().replace(/^["']|["']$/g, '');
+      deliveryRaw = deliveryRaw.replace(/^="*(.+?)"*$/g, '$1').trim();
+      const deliveryTime = deliveryRaw ? `"${deliveryRaw.replace(/"/g, '""')}"` : '""';
+      const deliveryMatch = deliveryRaw.match(/(\d+)/);
+      const deliveryDays = deliveryMatch ? parseInt(deliveryMatch[1], 10) : 0;
       
       // Build CSV row
       const row = [
@@ -222,7 +230,8 @@ async function mergeCSVFiles(csvPaths, integration) {
         `""`, // stockCode
         parseFloat(cols[colMap.weight]) || 0,
         0, // volume
-        0, // deliveryDays
+        deliveryTime,
+        deliveryDays,
         `"${(cols[colMap.category] || '').replace(/['"]/g, '')}"`,
         `"${integrationId}"`,
         `"${integrationName}"`,
@@ -365,6 +374,8 @@ async function nodeBulkImport(csvPath, totalRows, integration) {
         doc[h] = parseFloat(val) || 0;
       } else if (['quantity', 'minOrderQty', 'deliveryDays'].includes(h)) {
         doc[h] = parseInt(val) || 0;
+      } else if (h === 'deliveryTime') {
+        doc[h] = (val || '').replace(/^["']|["']$/g, '').trim();
       } else {
         doc[h] = val;
       }

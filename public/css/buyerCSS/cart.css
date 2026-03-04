@@ -787,10 +787,59 @@
   align-items: flex-end;
   gap: 2rem;
   padding: 2rem 2.5rem;
+}
+
+/* Cart Summary Pro - Compact & Structured */
+.cart-summary-pro {
+  flex-direction: row;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1rem 1.5rem;
+  background: linear-gradient(180deg, #fafbfc 0%, #f8fafc 100%);
+  border-top: 1px solid #e2e8f0;
   background: #ffffff;
   border-radius: var(--buyer-radius-lg);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(64, 84, 94, 0.05);
   border: 1px solid #e2e8f0;
+}
+
+.cart-summary-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.summary-stats {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #64748b;
+}
+
+.summary-stat strong {
+  color: #1e293b;
+  font-weight: 600;
+}
+
+.summary-stat-sep {
+  color: #cbd5e1;
+  font-weight: 300;
+}
+
+.summary-expiry {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin: 0;
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+.summary-expiry i {
+  width: 14px;
+  height: 14px;
 }
 
 .cart-summary-left {
@@ -818,6 +867,43 @@
   font-size: 0.8125rem;
   color: var(--buyer-text-muted);
   margin: 0;
+}
+
+.cart-summary-actions {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.summary-total-box {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.125rem;
+}
+
+.summary-total-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #94a3b8;
+}
+
+.summary-total-value {
+  font-size: 0.9375rem;
+  color: #475569;
+}
+
+.summary-total-value strong {
+  color: #1e293b;
+  font-weight: 700;
+}
+
+.btn-checkout-pro {
+  padding: 0.625rem 1.25rem !important;
+  font-size: 0.875rem !important;
+  min-height: 40px;
 }
 
 .summary-tip {
@@ -1173,11 +1259,22 @@
     width: 92%;
   }
   
-  .cart-summary {
+  .cart-summary,
+  .cart-summary-pro {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .cart-summary-actions {
     flex-direction: column;
     align-items: stretch;
   }
-  
+
+  .summary-total-box {
+    align-items: flex-start;
+  }
+
   .cart-summary-right {
     flex-direction: column;
     align-items: stretch;
@@ -1331,6 +1428,10 @@
   .cart-summary {
     padding: 1.5rem;
   }
+
+  .cart-summary-pro {
+    padding: 1rem 1.25rem;
+  }
 }
 
 /* ====================================
@@ -1351,56 +1452,82 @@
 }
 
 /* ====================================
-   QUOTATION MODAL STYLES
+   QUOTATION MODAL - Brand-Aligned (AI Excel / AI Filter style)
    ==================================== */
+#quotation-modal .modal-backdrop,
+#quotation-preview-modal .modal-backdrop,
+#logo-cropper-modal .modal-backdrop {
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
 .modal-quotation {
   max-width: 900px;
   width: 95%;
   max-height: 90vh;
   display: flex;
   flex-direction: column;
-  border-radius: 16px;
+  border-radius: 1.25rem;
   overflow: hidden;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.12);
 }
 
 .modal-quotation .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.25rem 1.5rem;
-  background: #1e3a5f;
-  color: white;
+  padding: 1.5rem 1.75rem;
+  background: var(--aitetsu);
+  color: var(--washi);
+  position: relative;
+  overflow: hidden;
 }
 
 .modal-quotation .modal-header-content {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.875rem;
+  position: relative;
+  z-index: 1;
 }
 
 .modal-quotation .modal-header-content i {
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
+  color: var(--washi);
 }
 
 .modal-quotation .modal-header-content h2 {
   font-size: 1.25rem;
-  font-weight: 600;
+  font-weight: 700;
   margin: 0;
+  color: var(--washi);
+  letter-spacing: -0.01em;
 }
 
 .modal-quotation .modal-close-btn {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.15);
   border: none;
-  border-radius: 8px;
-  padding: 0.5rem;
+  border-radius: 10px;
+  width: 38px;
+  height: 38px;
+  padding: 0;
   cursor: pointer;
-  color: white;
+  color: var(--washi);
   transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
 }
 
 .modal-quotation .modal-close-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.05);
 }
 
 .modal-quotation .modal-close-btn i {
@@ -1412,7 +1539,7 @@
   flex: 1;
   overflow-y: auto;
   padding: 1.5rem;
-  background: #f9fafb;
+  background: var(--washi);
 }
 
 .modal-quotation .modal-footer {
@@ -1420,8 +1547,8 @@
   justify-content: flex-end;
   gap: 0.75rem;
   padding: 1rem 1.5rem;
-  background: white;
-  border-top: 1px solid #e5e7eb;
+  background: #ffffff;
+  border-top: 1px solid #e2e8f0;
 }
 
 /* Config Sections */
@@ -1454,13 +1581,13 @@
 .config-section-title i {
   width: 20px;
   height: 20px;
-  color: #1e3a5f;
+  color: var(--aitetsu);
 }
 
 .items-count-badge {
   margin-left: auto;
-  background: #e8f0f8;
-  color: #1e3a5f;
+  background: rgba(64, 84, 94, 0.1);
+  color: var(--aitetsu);
   padding: 0.25rem 0.75rem;
   border-radius: 12px;
   font-size: 0.75rem;
@@ -1504,8 +1631,8 @@
 .config-item select:focus,
 .config-item textarea:focus {
   outline: none;
-  border-color: #1e3a5f;
-  box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.1);
+  border-color: var(--aitetsu);
+  box-shadow: 0 0 0 3px rgba(64, 84, 94, 0.12);
 }
 
 .config-item input::placeholder,
@@ -1543,8 +1670,8 @@
 }
 
 .logo-upload-area:hover {
-  border-color: #1e3a5f;
-  background: #f0f5fa;
+  border-color: var(--aitetsu);
+  background: rgba(64, 84, 94, 0.04);
 }
 
 .logo-placeholder {
@@ -1719,7 +1846,7 @@
 }
 
 .quote-totals .grand-total-row span:last-child {
-  color: #1e3a5f;
+  color: var(--aitetsu);
 }
 
 /* Modal Footer Buttons */
@@ -1757,23 +1884,24 @@
 }
 
 .btn-preview-quotation {
-  background: #e8f0f8;
-  color: #1e3a5f;
+  background: rgba(64, 84, 94, 0.08);
+  color: var(--aitetsu);
+  border: 1px solid rgba(64, 84, 94, 0.2);
 }
 
 .btn-preview-quotation:hover {
-  background: #d0e0f0;
+  background: rgba(64, 84, 94, 0.12);
+  border-color: rgba(64, 84, 94, 0.3);
 }
 
 .btn-download-quotation {
-  background: #1e3a5f;
-  color: white;
+  background: var(--aitetsu);
+  color: var(--washi);
 }
 
 .btn-download-quotation:hover {
-  background: #152a45;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(30, 58, 95, 0.3);
+  background: var(--kurogane);
+  box-shadow: 0 4px 12px rgba(64, 84, 94, 0.25);
 }
 
 .btn-preview-quotation i,
@@ -1782,55 +1910,72 @@
   height: 18px;
 }
 
-/* Preview Modal */
+/* Preview Modal - Brand-aligned */
 .modal-preview {
   max-width: 900px;
   width: 95%;
   max-height: 90vh;
   display: flex;
   flex-direction: column;
-  border-radius: 16px;
+  border-radius: 1.25rem;
   overflow: hidden;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.12);
 }
 
 .modal-preview .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.25rem 1.5rem;
-  background: #1e3a5f;
-  color: white;
+  padding: 1.5rem 1.75rem;
+  background: var(--aitetsu);
+  color: var(--washi);
+  position: relative;
+  overflow: hidden;
 }
 
 .modal-preview .modal-header-content {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.875rem;
+  position: relative;
+  z-index: 1;
 }
 
 .modal-preview .modal-header-content i {
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
+  color: var(--washi);
 }
 
 .modal-preview .modal-header-content h2 {
   font-size: 1.25rem;
-  font-weight: 600;
+  font-weight: 700;
   margin: 0;
+  color: var(--washi);
 }
 
 .modal-preview .modal-close-btn {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.15);
   border: none;
-  border-radius: 8px;
-  padding: 0.5rem;
+  border-radius: 10px;
+  width: 38px;
+  height: 38px;
+  padding: 0;
   cursor: pointer;
-  color: white;
+  color: var(--washi);
   transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
 }
 
 .modal-preview .modal-close-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.05);
 }
 
 .modal-preview .modal-close-btn i {
