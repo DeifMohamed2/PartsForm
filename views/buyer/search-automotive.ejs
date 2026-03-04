@@ -11,6 +11,9 @@
     AUTOMOTIVE SEARCH PAGE - PROFESSIONAL DESIGN
         ==================================== -->
 <div class="search2-page automotive-theme">
+  <!-- Advanced Filters - Full Page Overlay Sidebar (always available) -->
+  <%- include('partials/search-filters-overlay') %>
+
   <!-- Hero Section - Automotive Theme -->
   <div class="search2-hero automotive-hero">
     <!-- Animated Car Icons Background -->
@@ -75,7 +78,7 @@
             <i data-lucide="sparkles"></i>
             <span><%= t('search.aiSmartFilter') %></span>
           </button>
-          <button class="quick-action-btn hidden" id="advanced-filter-trigger">
+          <button class="quick-action-btn" id="advanced-filter-trigger">
             <i data-lucide="sliders-horizontal"></i>
             <span><%= t('search.advancedFilters') %></span>
           </button>

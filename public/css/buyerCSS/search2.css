@@ -535,7 +535,7 @@ body:has(.search2-page) {
    RESULTS SECTION - Clean Professional Design
    ==================================== */
 .search2-results-section {
-  padding: 0;
+  padding: 3rem 0 4rem;
   width: 100%;
   overflow: hidden;
   background: linear-gradient(180deg, #f0f2f5 0%, #f8f9fb 40%, #ffffff 100%);
@@ -579,7 +579,7 @@ body:has(.search2-page) {
 .search2-results-section .container {
   max-width: 1400px;
   width: 100%;
-  padding: 1.75rem 1.5rem 2.5rem;
+  padding: 0 1.5rem;
   margin: 0 auto;
 }
 
@@ -761,55 +761,65 @@ body:has(.search2-page) {
    FILTERS SIDEBAR (MATCHING ORIGINAL SEARCH.EJS)
    ==================================== */
 .search-results-container {
-  grid-template-columns: 320px 1fr;
-  gap: 2rem;
+  display: block;
   position: relative;
   width: 100%;
   max-width: 100%;
 }
 
-/* Sidebar backdrop */
+/* ====================================
+   ADVANCED FILTERS - Full Page Overlay
+   Backdrop covers entire viewport
+   ==================================== */
 .filters-backdrop {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(4px);
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   z-index: 10050;
   opacity: 0;
   visibility: hidden;
+  pointer-events: none;
   transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 
 .filters-backdrop.active {
   opacity: 1;
   visibility: visible;
+  pointer-events: auto;
 }
 
 /* ====================================
-   FILTERS SIDEBAR - PROFESSIONAL DESIGN
+   FILTERS SIDEBAR - Pro Full-Page Overlay Design
    ==================================== */
-.filters-sidebar {
+.filters-sidebar,
+.filters-sidebar-pro {
   position: fixed;
   top: 0;
   left: 0;
-  width: 420px;
+  width: min(420px, 92vw);
+  max-width: 420px;
   height: 100vh;
+  height: 100dvh;
   background: #ffffff;
-  border-right: 1px solid #e5e7eb;
-  box-shadow: 0 0 40px rgba(0, 0, 0, 0.08);
+  border-right: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 16px 0 48px rgba(0, 0, 0, 0.12), 0 0 1px rgba(0, 0, 0, 0.08);
   z-index: 10051;
   transform: translateX(-100%);
-  transition: transform 0.25s ease;
+  transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1), box-shadow 0.3s ease;
   overflow: hidden;
   display: flex;
   flex-direction: column;
 }
 
-.filters-sidebar.active {
+.filters-sidebar.active,
+.filters-sidebar-pro.active {
   transform: translateX(0);
+  box-shadow: 24px 0 64px rgba(0, 0, 0, 0.15), 0 0 1px rgba(0, 0, 0, 0.1);
 }
 
 .filters-header {
@@ -817,8 +827,9 @@ body:has(.search2-page) {
   align-items: center;
   justify-content: space-between;
   padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid #e5e7eb;
-  background: #fafafa;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+  flex-shrink: 0;
 }
 
 .filters-header-content {
@@ -865,6 +876,30 @@ body:has(.search2-page) {
   width: 18px;
   height: 18px;
   color: #6b7280;
+}
+
+/* Pro exit icon in filters header */
+.filters-close-pro {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.filters-close-pro i {
+  width: 20px;
+  height: 20px;
+  color: #475569;
+}
+
+.filters-close-pro:hover {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+.filters-close-pro:hover i {
+  color: #dc2626;
 }
 
 .filters-content {
@@ -2049,28 +2084,10 @@ body:has(.search2-page) {
   color: var(--primary);
 }
 
-.filters-close {
-  display: none;
-  width: 2rem;
-  height: 2rem;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  border: none;
-  border-radius: 50%;
-  color: var(--text-secondary);
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.filters-close:hover {
-  background: var(--border-color);
-  color: var(--text-primary);
-}
-
-.filters-close i {
-  width: 1.125rem;
-  height: 1.125rem;
+/* Overlay sidebar: close button always visible */
+.filters-sidebar .filters-close,
+.filters-sidebar-pro .filters-close {
+  display: flex;
 }
 
 /* ====================================
@@ -3417,7 +3434,6 @@ body:has(.search2-page) {
 /* Tablet Landscape (1024px - 1199px) */
 @media (max-width: 1199px) {
   .search-results-container {
-    grid-template-columns: 1fr;
     gap: 1.5rem;
   }
 
@@ -3427,12 +3443,14 @@ body:has(.search2-page) {
     overflow: hidden;
   }
 
-  .filters-sidebar {
-    width: 320px;
-    max-width: 90vw;
+  .filters-sidebar,
+  .filters-sidebar-pro {
+    width: min(380px, 92vw);
+    max-width: 92vw;
   }
 
-  .filters-sidebar.active {
+  .filters-sidebar.active,
+  .filters-sidebar-pro.active {
     transform: translateX(0);
   }
 
@@ -3573,6 +3591,7 @@ body:has(.search2-page) {
 
   .search2-results-section {
     overflow-x: hidden;
+    padding: 2rem 0 3rem;
   }
 
   .search2-results-section .container {
@@ -4122,6 +4141,7 @@ body:has(.search2-page) {
 
   .search2-results-section {
     overflow-x: hidden;
+    padding: 1.5rem 0 2.5rem;
   }
 
   .results-header {
@@ -4177,6 +4197,7 @@ body:has(.search2-page) {
 
   .search2-results-section {
     overflow-x: hidden;
+    padding: 1.25rem 0 2rem;
   }
 
   .empty-state {

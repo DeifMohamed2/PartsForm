@@ -376,6 +376,18 @@
     elements.clearAllFilters?.addEventListener('click', clearFilters);
     elements.applyFilters?.addEventListener('click', applyFilters);
 
+    // Mobile/desktop filter toggle (opens sidebar)
+    const mobileFilterToggle = document.getElementById('mobile-filter-toggle');
+    if (mobileFilterToggle) {
+      mobileFilterToggle.addEventListener('click', () => {
+        if (typeof window.BuyerAuth !== 'undefined' && window.BuyerAuth.isLoggedIn()) {
+          showFiltersPanel();
+        } else if (typeof window.showLoginModal === 'function') {
+          window.showLoginModal();
+        }
+      });
+    }
+
     // Filter chips
     document.querySelectorAll('.filter-chip').forEach((chip) => {
       chip.addEventListener('click', handleFilterChipClick);
@@ -992,10 +1004,7 @@
     elements.resultsTableContainer.classList.add('hidden');
     elements.noResultsState.classList.add('hidden');
 
-    // Hide advanced filter trigger when resetting
-    if (elements.advancedFilterTrigger) {
-      elements.advancedFilterTrigger.classList.add('hidden');
-    }
+    // Advanced filter trigger stays visible (full-page overlay)
 
     // Show empty state
     elements.emptyState.classList.remove('hidden');
@@ -1681,7 +1690,7 @@
 
   function showQuickSortBar() {
     if (elements.quickSortBar) {
-      elements.quickSortBar.style.display = 'flex';
+      elements.quickSortBar.classList.remove('hidden');
       // Re-initialize lucide icons
       if (typeof lucide !== 'undefined') {
         lucide.createIcons({ nameAttr: 'data-lucide' });
@@ -1691,7 +1700,7 @@
 
   function hideQuickSortBar() {
     if (elements.quickSortBar) {
-      elements.quickSortBar.style.display = 'none';
+      elements.quickSortBar.classList.add('hidden');
     }
   }
 
