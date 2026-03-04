@@ -17,16 +17,16 @@
           const itemCount = cartData.items?.length || 0;
           if (itemCount > 0) {
             cartBadge.textContent = itemCount;
-            cartBadge.style.display = 'flex';
+            cartBadge.classList.remove('hidden');
           } else {
-            cartBadge.style.display = 'none';
+            cartBadge.classList.add('hidden');
           }
         } else {
-          cartBadge.style.display = 'none';
+          cartBadge.classList.add('hidden');
         }
       } catch (error) {
         console.error('Error updating cart badge:', error);
-        cartBadge.style.display = 'none';
+        cartBadge.classList.add('hidden');
       }
     }
   }

@@ -426,8 +426,8 @@
 
   function showEmptyState() {
     if (DOM.emptyCartState && DOM.cartItemsContainer) {
-      DOM.emptyCartState.style.display = 'block';
-      DOM.cartItemsContainer.style.display = 'none';
+      DOM.emptyCartState.classList.remove('hidden');
+      DOM.cartItemsContainer.classList.add('hidden');
     }
   }
 
@@ -436,8 +436,8 @@
       return;
     }
 
-    DOM.emptyCartState.style.display = 'none';
-    DOM.cartItemsContainer.style.display = 'block';
+    DOM.emptyCartState.classList.add('hidden');
+    DOM.cartItemsContainer.classList.remove('hidden');
 
     DOM.cartTableBody.innerHTML = '';
 
@@ -623,9 +623,9 @@
       const itemCount = cartState.items.length;
       if (itemCount > 0) {
         cartBadge.textContent = itemCount;
-        cartBadge.style.display = 'flex';
+        cartBadge.classList.remove('hidden');
       } else {
-        cartBadge.style.display = 'none';
+        cartBadge.classList.add('hidden');
       }
     }
   }
