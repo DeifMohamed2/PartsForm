@@ -1,46 +1,46 @@
 <%- include('partials/header') %>
 <link rel="stylesheet" href="/css/buyerCSS/buyer-main.css">
-<link rel="stylesheet" href="/css/buyerCSS/create-ticket.css">
+<link rel="stylesheet" href="/css/buyerCSS/create-claim.css">
 
 <%- include('partials/navbar') %>
 
 <!-- ====================================
-     CREATE TICKET PAGE - PROFESSIONAL DESIGN
+     CREATE CLAIM PAGE - PROFESSIONAL DESIGN
      ==================================== -->
-<div class="create-ticket-page">
+<div class="create-claim-page">
   <!-- Hero Section -->
-  <div class="create-ticket-hero">
-    <div class="create-ticket-hero-content">
+  <div class="create-claim-hero">
+    <div class="create-claim-hero-content">
       <div class="hero-badge">
         <i data-lucide="life-buoy"></i>
-        <span><%= t('tickets.create.badge') %></span>
+        <span>Claim Support</span>
       </div>
 
-      <h1 class="create-ticket-hero-title"><%= t('tickets.create.title') %></h1>
-      <p class="create-ticket-hero-subtitle">
-        <%= t('tickets.create.subtitle') %>
+      <h1 class="create-claim-hero-title">Create New Claim</h1>
+      <p class="create-claim-hero-subtitle">
+        Submit a claim for any issues with your orders or inquiries
       </p>
     </div>
   </div>
 
   <!-- Main Content -->
   <div class="buyer-container">
-    <div class="create-ticket-section">
-      <div class="create-ticket-container">
+    <div class="create-claim-section">
+      <div class="create-claim-container">
         <!-- Back Button -->
-        <a href="/buyer/tickets" class="btn-back">
+        <a href="/buyer/claim-support" class="btn-back">
           <i data-lucide="arrow-left"></i>
-          <span><%= t('tickets.create.backToTickets') %></span>
+          <span>Back to Claims</span>
         </a>
 
         <!-- Form Card -->
-        <div class="create-ticket-card">
+        <div class="create-claim-card">
           <div class="card-header">
-            <h2 class="card-title"><%= t('tickets.create.cardTitle') %></h2>
-            <p class="card-subtitle"><%= t('tickets.create.cardSubtitle') %></p>
+            <h2 class="card-title">Claim Details</h2>
+            <p class="card-subtitle">Provide details about your claim and we'll assist you</p>
           </div>
 
-          <form id="create-ticket-form" class="ticket-form">
+          <form id="create-claim-form" class="claim-form">
             <!-- Category (First to determine if order is needed) -->
             <div class="form-group">
               <label for="category" class="form-label">
@@ -83,6 +83,9 @@
                 <% } %>
               </select>
               <span class="form-hint"><%= t('tickets.create.orderHint') %></span>
+              <% if (typeof orders !== 'undefined' && orders && orders.length === 0) { %>
+              <span class="form-hint form-hint-info"><%= t('tickets.create.noOrdersHint') || 'Orders with active claims are not listed. You can submit a general inquiry without selecting an order.' %></span>
+              <% } %>
             </div>
 
             <!-- Subject -->
@@ -154,13 +157,13 @@
 
             <!-- Form Actions -->
             <div class="form-actions">
-              <button type="button" class="btn-cancel" onclick="window.location.href='/buyer/tickets'">
+              <button type="button" class="btn-cancel" onclick="window.location.href='/buyer/claim-support'">
                 <i data-lucide="x"></i>
-                <span><%= t('tickets.create.cancel') %></span>
+                <span>Cancel</span>
               </button>
               <button type="submit" class="btn-submit">
                 <i data-lucide="send"></i>
-                <span><%= t('tickets.create.submit') %></span>
+                <span>Submit Claim</span>
               </button>
             </div>
           </form>
@@ -196,6 +199,7 @@
 <%- include('partials/quick-search') %>
 <%- include('partials/footer') %>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="/js/main.js"></script>
 <script src="/js/quick-search.js"></script>
 <script src="/js/cart.js"></script>
@@ -203,6 +207,16 @@
 <script>
   lucide.createIcons();
   window.addEventListener('load', () => lucide.createIcons());
+  
+  // Pre-populate order from URL parameter
+  const urlParams = new URLSearchParams(window.location.search);
+  const orderParam = urlParams.get('order');
+  if (orderParam) {
+    const orderSelect = document.getElementById('order-number');
+    if (orderSelect) {
+      orderSelect.value = orderParam;
+    }
+  }
   
   // Categories that typically require an order
   const orderRelatedCategories = ['Shipping Issue', 'Order Issue', 'Payment', 'Return Request'];
@@ -311,7 +325,7 @@
   }
 
   // Form submission
-  document.getElementById('create-ticket-form').addEventListener('submit', async (e) => {
+  document.getElementById('create-claim-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     
     const submitBtn = e.target.querySelector('.btn-submit');
@@ -334,7 +348,7 @@
         formData.append('attachments', file);
       });
 
-      const response = await fetch('/buyer/api/tickets', {
+      const response = await fetch('/buyer/api/claims', {
         method: 'POST',
         body: formData
       });
@@ -342,19 +356,46 @@
       const data = await response.json();
       
       if (data.success) {
-        // Show success message
-        alert('Ticket created successfully!');
-        // Redirect to the new ticket
-        window.location.href = '/buyer/tickets/' + data.ticket.id;
+        await Swal.fire({
+          icon: 'success',
+          title: 'Claim Created',
+          html: '<p style="font-family: \'Antartida\', sans-serif; color: #8E9CA6; font-size: 0.95rem;">Your claim has been submitted successfully. Our support team will review it shortly.</p>',
+          confirmButtonText: 'View Claim',
+          confirmButtonColor: '#D4AF37',
+          customClass: {
+            popup: 'swal-claim-popup',
+            title: 'swal-claim-title',
+            confirmButton: 'swal-claim-btn'
+          }
+        });
+        window.location.href = '/buyer/claim-support/' + data.claim.id;
       } else {
-        alert(data.message || 'Failed to create ticket. Please try again.');
+        const errorMsg = data.error || data.message || 'Failed to create claim. Please try again.';
+        const hasClaimId = data.claimId;
+        await Swal.fire({
+          icon: 'error',
+          title: hasClaimId ? 'Order Already Has Claim' : 'Submission Failed',
+          text: errorMsg,
+          confirmButtonText: hasClaimId ? 'View Existing Claim' : 'OK',
+          confirmButtonColor: hasClaimId ? '#D4AF37' : '#40545E'
+        });
+        if (hasClaimId) {
+          window.location.href = '/buyer/claim-support/' + data.claimId;
+          return;
+        }
         submitBtn.disabled = false;
         submitBtn.innerHTML = originalBtnText;
         lucide.createIcons();
       }
     } catch (error) {
-      console.error('Error creating ticket:', error);
-      alert('An error occurred. Please try again.');
+      console.error('Error creating claim:', error);
+      await Swal.fire({
+        icon: 'error',
+        title: 'Something Went Wrong',
+        text: 'An error occurred. Please try again.',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#40545E'
+      });
       submitBtn.disabled = false;
       submitBtn.innerHTML = originalBtnText;
       lucide.createIcons();

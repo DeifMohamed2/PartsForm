@@ -33,7 +33,7 @@ const attachmentSchema = new mongoose.Schema({
 
 /**
  * Message Schema
- * For individual messages in a ticket conversation
+ * For individual messages in a claim conversation
  */
 const messageSchema = new mongoose.Schema({
   sender: {
@@ -73,10 +73,10 @@ const messageSchema = new mongoose.Schema({
 }, { _id: true });
 
 /**
- * Ticket Schema
- * Main ticket document for support system
+ * Claim Schema
+ * Main claim document for support system
  */
-const ticketSchema = new mongoose.Schema({
+const claimSchema = new mongoose.Schema({
   ticketNumber: {
     type: String,
     required: true,
@@ -153,7 +153,7 @@ const ticketSchema = new mongoose.Schema({
   // Unread counts for notifications
   unreadByAdmin: {
     type: Number,
-    default: 1  // Initial ticket counts as unread
+    default: 1  // Initial claim counts as unread
   },
   unreadByBuyer: {
     type: Number,
@@ -181,39 +181,40 @@ const ticketSchema = new mongoose.Schema({
 });
 
 // Indexes for efficient queries
-// Note: ticketNumber index is already created by unique: true
-ticketSchema.index({ buyer: 1, status: 1 });
-ticketSchema.index({ status: 1, createdAt: -1 });
-ticketSchema.index({ orderNumber: 1 });
-ticketSchema.index({ lastMessageAt: -1 });
-ticketSchema.index({ assignedTo: 1, status: 1 });
+// Note: ticketNumber index is already created by unique: true (kept for DB compatibility)
+claimSchema.index({ buyer: 1, status: 1 });
+claimSchema.index({ status: 1, createdAt: -1 });
+claimSchema.index({ orderNumber: 1 });
+claimSchema.index({ lastMessageAt: -1 });
+claimSchema.index({ assignedTo: 1, status: 1 });
 
 // Virtual for message count
-ticketSchema.virtual('messageCount').get(function() {
+claimSchema.virtual('messageCount').get(function() {
   return this.messages ? this.messages.length : 0;
 });
 
-// Virtual for formatted ticket ID
-ticketSchema.virtual('id').get(function() {
+// Virtual for formatted claim ID
+claimSchema.virtual('id').get(function() {
   return this.ticketNumber;
 });
 
 /**
- * Generate unique ticket number
+ * Generate unique claim number
+ * Note: Uses TKT- prefix for DB compatibility with existing records
  */
-ticketSchema.statics.generateTicketNumber = async function() {
+claimSchema.statics.generateTicketNumber = async function() {
   const date = new Date();
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
   
-  // Find the last ticket number for this month
-  const lastTicket = await this.findOne({
+  // Find the last claim number for this month
+  const lastClaim = await this.findOne({
     ticketNumber: new RegExp(`^TKT-${year}${month}`)
   }).sort({ ticketNumber: -1 });
 
   let nextNumber = 1;
-  if (lastTicket) {
-    const lastNumber = parseInt(lastTicket.ticketNumber.split('-')[2], 10);
+  if (lastClaim) {
+    const lastNumber = parseInt(lastClaim.ticketNumber.split('-')[2], 10);
     nextNumber = lastNumber + 1;
   }
 
@@ -221,9 +222,9 @@ ticketSchema.statics.generateTicketNumber = async function() {
 };
 
 /**
- * Add a message to the ticket
+ * Add a message to the claim
  */
-ticketSchema.methods.addMessage = async function(messageData) {
+claimSchema.methods.addMessage = async function(messageData) {
   const message = {
     sender: messageData.sender,
     senderName: messageData.senderName,
@@ -247,7 +248,7 @@ ticketSchema.methods.addMessage = async function(messageData) {
     this.unreadByBuyer += 1;
   }
 
-  // Update status if admin replies to open ticket
+  // Update status if admin replies to open claim
   if (messageData.sender === 'admin' && this.status === 'open') {
     this.status = 'in-progress';
   }
@@ -259,7 +260,7 @@ ticketSchema.methods.addMessage = async function(messageData) {
 /**
  * Mark messages as read
  */
-ticketSchema.methods.markAsRead = async function(reader) {
+claimSchema.methods.markAsRead = async function(reader) {
   if (reader === 'admin') {
     this.unreadByAdmin = 0;
     this.messages.forEach(msg => {
@@ -279,9 +280,9 @@ ticketSchema.methods.markAsRead = async function(reader) {
 };
 
 /**
- * Update ticket status
+ * Update claim status
  */
-ticketSchema.methods.updateStatus = async function(newStatus, updatedBy) {
+claimSchema.methods.updateStatus = async function(newStatus, updatedBy) {
   this.status = newStatus;
   
   if (newStatus === 'resolved') {
@@ -294,7 +295,7 @@ ticketSchema.methods.updateStatus = async function(newStatus, updatedBy) {
   const statusMessage = {
     sender: updatedBy,
     senderName: updatedBy === 'admin' ? 'Support Team' : 'System',
-    content: `Ticket status changed to ${newStatus.replace('-', ' ')}`,
+    content: `Claim status changed to ${newStatus.replace('-', ' ')}`,
     readByAdmin: true,
     readByBuyer: true,
     createdAt: new Date()
@@ -305,6 +306,7 @@ ticketSchema.methods.updateStatus = async function(newStatus, updatedBy) {
   await this.save();
 };
 
-const Ticket = mongoose.model('Ticket', ticketSchema);
+// Use 'Ticket' as model name for DB compatibility with existing collection
+const Claim = mongoose.model('Ticket', claimSchema);
 
-module.exports = Ticket;
+module.exports = Claim;

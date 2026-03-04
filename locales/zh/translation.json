@@ -643,24 +643,42 @@
     "general": {
       "title": "常规设置",
       "subtitle": "管理您的基本账户偏好",
-      "language": "语言",
-      "timezone": "时区",
-      "dateFormat": "日期格式",
-      "languageDesc": "选择您的首选界面语言",
-      "timezoneDesc": "设置您的时区以获得准确的时间显示",
-      "dateFormatDesc": "选择日期的显示方式"
+      "language": {
+        "title": "语言",
+        "desc": "选择您的首选界面语言"
+      },
+      "timezone": {
+        "title": "时区",
+        "desc": "设置您的时区以获得准确的时间显示"
+      },
+      "dateFormat": {
+        "title": "日期格式",
+        "desc": "选择日期的显示方式"
+      },
+      "currency": {
+        "title": "货币",
+        "desc": "选择您喜欢的货币用于显示价格"
+      }
     },
     "notifications": {
       "title": "通知设置",
       "subtitle": "控制您收到通知的方式和时间",
-      "email": "电子邮件通知",
-      "orderUpdates": "订单更新",
-      "promotional": "促销邮件",
-      "sms": "短信通知",
-      "emailDesc": "接收重要更新的电子邮件通知",
-      "orderUpdatesDesc": "当您的订单状态变化时接收通知",
-      "promotionalDesc": "接收关于新产品和特别优惠的邮件",
-      "smsDesc": "接收紧急更新的短信通知"
+      "email": {
+        "title": "电子邮件通知",
+        "desc": "接收重要更新的电子邮件通知"
+      },
+      "orderUpdates": {
+        "title": "订单更新",
+        "desc": "当您的订单状态变化时接收通知"
+      },
+      "promotional": {
+        "title": "促销邮件",
+        "desc": "接收关于新产品和特别优惠的邮件"
+      },
+      "sms": {
+        "title": "短信通知",
+        "desc": "接收紧急更新的短信通知"
+      }
     },
     "privacy": {
       "title": "隐私设置",
@@ -672,15 +690,14 @@
         "private": "私密",
         "friendsOnly": "仅好友"
       },
-      "dataCollection": "数据收集",
-      "cookies": "Cookie",
-      "visibility": "个人资料可见性",
-      "visibilityDesc": "控制谁可以看到您的个人资料信息",
-      "public": "公开",
-      "private": "私密",
-      "friendsOnly": "仅好友",
-      "dataCollectionDesc": "允许我们收集分析数据以改进服务",
-      "cookiesDesc": "接受Cookie以获得更好的浏览体验"
+      "dataCollection": {
+        "title": "数据收集",
+        "desc": "允许我们收集分析数据以改进服务"
+      },
+      "cookies": {
+        "title": "Cookie",
+        "desc": "接受Cookie以获得更好的浏览体验"
+      }
     },
     "security": {
       "title": "安全设置",
@@ -690,48 +707,50 @@
         "desc": "为您的账户添加额外的安全层",
         "setup": "设置双重认证"
       },
-      "changePassword": "更改密码",
+      "changePassword": {
+        "title": "更改密码",
+        "desc": "定期更新您的账户密码",
+        "button": "更改密码"
+      },
       "sessions": {
         "title": "活跃会话",
         "desc": "查看和管理已登录的设备",
         "view": "查看会话"
-      },
-      "twoFA": "双重认证",
-      "twoFADesc": "为您的账户添加额外的安全层",
-      "changePasswordDesc": "定期更新您的账户密码",
-      "changePasswordBtn": "更改密码",
-      "activeSessions": "活跃会话",
-      "activeSessionsDesc": "查看和管理已登录的设备",
-      "viewSessions": "查看会话"
+      }
     },
     "preferences": {
       "title": "偏好设置",
       "subtitle": "自定义您的体验",
-      "theme": "主题",
-      "itemsPerPage": "每页项目数",
-      "themeDesc": "选择您喜欢的颜色主题",
-      "light": "浅色",
-      "dark": "深色",
-      "auto": "自动（系统）",
-      "itemsPerPageDesc": "每页显示的项目数量"
+      "theme": {
+        "title": "主题",
+        "desc": "选择您喜欢的颜色主题",
+        "light": "浅色",
+        "dark": "深色",
+        "auto": "自动（系统）"
+      },
+      "itemsPerPage": {
+        "title": "每页项目数",
+        "desc": "每页显示的项目数量"
+      }
     },
     "billing": {
       "title": "账单设置",
       "subtitle": "管理您的付款方式和账单信息",
-      "paymentMethods": "付款方式",
-      "billingAddress": "账单地址",
+      "paymentMethods": {
+        "title": "付款方式",
+        "desc": "管理您保存的付款方式",
+        "manage": "管理付款方式"
+      },
+      "billingAddress": {
+        "title": "账单地址",
+        "desc": "更新您的账单地址",
+        "update": "更新地址"
+      },
       "invoices": {
         "title": "发票历史",
         "desc": "查看和下载您的历史发票",
         "view": "查看发票"
-      },
-      "paymentMethodsDesc": "管理您保存的付款方式",
-      "managePaymentMethods": "管理付款方式",
-      "billingAddressDesc": "更新您的账单地址",
-      "updateAddress": "更新地址",
-      "invoiceHistory": "发票历史",
-      "invoiceHistoryDesc": "查看和下载您的历史发票",
-      "viewInvoices": "查看发票"
+      }
     },
     "actions": {
       "saveChanges": "保存更改",
@@ -817,20 +836,21 @@
     "stats": {
       "resolved": "Resolved",
       "inProgress": "In Progress",
-      "open": "Open"
+      "open": "Open",
+      "closed": "已关闭"
     },
     "filters": {
       "status": "Status",
       "allStatuses": "All Statuses",
       "search": "Search",
-      "searchPlaceholder": "Search tickets...",
+      "searchPlaceholder": "Search claims...",
       "apply": "Apply Filters",
       "reset": "Reset"
     },
     "empty": {
-      "title": "No Tickets Yet",
-      "text": "You haven't created any support tickets",
-      "createFirst": "Create First Ticket"
+      "title": "No Claims Yet",
+      "text": "You haven't created any support claims",
+      "createFirst": "Create First Claim"
     }
   },
   "contacts": {
@@ -852,8 +872,7 @@
   "affiliate": {
     "badge": "合作伙伴计划",
     "title": "客户忠诚度计划",
-    "subtitle": "我们重视每一位客户，并为对您的品牌有贡献的客户提供最佳奖励。您与我们的成长越多，获得的奖励就越多！",
-    "description": "我们的计划包括以下等级：铜级 - 改善的条款和额外折扣；银级 - 高级折扣和优先服务；金级 - 独家价格和专属支持；白金级 - VIP福利和个性化服务；白金+级 - 最高等级，享有VIP+条款、优先特权和独特优惠。",
+    "subtitle": "随着您的进步获得更多奖励。等级越高，福利越好。",
     "tiers": {
       "title": "会员等级",
       "subtitle": "您的忠诚度根据订单量决定您的购买等级。等级越高，获得的福利越多。",

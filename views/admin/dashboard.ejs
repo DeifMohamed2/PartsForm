@@ -483,24 +483,24 @@
           <!-- Open Tickets -->
           <div class="activity-card" style="margin-bottom: 0;">
             <div class="activity-header">
-              <h3 class="activity-title">Open Tickets</h3>
-              <a href="/admin/tickets" class="admin-btn admin-btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">
+              <h3 class="activity-title">Open Claims</h3>
+              <a href="/admin/claims" class="admin-btn admin-btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">
                 View All
               </a>
             </div>
             <div class="activity-list" style="max-height: 280px; overflow-y: auto;">
-              <% var openTickets = tickets.filter(function(t) { return t.status === 'open' || t.status === 'in-progress'; }); %>
-              <% openTickets.slice(0, 6).forEach(function(ticket) { %>
+              <% var openClaims = claims.filter(function(c) { return c.status === 'open' || c.status === 'in-progress'; }); %>
+              <% openClaims.slice(0, 6).forEach(function(claim) { %>
                 <div class="activity-item">
-                  <div class="activity-icon <%= ticket.status === 'open' ? 'warning' : '' %>">
-                    <i data-lucide="<%= ticket.priority === 'urgent' ? 'alert-circle' : 'message-square' %>"></i>
+                  <div class="activity-icon <%= claim.status === 'open' ? 'warning' : '' %>">
+                    <i data-lucide="<%= claim.priority === 'urgent' ? 'alert-circle' : 'message-square' %>"></i>
                   </div>
                   <div class="activity-content" style="flex: 1;">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                      <div class="activity-text"><strong><%= ticket.id %></strong></div>
-                      <span style="font-size: 0.65rem; padding: 0.15rem 0.4rem; border-radius: 8px; background: <%= ticket.priority === 'urgent' ? 'rgba(239, 68, 68, 0.15)' : ticket.priority === 'high' ? 'rgba(245, 158, 11, 0.15)' : 'rgba(59, 130, 246, 0.15)' %>; color: <%= ticket.priority === 'urgent' ? '#dc2626' : ticket.priority === 'high' ? '#d97706' : '#3b82f6' %>;"><%= ticket.priority %></span>
+                      <div class="activity-text"><strong><%= claim.id %></strong></div>
+                      <span style="font-size: 0.65rem; padding: 0.15rem 0.4rem; border-radius: 8px; background: <%= claim.priority === 'urgent' ? 'rgba(239, 68, 68, 0.15)' : claim.priority === 'high' ? 'rgba(245, 158, 11, 0.15)' : 'rgba(59, 130, 246, 0.15)' %>; color: <%= claim.priority === 'urgent' ? '#dc2626' : claim.priority === 'high' ? '#d97706' : '#3b82f6' %>;"><%= claim.priority %></span>
                     </div>
-                    <div class="activity-time" style="font-size: 0.75rem;"><%= ticket.subject.substring(0, 30) %><%= ticket.subject.length > 30 ? '...' : '' %></div>
+                    <div class="activity-time" style="font-size: 0.75rem;"><%= claim.subject.substring(0, 30) %><%= claim.subject.length > 30 ? '...' : '' %></div>
                   </div>
                 </div>
               <% }); %>
@@ -1423,31 +1423,31 @@
           </div>
           </div>
           
-          <!-- Support Tickets -->
+          <!-- Support Claims -->
           <div class="activity-card" style="margin-bottom: 0;">
             <div class="activity-header">
-              <h3 class="activity-title">Support Tickets</h3>
-              <a href="/admin/tickets" class="admin-btn admin-btn-secondary">Manage</a>
+              <h3 class="activity-title">Support Claims</h3>
+              <a href="/admin/claims" class="admin-btn admin-btn-secondary">Manage</a>
             </div>
             <div class="activity-list" style="max-height: 300px; overflow-y: auto;">
-              <% if (tickets.length === 0) { %>
+              <% if (claims.length === 0) { %>
                 <div style="padding: 2rem; text-align: center; color: var(--admin-text-muted);">
-                  No tickets found.
+                  No claims found.
                 </div>
               <% } else { %>
-                <% tickets.slice(0, 5).forEach(function(ticket) { %>
+                <% claims.slice(0, 5).forEach(function(claim) { %>
                   <div class="activity-item" style="padding: 0.875rem;">
-                    <div class="activity-icon <%= ticket.status === 'resolved' ? 'success' : ticket.status === 'open' ? 'warning' : '' %>">
-                      <i data-lucide="<%= ticket.status === 'resolved' ? 'check-circle' : 'mail' %>"></i>
+                    <div class="activity-icon <%= claim.status === 'resolved' ? 'success' : claim.status === 'open' ? 'warning' : '' %>">
+                      <i data-lucide="<%= claim.status === 'resolved' ? 'check-circle' : 'mail' %>"></i>
                     </div>
                     <div class="activity-content" style="flex: 1;">
                       <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div class="activity-text"><strong><%= ticket.id %></strong></div>
-                        <span style="font-size: 0.65rem; padding: 0.15rem 0.4rem; border-radius: 8px; background: <%= ticket.priority === 'urgent' ? 'rgba(239, 68, 68, 0.15)' : ticket.priority === 'high' ? 'rgba(245, 158, 11, 0.15)' : 'rgba(59, 130, 246, 0.15)' %>; color: <%= ticket.priority === 'urgent' ? '#dc2626' : ticket.priority === 'high' ? '#d97706' : '#3b82f6' %>;"><%= ticket.priority %></span>
+                        <div class="activity-text"><strong><%= claim.id %></strong></div>
+                        <span style="font-size: 0.65rem; padding: 0.15rem 0.4rem; border-radius: 8px; background: <%= claim.priority === 'urgent' ? 'rgba(239, 68, 68, 0.15)' : claim.priority === 'high' ? 'rgba(245, 158, 11, 0.15)' : 'rgba(59, 130, 246, 0.15)' %>; color: <%= claim.priority === 'urgent' ? '#dc2626' : claim.priority === 'high' ? '#d97706' : '#3b82f6' %>;"><%= claim.priority %></span>
                       </div>
-                      <div class="activity-time"><%= ticket.subject.substring(0, 30) %><%= ticket.subject.length > 30 ? '...' : '' %></div>
+                      <div class="activity-time"><%= claim.subject.substring(0, 30) %><%= claim.subject.length > 30 ? '...' : '' %></div>
                       <div style="font-size: 0.7rem; color: var(--admin-text-muted); margin-top: 0.25rem;">
-                        <%= ticket.status.charAt(0).toUpperCase() + ticket.status.slice(1) %> • <%= ticket.category %>
+                        <%= claim.status.charAt(0).toUpperCase() + claim.status.slice(1) %> • <%= claim.category %>
                       </div>
                     </div>
                   </div>

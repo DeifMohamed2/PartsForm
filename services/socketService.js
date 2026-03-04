@@ -1,10 +1,11 @@
 /**
  * Socket.io Service
- * Handles real-time communication for the ticket/chat system
+ * Handles real-time communication for the claim/chat system
  */
 
 const { Server } = require('socket.io');
 const jwt = require('jsonwebtoken');
+const logger = require('../utils/logger');
 
 let io = null;
 
@@ -12,7 +13,7 @@ let io = null;
 const connections = {
   buyers: new Map(),    // Map<buyerId, Set<socketId>>
   admins: new Map(),    // Map<adminId, Set<socketId>>
-  tickets: new Map()    // Map<ticketId, Set<socketId>> - users currently viewing a ticket
+  claims: new Map()    // Map<claimId, Set<socketId>> - users currently viewing a claim
 };
 
 /**
@@ -49,7 +50,7 @@ const initialize = (server) => {
       };
       next();
     } catch (error) {
-      console.log('Socket auth error:', error.message);
+      logger.warn('Socket auth failed', { error: error.message });
       socket.userData = { authenticated: false };
       next();
     }
@@ -57,56 +58,59 @@ const initialize = (server) => {
 
   // Connection handler
   io.on('connection', (socket) => {
-    console.log(`Socket connected: ${socket.id} - ${socket.userData.authenticated ? socket.userData.email : 'unauthenticated'}`);
+    logger.info('Socket connected', {
+      socketId: socket.id,
+      user: socket.userData.authenticated ? socket.userData.email : 'unauthenticated',
+    });
 
     // Register user connection
     if (socket.userData.authenticated) {
       registerConnection(socket);
     }
 
-    // Join a ticket room for real-time updates
-    socket.on('join-ticket', (ticketId) => {
+    // Join a claim room for real-time updates
+    socket.on('join-claim', (claimId) => {
       if (!socket.userData.authenticated) return;
       
-      socket.join(`ticket:${ticketId}`);
+      socket.join(`claim:${claimId}`);
       
-      // Track who's viewing this ticket
-      if (!connections.tickets.has(ticketId)) {
-        connections.tickets.set(ticketId, new Set());
+      // Track who's viewing this claim
+      if (!connections.claims.has(claimId)) {
+        connections.claims.set(claimId, new Set());
       }
-      connections.tickets.get(ticketId).add(socket.id);
+      connections.claims.get(claimId).add(socket.id);
       
-      console.log(`User ${socket.userData.email} joined ticket room: ${ticketId}`);
+      logger.debug('User joined claim room', { user: socket.userData.email, claimId });
       
       // Emit typing indicator presence
-      socket.to(`ticket:${ticketId}`).emit('user-joined', {
+      socket.to(`claim:${claimId}`).emit('user-joined', {
         userId: socket.userData.userId,
         userType: socket.userData.userType
       });
     });
 
-    // Leave a ticket room
-    socket.on('leave-ticket', (ticketId) => {
-      socket.leave(`ticket:${ticketId}`);
+    // Leave a claim room
+    socket.on('leave-claim', (claimId) => {
+      socket.leave(`claim:${claimId}`);
       
-      if (connections.tickets.has(ticketId)) {
-        connections.tickets.get(ticketId).delete(socket.id);
-        if (connections.tickets.get(ticketId).size === 0) {
-          connections.tickets.delete(ticketId);
+      if (connections.claims.has(claimId)) {
+        connections.claims.get(claimId).delete(socket.id);
+        if (connections.claims.get(claimId).size === 0) {
+          connections.claims.delete(claimId);
         }
       }
       
-      socket.to(`ticket:${ticketId}`).emit('user-left', {
+      socket.to(`claim:${claimId}`).emit('user-left', {
         userId: socket.userData.userId,
         userType: socket.userData.userType
       });
     });
 
     // Typing indicator
-    socket.on('typing', ({ ticketId, isTyping }) => {
+    socket.on('typing', ({ claimId, isTyping }) => {
       if (!socket.userData.authenticated) return;
       
-      socket.to(`ticket:${ticketId}`).emit('user-typing', {
+      socket.to(`claim:${claimId}`).emit('user-typing', {
         userId: socket.userData.userId,
         userType: socket.userData.userType,
         isTyping
@@ -117,32 +121,32 @@ const initialize = (server) => {
     socket.on('new-message', (data) => {
       if (!socket.userData.authenticated) return;
       
-      // Broadcast to all users in the ticket room
-      io.to(`ticket:${data.ticketId}`).emit('message-received', {
+      // Broadcast to all users in the claim room
+      io.to(`claim:${data.claimId}`).emit('message-received', {
         ...data.message,
-        ticketId: data.ticketId
+        claimId: data.claimId
       });
 
       // Also notify the buyer/admin if they're not in the room
-      notifyNewMessage(data.ticketId, data.message, socket.userData);
+      notifyNewMessage(data.claimId, data.message, socket.userData);
     });
 
     // Handle message read
-    socket.on('messages-read', ({ ticketId, userType }) => {
+    socket.on('messages-read', ({ claimId, userType }) => {
       if (!socket.userData.authenticated) return;
       
-      socket.to(`ticket:${ticketId}`).emit('messages-marked-read', {
-        ticketId,
+      socket.to(`claim:${claimId}`).emit('messages-marked-read', {
+        claimId,
         readBy: userType
       });
     });
 
     // Handle status update
-    socket.on('status-updated', ({ ticketId, status }) => {
+    socket.on('status-updated', ({ claimId, status }) => {
       if (!socket.userData.authenticated) return;
       
-      io.to(`ticket:${ticketId}`).emit('ticket-status-changed', {
-        ticketId,
+      io.to(`claim:${claimId}`).emit('claim-status-changed', {
+        claimId,
         status,
         updatedBy: socket.userData.userType
       });
@@ -150,12 +154,12 @@ const initialize = (server) => {
 
     // Disconnect handler
     socket.on('disconnect', () => {
-      console.log(`Socket disconnected: ${socket.id}`);
+      logger.info('Socket disconnected', { socketId: socket.id });
       unregisterConnection(socket);
     });
   });
 
-  console.log('🔌 Socket.io initialized');
+  logger.info('Socket.io initialized');
   return io;
 };
 
@@ -188,11 +192,11 @@ const unregisterConnection = (socket) => {
     }
   }
 
-  // Remove from any ticket rooms
-  connections.tickets.forEach((sockets, ticketId) => {
+  // Remove from any claim rooms
+  connections.claims.forEach((sockets, claimId) => {
     sockets.delete(socket.id);
     if (sockets.size === 0) {
-      connections.tickets.delete(ticketId);
+      connections.claims.delete(claimId);
     }
   });
 };
@@ -200,17 +204,17 @@ const unregisterConnection = (socket) => {
 /**
  * Notify a user about a new message
  */
-const notifyNewMessage = (ticketId, message, sender) => {
+const notifyNewMessage = (claimId, message, sender) => {
   // If sender is buyer, notify admins
   // If sender is admin, notify the buyer
-  // This is for showing notifications on the tickets list page
+  // This is for showing notifications on the claims list page
   
   if (sender.userType === 'buyer') {
     // Notify all connected admins
     connections.admins.forEach((socketIds, adminId) => {
       socketIds.forEach(socketId => {
-        io.to(socketId).emit('ticket-new-message', {
-          ticketId,
+        io.to(socketId).emit('claim-new-message', {
+          claimId,
           message,
           fromBuyer: true
         });
@@ -218,17 +222,17 @@ const notifyNewMessage = (ticketId, message, sender) => {
     });
   } else {
     // Notify the specific buyer
-    // We'd need to know the buyer ID for this ticket
+    // We'd need to know the buyer ID for this claim
     // This will be handled by the controller when saving messages
   }
 };
 
 /**
- * Emit event to a specific ticket room
+ * Emit event to a specific claim room
  */
-const emitToTicket = (ticketId, event, data) => {
+const emitToClaim = (claimId, event, data) => {
   if (io) {
-    io.to(`ticket:${ticketId}`).emit(event, data);
+    io.to(`claim:${claimId}`).emit(event, data);
   }
 };
 
@@ -257,24 +261,24 @@ const emitToAdmins = (event, data) => {
 };
 
 /**
- * Emit new ticket notification
+ * Emit new claim notification
  */
-const notifyNewTicket = (ticket) => {
-  emitToAdmins('ticket-created', {
-    ticketId: ticket.ticketNumber,
-    subject: ticket.subject,
-    buyerName: ticket.buyerName,
-    category: ticket.category,
-    priority: ticket.priority
+const notifyNewClaim = (claim) => {
+  emitToAdmins('claim-created', {
+    claimId: claim.ticketNumber,
+    subject: claim.subject,
+    buyerName: claim.buyerName,
+    category: claim.category,
+    priority: claim.priority
   });
 };
 
 /**
- * Emit ticket update notification
+ * Emit claim update notification
  */
-const notifyTicketUpdate = (ticketId, updateType, data) => {
-  emitToTicket(ticketId, 'ticket-updated', {
-    ticketId,
+const notifyClaimUpdate = (claimId, updateType, data) => {
+  emitToClaim(claimId, 'claim-updated', {
+    claimId,
     updateType,
     ...data
   });
@@ -294,21 +298,24 @@ const isUserOnline = (userId, userType) => {
 };
 
 /**
- * Get users currently viewing a ticket
+ * Get users currently viewing a claim
  */
-const getTicketViewers = (ticketId) => {
-  return connections.tickets.has(ticketId) ? 
-    Array.from(connections.tickets.get(ticketId)) : [];
+const getClaimViewers = (claimId) => {
+  return connections.claims.has(claimId) ? 
+    Array.from(connections.claims.get(claimId)) : [];
 };
 
 module.exports = {
   initialize,
   getIO,
-  emitToTicket,
+  emitToClaim: emitToClaim, // Alias maintained for compatibility
+  emitToClaim: emitToClaim, // Alias maintained for compatibility // Alias for claim support
   emitToBuyer,
   emitToAdmins,
-  notifyNewTicket,
-  notifyTicketUpdate,
+  notifyNewClaim,
+  
+  notifyClaimUpdate,
+  
   isUserOnline,
-  getTicketViewers
+  getClaimViewers
 };

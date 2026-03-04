@@ -1,12 +1,12 @@
 /* ====================================
-   CREATE TICKET PAGE - PROFESSIONAL DESIGN
+   CREATE CLAIM PAGE - PROFESSIONAL DESIGN
    PARTSFORM Buyer Portal
    ==================================== */
 
 /* ====================================
    PAGE LAYOUT
    ==================================== */
-.create-ticket-page {
+.create-claim-page {
     min-height: 100vh;
     background: var(--washi);
     padding-top: 0;
@@ -14,7 +14,7 @@
 }
 
 /* Ensure navbar stays on top */
-.create-ticket-page .nav-bar {
+.create-claim-page .nav-bar {
     z-index: 10001 !important;
     position: fixed !important;
     top: 0 !important;
@@ -29,7 +29,7 @@
 /* ====================================
    HERO SECTION
    ==================================== */
-.create-ticket-hero {
+.create-claim-hero {
     padding: 8rem 0 4rem;
     position: relative;
     overflow: hidden;
@@ -39,7 +39,7 @@
     box-shadow: 0 10px 30px rgba(43, 43, 43, 0.2);
 }
 
-.create-ticket-hero::before {
+.create-claim-hero::before {
     content: '';
     position: absolute;
     top: 0;
@@ -50,24 +50,31 @@
     background-size: cover;
     background-position: center;
     background-blend-mode: overlay;
-    opacity: 0.3;
+    opacity: 0.25;
     z-index: 1;
     pointer-events: none;
+    animation: createClaimHeroShift 25s ease-in-out infinite;
 }
 
-.create-ticket-hero::after {
+@keyframes createClaimHeroShift {
+    0%, 100% { background-position: center center; }
+    33% { background-position: center 25%; }
+    66% { background-position: center 75%; }
+}
+
+.create-claim-hero::after {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(26, 43, 61, 0.5);
+    background: linear-gradient(180deg, rgba(64, 84, 94, 0.75) 0%, rgba(43, 43, 43, 0.85) 100%);
     z-index: 1;
     pointer-events: none;
 }
 
-.create-ticket-hero-content {
+.create-claim-hero-content {
     position: relative;
     z-index: 2;
     text-align: center;
@@ -81,15 +88,17 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.5rem 1rem;
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(149, 175, 192, 0.15);
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    border-radius: var(--radius-sm);
-    color: #ffffff;
+    border: 1px solid rgba(149, 175, 192, 0.35);
+    border-radius: 4px;
+    color: var(--washi);
+    font-family: 'Antartida', sans-serif;
     font-weight: 500;
-    font-size: 0.85rem;
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
     margin-bottom: 2rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     animation: fadeInUp 0.6s ease-out forwards;
 }
 
@@ -110,23 +119,24 @@
     height: 16px;
 }
 
-.create-ticket-hero-title {
-    font-size: 3rem;
-    font-weight: 700;
-    color: #ffffff;
+.create-claim-hero-title {
+    font-family: 'Quantico', sans-serif;
+    font-size: 2.5rem;
+    font-weight: 400;
+    color: var(--washi);
     margin-bottom: 1rem;
     line-height: 1.2;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
     animation: fadeInUp 0.6s ease-out 0.1s backwards;
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-    letter-spacing: -0.01em;
 }
 
-.create-ticket-hero-subtitle {
-    font-size: 1.1rem;
-    color: rgba(255, 255, 255, 0.9);
+.create-claim-hero-subtitle {
+    font-family: 'Antartida', sans-serif;
+    font-size: 1rem;
+    color: rgba(248, 250, 252, 0.9);
     line-height: 1.6;
     animation: fadeInUp 0.6s ease-out 0.2s backwards;
-    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
     font-weight: 400;
     max-width: 600px;
     margin: 0 auto;
@@ -135,11 +145,11 @@
 /* ====================================
    MAIN CONTENT
    ==================================== */
-.create-ticket-section {
+.create-claim-section {
     padding: 3rem 0;
 }
 
-.create-ticket-container {
+.create-claim-container {
     max-width: 800px;
     margin: 0 auto;
 }
@@ -149,15 +159,16 @@
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.75rem 1.25rem;
+    padding: 0.625rem 1.125rem;
     background: white;
     color: var(--namari);
-    border: 1px solid #e2e8f0;
-    border-radius: 10px;
-    font-weight: 600;
-    font-size: 0.9rem;
+    border: 1.5px solid var(--suzu);
+    border-radius: 4px;
+    font-family: 'Antartida', sans-serif;
+    font-weight: 500;
+    font-size: 0.875rem;
     text-decoration: none;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
     margin-bottom: 2rem;
 }
 
@@ -175,12 +186,12 @@
 /* ====================================
    FORM CARD
    ==================================== */
-.create-ticket-card {
+.create-claim-card {
     background: white;
-    border-radius: 16px;
-    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    border: 1px solid rgba(149, 175, 192, 0.25);
     padding: 2.5rem;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 16px rgba(149, 175, 192, 0.08);
     margin-bottom: 2rem;
 }
 
@@ -191,21 +202,25 @@
 }
 
 .card-title {
-    font-size: 1.75rem;
-    font-weight: 700;
+    font-family: 'Quantico', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 400;
     color: var(--kurogane);
     margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
 }
 
 .card-subtitle {
-    font-size: 0.95rem;
+    font-family: 'Antartida', sans-serif;
+    font-size: 0.9375rem;
     color: var(--namari);
 }
 
 /* ====================================
    FORM ELEMENTS
    ==================================== */
-.ticket-form {
+.claim-form {
     display: flex;
     flex-direction: column;
     gap: 2rem;
@@ -219,10 +234,10 @@
 
 /* Highlighted state when order is recommended */
 .form-group.order-recommended {
-    background: rgba(64, 84, 94, 0.05);
+    background: rgba(149, 175, 192, 0.06);
     padding: 1rem;
-    border-radius: 12px;
-    border: 1px dashed rgba(64, 84, 94, 0.3);
+    border-radius: 4px;
+    border: 1px dashed rgba(149, 175, 192, 0.35);
     margin: -0.5rem;
     margin-bottom: 0.5rem;
 }
@@ -236,8 +251,9 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    font-size: 0.95rem;
-    font-weight: 600;
+    font-family: 'Antartida', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
     color: var(--kurogane);
 }
 
@@ -248,8 +264,8 @@
 }
 
 .required {
-    color: #dc2626;
-    font-weight: 700;
+    color: var(--namari);
+    font-weight: 500;
 }
 
 .optional {
@@ -261,23 +277,23 @@
 .form-input,
 .form-select,
 .form-textarea {
-    padding: 0.875rem 1.125rem;
-    border: 2px solid #e2e8f0;
-    border-radius: 10px;
-    font-size: 0.95rem;
+    padding: 0.75rem 1rem;
+    border: 1.5px solid rgba(149, 175, 192, 0.25);
+    border-radius: 4px;
+    font-family: 'Antartida', sans-serif;
+    font-size: 0.9375rem;
     color: var(--kurogane);
     background: var(--washi);
-    transition: all 0.2s ease;
-    font-family: inherit;
+    transition: all 0.3s ease;
 }
 
 .form-input:focus,
 .form-select:focus,
 .form-textarea:focus {
     outline: none;
-    border-color: var(--sei);
+    border-color: var(--kintsugi);
     background: white;
-    box-shadow: 0 0 0 4px rgba(149, 175, 192, 0.1);
+    box-shadow: 0 0 0 3px rgba(214, 172, 63, 0.12);
 }
 
 .form-textarea {
@@ -289,6 +305,13 @@
     font-size: 0.85rem;
     color: var(--namari);
     margin-top: -0.25rem;
+}
+
+.form-hint-info {
+    display: block;
+    margin-top: 0.5rem;
+    color: var(--aitetsu);
+    font-size: 0.8rem;
 }
 
 /* ====================================
@@ -314,17 +337,17 @@
     align-items: center;
     gap: 0.75rem;
     padding: 1.25rem;
-    border: 2px solid #e2e8f0;
-    border-radius: 12px;
+    border: 1.5px solid rgba(149, 175, 192, 0.25);
+    border-radius: 4px;
     background: var(--washi);
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
     text-align: center;
 }
 
 .priority-option input[type="radio"]:checked+.priority-card {
     border-color: var(--aitetsu);
-    background: #eff6ff;
-    box-shadow: 0 4px 12px rgba(64, 84, 94, 0.2);
+    background: rgba(149, 175, 192, 0.08);
+    box-shadow: 0 2px 12px rgba(149, 175, 192, 0.12);
 }
 
 .priority-card:hover {
@@ -335,14 +358,12 @@
 .priority-icon {
     width: 40px;
     height: 40px;
-    border-radius: 50%;
+    border-radius: 4px;
     display: flex;
     align-items: center;
     justify-content: center;
-}
-
-.priority-card.low .priority-icon {
-    background: #f1f5f9;
+    background: var(--washi);
+    border: 1px solid rgba(149, 175, 192, 0.25);
 }
 
 .priority-card.low .priority-icon i {
@@ -351,34 +372,17 @@
     color: var(--namari);
 }
 
-.priority-card.medium .priority-icon {
-    background: #dbeafe;
-}
-
 .priority-card.medium .priority-icon i {
     width: 20px;
     height: 20px;
-    color: #2563eb;
+    color: var(--aitetsu);
 }
 
-.priority-card.high .priority-icon {
-    background: #fef3c7;
-}
-
-.priority-card.high .priority-icon i {
-    width: 20px;
-    height: 20px;
-    color: #d97706;
-}
-
-.priority-card.urgent .priority-icon {
-    background: #fee2e2;
-}
-
+.priority-card.high .priority-icon i,
 .priority-card.urgent .priority-icon i {
     width: 20px;
     height: 20px;
-    color: #dc2626;
+    color: var(--namari);
 }
 
 .priority-label {
@@ -396,18 +400,18 @@
    FILE UPLOAD
    ==================================== */
 .file-upload-area {
-    border: 2px dashed #cbd5e1;
-    border-radius: 12px;
+    border: 2px dashed rgba(149, 175, 192, 0.4);
+    border-radius: 4px;
     padding: 2rem;
     background: var(--washi);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
 }
 
 .file-upload-area:hover,
 .file-upload-area.drag-over {
     border-color: var(--sei);
-    background: #eff6ff;
+    background: rgba(149, 175, 192, 0.06);
 }
 
 .file-upload-content {
@@ -420,8 +424,9 @@
 .file-upload-icon {
     width: 60px;
     height: 60px;
-    border-radius: 50%;
-    background: #dbeafe;
+    border-radius: 4px;
+    background: var(--washi);
+    border: 1px solid rgba(149, 175, 192, 0.25);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -464,8 +469,8 @@
     align-items: center;
     padding: 0.875rem 1.125rem;
     background: var(--washi);
-    border: 1px solid #e2e8f0;
-    border-radius: 10px;
+    border: 1px solid rgba(149, 175, 192, 0.25);
+    border-radius: 4px;
 }
 
 .file-info {
@@ -495,20 +500,21 @@
 .file-remove {
     width: 32px;
     height: 32px;
-    border-radius: 50%;
-    border: none;
-    background: #fee2e2;
-    color: #dc2626;
+    border-radius: 4px;
+    border: 1.5px solid var(--suzu);
+    background: white;
+    color: var(--namari);
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
 }
 
 .file-remove:hover {
-    background: #dc2626;
-    color: white;
+    background: var(--washi);
+    border-color: var(--namari);
+    color: var(--kurogane);
 }
 
 .file-remove i {
@@ -533,34 +539,40 @@
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    padding: 1rem 2rem;
-    border: none;
-    border-radius: 10px;
-    font-weight: 600;
-    font-size: 1rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    font-family: 'Quantico', sans-serif;
+    font-size: 0.8125rem;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
     cursor: pointer;
     transition: all 0.3s ease;
 }
 
 .btn-cancel {
-    background: #f1f5f9;
+    background: white;
     color: var(--namari);
+    border: 1.5px solid var(--suzu);
 }
 
 .btn-cancel:hover {
-    background: #e2e8f0;
-    color: var(--namari);
+    background: var(--washi);
+    border-color: var(--aitetsu);
+    color: var(--aitetsu);
 }
 
 .btn-submit {
     background: var(--kintsugi);
     color: white;
-    box-shadow: 0 4px 12px rgba(64, 84, 94, 0.3);
+    border: 1.5px solid var(--kintsugi);
 }
 
 .btn-submit:hover {
+    background: #c9a432;
+    border-color: #c9a432;
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(64, 84, 94, 0.4);
+    box-shadow: 0 4px 12px rgba(214, 172, 63, 0.3);
 }
 
 .btn-cancel i,
@@ -573,9 +585,9 @@
    HELP CARD
    ==================================== */
 .help-card {
-    background: #eff6ff;
-    border-radius: 16px;
-    border: 1px solid #bfdbfe;
+    background: rgba(149, 175, 192, 0.06);
+    border-radius: 4px;
+    border: 1px solid rgba(149, 175, 192, 0.25);
     padding: 2rem;
     display: flex;
     gap: 1.5rem;
@@ -584,8 +596,9 @@
 .help-icon {
     width: 50px;
     height: 50px;
-    border-radius: 50%;
+    border-radius: 4px;
     background: white;
+    border: 1px solid rgba(149, 175, 192, 0.25);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -603,16 +616,21 @@
 }
 
 .help-title {
-    font-size: 1.25rem;
-    font-weight: 700;
+    font-family: 'Quantico', sans-serif;
+    font-size: 1.125rem;
+    font-weight: 400;
     color: var(--kurogane);
     margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 .help-text {
-    font-size: 0.95rem;
+    font-family: 'Antartida', sans-serif;
+    font-size: 0.9375rem;
     color: var(--namari);
     margin-bottom: 1rem;
+    line-height: 1.6;
 }
 
 .help-contacts {
@@ -627,17 +645,19 @@
     gap: 0.75rem;
     padding: 0.75rem 1rem;
     background: white;
-    border-radius: 10px;
+    border: 1px solid rgba(149, 175, 192, 0.25);
+    border-radius: 4px;
     color: var(--aitetsu);
     text-decoration: none;
-    font-weight: 600;
-    font-size: 0.95rem;
-    transition: all 0.2s ease;
+    font-family: 'Antartida', sans-serif;
+    font-weight: 500;
+    font-size: 0.9375rem;
+    transition: all 0.3s ease;
 }
 
 .help-contact:hover {
     background: var(--washi);
-    transform: translateX(4px);
+    border-color: var(--aitetsu);
 }
 
 .help-contact i {
@@ -649,19 +669,19 @@
    RESPONSIVE DESIGN
    ==================================== */
 @media (max-width: 768px) {
-    .create-ticket-hero {
+    .create-claim-hero {
         padding: 7rem 0 3rem;
     }
 
-    .create-ticket-hero-title {
+    .create-claim-hero-title {
         font-size: 2.5rem;
     }
 
-    .create-ticket-hero-subtitle {
+    .create-claim-hero-subtitle {
         font-size: 1rem;
     }
 
-    .create-ticket-card {
+    .create-claim-card {
         padding: 1.75rem;
     }
 
@@ -683,19 +703,46 @@
 }
 
 @media (max-width: 480px) {
-    .create-ticket-hero {
-        padding: 6rem 0 2.5rem;
-    }
+  .create-claim-hero {
+    padding: 6rem 0 2.5rem;
+  }
 
-    .create-ticket-hero-title {
-        font-size: 2rem;
-    }
+  .create-claim-hero-title {
+    font-size: 2rem;
+  }
 
-    .create-ticket-card {
-        padding: 1.5rem;
-    }
+  .create-claim-card {
+    padding: 1.5rem;
+  }
 
-    .priority-options {
-        grid-template-columns: 1fr;
-    }
+  .priority-options {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ====================================
+   SWEET ALERT - Brand Styling
+   ==================================== */
+.swal-claim-popup {
+  border-radius: 4px !important;
+  border: 1px solid rgba(149, 175, 192, 0.25) !important;
+  box-shadow: 0 8px 32px rgba(43, 43, 43, 0.12) !important;
+}
+
+.swal-claim-title {
+  font-family: 'Quantico', sans-serif !important;
+  font-size: 1.5rem !important;
+  font-weight: 400 !important;
+  color: var(--kurogane) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.08em !important;
+}
+
+.swal-claim-btn {
+  font-family: 'Quantico', sans-serif !important;
+  font-size: 0.8125rem !important;
+  font-weight: 400 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.08em !important;
+  border-radius: 4px !important;
 }

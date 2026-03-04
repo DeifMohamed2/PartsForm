@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const logger = require('../utils/logger');
 
 // OOM Prevention utilities
 const { circuitBreakers, logThrottle } = require('../utils/oomPrevention');
@@ -8,9 +9,7 @@ const connectDB = async () => {
   try {
     const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/partsform';
     
-    // Log which database we're connecting to (hide credentials)
-    const sanitizedUri = mongoURI.replace(/:\/\/[^:]+:[^@]+@/, '://****:****@');
-    console.log(`📦 Connecting to MongoDB: ${sanitizedUri}`);
+    logger.info('Connecting to MongoDB', { service: 'partsform', event: 'DATABASE_CONNECTING' });
     
     const conn = await mongoose.connect(mongoURI, {
       // Performance optimizations for 96GB/18-core/NVMe server
@@ -25,7 +24,8 @@ const connectDB = async () => {
       }
     });
 
-    console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
+    logger.info('System: DATABASE_CONNECTED', { service: 'partsform', event: 'DATABASE_CONNECTED' });
+    logger.info('Database connected successfully', { service: 'partsform', host: conn.connection.host });
     
     // Update circuit breaker on successful connection
     circuitBreakers.mongodb.recordSuccess();
@@ -43,19 +43,19 @@ const connectDB = async () => {
 
     mongoose.connection.on('reconnected', () => {
       circuitBreakers.mongodb.recordSuccess();
-      console.log('✅ MongoDB reconnected');
+      logger.info('Database reconnected', { service: 'partsform', event: 'DATABASE_RECONNECTED' });
     });
 
     // Graceful shutdown
     process.on('SIGINT', async () => {
       await mongoose.connection.close();
-      console.log('MongoDB connection closed due to app termination');
+      logger.info('Database connection closed', { service: 'partsform', event: 'DATABASE_CLOSED' });
       process.exit(0);
     });
 
     return conn;
   } catch (error) {
-    console.error(`❌ MongoDB connection failed: ${error.message}`);
+    logger.error('Database connection failed', { service: 'partsform', event: 'DATABASE_ERROR', error: error.message });
     process.exit(1);
   }
 };

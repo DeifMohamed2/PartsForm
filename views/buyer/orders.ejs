@@ -13,40 +13,24 @@
         <div class="container">
           <div class="orders-header-content">
             <div class="orders-header-left">
-              <h1 class="orders-header-title">
-                <i data-lucide="package"></i>
-                <span><%= t('orders.title') %></span>
-              </h1>
+              <h1 class="orders-header-title"><%= t('orders.title') %></h1>
               <p class="orders-header-subtitle"><%= t('orders.subtitle') %></p>
             </div>
             <div class="orders-header-right">
-              <div class="orders-stats">
-                <div class="stat-card">
-                  <div class="stat-card-icon pending">
-                    <i data-lucide="clock"></i>
-                  </div>
-                  <div class="stat-card-content">
-                    <span class="stat-card-value" id="stat-pending">0</span>
-                    <span class="stat-card-label"><%= t('orders.stats.pending') %></span>
-                  </div>
+              <div class="orders-stats-minimal">
+                <div class="stat-minimal">
+                  <span class="stat-value" id="stat-pending">0</span>
+                  <span class="stat-label"><%= t('orders.stats.pending') %></span>
                 </div>
-                <div class="stat-card">
-                  <div class="stat-card-icon processing">
-                    <i data-lucide="loader"></i>
-                  </div>
-                  <div class="stat-card-content">
-                    <span class="stat-card-value" id="stat-processing">0</span>
-                    <span class="stat-card-label"><%= t('orders.stats.processing') %></span>
-                  </div>
+                <div class="stat-divider"></div>
+                <div class="stat-minimal">
+                  <span class="stat-value" id="stat-processing">0</span>
+                  <span class="stat-label"><%= t('orders.stats.processing') %></span>
                 </div>
-                <div class="stat-card">
-                  <div class="stat-card-icon completed">
-                    <i data-lucide="check-circle"></i>
-                  </div>
-                  <div class="stat-card-content">
-                    <span class="stat-card-value" id="stat-completed">0</span>
-                    <span class="stat-card-label"><%= t('orders.stats.completed') %></span>
-                  </div>
+                <div class="stat-divider"></div>
+                <div class="stat-minimal">
+                  <span class="stat-value" id="stat-completed">0</span>
+                  <span class="stat-label"><%= t('orders.stats.completed') %></span>
                 </div>
               </div>
             </div>
@@ -102,6 +86,7 @@
             <table class="orders-table" id="orders-table">
               <thead>
                 <tr>
+                  <th></th>
                   <th class="sortable" data-sort="orderNumber">
                     <%= t('orders.table.orderNumber') %>
                   </th>

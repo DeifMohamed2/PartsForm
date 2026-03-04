@@ -2,7 +2,7 @@
   "nav": {
     "search": "Suche",
     "myOrders": "Meine Bestellungen",
-    "tickets": "Tickets",
+    "Claims": "Claims",
     "affiliate": "Partnerprogramm",
     "payment": "Zahlung",
     "delivery": "Lieferung",
@@ -12,7 +12,7 @@
     "more": "Mehr",
     "paymentDesc": "Zahlungsmethoden verwalten",
     "deliveryDesc": "Lieferadressen",
-    "ticketsDesc": "Support-Tickets",
+    "claimsDesc": "Support-claims",
     "contactsDesc": "Kontaktinformationen",
     "searchDropdown": {
       "automotive": {
@@ -643,24 +643,42 @@
     "general": {
       "title": "Allgemeine Einstellungen",
       "subtitle": "Verwalten Sie Ihre allgemeinen Kontoeinstellungen",
-      "language": "Sprache",
-      "timezone": "Zeitzone",
-      "dateFormat": "Datumsformat",
-      "languageDesc": "Wählen Sie Ihre bevorzugte Sprache für die Benutzeroberfläche",
-      "timezoneDesc": "Legen Sie Ihre Zeitzone für genaue Zeitanzeige fest",
-      "dateFormatDesc": "Wählen Sie, wie Daten angezeigt werden"
+      "language": {
+        "title": "Sprache",
+        "desc": "Wählen Sie Ihre bevorzugte Sprache für die Benutzeroberfläche"
+      },
+      "timezone": {
+        "title": "Zeitzone",
+        "desc": "Legen Sie Ihre Zeitzone für genaue Zeitanzeige fest"
+      },
+      "dateFormat": {
+        "title": "Datumsformat",
+        "desc": "Wählen Sie, wie Daten angezeigt werden"
+      },
+      "currency": {
+        "title": "Währung",
+        "desc": "Wählen Sie Ihre bevorzugte Währung für die Preisanzeige"
+      }
     },
     "notifications": {
       "title": "Benachrichtigungseinstellungen",
       "subtitle": "Steuern Sie, wie und wann Sie Benachrichtigungen erhalten",
-      "email": "E-Mail-Benachrichtigungen",
-      "orderUpdates": "Bestellaktualisierungen",
-      "promotional": "Werbe-E-Mails",
-      "sms": "SMS-Benachrichtigungen",
-      "emailDesc": "Erhalten Sie E-Mail-Benachrichtigungen für wichtige Updates",
-      "orderUpdatesDesc": "Werden Sie benachrichtigt, wenn sich der Status Ihrer Bestellung ändert",
-      "promotionalDesc": "Erhalten Sie E-Mails über neue Produkte und Sonderangebote",
-      "smsDesc": "Erhalten Sie SMS-Benachrichtigungen für dringende Updates"
+      "email": {
+        "title": "E-Mail-Benachrichtigungen",
+        "desc": "Erhalten Sie E-Mail-Benachrichtigungen für wichtige Updates"
+      },
+      "orderUpdates": {
+        "title": "Bestellaktualisierungen",
+        "desc": "Werden Sie benachrichtigt, wenn sich der Status Ihrer Bestellung ändert"
+      },
+      "promotional": {
+        "title": "Werbe-E-Mails",
+        "desc": "Erhalten Sie E-Mails über neue Produkte und Sonderangebote"
+      },
+      "sms": {
+        "title": "SMS-Benachrichtigungen",
+        "desc": "Erhalten Sie SMS-Benachrichtigungen für dringende Updates"
+      }
     },
     "privacy": {
       "title": "Datenschutzeinstellungen",
@@ -672,15 +690,14 @@
         "private": "Privat",
         "friendsOnly": "Nur Freunde"
       },
-      "dataCollection": "Datenerfassung",
-      "cookies": "Cookies",
-      "visibility": "Profilsichtbarkeit",
-      "visibilityDesc": "Steuern Sie, wer Ihre Profilinformationen sehen kann",
-      "public": "Öffentlich",
-      "private": "Privat",
-      "friendsOnly": "Nur Freunde",
-      "dataCollectionDesc": "Erlauben Sie uns, Analysedaten zu sammeln, um unseren Service zu verbessern",
-      "cookiesDesc": "Akzeptieren Sie Cookies für ein besseres Surferlebnis"
+      "dataCollection": {
+        "title": "Datenerfassung",
+        "desc": "Erlauben Sie uns, Analysedaten zu sammeln, um unseren Service zu verbessern"
+      },
+      "cookies": {
+        "title": "Cookies",
+        "desc": "Akzeptieren Sie Cookies für ein besseres Surferlebnis"
+      }
     },
     "security": {
       "title": "Sicherheitseinstellungen",
@@ -690,48 +707,50 @@
         "desc": "Fügen Sie Ihrem Konto eine zusätzliche Sicherheitsebene hinzu",
         "setup": "2FA einrichten"
       },
-      "changePassword": "Passwort ändern",
+      "changePassword": {
+        "title": "Passwort ändern",
+        "desc": "Aktualisieren Sie regelmäßig Ihr Kontopasswort",
+        "button": "Passwort ändern"
+      },
       "sessions": {
         "title": "Aktive Sitzungen",
         "desc": "Sehen und verwalten Sie Geräte, auf denen Sie angemeldet sind",
         "view": "Sitzungen ansehen"
-      },
-      "twoFA": "Zwei-Faktor-Authentifizierung",
-      "twoFADesc": "Fügen Sie Ihrem Konto eine zusätzliche Sicherheitsebene hinzu",
-      "changePasswordDesc": "Aktualisieren Sie regelmäßig Ihr Kontopasswort",
-      "changePasswordBtn": "Passwort ändern",
-      "activeSessions": "Aktive Sitzungen",
-      "activeSessionsDesc": "Sehen und verwalten Sie Geräte, auf denen Sie angemeldet sind",
-      "viewSessions": "Sitzungen ansehen"
+      }
     },
     "preferences": {
       "title": "Präferenzen",
       "subtitle": "Passen Sie Ihr Erlebnis an",
-      "theme": "Design",
-      "itemsPerPage": "Artikel pro Seite",
-      "themeDesc": "Wählen Sie Ihr bevorzugtes Farbschema",
-      "light": "Hell",
-      "dark": "Dunkel",
-      "auto": "Auto (System)",
-      "itemsPerPageDesc": "Anzahl der anzuzeigenden Artikel pro Seite"
+      "theme": {
+        "title": "Design",
+        "desc": "Wählen Sie Ihr bevorzugtes Farbschema",
+        "light": "Hell",
+        "dark": "Dunkel",
+        "auto": "Auto (System)"
+      },
+      "itemsPerPage": {
+        "title": "Artikel pro Seite",
+        "desc": "Anzahl der anzuzeigenden Artikel pro Seite"
+      }
     },
     "billing": {
       "title": "Abrechnungseinstellungen",
       "subtitle": "Verwalten Sie Ihre Zahlungsmethoden und Abrechnungsinformationen",
-      "paymentMethods": "Zahlungsmethoden",
-      "billingAddress": "Rechnungsadresse",
+      "paymentMethods": {
+        "title": "Zahlungsmethoden",
+        "desc": "Verwalten Sie Ihre gespeicherten Zahlungsmethoden",
+        "manage": "Zahlungsmethoden verwalten"
+      },
+      "billingAddress": {
+        "title": "Rechnungsadresse",
+        "desc": "Aktualisieren Sie Ihre Rechnungsadresse",
+        "update": "Adresse aktualisieren"
+      },
       "invoices": {
         "title": "Rechnungsverlauf",
         "desc": "Sehen und laden Sie Ihre vergangenen Rechnungen herunter",
         "view": "Rechnungen ansehen"
-      },
-      "paymentMethodsDesc": "Verwalten Sie Ihre gespeicherten Zahlungsmethoden",
-      "managePaymentMethods": "Zahlungsmethoden verwalten",
-      "billingAddressDesc": "Aktualisieren Sie Ihre Rechnungsadresse",
-      "updateAddress": "Adresse aktualisieren",
-      "invoiceHistory": "Rechnungsverlauf",
-      "invoiceHistoryDesc": "Sehen und laden Sie Ihre vergangenen Rechnungen herunter",
-      "viewInvoices": "Rechnungen ansehen"
+      }
     },
     "actions": {
       "saveChanges": "Änderungen speichern",
@@ -742,15 +761,15 @@
   "tickets": {
     "title": "Support-Tickets",
     "subtitle": "Hilfe bei Ihren Bestellungen erhalten",
-    "createTicket": "Ticket erstellen",
-    "ticketNumber": "Ticketnummer",
+    "createClaim": "Claim erstellen",
+    "ClaimNumber": "Claimnummer",
     "subject": "Betreff",
     "category": "Kategorie",
     "priority": "Priorität",
     "status": "Status",
     "created": "Erstellt",
     "updated": "Aktualisiert",
-    "noTickets": "Keine Tickets gefunden",
+    "noclaims": "Keine claims gefunden",
     "categories": {
       "shipping": "Versandproblem",
       "order": "Bestellproblem",
@@ -766,9 +785,9 @@
       "reply": "Antworten",
       "attachments": "Anhänge",
       "addAttachment": "Anhang hinzufügen",
-      "backToTickets": "Zurück zu Tickets",
+      "backToClaims": "Zurück zu Claims",
       "loading": "Laden...",
-      "ticketInfo": "Ticket-Informationen",
+      "ClaimInfo": "Claim-Informationen",
       "category": "Kategorie",
       "status": "Status",
       "lastUpdated": "Zuletzt aktualisiert",
@@ -786,7 +805,7 @@
       "describeIssue": "Beschreiben Sie Ihr Problem",
       "attachFiles": "Dateien anhängen",
       "badge": "Support-Center",
-      "backToTickets": "Zurück zu Tickets",
+      "backToClaims": "Zurück zu Claims",
       "cardTitle": "Ticket-Informationen",
       "cardSubtitle": "Bitte geben Sie Details zu Ihrem Problem an",
       "category": "Kategorie",
@@ -817,20 +836,21 @@
     "stats": {
       "resolved": "Resolved",
       "inProgress": "In Progress",
-      "open": "Open"
+      "open": "Open",
+      "closed": "Geschlossen"
     },
     "filters": {
       "status": "Status",
       "allStatuses": "All Statuses",
       "search": "Search",
-      "searchPlaceholder": "Search tickets...",
+      "searchPlaceholder": "Search claims...",
       "apply": "Apply Filters",
       "reset": "Reset"
     },
     "empty": {
-      "title": "No Tickets Yet",
-      "text": "You haven't created any support tickets",
-      "createFirst": "Create First Ticket"
+      "title": "No Claims Yet",
+      "text": "You haven't created any support claims",
+      "createFirst": "Create First Claim"
     }
   },
   "contacts": {
@@ -852,8 +872,7 @@
   "affiliate": {
     "badge": "Partnerprogramm",
     "title": "Treueprogramm für unsere Kunden",
-    "subtitle": "Wir schätzen jeden Kunden und bieten Top-Belohnungen für diejenigen, die zu Ihrer Marke beitragen. Je mehr Sie mit uns vorankommen, desto mehr Belohnungen erhalten Sie!",
-    "description": "Unser Programm umfasst folgende Stufen: BRONZE – verbesserte Konditionen und zusätzliche Rabatte; SILBER – Premium-Rabatte und Prioritätsservice; GOLD – exklusive Preise und dedizierter Support; PLATIN – VIP-Vorteile und persönlicher Ansatz; PLATIN+ – die höchste Stufe mit VIP+-Konditionen, Prioritätsprivilegien und einzigartigen Angeboten.",
+    "subtitle": "Verdienen Sie mehr Belohnungen mit jedem Fortschritt. Je höher Ihre Stufe, desto besser Ihre Vorteile.",
     "tiers": {
       "title": "Mitgliedschaftsstufen",
       "subtitle": "Ihre Treue bestimmt das Niveau Ihrer Einkäufe basierend auf Ihrem Bestellvolumen. Je besser das Niveau, desto mehr Vorteile erhalten Sie.",

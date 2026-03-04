@@ -3,7 +3,7 @@
 
 const Buyer = require('../models/Buyer');
 const Order = require('../models/Order');
-const Ticket = require('../models/Ticket');
+const Claim = require('../models/Claim');
 const Part = require('../models/Part');
 const { processProfileImage, deleteOldProfileImage } = require('../utils/fileUploader');
 const socketService = require('../services/socketService');
@@ -200,6 +200,9 @@ const getProfilePage = async (req, res) => {
   try {
     const buyer = req.user;
 
+    // Count orders for this buyer
+    const totalOrders = await Order.countDocuments({ buyer: buyer._id });
+
     // Calculate member since year
     const memberSince = buyer.createdAt ? new Date(buyer.createdAt).getFullYear() : new Date().getFullYear();
 
@@ -223,6 +226,7 @@ const getProfilePage = async (req, res) => {
         newsletter: buyer.newsletter,
         avatar: buyer.avatar,
         memberSince: memberSince,
+        totalOrders: totalOrders,
         passwordLastChanged: passwordLastChanged,
         createdAt: buyer.createdAt,
         lastLogin: buyer.lastLogin,
@@ -255,86 +259,104 @@ const getSettingsPage = async (req, res) => {
 };
 
 /**
- * Get Support Tickets page
+ * Get Claim Support page
  */
-const getTicketsPage = async (req, res) => {
+const getClaimsPage = async (req, res) => {
   try {
-    res.render('buyer/tickets', {
-      title: 'Support Tickets | PARTSFORM',
+    res.render('buyer/claims', {
+      title: 'Claim Support | PARTSFORM',
     });
   } catch (error) {
-    console.error('Error in getTicketsPage:', error);
+    console.error('Error in getClaimsPage:', error);
     res.status(500).render('error', {
       title: 'Error | PARTSFORM',
-      error: 'Failed to load tickets page',
+      error: 'Failed to load claims page',
     });
   }
 };
 
 /**
- * Get Create Ticket page
+ * Get Create Claim page
+ * Excludes orders that already have active claims (open or in-progress)
  */
-const getCreateTicketPage = async (req, res) => {
+const getCreateClaimPage = async (req, res) => {
   try {
-    // Get buyer's orders for the dropdown
-    const orders = await Order.find({ buyer: req.user._id })
+    const buyerId = req.user._id;
+
+    // Get buyer's orders
+    const allOrders = await Order.find({ buyer: buyerId })
       .select('orderNumber status createdAt')
       .sort({ createdAt: -1 })
       .limit(50)
       .lean();
 
-    res.render('buyer/create-ticket', {
-      title: 'Create Support Ticket | PARTSFORM',
+    // Get order numbers that have active claims (open or in-progress)
+    const orderNumbers = allOrders.map(o => o.orderNumber);
+    const claimsOnOrders = await Claim.find({
+      buyer: buyerId,
+      orderNumber: { $in: orderNumbers },
+      status: { $in: ['open', 'in-progress'] }
+    })
+      .select('orderNumber')
+      .lean();
+
+    const orderNumbersWithActiveClaims = new Set(claimsOnOrders.map(c => c.orderNumber));
+
+    // Filter out orders that already have active claims
+    const orders = allOrders.filter(o => !orderNumbersWithActiveClaims.has(o.orderNumber));
+
+    res.render('buyer/create-claim', {
+      title: 'Create Claim | PARTSFORM',
       orders: orders
     });
   } catch (error) {
-    console.error('Error in getCreateTicketPage:', error);
+    console.error('Error in getCreateClaimPage:', error);
     res.status(500).render('error', {
       title: 'Error | PARTSFORM',
-      error: 'Failed to load create ticket page',
+      error: 'Failed to load create claim page',
     });
   }
 };
 
 /**
- * Get Ticket Details page
+ * Get Claim Details page
  */
-const getTicketDetailsPage = async (req, res) => {
+const getClaimDetailsPage = async (req, res) => {
   try {
-    const ticketId = req.params.ticketId;
+    const claimId = req.params.claimId;
     
-    // Find the ticket and verify ownership
-    const ticket = await Ticket.findOne({
-      ticketNumber: ticketId,
+    // Find the claim and verify ownership
+    const claim = await Claim.findOne({
+      ticketNumber: claimId,
       buyer: req.user._id
     }).lean();
 
-    if (!ticket) {
+    if (!claim) {
       return res.status(404).render('error', {
-        title: 'Ticket Not Found | PARTSFORM',
-        error: 'Ticket not found or you do not have access to it',
+        title: 'Claim Not Found | PARTSFORM',
+        error: 'Claim not found or you do not have access to it',
       });
     }
 
-    res.render('buyer/ticket-details', {
-      title: `Ticket #${ticketId} | PARTSFORM`,
-      ticketId: ticketId,
-      ticket: ticket
+    res.render('buyer/claim-details', {
+      title: `Claim #${claimId} | PARTSFORM`,
+      claimId: claimId,
+      claim: claim
     });
   } catch (error) {
-    console.error('Error in getTicketDetailsPage:', error);
+    console.error('Error in getClaimDetailsPage:', error);
     res.status(500).render('error', {
       title: 'Error | PARTSFORM',
-      error: 'Failed to load ticket details page',
+      error: 'Failed to load claim details page',
     });
   }
 };
 
 /**
- * Get tickets list API
- * GET /buyer/api/tickets
+ * Get claims list API
+ * GET /buyer/api/claims
  */
-const getTicketsApi = async (req, res) => {
+const getClaimsApi = async (req, res) => {
   try {
     const { status, search, page = 1, limit = 20 } = req.query;
     const buyerId = req.user._id;
@@ -356,44 +378,45 @@ const getTicketsApi = async (req, res) => {
       ];
     }
 
-    // Get tickets with pagination
+    // Get claims with pagination
     const skip = (parseInt(page) - 1) * parseInt(limit);
     
-    const [tickets, total] = await Promise.all([
-      Ticket.find(query)
+    const [claims, total] = await Promise.all([
+      Claim.find(query)
         .select('ticketNumber subject category status priority orderNumber createdAt updatedAt messages unreadByBuyer lastMessageAt lastMessageBy')
         .sort({ lastMessageAt: -1, createdAt: -1 })
         .skip(skip)
         .limit(parseInt(limit))
         .lean(),
-      Ticket.countDocuments(query)
+      Claim.countDocuments(query)
     ]);
 
-    // Format tickets for frontend
-    const formattedTickets = tickets.map(ticket => ({
-      id: ticket.ticketNumber,
-      subject: ticket.subject,
-      category: ticket.category,
-      status: ticket.status,
-      priority: ticket.priority,
-      orderNumber: ticket.orderNumber || 'N/A',
-      createdAt: ticket.createdAt,
-      updatedAt: ticket.updatedAt || ticket.lastMessageAt,
-      messageCount: ticket.messages ? ticket.messages.length : 0,
-      unreadCount: ticket.unreadByBuyer || 0,
-      lastMessageBy: ticket.lastMessageBy
+    // Format claims for frontend
+    const formattedClaims = claims.map(claim => ({
+      id: claim.ticketNumber,
+      subject: claim.subject,
+      category: claim.category,
+      status: claim.status,
+      priority: claim.priority,
+      orderNumber: claim.orderNumber || 'N/A',
+      createdAt: claim.createdAt,
+      updatedAt: claim.updatedAt || claim.lastMessageAt,
+      messageCount: claim.messages ? claim.messages.length : 0,
+      unreadCount: claim.unreadByBuyer || 0,
+      lastMessageBy: claim.lastMessageBy
     }));
 
     // Get status counts for statistics
-    const [openCount, inProgressCount, resolvedCount] = await Promise.all([
-      Ticket.countDocuments({ buyer: buyerId, status: 'open' }),
-      Ticket.countDocuments({ buyer: buyerId, status: 'in-progress' }),
-      Ticket.countDocuments({ buyer: buyerId, status: 'resolved' })
+    const [openCount, inProgressCount, resolvedCount, closedCount] = await Promise.all([
+      Claim.countDocuments({ buyer: buyerId, status: 'open' }),
+      Claim.countDocuments({ buyer: buyerId, status: 'in-progress' }),
+      Claim.countDocuments({ buyer: buyerId, status: 'resolved' }),
+      Claim.countDocuments({ buyer: buyerId, status: 'closed' })
     ]);
 
     res.json({
       success: true,
-      tickets: formattedTickets,
+      claims: formattedClaims,
       pagination: {
         page: parseInt(page),
         limit: parseInt(limit),
@@ -403,36 +426,37 @@ const getTicketsApi = async (req, res) => {
       stats: {
         open: openCount,
         'in-progress': inProgressCount,
-        resolved: resolvedCount
+        resolved: resolvedCount,
+        closed: closedCount
       }
     });
   } catch (error) {
-    console.error('Error in getTicketsApi:', error);
-    res.status(500).json({ success: false, error: 'Failed to load tickets' });
+    console.error('Error in getClaimsApi:', error);
+    res.status(500).json({ success: false, error: 'Failed to load claims' });
   }
 };
 
 /**
- * Get ticket details API
- * GET /buyer/api/tickets/:ticketId
+ * Get claim details API
+ * GET /buyer/api/claims/:claimId
  */
-const getTicketDetailsApi = async (req, res) => {
+const getClaimDetailsApi = async (req, res) => {
   try {
-    const ticketId = req.params.ticketId;
+    const claimId = req.params.claimId;
     const buyerId = req.user._id;
     
-    const ticket = await Ticket.findOne({
-      ticketNumber: ticketId,
+    const claim = await Claim.findOne({
+      ticketNumber: claimId,
       buyer: buyerId
     }).lean();
 
-    if (!ticket) {
-      return res.status(404).json({ success: false, error: 'Ticket not found' });
+    if (!claim) {
+      return res.status(404).json({ success: false, error: 'Claim not found' });
     }
 
     // Mark messages as read by buyer
-    await Ticket.updateOne(
-      { _id: ticket._id },
+    await Claim.updateOne(
+      { _id: claim._id },
       { 
         $set: { 
           unreadByBuyer: 0,
@@ -445,19 +469,19 @@ const getTicketDetailsApi = async (req, res) => {
     );
 
     // Format response
-    const formattedTicket = {
-      id: ticket.ticketNumber,
-      subject: ticket.subject,
-      description: ticket.description,
-      category: ticket.category,
-      status: ticket.status,
-      priority: ticket.priority,
-      orderNumber: ticket.orderNumber || 'N/A',
-      createdAt: ticket.createdAt,
-      updatedAt: ticket.updatedAt,
-      lastMessageAt: ticket.lastMessageAt,
-      attachments: ticket.attachments || [],
-      messages: ticket.messages.map(msg => ({
+    const formattedClaim = {
+      id: claim.ticketNumber,
+      subject: claim.subject,
+      description: claim.description,
+      category: claim.category,
+      status: claim.status,
+      priority: claim.priority,
+      orderNumber: claim.orderNumber || 'N/A',
+      createdAt: claim.createdAt,
+      updatedAt: claim.updatedAt,
+      lastMessageAt: claim.lastMessageAt,
+      attachments: claim.attachments || [],
+      messages: claim.messages.map(msg => ({
         id: msg._id,
         sender: msg.sender,
         senderName: msg.senderName,
@@ -468,18 +492,18 @@ const getTicketDetailsApi = async (req, res) => {
       }))
     };
 
-    res.json({ success: true, ticket: formattedTicket });
+    res.json({ success: true, claim: formattedClaim });
   } catch (error) {
-    console.error('Error in getTicketDetailsApi:', error);
-    res.status(500).json({ success: false, error: 'Failed to load ticket' });
+    console.error('Error in getClaimDetailsApi:', error);
+    res.status(500).json({ success: false, error: 'Failed to load claim' });
   }
 };
 
 /**
- * Create a new ticket
- * POST /buyer/api/tickets
+ * Create a new claim
+ * POST /buyer/api/claims
  */
-const createTicket = async (req, res) => {
+const createClaim = async (req, res) => {
   try {
     const buyer = req.user;
     const { subject, category, description, orderNumber, priority } = req.body;
@@ -492,8 +516,24 @@ const createTicket = async (req, res) => {
       });
     }
 
-    // Generate ticket number
-    const ticketNumber = await Ticket.generateTicketNumber();
+    // Prevent duplicate claims: if orderNumber provided, check for existing active claim
+    if (orderNumber && orderNumber.trim()) {
+      const existingClaim = await Claim.findOne({
+        buyer: buyer._id,
+        orderNumber: orderNumber.trim(),
+        status: { $in: ['open', 'in-progress'] }
+      });
+      if (existingClaim) {
+        return res.status(400).json({
+          success: false,
+          error: 'This order already has an active claim. Please use the existing claim or wait until it is resolved.',
+          claimId: existingClaim.ticketNumber
+        });
+      }
+    }
+
+    // Generate claim number
+    const claimNumber = await Claim.generateTicketNumber();
 
     // Handle file attachments if any
     const attachments = [];
@@ -504,14 +544,14 @@ const createTicket = async (req, res) => {
           originalName: file.originalname,
           mimetype: file.mimetype,
           size: file.size,
-          path: `/uploads/tickets/${file.filename}`
+          path: `/uploads/claims/${file.filename}`
         });
       }
     }
 
-    // Create the ticket
-    const ticket = new Ticket({
-      ticketNumber,
+    // Create the claim
+    const claim = new Claim({
+      ticketNumber: claimNumber,
       subject: subject.trim(),
       category,
       priority: priority || 'medium',
@@ -536,37 +576,37 @@ const createTicket = async (req, res) => {
       lastMessageBy: 'buyer'
     });
 
-    await ticket.save();
+    await claim.save();
 
-    // Notify admins about new ticket via socket
-    socketService.notifyNewTicket(ticket);
+    // Notify admins about new claim via socket
+    socketService.notifyNewClaim(claim);
 
     res.status(201).json({
       success: true,
-      message: 'Ticket created successfully',
-      ticket: {
-        id: ticket.ticketNumber,
-        subject: ticket.subject,
-        status: ticket.status,
-        createdAt: ticket.createdAt
+      message: 'Claim created successfully',
+      claim: {
+        id: claim.ticketNumber,
+        subject: claim.subject,
+        status: claim.status,
+        createdAt: claim.createdAt
       }
     });
   } catch (error) {
-    console.error('Error in createTicket:', error);
+    console.error('Error in createClaim:', error);
     res.status(500).json({
       success: false,
-      error: 'Failed to create ticket'
+      error: 'Failed to create claim'
     });
   }
 };
 
 /**
- * Send a message in a ticket
- * POST /buyer/api/tickets/:ticketId/messages
+ * Send a message in a claim
+ * POST /buyer/api/claims/:claimId/messages
  */
-const sendTicketMessage = async (req, res) => {
+const sendClaimMessage = async (req, res) => {
   try {
-    const ticketId = req.params.ticketId;
+    const claimId = req.params.claimId;
     const buyer = req.user;
     const { message } = req.body;
 
@@ -577,24 +617,24 @@ const sendTicketMessage = async (req, res) => {
       });
     }
 
-    // Find the ticket
-    const ticket = await Ticket.findOne({
-      ticketNumber: ticketId,
+    // Find the claim
+    const claim = await Claim.findOne({
+      ticketNumber: claimId,
       buyer: buyer._id
     });
 
-    if (!ticket) {
+    if (!claim) {
       return res.status(404).json({
         success: false,
-        error: 'Ticket not found'
+        error: 'Claim not found'
       });
     }
 
-    // Do not allow sending messages to resolved or closed tickets
-    if (['resolved', 'closed'].includes(ticket.status)) {
+    // Do not allow sending messages to resolved or closed claims
+    if (['resolved', 'closed'].includes(claim.status)) {
       return res.status(403).json({
         success: false,
-        error: 'Cannot send messages to a resolved or closed ticket'
+        error: 'Cannot send messages to a resolved or closed claim'
       });
     }
 
@@ -607,13 +647,13 @@ const sendTicketMessage = async (req, res) => {
           originalName: file.originalname,
           mimetype: file.mimetype,
           size: file.size,
-          path: `/uploads/tickets/${file.filename}`
+          path: `/uploads/claims/${file.filename}`
         });
       }
     }
 
     // Add the message
-    const newMessage = await ticket.addMessage({
+    const newMessage = await claim.addMessage({
       sender: 'buyer',
       senderName: `${buyer.firstName} ${buyer.lastName}`.trim() || 'Customer',
       senderId: buyer._id,
@@ -622,8 +662,8 @@ const sendTicketMessage = async (req, res) => {
     });
 
     // Emit socket event for real-time update
-    socketService.emitToTicket(ticketId, 'message-received', {
-      ticketId,
+    socketService.emitToClaim(claimId, 'message-received', {
+      claimId,
       message: {
         id: newMessage._id,
         sender: 'buyer',
@@ -635,10 +675,10 @@ const sendTicketMessage = async (req, res) => {
     });
 
     // Notify admins
-    socketService.emitToAdmins('ticket-new-message', {
-      ticketId,
-      ticketNumber: ticket.ticketNumber,
-      subject: ticket.subject,
+    socketService.emitToAdmins('claim-new-message', {
+      claimId,
+      claimNumber: claim.ticketNumber,
+      subject: claim.subject,
       message: {
         sender: 'buyer',
         senderName: `${buyer.firstName} ${buyer.lastName}`.trim() || 'Customer',
@@ -659,7 +699,7 @@ const sendTicketMessage = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Error in sendTicketMessage:', error);
+    console.error('Error in sendClaimMessage:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to send message'
@@ -668,37 +708,37 @@ const sendTicketMessage = async (req, res) => {
 };
 
 /**
- * Mark ticket messages as read
- * PUT /buyer/api/tickets/:ticketId/read
+ * Mark claim messages as read
+ * PUT /buyer/api/claims/:claimId/read
  */
-const markTicketAsRead = async (req, res) => {
+const markClaimAsRead = async (req, res) => {
   try {
-    const ticketId = req.params.ticketId;
+    const claimId = req.params.claimId;
     const buyerId = req.user._id;
 
-    const ticket = await Ticket.findOne({
-      ticketNumber: ticketId,
+    const claim = await Claim.findOne({
+      ticketNumber: claimId,
       buyer: buyerId
     });
 
-    if (!ticket) {
+    if (!claim) {
       return res.status(404).json({
         success: false,
-        error: 'Ticket not found'
+        error: 'Claim not found'
       });
     }
 
-    await ticket.markAsRead('buyer');
+    await claim.markAsRead('buyer');
 
     // Notify via socket
-    socketService.emitToTicket(ticketId, 'messages-marked-read', {
-      ticketId,
+    socketService.emitToClaim(claimId, 'messages-marked-read', {
+      claimId,
       readBy: 'buyer'
     });
 
     res.json({ success: true });
   } catch (error) {
-    console.error('Error in markTicketAsRead:', error);
+    console.error('Error in markClaimAsRead:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to mark as read'
@@ -742,13 +782,16 @@ const updatePreferredCurrency = async (req, res) => {
       });
     }
 
-    buyer.preferredCurrency = currency.toUpperCase();
-    await buyer.save();
+    const updated = await Buyer.findByIdAndUpdate(
+      buyer._id,
+      { preferredCurrency: currency.toUpperCase() },
+      { new: true, runValidators: false }
+    );
 
     res.json({
       success: true,
       message: 'Currency preference updated successfully',
-      currency: buyer.preferredCurrency,
+      currency: updated.preferredCurrency,
     });
   } catch (error) {
     console.error('Error in updatePreferredCurrency:', error);
@@ -786,9 +829,8 @@ const uploadAvatar = async (req, res) => {
       await deleteOldProfileImage(buyer.avatar);
     }
 
-    // Update buyer's avatar in database
-    buyer.avatar = imageInfo.url;
-    await buyer.save();
+    // Update only avatar field (avoids full-document validation that can fail on other fields e.g. country)
+    await Buyer.findByIdAndUpdate(buyer._id, { avatar: imageInfo.url });
 
     res.status(200).json({
       success: true,
@@ -1611,20 +1653,40 @@ const getOrders = async (req, res) => {
       Order.countDocuments(query)
     ]);
 
+    // Get active claims for these orders (open or in-progress only)
+    const orderNumbers = orders.map(o => o.orderNumber);
+    const activeClaims = await Claim.find({
+      buyer: buyerId,
+      orderNumber: { $in: orderNumbers },
+      status: { $in: ['open', 'in-progress'] }
+    })
+      .select('orderNumber ticketNumber')
+      .lean();
+
+    const orderToClaim = {};
+    activeClaims.forEach(c => {
+      orderToClaim[c.orderNumber] = { id: c.ticketNumber };
+    });
+
     // Format orders for response
-    const formattedOrders = orders.map(order => ({
-      orderNumber: order.orderNumber,
-      date: order.createdAt,
-      status: order.status,
-      items: order.items,
-      itemsCount: order.totalItems,
-      itemsPreview: order.items.slice(0, 3).map(item => item.description || item.partNumber),
-      amount: order.pricing.total,
-      total: order.pricing.total,
-      paymentStatus: order.payment.status,
-      type: order.type,
-      category: order.type
-    }));
+    const formattedOrders = orders.map(order => {
+      const claimInfo = orderToClaim[order.orderNumber];
+      return {
+        orderNumber: order.orderNumber,
+        date: order.createdAt,
+        status: order.status,
+        items: order.items,
+        itemsCount: order.totalItems,
+        itemsPreview: (order.items || []).slice(0, 3).map(item => item.description || item.partNumber),
+        amount: order.pricing.total,
+        total: order.pricing.total,
+        paymentStatus: order.payment.status,
+        type: order.type,
+        category: order.type,
+        hasActiveClaim: !!claimInfo,
+        claimId: claimInfo ? claimInfo.id : null
+      };
+    });
 
     // Get status counts
     const statusCounts = await Order.aggregate([
@@ -1689,10 +1751,21 @@ const getOrderDetails = async (req, res) => {
       });
     }
 
+    // Check if order has active claim
+    const activeClaim = await Claim.findOne({
+      buyer: buyerId,
+      orderNumber: order.orderNumber,
+      status: { $in: ['open', 'in-progress'] }
+    })
+      .select('ticketNumber')
+      .lean();
+
     res.json({
       success: true,
       order: {
         orderNumber: order.orderNumber,
+        hasActiveClaim: !!activeClaim,
+        claimId: activeClaim ? activeClaim.ticketNumber : null,
         status: order.status,
         createdAt: order.createdAt,
         updatedAt: order.updatedAt,
@@ -2149,9 +2222,9 @@ module.exports = {
   getOrderDetailsPage,
   getProfilePage,
   getSettingsPage,
-  getTicketsPage,
-  getCreateTicketPage,
-  getTicketDetailsPage,
+  getClaimsPage,
+  getCreateClaimPage,
+  getClaimDetailsPage,
   uploadAvatar,
   updateProfile,
   changePassword,
@@ -2174,12 +2247,12 @@ module.exports = {
   deleteAddress,
   setDefaultAddress,
 
-  // Tickets API
-  getTicketsApi,
-  getTicketDetailsApi,
-  createTicket,
-  sendTicketMessage,
-  markTicketAsRead,
+  // Claims API
+  getClaimsApi,
+  getClaimDetailsApi,
+  createClaim,
+  sendClaimMessage,
+  markClaimAsRead,
 
   // Currency Preference API
   getPreferredCurrency,

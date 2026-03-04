@@ -1,23 +1,23 @@
 <%- include('partials/header') %>
 <link rel="stylesheet" href="/css/buyerCSS/buyer-main.css">
-<link rel="stylesheet" href="/css/buyerCSS/tickets.css">
+<link rel="stylesheet" href="/css/buyerCSS/claims.css">
 
 <%- include('partials/navbar') %>
 
 <!-- ====================================
-     TICKETS PAGE - PROFESSIONAL DESIGN
+     Claims Page - PROFESSIONAL DESIGN
      ==================================== -->
-<div class="tickets-page">
+<div class="claims-page">
   <!-- Hero Section -->
-  <div class="tickets-hero">
-    <div class="tickets-hero-content">
-      <div class="ticket-badge">
-        <i data-lucide="headset"></i>
+  <div class="claims-hero">
+    <div class="claims-hero-content">
+      <div class="claim-badge">
+        <i data-lucide="headphones"></i>
         <span><%= t('tickets.badge') %></span>
       </div>
 
-      <h1 class="tickets-hero-title"><%= t('tickets.title') %></h1>
-      <p class="tickets-hero-subtitle">
+      <h1 class="claims-hero-title"><%= t('tickets.title') %></h1>
+      <p class="claims-hero-subtitle">
         <%= t('tickets.subtitle') %>
       </p>
     </div>
@@ -25,46 +25,31 @@
 
   <!-- Main Content -->
   <div class="buyer-container">
-    <div class="tickets-section">
+    <div class="claims-section">
       <!-- Header with Stats and Create Button -->
-      <div class="tickets-header">
-        <div class="tickets-stats">
-          <div class="stat-card">
-            <div class="stat-icon open">
-              <i data-lucide="alert-circle"></i>
-            </div>
-            <div class="stat-content">
-              <span class="stat-value" id="stat-open">0</span>
-              <span class="stat-label"><%= t('tickets.stats.open') %></span>
-            </div>
+      <div class="claims-header">
+        <div class="claims-stats-grid">
+          <div class="claims-stat-card stat-open">
+            <span class="claims-stat-value" id="stat-open">0</span>
+            <span class="claims-stat-label"><%= t('tickets.stats.open') %></span>
           </div>
-          <div class="stat-card">
-            <div class="stat-icon in-progress">
-              <i data-lucide="loader"></i>
-            </div>
-            <div class="stat-content">
-              <span class="stat-value" id="stat-in-progress">0</span>
-              <span class="stat-label"><%= t('tickets.stats.inProgress') %></span>
-            </div>
+          <div class="claims-stat-card stat-in-progress">
+            <span class="claims-stat-value" id="stat-in-progress">0</span>
+            <span class="claims-stat-label"><%= t('tickets.stats.inProgress') %></span>
           </div>
-          <div class="stat-card">
-            <div class="stat-icon resolved">
-              <i data-lucide="check-circle"></i>
-            </div>
-            <div class="stat-content">
-              <span class="stat-value" id="stat-resolved">0</span>
-              <span class="stat-label"><%= t('tickets.stats.resolved') %></span>
-            </div>
+          <div class="claims-stat-card stat-resolved">
+            <span class="claims-stat-value" id="stat-resolved">0</span>
+            <span class="claims-stat-label"><%= t('tickets.stats.resolved') %></span>
           </div>
         </div>
-        <a href="/buyer/tickets/create" class="btn-create-ticket">
+        <a href="/buyer/claim-support/create" class="btn-create-claim">
           <i data-lucide="plus"></i>
           <span><%= t('tickets.createTicket') %></span>
         </a>
       </div>
 
       <!-- Filters -->
-      <div class="tickets-filters">
+      <div class="claims-filters">
         <div class="filter-group">
           <label class="filter-label" for="filter-status"><%= t('tickets.filters.status') %></label>
           <select class="filter-select" id="filter-status">
@@ -72,6 +57,7 @@
             <option value="open"><%= t('tickets.stats.open') %></option>
             <option value="in-progress"><%= t('tickets.stats.inProgress') %></option>
             <option value="resolved"><%= t('tickets.stats.resolved') %></option>
+            <option value="closed"><%= t('tickets.stats.closed') %></option>
           </select>
         </div>
         <div class="filter-group">
@@ -90,21 +76,21 @@
         </div>
       </div>
 
-      <!-- Tickets List -->
-      <div class="tickets-list" id="tickets-list">
-        <!-- Tickets will be populated by JavaScript -->
+      <!-- Claims List -->
+      <div class="claims-list" id="claims-list">
+        <!-- Claims will be populated by JavaScript -->
       </div>
 
       <!-- Empty State -->
-      <div class="tickets-empty hidden" id="tickets-empty">
-        <div class="tickets-empty-icon">
+      <div class="claims-empty hidden" id="claims-empty">
+        <div class="claims-empty-icon">
           <i data-lucide="inbox"></i>
         </div>
-        <h2 class="tickets-empty-title"><%= t('tickets.empty.title') %></h2>
-        <p class="tickets-empty-text">
+        <h2 class="claims-empty-title"><%= t('tickets.empty.title') %></h2>
+        <p class="claims-empty-text">
           <%= t('tickets.empty.text') %>
         </p>
-        <a href="/buyer/tickets/create" class="btn-empty-action">
+        <a href="/buyer/claim-support/create" class="btn-empty-action">
           <i data-lucide="plus-circle"></i>
           <span><%= t('tickets.empty.createFirst') %></span>
         </a>
@@ -120,7 +106,7 @@
 <script src="/js/quick-search.js"></script>
 <script src="/js/cart.js"></script>
 <script src="/js/cart-badge-updater.js"></script>
-<script src="/js/tickets.js"></script>
+<script src="/js/claims.js"></script>
 <script>
   lucide.createIcons();
   window.addEventListener('load', () => lucide.createIcons());

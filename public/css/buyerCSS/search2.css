@@ -234,7 +234,6 @@ body:has(.search2-page) {
 .search2-clear-btn:hover {
   background: var(--border-color);
   color: var(--text-primary);
-  transform: scale(1.1);
 }
 
 .search2-clear-btn i {
@@ -261,8 +260,6 @@ body:has(.search2-page) {
 
 .search2-btn:hover {
   background: var(--kintsugi-hover);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
 }
 
 .search2-btn:active {
@@ -294,8 +291,6 @@ body:has(.search2-page) {
 .search2-reset-btn:hover {
   background: rgba(239, 68, 68, 0.15);
   border-color: rgba(239, 68, 68, 0.5);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
 }
 
 .search2-reset-btn i {
@@ -463,8 +458,6 @@ body:has(.search2-page) {
 .quick-action-btn:hover {
   background: rgba(255, 255, 255, 0.15);
   border-color: rgba(255, 255, 255, 0.35);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 }
 
 .quick-action-btn i {
@@ -500,8 +493,6 @@ body:has(.search2-page) {
 
 .stat-item:hover {
   background: var(--bg-primary);
-  box-shadow: var(--shadow-md);
-  transform: translateY(-4px);
 }
 
 .stat-icon {
@@ -1313,7 +1304,6 @@ body:has(.search2-page) {
 
 .filter-section-enhanced:hover {
   border-color: #e0e0e0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .filter-section-enhanced .filter-section-title {
@@ -1427,8 +1417,7 @@ body:has(.search2-page) {
 }
 
 .slider-thumb::-webkit-slider-thumb:hover {
-  transform: scale(1.15);
-  box-shadow: 0 3px 10px rgba(64, 84, 94, 0.3);
+  background: var(--kurogane);
 }
 
 .slider-thumb::-webkit-slider-thumb:active {
@@ -1506,7 +1495,6 @@ body:has(.search2-page) {
 
 .filter-card:hover {
   border-color: var(--sei);
-  box-shadow: 0 2px 8px rgba(149, 175, 192, 0.15);
 }
 
 .filter-card input:checked ~ .filter-card-content {
@@ -1929,13 +1917,11 @@ body:has(.search2-page) {
   border: none;
   border-radius: 0.5rem;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(64, 84, 94, 0.25);
+  transition: background 0.15s ease;
 }
 
 .filter-btn-apply:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(64, 84, 94, 0.35);
+  background: var(--kurogane);
 }
 
 /* Search Results Main */
@@ -2411,7 +2397,6 @@ body:has(.search2-page) {
 .btn-add-single-to-cart:hover {
   background: rgba(64, 84, 94, 0.15);
   border-color: rgba(64, 84, 94, 0.35);
-  box-shadow: 0 2px 8px rgba(64, 84, 94, 0.15);
 }
 
 .btn-add-single-to-cart:active {
@@ -2425,9 +2410,6 @@ body:has(.search2-page) {
   transition: all 0.2s ease;
 }
 
-.btn-add-single-to-cart:hover i {
-  transform: scale(1.08);
-}
 
 .btn-add-single-to-cart .plus-icon {
   position: absolute;
@@ -2443,9 +2425,6 @@ body:has(.search2-page) {
   transition: all 0.2s ease;
 }
 
-.btn-add-single-to-cart:hover .plus-icon {
-  transform: scale(1.1);
-}
 
 /* Success animation when clicked */
 @keyframes cart-success {
@@ -2503,8 +2482,6 @@ body:has(.search2-page) {
 
 .btn-add-to-cart:hover:not(:disabled) {
   background: var(--kurogane);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(64, 84, 94, 0.4);
 }
 
 .btn-add-to-cart:disabled {
@@ -2540,8 +2517,6 @@ body:has(.search2-page) {
 
 .btn-add-to-cart-header:hover:not(:disabled) {
   background: var(--kurogane);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(64, 84, 94, 0.4);
 }
 
 .btn-add-to-cart-header:disabled {
@@ -2803,9 +2778,6 @@ body:has(.search2-page) {
   background: rgba(64, 84, 94, 0.06);
   border-color: rgba(64, 84, 94, 0.4);
   color: var(--primary);
-  transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 8px 24px rgba(64, 84, 94, 0.2),
-    0 0 0 3px rgba(64, 84, 94, 0.08);
 }
 
 .popular-chip:hover::before {
@@ -2822,9 +2794,6 @@ body:has(.search2-page) {
   transition: transform 0.3s ease;
 }
 
-.popular-chip:hover i {
-  transform: rotate(360deg) scale(1.1);
-}
 
 /* Empty State Features */
 .empty-state-features {
@@ -2850,7 +2819,6 @@ body:has(.search2-page) {
 
 .feature-item:hover {
   color: var(--primary);
-  transform: translateY(-2px);
 }
 
 .feature-item i {
@@ -2865,8 +2833,6 @@ body:has(.search2-page) {
 
 .feature-item:hover i {
   background: rgba(64, 84, 94, 0.15);
-  transform: scale(1.1);
-  box-shadow: 0 4px 12px rgba(64, 84, 94, 0.2);
 }
 
 /* Category Cards */
@@ -2924,9 +2890,6 @@ body:has(.search2-page) {
 
 .category-card:hover {
   border-color: rgba(64, 84, 94, 0.3);
-  transform: translateY(-4px);
-  box-shadow: 0 12px 28px rgba(64, 84, 94, 0.15),
-    0 0 0 3px rgba(64, 84, 94, 0.05);
 }
 
 .category-card:hover::before {
@@ -2945,7 +2908,6 @@ body:has(.search2-page) {
 
 .category-card:hover i {
   background: rgba(64, 84, 94, 0.15);
-  transform: scale(1.1) rotate(5deg);
 }
 
 .category-card span {
@@ -2984,8 +2946,7 @@ body:has(.search2-page) {
 }
 
 .stat-item:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 24px rgba(64, 84, 94, 0.12);
+  background: rgba(64, 84, 94, 0.04);
 }
 
 .stat-icon {
@@ -3001,7 +2962,6 @@ body:has(.search2-page) {
 
 .stat-item:hover .stat-icon {
   background: rgba(64, 84, 94, 0.15);
-  transform: scale(1.1);
 }
 
 .stat-icon i {
@@ -3078,7 +3038,6 @@ body:has(.search2-page) {
   background: var(--bg-secondary);
   border-color: var(--primary);
   color: var(--primary);
-  transform: translateY(-2px);
 }
 
 /* ====================================
@@ -3396,8 +3355,6 @@ body:has(.search2-page) {
 
 .btn-primary:hover {
   background: var(--kurogane);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(64, 84, 94, 0.4);
 }
 
 .btn-primary i {
@@ -4690,7 +4647,6 @@ body:has(.search2-page) {
 
 .btn-try-again:hover {
   background: var(--primary-dark);
-  transform: translateY(-2px);
 }
 
 .btn-contact-support {
@@ -4869,7 +4825,6 @@ body:has(.search2-page) {
 
 .recent-search-all-btn:hover {
   background: var(--primary-dark);
-  transform: translateY(-1px);
 }
 
 .recent-search-all-btn i {

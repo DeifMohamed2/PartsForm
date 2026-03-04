@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 const Buyer = require('../models/Buyer');
 const Admin = require('../models/Admin');
 const Order = require('../models/Order');
-const Ticket = require('../models/Ticket');
+const Claim = require('../models/Claim');
 const Supplier = require('../models/Supplier');
 
 // JWT Secret - Must match authController (loaded from environment)
@@ -224,7 +224,7 @@ const requireAdminAuth = async (req, res, next) => {
     res.locals.currentAdmin = admin;
     res.locals.PERMISSIONS = PERMISSIONS;
 
-    // Fetch sidebar notification counts for orders and tickets
+    // Fetch sidebar notification counts for orders and claims
     // Only fetch for non-API requests to avoid slowing down API calls
     if (!req.xhr && !req.headers.accept?.includes('application/json')) {
       try {
@@ -233,20 +233,20 @@ const requireAdminAuth = async (req, res, next) => {
           status: { $in: ['pending', 'processing'] } 
         });
         
-        // Count open/in-progress tickets (tickets that need attention)
-        const openTicketsCount = await Ticket.countDocuments({ 
+        // Count open/in-progress claims (claims that need attention)
+        const openClaimsCount = await Claim.countDocuments({ 
           status: { $in: ['open', 'in-progress'] } 
         });
         
         res.locals.sidebarCounts = {
           newOrders: newOrdersCount,
-          openTickets: openTicketsCount
+          openClaims: openClaimsCount
         };
       } catch (countError) {
         console.error('Error fetching sidebar counts:', countError);
         res.locals.sidebarCounts = {
           newOrders: 0,
-          openTickets: 0
+          openClaims: 0
         };
       }
     }

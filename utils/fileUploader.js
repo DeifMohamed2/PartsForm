@@ -126,8 +126,8 @@ const validateFileType = (mimeType, allowedTypes) => {
 const profileImageStorage = multer.diskStorage({
   destination: (req, file, cb) => {
     const uploadPath = path.join(UPLOAD_CONFIG.baseDir, UPLOAD_CONFIG.directories.profileImages);
-    ensureDirectoryExists(uploadPath);
-    cb(null, uploadPath);
+    const fullPath = ensureDirectoryExists(uploadPath);
+    cb(null, fullPath);
   },
   filename: (req, file, cb) => {
     const userId = req.user?._id?.toString() || 'anonymous';
@@ -227,11 +227,14 @@ const processProfileImage = (file) => {
 
 /**
  * Delete old profile image when updating
+ * oldImagePath is a URL like /uploads/profile-images/filename.jpg
+ * deleteFile expects path relative to public folder: uploads/profile-images/filename.jpg
  */
 const deleteOldProfileImage = async (oldImagePath) => {
   if (oldImagePath && !oldImagePath.includes('default')) {
     try {
-      await deleteFile(oldImagePath);
+      const filePath = oldImagePath.replace(/^\//, '');
+      await deleteFile(filePath);
       return true;
     } catch (error) {
       console.error('Failed to delete old profile image:', error);

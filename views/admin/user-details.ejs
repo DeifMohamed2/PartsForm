@@ -98,8 +98,8 @@
               <i data-lucide="ticket"></i>
             </div>
             <div class="quick-stat-content">
-              <div class="quick-stat-value"><%= user.tickets || 0 %></div>
-              <div class="quick-stat-label">Support Tickets</div>
+              <div class="quick-stat-value"><%= user.claims || 0 %></div>
+              <div class="quick-stat-label">Support Claims</div>
             </div>
           </div>
           <div class="quick-stat-card purple">
@@ -423,7 +423,7 @@
             <table class="users-table">
               <thead>
                 <tr>
-                  <th>Ticket ID</th>
+                  <th>Claim ID</th>
                   <th>Subject</th>
                   <th>Category</th>
                   <th>Date</th>
@@ -432,10 +432,10 @@
                 </tr>
               </thead>
               <tbody>
-                <!-- Tickets will be loaded from database when Ticket model is implemented -->
+                <!-- Claims will be loaded from database -->
                 <tr>
                   <td colspan="6" style="text-align: center; padding: 2rem; color: #64748b;">
-                    No tickets found for this user
+                    No claims found for this user
                   </td>
                 </tr>
               </tbody>
@@ -959,7 +959,7 @@
       font-size: 0.75rem;
     }
 
-    .id-badge.ticket {
+    .id-badge.claim {
       background: rgba(245, 158, 11, 0.1);
       color: #f59e0b;
     }
@@ -1204,7 +1204,7 @@
     }
 
     /* Status Badges */
-    .ticket-status-badge {
+    .claim-status-badge {
       display: inline-flex;
       padding: 0.3rem 0.6rem;
       border-radius: 6px;
@@ -1212,12 +1212,12 @@
       font-weight: 600;
     }
 
-    .ticket-status-badge.open {
+    .claim-status-badge.open {
       background: rgba(245, 158, 11, 0.12);
       color: #d97706;
     }
 
-    .ticket-status-badge.resolved {
+    .claim-status-badge.resolved {
       background: rgba(16, 185, 129, 0.12);
       color: #059669;
     }

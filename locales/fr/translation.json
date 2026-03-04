@@ -2,7 +2,7 @@
   "nav": {
     "search": "Rechercher",
     "myOrders": "Mes Commandes",
-    "tickets": "Tickets",
+    "Claims": "Claims",
     "affiliate": "Affilié",
     "payment": "Paiement",
     "delivery": "Livraison",
@@ -12,7 +12,7 @@
     "more": "Plus",
     "paymentDesc": "Gérer les méthodes de paiement",
     "deliveryDesc": "Adresses de livraison",
-    "ticketsDesc": "Tickets de support",
+    "claimsDesc": "claims de support",
     "contactsDesc": "Informations de contact",
     "searchDropdown": {
       "automotive": {
@@ -650,82 +650,10 @@
     }
   },
   "settings": {
-    "badge": "Paramètres",
+    "badge": "Paramètres du compte",
     "title": "Paramètres",
-    "subtitle": "Personnalisez votre expérience et vos préférences",
-    "sections": {
-      "preferences": "Préférences",
-      "notifications": "Notifications",
-      "privacy": "Confidentialité"
-    },
-    "preferences": {
-      "title": "Préférences",
-      "subtitle": "Personnaliser votre expérience",
-      "language": "Langue",
-      "selectLanguage": "Sélectionner la langue",
-      "currency": "Devise",
-      "selectCurrency": "Sélectionner la devise",
-      "timezone": "Fuseau Horaire",
-      "selectTimezone": "Sélectionner le fuseau horaire",
-      "dateFormat": "Format de Date",
-      "savePreferences": "Enregistrer les Préférences",
-      "theme": "Thème",
-      "itemsPerPage": "Éléments par Page",
-      "themeDesc": "Choisir le thème de couleur",
-      "light": "Clair",
-      "dark": "Sombre",
-      "auto": "Auto (Système)",
-      "itemsPerPageDesc": "Nombre d'éléments à afficher"
-    },
-    "notifications": {
-      "title": "Paramètres de Notifications",
-      "subtitle": "Contrôlez quand vous recevez des notifications",
-      "email": "Notifications Email",
-      "push": {
-        "title": "Notifications Push",
-        "enabled": "Activer les notifications push",
-        "enabledDesc": "Recevoir des notifications en temps réel dans votre navigateur"
-      },
-      "saveNotifications": "Enregistrer les Paramètres",
-      "orderUpdates": "Mises à jour Commandes",
-      "promotional": "Emails Promotionnels",
-      "sms": "Notifications SMS",
-      "emailDesc": "Recevoir des notifications par email",
-      "orderUpdatesDesc": "Notification des changements de statut",
-      "promotionalDesc": "Recevoir des offres spéciales",
-      "smsDesc": "Recevoir des SMS pour les urgences"
-    },
-    "privacy": {
-      "title": "Paramètres de Confidentialité",
-      "subtitle": "Gérer vos préférences de confidentialité",
-      "dataSharing": "Partage de Données",
-      "dataSharingDesc": "Autoriser le partage anonyme des données d'utilisation pour l'amélioration du service",
-      "activityTracking": "Suivi d'Activité",
-      "activityTrackingDesc": "Autoriser le suivi d'activité pour des recommandations personnalisées",
-      "savePrivacy": "Enregistrer les Paramètres",
-      "profileVisibility": {
-        "title": "Visibilité du Profil",
-        "desc": "Qui peut voir votre profil",
-        "public": "Public",
-        "private": "Privé",
-        "friendsOnly": "Amis Seulement"
-      },
-      "dataCollection": "Collecte de Données",
-      "cookies": "Cookies",
-      "visibility": "Visibilité du Profil",
-      "visibilityDesc": "Qui peut voir votre profil",
-      "public": "Public",
-      "private": "Privé",
-      "friendsOnly": "Amis Seulement",
-      "dataCollectionDesc": "Autoriser l'analyse pour améliorer le service",
-      "cookiesDesc": "Accepter les cookies pour une meilleure expérience"
-    },
-    "dangerZone": {
-      "title": "Zone de Danger",
-      "deleteAccount": "Supprimer le Compte",
-      "deleteAccountDesc": "Supprimer définitivement votre compte et toutes les données associées",
-      "deleteButton": "Supprimer le Compte"
-    },
+    "subtitle": "Personnalisez vos préférences de compte et gérez vos paramètres",
+    "resetToDefault": "Réinitialiser par défaut",
     "nav": {
       "general": "Général",
       "notifications": "Notifications",
@@ -737,72 +665,130 @@
     "general": {
       "title": "Paramètres Généraux",
       "subtitle": "Gérer les préférences générales du compte",
-      "language": "Langue",
-      "timezone": "Fuseau Horaire",
-      "dateFormat": "Format de Date",
+      "language": {
+        "title": "Langue",
+        "desc": "Choisissez votre langue préférée pour l'interface"
+      },
+      "timezone": {
+        "title": "Fuseau horaire",
+        "desc": "Définissez votre fuseau horaire pour un affichage précis du temps"
+      },
+      "dateFormat": {
+        "title": "Format de date",
+        "desc": "Choisissez comment les dates sont affichées"
+      },
       "currency": {
         "title": "Devise",
-        "desc": "Sélectionnez votre devise préférée"
+        "desc": "Choisissez votre devise préférée pour l'affichage des prix"
+      }
+    },
+    "notifications": {
+      "title": "Paramètres de notifications",
+      "subtitle": "Contrôlez comment et quand vous recevez des notifications",
+      "email": {
+        "title": "Notifications par e-mail",
+        "desc": "Recevez des notifications par e-mail pour les mises à jour importantes"
       },
-      "languageDesc": "Choisissez votre langue préférée",
-      "timezoneDesc": "Définissez votre fuseau horaire",
-      "dateFormatDesc": "Choisissez l'affichage des dates"
+      "orderUpdates": {
+        "title": "Mises à jour des commandes",
+        "desc": "Soyez notifié lorsque le statut de votre commande change"
+      },
+      "promotional": {
+        "title": "E-mails promotionnels",
+        "desc": "Recevez des e-mails sur les nouveaux produits et offres spéciales"
+      },
+      "sms": {
+        "title": "Notifications SMS",
+        "desc": "Recevez des notifications SMS pour les mises à jour urgentes"
+      }
+    },
+    "privacy": {
+      "title": "Paramètres de confidentialité",
+      "subtitle": "Gérez vos préférences de confidentialité et de données",
+      "profileVisibility": {
+        "title": "Visibilité du profil",
+        "desc": "Contrôlez qui peut voir les informations de votre profil",
+        "public": "Public",
+        "private": "Privé",
+        "friendsOnly": "Amis uniquement"
+      },
+      "dataCollection": {
+        "title": "Collecte de données",
+        "desc": "Autorisez-nous à collecter des données analytiques pour améliorer notre service"
+      },
+      "cookies": {
+        "title": "Cookies",
+        "desc": "Acceptez les cookies pour une meilleure expérience de navigation"
+      }
     },
     "security": {
-      "title": "Paramètres de Sécurité",
-      "subtitle": "Gérer la sécurité du compte",
+      "title": "Paramètres de sécurité",
+      "subtitle": "Gérez la sécurité de votre compte et l'authentification",
       "twoFactor": {
-        "title": "Authentification à Deux Facteurs",
-        "desc": "Ajouter une couche de sécurité",
+        "title": "Authentification à deux facteurs",
+        "desc": "Ajoutez une couche de sécurité supplémentaire à votre compte",
         "setup": "Configurer 2FA"
       },
-      "changePassword": "Changer le Mot de Passe",
-      "sessions": {
-        "title": "Sessions Actives",
-        "desc": "Voir les appareils connectés",
-        "view": "Voir les Sessions"
+      "changePassword": {
+        "title": "Changer le mot de passe",
+        "desc": "Mettez à jour régulièrement le mot de passe de votre compte",
+        "button": "Changer le mot de passe"
       },
-      "twoFA": "Authentification à Deux Facteurs",
-      "twoFADesc": "Ajouter une couche de sécurité",
-      "changePasswordDesc": "Mettre à jour régulièrement",
-      "changePasswordBtn": "Changer le Mot de Passe",
-      "activeSessions": "Sessions Actives",
-      "activeSessionsDesc": "Voir les appareils connectés",
-      "viewSessions": "Voir les Sessions"
+      "sessions": {
+        "title": "Sessions actives",
+        "desc": "Voir et gérer les appareils où vous êtes connecté",
+        "view": "Voir les sessions"
+      }
+    },
+    "preferences": {
+      "title": "Préférences",
+      "subtitle": "Personnalisez votre expérience",
+      "theme": {
+        "title": "Thème",
+        "desc": "Choisissez votre thème de couleur préféré",
+        "light": "Clair",
+        "dark": "Sombre",
+        "auto": "Auto (système)"
+      },
+      "itemsPerPage": {
+        "title": "Éléments par page",
+        "desc": "Nombre d'éléments à afficher par page"
+      }
     },
     "billing": {
-      "title": "Paramètres de Facturation",
-      "subtitle": "Gérer les méthodes de paiement",
-      "paymentMethods": "Méthodes de Paiement",
-      "billingAddress": "Adresse de Facturation",
-      "invoices": {
-        "title": "Historique des Factures",
-        "desc": "Voir et télécharger les factures",
-        "view": "Voir les Factures"
+      "title": "Paramètres de facturation",
+      "subtitle": "Gérez vos méthodes de paiement et informations de facturation",
+      "paymentMethods": {
+        "title": "Méthodes de paiement",
+        "desc": "Gérez vos méthodes de paiement enregistrées",
+        "manage": "Gérer les méthodes de paiement"
       },
-      "paymentMethodsDesc": "Gérer les méthodes enregistrées",
-      "managePaymentMethods": "Gérer les Méthodes",
-      "billingAddressDesc": "Mettre à jour l'adresse",
-      "updateAddress": "Mettre à Jour",
-      "invoiceHistory": "Historique des Factures",
-      "invoiceHistoryDesc": "Voir et télécharger les factures",
-      "viewInvoices": "Voir les Factures"
+      "billingAddress": {
+        "title": "Adresse de facturation",
+        "desc": "Mettez à jour votre adresse de facturation",
+        "update": "Mettre à jour l'adresse"
+      },
+      "invoices": {
+        "title": "Historique des factures",
+        "desc": "Voir et télécharger vos factures passées",
+        "view": "Voir les factures"
+      }
     },
     "actions": {
-      "saveChanges": "Enregistrer",
-      "resetToDefault": "Réinitialiser"
-    },
-    "resetToDefault": "Réinitialiser"
+      "saveChanges": "Enregistrer les modifications",
+      "resetToDefault": "Réinitialiser par défaut"
+    }
   },
   "tickets": {
     "badge": "Support",
     "title": "Tickets de Support",
     "subtitle": "Obtenez de l'aide pour vos commandes et questions",
-    "createTicket": "Créer un Ticket",
+    "createClaim": "Créer un Claim",
     "stats": {
       "open": "Ouverts",
       "inProgress": "En Cours",
-      "resolved": "Résolus"
+      "resolved": "Résolus",
+      "closed": "Fermé"
     },
     "filters": {
       "status": "Statut",
@@ -817,7 +803,7 @@
       "reset": "Réinitialiser"
     },
     "table": {
-      "ticketNumber": "Numéro de Ticket",
+      "ClaimNumber": "Numéro de Claim",
       "subject": "Sujet",
       "category": "Catégorie",
       "priority": "Priorité",
@@ -843,7 +829,7 @@
     "emptyState": {
       "title": "Aucun Ticket de Support",
       "text": "Vous n'avez pas encore créé de ticket de support. Si vous avez besoin d'aide, créez un nouveau ticket.",
-      "createTicket": "Créer un Ticket"
+      "createClaim": "Créer un Claim"
     },
     "actions": {
       "viewTicket": "Voir le Ticket",
@@ -851,8 +837,8 @@
     },
     "details": {
       "title": "Détails du Ticket",
-      "backToTickets": "Retour aux Tickets",
-      "ticketInfo": "Informations du Ticket",
+      "backToClaims": "Retour aux Claims",
+      "ClaimInfo": "Informations du Claim",
       "conversation": "Conversation",
       "reply": "Répondre",
       "replyPlaceholder": "Tapez votre réponse...",
@@ -884,7 +870,7 @@
       "attachFiles": "Joindre des Fichiers",
       "submitTicket": "Soumettre le Ticket",
       "badge": "Centre de Support",
-      "backToTickets": "Retour aux Tickets",
+      "backToClaims": "Retour aux Claims",
       "cardTitle": "Informations du Ticket",
       "cardSubtitle": "Veuillez fournir des détails sur votre problème",
       "category": "Catégorie",
@@ -908,7 +894,7 @@
       "helpText": "Pour les urgences, vous pouvez aussi nous contacter directement:",
       "describeIssue": "Décrivez votre problème"
     },
-    "ticketNumber": "Numéro de Ticket",
+    "ClaimNumber": "Numéro de Claim",
     "subject": "Sujet",
     "category": "Catégorie",
     "priority": "Priorité",
@@ -917,16 +903,15 @@
     "updated": "Mis à jour",
     "noTickets": "Aucun ticket trouvé",
     "empty": {
-      "title": "No Tickets Yet",
-      "text": "You haven't created any support tickets",
-      "createFirst": "Create First Ticket"
+      "title": "No Claims Yet",
+      "text": "You haven't created any support claims",
+      "createFirst": "Create First Claim"
     }
   },
   "affiliate": {
     "badge": "Programme d'Affiliation",
     "title": "Programme de Fidélité pour Nos Clients",
-    "subtitle": "Nous valorisons chaque client et offrons les meilleures récompenses à ceux qui contribuent à votre marque. Plus vous avancez avec nous, plus vous recevez de récompenses !",
-    "description": "Notre programme comprend les niveaux suivants : BRONZE – conditions améliorées et remises supplémentaires ; ARGENT – remises premium et service prioritaire ; OR – tarification exclusive et support dédié ; PLATINE – avantages VIP et approche personnalisée ; PLATINE+ – le niveau le plus élevé avec conditions VIP+, privilèges prioritaires et offres exclusives.",
+    "subtitle": "Gagnez plus de récompenses en progressant. Plus votre niveau est élevé, plus vos avantages sont importants.",
     "tiers": {
       "title": "Niveaux d'Adhésion",
       "subtitle": "Votre fidélité détermine le niveau de vos achats en fonction du volume de commandes. Meilleur est le niveau, plus vous recevez d'avantages.",

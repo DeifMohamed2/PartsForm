@@ -1,9 +1,10 @@
 /* ====================================
-   AFFILIATE PROGRAM PAGE - PROFESSIONAL TIER CARDS
-   PARTSFORM Buyer Portal
+   AFFILIATE PROGRAM PAGE - BRAND SYSTEM
+   60% Washi/Suzu | 30% Kurogane/Blues | 10% Kintsugi
+   Quantico headlines | Antartida body
    ==================================== */
 
-/* Ensure dropdown works on affiliate page */
+/* Ensure dropdown works */
 .affiliate-page .nav-dropdown-menu {
   z-index: 10002 !important;
 }
@@ -15,15 +16,12 @@
 /* ====================================
    PAGE LAYOUT
    ==================================== */
-
 .affiliate-page {
   min-height: 100vh;
   background: var(--washi);
   padding-top: 0;
-  position: relative;
 }
 
-/* Ensure navbar stays on top and visible */
 .affiliate-page .nav-bar {
   z-index: 10001 !important;
   position: fixed !important;
@@ -32,12 +30,10 @@
   background: rgba(255, 255, 255, 0.98) !important;
   backdrop-filter: blur(20px) saturate(180%) !important;
   -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
-  border-bottom: 1px solid rgba(64, 84, 94, 0.12) !important;
-  box-shadow: 0 4px 20px rgba(43, 43, 43, 0.08),
-    0 2px 8px rgba(64, 84, 94, 0.03) !important;
+  border-bottom: 1px solid rgba(149, 175, 192, 0.2) !important;
+  box-shadow: 0 4px 20px rgba(43, 43, 43, 0.08), 0 2px 8px rgba(149, 175, 192, 0.05) !important;
 }
 
-/* Ensure navbar links are visible */
 .affiliate-page .nav-link {
   color: var(--kurogane) !important;
 }
@@ -46,28 +42,25 @@
   color: var(--aitetsu) !important;
 }
 
-/* Ensure logo is visible */
 .affiliate-page .nav-logo img {
   filter: none !important;
   opacity: 1 !important;
 }
 
 /* ====================================
-   HERO SECTION
+   HERO SECTION - Animated Background
    ==================================== */
-
 .affiliate-hero {
-  padding: 10rem 0 5rem;
+  padding: 7.5rem 0 4.5rem;
   position: relative;
   overflow: hidden;
   background: var(--kurogane);
   margin-top: 0;
-  clip-path: polygon(0 0, 100% 0, 100% 92%, 0 100%);
-  box-shadow: 0 15px 50px rgba(43, 43, 43, 0.25),
-    0 5px 20px rgba(64, 84, 94, 0.15);
+  border-radius: 0 0 20px 20px;
+  box-shadow: 0 10px 30px rgba(43, 43, 43, 0.2);
 }
 
-/* Background Image Overlay */
+/* Animated background - moodboard warehouse hero */
 .affiliate-hero::before {
   content: '';
   position: absolute;
@@ -75,34 +68,23 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-image: url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80');
+  background-image: url('/images/brand/moodboard/warehouse-hero.png');
   background-size: cover;
   background-position: center;
   background-blend-mode: overlay;
   opacity: 0.3;
   z-index: 1;
   pointer-events: none;
-  animation: subtleShift 20s ease-in-out infinite;
+  animation: affiliateHeroShift 25s ease-in-out infinite;
 }
 
-@keyframes subtleShift {
-  0%,
-  100% {
-    background-position: center center;
-  }
-  50% {
-    background-position: center bottom;
-  }
+@keyframes affiliateHeroShift {
+  0%, 100% { background-position: center center; }
+  33% { background-position: center 20%; }
+  66% { background-position: center 80%; }
 }
 
-/* Alternative: Use a local background image - uncomment and update path */
-/*
-.affiliate-hero::before {
-  background-image: url('/images/affiliate-hero-bg.jpg');
-}
-*/
-
-/* Solid overlay for better text readability */
+/* Dark overlay - Aitetsu tint */
 .affiliate-hero::after {
   content: '';
   position: absolute;
@@ -110,7 +92,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(26, 43, 61, 0.5);
+  background: linear-gradient(180deg, rgba(64, 84, 94, 0.7) 0%, rgba(43, 43, 43, 0.85) 100%);
   z-index: 1;
   pointer-events: none;
 }
@@ -127,308 +109,178 @@
 .affiliate-badge {
   display: inline-flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.85rem 1.75rem;
-  background: rgba(255, 255, 255, 0.18);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1.5px solid rgba(255, 255, 255, 0.3);
-  border-radius: 2rem;
-  color: white;
-  font-weight: 600;
-  font-size: 0.95rem;
-  margin-bottom: 2.5rem;
-  animation: fadeInUp 0.6s ease-out, badgeGlow 2s ease-in-out infinite;
-  box-shadow: 0 4px 20px rgba(64, 84, 94, 0.3),
-    0 0 40px rgba(64, 84, 94, 0.1), inset 0 1px 2px rgba(255, 255, 255, 0.2);
-  position: relative;
-  overflow: hidden;
-}
-
-.affiliate-badge::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: rgba(255, 255, 255, 0.3);
-  animation: shimmer 3s infinite;
-}
-
-@keyframes badgeGlow {
-  0%,
-  100% {
-    box-shadow: 0 4px 20px rgba(64, 84, 94, 0.3),
-      0 0 40px rgba(64, 84, 94, 0.1), inset 0 1px 2px rgba(255, 255, 255, 0.2);
-  }
-  50% {
-    box-shadow: 0 4px 24px rgba(64, 84, 94, 0.4),
-      0 0 50px rgba(64, 84, 94, 0.2), inset 0 1px 2px rgba(255, 255, 255, 0.3);
-  }
-}
-
-@keyframes shimmer {
-  0% {
-    left: -100%;
-  }
-  100% {
-    left: 200%;
-  }
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: rgba(149, 175, 192, 0.15);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(149, 175, 192, 0.35);
+  border-radius: 4px;
+  color: var(--washi);
+  font-family: 'Antartida', sans-serif;
+  font-weight: 500;
+  font-size: 0.8125rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 1.25rem;
+  animation: affiliateFadeInUp 0.6s ease-out forwards;
 }
 
 .affiliate-badge i {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
+}
+
+@keyframes affiliateFadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .affiliate-hero-title {
-  font-size: 3.75rem;
-  font-weight: 800;
-  background: #ffffff;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin-bottom: 1.75rem;
-  line-height: 1.15;
-  animation: fadeInUp 0.6s ease-out 0.1s backwards,
-    titleFloat 4s ease-in-out infinite;
-  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
-  letter-spacing: -0.02em;
-}
-
-@keyframes titleFloat {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-5px);
-  }
+  font-family: 'Quantico', sans-serif;
+  font-size: 2.5rem;
+  font-weight: 400;
+  color: var(--washi);
+  margin-bottom: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  line-height: 1.2;
 }
 
 .affiliate-hero-subtitle {
-  font-size: 1.35rem;
-  color: rgba(255, 255, 255, 0.95);
-  margin-bottom: 1.25rem;
-  line-height: 1.65;
-  animation: fadeInUp 0.6s ease-out 0.2s backwards;
-  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
-  font-weight: 500;
-  letter-spacing: 0.01em;
-}
-
-.affiliate-hero-description {
+  font-family: 'Antartida', sans-serif;
   font-size: 1.05rem;
-  color: rgba(255, 255, 255, 0.85);
-  max-width: 720px;
-  margin: 0 auto 2.5rem;
-  line-height: 1.85;
-  animation: fadeInUp 0.6s ease-out 0.3s backwards;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  font-weight: 400;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.5;
+  max-width: 560px;
+  margin: 0 auto;
 }
 
 /* ====================================
-   SECTION HEADERS
+   SECTION HEADERS (no decorative lines)
    ==================================== */
-
 .affiliate-section {
-  padding: 5rem 0;
-  position: relative;
+  padding: 2rem 0 4rem;
 }
 
 .section-header {
   text-align: center;
   max-width: 800px;
-  margin: 0 auto 4rem;
-  position: relative;
+  margin: 0 auto 3rem;
 }
 
 .section-title {
-  font-size: 2.75rem;
-  font-weight: 700;
+  font-family: 'Quantico', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 400;
   color: var(--kurogane);
-  margin-bottom: 1.5rem;
-  position: relative;
-}
-
-.section-title::after {
-  content: '';
-  position: absolute;
-  bottom: -0.5rem;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 60px;
-  height: 3px;
-  background: var(--aitetsu);
-  border-radius: 2px;
+  margin-bottom: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
 .section-subtitle {
-  font-size: 1.15rem;
+  font-family: 'Antartida', sans-serif;
+  font-size: 0.95rem;
   color: var(--namari);
-  line-height: 1.7;
-  margin-top: 1.5rem;
+  line-height: 1.6;
 }
 
 /* ====================================
-   TIER CARDS GRID
+   TIER CARDS - Neutral Brand Colors
    ==================================== */
-
 .affiliate-tiers {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
   margin-bottom: 3rem;
 }
 
-/* ====================================
-   TIER CARD DESIGN
-   ==================================== */
-
 .tier-card {
   background: white;
-  border-radius: 1.5rem;
-  padding: 2.5rem 2rem;
-  border: 2px solid #e2e8f0;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
+  border-radius: 12px;
+  padding: 1.75rem 1.5rem;
+  border: 2px solid rgba(149, 175, 192, 0.3);
+  box-shadow: 0 2px 16px rgba(149, 175, 192, 0.08);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
   overflow: hidden;
-  box-shadow: 0 4px 16px rgba(43, 43, 43, 0.08);
-}
-
-.tier-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 6px;
-  background: var(--tier-color-1);
-  opacity: 0;
-  transition: opacity 0.4s ease;
 }
 
 .tier-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 20px 48px rgba(43, 43, 43, 0.15);
-  border-color: var(--tier-color-1);
+  border-color: rgba(149, 175, 192, 0.5);
+  box-shadow: 0 6px 28px rgba(149, 175, 192, 0.15);
 }
 
-.tier-card:hover::before {
-  opacity: 1;
-}
-
-/* Tier-specific colors */
-.tier-card.bronze {
-  --tier-color-1: #cd7f32;
-  --tier-color-2: #b8732d;
-}
-
-.tier-card.silver {
-  --tier-color-1: #c0c0c0;
-  --tier-color-2: #a8a8a8;
-}
-
-.tier-card.gold {
-  --tier-color-1: #ffd700;
-  --tier-color-2: #ffb700;
-}
-
-.tier-card.platinum {
-  --tier-color-1: #e5e4e2;
-  --tier-color-2: #b8b8b8;
-}
-
-.tier-card.platinum-plus {
-  --tier-color-1: var(--aitetsu);
-  --tier-color-2: #2563eb;
-  border: 2px solid var(--aitetsu);
-  background: #ffffff;
-}
-
-.tier-card.platinum-plus::before {
-  opacity: 1;
-  height: 8px;
-}
-
-/* ====================================
-   TIER CARD HEADER
-   ==================================== */
+/* Subtle tier accents (brand palette) */
+.tier-card.bronze { border-left: 4px solid rgba(149, 175, 192, 0.4); }
+.tier-card.silver { border-left: 4px solid rgba(149, 175, 192, 0.55); }
+.tier-card.gold { border-left: 4px solid rgba(201, 164, 50, 0.5); }
+.tier-card.platinum { border-left: 4px solid rgba(64, 84, 94, 0.55); }
+.tier-card.platinum-plus { border-left: 4px solid var(--aitetsu); }
 
 .tier-header {
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 }
 
 .tier-icon {
-  width: 80px;
-  height: 80px;
-  margin: 0 auto 1.5rem;
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 1rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
-  background: var(--tier-color-1);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-  position: relative;
-}
-
-.tier-icon::after {
-  content: '';
-  position: absolute;
-  inset: -4px;
-  border-radius: 50%;
-  background: var(--tier-color-1);
-  opacity: 0.2;
-  filter: blur(8px);
+  border-radius: 10px;
+  background: var(--washi);
+  border: 2px solid rgba(149, 175, 192, 0.3);
 }
 
 .tier-icon i {
-  width: 40px;
-  height: 40px;
-  color: white;
-  z-index: 1;
-  position: relative;
+  width: 24px;
+  height: 24px;
+  color: var(--aitetsu);
 }
 
 .tier-name {
-  font-size: 1.75rem;
-  font-weight: 700;
+  font-family: 'Quantico', sans-serif;
+  font-size: 1.125rem;
+  font-weight: 400;
   color: var(--kurogane);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .tier-range {
-  font-size: 1rem;
+  font-family: 'Antartida', sans-serif;
+  font-size: 0.85rem;
   color: var(--namari);
-  font-weight: 500;
 }
 
 .tier-revenue {
-  font-size: 0.9rem;
+  font-family: 'Antartida', sans-serif;
+  font-size: 0.8rem;
   color: var(--suzu);
   margin-top: 0.25rem;
 }
 
 /* ====================================
-   TIER STATS
+   TIER STATS - Neutral
    ==================================== */
-
 .tier-stats {
   background: var(--washi);
-  border-radius: var(--radius-sm);
-  padding: 1.5rem;
-  margin-bottom: 2rem;
+  border-radius: 10px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  border: 2px solid rgba(149, 175, 192, 0.25);
 }
 
 .tier-stat {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.75rem 0;
-  border-bottom: 1px solid #e2e8f0;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(149, 175, 192, 0.15);
 }
 
 .tier-stat:last-child {
@@ -436,14 +288,16 @@
 }
 
 .stat-label {
-  font-size: 0.95rem;
+  font-family: 'Antartida', sans-serif;
+  font-size: 0.85rem;
   color: var(--namari);
   font-weight: 500;
 }
 
 .stat-value {
-  font-size: 1.1rem;
-  font-weight: 700;
+  font-family: 'Antartida', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
   color: var(--kurogane);
 }
 
@@ -452,48 +306,49 @@
 }
 
 .stat-value.success {
-  color: #10b981;
+  color: var(--sei);
 }
 
 /* ====================================
    TIER BENEFITS
    ==================================== */
-
 .tier-benefits {
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 }
 
 .tier-benefits-title {
-  font-size: 1.1rem;
+  font-family: 'Antartida', sans-serif;
+  font-size: 0.9rem;
   font-weight: 600;
   color: var(--kurogane);
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
 }
 
 .benefit-item {
   display: flex;
   align-items: flex-start;
-  gap: 0.75rem;
-  padding: 0.75rem 0;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
 }
 
 .benefit-icon {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   flex-shrink: 0;
-  margin-top: 0.1rem;
+  margin-top: 0.15rem;
 }
 
 .benefit-icon.available {
-  color: #10b981;
+  color: var(--sei);
 }
 
 .benefit-icon.not-available {
-  color: #cbd5e1;
+  color: var(--suzu);
 }
 
 .benefit-text {
-  font-size: 0.95rem;
+  font-family: 'Antartida', sans-serif;
+  font-size: 0.875rem;
   color: var(--namari);
   line-height: 1.5;
 }
@@ -505,465 +360,263 @@
 
 .benefit-badge {
   display: inline-block;
-  padding: 0.25rem 0.75rem;
-  background: var(--tier-color-1);
-  color: white;
-  border-radius: var(--radius-sm);
-  font-size: 0.75rem;
+  padding: 0.2rem 0.5rem;
+  background: rgba(149, 175, 192, 0.15);
+  color: var(--kurogane);
+  border: 1px solid rgba(149, 175, 192, 0.25);
+  border-radius: 4px;
+  font-size: 0.7rem;
   font-weight: 600;
   margin-left: 0.5rem;
 }
 
 /* ====================================
-   TIER ACTIONS
+   TIER ACTIONS - Kintsugi for primary only
    ==================================== */
-
 .tier-action {
   width: 100%;
-  padding: 1rem;
-  border-radius: var(--radius-sm);
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  font-family: 'Antartida', sans-serif;
   font-weight: 600;
-  font-size: 1rem;
-  border: none;
+  font-size: 0.9rem;
+  border: 1.5px solid;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
   text-decoration: none;
   color: white;
-  background: var(--tier-color-1);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  background: var(--kintsugi);
+  border-color: var(--kintsugi);
 }
 
 .tier-action:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  background: var(--kintsugi-hover, #c9a432);
+  border-color: var(--kintsugi-hover, #c9a432);
 }
 
 .tier-action i {
+  width: 18px;
+  height: 18px;
+}
+
+/* Current level - neutral */
+.tier-card.bronze .tier-action {
+  background: white;
+  color: var(--kurogane);
+  border-color: rgba(149, 175, 192, 0.3);
+}
+
+.tier-card.bronze .tier-action:hover {
+  background: var(--washi);
+  border-color: var(--suzu);
+}
+
+/* ====================================
+   HOW IT WORKS - Photo Cards (moodboard)
+   ==================================== */
+.affiliate-how-it-works {
+  padding: 2rem 0 3rem;
+}
+
+.affiliate-how-it-works .section-header {
+  margin-bottom: 2.5rem;
+}
+
+.how-it-works-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+.how-it-works-card {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  min-height: 280px;
+  border: 2px solid rgba(149, 175, 192, 0.35);
+  box-shadow: 0 4px 20px rgba(43, 43, 43, 0.12);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.how-it-works-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(43, 43, 43, 0.18);
+}
+
+.how-it-works-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: var(--card-bg);
+  background-size: cover;
+  background-position: center;
+  z-index: 0;
+}
+
+.how-it-works-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to top, rgba(43, 43, 43, 0.92) 0%, rgba(43, 43, 43, 0.6) 40%, rgba(43, 43, 43, 0.3) 100%);
+  z-index: 1;
+}
+
+.how-it-works-content {
+  position: relative;
+  z-index: 2;
+  padding: 2rem 1.5rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.how-it-works-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(149, 175, 192, 0.2);
+  border: 2px solid rgba(149, 175, 192, 0.4);
+  border-radius: 10px;
+  margin-bottom: 1rem;
+}
+
+.how-it-works-icon i {
+  width: 24px;
+  height: 24px;
+  color: var(--aitetsu);
+}
+
+.how-it-works-title {
+  font-family: 'Quantico', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 400;
+  color: var(--washi);
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.how-it-works-text {
+  font-family: 'Antartida', sans-serif;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.6;
+}
+
+/* ====================================
+   DISCLAIMER - Neutral
+   ==================================== */
+.affiliate-disclaimer {
+  background: white;
+  border: 2px solid rgba(149, 175, 192, 0.3);
+  border-radius: 12px;
+  padding: 1.5rem 2rem;
+  text-align: center;
+  margin-top: 2rem;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.disclaimer-icon {
+  width: 40px;
+  height: 40px;
+  margin: 0 auto 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--washi);
+  border: 2px solid rgba(149, 175, 192, 0.3);
+  border-radius: 10px;
+  color: var(--aitetsu);
+}
+
+.disclaimer-icon i {
   width: 20px;
   height: 20px;
 }
 
-/* ====================================
-   INFO SECTION - PHOTO BASED DESIGN
-   ==================================== */
-
-.affiliate-info-photo {
-  padding: 5rem 0;
-  position: relative;
-  overflow: hidden;
-}
-
-.affiliate-info-photo .section-header {
-  margin-bottom: 4rem;
-}
-
-/* Photo Grid Layout */
-.info-photo-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 2rem;
-  margin-top: 3rem;
-}
-
-@media (max-width: 1024px) {
-  .info-photo-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 640px) {
-  .info-photo-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* Individual Photo Item */
-.info-photo-item {
-  position: relative;
-  height: 380px;
-  border-radius: 1.5rem;
-  overflow: hidden;
-  cursor: pointer;
-  transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-}
-
-.info-photo-item:hover {
-  transform: translateY(-12px) scale(1.03);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15), 0 10px 20px rgba(0, 0, 0, 0.1);
-}
-
-/* Background Photo */
-.info-photo-bg {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-}
-
-.info-photo-bg img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
-  filter: brightness(0.85);
-}
-
-.info-photo-item:hover .info-photo-bg img {
-  transform: scale(1.15);
-  filter: brightness(0.7);
-}
-
-/* Gradient Overlay */
-.info-photo-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(26, 43, 61, 0.75);
-  transition: background 0.6s ease;
-  z-index: 1;
-}
-
-.info-photo-item:hover .info-photo-overlay {
-  background: rgba(26, 43, 61, 0.85);
-}
-
-/* Content Overlay */
-.info-photo-content {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 2rem;
-  z-index: 3;
-  transform: translateY(0);
-  transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-/* Icon */
-.info-photo-icon {
-  width: 56px;
-  height: 56px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(12px);
-  border: 1.5px solid rgba(255, 255, 255, 0.3);
-  border-radius: var(--radius-sm);
-  margin-bottom: 1.25rem;
-  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.info-photo-item:hover .info-photo-icon {
-  background: rgba(255, 255, 255, 0.25);
-  border-color: rgba(255, 255, 255, 0.5);
-  transform: rotate(360deg) scale(1.15);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-}
-
-.info-photo-icon i {
-  width: 28px;
-  height: 28px;
-  color: #ffffff;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
-}
-
-/* Title */
-.info-photo-title {
-  font-family: var(--font-display);
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #ffffff;
-  margin-bottom: 0.5rem;
-  line-height: 1.3;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  transition: all 0.4s ease;
-}
-
-.info-photo-item:hover .info-photo-title {
-  color: #ffffff;
-  text-shadow: 0 3px 12px rgba(0, 0, 0, 0.5);
-  transform: translateX(4px);
-}
-
-/* Text */
-.info-photo-text {
-  font-family: var(--font-body);
-  font-size: 1rem;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.85);
-  line-height: 1.5;
-  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-  transition: all 0.4s ease;
-}
-
-.info-photo-item:hover .info-photo-text {
-  color: rgba(255, 255, 255, 1);
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-  transform: translateX(4px);
-}
-
-/* ====================================
-   DISCLAIMER
-   ==================================== */
-
-.affiliate-disclaimer {
-  background: var(--washi);
-  border: 2px dashed rgba(64, 84, 94, 0.2);
-  border-radius: 1.5rem;
-  padding: 2.5rem;
-  text-align: center;
-  margin-top: 4rem;
-  max-width: 900px;
-  margin-left: auto;
-  margin-right: auto;
-  position: relative;
-  overflow: hidden;
-}
-
-.affiliate-disclaimer::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  right: -50%;
-  width: 200%;
-  height: 200%;
-  background: transparent;
-  animation: pulse 4s ease-in-out infinite;
-}
-
-@keyframes pulse {
-  0%,
-  100% {
-    transform: scale(1);
-    opacity: 0.5;
-  }
-  50% {
-    transform: scale(1.1);
-    opacity: 0.8;
-  }
-}
-
-.disclaimer-icon {
-  width: 56px;
-  height: 56px;
-  margin: 0 auto 1.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--aitetsu);
-  border-radius: var(--radius-sm);
-  color: white;
-  box-shadow: 0 8px 24px rgba(64, 84, 94, 0.3);
-  position: relative;
-  z-index: 1;
-}
-
-.disclaimer-icon::after {
-  content: '';
-  position: absolute;
-  inset: -4px;
-  border-radius: var(--radius-sm);
-  background: var(--aitetsu);
-  opacity: 0.3;
-  filter: blur(8px);
-  z-index: -1;
-}
-
-.disclaimer-icon i {
-  width: 28px;
-  height: 28px;
-}
-
 .disclaimer-text {
-  font-size: 1rem;
+  font-family: 'Antartida', sans-serif;
+  font-size: 0.9rem;
   color: var(--namari);
-  line-height: 1.8;
-  max-width: 800px;
-  margin: 0 auto;
-  position: relative;
-  z-index: 1;
+  line-height: 1.7;
 }
 
 .disclaimer-text strong {
   color: var(--kurogane);
-  font-weight: 700;
+  font-weight: 600;
 }
 
 /* ====================================
-   ANIMATIONS
+   RESPONSIVE
    ==================================== */
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
-.tier-icon {
-  animation: float 3s ease-in-out infinite;
-}
-
-.tier-card:nth-child(1) .tier-icon {
-  animation-delay: 0s;
-}
-
-.tier-card:nth-child(2) .tier-icon {
-  animation-delay: 0.2s;
-}
-
-.tier-card:nth-child(3) .tier-icon {
-  animation-delay: 0.4s;
-}
-
-.tier-card:nth-child(4) .tier-icon {
-  animation-delay: 0.6s;
-}
-
-.tier-card:nth-child(5) .tier-icon {
-  animation-delay: 0.8s;
-}
-
-/* ====================================
-   RESPONSIVE DESIGN
-   ==================================== */
-
 @media (max-width: 1200px) {
   .affiliate-tiers {
     grid-template-columns: repeat(2, 1fr);
-    gap: 1.5rem;
+  }
+
+  .how-it-works-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
 @media (max-width: 768px) {
-  .affiliate-page {
-    padding-top: 0;
-  }
-
   .affiliate-hero {
-    padding: 7rem 0 3rem;
-    clip-path: polygon(0 0, 100% 0, 100% 95%, 0 100%);
+    padding: 6rem 0 3rem;
   }
 
   .affiliate-hero-title {
-    font-size: 2.5rem;
-  }
-
-  .affiliate-hero-subtitle {
-    font-size: 1.1rem;
-  }
-
-  .section-title {
-    font-size: 2rem;
-  }
-
-  .affiliate-tiers {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-  }
-
-  .tier-card {
-    padding: 2rem 1.5rem;
-  }
-
-  .affiliate-info-photo {
-    padding: 3rem 0;
-  }
-
-  .info-photo-grid {
-    grid-template-columns: 1fr;
-    gap: 2rem;
-  }
-
-  .info-photo-item {
-    height: 320px;
-  }
-}
-
-@media (max-width: 480px) {
-  .affiliate-hero-content {
-    padding: 0 1.25rem;
-  }
-
-  .affiliate-hero {
-    padding: 6rem 0 2.5rem;
-    clip-path: polygon(0 0, 100% 0, 100% 97%, 0 100%);
-  }
-
-  .affiliate-hero-title {
-    font-size: 2rem;
-    letter-spacing: -0.01em;
+    font-size: 1.75rem;
   }
 
   .affiliate-hero-subtitle {
     font-size: 1rem;
   }
 
-  .affiliate-badge {
-    padding: 0.7rem 1.4rem;
-    font-size: 0.85rem;
+  .how-it-works-card {
+    min-height: 240px;
   }
 
-  .tier-name {
-    font-size: 1.5rem;
+  .affiliate-tiers {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  .how-it-works-grid {
+    grid-template-columns: 1fr;
   }
 
   .tier-card {
-    padding: 1.5rem 1rem;
+    padding: 1.5rem 1.25rem;
+  }
+
+  .section-title {
+    font-size: 1.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .affiliate-hero-title {
+    font-size: 1.5rem;
+  }
+
+  .tier-name {
+    font-size: 1rem;
   }
 
   .tier-stats {
-    padding: 1rem;
-  }
-
-  .affiliate-info-photo {
-    padding: 2rem 0;
-  }
-
-  .info-photo-item {
-    height: 300px;
-  }
-
-  .info-photo-content {
-    padding: 1.5rem;
-  }
-
-  .info-photo-icon {
-    width: 48px;
-    height: 48px;
-    margin-bottom: 1rem;
-  }
-
-  .info-photo-icon i {
-    width: 24px;
-    height: 24px;
-  }
-
-  .info-photo-title {
-    font-size: 1.25rem;
-  }
-
-  .info-photo-text {
-    font-size: 0.9rem;
+    padding: 0.875rem;
   }
 }

@@ -68,7 +68,7 @@
                 <i data-lucide="package"></i>
               </div>
               <div class="stat-content">
-                <span class="stat-value" id="totalOrders">0</span>
+                <span class="stat-value" id="totalOrders"><%= buyer.totalOrders || 0 %></span>
                 <span class="stat-label"><%= t('profile.totalOrders') %></span>
               </div>
             </div>
@@ -423,10 +423,10 @@
     function resetUpload() {
       selectedFile = null;
       previewImage.src = '';
-      uploadPreview.style.display = 'none';
-      uploadPlaceholder.style.display = 'flex';
+      uploadPreview.classList.add('hidden');
+      uploadPlaceholder.classList.remove('hidden');
       avatarUploadBtn.disabled = true;
-      uploadProgress.style.display = 'none';
+      uploadProgress.classList.add('hidden');
       progressFill.style.width = '0%';
       avatarInput.value = '';
     }
@@ -450,12 +450,12 @@
 
       selectedFile = file;
 
-      // Show preview
+      // Show preview (use classList - .hidden has display:none !important which overrides inline styles)
       const reader = new FileReader();
       reader.onload = function(e) {
         previewImage.src = e.target.result;
-        uploadPreview.style.display = 'block';
-        uploadPlaceholder.style.display = 'none';
+        uploadPreview.classList.remove('hidden');
+        uploadPlaceholder.classList.add('hidden');
         avatarUploadBtn.disabled = false;
       };
       reader.readAsDataURL(file);
@@ -470,7 +470,7 @@
 
       // Show progress
       avatarUploadBtn.disabled = true;
-      uploadProgress.style.display = 'block';
+      uploadProgress.classList.remove('hidden');
 
       try {
         const response = await fetch('/buyer/profile/avatar', {
@@ -515,6 +515,7 @@
         progressText.textContent = 'Upload failed. Please try again.';
         progressFill.style.background = '#ef4444';
         avatarUploadBtn.disabled = false;
+        uploadProgress.classList.add('hidden');
       }
     }
 

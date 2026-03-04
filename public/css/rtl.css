@@ -1832,38 +1832,38 @@
 }
 
 /* ====================================
-   TICKETS PAGE RTL
+   Claims Page RTL
    ==================================== */
-[dir="rtl"] .tickets-header-content {
+[dir="rtl"] .claims-header-content {
     flex-direction: row-reverse;
 }
 
-[dir="rtl"] .tickets-header-left {
+[dir="rtl"] .claims-header-left {
     text-align: right;
 }
 
-[dir="rtl"] .tickets-header-title {
+[dir="rtl"] .claims-header-title {
     flex-direction: row-reverse;
 }
 
-[dir="rtl"] .tickets-header-title i {
+[dir="rtl"] .claims-header-title i {
     margin-right: 0;
     margin-left: 0.5rem;
 }
 
-[dir="rtl"] .ticket-card {
+[dir="rtl"] .claim-card {
     text-align: right;
 }
 
-[dir="rtl"] .ticket-card-header {
+[dir="rtl"] .claim-card-header {
     flex-direction: row-reverse;
 }
 
-[dir="rtl"] .ticket-meta {
+[dir="rtl"] .claim-meta {
     flex-direction: row-reverse;
 }
 
-[dir="rtl"] .ticket-meta-item i {
+[dir="rtl"] .claim-meta-item i {
     margin-right: 0;
     margin-left: 0.25rem;
 }
@@ -2104,19 +2104,17 @@
     text-align: right;
 }
 
-[dir="rtl"] .order-items-table th,
-[dir="rtl"] .order-items-table td {
-    text-align: right;
+[dir="rtl"] .order-item-card::before {
+    left: auto;
+    right: 0;
 }
 
-[dir="rtl"] .order-items-table th[style*="text-align: right"],
-[dir="rtl"] .order-items-table td[style*="text-align: right"] {
-    text-align: left !important;
+[dir="rtl"] .order-item-card:hover {
+    transform: translateX(-4px);
 }
 
-[dir="rtl"] .order-items-table th[style*="text-align: center"],
-[dir="rtl"] .order-items-table td[style*="text-align: center"] {
-    text-align: center !important;
+[dir="rtl"] .order-item-card-price {
+    text-align: start;
 }
 
 [dir="rtl"] .order-summary-card {

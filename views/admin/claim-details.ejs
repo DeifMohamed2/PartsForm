@@ -1,108 +1,108 @@
 <%- include('partials/header') %>
 <link rel="stylesheet" href="/css/adminCSS/admin-dashboard.css">
-<link rel="stylesheet" href="/css/adminCSS/admin-tickets.css">
+<link rel="stylesheet" href="/css/adminCSS/admin-claims.css">
 </head>
-<body data-ticket-id="<%= ticket.id %>" data-ticket-oid="<%= ticket._id %>">
+<body data-claim-id="<%= claim.id %>" data-claim-oid="<%= claim._id %>">
   <div class="admin-wrapper">
-    <%- include('partials/sidebar', { activePage: 'tickets' }) %>
+    <%- include('partials/sidebar', { activePage: 'claims' }) %>
     
     <main class="admin-main">
-      <%- include('partials/topbar', { pageTitle: 'Ticket Chat' }) %>
+      <%- include('partials/topbar', { pageTitle: 'Claim Chat' }) %>
       
       <div class="admin-content">
         <!-- Breadcrumb -->
         <div style="margin-bottom: 1.5rem;">
-          <a href="/admin/tickets" style="color: var(--admin-text-muted); text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.9rem;">
+          <a href="/admin/claims" style="color: var(--admin-text-muted); text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.9rem;">
             <i data-lucide="arrow-left" style="width: 16px; height: 16px;"></i>
-            Back to Tickets
+            Back to Claims
           </a>
         </div>
 
-        <!-- Ticket Details Layout -->
-        <div class="ticket-details-layout">
+        <!-- Claim Details Layout -->
+        <div class="claim-details-layout">
           <!-- Sidebar -->
-          <div class="ticket-sidebar">
-            <!-- Ticket Info -->
-            <div class="ticket-info-card">
-              <div class="ticket-info-header">
-                <h3><i data-lucide="ticket"></i> Ticket Information</h3>
+          <div class="claim-sidebar">
+            <!-- Claim Info -->
+            <div class="claim-info-card">
+              <div class="claim-info-header">
+                <h3><i data-lucide="ticket"></i> Claim Information</h3>
               </div>
-              <div class="ticket-info-body">
+              <div class="claim-info-body">
                 <div class="info-row">
-                  <span class="info-label">Ticket ID</span>
-                  <span class="info-value" style="color: var(--module-primary, var(--admin-primary));"><%= ticket.id %></span>
+                  <span class="info-label">Claim ID</span>
+                  <span class="info-value" style="color: var(--module-primary, var(--admin-primary));"><%= claim.id %></span>
                 </div>
                 <div class="info-row">
                   <span class="info-label">Order</span>
-                  <span class="info-value"><%= ticket.orderNumber || 'N/A' %></span>
+                  <span class="info-value"><%= claim.orderNumber || 'N/A' %></span>
                 </div>
                 <div class="info-row">
                   <span class="info-label">Category</span>
-                  <span class="info-value"><%= ticket.category %></span>
+                  <span class="info-value"><%= claim.category %></span>
                 </div>
                 <div class="info-row">
                   <span class="info-label">Priority</span>
                   <span class="info-value">
-                    <span class="priority-badge <%= ticket.priority || 'medium' %>" style="padding: 0.2rem 0.5rem; border-radius: 6px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase;">
-                      <%= (ticket.priority || 'medium').toUpperCase() %>
+                    <span class="priority-badge <%= claim.priority || 'medium' %>" style="padding: 0.2rem 0.5rem; border-radius: 6px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase;">
+                      <%= (claim.priority || 'medium').toUpperCase() %>
                     </span>
                   </span>
                 </div>
                 <div class="info-row">
                   <span class="info-label">Created</span>
-                  <span class="info-value"><%= new Date(ticket.createdAt).toLocaleDateString() %></span>
+                  <span class="info-value"><%= new Date(claim.createdAt).toLocaleDateString() %></span>
                 </div>
                 <div class="info-row">
                   <span class="info-label">Messages</span>
-                  <span class="info-value"><%= ticket.messages ? ticket.messages.length : 0 %></span>
+                  <span class="info-value"><%= claim.messages ? claim.messages.length : 0 %></span>
                 </div>
               </div>
               <div class="status-update-section">
                 <label>Update Status</label>
                 <select class="status-select" id="statusSelect" onchange="updateStatus()">
-                  <option value="open" <%= ticket.status === 'open' ? 'selected' : '' %>>Open</option>
-                  <option value="in-progress" <%= ticket.status === 'in-progress' ? 'selected' : '' %>>In Progress</option>
-                  <option value="resolved" <%= ticket.status === 'resolved' ? 'selected' : '' %>>Resolved</option>
+                  <option value="open" <%= claim.status === 'open' ? 'selected' : '' %>>Open</option>
+                  <option value="in-progress" <%= claim.status === 'in-progress' ? 'selected' : '' %>>In Progress</option>
+                  <option value="resolved" <%= claim.status === 'resolved' ? 'selected' : '' %>>Resolved</option>
                   <option value="closed">Closed</option>
                 </select>
               </div>
             </div>
 
             <!-- Customer Info -->
-            <div class="ticket-info-card">
-              <div class="ticket-info-header">
+            <div class="claim-info-card">
+              <div class="claim-info-header">
                 <h3><i data-lucide="user"></i> Customer</h3>
               </div>
-              <div class="ticket-info-body">
+              <div class="claim-info-body">
                 <div style="display: flex; align-items: center; padding-bottom: 1rem; border-bottom: 1px solid var(--admin-border);">
                   <div class="customer-avatar">
-                    <%= (ticket.customerName || ticket.customer || 'C').charAt(0).toUpperCase() %>
+                    <%= (claim.customerName || claim.customer || 'C').charAt(0).toUpperCase() %>
                   </div>
                   <div>
-                    <div style="font-weight: 600; color: var(--admin-text-primary);"><%= ticket.customerName || ticket.customer || 'Customer' %></div>
-                    <div style="font-size: 0.8rem; color: var(--admin-text-muted);"><%= ticket.customerEmail || ticket.email || '' %></div>
+                    <div style="font-weight: 600; color: var(--admin-text-primary);"><%= claim.customerName || claim.customer || 'Customer' %></div>
+                    <div style="font-size: 0.8rem; color: var(--admin-text-muted);"><%= claim.customerEmail || claim.email || '' %></div>
                   </div>
                 </div>
                 <div class="info-row">
                   <span class="info-label">Industry</span>
-                  <span class="info-value"><%= ticket.industry || 'N/A' %></span>
+                  <span class="info-value"><%= claim.industry || 'N/A' %></span>
                 </div>
               </div>
             </div>
 
             <!-- Quick Actions -->
-            <div class="ticket-info-card">
-              <div class="ticket-info-header">
+            <div class="claim-info-card">
+              <div class="claim-info-header">
                 <h3><i data-lucide="zap"></i> Quick Actions</h3>
               </div>
-              <div class="ticket-info-body" style="display: flex; flex-direction: column; gap: 0.5rem;">
+              <div class="claim-info-body" style="display: flex; flex-direction: column; gap: 0.5rem;">
                 <button class="admin-btn admin-btn-secondary" style="width: 100%; justify-content: center;" onclick="markResolved()">
                   <i data-lucide="check-circle"></i>
                   Mark Resolved
                 </button>
-                <button class="admin-btn" style="width: 100%; justify-content: center; background: rgba(239, 68, 68, 0.1); color: #ef4444; border: none;" onclick="closeTicket()">
+                <button class="admin-btn" style="width: 100%; justify-content: center; background: rgba(239, 68, 68, 0.1); color: #ef4444; border: none;" onclick="closeClaim()">
                   <i data-lucide="x-circle"></i>
-                  Close Ticket
+                  Close Claim
                 </button>
               </div>
             </div>
@@ -115,33 +115,33 @@
                 <i data-lucide="message-circle"></i>
               </div>
               <div class="chat-header-text">
-                <h3><%= ticket.subject %></h3>
-                <p>Conversation with <%= ticket.customerName || ticket.customer || 'Customer' %></p>
+                <h3><%= claim.subject %></h3>
+                <p>Conversation with <%= claim.customerName || claim.customer || 'Customer' %></p>
               </div>
               <div style="margin-left: auto;">
-                <span class="ticket-status-badge <%= ticket.status %>">
-                  <% if (ticket.status === 'open') { %>
+                <span class="claim-status-badge <%= claim.status %>">
+                  <% if (claim.status === 'open') { %>
                     <i data-lucide="inbox"></i>
-                  <% } else if (ticket.status === 'in-progress') { %>
+                  <% } else if (claim.status === 'in-progress') { %>
                     <i data-lucide="loader"></i>
                   <% } else { %>
                     <i data-lucide="check-circle"></i>
                   <% } %>
-                  <%= ticket.status.split('-').map(function(w) { return w.charAt(0).toUpperCase() + w.slice(1); }).join(' ') %>
+                  <%= claim.status.split('-').map(function(w) { return w.charAt(0).toUpperCase() + w.slice(1); }).join(' ') %>
                 </span>
               </div>
             </div>
 
             <div class="chat-messages" id="chatMessages">
               <%
-                var messages = ticket.messages || [
-                  { sender: 'customer', content: ticket.description || 'Initial ticket description', time: ticket.createdAt || new Date().toISOString() }
+                var messages = claim.messages || [
+                  { sender: 'customer', content: claim.description || 'Initial claim description', time: claim.createdAt || new Date().toISOString() }
                 ];
               %>
               <% messages.forEach(function(msg) { %>
               <div class="message <%= msg.sender === 'admin' ? 'admin' : 'customer' %>">
                 <div class="message-avatar">
-                  <% if (msg.sender === 'admin') { %>A<% } else { %><%= (ticket.customerName || 'C').charAt(0) %><% } %>
+                  <% if (msg.sender === 'admin') { %>A<% } else { %><%= (claim.customerName || 'C').charAt(0) %><% } %>
                 </div>
                 <div class="message-bubble">
                   <div class="message-text"><%= msg.content || msg.text %></div>
@@ -164,7 +164,7 @@
                   </div>
                   <% } %>
                   <div class="message-time">
-                    <%= msg.sender === 'admin' ? 'Admin' : (ticket.customerName || 'Customer') %> • 
+                    <%= msg.sender === 'admin' ? 'Admin' : (claim.customerName || 'Customer') %> • 
                     <%= typeof msg.time === 'string' ? msg.time : new Date(msg.time || msg.createdAt).toLocaleString() %>
                   </div>
                 </div>
@@ -204,12 +204,12 @@
   </div>
 
   <script>
-    window.adminTicketId = '<%= ticket.id %>';
-    window.adminTicketOid = '<%= ticket._id %>';
-    window.customerName = '<%= ticket.customerName || ticket.customer || "Customer" %>';
-    window.ticketStatus = '<%= ticket.status %>';
+    window.adminTicketId = '<%= claim.id %>';
+    window.adminTicketOid = '<%= claim._id %>';
+    window.customerName = '<%= claim.customerName || claim.customer || "Customer" %>';
+    window.ticketStatus = '<%= claim.status %>';
   </script>
   <script src="/socket.io/socket.io.js"></script>
-  <script src="/js/adminJS/admin-ticket-details.js"></script>
+  <script src="/js/adminJS/admin-claim-details.js"></script>
 
 <%- include('partials/footer') %>

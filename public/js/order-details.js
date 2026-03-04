@@ -92,9 +92,9 @@
     const contentEl = document.getElementById('order-content');
     const errorEl = document.getElementById('order-error');
 
-    if (loadingEl) loadingEl.style.display = 'block';
-    if (contentEl) contentEl.style.display = 'none';
-    if (errorEl) errorEl.style.display = 'none';
+    if (loadingEl) loadingEl.classList.remove('hidden');
+    if (contentEl) contentEl.classList.add('hidden');
+    if (errorEl) errorEl.classList.add('hidden');
 
     try {
       const response = await fetch(`/buyer/api/orders/${encodeURIComponent(orderNumber)}`);
@@ -131,8 +131,8 @@
     const loadingEl = document.getElementById('order-loading');
     const contentEl = document.getElementById('order-content');
     
-    if (loadingEl) loadingEl.style.display = 'none';
-    if (contentEl) contentEl.style.display = 'block';
+    if (loadingEl) loadingEl.classList.add('hidden');
+    if (contentEl) contentEl.classList.remove('hidden');
 
     // Update title and status
     const titleEl = document.getElementById('order-details-title');
@@ -192,30 +192,55 @@
   // ====================================
   // RENDER ORDER ITEMS
   // ====================================
+  function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
   function renderOrderItems(items) {
-    const tbody = document.getElementById('order-items-tbody');
-    if (!tbody) return;
+    const list = document.getElementById('order-items-list');
+    if (!list) return;
     
-    tbody.innerHTML = '';
+    list.innerHTML = '';
+    list.classList.toggle('scrollable', (items || []).length > 7);
 
-    // Each item is individual - no quantity grouping
-    items.forEach(item => {
+    items.forEach((item, index) => {
       const price = parseFloat(item.price) || 0;
+      const weight = (parseFloat(item.weight) || 0).toFixed(3);
+      const stock = item.stock || 'N/A';
+      const partNumber = escapeHtml(item.partNumber || 'N/A');
+      const description = escapeHtml(item.description || '');
+      const brand = (item.brand && item.brand !== 'N/A') ? escapeHtml(item.brand) : '';
 
-      const row = document.createElement('tr');
-      row.innerHTML = `
-        <td>
-          <div class="order-item-part">${item.partNumber || 'N/A'}</div>
-          <div class="order-item-desc">${item.description || ''}</div>
-          ${item.brand && item.brand !== 'N/A' ? `<div class="order-item-brand">Brand: ${item.brand}</div>` : ''}
-          ${item.supplier ? `<div class="order-item-supplier">Supplier: ${item.supplier}</div>` : ''}
-        </td>
-        <td style="text-align: center;" class="order-item-weight">${(parseFloat(item.weight) || 0).toFixed(3)} kg</td>
-        <td style="text-align: center;" class="order-item-stock">${item.stock || 'N/A'}</td>
-        <td style="text-align: right;" class="order-item-price">${formatAmount(price)}</td>
+      const card = document.createElement('div');
+      card.className = 'order-item-card';
+      card.innerHTML = `
+        <div class="order-item-card-index">${index + 1}</div>
+        <div class="order-item-card-info">
+          <div class="order-item-card-part">${partNumber}</div>
+          <div class="order-item-card-desc" title="${description}">${description || '—'}</div>
+          <div class="order-item-card-brand ${brand ? '' : 'empty'}">${brand ? `<i data-lucide="tag"></i> ${brand}` : '—'}</div>
+        </div>
+        <div class="order-item-card-bottom">
+          <div class="order-item-card-meta">
+            <div class="order-item-card-weight">
+              <i data-lucide="scale"></i>
+              <span>${weight} kg</span>
+            </div>
+            <div class="order-item-card-stock">
+              <i data-lucide="package-check"></i>
+              <span>${stock}</span>
+            </div>
+          </div>
+          <div class="order-item-card-price">${formatAmount(price)}</div>
+        </div>
       `;
-      tbody.appendChild(row);
+      list.appendChild(card);
     });
+
+    if (typeof lucide !== 'undefined') lucide.createIcons();
   }
 
   // ====================================
@@ -589,17 +614,17 @@
     const downloadBtn = document.getElementById('btn-download-invoice');
     if (downloadBtn) {
       if (order.status === 'completed' || order.status === 'delivered') {
-        downloadBtn.style.display = 'inline-flex';
+        downloadBtn.classList.remove('hidden');
       } else {
-        downloadBtn.style.display = 'none';
+        downloadBtn.classList.add('hidden');
       }
     }
 
-    // Remove any existing cancel button
+    // Remove any existing cancel and claim buttons
     const existingCancelBtn = document.getElementById('btn-cancel-order');
-    if (existingCancelBtn) {
-      existingCancelBtn.remove();
-    }
+    if (existingCancelBtn) existingCancelBtn.remove();
+    const existingClaimBtn = document.getElementById('btn-order-claim');
+    if (existingClaimBtn) existingClaimBtn.remove();
 
     // Add cancel button for pending orders
     if (order.status === 'pending') {
@@ -609,10 +634,23 @@
       cancelBtn.innerHTML = '<i data-lucide="x"></i><span>Cancel Order</span>';
       cancelBtn.addEventListener('click', () => cancelOrder(order.orderNumber));
       headerActions.appendChild(cancelBtn);
-      
-      if (typeof lucide !== 'undefined') {
-        lucide.createIcons();
-      }
+    }
+
+    // Add claim button - View Claim if active claim exists, else Create Claim
+    const claimBtn = document.createElement('a');
+    claimBtn.id = 'btn-order-claim';
+    claimBtn.className = 'order-details-action-btn primary';
+    if (order.hasActiveClaim && order.claimId) {
+      claimBtn.href = `/buyer/claim-support/${order.claimId}`;
+      claimBtn.innerHTML = '<i data-lucide="message-square"></i><span>View Claim</span>';
+    } else {
+      claimBtn.href = `/buyer/claim-support/create?order=${encodeURIComponent(order.orderNumber)}`;
+      claimBtn.innerHTML = '<i data-lucide="alert-circle"></i><span>Create Claim</span>';
+    }
+    headerActions.insertBefore(claimBtn, headerActions.firstChild);
+
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
     }
   }
 
@@ -757,10 +795,10 @@
     const contentEl = document.getElementById('order-content');
     const errorEl = document.getElementById('order-error');
     
-    if (loadingEl) loadingEl.style.display = 'none';
-    if (contentEl) contentEl.style.display = 'none';
+    if (loadingEl) loadingEl.classList.add('hidden');
+    if (contentEl) contentEl.classList.add('hidden');
     if (errorEl) {
-      errorEl.style.display = 'block';
+      errorEl.classList.remove('hidden');
       const errorMessage = errorEl.querySelector('.error-message');
       if (errorMessage) {
         errorMessage.textContent = message || 'Failed to load order details';

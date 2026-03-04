@@ -1,22 +1,22 @@
 <%- include('partials/header') %>
 <link rel="stylesheet" href="/css/adminCSS/admin-dashboard.css">
-<link rel="stylesheet" href="/css/adminCSS/admin-tickets.css">
+<link rel="stylesheet" href="/css/adminCSS/admin-claims.css">
 </head>
 <body>
   <div class="admin-wrapper">
-    <%- include('partials/sidebar', { activePage: 'tickets' }) %>
+    <%- include('partials/sidebar', { activePage: 'claims' }) %>
     
     <main class="admin-main">
-      <%- include('partials/topbar', { pageTitle: 'Tickets' }) %>
+      <%- include('partials/topbar', { pageTitle: 'Claims' }) %>
       
       <div class="admin-content">
         <!-- Page Header -->
-        <div class="tickets-page-header">
-          <h2>Support Tickets</h2>
-          <div class="tickets-header-actions">
-            <div class="tickets-search-container">
+        <div class="claims-page-header">
+          <h2>Claim Support</h2>
+          <div class="claims-header-actions">
+            <div class="claims-search-container">
               <i data-lucide="search" class="search-icon"></i>
-              <input type="text" id="ticketsSearch" placeholder="Search tickets..." autocomplete="off">
+              <input type="text" id="claimsSearch" placeholder="Search claims..." autocomplete="off">
             </div>
             <button class="admin-btn admin-btn-secondary">
               <i data-lucide="download"></i>
@@ -25,56 +25,28 @@
           </div>
         </div>
 
-        <!-- Stats Cards -->
-        <div class="stats-grid" style="margin-bottom: 1.5rem;">
-          <%
-            var openCount = 0, inProgressCount = 0, resolvedCount = 0;
-            tickets.forEach(function(t) {
-              if (t.status === 'open') openCount++;
-              else if (t.status === 'in-progress') inProgressCount++;
-              else if (t.status === 'resolved') resolvedCount++;
-            });
-          %>
-          <div class="stat-card orange">
-            <div class="stat-icon">
-              <i data-lucide="inbox"></i>
-            </div>
-            <div class="stat-content">
-              <div class="stat-value"><%= openCount %></div>
-              <div class="stat-label">Open Tickets</div>
-            </div>
+        <!-- Stats - Individual cards with clear separation -->
+        <div class="admin-claims-stats-grid" style="margin-bottom: 1.5rem;">
+          <div class="admin-claims-stat-card stat-open">
+            <span class="admin-claims-stat-value"><%= typeof stats !== 'undefined' ? stats.open : 0 %></span>
+            <span class="admin-claims-stat-label">Open</span>
           </div>
-          <div class="stat-card module-themed">
-            <div class="stat-icon">
-              <i data-lucide="loader"></i>
-            </div>
-            <div class="stat-content">
-              <div class="stat-value"><%= inProgressCount %></div>
-              <div class="stat-label">In Progress</div>
-            </div>
+          <div class="admin-claims-stat-card stat-in-progress">
+            <span class="admin-claims-stat-value"><%= typeof stats !== 'undefined' ? stats.inProgress : 0 %></span>
+            <span class="admin-claims-stat-label">In Progress</span>
           </div>
-          <div class="stat-card green">
-            <div class="stat-icon">
-              <i data-lucide="check-circle"></i>
-            </div>
-            <div class="stat-content">
-              <div class="stat-value"><%= resolvedCount %></div>
-              <div class="stat-label">Resolved</div>
-            </div>
+          <div class="admin-claims-stat-card stat-resolved">
+            <span class="admin-claims-stat-value"><%= typeof stats !== 'undefined' ? stats.resolved : 0 %></span>
+            <span class="admin-claims-stat-label">Resolved</span>
           </div>
-          <div class="stat-card purple">
-            <div class="stat-icon">
-              <i data-lucide="ticket"></i>
-            </div>
-            <div class="stat-content">
-              <div class="stat-value"><%= tickets.length %></div>
-              <div class="stat-label">Total Tickets</div>
-            </div>
+          <div class="admin-claims-stat-card stat-total">
+            <span class="admin-claims-stat-value"><%= typeof stats !== 'undefined' ? stats.total : 0 %></span>
+            <span class="admin-claims-stat-label">Total</span>
           </div>
         </div>
 
         <!-- Filters -->
-        <div class="tickets-filters">
+        <div class="claims-filters">
           <div class="filter-group">
             <span class="filter-label">Status:</span>
             <select class="filter-select" id="filterStatus">
@@ -113,45 +85,45 @@
         </div>
 
         <!-- Tickets List -->
-        <% if (tickets.length === 0) { %>
-        <div class="tickets-empty">
-          <div class="tickets-empty-icon">
+        <% if (claims.length === 0) { %>
+        <div class="claims-empty">
+          <div class="claims-empty-icon">
             <i data-lucide="ticket"></i>
           </div>
-          <h3>No Tickets Found</h3>
-          <p>There are no support tickets matching your criteria.</p>
+          <h3>No Claims Found</h3>
+          <p>There are no claim support matching your criteria.</p>
         </div>
         <% } else { %>
-        <div id="ticketsList">
-          <% tickets.forEach(function(ticket) { %>
+        <div id="claimsList">
+          <% claims.forEach(function(claim) { %>
           <%
-            var unreadCount = ticket.unreadCount || 0;
+            var unreadCount = claim.unreadCount || 0;
             var hasUnread = unreadCount > 0;
-            var lastMessage = ticket.lastMessage || (ticket.messages && ticket.messages.length > 0 ? ticket.messages[ticket.messages.length - 1] : null);
+            var lastMessage = claim.lastMessage || (claim.messages && claim.messages.length > 0 ? claim.messages[claim.messages.length - 1] : null);
             var lastMessageText = lastMessage ? (lastMessage.content || lastMessage.text || '') : '';
             var lastMessageTime = lastMessage ? (lastMessage.time || lastMessage.createdAt || '') : '';
           %>
-          <a href="/admin/tickets/<%= ticket.id %>" 
-             class="ticket-card <%= hasUnread ? 'has-unread' : '' %>"
-             data-status="<%= ticket.status %>"
-             data-priority="<%= ticket.priority || 'medium' %>"
-             data-category="<%= ticket.category %>">
-            <div class="ticket-priority-bar <%= ticket.priority || 'medium' %>"></div>
-            <div class="ticket-content">
-              <div class="ticket-header-row">
-                <span class="ticket-id"><%= ticket.id %></span>
-                <h4 class="ticket-subject"><%= ticket.subject %></h4>
+          <a href="/admin/claims/<%= claim.id %>" 
+             class="claim-card <%= hasUnread ? 'has-unread' : '' %>"
+             data-status="<%= claim.status %>"
+             data-priority="<%= claim.priority || 'medium' %>"
+             data-category="<%= claim.category %>">
+            <div class="claim-priority-bar <%= claim.priority || 'medium' %>"></div>
+            <div class="claim-content">
+              <div class="claim-header-row">
+                <span class="claim-id"><%= claim.id %></span>
+                <h4 class="claim-subject"><%= claim.subject %></h4>
                 <% if (hasUnread) { %>
                 <span class="unread-badge"><%= unreadCount %></span>
                 <% } %>
               </div>
-              <div class="ticket-customer">
+              <div class="claim-customer">
                 <i data-lucide="user"></i>
-                <span><%= ticket.customerName || ticket.customer || 'Customer' %></span>
-                <span style="color: var(--admin-text-muted); margin-left: 0.5rem;">• <%= ticket.customerEmail || ticket.email || '' %></span>
+                <span><%= claim.customerName || claim.customer || 'Customer' %></span>
+                <span style="color: var(--admin-text-muted); margin-left: 0.5rem;">• <%= claim.customerEmail || claim.email || '' %></span>
               </div>
               <% if (lastMessageText) { %>
-              <div class="ticket-last-message">
+              <div class="claim-last-message">
                 <i data-lucide="message-circle" style="width: 14px; height: 14px; flex-shrink: 0;"></i>
                 <span class="message-preview"><%= lastMessageText.substring(0, 80) %><%= lastMessageText.length > 80 ? '...' : '' %></span>
                 <% if (lastMessageTime) { %>
@@ -159,41 +131,41 @@
                 <% } %>
               </div>
               <% } %>
-              <div class="ticket-meta-row">
+              <div class="claim-meta-row">
                 <span>
                   <i data-lucide="shopping-bag"></i>
-                  <%= ticket.orderNumber || 'N/A' %>
+                  <%= claim.orderNumber || 'N/A' %>
                 </span>
                 <span>
                   <i data-lucide="folder"></i>
-                  <%= ticket.category %>
+                  <%= claim.category %>
                 </span>
                 <span>
                   <i data-lucide="clock"></i>
-                  <%= new Date(ticket.createdAt).toLocaleDateString() %>
+                  <%= new Date(claim.createdAt).toLocaleDateString() %>
                 </span>
                 <span>
                   <i data-lucide="message-circle"></i>
-                  <%= ticket.messages ? ticket.messages.length : 0 %> messages
+                  <%= claim.messages ? claim.messages.length : 0 %> messages
                 </span>
               </div>
             </div>
-            <div class="ticket-status-col">
-              <span class="ticket-status-badge <%= ticket.status %>">
-                <% if (ticket.status === 'open') { %>
+            <div class="claim-status-col">
+              <span class="claim-status-badge <%= claim.status %>">
+                <% if (claim.status === 'open') { %>
                   <i data-lucide="inbox"></i>
-                <% } else if (ticket.status === 'in-progress') { %>
+                <% } else if (claim.status === 'in-progress') { %>
                   <i data-lucide="loader"></i>
                 <% } else { %>
                   <i data-lucide="check-circle"></i>
                 <% } %>
-                <%= ticket.status.split('-').map(function(w) { return w.charAt(0).toUpperCase() + w.slice(1); }).join(' ') %>
+                <%= claim.status.split('-').map(function(w) { return w.charAt(0).toUpperCase() + w.slice(1); }).join(' ') %>
               </span>
-              <div class="ticket-actions" onclick="event.preventDefault(); event.stopPropagation();">
-                <button class="ticket-action-btn chat" title="Open Chat" onclick="window.location.href='/admin/tickets/<%= ticket.id %>'">
+              <div class="claim-actions" onclick="event.preventDefault(); event.stopPropagation();">
+                <button class="claim-action-btn chat" title="Open Chat" onclick="window.location.href='/admin/claims/<%= claim.id %>'">
                   <i data-lucide="message-square"></i>
                 </button>
-                <button class="ticket-action-btn" title="Change Status" onclick="openStatusModal('<%= ticket.id %>', '<%= ticket.status %>', '<%= ticket.subject %>')">
+                <button class="claim-action-btn" title="Change Status" onclick="openStatusModal('<%= claim.id %>', '<%= claim.status %>', '<%= claim.subject %>')">
                   <i data-lucide="refresh-cw"></i>
                 </button>
               </div>
@@ -214,7 +186,7 @@
           <i data-lucide="refresh-cw"></i>
         </div>
         <div>
-          <h3>Update Ticket Status</h3>
+          <h3>Update Claim Status</h3>
           <p id="statusModalTicketId">TKT-001</p>
         </div>
         <button class="status-modal-close" onclick="closeStatusModal()">
@@ -222,7 +194,7 @@
         </button>
       </div>
       <div class="status-modal-body">
-        <p class="status-modal-subject" id="statusModalSubject">Ticket Subject</p>
+        <p class="status-modal-subject" id="statusModalSubject">Claim Subject</p>
         <div class="status-options">
           <label class="status-option" data-status="open">
             <input type="radio" name="newStatus" value="open">
@@ -268,7 +240,7 @@
               </div>
               <div class="status-option-info">
                 <span class="status-option-label">Closed</span>
-                <span class="status-option-desc">Ticket has been closed</span>
+                <span class="status-option-desc">Claim has been closed</span>
               </div>
             </div>
           </label>
@@ -464,12 +436,12 @@
   </style>
 
   <script>
-    var currentTicketId = null;
+    var currentClaimId = null;
     
     // Search functionality
     document.getElementById('ticketsSearch').addEventListener('input', function(e) {
       var searchTerm = e.target.value.toLowerCase();
-      var cards = document.querySelectorAll('.ticket-card');
+      var cards = document.querySelectorAll('.claim-card');
       
       cards.forEach(function(card) {
         var text = card.textContent.toLowerCase();
@@ -482,7 +454,7 @@
       var status = document.getElementById('filterStatus').value;
       var priority = document.getElementById('filterPriority').value;
       var category = document.getElementById('filterCategory').value;
-      var cards = document.querySelectorAll('.ticket-card');
+      var cards = document.querySelectorAll('.claim-card');
       
       cards.forEach(function(card) {
         var cardStatus = card.dataset.status;
@@ -506,14 +478,14 @@
       document.getElementById('filterPriority').value = '';
       document.getElementById('filterCategory').value = '';
       document.getElementById('ticketsSearch').value = '';
-      var cards = document.querySelectorAll('.ticket-card');
+      var cards = document.querySelectorAll('.claim-card');
       cards.forEach(function(card) { card.style.display = ''; });
     }
 
     // Status Modal Functions
-    function openStatusModal(ticketId, currentStatus, subject) {
-      currentTicketId = ticketId;
-      document.getElementById('statusModalTicketId').textContent = ticketId;
+    function openStatusModal(claimId, currentStatus, subject) {
+      currentClaimId = claimId;
+      document.getElementById('statusModalTicketId').textContent = claimId;
       document.getElementById('statusModalSubject').textContent = subject;
       
       // Select current status
@@ -532,12 +504,12 @@
     
     function closeStatusModal() {
       document.getElementById('statusModalOverlay').classList.remove('active');
-      currentTicketId = null;
+      currentClaimId = null;
     }
     
     function confirmStatusChange() {
       var selectedStatus = document.querySelector('input[name="newStatus"]:checked');
-      if (!selectedStatus || !currentTicketId) return;
+      if (!selectedStatus || !currentClaimId) return;
       
       var newStatus = selectedStatus.value;
       
@@ -546,7 +518,7 @@
       btn.innerHTML = '<i data-lucide="loader" class="spin"></i> Updating...';
       btn.disabled = true;
       
-      fetch('/admin/tickets/' + currentTicketId + '/status', {
+      fetch('/admin/claims/' + currentClaimId + '/status', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus })

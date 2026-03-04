@@ -5,7 +5,7 @@
 <%- include('partials/navbar') %>
 
 <!-- ====================================
-     PAYMENT PAGE - PROFESSIONAL DESIGN
+     PAYMENT & BILLING PAGE - ORDERS DESIGN
      ==================================== -->
 <div class="payment-page">
   <!-- Header Bar -->
@@ -13,10 +13,7 @@
     <div class="container">
       <div class="payment-header-content">
         <div class="payment-header-left">
-          <h1 class="payment-header-title">
-            <i data-lucide="wallet"></i>
-            <span><%= t('payment.title') %></span>
-          </h1>
+          <h1 class="payment-header-title"><%= t('payment.title') %></h1>
           <p class="payment-header-subtitle"><%= t('payment.subtitle') %></p>
         </div>
         <div class="payment-header-right">
@@ -36,19 +33,13 @@
       <!-- Account Balance Section -->
       <div class="balance-section">
         <div class="balance-header">
-          <h2 class="section-title">
-            <i data-lucide="trending-up"></i>
-            <span><%= t('payment.accountBalance') %></span>
-          </h2>
+          <h2 class="section-title"><%= t('payment.accountBalance') %></h2>
         </div>
 
         <div class="balance-cards-grid">
           <!-- Main Balance Card -->
           <div class="balance-card main-balance">
             <div class="balance-card-header">
-              <div class="balance-icon">
-                <i data-lucide="wallet"></i>
-              </div>
               <span class="balance-label"><%= t('payment.availableBalance') %></span>
             </div>
             <div class="balance-amount">$0.00</div>
@@ -60,9 +51,6 @@
           <!-- Pending Balance -->
           <div class="balance-card">
             <div class="balance-card-header">
-              <div class="balance-icon pending">
-                <i data-lucide="clock"></i>
-              </div>
               <span class="balance-label"><%= t('payment.pendingPayment') %></span>
             </div>
             <div class="balance-amount secondary">$0.00</div>
@@ -74,9 +62,6 @@
           <!-- Total Spent -->
           <div class="balance-card">
             <div class="balance-card-header">
-              <div class="balance-icon spent">
-                <i data-lucide="shopping-bag"></i>
-              </div>
               <span class="balance-label"><%= t('payment.totalSpent') %></span>
             </div>
             <div class="balance-amount secondary">$0.00</div>
@@ -90,10 +75,7 @@
       <!-- Payment Methods Section -->
       <div class="payment-methods-section">
         <div class="section-header">
-          <h2 class="section-title">
-            <i data-lucide="credit-card"></i>
-            <span><%= t('payment.paymentMethods') %></span>
-          </h2>
+          <h2 class="section-title"><%= t('payment.paymentMethods') %></h2>
           <button class="btn-add-method" id="btn-add-method">
             <i data-lucide="plus"></i>
             <span><%= t('payment.addMethod') %></span>
@@ -106,7 +88,7 @@
 
         <!-- Empty State -->
         <div class="payment-methods-empty" id="payment-methods-empty">
-          <div class="empty-icon">
+          <div class="payment-empty-icon">
             <i data-lucide="credit-card"></i>
           </div>
           <h3 class="empty-title"><%= t('payment.noPaymentMethods') %></h3>
@@ -121,10 +103,7 @@
       <!-- Transaction History Section -->
       <div class="transactions-section">
         <div class="section-header">
-          <h2 class="section-title">
-            <i data-lucide="receipt"></i>
-            <span><%= t('payment.transactionHistory') %></span>
-          </h2>
+          <h2 class="section-title"><%= t('payment.transactionHistory') %></h2>
           <div class="transaction-filters">
             <button class="filter-btn active" data-filter="all"><%= t('payment.filters.all') %></button>
             <button class="filter-btn" data-filter="completed"><%= t('payment.filters.completed') %></button>
@@ -154,7 +133,7 @@
 
           <!-- Empty State -->
           <div class="transactions-empty" id="transactions-empty">
-            <div class="empty-icon">
+            <div class="payment-empty-icon">
               <i data-lucide="file-text"></i>
             </div>
             <h3 class="empty-title"><%= t('payment.noTransactions') %></h3>
@@ -177,9 +156,6 @@
     
     <div class="payment-modal-content">
       <div class="modal-header">
-        <div class="modal-icon">
-          <i data-lucide="plus-circle"></i>
-        </div>
         <h2 class="modal-title"><%= t('payment.addFunds') %></h2>
         <p class="modal-subtitle"><%= t('payment.addFundsDesc') %></p>
       </div>
@@ -243,9 +219,6 @@
     
     <div class="payment-modal-content">
       <div class="modal-header">
-        <div class="modal-icon">
-          <i data-lucide="credit-card"></i>
-        </div>
         <h2 class="modal-title" id="method-modal-title"><%= t('payment.addPaymentMethod') %></h2>
         <p class="modal-subtitle"><%= t('payment.addPaymentMethodDesc') %></p>
       </div>

@@ -5,7 +5,7 @@
 <%- include('partials/navbar') %>
 
 <!-- ====================================
-     DELIVERY PAGE - PROFESSIONAL DESIGN
+     DELIVERY & ADDRESSES - ORDERS DESIGN
      ==================================== -->
 <div class="delivery-page">
   <!-- Header Bar -->
@@ -13,10 +13,7 @@
     <div class="container">
       <div class="delivery-header-content">
         <div class="delivery-header-left">
-          <h1 class="delivery-header-title">
-            <i data-lucide="truck"></i>
-            <span><%= t('delivery.title') %></span>
-          </h1>
+          <h1 class="delivery-header-title"><%= t('delivery.title') %></h1>
           <p class="delivery-header-subtitle"><%= t('delivery.subtitle') %></p>
         </div>
         <div class="delivery-header-right">
@@ -35,10 +32,7 @@
       <!-- Addresses Grid -->
       <div class="addresses-section">
         <div class="section-header">
-          <h2 class="section-title">
-            <i data-lucide="map-pin"></i>
-            <span><%= t('delivery.savedAddresses') %></span>
-          </h2>
+          <h2 class="section-title"><%= t('delivery.savedAddresses') %></h2>
           <p class="section-subtitle"><%= t('delivery.manageLocations') %></p>
         </div>
 
@@ -48,7 +42,7 @@
 
         <!-- Empty State -->
         <div class="addresses-empty hidden" id="addresses-empty">
-          <div class="empty-icon">
+          <div class="delivery-empty-icon">
             <i data-lucide="map-pin-off"></i>
           </div>
           <h3 class="empty-title"><%= t('delivery.noAddresses') %></h3>
@@ -63,10 +57,7 @@
       <!-- Order Tracking Section -->
       <div class="tracking-section">
         <div class="section-header">
-          <h2 class="section-title">
-            <i data-lucide="package-search"></i>
-            <span><%= t('delivery.trackOrder') %></span>
-          </h2>
+          <h2 class="section-title"><%= t('delivery.trackOrder') %></h2>
           <p class="section-subtitle"><%= t('delivery.trackOrderDesc') %></p>
         </div>
 
@@ -106,9 +97,6 @@
     
     <div class="address-modal-content">
       <div class="modal-header">
-        <div class="modal-icon">
-          <i data-lucide="map-pin"></i>
-        </div>
         <h2 class="modal-title" id="modal-title"><%= t('delivery.addNewAddress') %></h2>
         <p class="modal-subtitle"><%= t('delivery.fillDetails') %></p>
       </div>

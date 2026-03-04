@@ -1,19 +1,19 @@
 /* ====================================
-   TICKET DETAILS PAGE - CHAT INTERFACE
+   CLAIM DETAILS PAGE - CHAT INTERFACE
    PARTSFORM Buyer Portal
    ==================================== */
 
 /* ====================================
    PAGE LAYOUT
    ==================================== */
-.ticket-details-page {
+.claim-details-page {
     min-height: 100vh;
     background: var(--washi);
     padding-top: 0;
 }
 
 /* Ensure navbar stays on top */
-.ticket-details-page .nav-bar {
+.claim-details-page .nav-bar {
     z-index: 10001 !important;
     position: fixed !important;
     top: 0 !important;
@@ -25,16 +25,62 @@
 }
 
 /* ====================================
-   TICKET HEADER BAR
+   CLAIM HEADER BAR - Animated Background
    ==================================== */
-.ticket-header-bar {
-    background: var(--kurogane);
+.claim-header-bar {
+    position: relative;
     padding: 7rem 0 2rem;
     margin-top: 0;
-    box-shadow: 0 4px 20px rgba(43, 43, 43, 0.15);
+    overflow: hidden;
 }
 
-.ticket-header-content {
+.claim-header-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--kurogane);
+    z-index: 0;
+}
+
+.claim-header-bg::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('https://images.unsplash.com/photo-1557804506-669a67965ba0?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80');
+    background-size: cover;
+    background-position: center;
+    opacity: 0.2;
+    z-index: 1;
+    animation: claimDetailsBgShift 20s ease-in-out infinite;
+}
+
+@keyframes claimDetailsBgShift {
+    0%, 100% { background-position: center center; }
+    50% { background-position: center 30%; }
+}
+
+.claim-header-bg::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(180deg, rgba(64, 84, 94, 0.8) 0%, rgba(43, 43, 43, 0.9) 100%);
+    z-index: 2;
+}
+
+.claim-header-inner {
+    position: relative;
+    z-index: 3;
+}
+
+.claim-header-content {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
@@ -45,21 +91,22 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.625rem 1.125rem;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(149, 175, 192, 0.15);
     backdrop-filter: blur(10px);
-    color: white;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 0.9rem;
+    color: var(--washi);
+    border: 1px solid rgba(149, 175, 192, 0.35);
+    border-radius: 4px;
+    font-family: 'Antartida', sans-serif;
+    font-weight: 500;
+    font-size: 0.875rem;
     text-decoration: none;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
     width: fit-content;
 }
 
 .btn-back-header:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: rgba(255, 255, 255, 0.3);
+    background: rgba(149, 175, 192, 0.25);
+    border-color: rgba(149, 175, 192, 0.5);
 }
 
 .btn-back-header i {
@@ -67,34 +114,39 @@
     height: 16px;
 }
 
-.ticket-header-info {
+.claim-header-info {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
     gap: 2rem;
 }
 
-.ticket-header-left {
+.claim-header-left {
     flex: 1;
 }
 
-.ticket-id-header {
+.claim-id-header {
     display: inline-block;
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: #60a5fa;
+    font-family: 'Quantico', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 400;
+    color: var(--sei);
     margin-bottom: 0.75rem;
+    letter-spacing: 0.05em;
 }
 
-.ticket-subject-header {
-    font-size: 2rem;
-    font-weight: 700;
-    color: white;
+.claim-subject-header {
+    font-family: 'Quantico', sans-serif;
+    font-size: 1.75rem;
+    font-weight: 400;
+    color: var(--washi);
     margin-bottom: 1rem;
     line-height: 1.3;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
 }
 
-.ticket-meta-header {
+.claim-meta-header {
     display: flex;
     gap: 1.5rem;
     flex-wrap: wrap;
@@ -113,7 +165,7 @@
     height: 16px;
 }
 
-.ticket-header-right {
+.claim-header-right {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
@@ -130,40 +182,40 @@
 }
 
 .status-badge-header {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(149, 175, 192, 0.2);
     backdrop-filter: blur(10px);
-    color: white;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--washi);
+    border: 1px solid rgba(149, 175, 192, 0.4);
 }
 
 .priority-badge-header {
-    background: rgba(251, 191, 36, 0.2);
+    background: rgba(149, 175, 192, 0.2);
     backdrop-filter: blur(10px);
-    color: #fbbf24;
-    border: 1px solid rgba(251, 191, 36, 0.3);
+    color: var(--washi);
+    border: 1px solid rgba(149, 175, 192, 0.4);
 }
 
 /* ====================================
    MAIN CONTENT
    ==================================== */
-.ticket-details-section {
+.claim-details-section {
     padding: 3rem 0;
 }
 
-.ticket-details-container {
+.claim-details-container {
     display: grid;
     grid-template-columns: 320px 1fr;
     gap: 2rem;
 }
 
 /* ====================================
-   TICKET INFO CARD
+   CLAIM INFO CARD
    ==================================== */
-.ticket-info-card {
+.claim-info-card {
     background: white;
-    border-radius: 16px;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    border-radius: 4px;
+    border: 1px solid rgba(149, 175, 192, 0.25);
+    box-shadow: 0 2px 16px rgba(149, 175, 192, 0.08);
     height: fit-content;
     position: sticky;
     top: 7rem;
@@ -175,10 +227,13 @@
 }
 
 .info-card-title {
-    font-size: 1.1rem;
-    font-weight: 700;
+    font-family: 'Quantico', sans-serif;
+    font-size: 1rem;
+    font-weight: 400;
     color: var(--kurogane);
     margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
 }
 
 .info-card-body {
@@ -219,31 +274,61 @@
 
 .info-value.priority {
     padding: 0.5rem 0.875rem;
-    background: #fef3c7;
-    color: #d97706;
-    border-radius: 6px;
+    background: var(--washi);
+    color: var(--namari);
+    border: 1.5px solid var(--suzu);
+    border-radius: 4px;
     width: fit-content;
-    font-weight: 600;
+    font-weight: 500;
 }
 
 .status-select {
     width: 100%;
     padding: 0.625rem 0.875rem;
-    border: 2px solid #e2e8f0;
-    border-radius: 8px;
+    border: 1.5px solid rgba(149, 175, 192, 0.25);
+    border-radius: 4px;
+    font-family: 'Antartida', sans-serif;
     font-size: 0.9rem;
     color: var(--kurogane);
     background: var(--washi);
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
 }
 
 .status-select:focus {
     outline: none;
-    border-color: var(--sei);
+    border-color: var(--kintsugi);
     background: white;
-    box-shadow: 0 0 0 3px rgba(149, 175, 192, 0.1);
+    box-shadow: 0 0 0 3px rgba(214, 172, 63, 0.12);
+}
+
+.status-badge-small {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.375rem 0.875rem;
+    border-radius: 4px;
+    font-family: 'Antartida', sans-serif;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    background: white;
+    border: 1.5px solid var(--suzu);
+    color: var(--namari);
+}
+
+.status-badge-small.open {
+    border-color: var(--suzu);
+    color: var(--namari);
+}
+
+.status-badge-small.in-progress {
+    border-color: var(--sei);
+    color: var(--aitetsu);
+}
+
+.status-badge-small.resolved {
+    border-color: var(--sei);
+    color: var(--sei);
 }
 
 /* ====================================
@@ -251,9 +336,9 @@
    ==================================== */
 .chat-container {
     background: white;
-    border-radius: 16px;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    border-radius: 4px;
+    border: 1px solid rgba(149, 175, 192, 0.25);
+    box-shadow: 0 2px 16px rgba(149, 175, 192, 0.08);
     display: flex;
     flex-direction: column;
     height: calc(100vh - 22rem);
@@ -271,8 +356,9 @@
 .chat-header-icon {
     width: 48px;
     height: 48px;
-    border-radius: 12px;
-    background: #dbeafe;
+    border-radius: 4px;
+    background: var(--washi);
+    border: 1px solid rgba(149, 175, 192, 0.25);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -406,7 +492,7 @@
 /* Customer/Buyer bubble - on the right */
 .message.customer .message-bubble {
     background: var(--aitetsu);
-    color: white;
+    color: var(--washi);
     border: none;
     border-bottom-right-radius: 4px;
     box-shadow: 0 2px 12px rgba(64, 84, 94, 0.18);
@@ -445,11 +531,10 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #3c6dbb;
-    border-radius: 8px;
-    color: #ffffff;
+    background: var(--aitetsu);
+    border-radius: 4px;
+    color: var(--washi);
     flex-shrink: 0;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .attachment-icon i {
@@ -511,9 +596,8 @@
 }
 
 .message.customer .attachment-icon {
-    background: #3c6dbb;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    color: #ffffff  !important;
+    background: var(--aitetsu);
+    color: var(--washi);
 }
 
 .message.customer .attachment-icon i {
@@ -594,15 +678,15 @@
     gap: 0.5rem;
     padding: 0.75rem 1rem;
     background: var(--washi);
-    border: 2px solid #e2e8f0;
-    border-radius: 12px;
-    transition: all 0.2s ease;
+    border: 1.5px solid rgba(149, 175, 192, 0.25);
+    border-radius: 4px;
+    transition: all 0.3s ease;
 }
 
 .chat-input-wrapper:focus-within {
-    border-color: var(--sei);
+    border-color: var(--kintsugi);
     background: white;
-    box-shadow: 0 0 0 4px rgba(149, 175, 192, 0.1);
+    box-shadow: 0 0 0 3px rgba(214, 172, 63, 0.12);
 }
 
 .chat-input {
@@ -645,24 +729,28 @@
 }
 
 .btn-send {
-    padding: 0.875rem 1.75rem;
+    padding: 0.75rem 1.5rem;
     background: var(--kintsugi);
     color: white;
-    border: none;
-    border-radius: 12px;
-    font-weight: 600;
-    font-size: 0.95rem;
+    border: 1.5px solid var(--kintsugi);
+    border-radius: 4px;
+    font-family: 'Quantico', sans-serif;
+    font-size: 0.8125rem;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
     cursor: pointer;
     display: flex;
     align-items: center;
     gap: 0.5rem;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(64, 84, 94, 0.3);
 }
 
 .btn-send:hover {
+    background: #c9a432;
+    border-color: #c9a432;
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(64, 84, 94, 0.4);
+    box-shadow: 0 4px 12px rgba(214, 172, 63, 0.3);
 }
 
 .btn-send i {
@@ -674,11 +762,11 @@
    RESPONSIVE DESIGN
    ==================================== */
 @media (max-width: 1024px) {
-    .ticket-details-container {
+    .claim-details-container {
         grid-template-columns: 1fr;
     }
 
-    .ticket-info-card {
+    .claim-info-card {
         position: static;
     }
 
@@ -688,19 +776,19 @@
 }
 
 @media (max-width: 768px) {
-    .ticket-header-bar {
+    .claim-header-bar {
         padding: 6rem 0 1.5rem;
     }
 
-    .ticket-subject-header {
+    .claim-subject-header {
         font-size: 1.5rem;
     }
 
-    .ticket-header-info {
+    .claim-header-info {
         flex-direction: column;
     }
 
-    .ticket-header-right {
+    .claim-header-right {
         flex-direction: row;
         align-items: center;
         width: 100%;
@@ -725,11 +813,11 @@
 }
 
 @media (max-width: 480px) {
-    .ticket-header-bar {
+    .claim-header-bar {
         padding: 5.5rem 0 1.25rem;
     }
 
-    .ticket-subject-header {
+    .claim-subject-header {
         font-size: 1.25rem;
     }
 
@@ -761,7 +849,7 @@
 
 .file-preview-container.uploading {
     border-color: var(--sei);
-    background: #eff6ff;
+    background: rgba(149, 175, 192, 0.08);
 }
 
 .file-preview-header {
@@ -793,18 +881,20 @@
     align-items: center;
     gap: 0.35rem;
     padding: 0.4rem 0.75rem;
-    background: #fee2e2;
-    color: #dc2626;
-    border: none;
-    border-radius: 6px;
+    background: var(--washi);
+    color: var(--namari);
+    border: 1.5px solid var(--suzu);
+    border-radius: 4px;
+    font-family: 'Antartida', sans-serif;
     font-size: 0.75rem;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
 }
 
 .file-preview-clear:hover {
-    background: #fecaca;
+    border-color: var(--namari);
+    color: var(--kurogane);
 }
 
 .file-preview-clear i {
@@ -830,8 +920,8 @@
 }
 
 .file-preview-container.uploading .file-preview-item {
-    border-color: #93c5fd;
-    background: #eff6ff;
+    border-color: var(--sei);
+    background: rgba(149, 175, 192, 0.08);
 }
 
 .file-thumbnail {

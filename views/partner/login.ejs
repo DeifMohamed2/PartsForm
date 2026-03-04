@@ -1,23 +1,75 @@
-<%- include('partials/header-public') %>
-
-<link rel="stylesheet" href="/css/partnerCSS/partner-login.css">
-
-<%- include('partials/navbar-public', { activePage: 'login' }) %>
-
-<div class="partner-login-page-wrapper">
-  <section class="partner-login-section">
-    <div class="partner-login-container">
-      <div class="partner-login-card">
-        <!-- Header -->
-        <div class="partner-login-header">
-          <div class="partner-login-icon">
-            <i data-lucide="handshake"></i>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Partner Login | PARTSFORM</title>
+  <link rel="icon" type="image/png" href="/images/PARTSFORM-LOGO.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@0.294.0/dist/umd/lucide.min.js"></script>
+  <link rel="stylesheet" href="/css/partnerCSS/partner-login.css">
+</head>
+<body>
+  <div class="partner-login-container">
+    <!-- Left Brand Panel -->
+    <div class="partner-login-brand">
+      <img src="/images/PARTSFORM-LOGO.png" alt="PARTSFORM" class="partner-brand-logo">
+      <h1 class="partner-brand-title">Partner Portal</h1>
+      <p class="partner-brand-subtitle">Earn rewards by connecting buyers with quality suppliers</p>
+      
+      <div class="partner-brand-features">
+        <div class="partner-feature-item">
+          <div class="partner-feature-icon">
+            <i data-lucide="trending-up" style="width: 20px; height: 20px;"></i>
           </div>
-          <h1>Partner Portal</h1>
-          <p>Access your referral dashboard and earnings</p>
+          <div class="partner-feature-text">
+            <h4>Referral Dashboard</h4>
+            <p>Track your referrals and commissions in real time</p>
+          </div>
         </div>
-
-        <!-- Error Message -->
+        
+        <div class="partner-feature-item">
+          <div class="partner-feature-icon">
+            <i data-lucide="wallet" style="width: 20px; height: 20px;"></i>
+          </div>
+          <div class="partner-feature-text">
+            <h4>Earnings & Payouts</h4>
+            <p>Transparent commission structure and timely payouts</p>
+          </div>
+        </div>
+        
+        <div class="partner-feature-item">
+          <div class="partner-feature-icon">
+            <i data-lucide="users" style="width: 20px; height: 20px;"></i>
+          </div>
+          <div class="partner-feature-text">
+            <h4>Partner Network</h4>
+            <p>Join a global network of industrial sourcing experts</p>
+          </div>
+        </div>
+        
+        <div class="partner-feature-item">
+          <div class="partner-feature-icon">
+            <i data-lucide="shield-check" style="width: 20px; height: 20px;"></i>
+          </div>
+          <div class="partner-feature-text">
+            <h4>Verified Platform</h4>
+            <p>Secure access to verified suppliers and buyers</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Right Form Panel -->
+    <div class="partner-login-form-panel">
+      <div class="partner-login-form-wrapper">
+        <div class="partner-form-header">
+          <h1>Welcome Back</h1>
+          <p>Sign in to your partner account</p>
+        </div>
+        
         <% if (typeof error !== 'undefined' && error) { %>
         <div class="partner-login-error">
           <i data-lucide="alert-circle"></i>
@@ -30,39 +82,38 @@
           </span>
         </div>
         <% } %>
-
-        <!-- Login Form -->
+        
         <form class="partner-login-form" action="/partner/login" method="POST">
-          <div class="partner-login-form-group">
-            <label for="email">Email Address</label>
-            <div class="partner-login-input-wrapper">
-              <i data-lucide="mail" class="partner-login-input-icon"></i>
+          <div class="partner-form-group">
+            <label class="partner-form-label">Email Address</label>
+            <div class="partner-input-wrapper">
+              <i data-lucide="mail" class="partner-input-icon"></i>
               <input 
                 type="email" 
                 id="email" 
                 name="email" 
-                class="partner-login-input" 
-                placeholder="Enter your email"
+                class="partner-form-input" 
+                placeholder="you@company.com"
                 required
                 autocomplete="email"
               >
             </div>
           </div>
 
-          <div class="partner-login-form-group">
-            <label for="password">Password</label>
-            <div class="partner-login-input-wrapper">
-              <i data-lucide="lock" class="partner-login-input-icon"></i>
+          <div class="partner-form-group">
+            <label class="partner-form-label">Password</label>
+            <div class="partner-input-wrapper">
+              <i data-lucide="lock" class="partner-input-icon"></i>
               <input 
                 type="password" 
                 id="password" 
                 name="password" 
-                class="partner-login-input" 
+                class="partner-form-input" 
                 placeholder="Enter your password"
                 required
                 autocomplete="current-password"
               >
-              <button type="button" class="partner-login-password-toggle" onclick="togglePassword()">
+              <button type="button" class="partner-password-toggle" onclick="togglePassword()">
                 <i data-lucide="eye" id="passwordToggleIcon"></i>
               </button>
             </div>
@@ -74,38 +125,40 @@
           </button>
         </form>
 
-        <!-- Footer -->
         <div class="partner-login-footer">
-          Not a partner yet? <a href="/become-partner">Apply to become a partner</a>
+          <p>Not a partner yet? <a href="/become-partner">Apply to become a partner</a></p>
+          <a href="/" class="partner-back-home">
+            <i data-lucide="arrow-left"></i>
+            Back to PARTSFORM
+          </a>
         </div>
       </div>
     </div>
-  </section>
+  </div>
 
-  <%- include('partials/footer-public') %>
-</div>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+    });
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  if (typeof lucide !== 'undefined') {
-    lucide.createIcons();
-  }
-});
-
-function togglePassword() {
-  const passwordInput = document.getElementById('password');
-  const toggleIcon = document.getElementById('passwordToggleIcon');
-  
-  if (passwordInput.type === 'password') {
-    passwordInput.type = 'text';
-    toggleIcon.setAttribute('data-lucide', 'eye-off');
-  } else {
-    passwordInput.type = 'password';
-    toggleIcon.setAttribute('data-lucide', 'eye');
-  }
-  
-  if (typeof lucide !== 'undefined') {
-    lucide.createIcons();
-  }
-}
-</script>
+    function togglePassword() {
+      const passwordInput = document.getElementById('password');
+      const toggleIcon = document.getElementById('passwordToggleIcon');
+      
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        toggleIcon.setAttribute('data-lucide', 'eye-off');
+      } else {
+        passwordInput.type = 'password';
+        toggleIcon.setAttribute('data-lucide', 'eye');
+      }
+      
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+    }
+  </script>
+</body>
+</html>

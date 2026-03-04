@@ -183,15 +183,8 @@ app.use('/partner', partnerRoutes);
 app.use('/api/supplier', supplierRoutes); // Supplier API routes
 app.use('/supplier', supplierViewRoutes); // Supplier portal views
 
-// 404 Handler - Catch all unmatched routes
+// 404 Handler - Catch all unmatched routes (requestIdMiddleware logs the 404)
 app.use((req, res, next) => {
-  logger.warn('404 Not Found', {
-    requestId: req.requestId,
-    url: req.originalUrl,
-    method: req.method,
-    ip: req.ip,
-  });
-  
   if (req.xhr || req.headers.accept?.includes('application/json')) {
     return res.status(404).json({
       success: false,
@@ -254,11 +247,11 @@ app.use((err, req, res, next) => {
 
 // Start server with Socket.io
 server.listen(PORT, () => {
-  logger.info('PARTSFORM Server Started', {
+  logger.info('System: SERVER_STARTED', {
+    service: 'partsform',
+    event: 'SERVER_STARTED',
     port: PORT,
     nodeEnv: process.env.NODE_ENV || 'development',
-    nodeVersion: process.version,
-    pid: process.pid,
   });
   
   console.log(`\n🚀 PARTSFORM Server Running!\n`);

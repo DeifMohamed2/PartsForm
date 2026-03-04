@@ -1,8 +1,8 @@
-// Admin Ticket Details Page JavaScript
+// Admin Claim Details Page JavaScript
 // Real-time chat using Socket.io
 
-var ticketId = null;  // Ticket number like TKT-202602-0001
-var ticketOid = null; // MongoDB ObjectId for socket operations
+var claimId = null;  // Claim number like TKT-202602-0001
+var claimOid = null; // MongoDB ObjectId for socket operations
 var moduleParam = '';
 var socket = null;
 var isTyping = false;
@@ -10,9 +10,9 @@ var typingTimeout = null;
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
-  // Get ticket ID from the page (set in EJS)
-  ticketId = window.adminTicketId || document.querySelector('[data-ticket-id]')?.dataset.ticketId;
-  ticketOid = window.adminTicketOid || document.querySelector('[data-ticket-oid]')?.dataset.ticketOid || ticketId;
+  // Get claim ID from the page (set in EJS)
+  claimId = window.adminClaimId || document.querySelector('[data-claim-id]')?.dataset.claimId;
+  claimOid = window.adminClaimOid || document.querySelector('[data-claim-oid]')?.dataset.claimOid || claimId;
   moduleParam = window.adminModuleParam || '';
   
   initializeSocket();
@@ -34,7 +34,7 @@ function initializeSocket() {
 
   socket.on('connect', function() {
     console.log('Admin socket connected');
-    socket.emit('join-ticket', ticketId);
+    socket.emit('join-claim', claimId);
   });
 
   socket.on('disconnect', function() {
@@ -43,7 +43,7 @@ function initializeSocket() {
 
   // Listen for new messages from buyer
   socket.on('message-received', function(data) {
-    if (data.ticketId === ticketId && data.sender !== 'admin') {
+    if (data.claimId === claimId && data.sender !== 'admin') {
       addMessageToChat(data.message || data);
       scrollToBottom();
       markAsRead();
@@ -59,7 +59,7 @@ function initializeSocket() {
 
   // Listen for read receipts
   socket.on('messages-marked-read', function(data) {
-    if (data.ticketId === ticketId && data.readBy === 'buyer') {
+    if (data.claimId === claimId && data.readBy === 'buyer') {
       updateReadReceipts();
     }
   });
@@ -112,13 +112,13 @@ function handleTyping() {
 
   if (!isTyping) {
     isTyping = true;
-    socket.emit('typing', { ticketId: ticketId, isTyping: true });
+    socket.emit('typing', { claimId: claimId, isTyping: true });
   }
 
   clearTimeout(typingTimeout);
   typingTimeout = setTimeout(function() {
     isTyping = false;
-    socket.emit('typing', { ticketId: ticketId, isTyping: false });
+    socket.emit('typing', { claimId: claimId, isTyping: false });
   }, 2000);
 }
 
@@ -182,11 +182,11 @@ function sendMessage(e) {
 
   // Stop typing
   if (socket) {
-    socket.emit('typing', { ticketId: ticketId, isTyping: false });
+    socket.emit('typing', { claimId: claimId, isTyping: false });
   }
 
   // Send to server and wait for response before adding to UI
-  fetch('/admin/tickets/' + ticketId + '/reply', {
+  fetch('/admin/claims/' + claimId + '/reply', {
     method: 'POST',
     body: formData
   })
@@ -457,10 +457,10 @@ function updateReadReceipts() {
 }
 
 /**
- * Mark ticket as read
+ * Mark claim as read
  */
 function markAsRead() {
-  fetch('/admin/api/tickets/' + ticketId + '/read', {
+  fetch('/admin/api/claims/' + claimId + '/read', {
     method: 'PUT'
   }).catch(function(err) {
     console.error('Error marking as read:', err);
@@ -478,13 +478,13 @@ function insertQuickReply(text) {
 }
 
 /**
- * Update ticket status
+ * Update claim status
  */
 function updateStatus() {
   var select = document.getElementById('statusSelect');
   var newStatus = select.value;
   
-  fetch('/admin/tickets/' + ticketId + '/status', {
+  fetch('/admin/claims/' + claimId + '/status', {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ status: newStatus })
@@ -495,9 +495,9 @@ function updateStatus() {
   .then(function(data) {
     if (data.success) {
       // Update UI
-      var badge = document.querySelector('.chat-header .ticket-status-badge');
+      var badge = document.querySelector('.chat-header .claim-status-badge');
       if (badge) {
-        badge.className = 'ticket-status-badge ' + newStatus;
+        badge.className = 'claim-status-badge ' + newStatus;
         var iconMap = {
           'open': 'inbox',
           'in-progress': 'loader',
@@ -524,7 +524,7 @@ function updateStatus() {
 }
 
 /**
- * Mark ticket as resolved
+ * Mark claim as resolved
  */
 function markResolved() {
   document.getElementById('statusSelect').value = 'resolved';
@@ -532,14 +532,14 @@ function markResolved() {
 }
 
 /**
- * Close ticket
+ * Close claim
  */
-function closeTicket() {
-  if (confirm('Are you sure you want to close this ticket?')) {
+function closeClaim() {
+  if (confirm('Are you sure you want to close this claim?')) {
     document.getElementById('statusSelect').value = 'closed';
     updateStatus();
     setTimeout(function() {
-      window.location.href = '/admin/tickets' + moduleParam;
+      window.location.href = '/admin/claims' + moduleParam;
     }, 1000);
   }
 }
@@ -624,7 +624,7 @@ function formatFileSize(bytes) {
 // Cleanup on page unload
 window.addEventListener('beforeunload', function() {
   if (socket) {
-    socket.emit('leave-ticket', ticketId);
+    socket.emit('leave-claim', claimId);
     socket.disconnect();
   }
 });

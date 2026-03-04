@@ -2,7 +2,7 @@
   "nav": {
     "search": "Zoeken",
     "myOrders": "Mijn Bestellingen",
-    "tickets": "Tickets",
+    "Claims": "Claims",
     "affiliate": "Affiliate",
     "payment": "Betaling",
     "delivery": "Levering",
@@ -12,7 +12,7 @@
     "more": "Meer",
     "paymentDesc": "Beheeer betaalmethoden",
     "deliveryDesc": "Afleveradressen",
-    "ticketsDesc": "Supporttickets",
+    "claimsDesc": "Supportclaims",
     "contactsDesc": "Contactgegevens",
     "searchDropdown": {
       "automotive": {
@@ -641,26 +641,44 @@
       "billing": "Facturering"
     },
     "general": {
-      "title": "Algemene Instellingen",
+      "title": "Algemene instellingen",
       "subtitle": "Beheer uw algemene accountvoorkeuren",
-      "language": "Taal",
-      "timezone": "Tijdzone",
-      "dateFormat": "Datumformaat",
-      "languageDesc": "Kies uw voorkeurstaal voor de interface",
-      "timezoneDesc": "Stel uw tijdzone in voor nauwkeurige tijdweergave",
-      "dateFormatDesc": "Kies hoe datums worden weergegeven"
+      "language": {
+        "title": "Taal",
+        "desc": "Kies uw voorkeurstaal voor de interface"
+      },
+      "timezone": {
+        "title": "Tijdzone",
+        "desc": "Stel uw tijdzone in voor nauwkeurige tijdweergave"
+      },
+      "dateFormat": {
+        "title": "Datumformaat",
+        "desc": "Kies hoe datums worden weergegeven"
+      },
+      "currency": {
+        "title": "Valuta",
+        "desc": "Kies uw voorkeursvaluta voor het weergeven van prijzen"
+      }
     },
     "notifications": {
       "title": "Meldingsinstellingen",
       "subtitle": "Bepaal hoe en wanneer u meldingen ontvangt",
-      "email": "E-mailmeldingen",
-      "orderUpdates": "Bestelingupdates",
-      "promotional": "Promotionele E-mails",
-      "sms": "SMS-meldingen",
-      "emailDesc": "Ontvang e-mailmeldingen voor belangrijke updates",
-      "orderUpdatesDesc": "Ontvang meldingen wanneer uw bestelstatus wijzigt",
-      "promotionalDesc": "Ontvang e-mails over nieuwe producten en speciale aanbiedingen",
-      "smsDesc": "Ontvang SMS-meldingen voor dringende updates"
+      "email": {
+        "title": "E-mailmeldingen",
+        "desc": "Ontvang e-mailmeldingen voor belangrijke updates"
+      },
+      "orderUpdates": {
+        "title": "Bestelupdates",
+        "desc": "Ontvang meldingen wanneer uw bestelstatus wijzigt"
+      },
+      "promotional": {
+        "title": "Promotionele e-mails",
+        "desc": "Ontvang e-mails over nieuwe producten en speciale aanbiedingen"
+      },
+      "sms": {
+        "title": "SMS-meldingen",
+        "desc": "Ontvang SMS-meldingen voor dringende updates"
+      }
     },
     "privacy": {
       "title": "Privacy-instellingen",
@@ -670,68 +688,69 @@
         "desc": "Bepaal wie uw profielinformatie kan zien",
         "public": "Openbaar",
         "private": "Privé",
-        "friendsOnly": "Alleen Vrienden"
+        "friendsOnly": "Alleen vrienden"
       },
-      "dataCollection": "Gegevensverzameling",
-      "cookies": "Cookies",
-      "visibility": "Profielzichtbaarheid",
-      "visibilityDesc": "Bepaal wie uw profielinformatie kan zien",
-      "public": "Openbaar",
-      "private": "Privé",
-      "friendsOnly": "Alleen Vrienden",
-      "dataCollectionDesc": "Sta ons toe analysegegevens te verzamelen om onze service te verbeteren",
-      "cookiesDesc": "Accepteer cookies voor een betere browse-ervaring"
+      "dataCollection": {
+        "title": "Gegevensverzameling",
+        "desc": "Sta ons toe analysegegevens te verzamelen om onze service te verbeteren"
+      },
+      "cookies": {
+        "title": "Cookies",
+        "desc": "Accepteer cookies voor een betere browse-ervaring"
+      }
     },
     "security": {
       "title": "Beveiligingsinstellingen",
       "subtitle": "Beheer uw accountbeveiliging en authenticatie",
       "twoFactor": {
-        "title": "Twee-Factor Authenticatie",
+        "title": "Twee-factorauthenticatie",
         "desc": "Voeg een extra beveiligingslaag toe aan uw account",
-        "setup": "2FA Instellen"
+        "setup": "2FA instellen"
       },
-      "changePassword": "Wachtwoord Wijzigen",
+      "changePassword": {
+        "title": "Wachtwoord wijzigen",
+        "desc": "Werk uw accountwachtwoord regelmatig bij",
+        "button": "Wachtwoord wijzigen"
+      },
       "sessions": {
-        "title": "Actieve Sessies",
+        "title": "Actieve sessies",
         "desc": "Bekijk en beheer apparaten waarop u bent ingelogd",
-        "view": "Bekijk Sessies"
-      },
-      "twoFA": "Twee-Factor Authenticatie",
-      "twoFADesc": "Voeg een extra beveiligingslaag toe aan uw account",
-      "changePasswordDesc": "Werk uw accountwachtwoord regelmatig bij",
-      "changePasswordBtn": "Wachtwoord Wijzigen",
-      "activeSessions": "Actieve Sessies",
-      "activeSessionsDesc": "Bekijk en beheer apparaten waarop u bent ingelogd",
-      "viewSessions": "Bekijk Sessies"
+        "view": "Bekijk sessies"
+      }
     },
     "preferences": {
       "title": "Voorkeuren",
       "subtitle": "Pas uw ervaring aan",
-      "theme": "Thema",
-      "itemsPerPage": "Items per Pagina",
-      "themeDesc": "Kies uw voorkeurskleurthema",
-      "light": "Licht",
-      "dark": "Donker",
-      "auto": "Auto (Systeem)",
-      "itemsPerPageDesc": "Aantal items dat per pagina wordt weergegeven"
+      "theme": {
+        "title": "Thema",
+        "desc": "Kies uw voorkeurskleurthema",
+        "light": "Licht",
+        "dark": "Donker",
+        "auto": "Auto (systeem)"
+      },
+      "itemsPerPage": {
+        "title": "Items per pagina",
+        "desc": "Aantal items dat per pagina wordt weergegeven"
+      }
     },
     "billing": {
       "title": "Factureringsinstellingen",
       "subtitle": "Beheer uw betaalmethoden en factuurgegevens",
-      "paymentMethods": "Betaalmethoden",
-      "billingAddress": "Factuuradres",
+      "paymentMethods": {
+        "title": "Betaalmethoden",
+        "desc": "Beheer uw opgeslagen betaalmethoden",
+        "manage": "Betaalmethoden beheren"
+      },
+      "billingAddress": {
+        "title": "Factuuradres",
+        "desc": "Werk uw factuuradres bij",
+        "update": "Adres bijwerken"
+      },
       "invoices": {
         "title": "Factuurgeschiedenis",
         "desc": "Bekijk en download uw eerdere facturen",
-        "view": "Bekijk Facturen"
-      },
-      "paymentMethodsDesc": "Beheer uw opgeslagen betaalmethoden",
-      "managePaymentMethods": "Betaalmethoden Beheren",
-      "billingAddressDesc": "Werk uw factuuradres bij",
-      "updateAddress": "Adres Bijwerken",
-      "invoiceHistory": "Factuurgeschiedenis",
-      "invoiceHistoryDesc": "Bekijk en download uw eerdere facturen",
-      "viewInvoices": "Bekijk Facturen"
+        "view": "Bekijk facturen"
+      }
     },
     "actions": {
       "saveChanges": "Wijzigingen Opslaan",
@@ -742,15 +761,15 @@
   "tickets": {
     "title": "Supporttickets",
     "subtitle": "Krijg hulp bij uw bestellingen",
-    "createTicket": "Ticket Aanmaken",
-    "ticketNumber": "Ticketnummer",
+    "createClaim": "Claim Aanmaken",
+    "ClaimNumber": "Claimnummer",
     "subject": "Onderwerp",
     "category": "Categorie",
     "priority": "Prioriteit",
     "status": "Status",
     "created": "Aangemaakt",
     "updated": "Bijgewerkt",
-    "noTickets": "Geen tickets gevonden",
+    "noclaims": "Geen claims gevonden",
     "categories": {
       "shipping": "Verzendprobleem",
       "order": "Bestelprobleem",
@@ -766,9 +785,9 @@
       "reply": "Beantwoorden",
       "attachments": "Bijlagen",
       "addAttachment": "Bijlage Toevoegen",
-      "backToTickets": "Terug naar Tickets",
+      "backToClaims": "Terug naar Claims",
       "loading": "Laden...",
-      "ticketInfo": "Ticketinformatie",
+      "ClaimInfo": "Claiminformatie",
       "category": "Categorie",
       "status": "Status",
       "lastUpdated": "Laatst bijgewerkt",
@@ -786,7 +805,7 @@
       "describeIssue": "Beschrijf uw probleem",
       "attachFiles": "Bestanden Bijvoegen",
       "badge": "Ondersteuningscentrum",
-      "backToTickets": "Terug naar Tickets",
+      "backToClaims": "Terug naar Claims",
       "cardTitle": "Ticketinformatie",
       "cardSubtitle": "Geef details over uw probleem",
       "category": "Categorie",
@@ -817,20 +836,21 @@
     "stats": {
       "resolved": "Resolved",
       "inProgress": "In Progress",
-      "open": "Open"
+      "open": "Open",
+      "closed": "Gesloten"
     },
     "filters": {
       "status": "Status",
       "allStatuses": "All Statuses",
       "search": "Search",
-      "searchPlaceholder": "Search tickets...",
+      "searchPlaceholder": "Search claims...",
       "apply": "Apply Filters",
       "reset": "Reset"
     },
     "empty": {
-      "title": "No Tickets Yet",
-      "text": "You haven't created any support tickets",
-      "createFirst": "Create First Ticket"
+      "title": "No Claims Yet",
+      "text": "You haven't created any support claims",
+      "createFirst": "Create First Claim"
     }
   },
   "contacts": {
@@ -852,8 +872,7 @@
   "affiliate": {
     "badge": "Partnerprogramma",
     "title": "Loyaliteitsprogramma voor Onze Klanten",
-    "subtitle": "Wij waarderen elke klant en bieden de beste beloningen aan degenen die bijdragen aan uw merk. Hoe meer u met ons groeit, hoe meer beloningen u ontvangt!",
-    "description": "Ons programma omvat de volgende niveaus: BRONS – verbeterde voorwaarden en extra kortingen; ZILVER – premium kortingen en prioriteitsservice; GOUD – exclusieve prijzen en toegewijde ondersteuning; PLATINA – VIP-voordelen en persoonlijke benadering; PLATINA+ – het hoogste niveau met VIP+-voorwaarden, prioriteitsprivileges en unieke aanbiedingen.",
+    "subtitle": "Verdien meer beloningen naarmate u vordert. Hoe hoger uw niveau, hoe beter uw voordelen.",
     "tiers": {
       "title": "Lidmaatschapsniveaus",
       "subtitle": "Uw loyaliteit bepaalt het niveau van uw aankoop op basis van uw bestelvolume. Hoe beter het niveau, hoe meer voordelen u ontvangt.",

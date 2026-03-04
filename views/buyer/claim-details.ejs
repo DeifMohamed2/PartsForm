@@ -1,38 +1,39 @@
 <%- include('partials/header') %>
 <link rel="stylesheet" href="/css/buyerCSS/buyer-main.css">
-<link rel="stylesheet" href="/css/buyerCSS/ticket-details.css">
+<link rel="stylesheet" href="/css/buyerCSS/claim-details.css">
 
 <%- include('partials/navbar') %>
 
 <!-- ====================================
-     TICKET DETAILS PAGE - CHAT INTERFACE
+     CLAIM DETAILS PAGE - CHAT INTERFACE
      ==================================== -->
-<div class="ticket-details-page" data-ticket-id="<%= ticket ? ticket._id : '' %>">
-  <!-- Ticket Header -->
-  <div class="ticket-header-bar">
-    <div class="buyer-container">
-      <div class="ticket-header-content">
-        <a href="/buyer/tickets" class="btn-back-header">
+<div class="claim-details-page" data-claim-id="<%= claim ? claim._id : '' %>">
+  <!-- Claim Header with Animated Background -->
+  <div class="claim-header-bar">
+    <div class="claim-header-bg"></div>
+    <div class="buyer-container claim-header-inner">
+      <div class="claim-header-content">
+        <a href="/buyer/claim-support" class="btn-back-header">
           <i data-lucide="arrow-left"></i>
           <span><%= t('tickets.details.backToTickets') %></span>
         </a>
         
-        <div class="ticket-header-info">
-          <div class="ticket-header-left">
-            <span class="ticket-id-header" id="ticket-id-header">TKT-001</span>
-            <h1 class="ticket-subject-header" id="ticket-subject-header"><%= t('tickets.details.loading') %></h1>
-            <div class="ticket-meta-header">
+        <div class="claim-header-info">
+          <div class="claim-header-left">
+            <span class="claim-id-header" id="claim-id-header">TKT-001</span>
+            <h1 class="claim-subject-header" id="claim-subject-header"><%= t('tickets.details.loading') %></h1>
+            <div class="claim-meta-header">
               <span class="meta-item">
                 <i data-lucide="package"></i>
-                <span id="ticket-order-header">ORD-2025-001</span>
+                <span id="claim-order-header">ORD-2025-001</span>
               </span>
               <span class="meta-item">
                 <i data-lucide="calendar"></i>
-                <span id="ticket-created-header">Dec 20, 2025</span>
+                <span id="claim-created-header">Dec 20, 2025</span>
               </span>
             </div>
           </div>
-          <div class="ticket-header-right">
+          <div class="claim-header-right">
             <span class="status-badge-header" id="status-badge-header"><%= t('tickets.status') %></span>
           </div>
         </div>
@@ -42,30 +43,30 @@
 
   <!-- Main Content -->
   <div class="buyer-container">
-    <div class="ticket-details-section">
-      <div class="ticket-details-container">
-        <!-- Ticket Info Card -->
-        <div class="ticket-info-card">
+    <div class="claim-details-section">
+      <div class="claim-details-container">
+        <!-- Claim Info Card -->
+        <div class="claim-info-card">
           <div class="info-card-header">
             <h3 class="info-card-title"><%= t('tickets.details.ticketInfo') %></h3>
           </div>
           <div class="info-card-body">
             <div class="info-item">
               <span class="info-label"><%= t('tickets.details.category') %></span>
-              <span class="info-value" id="ticket-category">
+              <span class="info-value" id="claim-category">
                 <i data-lucide="tag"></i>
                 <span><%= t('tickets.categories.shipping') %></span>
               </span>
             </div>
             <div class="info-item">
               <span class="info-label"><%= t('tickets.details.status') %></span>
-              <span class="info-value" id="ticket-status-info">
+              <span class="info-value" id="claim-status-info">
                 <span class="status-badge-small" id="status-badge-small"><%= t('tickets.status') %></span>
               </span>
             </div>
             <div class="info-item">
               <span class="info-label"><%= t('tickets.details.lastUpdated') %></span>
-              <span class="info-value" id="ticket-updated">2 hours ago</span>
+              <span class="info-value" id="claim-updated">2 hours ago</span>
             </div>
           </div>
         </div>
@@ -120,7 +121,7 @@
 <script src="/js/quick-search.js"></script>
 <script src="/js/cart.js"></script>
 <script src="/js/cart-badge-updater.js"></script>
-<script src="/js/ticket-details.js"></script>
+<script src="/js/claim-details.js"></script>
 <script>
   lucide.createIcons();
   window.addEventListener('load', () => lucide.createIcons());

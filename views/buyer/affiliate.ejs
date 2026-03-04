@@ -5,23 +5,19 @@
 <%- include('partials/navbar') %>
 
 <!-- ====================================
-    AFFILIATE PROGRAM PAGE
+    AFFILIATE PROGRAM PAGE - Brand System
     ==================================== -->
 <div class="affiliate-page">
-  <!-- Hero Section -->
+  <!-- Hero Section with Animated Background -->
   <div class="affiliate-hero">
     <div class="affiliate-hero-content">
       <div class="affiliate-badge">
         <i data-lucide="trophy"></i>
         <span><%= t('affiliate.badge') %></span>
       </div>
-
       <h1 class="affiliate-hero-title"><%= t('affiliate.title') %></h1>
       <p class="affiliate-hero-subtitle">
         <%= t('affiliate.subtitle') %>
-      </p>
-      <p class="affiliate-hero-description">
-        <%= t('affiliate.description') %>
       </p>
     </div>
   </div>
@@ -259,7 +255,7 @@
             </div>
             <div class="tier-stat">
               <span class="stat-label"><%= t('affiliate.stats.procurement') %></span>
-              <span class="stat-label">10%</span>
+              <span class="stat-value">10%</span>
             </div>
             <div class="tier-stat">
               <span class="stat-label"><%= t('affiliate.stats.paySplit') %></span>
@@ -369,8 +365,8 @@
         </div>
       </div>
 
-      <!-- Info Section - Photo Based Design -->
-      <div class="affiliate-info-photo" id="how-it-works">
+      <!-- How It Works - Photo Cards (moodboard images) -->
+      <div class="affiliate-how-it-works" id="how-it-works">
         <div class="section-header">
           <h2 class="section-title"><%= t('affiliate.howItWorks.title') %></h2>
           <p class="section-subtitle">
@@ -378,50 +374,42 @@
           </p>
         </div>
 
-        <div class="info-photo-grid">
-          <div class="info-photo-item">
-            <div class="info-photo-bg">
-              <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?q=80&w=1600&auto=format&fit=crop" alt="<%= t('affiliate.howItWorks.placeOrders.title') %>" loading="lazy">
-              <div class="info-photo-overlay"></div>
-            </div>
-            <div class="info-photo-content">
-              <div class="info-photo-icon">
+        <div class="how-it-works-grid">
+          <div class="how-it-works-card" style="--card-bg: url('/images/brand/moodboard/automated-warehouse.png')">
+            <div class="how-it-works-bg"></div>
+            <div class="how-it-works-overlay"></div>
+            <div class="how-it-works-content">
+              <div class="how-it-works-icon">
                 <i data-lucide="shopping-cart"></i>
               </div>
-              <h3 class="info-photo-title"><%= t('affiliate.howItWorks.placeOrders.title') %></h3>
-              <p class="info-photo-text">
+              <h3 class="how-it-works-title"><%= t('affiliate.howItWorks.placeOrders.title') %></h3>
+              <p class="how-it-works-text">
                 <%= t('affiliate.howItWorks.placeOrders.description') %>
               </p>
             </div>
           </div>
-
-          <div class="info-photo-item">
-            <div class="info-photo-bg">
-              <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=1600&auto=format&fit=crop" alt="<%= t('affiliate.howItWorks.growSales.title') %>" loading="lazy">
-              <div class="info-photo-overlay"></div>
-            </div>
-            <div class="info-photo-content">
-              <div class="info-photo-icon">
+          <div class="how-it-works-card" style="--card-bg: url('/images/brand/moodboard/logistics-belt.png')">
+            <div class="how-it-works-bg"></div>
+            <div class="how-it-works-overlay"></div>
+            <div class="how-it-works-content">
+              <div class="how-it-works-icon">
                 <i data-lucide="trending-up"></i>
               </div>
-              <h3 class="info-photo-title"><%= t('affiliate.howItWorks.growSales.title') %></h3>
-              <p class="info-photo-text">
+              <h3 class="how-it-works-title"><%= t('affiliate.howItWorks.growSales.title') %></h3>
+              <p class="how-it-works-text">
                 <%= t('affiliate.howItWorks.growSales.description') %>
               </p>
             </div>
           </div>
-
-          <div class="info-photo-item">
-            <div class="info-photo-bg">
-              <img src="https://images.unsplash.com/photo-1559526324-4b87b5e36e44?q=80&w=1600&auto=format&fit=crop" alt="<%= t('affiliate.howItWorks.earnRewards.title') %>" loading="lazy">
-              <div class="info-photo-overlay"></div>
-            </div>
-            <div class="info-photo-content">
-              <div class="info-photo-icon">
+          <div class="how-it-works-card" style="--card-bg: url('/images/brand/moodboard/components-display.png')">
+            <div class="how-it-works-bg"></div>
+            <div class="how-it-works-overlay"></div>
+            <div class="how-it-works-content">
+              <div class="how-it-works-icon">
                 <i data-lucide="gift"></i>
               </div>
-              <h3 class="info-photo-title"><%= t('affiliate.howItWorks.earnRewards.title') %></h3>
-              <p class="info-photo-text">
+              <h3 class="how-it-works-title"><%= t('affiliate.howItWorks.earnRewards.title') %></h3>
+              <p class="how-it-works-text">
                 <%= t('affiliate.howItWorks.earnRewards.description') %>
               </p>
             </div>
@@ -457,6 +445,24 @@
 <!-- Initialize Lucide Icons -->
 <script>
   lucide.createIcons();
+  window.addEventListener('load', () => lucide.createIcons());
+
+  // Force navbar to stay white on affiliate page (like orders)
+  document.addEventListener('DOMContentLoaded', () => {
+    const navbar = document.getElementById('navbar');
+    if (navbar) {
+      navbar.classList.add('scrolled');
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+            if (!navbar.classList.contains('scrolled')) navbar.classList.add('scrolled');
+          }
+        });
+      });
+      observer.observe(navbar, { attributes: true, attributeFilter: ['class'] });
+      window.addEventListener('scroll', () => navbar.classList.add('scrolled'), { passive: true });
+    }
+  });
   
   // Smooth scroll to the clicked card when clicking Learn More
   document.addEventListener('DOMContentLoaded', () => {

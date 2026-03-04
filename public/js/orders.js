@@ -149,12 +149,15 @@
     const emptyState = document.getElementById('orders-empty');
 
     if (emptyState) emptyState.style.display = 'none';
-    if (tableContainer) tableContainer.style.display = 'block';
+    if (tableContainer) {
+      tableContainer.classList.remove('hidden');
+      tableContainer.style.display = 'block';
+    }
     
     if (tbody) {
       tbody.innerHTML = `
         <tr>
-          <td colspan="6" style="text-align: center; padding: 3rem;">
+          <td colspan="5" style="text-align: center; padding: 3rem;">
             <div style="display: flex; flex-direction: column; align-items: center; gap: 1rem;">
               <i data-lucide="loader" class="animate-spin" style="width: 2rem; height: 2rem; color: var(--color-accent);"></i>
               <span style="color: var(--color-text-secondary);">Loading orders...</span>
@@ -176,7 +179,7 @@
     if (tbody) {
       tbody.innerHTML = `
         <tr>
-          <td colspan="6" style="text-align: center; padding: 3rem;">
+          <td colspan="5" style="text-align: center; padding: 3rem;">
             <div style="display: flex; flex-direction: column; align-items: center; gap: 1rem; color: #ef4444;">
               <i data-lucide="alert-circle" style="width: 2rem; height: 2rem;"></i>
               <span>${message}</span>
@@ -209,16 +212,28 @@
 
     if (filteredOrders.length === 0) {
       // Show empty state
-      if (tableContainer) tableContainer.style.display = 'none';
-      if (pagination) pagination.style.display = 'none';
+      if (tableContainer) {
+        tableContainer.classList.add('hidden');
+        tableContainer.style.display = 'none';
+      }
+      if (pagination) {
+        pagination.classList.add('hidden');
+        pagination.style.display = 'none';
+      }
       if (emptyState) emptyState.style.display = 'block';
       return;
     }
 
     // Show table, hide empty state
-    if (tableContainer) tableContainer.style.display = 'block';
+    if (tableContainer) {
+      tableContainer.classList.remove('hidden');
+      tableContainer.style.display = 'block';
+    }
     if (emptyState) emptyState.style.display = 'none';
-    if (pagination) pagination.style.display = 'flex';
+    if (pagination) {
+      pagination.classList.remove('hidden');
+      pagination.style.display = 'flex';
+    }
 
     // Render orders (already paginated from server)
     filteredOrders.forEach(order => {
@@ -237,6 +252,7 @@
   // ====================================
   // CREATE ORDER ROW
   // ====================================
+  // Remove the first column ("Order Number") here as per instructions
   function createOrderRow(order) {
     const row = document.createElement('tr');
     row.dataset.orderId = order.orderNumber;
@@ -263,11 +279,15 @@
 
     // Link to order details
     const orderLink = `/buyer/orders/${encodeURIComponent(order.orderNumber)}`;
+    const hasActiveClaim = order.hasActiveClaim === true;
+    const claimId = order.claimId || '';
 
+    // Removed the first td (Order Number) as per request
     row.innerHTML = `
       <td data-label="Order Number">
         <a href="${orderLink}" class="order-number-link" data-order="${order.orderNumber}">
           <span class="order-number">${order.orderNumber}</span>
+          ${hasActiveClaim ? '<span class="order-claim-badge" title="Has active claim"><i data-lucide="message-square"></i></span>' : ''}
         </a>
       </td>
       <td data-label="Date">
@@ -311,6 +331,17 @@
               </button>
             ` : ''}
           ` : ''}
+          ${hasActiveClaim ? `
+            <a href="/buyer/claim-support/${claimId}" class="btn-action claim view-claim" data-order="${order.orderNumber}">
+              <i data-lucide="message-square"></i>
+              <span>View Claim</span>
+            </a>
+          ` : `
+            <a href="/buyer/claim-support/create?order=${encodeURIComponent(order.orderNumber)}" class="btn-action claim" data-order="${order.orderNumber}">
+              <i data-lucide="alert-circle"></i>
+              <span>Claim</span>
+            </a>
+          `}
         </div>
       </td>
     `;

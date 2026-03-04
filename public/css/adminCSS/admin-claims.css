@@ -1,10 +1,60 @@
-/* Admin Tickets Styles */
-/* Professional styling for tickets management pages */
+/* Admin Claims Styles */
+/* Professional styling for claims management pages */
 
 /* ================================
-   Tickets Page Layout
+   Stats - Individual cards with clear separation
    ================================ */
-.tickets-page-header {
+.admin-claims-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+}
+
+.admin-claims-stat-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1.5rem 1.75rem;
+    background: var(--admin-bg-secondary);
+    border: 1px solid var(--admin-border);
+    border-radius: 12px;
+}
+
+.admin-claims-stat-card.stat-open {
+    border-left: 4px solid #f59e0b;
+}
+
+.admin-claims-stat-card.stat-in-progress {
+    border-left: 4px solid var(--module-primary, #3b82f6);
+}
+
+.admin-claims-stat-card.stat-resolved {
+    border-left: 4px solid #10b981;
+}
+
+.admin-claims-stat-card.stat-total {
+    border-left: 4px solid #8b5cf6;
+}
+
+.admin-claims-stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--admin-text-primary);
+    line-height: 1;
+}
+
+.admin-claims-stat-label {
+    font-size: 0.8rem;
+    color: var(--admin-text-muted);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+/* ================================
+   Claims Page Layout
+   ================================ */
+.claims-page-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -13,14 +63,14 @@
     gap: 1rem;
 }
 
-.tickets-page-header h2 {
+.claims-page-header h2 {
     font-size: 1.5rem;
     font-weight: 700;
     color: var(--admin-text-primary);
     margin: 0;
 }
 
-.tickets-header-actions {
+.claims-header-actions {
     display: flex;
     align-items: center;
     gap: 0.75rem;
@@ -29,14 +79,14 @@
 /* ================================
    Search Bar
    ================================ */
-.tickets-search-container {
+.claims-search-container {
     position: relative;
     display: flex;
     align-items: center;
     width: 320px;
 }
 
-.tickets-search-container .search-icon {
+.claims-search-container .search-icon {
     position: absolute;
     left: 14px;
     top: 50%;
@@ -48,7 +98,7 @@
     z-index: 2;
 }
 
-.tickets-search-container input {
+.claims-search-container input {
     width: 100%;
     padding: 0.7rem 1rem 0.7rem 2.75rem;
     background: var(--admin-bg-secondary);
@@ -60,7 +110,7 @@
     transition: all 0.2s ease;
 }
 
-.tickets-search-container input:focus {
+.claims-search-container input:focus {
     border-color: var(--module-primary, var(--admin-primary));
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
@@ -68,7 +118,7 @@
 /* ================================
    Filters Section
    ================================ */
-.tickets-filters {
+.claims-filters {
     display: flex;
     align-items: center;
     gap: 1rem;
@@ -111,9 +161,9 @@
 }
 
 /* ================================
-   Ticket Cards
+   Claim Cards
    ================================ */
-.ticket-card {
+.claim-card {
     background: var(--admin-bg-secondary);
     border: 1px solid var(--admin-border);
     border-radius: 16px;
@@ -128,54 +178,54 @@
     text-decoration: none;
 }
 
-.ticket-card:hover {
+.claim-card:hover {
     border-color: var(--module-primary, var(--admin-primary));
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     transform: translateY(-1px);
 }
 
-.ticket-card.has-unread {
+.claim-card.has-unread {
     background: linear-gradient(90deg, rgba(59, 130, 246, 0.03), transparent);
     border-left-color: var(--module-primary, var(--admin-primary));
 }
 
 /* Priority Bar */
-.ticket-priority-bar {
+.claim-priority-bar {
     width: 6px;
     height: 70px;
     border-radius: 3px;
     transition: all 0.2s ease;
 }
 
-.ticket-priority-bar.urgent {
+.claim-priority-bar.urgent {
     background: linear-gradient(180deg, #38bdf8, #0ea5e9);
 }
 
-.ticket-priority-bar.high {
+.claim-priority-bar.high {
     background: linear-gradient(180deg, #f59e0b, #d97706);
 }
 
-.ticket-priority-bar.medium {
+.claim-priority-bar.medium {
     background: linear-gradient(180deg, #3b82f6, #2563eb);
 }
 
-.ticket-priority-bar.low {
+.claim-priority-bar.low {
     background: linear-gradient(180deg, #10b981, #059669);
 }
 
-/* Ticket Content */
-.ticket-content {
+/* Claim Content */
+.claim-content {
     min-width: 0;
 }
 
-.ticket-header-row {
+.claim-header-row {
     display: flex;
     align-items: center;
     gap: 0.75rem;
     margin-bottom: 0.5rem;
 }
 
-.ticket-id {
+.claim-id {
     font-size: 0.8rem;
     font-weight: 600;
     color: var(--module-primary, var(--admin-primary));
@@ -184,7 +234,7 @@
     border-radius: 6px;
 }
 
-.ticket-subject {
+.claim-subject {
     font-size: 1rem;
     font-weight: 600;
     color: var(--admin-text-primary);
@@ -210,7 +260,7 @@
 }
 
 /* Last Message Preview */
-.ticket-last-message {
+.claim-last-message {
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -219,21 +269,21 @@
     margin-top: 0.5rem;
 }
 
-.ticket-last-message .message-preview {
+.claim-last-message .message-preview {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 400px;
 }
 
-.ticket-last-message .message-time {
+.claim-last-message .message-time {
     font-size: 0.75rem;
     color: var(--admin-text-muted);
     flex-shrink: 0;
 }
 
 /* Customer Info */
-.ticket-customer {
+.claim-customer {
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -242,13 +292,13 @@
     margin-top: 0.25rem;
 }
 
-.ticket-customer i {
+.claim-customer i {
     width: 14px;
     height: 14px;
 }
 
-/* Ticket Meta */
-.ticket-meta-row {
+/* Claim Meta */
+.claim-meta-row {
     display: flex;
     align-items: center;
     gap: 1rem;
@@ -257,26 +307,26 @@
     margin-top: 0.5rem;
 }
 
-.ticket-meta-row span {
+.claim-meta-row span {
     display: flex;
     align-items: center;
     gap: 0.35rem;
 }
 
-.ticket-meta-row i {
+.claim-meta-row i {
     width: 14px;
     height: 14px;
 }
 
 /* Status & Actions Column */
-.ticket-status-col {
+.claim-status-col {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
     gap: 0.5rem;
 }
 
-.ticket-status-badge {
+.claim-status-badge {
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
@@ -287,38 +337,38 @@
     text-transform: capitalize;
 }
 
-.ticket-status-badge i {
+.claim-status-badge i {
     width: 12px;
     height: 12px;
 }
 
-.ticket-status-badge.open {
+.claim-status-badge.open {
     background: rgba(245, 158, 11, 0.12);
     color: #d97706;
 }
 
-.ticket-status-badge.in-progress {
+.claim-status-badge.in-progress {
     background: rgba(59, 130, 246, 0.12);
     color: #2563eb;
 }
 
-.ticket-status-badge.resolved {
+.claim-status-badge.resolved {
     background: rgba(16, 185, 129, 0.12);
     color: #059669;
 }
 
-.ticket-status-badge.closed {
+.claim-status-badge.closed {
     background: var(--admin-bg-tertiary);
     color: var(--admin-text-muted);
 }
 
 /* Actions */
-.ticket-actions {
+.claim-actions {
     display: flex;
     gap: 0.35rem;
 }
 
-.ticket-action-btn {
+.claim-action-btn {
     width: 34px;
     height: 34px;
     border: none;
@@ -332,25 +382,25 @@
     transition: all 0.15s ease;
 }
 
-.ticket-action-btn i {
+.claim-action-btn i {
     width: 16px;
     height: 16px;
 }
 
-.ticket-action-btn:hover {
+.claim-action-btn:hover {
     background: var(--admin-bg-tertiary);
     color: var(--admin-text-primary);
 }
 
-.ticket-action-btn.chat:hover {
+.claim-action-btn.chat:hover {
     color: #3b82f6;
     background: rgba(59, 130, 246, 0.1);
 }
 
 /* ================================
-   Ticket Details / Chat Page
+   Claim Details / Chat Page
    ================================ */
-.ticket-details-layout {
+.claim-details-layout {
     display: grid;
     grid-template-columns: 320px 1fr;
     gap: 1.5rem;
@@ -358,26 +408,26 @@
 }
 
 /* Sidebar */
-.ticket-sidebar {
+.claim-sidebar {
     display: flex;
     flex-direction: column;
     gap: 1rem;
 }
 
-.ticket-info-card {
+.claim-info-card {
     background: var(--admin-bg-secondary);
     border: 1px solid var(--admin-border);
     border-radius: 16px;
     overflow: hidden;
 }
 
-.ticket-info-header {
+.claim-info-header {
     padding: 1rem 1.25rem;
     background: var(--admin-bg-tertiary);
     border-bottom: 1px solid var(--admin-border);
 }
 
-.ticket-info-header h3 {
+.claim-info-header h3 {
     font-size: 0.9rem;
     font-weight: 600;
     color: var(--admin-text-primary);
@@ -387,13 +437,13 @@
     gap: 0.5rem;
 }
 
-.ticket-info-header h3 i {
+.claim-info-header h3 i {
     width: 16px;
     height: 16px;
     color: var(--module-primary, var(--admin-primary));
 }
 
-.ticket-info-body {
+.claim-info-body {
     padding: 1rem 1.25rem;
 }
 
@@ -730,7 +780,7 @@
 /* ================================
    Empty State
    ================================ */
-.tickets-empty {
+.claims-empty {
     padding: 4rem 2rem;
     text-align: center;
     background: var(--admin-bg-secondary);
@@ -738,7 +788,7 @@
     border-radius: 16px;
 }
 
-.tickets-empty-icon {
+.claims-empty-icon {
     width: 80px;
     height: 80px;
     background: var(--admin-bg-tertiary);
@@ -749,20 +799,20 @@
     margin: 0 auto 1.5rem;
 }
 
-.tickets-empty-icon i {
+.claims-empty-icon i {
     width: 40px;
     height: 40px;
     color: var(--admin-text-muted);
 }
 
-.tickets-empty h3 {
+.claims-empty h3 {
     font-size: 1.25rem;
     font-weight: 600;
     color: var(--admin-text-primary);
     margin-bottom: 0.5rem;
 }
 
-.tickets-empty p {
+.claims-empty p {
     color: var(--admin-text-muted);
 }
 
@@ -770,17 +820,17 @@
    Responsive
    ================================ */
 @media (max-width: 1200px) {
-    .ticket-details-layout {
+    .claim-details-layout {
         grid-template-columns: 280px 1fr;
     }
 }
 
 @media (max-width: 992px) {
-    .ticket-details-layout {
+    .claim-details-layout {
         grid-template-columns: 1fr;
     }
 
-    .ticket-sidebar {
+    .claim-sidebar {
         order: 2;
     }
 
@@ -789,29 +839,29 @@
         order: 1;
     }
 
-    .ticket-card {
+    .claim-card {
         grid-template-columns: 6px 1fr;
         gap: 1rem;
     }
 
-    .ticket-status-col,
-    .ticket-actions {
+    .claim-status-col,
+    .claim-actions {
         grid-column: 2;
         justify-self: start;
     }
 }
 
 @media (max-width: 768px) {
-    .tickets-search-container {
+    .claims-search-container {
         width: 100%;
     }
 
-    .tickets-filters {
+    .claims-filters {
         flex-direction: column;
         align-items: stretch;
     }
 
-    .ticket-last-message .message-preview {
+    .claim-last-message .message-preview {
         max-width: 200px;
     }
 }
@@ -1151,4 +1201,25 @@
 @keyframes pulse {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.6; }
+}
+
+/* Admin claims stats responsive */
+@media (max-width: 1200px) {
+    .admin-claims-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 640px) {
+    .admin-claims-stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-claims-stat-card {
+        padding: 1.25rem 1.5rem;
+    }
+
+    .admin-claims-stat-value {
+        font-size: 1.75rem;
+    }
 }

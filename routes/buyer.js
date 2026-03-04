@@ -17,9 +17,9 @@ const {
   getOrderDetailsPage,
   getProfilePage,
   getSettingsPage,
-  getTicketsPage,
-  getCreateTicketPage,
-  getTicketDetailsPage,
+  getClaimsPage,
+  getCreateClaimPage,
+  getClaimDetailsPage,
   uploadAvatar,
   updateProfile,
   changePassword,
@@ -38,12 +38,12 @@ const {
   updateAddress,
   deleteAddress,
   setDefaultAddress,
-  // Tickets API
-  getTicketsApi,
-  getTicketDetailsApi,
-  createTicket,
-  sendTicketMessage,
-  markTicketAsRead,
+  // Claims API
+  getClaimsApi,
+  getClaimDetailsApi,
+  createClaim,
+  sendClaimMessage,
+  markClaimAsRead,
   // Currency Preference API
   getPreferredCurrency,
   updatePreferredCurrency,
@@ -73,24 +73,24 @@ const {
 } = require('../controllers/searchController');
 const { handleProfileImageUpload } = require('../utils/fileUploader');
 
-// Configure multer for ticket file uploads
-const ticketUploadDir = path.join(__dirname, '../public/uploads/tickets');
-if (!fs.existsSync(ticketUploadDir)) {
-  fs.mkdirSync(ticketUploadDir, { recursive: true });
+// Configure multer for claim file uploads
+const claimUploadDir = path.join(__dirname, '../public/uploads/claims');
+if (!fs.existsSync(claimUploadDir)) {
+  fs.mkdirSync(claimUploadDir, { recursive: true });
 }
 
-const ticketStorage = multer.diskStorage({
+const claimStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, ticketUploadDir);
+    cb(null, claimUploadDir);
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    cb(null, 'ticket-' + uniqueSuffix + path.extname(file.originalname));
+    cb(null, 'claim-' + uniqueSuffix + path.extname(file.originalname));
   },
 });
 
-const ticketUpload = multer({
-  storage: ticketStorage,
+const claimUpload = multer({
+  storage: claimStorage,
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
   fileFilter: (req, file, cb) => {
     const allowedTypes = [
@@ -206,21 +206,21 @@ router.post('/api/orders/:orderNumber/payment', processPayment);
 router.get('/api/referral/status', getReferralStatus); // Get buyer's linked referral (from registration)
 router.post('/api/referral/validate', validateReferralCode); // Deprecated - codes now applied at registration
 
-// Support Tickets routes
-router.get('/tickets', getTicketsPage);
-router.get('/tickets/create', getCreateTicketPage);
-router.get('/tickets/:ticketId', getTicketDetailsPage);
+// Claim Support routes
+router.get('/claim-support', getClaimsPage);
+router.get('/claim-support/create', getCreateClaimPage);
+router.get('/claim-support/:claimId', getClaimDetailsPage);
 
-// Tickets API
-router.get('/api/tickets', getTicketsApi);
-router.post('/api/tickets', ticketUpload.array('attachments', 5), createTicket);
-router.get('/api/tickets/:ticketId', getTicketDetailsApi);
+// Claims API
+router.get('/api/claims', getClaimsApi);
+router.post('/api/claims', claimUpload.array('attachments', 5), createClaim);
+router.get('/api/claims/:claimId', getClaimDetailsApi);
 router.post(
-  '/api/tickets/:ticketId/messages',
-  ticketUpload.array('attachments', 5),
-  sendTicketMessage,
+  '/api/claims/:claimId/messages',
+  claimUpload.array('attachments', 5),
+  sendClaimMessage,
 );
-router.put('/api/tickets/:ticketId/read', markTicketAsRead);
+router.put('/api/claims/:claimId/read', markClaimAsRead);
 
 // Address Management API
 router.get('/api/addresses', getAddresses);

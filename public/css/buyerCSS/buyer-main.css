@@ -2755,3 +2755,17 @@
     margin-right: 6px;
     vertical-align: middle;
 }
+
+/* ====================================
+   SCROLL-TO-TOP — Always above footer
+   Fix: button must stay visible when scrolling
+   ==================================== */
+.footer {
+  position: relative;
+  z-index: 1;
+}
+
+.scroll-top-fixed {
+  z-index: 10002 !important;
+  position: fixed !important;
+}

@@ -1,8 +1,8 @@
-// Tickets Page JavaScript - Buyer Side
-// Handles ticket list display, filtering, and statistics
+// Claims Page JavaScript - Buyer Side
+// Handles claim list display, filtering, and statistics
 
-let allTickets = [];
-let currentTickets = [];
+let allClaims = [];
+let currentClaims = [];
 let filters = {
   status: '',
   search: ''
@@ -20,53 +20,66 @@ let stats = {
 
 // Initialize page
 document.addEventListener('DOMContentLoaded', function() {
-  initializeTickets();
+  initializeClaims();
   setupEventListeners();
 });
 
-async function initializeTickets() {
-  await loadTickets();
+async function initializeClaims() {
+  await loadClaims();
 }
 
-async function loadTickets() {
+async function loadClaims() {
   try {
     // Show loading state
-    const ticketsList = document.getElementById('tickets-list');
-    if (ticketsList) {
-      ticketsList.innerHTML = '<div class="loading-state"><i data-lucide="loader-2" class="spin"></i><span>Loading tickets...</span></div>';
+    const claimsList = document.getElementById('claims-list');
+    if (claimsList) {
+      claimsList.innerHTML = '<div class="loading-state"><i data-lucide="loader-2" class="spin"></i><span>Loading claims...</span></div>';
+      if (typeof lucide !== 'undefined') lucide.createIcons();
     }
-    
+
     // Build query params
     const params = new URLSearchParams();
     if (filters.status) params.append('status', filters.status);
     if (filters.search) params.append('search', filters.search);
     params.append('page', pagination.page);
     params.append('limit', pagination.limit);
-    
-    const response = await fetch('/buyer/api/tickets?' + params.toString());
+
+    const response = await fetch('/buyer/api/claims?' + params.toString());
+
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      throw new Error('Server returned non-JSON response');
+    }
+
     const data = await response.json();
-    
+
     if (data.success) {
-      allTickets = data.tickets || [];
-      currentTickets = allTickets;
-      pagination = data.pagination || pagination;
-      stats = data.stats || stats;
-      
-      updateStatistics();
-      renderTickets();
+      allClaims = data.claims || [];
+      currentClaims = allClaims;
+      if (data.pagination) {
+        pagination = { ...pagination, ...data.pagination };
+      }
+      if (data.stats) {
+        stats = {
+          open: Number(data.stats.open) || 0,
+          'in-progress': Number(data.stats['in-progress']) || 0,
+          resolved: Number(data.stats.resolved) || 0
+        };
+      }
     } else {
-      allTickets = [];
-      currentTickets = [];
-      renderTickets();
+      allClaims = [];
+      currentClaims = [];
     }
   } catch (error) {
-    console.error('Error loading tickets:', error);
-    allTickets = [];
-    currentTickets = [];
-    renderTickets();
+    console.error('Error loading claims:', error);
+    allClaims = [];
+    currentClaims = [];
     if (typeof window.showCartAlert === 'function') {
-      window.showCartAlert('error', 'Loading Error', 'Failed to load support tickets. Please refresh the page.');
+      window.showCartAlert('error', 'Loading Error', 'Failed to load claim support. Please refresh the page.');
     }
+  } finally {
+    updateStatistics();
+    renderClaims();
   }
 }
 
@@ -98,7 +111,7 @@ function updateStatistics() {
   const statOpen = document.getElementById('stat-open');
   const statInProgress = document.getElementById('stat-in-progress');
   const statResolved = document.getElementById('stat-resolved');
-  
+
   if (statOpen) statOpen.textContent = stats.open || 0;
   if (statInProgress) statInProgress.textContent = stats['in-progress'] || 0;
   if (statResolved) statResolved.textContent = stats.resolved || 0;
@@ -108,11 +121,11 @@ function applyFilters() {
   const statusSelect = document.getElementById('filter-status');
   const searchInput = document.getElementById('filter-search');
   
-  filters.status = statusSelect ? statusSelect.value : '';
-  filters.search = searchInput ? searchInput.value.toLowerCase() : '';
-  pagination.page = 1; // Reset to first page
+  filters.status = statusSelect ? (statusSelect.value || '').trim() : '';
+  filters.search = searchInput ? (searchInput.value || '').trim().toLowerCase() : '';
+  pagination.page = 1;
 
-  loadTickets();
+  loadClaims();
 }
 
 function resetFilters() {
@@ -128,26 +141,26 @@ function resetFilters() {
   };
   pagination.page = 1;
 
-  loadTickets();
+  loadClaims();
 }
 
-function renderTickets() {
-  const ticketsList = document.getElementById('tickets-list');
-  const ticketsEmpty = document.getElementById('tickets-empty');
+function renderClaims() {
+  const claimsList = document.getElementById('claims-list');
+  const claimsEmpty = document.getElementById('claims-empty');
 
-  if (!ticketsList) return;
+  if (!claimsList) return;
 
-  if (currentTickets.length === 0) {
-    ticketsList.style.display = 'none';
-    if (ticketsEmpty) ticketsEmpty.style.display = 'block';
+  if (currentClaims.length === 0) {
+    claimsList.style.display = 'none';
+    if (claimsEmpty) claimsEmpty.style.display = 'block';
     return;
   }
 
-  ticketsList.style.display = 'grid';
-  if (ticketsEmpty) ticketsEmpty.style.display = 'none';
+  claimsList.style.display = 'grid';
+  if (claimsEmpty) claimsEmpty.style.display = 'none';
 
-  ticketsList.innerHTML = currentTickets.map(function(ticket) {
-    return createTicketCard(ticket);
+  claimsList.innerHTML = currentClaims.map(function(claim) {
+    return createClaimCard(claim);
   }).join('');
 
   // Re-initialize Lucide icons
@@ -156,58 +169,58 @@ function renderTickets() {
   }
 
   // Add click handlers
-  const cards = document.querySelectorAll('.ticket-card');
+  const cards = document.querySelectorAll('.claim-card');
   cards.forEach(function(card) {
     card.addEventListener('click', function() {
-      const ticketId = card.dataset.ticketId;
-      window.location.href = '/buyer/tickets/' + ticketId;
+      const claimId = card.dataset.claimId;
+      window.location.href = '/buyer/claim-support/' + claimId;
     });
   });
 }
 
-function createTicketCard(ticket) {
-  const createdDate = formatDate(ticket.createdAt);
-  const updatedDate = formatRelativeTime(ticket.updatedAt);
-  const categoryIcon = getCategoryIcon(ticket.category);
-  const hasUnread = ticket.unreadCount > 0;
+function createClaimCard(claim) {
+  const createdDate = formatDate(claim.createdAt);
+  const updatedDate = formatRelativeTime(claim.updatedAt);
+  const categoryIcon = getCategoryIcon(claim.category);
+  const hasUnread = claim.unreadCount > 0;
 
-  return '<div class="ticket-card' + (hasUnread ? ' has-unread' : '') + '" data-ticket-id="' + ticket.id + '">' +
-    '<div class="ticket-card-header">' +
-      '<div class="ticket-card-left">' +
-        '<div class="ticket-id">' + escapeHtml(ticket.id) + '</div>' +
-        '<h3 class="ticket-subject">' + escapeHtml(ticket.subject) + '</h3>' +
-        '<div class="ticket-order">' +
+  return '<div class="claim-card' + (hasUnread ? ' has-unread' : '') + '" data-claim-id="' + claim.id + '">' +
+    '<div class="claim-card-header">' +
+      '<div class="claim-card-left">' +
+        '<div class="claim-id">' + escapeHtml(claim.id) + '</div>' +
+        '<h3 class="claim-subject">' + escapeHtml(claim.subject) + '</h3>' +
+        '<div class="claim-order">' +
           '<i data-lucide="package"></i>' +
-          '<span>' + escapeHtml(ticket.orderNumber || 'No Order') + '</span>' +
+          '<span>' + escapeHtml(claim.orderNumber || 'No Order') + '</span>' +
         '</div>' +
       '</div>' +
-      '<div class="ticket-card-right">' +
-        '<span class="ticket-status-badge ' + ticket.status + '">' + formatStatus(ticket.status) + '</span>' +
-        (hasUnread ? '<span class="unread-badge">' + ticket.unreadCount + '</span>' : '') +
+      '<div class="claim-card-right">' +
+        '<span class="claim-status-badge ' + claim.status + '">' + formatStatus(claim.status) + '</span>' +
+        (hasUnread ? '<span class="unread-badge">' + claim.unreadCount + '</span>' : '') +
       '</div>' +
     '</div>' +
-    '<div class="ticket-card-body">' +
-      '<div class="ticket-category">' +
+    '<div class="claim-card-body">' +
+      '<div class="claim-category">' +
         '<i data-lucide="' + categoryIcon + '"></i>' +
-        '<span>' + escapeHtml(ticket.category) + '</span>' +
+        '<span>' + escapeHtml(claim.category) + '</span>' +
       '</div>' +
     '</div>' +
-    '<div class="ticket-card-footer">' +
-      '<div class="ticket-meta">' +
-        '<div class="ticket-meta-item">' +
+    '<div class="claim-card-footer">' +
+      '<div class="claim-meta">' +
+        '<div class="claim-meta-item">' +
           '<i data-lucide="calendar"></i>' +
           '<span>' + createdDate + '</span>' +
         '</div>' +
-        '<div class="ticket-meta-item">' +
+        '<div class="claim-meta-item">' +
           '<i data-lucide="clock"></i>' +
           '<span>Updated ' + updatedDate + '</span>' +
         '</div>' +
-        '<div class="ticket-meta-item">' +
+        '<div class="claim-meta-item">' +
           '<i data-lucide="message-circle"></i>' +
-          '<span>' + ticket.messageCount + ' ' + (ticket.messageCount === 1 ? 'message' : 'messages') + '</span>' +
+          '<span>' + claim.messageCount + ' ' + (claim.messageCount === 1 ? 'message' : 'messages') + '</span>' +
         '</div>' +
       '</div>' +
-      '<div class="ticket-action">' +
+      '<div class="claim-action">' +
         '<span>View Details</span>' +
         '<i data-lucide="arrow-right"></i>' +
       '</div>' +

@@ -1,12 +1,12 @@
 /* ====================================
-   TICKETS PAGE - PROFESSIONAL DESIGN
+   Claims Page - PROFESSIONAL DESIGN
    PARTSFORM Buyer Portal
    ==================================== */
 
 /* ====================================
    PAGE LAYOUT
    ==================================== */
-.tickets-page {
+.claims-page {
     min-height: 100vh;
     background: var(--washi);
     padding-top: 0;
@@ -14,7 +14,7 @@
 }
 
 /* Ensure navbar stays on top and visible */
-.tickets-page .nav-bar {
+.claims-page .nav-bar {
     z-index: 10001 !important;
     position: fixed !important;
     top: 0 !important;
@@ -30,7 +30,7 @@
 /* ====================================
    HERO SECTION
    ==================================== */
-.tickets-hero {
+.claims-hero {
     padding: 8rem 0 4rem;
     position: relative;
     overflow: hidden;
@@ -40,8 +40,8 @@
     box-shadow: 0 10px 30px rgba(43, 43, 43, 0.2);
 }
 
-/* Background overlay */
-.tickets-hero::before {
+/* Background overlay - industrial/tech imagery */
+.claims-hero::before {
     content: '';
     position: absolute;
     top: 0;
@@ -52,38 +52,32 @@
     background-size: cover;
     background-position: center;
     background-blend-mode: overlay;
-    opacity: 0.3;
+    opacity: 0.25;
     z-index: 1;
     pointer-events: none;
-    animation: subtleShift 20s ease-in-out infinite;
+    animation: claimsHeroShift 25s ease-in-out infinite;
 }
 
-@keyframes subtleShift {
-
-    0%,
-    100% {
-        background-position: center center;
-    }
-
-    50% {
-        background-position: center bottom;
-    }
+@keyframes claimsHeroShift {
+    0%, 100% { background-position: center center; }
+    33% { background-position: center 20%; }
+    66% { background-position: center 80%; }
 }
 
-/* Solid overlay */
-.tickets-hero::after {
+/* Solid overlay - Aitetsu tint (30% Kurogane/Blues) */
+.claims-hero::after {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(26, 43, 61, 0.5);
+    background: linear-gradient(180deg, rgba(64, 84, 94, 0.75) 0%, rgba(43, 43, 43, 0.85) 100%);
     z-index: 1;
     pointer-events: none;
 }
 
-.tickets-hero-content {
+.claims-hero-content {
     position: relative;
     z-index: 2;
     text-align: center;
@@ -92,21 +86,23 @@
     padding: 0 2rem;
 }
 
-.ticket-badge {
+.claim-badge {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
     padding: 0.5rem 1rem;
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(149, 175, 192, 0.15);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    border-radius: var(--radius-sm);
-    color: #ffffff;
+    border: 1px solid rgba(149, 175, 192, 0.35);
+    border-radius: 4px;
+    color: var(--washi);
+    font-family: 'Antartida', sans-serif;
     font-weight: 500;
-    font-size: 0.85rem;
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
     margin-bottom: 2rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     animation: fadeInUp 0.6s ease-out forwards;
 }
 
@@ -122,45 +118,46 @@
     }
 }
 
-.ticket-badge i {
+.claim-badge i {
     width: 16px;
     height: 16px;
     color: #ffffff;
 }
 
-.tickets-hero-title {
-    font-size: 3rem;
-    font-weight: 700;
-    color: #ffffff;
+.claims-hero-title {
+    font-family: 'Quantico', sans-serif;
+    font-size: 2.5rem;
+    font-weight: 400;
+    color: var(--washi);
     margin-bottom: 1rem;
     line-height: 1.2;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
     animation: fadeInUp 0.6s ease-out 0.1s backwards;
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-    letter-spacing: -0.01em;
 }
 
-.tickets-hero-subtitle {
-    font-size: 1.1rem;
-    color: rgba(255, 255, 255, 0.9);
+.claims-hero-subtitle {
+    font-family: 'Antartida', sans-serif;
+    font-size: 1rem;
+    color: rgba(248, 250, 252, 0.9);
     line-height: 1.6;
     animation: fadeInUp 0.6s ease-out 0.2s backwards;
-    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
     font-weight: 400;
     max-width: 600px;
     margin: 0 auto;
 }
 
 /* ====================================
-   TICKETS SECTION
+   CLAIMS SECTION
    ==================================== */
-.tickets-section {
+.claims-section {
     padding: 3rem 0;
 }
 
 /* ====================================
-   TICKETS HEADER WITH STATS
+   CLAIMS HEADER WITH STATS
    ==================================== */
-.tickets-header {
+.claims-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -168,112 +165,82 @@
     gap: 2rem;
 }
 
-.tickets-stats {
-    display: flex;
+/* Stats - Individual cards with clear separation */
+.claims-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
     gap: 1.5rem;
     flex: 1;
 }
 
-.stat-card {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    background: white;
-    padding: 1.25rem 1.5rem;
-    border-radius: 12px;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-    transition: all 0.3s ease;
-    flex: 1;
-}
-
-.stat-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.stat-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.stat-icon.open {
-    background: #fef3c7;
-}
-
-.stat-icon.open i {
-    width: 24px;
-    height: 24px;
-    color: #d97706;
-}
-
-.stat-icon.in-progress {
-    background: #dbeafe;
-}
-
-.stat-icon.in-progress i {
-    width: 24px;
-    height: 24px;
-    color: #2563eb;
-}
-
-.stat-icon.resolved {
-    background: #d1fae5;
-}
-
-.stat-icon.resolved i {
-    width: 24px;
-    height: 24px;
-    color: #059669;
-}
-
-.stat-content {
+.claims-stat-card {
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    gap: 0.5rem;
+    padding: 1.5rem 1.75rem;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid rgba(149, 175, 192, 0.25);
+    box-shadow: 0 2px 16px rgba(149, 175, 192, 0.08);
 }
 
-.stat-value {
-    font-size: 1.75rem;
+.claims-stat-card.stat-open {
+    border-left: 4px solid var(--suzu);
+}
+
+.claims-stat-card.stat-in-progress {
+    border-left: 4px solid var(--aitetsu);
+}
+
+.claims-stat-card.stat-resolved {
+    border-left: 4px solid var(--sei);
+}
+
+.claims-stat-value {
+    font-family: 'Quantico', sans-serif;
+    font-size: 2rem;
     font-weight: 700;
     color: var(--kurogane);
     line-height: 1;
 }
 
-.stat-label {
-    font-size: 0.85rem;
+.claims-stat-label {
+    font-family: 'Antartida', sans-serif;
+    font-size: 0.8rem;
     color: var(--namari);
     font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
 }
 
-/* Create Ticket Button */
-.btn-create-ticket {
+/* Create Claim Button */
+.btn-create-claim {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.875rem 1.75rem;
+    padding: 0.75rem 1.5rem;
     background: var(--kintsugi);
     color: white;
-    border: none;
-    border-radius: 10px;
-    font-weight: 600;
-    font-size: 0.95rem;
+    border: 1.5px solid var(--kintsugi);
+    border-radius: 4px;
+    font-family: 'Quantico', sans-serif;
+    font-size: 0.8125rem;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
     cursor: pointer;
     transition: all 0.3s ease;
     text-decoration: none;
-    box-shadow: 0 4px 12px rgba(64, 84, 94, 0.3);
 }
 
-.btn-create-ticket:hover {
+.btn-create-claim:hover {
+    background: #c9a432;
+    border-color: #c9a432;
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(64, 84, 94, 0.4);
+    box-shadow: 0 4px 12px rgba(214, 172, 63, 0.3);
 }
 
-.btn-create-ticket i {
+.btn-create-claim i {
     width: 18px;
     height: 18px;
 }
@@ -281,15 +248,15 @@
 /* ====================================
    FILTERS
    ==================================== */
-.tickets-filters {
+.claims-filters {
     display: flex;
     gap: 1rem;
     margin-bottom: 2rem;
     background: white;
     padding: 1.5rem;
-    border-radius: 12px;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    border-radius: 4px;
+    border: 1px solid rgba(149, 175, 192, 0.25);
+    box-shadow: 0 2px 16px rgba(149, 175, 192, 0.08);
 }
 
 .filter-group {
@@ -300,28 +267,32 @@
 }
 
 .filter-label {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--namari);
+    font-family: 'Antartida', sans-serif;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--aitetsu);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 .filter-select,
 .filter-input {
     padding: 0.75rem 1rem;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    font-size: 0.95rem;
+    border: 1.5px solid rgba(149, 175, 192, 0.25);
+    border-radius: 4px;
+    font-family: 'Antartida', sans-serif;
+    font-size: 0.9375rem;
     color: var(--kurogane);
     background: var(--washi);
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
 }
 
 .filter-select:focus,
 .filter-input:focus {
     outline: none;
-    border-color: var(--sei);
+    border-color: var(--kintsugi);
     background: white;
-    box-shadow: 0 0 0 3px rgba(149, 175, 192, 0.1);
+    box-shadow: 0 0 0 3px rgba(214, 172, 63, 0.12);
 }
 
 .filter-actions {
@@ -345,22 +316,26 @@
 }
 
 .btn-filter {
-    background: var(--aitetsu);
+    background: var(--kintsugi);
     color: white;
+    border: 1.5px solid var(--kintsugi);
 }
 
 .btn-filter:hover {
-    background: #2563eb;
+    background: #c9a432;
+    border-color: #c9a432;
 }
 
 .btn-reset {
-    background: #f1f5f9;
+    background: white;
     color: var(--namari);
+    border: 1.5px solid var(--suzu);
 }
 
 .btn-reset:hover {
-    background: #e2e8f0;
-    color: var(--namari);
+    background: var(--washi);
+    border-color: var(--aitetsu);
+    color: var(--aitetsu);
 }
 
 .btn-filter i,
@@ -370,48 +345,70 @@
 }
 
 /* ====================================
-   TICKETS LIST
+   LOADING STATE
    ==================================== */
-.tickets-list {
+.claims-list .loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  gap: 1rem;
+}
+
+.claims-list .loading-state i.spin,
+.claims-list .loading-state .spin {
+  animation: claims-spin 0.8s linear infinite;
+  display: inline-block;
+}
+
+@keyframes claims-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ====================================
+   CLAIMS LIST
+   ==================================== */
+.claims-list {
     display: grid;
     gap: 1.25rem;
 }
 
-.ticket-card {
+.claim-card {
     background: white;
-    border-radius: 12px;
-    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    border: 1px solid rgba(149, 175, 192, 0.25);
     padding: 1.5rem;
     transition: all 0.3s ease;
     cursor: pointer;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 16px rgba(149, 175, 192, 0.08);
 }
 
-.ticket-card:hover {
+.claim-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-    border-color: var(--sei);
+    box-shadow: 0 4px 12px rgba(149, 175, 192, 0.12);
+    border-color: rgba(149, 175, 192, 0.35);
 }
 
-.ticket-card-header {
+.claim-card-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
     margin-bottom: 1rem;
 }
 
-.ticket-card-left {
+.claim-card-left {
     flex: 1;
 }
 
-.ticket-id {
+.claim-id {
     font-size: 0.85rem;
     font-weight: 600;
     color: var(--aitetsu);
     margin-bottom: 0.5rem;
 }
 
-.ticket-subject {
+.claim-subject {
     font-size: 1.1rem;
     font-weight: 600;
     color: var(--kurogane);
@@ -419,7 +416,7 @@
     line-height: 1.4;
 }
 
-.ticket-order {
+.claim-order {
     font-size: 0.85rem;
     color: var(--namari);
     display: flex;
@@ -427,19 +424,19 @@
     gap: 0.5rem;
 }
 
-.ticket-order i {
+.claim-order i {
     width: 14px;
     height: 14px;
 }
 
-.ticket-card-right {
+.claim-card-right {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
     gap: 0.5rem;
 }
 
-.ticket-status-badge {
+.claim-status-badge {
     padding: 0.375rem 0.875rem;
     border-radius: 6px;
     font-size: 0.8rem;
@@ -447,55 +444,65 @@
     text-transform: capitalize;
 }
 
-.ticket-status-badge.open {
-    background: #fef3c7;
-    color: #d97706;
-}
-
-.ticket-status-badge.in-progress {
-    background: #dbeafe;
-    color: #2563eb;
-}
-
-.ticket-status-badge.resolved {
-    background: #d1fae5;
-    color: #059669;
-}
-
-.ticket-priority-badge {
-    padding: 0.25rem 0.75rem;
-    border-radius: 6px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.ticket-priority-badge.low {
-    background: #f1f5f9;
+.claim-status-badge {
+    background: white;
+    border: 1.5px solid var(--suzu);
     color: var(--namari);
 }
 
-.ticket-priority-badge.medium {
-    background: #dbeafe;
-    color: #2563eb;
+.claim-status-badge.open {
+    background: white;
+    color: var(--namari);
+    border-color: var(--suzu);
 }
 
-.ticket-priority-badge.high {
-    background: #fef3c7;
-    color: #d97706;
+.claim-status-badge.in-progress {
+    background: white;
+    color: var(--aitetsu);
+    border-color: var(--sei);
 }
 
-.ticket-priority-badge.urgent {
-    background: #fee2e2;
-    color: #dc2626;
+.claim-status-badge.resolved {
+    background: white;
+    color: var(--sei);
+    border-color: var(--sei);
 }
 
-.ticket-card-body {
+.claim-status-badge.closed {
+    background: white;
+    color: var(--namari);
+    border-color: var(--suzu);
+}
+
+.claim-priority-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    font-family: 'Antartida', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: white;
+    border: 1.5px solid var(--suzu);
+    color: var(--namari);
+}
+
+.claim-priority-badge.medium {
+    border-color: var(--sei);
+    color: var(--aitetsu);
+}
+
+.claim-priority-badge.high,
+.claim-priority-badge.urgent {
+    border-color: var(--namari);
+    color: var(--namari);
+}
+
+.claim-card-body {
     margin-bottom: 1rem;
 }
 
-.ticket-category {
+.claim-category {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
@@ -507,12 +514,12 @@
     font-weight: 500;
 }
 
-.ticket-category i {
+.claim-category i {
     width: 16px;
     height: 16px;
 }
 
-.ticket-card-footer {
+.claim-card-footer {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -520,25 +527,25 @@
     border-top: 1px solid #f1f5f9;
 }
 
-.ticket-meta {
+.claim-meta {
     display: flex;
     gap: 1.5rem;
     font-size: 0.85rem;
     color: var(--namari);
 }
 
-.ticket-meta-item {
+.claim-meta-item {
     display: flex;
     align-items: center;
     gap: 0.5rem;
 }
 
-.ticket-meta-item i {
+.claim-meta-item i {
     width: 14px;
     height: 14px;
 }
 
-.ticket-action {
+.claim-action {
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -552,13 +559,13 @@
     transition: all 0.2s ease;
 }
 
-.ticket-action:hover {
-    background: var(--aitetsu);
-    color: white;
+.claim-action:hover {
+    background: var(--washi);
     border-color: var(--aitetsu);
+    color: var(--aitetsu);
 }
 
-.ticket-action i {
+.claim-action i {
     width: 16px;
     height: 16px;
 }
@@ -566,45 +573,52 @@
 /* ====================================
    EMPTY STATE
    ==================================== */
-.tickets-empty {
+.claims-empty {
     text-align: center;
-    padding: 4rem 2rem;
+    padding: 6rem 2rem;
     background: white;
-    border-radius: 12px;
-    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    border: 1px solid rgba(149, 175, 192, 0.25);
+    box-shadow: 0 2px 12px rgba(149, 175, 192, 0.08);
 }
 
-.tickets-empty-icon {
-    width: 80px;
-    height: 80px;
-    margin: 0 auto 1.5rem;
-    background: #f1f5f9;
-    border-radius: 50%;
+.claims-empty-icon {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 2rem;
+    background: var(--washi);
+    border: 1px solid rgba(149, 175, 192, 0.25);
+    border-radius: 4px;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-.tickets-empty-icon i {
-    width: 40px;
-    height: 40px;
-    color: var(--suzu);
+.claims-empty-icon i {
+    width: 48px;
+    height: 48px;
+    color: var(--namari);
 }
 
-.tickets-empty-title {
+.claims-empty-title {
+    font-family: 'Quantico', sans-serif;
     font-size: 1.5rem;
-    font-weight: 700;
+    font-weight: 400;
     color: var(--kurogane);
-    margin-bottom: 0.75rem;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
 }
 
-.tickets-empty-text {
+.claims-empty-text {
+    font-family: 'Antartida', sans-serif;
     font-size: 1rem;
     color: var(--namari);
     margin-bottom: 2rem;
     max-width: 400px;
     margin-left: auto;
     margin-right: auto;
+    line-height: 1.6;
 }
 
 .btn-empty-action {
@@ -614,19 +628,21 @@
     padding: 0.875rem 1.75rem;
     background: var(--kintsugi);
     color: white;
-    border: none;
-    border-radius: 10px;
-    font-weight: 600;
-    font-size: 0.95rem;
+    border: 1.5px solid var(--kintsugi);
+    border-radius: 4px;
+    font-family: 'Quantico', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: background 0.15s ease, border-color 0.15s ease;
     text-decoration: none;
-    box-shadow: 0 4px 12px rgba(64, 84, 94, 0.3);
 }
 
 .btn-empty-action:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(64, 84, 94, 0.4);
+    background: #c9a432;
+    border-color: #c9a432;
 }
 
 .btn-empty-action i {
@@ -638,39 +654,47 @@
    RESPONSIVE DESIGN
    ==================================== */
 @media (max-width: 1024px) {
-    .tickets-header {
+    .claims-header {
         flex-direction: column;
         align-items: stretch;
     }
 
-    .tickets-stats {
-        flex-wrap: wrap;
+    .claims-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
     }
 
-    .btn-create-ticket {
+    .btn-create-claim {
         width: 100%;
         justify-content: center;
     }
 }
 
 @media (max-width: 768px) {
-    .tickets-hero {
+    .claims-hero {
         padding: 7rem 0 3rem;
     }
 
-    .tickets-hero-title {
+    .claims-hero-title {
         font-size: 2.5rem;
     }
 
-    .tickets-hero-subtitle {
+    .claims-hero-subtitle {
         font-size: 1rem;
     }
 
-    .tickets-stats {
-        flex-direction: column;
+    .claims-stats-grid {
+        grid-template-columns: 1fr;
     }
 
-    .tickets-filters {
+    .claims-stat-card {
+        padding: 1.25rem 1.5rem;
+    }
+
+    .claims-stat-value {
+        font-size: 1.75rem;
+    }
+
+    .claims-filters {
         flex-direction: column;
     }
 
@@ -685,53 +709,39 @@
         justify-content: center;
     }
 
-    .ticket-card-header {
+    .claim-card-header {
         flex-direction: column;
         gap: 1rem;
     }
 
-    .ticket-card-right {
+    .claim-card-right {
         flex-direction: row;
         align-items: center;
         width: 100%;
     }
 
-    .ticket-card-footer {
+    .claim-card-footer {
         flex-direction: column;
         gap: 1rem;
         align-items: stretch;
     }
 
-    .ticket-meta {
+    .claim-meta {
         flex-direction: column;
         gap: 0.75rem;
     }
 }
 
 @media (max-width: 480px) {
-    .tickets-hero {
+    .claims-hero {
         padding: 6rem 0 2.5rem;
     }
 
-    .tickets-hero-title {
+    .claims-hero-title {
         font-size: 2rem;
     }
 
-    .stat-card {
-        padding: 1rem;
-    }
-
-    .stat-icon {
-        width: 40px;
-        height: 40px;
-    }
-
-    .stat-icon i {
-        width: 20px;
-        height: 20px;
-    }
-
-    .stat-value {
+    .claims-stat-value {
         font-size: 1.5rem;
     }
 }

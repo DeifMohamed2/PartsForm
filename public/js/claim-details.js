@@ -1,18 +1,18 @@
-// Ticket Details Page JavaScript - Buyer Side
+// Claim Details Page JavaScript - Buyer Side
 // Real-time chat using Socket.io
 
-// Get ticket ID from URL
+// Get claim ID from URL
 const urlPath = window.location.pathname;
-const ticketId = urlPath.split('/').pop();
+const claimId = urlPath.split('/').pop();
 
-let currentTicket = null;
+let currentClaim = null;
 let socket = null;
 let isTyping = false;
 let typingTimeout = null;
 
 // Initialize page
 document.addEventListener('DOMContentLoaded', () => {
-  loadTicketData();
+  loadClaimData();
   setupEventListeners();
   initializeSocket();
 });
@@ -32,8 +32,8 @@ function initializeSocket() {
 
   socket.on('connect', () => {
     console.log('Socket connected');
-    // Join the ticket room
-    socket.emit('join-ticket', ticketId);
+    // Join the claim room
+    socket.emit('join-claim', claimId);
   });
 
   socket.on('disconnect', () => {
@@ -42,7 +42,7 @@ function initializeSocket() {
 
   // Listen for new messages
   socket.on('message-received', (data) => {
-    if (data.ticketId === ticketId && data.sender !== 'buyer') {
+    if (data.claimId === claimId && data.sender !== 'buyer') {
       addMessageToUI(data);
       scrollToBottom();
       markMessagesAsRead();
@@ -57,46 +57,52 @@ function initializeSocket() {
   });
 
   // Listen for status changes
-  socket.on('ticket-status-changed', (data) => {
-    if (data.ticketId === ticketId) {
+  socket.on('claim-status-changed', (data) => {
+    if (data.claimId === claimId) {
       updateStatusUI(data.status);
     }
   });
 
   // Listen for read receipts
   socket.on('messages-marked-read', (data) => {
-    if (data.ticketId === ticketId && data.readBy === 'admin') {
+    if (data.claimId === claimId && data.readBy === 'admin') {
       updateReadReceipts();
     }
   });
 }
 
 /**
- * Load ticket data from API
+ * Load claim data from API
  */
-async function loadTicketData() {
+async function loadClaimData() {
   try {
-    const response = await fetch('/buyer/api/tickets/' + ticketId);
+    const response = await fetch('/buyer/api/claims/' + claimId);
+    
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      throw new Error('Server returned non-JSON response');
+    }
+    
     const data = await response.json();
     
-    if (!data.success || !data.ticket) {
-      showError('Ticket not found');
+    if (!data.success || !data.claim) {
+      showError('Claim not found');
       setTimeout(() => {
-        window.location.href = '/buyer/tickets';
+        window.location.href = '/buyer/claim-support';
       }, 2000);
       return;
     }
 
-    currentTicket = data.ticket;
-    updateTicketHeader();
-    updateTicketInfo();
+    currentClaim = data.claim;
+    updateClaimHeader();
+    updateClaimInfo();
     renderMessages();
       scrollToBottom();
-      // Disable chat UI if ticket is resolved/closed
-      setChatEnabled(!['resolved', 'closed'].includes(currentTicket.status));
+      // Disable chat UI if claim is resolved/closed
+      setChatEnabled(!['resolved', 'closed'].includes(currentClaim.status));
   } catch (error) {
-    console.error('Error loading ticket:', error);
-    showError('Failed to load ticket');
+    console.error('Error loading claim:', error);
+    showError('Failed to load claim');
   }
 /**
  * Enable or disable the chat input UI for buyer
@@ -112,14 +118,14 @@ function setChatEnabled(enabled) {
   if (!chatInputContainer) return;
 
   // Remove existing notice
-  const existingNotice = chatInputContainer.querySelector('.ticket-closed-notice');
+  const existingNotice = chatInputContainer.querySelector('.claim-closed-notice');
   if (existingNotice) existingNotice.remove();
 
   if (!enabled) {
     if (chatForm) chatForm.classList.add('disabled');
     if (messageInput) {
       messageInput.disabled = true;
-      messageInput.placeholder = 'This ticket is resolved — you cannot send messages.';
+      messageInput.placeholder = 'This claim is resolved — you cannot send messages.';
     }
     if (fileInput) fileInput.disabled = true;
     if (attachBtn) attachBtn.disabled = true;
@@ -129,7 +135,7 @@ function setChatEnabled(enabled) {
     }
 
     const notice = document.createElement('div');
-    notice.className = 'ticket-closed-notice';
+    notice.className = 'claim-closed-notice';
     notice.style.padding = '0.75rem 1rem';
     notice.style.background = 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)';
     notice.style.border = '1px solid #bfdbfe';
@@ -137,7 +143,7 @@ function setChatEnabled(enabled) {
     notice.style.color = '#1e3a8a';
     notice.style.fontWeight = '600';
     notice.style.marginBottom = '0.75rem';
-    notice.textContent = 'This ticket has been resolved/closed. You cannot send new messages.';
+    notice.textContent = 'This claim has been resolved/closed. You cannot send new messages.';
     chatInputContainer.insertBefore(notice, chatInputContainer.firstChild);
   } else {
     if (chatForm) chatForm.classList.remove('disabled');
@@ -200,43 +206,43 @@ function handleTyping() {
 
   if (!isTyping) {
     isTyping = true;
-    socket.emit('typing', { ticketId, isTyping: true });
+    socket.emit('typing', { claimId, isTyping: true });
   }
 
   clearTimeout(typingTimeout);
   typingTimeout = setTimeout(() => {
     isTyping = false;
-    socket.emit('typing', { ticketId, isTyping: false });
+    socket.emit('typing', { claimId, isTyping: false });
   }, 2000);
 }
 
 /**
- * Update ticket header
+ * Update claim header
  */
-function updateTicketHeader() {
-  document.getElementById('ticket-id-header').textContent = currentTicket.id;
-  document.getElementById('ticket-subject-header').textContent = currentTicket.subject;
-  document.getElementById('ticket-order-header').textContent = currentTicket.orderNumber || 'N/A';
-  document.getElementById('ticket-created-header').textContent = formatDate(currentTicket.createdAt);
+function updateClaimHeader() {
+  document.getElementById('claim-id-header').textContent = currentClaim.id;
+  document.getElementById('claim-subject-header').textContent = currentClaim.subject;
+  document.getElementById('claim-order-header').textContent = currentClaim.orderNumber || 'N/A';
+  document.getElementById('claim-created-header').textContent = formatDate(currentClaim.createdAt);
   
   const statusBadge = document.getElementById('status-badge-header');
-  statusBadge.textContent = formatStatus(currentTicket.status);
-  statusBadge.className = 'status-badge-header ' + currentTicket.status;
+  statusBadge.textContent = formatStatus(currentClaim.status);
+  statusBadge.className = 'status-badge-header ' + currentClaim.status;
 }
 
 /**
- * Update ticket info panel
+ * Update claim info panel
  */
-function updateTicketInfo() {
-  const categoryIcon = getCategoryIcon(currentTicket.category);
-  document.getElementById('ticket-category').innerHTML = 
-    '<i data-lucide="' + categoryIcon + '"></i><span>' + currentTicket.category + '</span>';
+function updateClaimInfo() {
+  const categoryIcon = getCategoryIcon(currentClaim.category);
+  document.getElementById('claim-category').innerHTML = 
+    '<i data-lucide="' + categoryIcon + '"></i><span>' + currentClaim.category + '</span>';
 
   const statusBadgeSmall = document.getElementById('status-badge-small');
-  statusBadgeSmall.textContent = formatStatus(currentTicket.status);
-  statusBadgeSmall.className = 'status-badge-small ' + currentTicket.status;
+  statusBadgeSmall.textContent = formatStatus(currentClaim.status);
+  statusBadgeSmall.className = 'status-badge-small ' + currentClaim.status;
 
-  document.getElementById('ticket-updated').textContent = formatRelativeTime(currentTicket.updatedAt || currentTicket.lastMessageAt);
+  document.getElementById('claim-updated').textContent = formatRelativeTime(currentClaim.updatedAt || currentClaim.lastMessageAt);
 
   if (typeof lucide !== 'undefined') {
     lucide.createIcons();
@@ -248,9 +254,9 @@ function updateTicketInfo() {
  */
 function renderMessages() {
   const chatMessages = document.getElementById('chat-messages');
-  if (!chatMessages || !currentTicket.messages) return;
+  if (!chatMessages || !currentClaim.messages) return;
 
-  chatMessages.innerHTML = currentTicket.messages.map(msg => createMessageHTML(msg)).join('');
+  chatMessages.innerHTML = currentClaim.messages.map(msg => createMessageHTML(msg)).join('');
 
   if (typeof lucide !== 'undefined') {
     lucide.createIcons();
@@ -364,7 +370,7 @@ async function handleMessageSubmit(e) {
       formData.append('attachments', files[i]);
     }
 
-    const response = await fetch('/buyer/api/tickets/' + ticketId + '/messages', {
+    const response = await fetch('/buyer/api/claims/' + claimId + '/messages', {
       method: 'POST',
       body: formData
     });
@@ -390,7 +396,7 @@ async function handleMessageSubmit(e) {
 
       // Stop typing indicator
       if (socket) {
-        socket.emit('typing', { ticketId, isTyping: false });
+        socket.emit('typing', { claimId, isTyping: false });
       }
     } else {
       showError(data.error || 'Failed to send message');
@@ -580,7 +586,7 @@ function updateStatusUI(status) {
     statusBadgeSmall.className = 'status-badge-small ' + status;
   }
 
-  showNotification('Ticket status changed to ' + formattedStatus);
+  showNotification('Claim status changed to ' + formattedStatus);
   // Enable/disable chat depending on new status
   setChatEnabled(!['resolved', 'closed'].includes(status));
 }
@@ -612,7 +618,7 @@ function updateReadReceipts() {
  */
 async function markMessagesAsRead() {
   try {
-    await fetch('/buyer/api/tickets/' + ticketId + '/read', {
+    await fetch('/buyer/api/claims/' + claimId + '/read', {
       method: 'PUT'
     });
   } catch (error) {
@@ -767,7 +773,7 @@ function formatFileSize(bytes) {
 // Cleanup on page unload
 window.addEventListener('beforeunload', function() {
   if (socket) {
-    socket.emit('leave-ticket', ticketId);
+    socket.emit('leave-claim', claimId);
     socket.disconnect();
   }
 });

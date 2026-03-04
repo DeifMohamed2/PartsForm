@@ -22,12 +22,12 @@ const {
   updateOrderStatus,
   addTimelineNote,
   getOrderStats,
-  getTicketsManagement,
-  getTicketDetails,
-  postTicketReply,
-  updateTicketStatus,
-  getTicketsApi,
-  markTicketAsReadAdmin,
+  getClaimsManagement,
+  getClaimDetails,
+  postClaimReply,
+  updateClaimStatus,
+  getClaimsApi,
+  markClaimAsReadAdmin,
   getUsersManagement,
   getUserDetails,
   getUserCreate,
@@ -203,24 +203,24 @@ const upload = multer({
   },
 });
 
-// Configure multer for ticket file uploads
-const ticketUploadDir = path.join(__dirname, '../public/uploads/tickets');
-if (!fs.existsSync(ticketUploadDir)) {
-  fs.mkdirSync(ticketUploadDir, { recursive: true });
+// Configure multer for claim file uploads
+const claimUploadDir = path.join(__dirname, '../public/uploads/claims');
+if (!fs.existsSync(claimUploadDir)) {
+  fs.mkdirSync(claimUploadDir, { recursive: true });
 }
 
-const ticketStorage = multer.diskStorage({
+const claimStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, ticketUploadDir);
+    cb(null, claimUploadDir);
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    cb(null, 'ticket-admin-' + uniqueSuffix + path.extname(file.originalname));
+    cb(null, 'claim-admin-' + uniqueSuffix + path.extname(file.originalname));
   },
 });
 
-const ticketUpload = multer({
-  storage: ticketStorage,
+const claimUpload = multer({
+  storage: claimStorage,
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
   fileFilter: (req, file, cb) => {
     const allowedTypes = [
@@ -300,20 +300,20 @@ router.get('/api/search/autocomplete', autocomplete);
 // Legacy delete route for compatibility
 router.delete('/orders/:id', requirePermission(PERMISSIONS.DELETE, PERMISSIONS.MANAGE_ORDERS), deleteOrder);
 
-// Tickets management (read by default, write for replies)
-router.get('/tickets', getTicketsManagement);
-router.get('/tickets/:id', getTicketDetails);
+// Claims management (read by default, write for replies)
+router.get('/claims', getClaimsManagement);
+router.get('/claims/:id', getClaimDetails);
 router.post(
-  '/tickets/:id/reply',
+  '/claims/:id/reply',
   requirePermission(PERMISSIONS.WRITE),
-  ticketUpload.array('attachments', 5),
-  postTicketReply,
+  claimUpload.array('attachments', 5),
+  postClaimReply,
 );
-router.put('/tickets/:id/status', requirePermission(PERMISSIONS.WRITE), updateTicketStatus);
+router.put('/claims/:id/status', requirePermission(PERMISSIONS.WRITE), updateClaimStatus);
 
-// Tickets API endpoints
-router.get('/api/tickets', getTicketsApi);
-router.put('/api/tickets/:id/read', markTicketAsReadAdmin);
+// Claims API endpoints
+router.get('/api/claims', getClaimsApi);
+router.put('/api/claims/:id/read', markClaimAsReadAdmin);
 
 // Users management - Pages
 router.get('/users', getUsersManagement);

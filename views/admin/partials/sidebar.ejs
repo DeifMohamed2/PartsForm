@@ -49,11 +49,11 @@
         <span class="sidebar-nav-badge" style="background: linear-gradient(135deg, #667eea, #764ba2);" id="sidebarInquiriesBadge"><%= sidebarCounts.unreadInquiries %></span>
         <% } %>
       </a>
-      <a href="/admin/tickets" class="sidebar-nav-item <%= typeof activePage !== 'undefined' && activePage === 'tickets' ? 'active' : '' %>">
+      <a href="/admin/claims" class="sidebar-nav-item <%= typeof activePage !== 'undefined' && activePage === 'claims' ? 'active' : '' %>">
         <i data-lucide="ticket"></i>
-        <span>Tickets</span>
-        <% if (typeof sidebarCounts !== 'undefined' && sidebarCounts.openTickets > 0) { %>
-        <span class="sidebar-nav-badge" id="sidebarTicketsBadge"><%= sidebarCounts.openTickets %></span>
+        <span>Support Claims</span>
+        <% if (typeof sidebarCounts !== 'undefined' && sidebarCounts.openClaims > 0) { %>
+        <span class="sidebar-nav-badge" id="sidebarClaimsBadge"><%= sidebarCounts.openClaims %></span>
         <% } %>
       </a>
       <% if (typeof userPermissions === 'undefined' || userPermissions.canManageUsers || userPermissions.isSuperAdmin) { %>
@@ -348,7 +348,7 @@ document.addEventListener('DOMContentLoaded', function() {
       const data = await response.json();
       if (!data.success) return;
       
-      const { newOrders, openTickets, unreadInquiries } = data.counts;
+      const { newOrders, openClaims, unreadInquiries } = data.counts;
       
       // Update Orders badge
       const ordersBadge = document.getElementById('sidebarOrdersBadge');
@@ -369,23 +369,23 @@ document.addEventListener('DOMContentLoaded', function() {
         ordersBadge.remove();
       }
       
-      // Update Tickets badge
-      const ticketsBadge = document.getElementById('sidebarTicketsBadge');
-      const ticketsNavItem = document.querySelector('a[href*="/admin/tickets"]');
+      // Update Claims badge
+      const claimsBadge = document.getElementById('sidebarClaimsBadge');
+      const claimsNavItem = document.querySelector('a[href*="/admin/claims"]');
       
-      if (openTickets > 0) {
-        if (ticketsBadge) {
-          ticketsBadge.textContent = openTickets;
-        } else if (ticketsNavItem) {
+      if (openClaims > 0) {
+        if (claimsBadge) {
+          claimsBadge.textContent = openClaims;
+        } else if (claimsNavItem) {
           // Create badge if it doesn't exist
           const badge = document.createElement('span');
           badge.className = 'sidebar-nav-badge';
-          badge.id = 'sidebarTicketsBadge';
-          badge.textContent = openTickets;
-          ticketsNavItem.appendChild(badge);
+          badge.id = 'sidebarClaimsBadge';
+          badge.textContent = openClaims;
+          claimsNavItem.appendChild(badge);
         }
-      } else if (ticketsBadge) {
-        ticketsBadge.remove();
+      } else if (claimsBadge) {
+        claimsBadge.remove();
       }
       
       // Update Email Inquiries badge

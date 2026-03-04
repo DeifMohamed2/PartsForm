@@ -4,21 +4,19 @@
  * Features:
  * - Unique request ID generation for tracing
  * - Response time tracking
- * - Full request/response logging
- * - User context capture
+ * - Clean, human-readable HTTP logging (INFO/WARN/ERROR with colors)
  * - Skip health checks and static files
- * - Morgan integration
  */
 
-const morgan = require('morgan');
 const crypto = require('crypto');
 const logger = require('../utils/logger');
 
-// Skip logging for these paths (health checks, static files, etc.)
+// Skip logging for these paths (health checks, static files, browser noise)
 const SKIP_PATHS = [
   '/health',
   '/favicon.ico',
   '/robots.txt',
+  '/.well-known/',
   '/css/',
   '/js/',
   '/images/',
@@ -27,56 +25,41 @@ const SKIP_PATHS = [
 ];
 
 /**
- * Request ID middleware - adds unique ID to each request
+ * Request ID middleware - adds unique ID and logs each request when finished
  */
 const requestIdMiddleware = (req, res, next) => {
-  // Use existing request ID from header (for distributed tracing) or generate new one
   req.requestId = req.headers['x-request-id'] || crypto.randomUUID();
-  
-  // Add request ID to response headers for client-side tracking
   res.setHeader('X-Request-ID', req.requestId);
-  
-  // Store start time for response time calculation
   req.startTime = process.hrtime.bigint();
   
-  // Create a child logger with request context
   req.log = logger.child({
     requestId: req.requestId,
     userId: req.user?.id || req.admin?.id || req.user?._id || null,
     userType: req.userRole || (req.admin ? 'admin' : 'anonymous'),
     ip: req.ip || req.connection?.remoteAddress,
-    userAgent: req.get('user-agent')?.substring(0, 200),
   });
   
-  // Log response when finished
   res.on('finish', () => {
-    // Skip logging for certain paths
     if (shouldSkipLogging(req.path)) return;
     
     const endTime = process.hrtime.bigint();
-    const responseTime = Number(endTime - req.startTime) / 1000000; // Convert to ms
+    const responseTime = Math.round(Number(endTime - req.startTime) / 1000000);
     
     const logData = {
       requestId: req.requestId,
       method: req.method,
       url: req.originalUrl || req.url,
       statusCode: res.statusCode,
-      responseTime: Math.round(responseTime),
-      contentLength: res.get('content-length'),
+      responseTime,
       userId: req.user?.id || req.admin?.id || req.user?._id,
-      userType: req.userRole || (req.admin ? 'admin' : 'anonymous'),
-      ip: req.ip || req.connection?.remoteAddress,
-      userAgent: req.get('user-agent')?.substring(0, 100),
-      referer: req.get('referer'),
     };
     
-    // Log level based on status code
     if (res.statusCode >= 500) {
-      logger.error('HTTP Request Error', logData);
+      logger.error('Request failed', logData);
     } else if (res.statusCode >= 400) {
-      logger.warn('HTTP Request Warning', logData);
+      logger.warn('Request warning', logData);
     } else {
-      logger.http('HTTP Request', logData);
+      logger.info('Request', logData);
     }
   });
   
@@ -91,28 +74,10 @@ function shouldSkipLogging(path) {
 }
 
 /**
- * Morgan middleware configuration
- * Using combined format for comprehensive logging
+ * Morgan middleware - kept for http file logging only (no console output)
+ * Uses a no-op stream in dev since requestIdMiddleware handles console
  */
-const morganFormat = ':method :url :status :response-time ms - :res[content-length] - :req[x-request-id]';
-
-// Custom Morgan tokens
-morgan.token('req-id', (req) => req.requestId || '-');
-morgan.token('user-id', (req) => req.user?.id || req.admin?.id || '-');
-
-// Morgan middleware with skip logic and custom format
-const morganMiddleware = morgan(morganFormat, {
-  stream: logger.stream,
-  skip: (req, res) => {
-    // Skip health checks and static files
-    if (shouldSkipLogging(req.path)) return true;
-    // In production, skip successful static/OPTIONS requests
-    if (process.env.NODE_ENV === 'production') {
-      return req.method === 'OPTIONS' || (res.statusCode < 400 && req.path.includes('.'));
-    }
-    return false;
-  },
-});
+const morganMiddleware = (req, res, next) => next();
 
 /**
  * Error logging middleware - capture and log errors

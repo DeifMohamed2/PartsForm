@@ -50,9 +50,9 @@ winston.addColors(colors);
 
 // ==== FORMAT DEFINITIONS ====
 
-// Timestamp format
+// Timestamp format - [HH:mm:ss] style
 const timestampFormat = winston.format.timestamp({
-  format: 'YYYY-MM-DD HH:mm:ss.SSS',
+  format: 'HH:mm:ss',
 });
 
 // Error stack trace format
@@ -91,7 +91,17 @@ const metadataFormat = winston.format((info) => {
   return info;
 });
 
-// Pretty print format for console (development)
+// Human-readable status messages
+const STATUS_MESSAGES = {
+  200: 'OK', 201: 'Created', 204: 'No Content',
+  301: 'Moved', 302: 'Redirect', 304: 'Not Modified',
+  400: 'Bad Request', 401: 'Unauthorized', 403: 'Forbidden',
+  404: 'Not Found', 405: 'Method Not Allowed', 409: 'Conflict',
+  422: 'Validation Error', 429: 'Too Many Requests',
+  500: 'Server Error', 502: 'Bad Gateway', 503: 'Unavailable'
+};
+
+// Pretty print format - [HH:mm:ss] level: message {"service":"partsform","event":"..."}
 const prettyPrintFormat = winston.format.printf(({ 
   level, 
   message, 
@@ -103,47 +113,52 @@ const prettyPrintFormat = winston.format.printf(({
   statusCode,
   responseTime,
   stack,
+  error,
+  errorMessage,
   ...metadata 
 }) => {
-  let log = `${timestamp} [${level.toUpperCase().padEnd(5)}]`;
+  const levelLower = level.toLowerCase();
+  let log = `[${timestamp}] ${levelLower}: `;
   
-  // Add request context if available
-  if (requestId) {
-    log += ` [${requestId.substring(0, 8)}]`;
-  }
+  // Build metadata JSON (service + event + relevant fields)
+  const meta = { service: 'partsform' };
   
-  // Add user context if available
-  if (userId) {
-    log += ` [user:${userId}]`;
-  }
-  
-  // Add HTTP request info
+  // HTTP request
   if (method && url) {
-    log += ` ${method} ${url}`;
-    if (statusCode) {
-      log += ` ${statusCode}`;
-    }
-    if (responseTime) {
-      log += ` ${responseTime}ms`;
-    }
+    const statusMsg = STATUS_MESSAGES[statusCode] || statusCode;
+    const timeStr = responseTime != null ? ` (${responseTime}ms)` : '';
+    log += `HTTP ${method} ${url} ${statusCode} ${statusMsg}${timeStr}`;
+    meta.event = 'HTTP_REQUEST';
+    meta.method = method;
+    meta.url = url;
+    meta.statusCode = statusCode;
+    if (responseTime != null) meta.responseTime = responseTime;
   } else {
-    log += ` ${message}`;
+    log += message;
+    if (metadata.event) meta.event = metadata.event;
+    if (metadata.socketId) meta.socketId = metadata.socketId;
+    if (metadata.user) meta.user = metadata.user;
+    if (metadata.claimId) meta.claimId = metadata.claimId;
+    if (metadata.host) meta.host = metadata.host;
+    if (metadata.error) meta.error = metadata.error;
+    if (metadata.port) meta.port = metadata.port;
+    if (metadata.nodeEnv) meta.nodeEnv = metadata.nodeEnv;
   }
   
-  // Add stack trace for errors
-  if (stack) {
-    log += `\n${stack}`;
+  // Add request ID for errors
+  if (level === 'error' && requestId) {
+    meta.requestId = requestId.substring(0, 8);
+  }
+  if (level === 'error' && (errorMessage || metadata.errorMessage)) {
+    meta.error = errorMessage || metadata.errorMessage;
   }
   
-  // Add extra metadata if present (excluding already printed fields)
-  const extraMeta = { ...metadata };
-  delete extraMeta.pid;
-  delete extraMeta.hostname;
-  delete extraMeta.memory;
-  delete extraMeta.service;
+  log += ` ${JSON.stringify(meta)}`;
   
-  if (Object.keys(extraMeta).length > 0) {
-    log += `\n  Meta: ${JSON.stringify(extraMeta, null, 2).replace(/\n/g, '\n  ')}`;
+  // Stack trace for errors (on new line)
+  const errStack = stack || error?.stack;
+  if (errStack && level === 'error') {
+    log += `\n  ${errStack.split('\n').slice(0, 5).join('\n  ')}`;
   }
   
   return log;
@@ -157,11 +172,11 @@ const jsonFormat = winston.format.combine(
   winston.format.json()
 );
 
-// Console format (colorized, pretty)
+// Console format (colorized level, [HH:mm:ss] style)
 const consoleFormat = winston.format.combine(
   timestampFormat,
   errorStackFormat(),
-  winston.format.colorize({ all: true }),
+  winston.format.colorize({ level: true }),
   prettyPrintFormat
 );
 
@@ -512,13 +527,7 @@ function formatBytes(bytes) {
 
 // ==== STARTUP LOG ====
 
-logger.info('Logger initialized', {
-  environment: process.env.NODE_ENV || 'development',
-  logLevel,
-  logsDirectory: logsDir,
-  pid: process.pid,
-  nodeVersion: process.version,
-});
+logger.info('Logger ready', { service: 'partsform' });
 
 module.exports = logger;
 module.exports.httpLogger = httpLogger;
