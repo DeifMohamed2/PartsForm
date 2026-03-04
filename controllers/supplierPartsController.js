@@ -346,12 +346,12 @@ const importParts = async (req, res) => {
       // Delete parts from specific chosen file
       const deleteFileName = req.body.deleteFileName;
       if (deleteFileName) {
-        // Get IDs before deleting (for ES legacy support)
         const partsToDelete = await Part.find({
           'source.supplierId': req.supplier._id,
           fileName: deleteFileName
-        }, '_id').lean();
+        }, '_id partNumber').lean();
         const docIdsToDelete = partsToDelete.map(p => p._id);
+        const partNumbersToDelete = partsToDelete.map(p => p.partNumber);
         
         const result = await Part.deleteMany({ 
           'source.supplierId': req.supplier._id,
@@ -359,8 +359,7 @@ const importParts = async (req, res) => {
         });
         deletedCount = result.deletedCount;
         
-        // Also delete from Elasticsearch (pass IDs and supplier name for legacy support)
-        await elasticsearchService.deleteBySupplierFile(req.supplier._id, deleteFileName, docIdsToDelete, req.supplier.companyName || req.supplier.name);
+        await elasticsearchService.deleteBySupplierFile(req.supplier._id, deleteFileName, docIdsToDelete, req.supplier.companyName || req.supplier.name, partNumbersToDelete);
         logger.info(`Deleted ${deletedCount} parts from file: ${deleteFileName}`);
       }
     } else if (deleteOption === 'file') {

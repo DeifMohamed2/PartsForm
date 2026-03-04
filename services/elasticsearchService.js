@@ -1455,17 +1455,19 @@ class ElasticsearchService {
 
   /**
    * Delete all documents from a specific supplier's file
-   * Handles both new format (sourceSupplierId+fileName) and legacy format (fileName only)
+   * Handles new format (sourceSupplierId+fileName), legacy format, and orphan duplicates.
+   * Uses partNumbers to catch ALL docs for those parts from this supplier (fixes duplicate search results).
    */
-  async deleteBySupplierFile(supplierId, fileName, supplierDocIds = null, supplierName = null) {
-    if (!this.isAvailable || !fileName) return { deleted: 0 };
+  async deleteBySupplierFile(supplierId, fileName, supplierDocIds = null, supplierName = null, partNumbers = null) {
+    if (!this.isAvailable) return { deleted: 0 };
+    if (!fileName && !partNumbers?.length) return { deleted: 0 };
 
     try {
       const startTime = Date.now();
       let totalDeleted = 0;
       
       // First try: Delete by sourceSupplierId + fileName (new format)
-      if (supplierId) {
+      if (supplierId && fileName) {
         const response1 = await this.client.deleteByQuery({
           index: this.indexName,
           body: {
@@ -1505,8 +1507,7 @@ class ElasticsearchService {
       }
       
       // Third try: Delete any legacy orphans by fileName + supplier name (no sourceSupplierId)
-      // This catches any legacy docs that weren't covered by the above queries
-      if (supplierName) {
+      if (supplierName && fileName) {
         const response3 = await this.client.deleteByQuery({
           index: this.indexName,
           body: {
@@ -1533,8 +1534,38 @@ class ElasticsearchService {
         totalDeleted += response3.deleted || 0;
       }
 
+      // Fourth try: Delete by partNumber + sourceSupplierId - catches ALL orphan duplicates
+      // (e.g. same part indexed 3x from old uploads that weren't deleted from ES)
+      if (supplierId && partNumbers && partNumbers.length > 0) {
+        const uniquePartNumbers = [...new Set(partNumbers.map((p) => String(p).trim()).filter(Boolean))];
+        if (uniquePartNumbers.length > 0) {
+          const response4 = await this.client.deleteByQuery({
+            index: this.indexName,
+            body: {
+              query: {
+                bool: {
+                  must: [
+                    { term: { sourceSupplierId: supplierId.toString() } },
+                    { terms: { partNumber: uniquePartNumbers } }
+                  ]
+                }
+              },
+            },
+            conflicts: 'proceed',
+            refresh: true,
+            wait_for_completion: true,
+            slices: 'auto',
+          });
+          const deleted = response4.deleted || 0;
+          if (deleted > 0) {
+            console.log(`🗑️  ES: Removed ${deleted} orphan duplicate(s) by partNumber for supplier`);
+          }
+          totalDeleted += deleted;
+        }
+      }
+
       const duration = ((Date.now() - startTime) / 1000).toFixed(1);
-      console.log(`🗑️  ES: Deleted ${totalDeleted.toLocaleString()} docs for file "${fileName}" in ${duration}s`);
+      console.log(`🗑️  ES: Deleted ${totalDeleted.toLocaleString()} docs for file "${fileName || 'supplier'}" in ${duration}s`);
       this.invalidateDocCountCache();
       return { deleted: totalDeleted };
     } catch (error) {
