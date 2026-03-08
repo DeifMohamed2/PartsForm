@@ -159,8 +159,16 @@ class SupplierPartsService {
    */
   parseDeliveryTime(value) {
     const cleaned = this.cleanExcelValue(value);
-    if (!cleaned) return { deliveryTime: '', deliveryDays: '' };
-    return { deliveryTime: cleaned, deliveryDays: cleaned };
+    if (!cleaned) return { deliveryTime: '', deliveryDays: null };
+    
+    // Store original format (like "3/6")
+    const deliveryTime = cleaned;
+    
+    // Extract first number for filtering (e.g., "3/6" -> 3, "1-3" -> 1, "5" -> 5)
+    const match = cleaned.match(/(\d+)/);
+    const deliveryDays = match ? parseInt(match[1], 10) : null;
+    
+    return { deliveryTime, deliveryDays };
   }
 
   /**
@@ -219,7 +227,7 @@ class SupplierPartsService {
         if (field === 'deliveryTime') {
           const { deliveryTime, deliveryDays } = this.parseDeliveryTime(value);
           if (deliveryTime) part.deliveryTime = deliveryTime;
-          if (deliveryDays) part.deliveryDays = deliveryDays;
+          if (deliveryDays !== null) part.deliveryDays = deliveryDays;
         }
         // Special handling for stockCode - clean Excel wrapper
         else if (field === 'stockCode') {
@@ -264,19 +272,18 @@ class SupplierPartsService {
 
       // If replacing, delete existing parts from this file
       if (replaceExisting) {
-        // IMPORTANT: Get document IDs and partNumbers BEFORE deleting from MongoDB
+        // IMPORTANT: Get document IDs BEFORE deleting from MongoDB (for ES legacy support)
         const partsToDelete = await Part.find({
           'source.type': 'supplier_upload',
           'source.supplierId': supplier._id,
           fileName: filename
-        }, '_id partNumber').lean();
-        const docIdsToDelete = partsToDelete.map((p) => p._id);
-        const partNumbersToDelete = partsToDelete.map((p) => p.partNumber);
+        }, '_id').lean();
+        const docIdsToDelete = partsToDelete.map(p => p._id);
         
         // Delete from MongoDB
         await Part.deleteSupplierParts(supplier._id, { fileName: filename });
-        // Delete from Elasticsearch (partNumbers catches orphan duplicates)
-        await elasticsearchService.deleteBySupplierFile(supplier._id, filename, docIdsToDelete, supplier.companyName || supplier.name, partNumbersToDelete);
+        // Also delete from Elasticsearch (pass IDs and supplier name for legacy cleanup)
+        await elasticsearchService.deleteBySupplierFile(supplier._id, filename, docIdsToDelete, supplier.companyName || supplier.name);
       }
 
       // Map and validate rows
@@ -521,34 +528,34 @@ class SupplierPartsService {
   async deleteParts(supplier, options = {}) {
     const { partIds, fileName } = options;
     
-    // IMPORTANT: Get document IDs and partNumbers BEFORE deleting from MongoDB
-    // partNumbers used to delete ALL orphan duplicates from ES (fixes duplicate search results)
+    // IMPORTANT: Get document IDs BEFORE deleting from MongoDB
+    // This is needed to delete legacy ES documents that don't have sourceSupplierId
     let docIdsToDelete = [];
-    let partNumbersToDelete = [];
     if (partIds && partIds.length) {
       docIdsToDelete = partIds;
-      const parts = await Part.find({ _id: { $in: partIds } }, 'partNumber').lean();
-      partNumbersToDelete = parts.map((p) => p.partNumber);
     } else if (fileName) {
+      // Get IDs of all parts from this file
       const partsToDelete = await Part.find({
         'source.type': 'supplier_upload',
         'source.supplierId': supplier._id,
         fileName: fileName
-      }, '_id partNumber').lean();
-      docIdsToDelete = partsToDelete.map((p) => p._id);
-      partNumbersToDelete = partsToDelete.map((p) => p.partNumber);
+      }, '_id').lean();
+      docIdsToDelete = partsToDelete.map(p => p._id);
     }
 
     // Delete from MongoDB
     const deletedCount = await Part.deleteSupplierParts(supplier._id, { partIds, fileName });
 
-    // Remove from Elasticsearch (pass doc IDs, partNumbers for full cleanup including orphans)
+    // Remove from Elasticsearch (pass doc IDs and supplier name for legacy support)
     try {
       if (fileName) {
-        await elasticsearchService.deleteBySupplierFile(supplier._id, fileName, docIdsToDelete, supplier.companyName || supplier.name, partNumbersToDelete);
+        // Delete all parts from this file in ES
+        await elasticsearchService.deleteBySupplierFile(supplier._id, fileName, docIdsToDelete, supplier.companyName || supplier.name);
       } else if (partIds && partIds.length) {
-        // Delete by IDs and partNumbers (catches orphan duplicates)
-        await elasticsearchService.deleteBySupplierFile(supplier._id, null, docIdsToDelete, supplier.companyName || supplier.name, partNumbersToDelete);
+        // Delete individual parts from ES
+        for (const id of partIds) {
+          await elasticsearchService.deleteDocument(id);
+        }
       }
     } catch (err) {
       logger.error('ES delete error:', err.message);
@@ -567,8 +574,7 @@ class SupplierPartsService {
   }
 
   /**
-   * Index supplier parts to Elasticsearch - uses bulkIndex directly for immediate indexing
-   * (like sync process) so parts appear in search right away
+   * Index supplier parts to Elasticsearch
    */
   async indexSupplierParts(supplierId, fileName = null) {
     const query = {
@@ -578,46 +584,48 @@ class SupplierPartsService {
     if (fileName) query.fileName = fileName;
 
     const parts = await Part.find(query).lean();
+    
     if (parts.length === 0) return { indexed: 0 };
 
-    const supplierName = parts[0]?.source?.supplierName || '';
-    const BATCH_SIZE = 5000;
-    let totalIndexed = 0;
+    const batchSize = 1000;
+    let indexed = 0;
 
-    for (let i = 0; i < parts.length; i += BATCH_SIZE) {
-      const batch = parts.slice(i, i + BATCH_SIZE);
-      const docs = batch.map((part) => ({
-        _id: part._id,
-        partNumber: part.partNumber,
-        description: part.description,
-        brand: part.brand,
-        supplier: part.supplier || part.source?.supplierName || supplierName,
-        price: part.price,
-        currency: part.currency,
-        quantity: part.quantity,
-        minOrderQty: part.minOrderQty ?? 1,
-        stock: part.stock,
-        stockCode: part.stockCode,
-        weight: part.weight,
-        volume: part.volume,
-        deliveryDays: part.deliveryDays,
-        deliveryTime: part.deliveryTime,
-        category: part.category,
-        sourceType: 'supplier_upload',
-        sourceSupplierId: supplierId.toString(),
-        sourceSupplierName: part.source?.supplierName || supplierName,
-        fileName: part.fileName,
-        importedAt: part.importedAt,
-        createdAt: part.createdAt,
-      }));
-
-      const result = await elasticsearchService.bulkIndex(docs);
-      totalIndexed += result.indexed || 0;
+    for (let i = 0; i < parts.length; i += batchSize) {
+      const batch = parts.slice(i, i + batchSize);
+      
+      for (const part of batch) {
+        try {
+          await elasticsearchService.queueDocument({
+            _id: part._id,
+            partNumber: part.partNumber,
+            description: part.description,
+            brand: part.brand,
+            supplier: part.supplier || part.source?.supplierName,
+            price: part.price,
+            currency: part.currency,
+            quantity: part.quantity,
+            stock: part.stock,
+            stockCode: part.stockCode,
+            weight: part.weight,
+            volume: part.volume,
+            deliveryDays: part.deliveryDays,
+            deliveryTime: part.deliveryTime,
+            category: part.category,
+            sourceType: 'supplier_upload',
+            sourceSupplierId: supplierId.toString(),
+            sourceSupplierName: part.source?.supplierName,
+            fileName: part.fileName,
+            importedAt: part.importedAt,
+            createdAt: part.createdAt
+          });
+          indexed++;
+        } catch (err) {
+          logger.error(`ES index error for ${part._id}:`, err.message);
+        }
+      }
     }
 
-    elasticsearchService.invalidateDocCountCache();
-    await elasticsearchService.refreshIndex();
-    return { indexed: totalIndexed };
+    return { indexed };
   }
 
   /**
@@ -786,20 +794,24 @@ class SupplierPartsService {
       filter._id = { $in: criteria.partIds.map(id => new mongoose.Types.ObjectId(id)) };
     }
 
-    // Get parts to delete for ES cleanup (need partNumber for orphan duplicate removal)
-    const partsToDelete = await Part.find(filter).select('_id partNumber').lean();
-    const docIdsToDelete = partsToDelete.map(p => p._id);
-    const partNumbersToDelete = partsToDelete.map(p => p.partNumber);
+    // Get parts to delete for ES cleanup
+    const partsToDelete = await Part.find(filter).select('_id');
+    const partIds = partsToDelete.map(p => p._id.toString());
 
     // Delete from MongoDB
     const result = await Part.deleteMany(filter);
 
-    // Delete from Elasticsearch (use deleteBySupplierFile for full cleanup including orphans)
-    if (docIdsToDelete.length > 0) {
+    // Delete from Elasticsearch
+    if (partIds.length > 0 && this.esClient) {
       try {
-        const supplier = await Supplier.findById(supplierId).select('companyName name').lean();
-        const supplierName = supplier?.companyName || supplier?.name || '';
-        await elasticsearchService.deleteBySupplierFile(supplierId, criteria.fileName || null, docIdsToDelete, supplierName, partNumbersToDelete);
+        await this.esClient.deleteByQuery({
+          index: 'parts',
+          body: {
+            query: {
+              terms: { _id: partIds }
+            }
+          }
+        });
       } catch (err) {
         logger.error('Error deleting from ES:', err);
       }

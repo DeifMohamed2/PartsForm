@@ -181,7 +181,7 @@
   justify-content: center;
   width: 42px;
   height: 42px;
-  border-radius: 10px;
+  border-radius: 0 !important;
   background: rgba(255, 255, 255, 0.08) !important;
   border: 1px solid rgba(255, 255, 255, 0.12) !important;
   color: rgba(255, 255, 255, 0.9) !important;
@@ -224,7 +224,7 @@
   font-weight: 700;
   background: var(--kintsugi);
   color: var(--kurogane);
-  border-radius: 9px;
+  border-radius: 0 !important;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -241,7 +241,7 @@
   justify-content: center;
   width: 42px;
   height: 42px;
-  border-radius: 10px;
+  border-radius: 0 !important;
   background: rgba(255, 255, 255, 0.08) !important;
   border: 1px solid rgba(255, 255, 255, 0.12) !important;
   color: rgba(255, 255, 255, 0.9) !important;
@@ -290,7 +290,7 @@
   font-weight: 600;
   background: rgba(255, 255, 255, 0.15);
   border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: var(--radius-md);
+  border-radius: 0 !important;
   color: var(--washi);
   cursor: pointer;
   transition: all 0.3s ease;
@@ -323,8 +323,8 @@
 }
 
 /* --- Pages without hero: always solid --- */
-body:not(:has(.search2-hero)) .nav-bar,
-body:not(:has(.search2-page)) .nav-bar {
+body:not(:has(.search2-hero)):not(:has(.searchv2-hero)) .nav-bar,
+body:not(:has(.search2-page)):not(:has(.searchv2-page)) .nav-bar {
   background: rgba(248, 250, 252, 0.95);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
@@ -332,44 +332,44 @@ body:not(:has(.search2-page)) .nav-bar {
 }
 
 /* Pages without hero: show dark logo only */
-body:not(:has(.search2-hero)) .logo-for-hero,
-body:not(:has(.search2-page)) .logo-for-hero {
+body:not(:has(.search2-hero)):not(:has(.searchv2-hero)) .logo-for-hero,
+body:not(:has(.search2-page)):not(:has(.searchv2-page)) .logo-for-hero {
   display: none !important;
 }
 
-body:not(:has(.search2-hero)) .logo-for-scrolled,
-body:not(:has(.search2-page)) .logo-for-scrolled {
+body:not(:has(.search2-hero)):not(:has(.searchv2-hero)) .logo-for-scrolled,
+body:not(:has(.search2-page)):not(:has(.searchv2-page)) .logo-for-scrolled {
   display: block !important;
 }
 
-body:not(:has(.search2-hero)) .nav-link,
-body:not(:has(.search2-page)) .nav-link {
+body:not(:has(.search2-hero)):not(:has(.searchv2-hero)) .nav-link,
+body:not(:has(.search2-page)):not(:has(.searchv2-page)) .nav-link {
   color: var(--kurogane);
 }
 
-body:not(:has(.search2-hero)) .nav-link:hover,
-body:not(:has(.search2-hero)) .nav-link.active,
-body:not(:has(.search2-page)) .nav-link:hover,
-body:not(:has(.search2-page)) .nav-link.active {
+body:not(:has(.search2-hero)):not(:has(.searchv2-hero)) .nav-link:hover,
+body:not(:has(.search2-hero)):not(:has(.searchv2-hero)) .nav-link.active,
+body:not(:has(.search2-page)):not(:has(.searchv2-page)) .nav-link:hover,
+body:not(:has(.search2-page)):not(:has(.searchv2-page)) .nav-link.active {
   color: var(--aitetsu);
 }
 
-body:not(:has(.search2-hero)) .btn-cart,
-body:not(:has(.search2-page)) .btn-cart {
+body:not(:has(.search2-hero)):not(:has(.searchv2-hero)) .btn-cart,
+body:not(:has(.search2-page)):not(:has(.searchv2-page)) .btn-cart {
   background: rgba(64, 84, 94, 0.06) !important;
   border-color: rgba(209, 213, 219, 0.5) !important;
   color: var(--aitetsu) !important;
 }
 
-body:not(:has(.search2-hero)) .btn-tools-hamburger,
-body:not(:has(.search2-page)) .btn-tools-hamburger {
+body:not(:has(.search2-hero)):not(:has(.searchv2-hero)) .btn-tools-hamburger,
+body:not(:has(.search2-page)):not(:has(.searchv2-page)) .btn-tools-hamburger {
   background: rgba(64, 84, 94, 0.06) !important;
   border-color: rgba(209, 213, 219, 0.5) !important;
   color: var(--aitetsu) !important;
 }
 
-body:not(:has(.search2-hero)) .tools-line,
-body:not(:has(.search2-page)) .tools-line {
+body:not(:has(.search2-hero)):not(:has(.searchv2-hero)) .tools-line,
+body:not(:has(.search2-page)):not(:has(.searchv2-page)) .tools-line {
   background: var(--aitetsu) !important;
 }
 

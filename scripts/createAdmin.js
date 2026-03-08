@@ -158,27 +158,26 @@ async function createAdmin(adminData) {
 function getDefaultPermissions(role) {
   const permissions = {
     super_admin: [
-      'manage_admins',
+      // Full access within the permission enum defined on Admin model
+      'read',
+      'write',
+      'delete',
       'manage_users',
+      'manage_admins',
       'manage_orders',
-      'manage_tickets',
-      'manage_payments',
-      'manage_integrations',
       'manage_settings',
-      'view_analytics',
-      'manage_parts'
+      'manage_integrations',
     ],
     admin: [
+      'read',
+      'write',
       'manage_users',
       'manage_orders',
-      'manage_tickets',
-      'manage_payments',
-      'view_analytics',
-      'manage_parts'
+      'manage_settings',
+      'manage_integrations',
     ],
     moderator: [
-      'manage_tickets',
-      'view_analytics'
+      'read',
     ]
   };
   

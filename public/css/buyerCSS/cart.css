@@ -98,6 +98,10 @@
   text-align: center;
 }
 
+.cart-badge {
+  display: none;
+}
+
 .cart-hero-title {
   font-family: var(--font-display);
   font-size: 2.25rem;
@@ -392,36 +396,15 @@
 .cart-table-wrapper {
   background: white;
   overflow-x: auto;
-  overflow-y: visible;
   border-radius: 0 0 var(--buyer-radius-lg) var(--buyer-radius-lg);
   margin-bottom: 1.5rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-  -webkit-overflow-scrolling: touch;
-}
-
-.cart-table-wrapper::-webkit-scrollbar {
-  height: 8px;
-}
-
-.cart-table-wrapper::-webkit-scrollbar-track {
-  background: #f1f5f9;
-  border-radius: 4px;
-}
-
-.cart-table-wrapper::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
-}
-
-.cart-table-wrapper::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
 }
 
 .cart-table {
   width: 100%;
-  min-width: 1400px;
   border-collapse: collapse;
-  font-size: 0.9375rem;
+  font-size: 0.875rem;
 }
 
 .cart-table thead {
@@ -432,7 +415,7 @@
 }
 
 .cart-table th {
-  padding: 1.125rem 1rem;
+  padding: 1rem 0.75rem;
   text-align: left;
   font-weight: 700;
   color: #1e293b;
@@ -444,10 +427,9 @@
 }
 
 .cart-table td {
-  padding: 1.25rem 1rem;
+  padding: 1.25rem 0.75rem;
   border-bottom: 1px solid #f1f5f9;
   vertical-align: middle;
-  font-size: 0.9375rem;
 }
 
 .cart-table tbody tr {
@@ -464,78 +446,22 @@
   box-shadow: 0 0 0 2px var(--aitetsu) inset;
 }
 
-/* Table Column Widths - Pro layout with more details */
-.th-checkbox { width: 52px; text-align: center; }
-.th-brand { min-width: 120px; }
+/* Table Column Widths */
+.th-checkbox { width: 50px; text-align: center; }
+.th-brand { min-width: 100px; }
 .th-part-number { min-width: 140px; }
-.th-description { min-width: 200px; }
-.th-terms { min-width: 90px; }
-.th-stock { min-width: 90px; }
-.th-weight { min-width: 85px; }
+.th-description { min-width: 250px; }
+.th-terms { min-width: 80px; }
+.th-weight { min-width: 90px; }
+.th-stock { min-width: 80px; }
 .th-aircraft { min-width: 90px; }
-.th-qty { min-width: 130px; }
+.th-qty { min-width: 80px; }
 .th-packing { min-width: 120px; }
-.th-price { min-width: 110px; }
-.th-amount { min-width: 120px; }
+.th-price { min-width: 100px; }
+.th-amount { min-width: 110px; }
 .th-reference { min-width: 130px; }
 .th-date { min-width: 110px; }
-.th-actions { width: 56px; text-align: center; }
-
-/* Quantity controls - inline +/- with input */
-.qty-controls {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  overflow: hidden;
-  background: #f8fafc;
-}
-
-.qty-controls .qty-btn {
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #f1f5f9;
-  border: none;
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: #475569;
-  cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
-}
-
-.qty-controls .qty-btn:hover {
-  background: var(--aitetsu);
-  color: white;
-}
-
-.qty-controls .qty-input {
-  width: 48px;
-  height: 32px;
-  border: none;
-  border-left: 1px solid #e2e8f0;
-  border-right: 1px solid #e2e8f0;
-  text-align: center;
-  font-size: 0.9375rem;
-  font-weight: 600;
-  background: white;
-  -moz-appearance: textfield;
-}
-
-.qty-controls .qty-input::-webkit-outer-spin-button,
-.qty-controls .qty-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-.terms-text,
-.weight-text {
-  font-size: 0.875rem;
-  color: #475569;
-}
+.th-actions { width: 60px; }
 
 /* Checkbox Styling */
 .cart-checkbox {
@@ -787,59 +713,10 @@
   align-items: flex-end;
   gap: 2rem;
   padding: 2rem 2.5rem;
-}
-
-/* Cart Summary Pro - Compact & Structured */
-.cart-summary-pro {
-  flex-direction: row;
-  align-items: center;
-  gap: 1.5rem;
-  padding: 1rem 1.5rem;
-  background: linear-gradient(180deg, #fafbfc 0%, #f8fafc 100%);
-  border-top: 1px solid #e2e8f0;
   background: #ffffff;
   border-radius: var(--buyer-radius-lg);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(64, 84, 94, 0.05);
   border: 1px solid #e2e8f0;
-}
-
-.cart-summary-main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 0.375rem;
-}
-
-.summary-stats {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.875rem;
-  color: #64748b;
-}
-
-.summary-stat strong {
-  color: #1e293b;
-  font-weight: 600;
-}
-
-.summary-stat-sep {
-  color: #cbd5e1;
-  font-weight: 300;
-}
-
-.summary-expiry {
-  display: flex;
-  align-items: center;
-  gap: 0.375rem;
-  margin: 0;
-  font-size: 0.75rem;
-  color: #94a3b8;
-}
-
-.summary-expiry i {
-  width: 14px;
-  height: 14px;
 }
 
 .cart-summary-left {
@@ -867,43 +744,6 @@
   font-size: 0.8125rem;
   color: var(--buyer-text-muted);
   margin: 0;
-}
-
-.cart-summary-actions {
-  display: flex;
-  align-items: center;
-  gap: 1.25rem;
-}
-
-.summary-total-box {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.125rem;
-}
-
-.summary-total-label {
-  font-size: 0.6875rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: #94a3b8;
-}
-
-.summary-total-value {
-  font-size: 0.9375rem;
-  color: #475569;
-}
-
-.summary-total-value strong {
-  color: #1e293b;
-  font-weight: 700;
-}
-
-.btn-checkout-pro {
-  padding: 0.625rem 1.25rem !important;
-  font-size: 0.875rem !important;
-  min-height: 40px;
 }
 
 .summary-tip {
@@ -1259,22 +1099,11 @@
     width: 92%;
   }
   
-  .cart-summary,
-  .cart-summary-pro {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 1rem;
-  }
-
-  .cart-summary-actions {
+  .cart-summary {
     flex-direction: column;
     align-items: stretch;
   }
-
-  .summary-total-box {
-    align-items: flex-start;
-  }
-
+  
   .cart-summary-right {
     flex-direction: column;
     align-items: stretch;
@@ -1428,10 +1257,6 @@
   .cart-summary {
     padding: 1.5rem;
   }
-
-  .cart-summary-pro {
-    padding: 1rem 1.25rem;
-  }
 }
 
 /* ====================================
@@ -1452,82 +1277,56 @@
 }
 
 /* ====================================
-   QUOTATION MODAL - Brand-Aligned (AI Excel / AI Filter style)
+   QUOTATION MODAL STYLES
    ==================================== */
-#quotation-modal .modal-backdrop,
-#quotation-preview-modal .modal-backdrop,
-#logo-cropper-modal .modal-backdrop {
-  background: rgba(15, 23, 42, 0.5);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-}
-
 .modal-quotation {
   max-width: 900px;
   width: 95%;
   max-height: 90vh;
   display: flex;
   flex-direction: column;
-  border-radius: 1.25rem;
+  border-radius: 16px;
   overflow: hidden;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.12);
 }
 
 .modal-quotation .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.5rem 1.75rem;
-  background: var(--aitetsu);
-  color: var(--washi);
-  position: relative;
-  overflow: hidden;
+  padding: 1.25rem 1.5rem;
+  background: #1e3a5f;
+  color: white;
 }
 
 .modal-quotation .modal-header-content {
   display: flex;
   align-items: center;
-  gap: 0.875rem;
-  position: relative;
-  z-index: 1;
+  gap: 0.75rem;
 }
 
 .modal-quotation .modal-header-content i {
-  width: 24px;
-  height: 24px;
-  color: var(--washi);
+  width: 28px;
+  height: 28px;
 }
 
 .modal-quotation .modal-header-content h2 {
   font-size: 1.25rem;
-  font-weight: 700;
+  font-weight: 600;
   margin: 0;
-  color: var(--washi);
-  letter-spacing: -0.01em;
 }
 
 .modal-quotation .modal-close-btn {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.2);
   border: none;
-  border-radius: 10px;
-  width: 38px;
-  height: 38px;
-  padding: 0;
+  border-radius: 8px;
+  padding: 0.5rem;
   cursor: pointer;
-  color: var(--washi);
+  color: white;
   transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  z-index: 1;
 }
 
 .modal-quotation .modal-close-btn:hover {
-  background: rgba(255, 255, 255, 0.25);
-  transform: scale(1.05);
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .modal-quotation .modal-close-btn i {
@@ -1539,7 +1338,7 @@
   flex: 1;
   overflow-y: auto;
   padding: 1.5rem;
-  background: var(--washi);
+  background: #f9fafb;
 }
 
 .modal-quotation .modal-footer {
@@ -1547,8 +1346,8 @@
   justify-content: flex-end;
   gap: 0.75rem;
   padding: 1rem 1.5rem;
-  background: #ffffff;
-  border-top: 1px solid #e2e8f0;
+  background: white;
+  border-top: 1px solid #e5e7eb;
 }
 
 /* Config Sections */
@@ -1581,13 +1380,13 @@
 .config-section-title i {
   width: 20px;
   height: 20px;
-  color: var(--aitetsu);
+  color: #1e3a5f;
 }
 
 .items-count-badge {
   margin-left: auto;
-  background: rgba(64, 84, 94, 0.1);
-  color: var(--aitetsu);
+  background: #e8f0f8;
+  color: #1e3a5f;
   padding: 0.25rem 0.75rem;
   border-radius: 12px;
   font-size: 0.75rem;
@@ -1631,8 +1430,8 @@
 .config-item select:focus,
 .config-item textarea:focus {
   outline: none;
-  border-color: var(--aitetsu);
-  box-shadow: 0 0 0 3px rgba(64, 84, 94, 0.12);
+  border-color: #1e3a5f;
+  box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.1);
 }
 
 .config-item input::placeholder,
@@ -1670,8 +1469,8 @@
 }
 
 .logo-upload-area:hover {
-  border-color: var(--aitetsu);
-  background: rgba(64, 84, 94, 0.04);
+  border-color: #1e3a5f;
+  background: #f0f5fa;
 }
 
 .logo-placeholder {
@@ -1846,7 +1645,7 @@
 }
 
 .quote-totals .grand-total-row span:last-child {
-  color: var(--aitetsu);
+  color: #1e3a5f;
 }
 
 /* Modal Footer Buttons */
@@ -1884,24 +1683,23 @@
 }
 
 .btn-preview-quotation {
-  background: rgba(64, 84, 94, 0.08);
-  color: var(--aitetsu);
-  border: 1px solid rgba(64, 84, 94, 0.2);
+  background: #e8f0f8;
+  color: #1e3a5f;
 }
 
 .btn-preview-quotation:hover {
-  background: rgba(64, 84, 94, 0.12);
-  border-color: rgba(64, 84, 94, 0.3);
+  background: #d0e0f0;
 }
 
 .btn-download-quotation {
-  background: var(--aitetsu);
-  color: var(--washi);
+  background: #1e3a5f;
+  color: white;
 }
 
 .btn-download-quotation:hover {
-  background: var(--kurogane);
-  box-shadow: 0 4px 12px rgba(64, 84, 94, 0.25);
+  background: #152a45;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(30, 58, 95, 0.3);
 }
 
 .btn-preview-quotation i,
@@ -1910,72 +1708,55 @@
   height: 18px;
 }
 
-/* Preview Modal - Brand-aligned */
+/* Preview Modal */
 .modal-preview {
   max-width: 900px;
   width: 95%;
   max-height: 90vh;
   display: flex;
   flex-direction: column;
-  border-radius: 1.25rem;
+  border-radius: 16px;
   overflow: hidden;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.12);
 }
 
 .modal-preview .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.5rem 1.75rem;
-  background: var(--aitetsu);
-  color: var(--washi);
-  position: relative;
-  overflow: hidden;
+  padding: 1.25rem 1.5rem;
+  background: #1e3a5f;
+  color: white;
 }
 
 .modal-preview .modal-header-content {
   display: flex;
   align-items: center;
-  gap: 0.875rem;
-  position: relative;
-  z-index: 1;
+  gap: 0.75rem;
 }
 
 .modal-preview .modal-header-content i {
-  width: 24px;
-  height: 24px;
-  color: var(--washi);
+  width: 28px;
+  height: 28px;
 }
 
 .modal-preview .modal-header-content h2 {
   font-size: 1.25rem;
-  font-weight: 700;
+  font-weight: 600;
   margin: 0;
-  color: var(--washi);
 }
 
 .modal-preview .modal-close-btn {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.2);
   border: none;
-  border-radius: 10px;
-  width: 38px;
-  height: 38px;
-  padding: 0;
+  border-radius: 8px;
+  padding: 0.5rem;
   cursor: pointer;
-  color: var(--washi);
+  color: white;
   transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  z-index: 1;
 }
 
 .modal-preview .modal-close-btn:hover {
-  background: rgba(255, 255, 255, 0.25);
-  transform: scale(1.05);
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .modal-preview .modal-close-btn i {

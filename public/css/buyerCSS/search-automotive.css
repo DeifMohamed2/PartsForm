@@ -1,15 +1,18 @@
 /* ====================================
    AUTOMOTIVE SEARCH — Industrial Theme
    BRAND: 60% Washi/Suzu | 30% Kurogane/Blues | 10% Gold/Sei
+   Matches exact screenshot design
    ==================================== */
 
 /* Hero: Enhanced - Taller, More Refined */
 .automotive-theme .search2-hero {
   background: linear-gradient(135deg, #0a1628 0%, #1a2942 50%, #0f1b2e 100%);
-  padding: 10rem 0 5rem !important;
-  min-height: 75vh;
+  padding: 6rem 0 4rem !important;
+  min-height: 45vh;
   display: flex;
   align-items: center;
+  position: relative;
+  overflow: hidden;
 }
 
 .automotive-theme .search2-hero::before {
@@ -23,15 +26,82 @@
   z-index: 2;
 }
 
-/* Badge: subtle, industrial */
-.automotive-badge {
-  background: rgba(255, 255, 255, 0.08) !important;
-  border-color: rgba(255, 255, 255, 0.2) !important;
-  color: rgba(255, 255, 255, 0.8) !important;
+/* Hero Tagline - Top Right */
+.hero-tagline {
+  position: absolute;
+  top: 1.5rem;
+  right: 2rem;
+  z-index: 20;
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
 }
 
-.automotive-badge i {
-  color: var(--sei) !important;
+.tagline-main {
+  font-family: var(--font-display);
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  letter-spacing: 0.02em;
+}
+
+.tagline-sub {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Diagonal Yellow Accent */
+.hero-diagonal-accent {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 80px;
+  background: var(--kintsugi);
+  transform: skewX(-10deg) translateX(-40px);
+  z-index: 3;
+}
+
+@media (max-width: 768px) {
+  .hero-tagline {
+    display: none;
+  }
+
+  .hero-diagonal-accent {
+    width: 50px;
+    transform: skewX(-10deg) translateX(-25px);
+  }
+}
+
+/* Hero content alignment and styling */
+.automotive-theme .search2-hero-content {
+  text-align: center !important;
+  max-width: 850px !important;
+  padding-left: 2rem !important;
+}
+
+.automotive-theme .search2-hero-title {
+  font-family: var(--font-display) !important;
+  font-size: clamp(2rem, 4vw, 3.5rem) !important;
+  font-weight: 800 !important;
+  color: #FFFFFF !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.04em !important;
+  margin-bottom: 2rem !important;
+  text-shadow: 0 4px 24px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Hide badge in hero */
+.automotive-badge {
+  display: none !important;
+}
+
+/* Hide subtitle */
+.automotive-theme .search2-hero-subtitle {
+  display: none !important;
 }
 
 /* Disable floating icons — Shibui: no decorative noise */
@@ -46,7 +116,7 @@
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25), 0 2px 8px rgba(0, 0, 0, 0.15) !important;
   padding: 0.375rem 0.5rem !important;
   gap: 0.5rem !important;
-  border-radius: 12px !important;
+  border-radius: 0 !important;
 }
 
 .automotive-theme .search2-bar:focus-within {
@@ -104,21 +174,22 @@
   color: var(--sei) !important;
 }
 
-/* Search button: Refined styling with better spacing */
+/* Search button: Gold "FILTER SEARCH" */
 .automotive-theme .search2-btn {
-  background: var(--kintsugi);
-  color: var(--kurogane);
-  border: none;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  padding: 0.75rem 1.75rem !important;
-  border-radius: 8px;
+  background: var(--kintsugi) !important;
+  color: var(--kurogane) !important;
+  border: none !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  padding: 0.875rem 1.75rem !important;
+  border-radius: 0 !important;
   transition: all 0.2s ease;
+  font-size: 0.875rem !important;
 }
 
 .automotive-theme .search2-btn:hover {
-  background: var(--kintsugi-hover);
+  background: var(--kintsugi-hover) !important;
   box-shadow: 0 4px 12px rgba(212, 175, 55, 0.35);
   transform: translateY(-1px);
 }
@@ -126,7 +197,7 @@
 /* Reset button should only show when needed */
 .automotive-theme .search2-reset-btn {
   padding: 0.75rem 1.5rem !important;
-  border-radius: 8px;
+  border-radius: 0 !important;
 }
 
 /* Quick action buttons: wireframe style */
@@ -145,16 +216,356 @@
   background: var(--kintsugi-hover);
 }
 
+/* ====================================
+   TABLE STYLING - Matches Screenshot
+   ==================================== */
+
+/* Table header: Dark gray background like screenshot */
+.automotive-theme .results-table thead {
+  background: #4A5568 !important;
+  border-bottom: none !important;
+}
+
+.automotive-theme .results-table th {
+  background: #4A5568 !important;
+  color: #FFFFFF !important;
+  font-size: 0.6875rem !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.04em !important;
+  padding: 0.875rem 0.625rem !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.15) !important;
+  white-space: nowrap !important;
+  position: relative !important;
+  cursor: pointer !important;
+}
+
+/* Add sort indicator to sortable columns */
+.automotive-theme .results-table th:not(:first-child):not(:last-child)::after {
+  content: '';
+  display: inline-block;
+  width: 0;
+  height: 0;
+  margin-left: 0.375rem;
+  vertical-align: middle;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 5px solid rgba(255, 255, 255, 0.6);
+}
+
+.automotive-theme .results-table th:last-child {
+  border-right: none !important;
+}
+
+/* Table rows */
+.automotive-theme .results-table tbody tr {
+  border-bottom: 1px solid #E2E8F0 !important;
+  background: #FFFFFF !important;
+}
+
+.automotive-theme .results-table tbody tr:nth-child(even) {
+  background: #F8FAFC !important;
+}
+
+.automotive-theme .results-table tbody tr:hover {
+  background: #F1F5F9 !important;
+}
+
+/* Selected row styling (when checkbox is checked) */
+.automotive-theme .results-table tbody tr.selected,
+.automotive-theme .results-table tbody tr:has(input[type="checkbox"]:checked) {
+  background: rgba(212, 175, 55, 0.08) !important;
+  border-left: 3px solid var(--kintsugi) !important;
+}
+
+.automotive-theme .results-table td {
+  padding: 0.875rem 0.75rem !important;
+  font-size: 0.875rem !important;
+  color: #2D3748 !important;
+  border-right: 1px solid #E2E8F0 !important;
+}
+
+.automotive-theme .results-table td:last-child {
+  border-right: none !important;
+}
+
+/* Stock Code Badge: Yellow/Gold like screenshot (CT3, WE2 style) */
+.automotive-theme .stock-code-badge {
+  background: #D4AF37 !important;
+  color: #1A1A1A !important;
+  border: none !important;
+  padding: 0.375rem 0.625rem !important;
+  border-radius: 0 !important;
+  font-size: 0.75rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.03em !important;
+  text-transform: uppercase !important;
+}
+
+/* Checkbox styling */
+.automotive-theme .table-checkbox {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--kintsugi);
+  cursor: pointer;
+}
+
+/* Order Quantity Controls */
+.automotive-theme .order-qty-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.automotive-theme .qty-btn {
+  width: 28px;
+  height: 28px;
+  background: #F1F5F9 !important;
+  border: 1px solid #E2E8F0 !important;
+  border-radius: 0 !important;
+  font-size: 1rem !important;
+  color: #4A5568 !important;
+}
+
+.automotive-theme .qty-btn:hover {
+  background: #E2E8F0 !important;
+  border-color: #CBD5E0 !important;
+}
+
+.automotive-theme .qty-input {
+  width: 50px !important;
+  height: 28px !important;
+  padding: 0.25rem !important;
+  font-size: 0.875rem !important;
+  text-align: center !important;
+  border: 1px solid #E2E8F0 !important;
+  border-radius: 0 !important;
+  background: #FFFFFF !important;
+}
+
+/* Single Add to Cart Button - Gold Icon Button */
+.automotive-theme .btn-add-single-to-cart {
+  width: 36px;
+  height: 36px;
+  background: var(--kintsugi) !important;
+  border: none !important;
+  border-radius: 0 !important;
+}
+
+.automotive-theme .btn-add-single-to-cart i {
+  color: #1A1A1A !important;
+}
+
+.automotive-theme .btn-add-single-to-cart:hover {
+  background: var(--kintsugi-hover) !important;
+}
+
+/* Price column */
+.automotive-theme .results-table td:nth-child(11) {
+  font-weight: 600 !important;
+  color: #2D3748 !important;
+}
+
+/* ====================================
+   RESULTS SECTION CONTAINER WITH SIDEBAR
+   ==================================== */
+
+.automotive-theme .search2-results-section {
+  background: #F5F5F5 !important;
+  padding: 2rem 0 !important;
+}
+
+.automotive-theme .search-results-container {
+  display: grid !important;
+  grid-template-columns: 1fr 320px !important;
+  gap: 2rem !important;
+  align-items: start !important;
+  max-width: 1600px !important;
+  margin: 0 auto !important;
+  padding: 0 2rem !important;
+}
+
+@media (max-width: 1200px) {
+  .automotive-theme .search-results-container {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+.automotive-theme .search-results-main {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* ====================================
+   RESULTS FOOTER - "FOUND X MATCHES" Section
+   ==================================== */
+
+.automotive-theme .results-footer {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 1rem !important;
+  padding: 1.5rem 2rem !important;
+  background: #FFFFFF !important;
+  border-top: 1px solid #E2E8F0 !important;
+  border-radius: 0 !important;
+}
+
+.automotive-theme .results-footer-content {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  flex-wrap: wrap !important;
+  gap: 1.5rem !important;
+}
+
+.automotive-theme .results-footer-left {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.5rem !important;
+}
+
+/* Found matches title */
+.automotive-theme .found-matches-title {
+  font-family: var(--font-display) !important;
+  font-size: 2rem !important;
+  font-weight: 800 !important;
+  color: #1A202C !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.02em !important;
+  margin: 0 !important;
+  line-height: 1.2 !important;
+}
+
+.automotive-theme .found-matches-subtitle {
+  font-family: var(--font-body) !important;
+  font-size: 0.9375rem !important;
+  color: #718096 !important;
+  margin: 0 !important;
+}
+
+/* Total price display */
+.automotive-theme .selected-total-display {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.25rem !important;
+}
+
+.automotive-theme .selected-total-value {
+  font-family: var(--font-display) !important;
+  font-size: 2.5rem !important;
+  font-weight: 300 !important;
+  color: #2D3748 !important;
+  letter-spacing: -0.02em !important;
+  line-height: 1 !important;
+}
+
+.automotive-theme .selected-total-label {
+  font-family: var(--font-body) !important;
+  font-size: 0.875rem !important;
+  color: #718096 !important;
+}
+
 /* Add to cart: GOLD — this IS the primary action */
 .automotive-theme .btn-add-to-cart {
-  background: var(--kintsugi);
-  color: var(--kurogane);
-  font-weight: 700;
+  background: var(--kintsugi) !important;
+  color: #1A1A1A !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  padding: 1rem 2rem !important;
+  border-radius: 0 !important;
+  font-size: 0.9375rem !important;
+  box-shadow: none !important;
 }
 
 .automotive-theme .btn-add-to-cart:hover {
-  background: var(--kintsugi-hover);
-  box-shadow: none;
+  background: var(--kintsugi-hover) !important;
+  box-shadow: none !important;
+}
+
+.automotive-theme .btn-add-to-cart:disabled {
+  background: #D4AF37 !important;
+  opacity: 0.6 !important;
+}
+
+/* ====================================
+   REFERRAL PROGRAM SIDEBAR
+   ==================================== */
+
+.automotive-theme .referral-sidebar {
+  background: linear-gradient(180deg, #1A365D 0%, #2A4365 100%) !important;
+  border-radius: 0 !important;
+  padding: 2rem !important;
+  color: #FFFFFF !important;
+  position: sticky !important;
+  top: 6rem !important;
+}
+
+.automotive-theme .referral-sidebar-title {
+  font-family: var(--font-display) !important;
+  font-size: 1.25rem !important;
+  font-weight: 700 !important;
+  color: #FFFFFF !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.02em !important;
+  margin: 0 0 0.5rem 0 !important;
+  line-height: 1.3 !important;
+}
+
+.automotive-theme .referral-sidebar-subtitle {
+  font-family: var(--font-body) !important;
+  font-size: 0.875rem !important;
+  color: rgba(255, 255, 255, 0.8) !important;
+  margin: 0 0 1.5rem 0 !important;
+  line-height: 1.5 !important;
+}
+
+.automotive-theme .referral-sidebar-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  padding: 0.875rem 1.5rem !important;
+  background: transparent !important;
+  border: 2px solid #FFFFFF !important;
+  border-radius: 0 !important;
+  color: #FFFFFF !important;
+  font-family: var(--font-body) !important;
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+}
+
+.automotive-theme .referral-sidebar-btn:hover {
+  background: #FFFFFF !important;
+  color: #1A365D !important;
+}
+
+/* Hide old footer elements */
+.automotive-theme .selected-total-footer,
+.automotive-theme .results-header {
+  display: none !important;
+}
+
+/* Hide quick sort bar */
+.automotive-theme .quick-sort-bar {
+  display: none !important;
+}
+
+/* Show referral sidebar in automotive theme */
+.automotive-theme .referral-sidebar {
+  display: block !important;
+}
+
+/* Table container styling */
+.automotive-theme .results-table-container {
+  border-radius: 0 !important;
+  overflow: hidden !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+  border: none !important;
 }
 
 /* AI Excel button: clean */
@@ -173,7 +584,7 @@
   background: var(--aitetsu);
   color: var(--washi);
   padding: 0.15rem 0.5rem;
-  border-radius: var(--radius-xs);
+  border-radius: 0 !important;
   font-size: 0.65rem;
   font-weight: 700;
   letter-spacing: 0.05em;

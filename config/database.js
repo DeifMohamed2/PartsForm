@@ -12,12 +12,12 @@ const connectDB = async () => {
     logger.info('Connecting to MongoDB', { service: 'partsform', event: 'DATABASE_CONNECTING' });
     
     const conn = await mongoose.connect(mongoURI, {
-      // Performance optimizations for 96GB/18-core/NVMe server
-      maxPoolSize: 200, // 200 connections for 18 cores
-      minPoolSize: 20,
-      socketTimeoutMS: 600000, // 10 min timeout for massive delete operations
-      serverSelectionTimeoutMS: 30000,
-      connectTimeoutMS: 30000,
+      // Connection pool - balanced for 18-core server
+      maxPoolSize: 50, // Reasonable pool size (was 200 - too aggressive)
+      minPoolSize: 5,
+      socketTimeoutMS: 120000, // 2 min timeout (was 10 min - zombie connections)
+      serverSelectionTimeoutMS: 10000, // 10s server selection
+      connectTimeoutMS: 10000, // 10s connect timeout
       writeConcern: {
         w: 1, // Fast writes (acknowledge from primary only)
         j: false // Don't wait for journal

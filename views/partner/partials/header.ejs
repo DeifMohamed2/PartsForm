@@ -16,9 +16,94 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   
   <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <script src="https://unpkg.com/lucide@0.294.0/dist/umd/lucide.min.js"></script>
   
   <!-- Partner Portal Stylesheet -->
   <link rel="stylesheet" href="/css/partnerCSS/partner-main.css">
 </head>
 <body>
+  <div class="partner-layout">
+    <!-- Sidebar -->
+    <aside class="partner-sidebar" id="partnerSidebar">
+      <div class="partner-sidebar-header">
+        <a href="/partner/dashboard" class="partner-sidebar-logo">
+          <img src="/images/PARTSFORM-LOGO.png" alt="PARTSFORM">
+          <div class="partner-sidebar-logo-text">
+            <span>PARTSFORM</span>
+            <small>Partner Portal</small>
+          </div>
+        </a>
+      </div>
+
+      <nav class="partner-sidebar-nav">
+        <div class="partner-nav-section">
+          <div class="partner-nav-section-title">Overview</div>
+          <a href="/partner/dashboard" class="partner-sidebar-link <%= typeof activePage !== 'undefined' && activePage === 'dashboard' ? 'active' : '' %>">
+            <i data-lucide="layout-dashboard"></i>
+            <span>Dashboard</span>
+          </a>
+        </div>
+
+        <div class="partner-nav-section">
+          <div class="partner-nav-section-title">Earnings</div>
+          <a href="/partner/commissions" class="partner-sidebar-link <%= typeof activePage !== 'undefined' && activePage === 'commissions' ? 'active' : '' %>">
+            <i data-lucide="coins"></i>
+            <span>Commissions</span>
+          </a>
+          <a href="/partner/payouts" class="partner-sidebar-link <%= typeof activePage !== 'undefined' && activePage === 'payouts' ? 'active' : '' %>">
+            <i data-lucide="wallet"></i>
+            <span>Payouts</span>
+          </a>
+        </div>
+
+        <div class="partner-nav-section">
+          <div class="partner-nav-section-title">Account</div>
+          <a href="/partner/profile" class="partner-sidebar-link <%= typeof activePage !== 'undefined' && activePage === 'profile' ? 'active' : '' %>">
+            <i data-lucide="user-circle"></i>
+            <span>Profile</span>
+          </a>
+        </div>
+      </nav>
+
+      <div class="partner-sidebar-footer">
+        <div class="partner-sidebar-user">
+          <div class="partner-sidebar-avatar">
+            <%= (partner?.firstName || 'P').charAt(0).toUpperCase() %>
+          </div>
+          <div class="partner-sidebar-user-info">
+            <div class="partner-sidebar-user-name"><%= partner?.firstName || 'Partner' %> <%= partner?.lastName || '' %></div>
+            <div class="partner-sidebar-user-email"><%= partner?.email || '' %></div>
+          </div>
+        </div>
+        <a href="/partner/logout" class="partner-sidebar-logout">
+          <i data-lucide="log-out"></i>
+          <span>Sign Out</span>
+        </a>
+      </div>
+    </aside>
+
+    <!-- Main Area -->
+    <main class="partner-main-shell">
+      <header class="partner-topbar">
+        <div class="partner-topbar-left">
+          <button class="partner-topbar-toggle" id="partnerSidebarToggle" aria-label="Toggle navigation">
+            <i data-lucide="menu"></i>
+          </button>
+          <div class="partner-topbar-title">
+            <h1><%= typeof pageTitle !== 'undefined' ? pageTitle : 'Partner Dashboard' %></h1>
+          </div>
+        </div>
+        <div class="partner-topbar-right">
+          <button class="partner-topbar-icon-btn" type="button" onclick="location.reload()" title="Refresh">
+            <i data-lucide="refresh-cw"></i>
+          </button>
+          <div class="partner-topbar-user">
+            <div class="partner-topbar-user-text">
+              <span class="partner-topbar-user-name"><%= partner?.firstName || 'Partner' %> <%= partner?.lastName || '' %></span>
+              <span class="partner-topbar-user-email"><%= partner?.email || '' %></span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div class="partner-content">

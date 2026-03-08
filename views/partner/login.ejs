@@ -70,20 +70,24 @@
           <p>Sign in to your partner account</p>
         </div>
         
-        <% if (typeof error !== 'undefined' && error) { %>
-        <div class="partner-login-error">
+        <div 
+          class="partner-login-error" 
+          id="partnerLoginError"
+          style="<% if (!(typeof error !== 'undefined' && error)) { %>display:none;<% } %>"
+        >
           <i data-lucide="alert-circle"></i>
-          <span>
-            <% if (error === 'inactive') { %>
-              Your account is not active. Please contact support.
-            <% } else { %>
-              <%= error %>
+          <span id="partnerLoginErrorText">
+            <% if (typeof error !== 'undefined' && error) { %>
+              <% if (error === 'inactive') { %>
+                Your account is not active. Please contact support.
+              <% } else { %>
+                <%= error %>
+              <% } %>
             <% } %>
           </span>
         </div>
-        <% } %>
         
-        <form class="partner-login-form" action="/partner/login" method="POST">
+        <form class="partner-login-form" action="/partner/login" method="POST" novalidate>
           <div class="partner-form-group">
             <label class="partner-form-label">Email Address</label>
             <div class="partner-input-wrapper">
@@ -119,9 +123,9 @@
             </div>
           </div>
 
-          <button type="submit" class="partner-login-submit">
+          <button type="submit" class="partner-login-submit" id="partnerLoginSubmit">
             <i data-lucide="log-in"></i>
-            Sign In
+            <span class="partner-login-submit-label">Sign In</span>
           </button>
         </form>
 
@@ -140,6 +144,82 @@
     document.addEventListener('DOMContentLoaded', function() {
       if (typeof lucide !== 'undefined') {
         lucide.createIcons();
+      }
+
+      const form = document.querySelector('.partner-login-form');
+      const emailInput = document.getElementById('email');
+      const passwordInput = document.getElementById('password');
+      const errorBox = document.getElementById('partnerLoginError');
+      const errorText = document.getElementById('partnerLoginErrorText');
+      const submitButton = document.getElementById('partnerLoginSubmit');
+      const submitLabel = submitButton ? submitButton.querySelector('.partner-login-submit-label') : null;
+      const originalLabel = submitLabel ? submitLabel.textContent : '';
+
+      if (form && emailInput && passwordInput && submitButton) {
+        form.addEventListener('submit', async function(event) {
+          event.preventDefault();
+
+          if (errorBox && errorText) {
+            errorBox.style.display = 'none';
+            errorText.textContent = '';
+          }
+
+          submitButton.disabled = true;
+          submitButton.setAttribute('aria-busy', 'true');
+          if (submitLabel) {
+            submitLabel.textContent = 'Signing in...';
+          }
+
+          try {
+            const body = new URLSearchParams();
+            body.append('email', emailInput.value.trim());
+            body.append('password', passwordInput.value);
+
+            const response = await fetch('/partner/login', {
+              method: 'POST',
+              headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+              },
+              body: body.toString()
+            });
+
+            const data = await response.json().catch(() => null);
+
+            if (response.ok && data && data.success) {
+              const redirectUrl = data.redirectUrl || '/partner/dashboard';
+              window.location.href = redirectUrl;
+              return;
+            }
+
+            const message = data && data.message
+              ? data.message
+              : 'Login failed. Please check your credentials and try again.';
+
+            if (errorBox && errorText) {
+              errorText.textContent = message;
+              errorBox.style.display = 'flex';
+            } else {
+              alert(message);
+            }
+          } catch (err) {
+            console.error('Partner login error:', err);
+            const message = 'Unable to sign in right now. Please check your connection and try again.';
+
+            if (errorBox && errorText) {
+              errorText.textContent = message;
+              errorBox.style.display = 'flex';
+            } else {
+              alert(message);
+            }
+          } finally {
+            submitButton.disabled = false;
+            submitButton.removeAttribute('aria-busy');
+            if (submitLabel) {
+              submitLabel.textContent = originalLabel || 'Sign In';
+            }
+          }
+        });
       }
     });
 

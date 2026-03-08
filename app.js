@@ -5,6 +5,8 @@ const express = require('express');
 const http = require('http');
 const path = require('path');
 const cookieParser = require('cookie-parser');
+const compression = require('compression');
+const helmet = require('helmet');
 const i18next = require('./config/i18n');
 const middleware = require('i18next-http-middleware');
 const connectDB = require('./config/database');
@@ -138,11 +140,39 @@ app.set('socketService', socketService);
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
+// === PERFORMANCE MIDDLEWARE (must be first) ===
+
+// GZIP compression - reduces response size by 70-90%
+app.use(compression({
+  level: 6,
+  threshold: 1024, // Only compress responses > 1KB
+  filter: (req, res) => {
+    if (req.headers['x-no-compression']) return false;
+    return compression.filter(req, res);
+  },
+}));
+
+// Security headers
+app.use(helmet({
+  contentSecurityPolicy: false, // Disable CSP to avoid breaking inline scripts
+  crossOriginEmbedderPolicy: false,
+}));
+
+// EJS view caching - prevents re-reading/re-compiling templates on every request
+app.enable('view cache');
+
 // Middleware
 app.use(cookieParser());
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ extended: true, limit: '50mb' }));
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Static files with aggressive caching (7 days for assets)
+app.use(express.static(path.join(__dirname, 'public'), {
+  maxAge: '7d',
+  etag: true,
+  lastModified: true,
+  immutable: false,
+}));
 
 // Request logging middleware (before routes)
 app.use(requestIdMiddleware);

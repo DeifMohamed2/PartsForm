@@ -180,19 +180,19 @@ const bodyLoggerMiddleware = (req, res, next) => {
  * Security logger - logs security-related events
  */
 const securityLoggerMiddleware = (req, res, next) => {
-  // Log suspicious activity patterns
-  const suspiciousPatterns = [
+  // Only check non-GET requests and URLs (skip body serialization for performance)
+  const fullUrl = req.originalUrl || req.url;
+  
+  // Quick check on URL only (avoid expensive JSON.stringify on every request)
+  const suspiciousUrlPatterns = [
     /(\.\.|\/etc\/|\/proc\/)/i, // Path traversal
     /<script/i, // XSS attempt
     /union.*select/i, // SQL injection
     /\$ne|\$gt|\$lt|\$or/i, // NoSQL injection
   ];
   
-  const fullUrl = req.originalUrl || req.url;
-  const body = JSON.stringify(req.body || {});
-  
-  for (const pattern of suspiciousPatterns) {
-    if (pattern.test(fullUrl) || pattern.test(body)) {
+  for (const pattern of suspiciousUrlPatterns) {
+    if (pattern.test(fullUrl)) {
       logger.logSecurity('suspicious_request', {
         requestId: req.requestId,
         method: req.method,
@@ -202,6 +202,23 @@ const securityLoggerMiddleware = (req, res, next) => {
         pattern: pattern.source,
       });
       break;
+    }
+  }
+  
+  // Only check body for POST/PUT/PATCH (not on every GET)
+  if (req.method !== 'GET' && req.body && Object.keys(req.body).length > 0) {
+    const body = JSON.stringify(req.body);
+    for (const pattern of suspiciousUrlPatterns) {
+      if (pattern.test(body)) {
+        logger.logSecurity('suspicious_request_body', {
+          requestId: req.requestId,
+          method: req.method,
+          url: fullUrl,
+          ip: req.ip,
+          pattern: pattern.source,
+        });
+        break;
+      }
     }
   }
   

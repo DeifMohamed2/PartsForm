@@ -1,11 +1,10 @@
-<%- include('partials/header') %>
 <% activePage = 'profile'; %>
-<%- include('partials/navbar') %>
+<%- include('partials/header', { pageTitle: 'Profile' }) %>
 
-<div class="partner-page-wrapper">
-  <!-- Main Content -->
-  <main class="partner-main">
-    <div class="partner-container" style="max-width: 800px;">
+<div class="partner-container" style="max-width: 800px;">
+  <div class="partner-page-wrapper">
+    <!-- Main Content -->
+    <main class="partner-main">
       <!-- Page Header -->
       <div class="partner-page-header">
         <div class="partner-page-title">
@@ -247,11 +246,11 @@
           </div>
         </div>
       </div>
-    </div>
-  </main>
-
-  <%- include('partials/footer') %>
+    </main>
+  </div>
 </div>
+
+<%- include('partials/footer') %>
 
 <!-- Toast Notification -->
 <div class="partner-toast" id="toast">

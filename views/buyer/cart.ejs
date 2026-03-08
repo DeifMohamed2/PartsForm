@@ -86,9 +86,7 @@
                     <th class="th-brand"><%= t('cart.table.brand') %></th>
                     <th class="th-part-number"><%= t('cart.table.partNumber') %></th>
                     <th class="th-description"><%= t('cart.table.description') %></th>
-                    <th class="th-terms"><%= t('cart.table.terms') %></th>
                     <th class="th-stock"><%= t('cart.table.stock') %></th>
-                    <th class="th-weight"><%= t('cart.table.weight') %></th>
                     <th class="th-qty"><%= t('cart.table.qty') %></th>
                     <th class="th-price"><%= t('cart.table.price') %></th>
                     <th class="th-amount"><%= t('cart.table.amount') %></th>
@@ -101,29 +99,32 @@
               </table>
             </div>
 
-            <!-- Cart Summary - Compact & Structured -->
-            <div class="cart-summary cart-summary-pro">
-              <div class="cart-summary-main">
-                <div class="summary-stats">
-                  <span class="summary-stat">
+            <!-- Cart Summary -->
+            <div class="cart-summary">
+              <div class="cart-summary-left">
+                <div class="cart-summary-info">
+                  <p class="summary-text">
+                    <i data-lucide="shopping-cart" class="summary-icon"></i>
                     <strong id="total-items-count">0</strong> <%= t('cart.summary.pcs') %>
-                  </span>
-                  <span class="summary-stat-sep">•</span>
-                  <span class="summary-stat">
+                    <span class="summary-separator">•</span>
                     <%= t('cart.summary.total') %> <strong id="total-amount-text">0.00</strong> <span class="cart-currency-label">AED</span>
-                  </span>
+                  </p>
+                  <p class="summary-note">
+                    <i data-lucide="clock" class="summary-icon-small"></i>
+                    <%= t('cart.summary.note') %>
+                    <span id="cart-expiry-text"><%= t('cart.summary.timeRemaining') %> --</span>
+                  </p>
                 </div>
-                <p class="summary-expiry">
-                  <i data-lucide="clock"></i>
-                  <span id="cart-expiry-text">--</span>
-                </p>
               </div>
-              <div class="cart-summary-actions">
-                <div class="summary-total-box">
-                  <span class="summary-total-label"><%= t('cart.summary.total') %></span>
-                  <span class="summary-total-value"><strong id="total-items">0</strong> <%= t('cart.summary.pcs') %> · <strong id="total-amount">0.00</strong> <span class="cart-currency-label">AED</span></span>
+              <div class="cart-summary-right">
+                <div class="cart-total">
+                  <span class="total-label"><%= t('cart.summary.total') %></span>
+                  <div class="total-details">
+                    <span class="total-items"><strong id="total-items">0</strong> <%= t('cart.summary.pcs') %></span>
+                    <span class="total-amount"><strong id="total-amount">0.00</strong> <span class="cart-currency-label">AED</span></span>
+                  </div>
                 </div>
-                <button class="btn-checkout btn-checkout-pro" id="checkout-btn" disabled>
+                <button class="btn-checkout" id="checkout-btn" disabled>
                   <span><%= t('cart.checkout') %></span>
                   <i data-lucide="arrow-right"></i>
                 </button>
@@ -401,7 +402,6 @@
       <script src="/js/api-integration.js"></script>
       <script src="/js/buyer-quotation.js"></script>
       <script src="/js/cart.js"></script>
-      <script src="/js/cart-badge-updater.js"></script>
       <script>
         lucide.createIcons();
         window.addEventListener('load', () => lucide.createIcons());

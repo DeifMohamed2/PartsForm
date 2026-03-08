@@ -229,7 +229,7 @@ const autocomplete = async (req, res) => {
         },
         { $sort: { _id: 1 } },
         { $limit: parseInt(limit, 10) },
-      ]).hint({ partNumber: 1, supplier: 1 }).maxTimeMS(8000);
+      ]).option({ hint: { partNumber: 1, supplier: 1 }, maxTimeMS: 8000 });
 
       suggestions = results.map((r) => ({
         partNumber: r._id,

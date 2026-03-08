@@ -57,6 +57,25 @@ const getAutomotiveSearchPage = async (req, res) => {
 };
 
 /**
+ * Get Search V2 page - New design
+ */
+const getSearchV2Page = async (req, res) => {
+  try {
+    res.render('buyer/search-v2', {
+      title: 'Find Automotive Parts | PARTSFORM',
+      industry: 'automotive',
+      industryName: 'Automotive',
+    });
+  } catch (error) {
+    console.error('Error in getSearchV2Page:', error);
+    res.status(500).render('error', {
+      title: 'Error | PARTSFORM',
+      error: 'Failed to load search page',
+    });
+  }
+};
+
+/**
  * Get Affiliate Program page
  */
 const getAffiliatePage = async (req, res) => {
@@ -2212,6 +2231,7 @@ const setDefaultAddress = async (req, res) => {
 module.exports = {
   getBuyerMain,
   getAutomotiveSearchPage,
+  getSearchV2Page,
   getAffiliatePage,
   getOrdersPage,
   getPaymentPage,

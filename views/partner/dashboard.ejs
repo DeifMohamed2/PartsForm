@@ -1,10 +1,10 @@
-<%- include('partials/header') %>
 <% activePage = 'dashboard'; %>
-<%- include('partials/navbar') %>
+<%- include('partials/header', { pageTitle: 'Dashboard' }) %>
 
-<div class="partner-page-wrapper">
-  <!-- Main Content -->
-  <main class="partner-main">
+<div class="partner-container">
+  <div class="partner-page-wrapper">
+    <!-- Main Content -->
+    <main class="partner-main">
     <!-- Welcome Banner -->
     <div class="partner-welcome-banner">
       <div class="partner-welcome-text">
@@ -31,7 +31,8 @@
       </div>
       <% } %>
     </div>
-
+٤٢٢٠٨٦٩٥٢٦٨٧
+422086952687
     <!-- Stats Grid -->
     <div class="partner-stats-grid">
       <div class="partner-stat-card">
@@ -237,10 +238,11 @@
       </div>
     </div>
     <% } %>
-  </main>
-
-  <%- include('partials/footer') %>
+    </main>
+  </div>
 </div>
+
+<%- include('partials/footer') %>
 
 <script>
   function copyCodeValue(code) {

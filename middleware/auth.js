@@ -58,8 +58,8 @@ const requireAuth = async (req, res, next) => {
       return res.redirect('/');
     }
 
-    // Find buyer
-    const buyer = await Buyer.findById(decoded.id);
+    // Find buyer (lean for performance - read-only lookup)
+    const buyer = await Buyer.findById(decoded.id).lean();
 
     if (!buyer) {
       // Clear invalid cookie
@@ -502,7 +502,7 @@ const attachUser = async (req, res, next) => {
     
     // Check role from token
     if (decoded.role === 'admin') {
-      const admin = await Admin.findById(decoded.id);
+      const admin = await Admin.findById(decoded.id).lean();
       if (admin && admin.isActive) {
         req.user = admin;
         req.userRole = 'admin';
@@ -515,7 +515,7 @@ const attachUser = async (req, res, next) => {
       }
     } else if (decoded.role === 'referral_partner') {
       const ReferralPartner = require('../models/ReferralPartner');
-      const partner = await ReferralPartner.findById(decoded.id);
+      const partner = await ReferralPartner.findById(decoded.id).lean();
       if (partner && partner.status === 'active') {
         req.user = partner;
         req.userRole = 'referral_partner';
@@ -527,7 +527,7 @@ const attachUser = async (req, res, next) => {
         res.locals.userRole = null;
       }
     } else {
-      const buyer = await Buyer.findById(decoded.id);
+      const buyer = await Buyer.findById(decoded.id).lean();
       if (buyer && buyer.isActive) {
         req.user = buyer;
         req.userRole = 'buyer';

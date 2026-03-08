@@ -1181,6 +1181,9 @@
 
     // Update count — show total and page range
     elements.resultsCount.textContent = totalResults;
+    // Also update the footer results count
+    const footerResultsCount = document.getElementById('footer-results-count');
+    if (footerResultsCount) footerResultsCount.textContent = totalResults;
     // Update page info text
     const pageInfoEl = document.getElementById('results-page-info');
     if (pageInfoEl) {
@@ -1447,6 +1450,7 @@
     // Update all UI elements
     const selectedTotal = document.getElementById('selected-total');
     const selectedTotalFooter = document.getElementById('selected-total-footer');
+    const selectedTotalValue = document.getElementById('selected-total-value');
     const selectedCount = document.getElementById('selected-count');
     const selectedCountHeader = document.getElementById('selected-count-header');
     const selectionStatus = document.getElementById('selection-status');
@@ -1455,6 +1459,7 @@
 
     if (selectedTotal) selectedTotal.textContent = formatPrice(total) + ' ' + totalCurrencyDisplay;
     if (selectedTotalFooter) selectedTotalFooter.textContent = formatPrice(total) + ' ' + totalCurrencyDisplay;
+    if (selectedTotalValue) selectedTotalValue.textContent = formatPrice(total) + ' ' + totalCurrencyDisplay;
     if (selectedCount) selectedCount.textContent = count;
     if (selectedCountHeader) selectedCountHeader.textContent = count;
 

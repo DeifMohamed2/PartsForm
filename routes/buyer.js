@@ -7,6 +7,7 @@ const { requireAuth } = require('../middleware/auth');
 const {
   getBuyerMain,
   getAutomotiveSearchPage,
+  getSearchV2Page,
   getAffiliatePage,
   getOrdersPage,
   getPaymentPage,
@@ -161,6 +162,9 @@ router.put('/profile/password', changePassword);
 router.get('/search/automotive', getAutomotiveSearchPage);
 router.get('/search-automotive', getAutomotiveSearchPage);
 router.get('/search', getAutomotiveSearchPage); // Default search goes to automotive
+
+// Search V2 - New design test route
+router.get('/search-v2', getSearchV2Page);
 
 // Search API endpoints
 router.get('/api/search', searchParts);
