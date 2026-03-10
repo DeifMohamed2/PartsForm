@@ -159,16 +159,18 @@ app.use(helmet({
 }));
 
 // EJS view caching - prevents re-reading/re-compiling templates on every request
-app.enable('view cache');
+if (process.env.NODE_ENV === 'production') {
+  app.enable('view cache');
+}
 
 // Middleware
 app.use(cookieParser());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Static files with aggressive caching (7 days for assets)
+// Static files - aggressive caching in production, no caching in development
 app.use(express.static(path.join(__dirname, 'public'), {
-  maxAge: '7d',
+  maxAge: process.env.NODE_ENV === 'production' ? '7d' : 0,
   etag: true,
   lastModified: true,
   immutable: false,

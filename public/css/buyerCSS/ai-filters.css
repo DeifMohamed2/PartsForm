@@ -85,17 +85,21 @@
    AI FILTER MODAL - MAIN CONTAINER
    ==================================== */
 .ai-filter-modal {
-  position: fixed;
-  inset: 0;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
   z-index: 100000;
   display: none;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
 }
 
 .ai-filter-modal.show {
-  display: flex;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 .ai-filter-backdrop {
@@ -117,22 +121,23 @@
   }
 }
 
-/* Light Mode Container - Wider & Taller */
+/* Light Mode Container */
 .ai-filter-light .ai-filter-container {
   position: relative;
-  width: 100%;
-  max-width: 1400px;
-  max-height: 95vh;
+  z-index: 1;
+  width: 90%;
+  max-width: 860px;
+  max-height: 72vh;
   background: #ffffff;
-  border: 2px solid #d0e7f8;
-  border-radius: 1.5rem;
+  border: 1.5px solid #d0e7f8;
+  border-radius: 1rem;
   box-shadow:
-    0 20px 60px -12px rgba(43, 43, 43, 0.25),
-    0 0 0 1px rgba(43, 43, 43, 0.08);
+    0 24px 64px -12px rgba(43, 43, 43, 0.22),
+    0 0 0 1px rgba(43, 43, 43, 0.06);
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: modalSlideIn 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Light Mode Background Decorations - Simplified */
@@ -171,20 +176,21 @@
 
 .ai-filter-container {
   position: relative;
-  width: 100%;
-  max-width: 1100px;
-  max-height: 92vh;
+  z-index: 1;
+  width: 90%;
+  max-width: 860px;
+  max-height: 72vh;
   background: var(--kurogane);
   border: 1px solid rgba(64, 84, 94, 0.2);
-  border-radius: 1.5rem;
+  border-radius: 1rem;
   box-shadow:
     0 0 0 1px rgba(64, 84, 94, 0.1),
-    0 25px 80px rgba(0, 0, 0, 0.5),
-    0 0 100px rgba(64, 84, 94, 0.15);
+    0 24px 64px rgba(0, 0, 0, 0.45),
+    0 0 80px rgba(64, 84, 94, 0.12);
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: modalSlideIn 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @keyframes modalSlideIn {
@@ -2655,13 +2661,14 @@
    ==================================== */
 @media (max-width: 1024px) {
   .ai-filter-container {
-    max-width: 100%;
-    max-height: 95vh;
-    border-radius: 1.25rem;
+    width: 94%;
+    max-height: 78vh;
+    border-radius: 0.875rem;
   }
 
   .ai-filter-light .ai-filter-container {
-    max-width: 100%;
+    width: 94%;
+    max-height: 78vh;
   }
 
   .checkbox-grid,
@@ -2689,18 +2696,20 @@
 }
 
 @media (max-width: 768px) {
-  .ai-filter-modal {
-    padding: 0;
+  .ai-filter-modal.show {
+    align-items: flex-end;
   }
 
   .ai-filter-container {
-    max-height: 100vh;
-    border-radius: 0;
+    width: 100%;
+    max-height: 90vh;
+    border-radius: 1rem 1rem 0 0;
   }
 
   .ai-filter-light .ai-filter-container {
-    border-radius: 1.25rem 1.25rem 0 0;
-    max-height: 95vh;
+    width: 100%;
+    border-radius: 1rem 1rem 0 0;
+    max-height: 90vh;
   }
 
   .ai-filter-header {

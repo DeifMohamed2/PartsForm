@@ -210,32 +210,30 @@ const autocomplete = async (req, res) => {
     if (suggestions == null) {
       // MongoDB fallback - Part Number Prefix Match Only
       const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const parsedLimit = parseInt(limit, 10);
 
-      // Aggregate to get unique part numbers that START WITH the query
-      // Use hint for partNumber index, timeout 8s to avoid blocking
-      const results = await Part.aggregate([
-        {
-          $match: {
-            partNumber: { $regex: `^${escapedQuery}`, $options: 'i' },
-          },
-        },
-        { $limit: 5000 },
-        {
-          $group: {
-            _id: '$partNumber',
-            brand: { $first: '$brand' },
-            count: { $sum: 1 },
-          },
-        },
-        { $sort: { _id: 1 } },
-        { $limit: parseInt(limit, 10) },
-      ]).option({ hint: { partNumber: 1, supplier: 1 }, maxTimeMS: 8000 });
+      // Fast find + JS dedup (avoids expensive $group aggregation)
+      // Fetch more than needed so we can deduplicate in memory
+      const results = await Part.find(
+        { partNumber: { $regex: `^${escapedQuery}`, $options: 'i' } },
+        { partNumber: 1, brand: 1, _id: 0 }
+      )
+        .collation({ locale: 'simple' })
+        .limit(parsedLimit * 10)
+        .maxTimeMS(5000)
+        .lean();
 
-      suggestions = results.map((r) => ({
-        partNumber: r._id,
-        brand: r.brand,
-        count: r.count,
-      }));
+      // Deduplicate by partNumber in memory
+      const seen = new Map();
+      for (const r of results) {
+        const key = r.partNumber;
+        if (!seen.has(key)) {
+          seen.set(key, { partNumber: key, brand: r.brand, count: 1 });
+        } else {
+          seen.get(key).count++;
+        }
+      }
+      suggestions = Array.from(seen.values()).slice(0, parsedLimit);
     }
 
     res.json({
@@ -243,6 +241,11 @@ const autocomplete = async (req, res) => {
       suggestions,
     });
   } catch (error) {
+    // On timeout, return empty suggestions instead of 500
+    if (error.code === 50 || error.codeName === 'MaxTimeMSExpired') {
+      console.warn('Autocomplete timeout for query:', req.query.q);
+      return res.json({ success: true, suggestions: [] });
+    }
     console.error('Autocomplete error:', error);
     res.status(500).json({ success: false, error: 'Autocomplete failed' });
   }

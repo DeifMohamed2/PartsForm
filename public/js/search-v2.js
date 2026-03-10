@@ -39,6 +39,7 @@
     recentSearches: JSON.parse(localStorage.getItem('recentSearches') || '[]'),
     autocompleteIndex: -1,
     autocompleteResults: [],
+    autocompleteAbort: null,
   };
 
   // ====================================
@@ -362,10 +363,17 @@
   // AUTOCOMPLETE
   // ====================================
   function showAutocomplete(query) {
+    // Abort any in-flight autocomplete request
+    if (state.autocompleteAbort) {
+      state.autocompleteAbort.abort();
+    }
+    state.autocompleteAbort = new AbortController();
+
     fetch(`/buyer/api/search/autocomplete?q=${encodeURIComponent(query)}&limit=10`, {
       method: 'GET',
       headers: { 'Accept': 'application/json' },
       credentials: 'include',
+      signal: state.autocompleteAbort.signal,
     })
       .then(response => response.json())
       .then(data => {
@@ -399,7 +407,10 @@
           hideAutocomplete();
         }
       })
-      .catch(() => hideAutocomplete());
+      .catch((error) => {
+        if (error.name === 'AbortError') return;
+        hideAutocomplete();
+      });
   }
 
   function hideAutocomplete() {

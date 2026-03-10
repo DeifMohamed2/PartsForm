@@ -38,6 +38,7 @@
     recentSearches: JSON.parse(localStorage.getItem('recentSearches') || '[]'),
     autocompleteIndex: -1,
     autocompleteResults: [],
+    autocompleteAbort: null,
   };
 
   // ====================================
@@ -93,7 +94,47 @@
     initializeRecentSearches();
     initializeAdvancedFilters();
     checkAuthAndUpdateUI();
+    initResultsSection();
     console.log('Search2 page initialized');
+  }
+
+  // ====================================
+  // ALWAYS-VISIBLE RESULTS SECTION
+  // Show table with headers, footer, and placeholder on page load
+  // ====================================
+  function initResultsSection() {
+    const resultsSection = document.getElementById('search2-results-section');
+    const tableContainer = document.getElementById('results-table-container');
+    const tableBody = document.getElementById('results-table-body');
+
+    if (resultsSection) {
+      resultsSection.classList.remove('hidden');
+      resultsSection.classList.add('results-visible');
+    }
+    if (tableContainer) {
+      tableContainer.classList.remove('hidden');
+    }
+    // Hide empty states
+    if (elements.emptyState) elements.emptyState.classList.add('hidden');
+    if (elements.noResultsState) elements.noResultsState.classList.add('hidden');
+
+    // Show placeholder row in empty table
+    showTablePlaceholder();
+  }
+
+  function showTablePlaceholder() {
+    const tableBody = document.getElementById('results-table-body');
+    if (tableBody && tableBody.children.length === 0) {
+      tableBody.innerHTML = `
+        <tr class="table-empty-placeholder">
+          <td colspan="12">
+            <svg class="placeholder-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <div class="placeholder-text">Search for items</div>
+            <div class="placeholder-sub">Enter a part number, brand name, or description above to find parts</div>
+          </td>
+        </tr>
+      `;
+    }
   }
 
   // ====================================
@@ -258,6 +299,10 @@
         if (elements.resetBtn) {
           elements.resetBtn.classList.remove('hidden');
         }
+        if (elements.searchBtn) {
+          elements.searchBtn.classList.add('is-reset-mode');
+          elements.searchBtn.querySelector('span').textContent = 'RESET';
+        }
         
         // Update search input with the query
         if (elements.searchInput && query) {
@@ -311,6 +356,10 @@
         if (elements.resetBtn) {
           elements.resetBtn.classList.remove('hidden');
         }
+        if (elements.searchBtn) {
+          elements.searchBtn.classList.add('is-reset-mode');
+          elements.searchBtn.querySelector('span').textContent = 'RESET';
+        }
         
         if (elements.searchInput && aiQuery) {
           elements.searchInput.value = aiQuery;
@@ -338,7 +387,13 @@
     elements.searchInput?.addEventListener('input', handleSearchInput);
     elements.searchInput?.addEventListener('keydown', handleSearchKeydown);
     // Note: We don't show modal on focus - only when user tries to type or search
-    elements.searchBtn?.addEventListener('click', performSearch);
+    elements.searchBtn?.addEventListener('click', function() {
+      if (elements.searchBtn.classList.contains('is-reset-mode')) {
+        resetSearch();
+      } else {
+        performSearch();
+      }
+    });
     elements.clearBtn?.addEventListener('click', clearSearch);
     elements.resetBtn?.addEventListener('click', resetSearch);
 
@@ -557,11 +612,15 @@
     if (elements.emptyState) elements.emptyState.classList.add('hidden');
     if (elements.noResultsState) elements.noResultsState.classList.add('hidden');
     if (elements.resetBtn) elements.resetBtn.classList.remove('hidden');
+    if (elements.searchBtn) {
+      elements.searchBtn.classList.add('is-reset-mode');
+      elements.searchBtn.querySelector('span').textContent = 'RESET';
+    }
 
     // Clear table and show loading
     if (elements.resultsTableBody) {
       elements.resultsTableBody.innerHTML =
-        '<tr><td colspan="12" style="text-align: center; padding: 40px;"><div class="loading-spinner"></div> Searching...</td></tr>';
+        '<tr><td colspan="12"><div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;gap:12px"><div class="loading-spinner" style="width:32px;height:32px"></div><span style="font-family:var(--font-display);font-size:14px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#40545E">SEARCHING...</span></div></td></tr>';
     }
 
     // Build query parameters
@@ -690,11 +749,15 @@
     if (elements.emptyState) elements.emptyState.classList.add('hidden');
     if (elements.noResultsState) elements.noResultsState.classList.add('hidden');
     if (elements.resetBtn) elements.resetBtn.classList.remove('hidden');
+    if (elements.searchBtn) {
+      elements.searchBtn.classList.add('is-reset-mode');
+      elements.searchBtn.querySelector('span').textContent = 'RESET';
+    }
 
     // Clear table and show loading
     if (elements.resultsTableBody) {
       elements.resultsTableBody.innerHTML =
-        `<tr><td colspan="12" style="text-align: center; padding: 40px;"><div class="loading-spinner"></div> Searching for ${partNumbers.length} part numbers...</td></tr>`;
+        `<tr><td colspan="12"><div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;gap:12px"><div class="loading-spinner" style="width:32px;height:32px"></div><span style="font-family:var(--font-display);font-size:14px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#40545E">SEARCHING ${partNumbers.length} PARTS...</span></div></td></tr>`;
     }
 
     // Make API call to multi-search endpoint via POST to avoid 431 header-too-large
@@ -827,10 +890,14 @@
     if (elements.emptyState) elements.emptyState.classList.add('hidden');
     if (elements.noResultsState) elements.noResultsState.classList.add('hidden');
     if (elements.resetBtn) elements.resetBtn.classList.remove('hidden');
+    if (elements.searchBtn) {
+      elements.searchBtn.classList.add('is-reset-mode');
+      elements.searchBtn.querySelector('span').textContent = 'RESET';
+    }
 
     if (elements.resultsTableBody) {
       elements.resultsTableBody.innerHTML =
-        `<tr><td colspan="12" style="text-align: center; padding: 40px;"><div class="loading-spinner"></div> Searching for ${partNumbers.length} parts from Excel...</td></tr>`;
+        `<tr><td colspan="12"><div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;gap:12px"><div class="loading-spinner" style="width:32px;height:32px"></div><span style="font-family:var(--font-display);font-size:14px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#40545E">SEARCHING ${partNumbers.length} PARTS FROM EXCEL...</span></div></td></tr>`;
     }
 
     // Make API call with POST for larger data
@@ -983,6 +1050,12 @@
     elements.clearBtn.style.display = 'none';
     elements.resetBtn.classList.add('hidden');
 
+    // Restore search button to original state
+    if (elements.searchBtn) {
+      elements.searchBtn.classList.remove('is-reset-mode');
+      elements.searchBtn.querySelector('span').textContent = 'FILTER SEARCH';
+    }
+
     // Hide autocomplete
     hideAutocomplete();
 
@@ -992,25 +1065,25 @@
     // Hide quick sort bar
     hideQuickSortBar();
 
-    // Hide entire results section when resetting
+    // Keep results section visible but reset content
     const resultsSection = document.getElementById('search2-results-section');
     if (resultsSection) {
-      resultsSection.classList.add('hidden');
-      resultsSection.classList.remove('results-visible');
+      resultsSection.classList.remove('hidden');
+      resultsSection.classList.add('results-visible');
     }
 
-    // Hide results (use classList - .hidden has display:none !important)
+    // Keep table container visible
+    elements.resultsTableContainer.classList.remove('hidden');
+
+    // Hide results header (no results to summarize)
     elements.resultsHeader.classList.add('hidden');
-    elements.resultsTableContainer.classList.add('hidden');
     elements.noResultsState.classList.add('hidden');
+    elements.emptyState.classList.add('hidden');
 
     // Hide advanced filter trigger when resetting (only show when results exist)
     if (elements.advancedFilterTrigger) {
       elements.advancedFilterTrigger.classList.add('hidden');
     }
-
-    // Show empty state
-    elements.emptyState.classList.remove('hidden');
 
     // Clear state
     state.searchQuery = '';
@@ -1019,6 +1092,15 @@
 
     // Reset filters
     handleClearAdvancedFilters();
+
+    // Reset footer counts
+    const footerResultsCount = document.getElementById('footer-results-count');
+    if (footerResultsCount) footerResultsCount.textContent = '0';
+    const selectedTotalValue = document.getElementById('selected-total-value');
+    if (selectedTotalValue) selectedTotalValue.textContent = '0.00 USD';
+
+    // Show placeholder in table
+    showTablePlaceholder();
 
     // Focus input
     elements.searchInput.focus();
@@ -1033,6 +1115,12 @@
       return;
     }
 
+    // Abort any in-flight autocomplete request
+    if (state.autocompleteAbort) {
+      state.autocompleteAbort.abort();
+    }
+    state.autocompleteAbort = new AbortController();
+
     // Fetch autocomplete suggestions from API - Part Number Only
     fetch(`/buyer/api/search/autocomplete?q=${encodeURIComponent(query)}&limit=10`, {
       method: 'GET',
@@ -1040,6 +1128,7 @@
         'Accept': 'application/json',
       },
       credentials: 'include', // Include cookies for authentication
+      signal: state.autocompleteAbort.signal,
     })
       .then((response) => {
         if (!response.ok) {
@@ -1095,9 +1184,10 @@
         }
       })
       .catch((error) => {
+        // Ignore aborted requests (superseded by newer keystroke)
+        if (error.name === 'AbortError') return;
         console.error('Autocomplete error:', error);
         hideAutocomplete();
-        // Autocomplete failures are silent by design - non-critical background feature
       });
   }
 
@@ -1479,7 +1569,7 @@
   }
 
   function showNoResults() {
-    // Show results section even when no results (user has searched)
+    // Keep results section visible
     const resultsSection = document.getElementById('search2-results-section');
     if (resultsSection) {
       resultsSection.classList.remove('hidden');
@@ -1497,11 +1587,25 @@
     }
 
     elements.resultsHeader.classList.add('hidden');
+    // Keep table visible with placeholder
     const tableContainer = document.getElementById('results-table-container');
-    if (tableContainer) tableContainer.classList.add('hidden');
+    if (tableContainer) tableContainer.classList.remove('hidden');
     elements.emptyState.classList.add('hidden');
-    elements.noResultsState.classList.remove('hidden');
-    elements.noResultsQuery.textContent = state.searchQuery;
+    elements.noResultsState.classList.add('hidden');
+
+    // Show "no results" message inside the table
+    const tableBody = document.getElementById('results-table-body');
+    if (tableBody) {
+      tableBody.innerHTML = `
+        <tr class="table-empty-placeholder">
+          <td colspan="12">
+            <svg class="placeholder-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="0"/><path d="m9 9 6 6"/><path d="m15 9-6 6"/></svg>
+            <div class="placeholder-text">No parts found</div>
+            <div class="placeholder-sub">We couldn't find parts matching "${state.searchQuery}". Try a different part number or keyword.</div>
+          </td>
+        </tr>
+      `;
+    }
   }
 
   function hideNoResults() {
@@ -1509,18 +1613,19 @@
   }
 
   function showEmptyState() {
-    // Hide entire results section when showing empty state
+    // Keep results section visible with table placeholder
     const resultsSection = document.getElementById('search2-results-section');
     if (resultsSection) {
-      resultsSection.classList.add('hidden');
-      resultsSection.classList.remove('results-visible');
+      resultsSection.classList.remove('hidden');
+      resultsSection.classList.add('results-visible');
     }
 
     elements.resultsHeader.classList.add('hidden');
     const tableContainer = document.getElementById('results-table-container');
-    if (tableContainer) tableContainer.classList.add('hidden');
+    if (tableContainer) tableContainer.classList.remove('hidden');
     elements.noResultsState.classList.add('hidden');
-    elements.emptyState.classList.remove('hidden');
+    elements.emptyState.classList.add('hidden');
+    showTablePlaceholder();
   }
 
   function hideEmptyState() {

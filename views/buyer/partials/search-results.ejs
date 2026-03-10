@@ -76,6 +76,29 @@
 
       <!-- Results Table -->
       <div class="results-table-container hidden" id="results-table-container">
+        <!-- Results Summary Bar - Above Table -->
+        <div class="results-summary-bar">
+          <div class="results-summary-left">
+            <div class="results-summary-count">
+              <span class="summary-found-label"><%= t('searchResults.footer.found') || 'FOUND' %></span>
+              <span class="summary-found-number" id="footer-results-count">0</span>
+              <span class="summary-matches-label"><%= t('searchResults.footer.matches') || 'MATCHES' %></span>
+            </div>
+            <span class="summary-divider"></span>
+            <p class="summary-select-hint"><%= t('searchResults.footer.selectItems') || 'Select items to add to cart' %></p>
+          </div>
+          <div class="results-summary-right">
+            <div class="summary-total">
+              <span class="summary-total-label"><%= t('searchResults.footer.totalSelected') || 'Total Selected' %></span>
+              <span class="summary-total-value" id="selected-total-value">0.00 USD</span>
+            </div>
+            <button class="btn-add-to-cart" id="add-to-cart-btn" disabled>
+              <i data-lucide="shopping-cart"></i>
+              <span><%= t('searchResults.footer.addToCart') || 'ADD TO CART' %></span>
+            </button>
+          </div>
+        </div>
+
         <div class="table-wrapper">
           <table class="results-table" id="results-table">
             <thead>
@@ -103,26 +126,6 @@
         <!-- Pagination Controls -->
         <div class="results-pagination hidden" id="results-pagination">
           <!-- Populated by JS -->
-        </div>
-
-        <!-- Results Footer - New Design -->
-        <div class="results-footer">
-          <div class="results-footer-content">
-            <div class="results-footer-left">
-              <h2 class="found-matches-title"><%= t('searchResults.footer.found') || 'FOUND' %> <span id="footer-results-count">0</span> <%= t('searchResults.footer.matches') || 'MATCHES' %></h2>
-              <p class="found-matches-subtitle"><%= t('searchResults.footer.selectItems') || 'Select Items to add to cart' %></p>
-            </div>
-            <div class="selected-total-display">
-              <span class="selected-total-value" id="selected-total-value">0.00 USD</span>
-              <span class="selected-total-label"><%= t('searchResults.footer.totalSelected') || 'Total Selected' %></span>
-            </div>
-          </div>
-          <div class="results-footer-actions">
-            <button class="btn-add-to-cart" id="add-to-cart-btn" disabled>
-              <i data-lucide="shopping-cart"></i>
-              <span><%= t('searchResults.footer.addToCart') || 'ADD TO CART' %></span>
-            </button>
-          </div>
         </div>
       </div>
 
