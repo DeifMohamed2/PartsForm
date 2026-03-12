@@ -12,200 +12,97 @@
     padding-top: 0;
 }
 
-/* Ensure navbar stays on top */
-.claim-details-page .nav-bar {
-    z-index: 10001 !important;
-    position: fixed !important;
-    top: 0 !important;
-    width: 100% !important;
-    background: rgba(255, 255, 255, 0.98) !important;
-    backdrop-filter: blur(20px) saturate(180%) !important;
-    border-bottom: 1px solid rgba(64, 84, 94, 0.2) !important;
-    box-shadow: 0 4px 20px rgba(43, 43, 43, 0.08) !important;
-}
-
 /* ====================================
-   CLAIM HEADER BAR - Animated Background
+   HEADER BAR - STANDARDIZED DESIGN
    ==================================== */
-.claim-header-bar {
-    position: relative;
-    padding: 7rem 0 2rem;
-    margin-top: 0;
-    overflow: hidden;
+.claim-details-header-bar {
+    background: white;
+    border-bottom: 2px solid var(--suzu);
+    padding: 1.5rem 0 0.875rem;
+    margin-top: 4.5rem;
+    margin-bottom: 0.75rem;
 }
 
-.claim-header-bg {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: var(--kurogane);
-    z-index: 0;
-}
-
-.claim-header-bg::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-image: url('https://images.unsplash.com/photo-1557804506-669a67965ba0?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80');
-    background-size: cover;
-    background-position: center;
-    opacity: 0.2;
-    z-index: 1;
-    animation: claimDetailsBgShift 20s ease-in-out infinite;
-}
-
-@keyframes claimDetailsBgShift {
-    0%, 100% { background-position: center center; }
-    50% { background-position: center 30%; }
-}
-
-.claim-header-bg::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(180deg, rgba(64, 84, 94, 0.8) 0%, rgba(43, 43, 43, 0.9) 100%);
-    z-index: 2;
-}
-
-.claim-header-inner {
-    position: relative;
-    z-index: 3;
-}
-
-.claim-header-content {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-}
-
-.btn-back-header {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.625rem 1.125rem;
-    background: rgba(149, 175, 192, 0.15);
-    backdrop-filter: blur(10px);
-    color: var(--washi);
-    border: 1px solid rgba(149, 175, 192, 0.35);
-    border-radius: 0 !important;
-    font-family: 'Antartida', sans-serif;
-    font-weight: 500;
-    font-size: 0.875rem;
-    text-decoration: none;
-    transition: all 0.3s ease;
-    width: fit-content;
-}
-
-.btn-back-header:hover {
-    background: rgba(149, 175, 192, 0.25);
-    border-color: rgba(149, 175, 192, 0.5);
-}
-
-.btn-back-header i {
-    width: 16px;
-    height: 16px;
-}
-
-.claim-header-info {
+.claim-details-header-content {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: flex-end;
     gap: 2rem;
 }
 
-.claim-header-left {
+.claim-details-header-left {
     flex: 1;
 }
 
-.claim-id-header {
-    display: inline-block;
-    font-family: 'Quantico', sans-serif;
-    font-size: 0.875rem;
-    font-weight: 400;
-    color: var(--sei);
-    margin-bottom: 0.75rem;
-    letter-spacing: 0.05em;
-}
-
-.claim-subject-header {
+.claim-details-header-title {
     font-family: 'Quantico', sans-serif;
     font-size: 1.75rem;
     font-weight: 400;
-    color: var(--washi);
-    margin-bottom: 1rem;
-    line-height: 1.3;
+    color: var(--kurogane);
+    margin: 0 0 0.25rem 0;
     text-transform: uppercase;
     letter-spacing: 0.08em;
 }
 
-.claim-meta-header {
-    display: flex;
-    gap: 1.5rem;
-    flex-wrap: wrap;
-}
-
-.meta-item {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: rgba(255, 255, 255, 0.9);
-    font-size: 0.9rem;
-}
-
-.meta-item i {
-    width: 16px;
-    height: 16px;
-}
-
-.claim-header-right {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    align-items: flex-end;
-}
-
-.status-badge-header,
-.priority-badge-header {
-    padding: 0.5rem 1rem;
-    border-radius: 0 !important;
-    font-size: 0.85rem;
-    font-weight: 600;
-    text-transform: capitalize;
-}
-
-.status-badge-header {
-    background: rgba(149, 175, 192, 0.2);
-    backdrop-filter: blur(10px);
-    color: var(--washi);
-    border: 1px solid rgba(149, 175, 192, 0.4);
-}
-
-.priority-badge-header {
-    background: rgba(149, 175, 192, 0.2);
-    backdrop-filter: blur(10px);
-    color: var(--washi);
-    border: 1px solid rgba(149, 175, 192, 0.4);
+.claim-details-header-subtitle {
+    font-family: 'Antartida', sans-serif;
+    font-size: 0.875rem;
+    color: var(--namari);
+    margin: 0;
+    font-weight: 500;
 }
 
 /* ====================================
    MAIN CONTENT
    ==================================== */
+.claim-details-content {
+    background: var(--washi);
+    min-height: calc(100vh - 12rem);
+}
+
 .claim-details-section {
-    padding: 3rem 0;
+    padding: 1.5rem 0;
 }
 
 .claim-details-container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* Back Button */
+.btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.125rem;
+    background: white;
+    color: var(--kurogane);
+    border: 2px solid var(--suzu);
+    font-family: 'Antartida', sans-serif;
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    margin-bottom: 1rem;
+}
+
+.btn-back:hover {
+    background: var(--aitetsu);
+    border-color: var(--aitetsu);
+    color: white;
+    transform: translateX(-4px);
+}
+
+.btn-back i {
+    width: 16px;
+    height: 16px;
+}
+
+/* Grid Layout */
+.claim-details-grid {
     display: grid;
-    grid-template-columns: 320px 1fr;
-    gap: 2rem;
+    grid-template-columns: 340px 1fr;
+    gap: 1.5rem;
 }
 
 /* ====================================
@@ -213,22 +110,20 @@
    ==================================== */
 .claim-info-card {
     background: white;
-    border-radius: 0 !important;
-    border: 1px solid rgba(149, 175, 192, 0.25);
-    box-shadow: 0 2px 16px rgba(149, 175, 192, 0.08);
+    border: 2px solid var(--suzu);
+    box-shadow: 0 2px 8px rgba(149, 175, 192, 0.08);
     height: fit-content;
-    position: sticky;
-    top: 7rem;
 }
 
 .info-card-header {
-    padding: 1.5rem;
-    border-bottom: 1px solid #f1f5f9;
+    padding: 1.25rem;
+    border-bottom: 2px solid var(--suzu);
+    background: var(--washi);
 }
 
 .info-card-title {
     font-family: 'Quantico', sans-serif;
-    font-size: 1rem;
+    font-size: 0.9375rem;
     font-weight: 400;
     color: var(--kurogane);
     margin: 0;
@@ -237,98 +132,77 @@
 }
 
 .info-card-body {
-    padding: 1.5rem;
+    padding: 1.25rem;
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1.25rem;
 }
 
 .info-item {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.375rem;
 }
 
 .info-label {
-    font-size: 0.85rem;
-    font-weight: 600;
+    font-size: 0.75rem;
+    font-weight: 700;
     color: var(--namari);
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
 .info-value {
-    font-size: 0.95rem;
+    font-size: 0.9375rem;
     color: var(--kurogane);
-    font-weight: 500;
+    font-weight: 600;
     display: flex;
     align-items: center;
     gap: 0.5rem;
+}
+
+.info-value.ticket-id {
+    font-family: 'Quantico', sans-serif;
+    font-size: 1rem;
+    color: var(--aitetsu);
+    letter-spacing: 0.05em;
 }
 
 .info-value i {
     width: 16px;
     height: 16px;
     color: var(--aitetsu);
-}
-
-.info-value.priority {
-    padding: 0.5rem 0.875rem;
-    background: var(--washi);
-    color: var(--namari);
-    border: 1.5px solid var(--suzu);
-    border-radius: 0 !important;
-    width: fit-content;
-    font-weight: 500;
-}
-
-.status-select {
-    width: 100%;
-    padding: 0.625rem 0.875rem;
-    border: 1.5px solid rgba(149, 175, 192, 0.25);
-    border-radius: 0 !important;
-    font-family: 'Antartida', sans-serif;
-    font-size: 0.9rem;
-    color: var(--kurogane);
-    background: var(--washi);
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.status-select:focus {
-    outline: none;
-    border-color: var(--kintsugi);
-    background: white;
-    box-shadow: 0 0 0 3px rgba(214, 172, 63, 0.12);
+    flex-shrink: 0;
 }
 
 .status-badge-small {
     display: inline-flex;
     align-items: center;
-    padding: 0.375rem 0.875rem;
-    border-radius: 0 !important;
+    padding: 0.375rem 0.75rem;
     font-family: 'Antartida', sans-serif;
     font-size: 0.8125rem;
-    font-weight: 500;
+    font-weight: 600;
     background: white;
-    border: 1.5px solid var(--suzu);
+    border: 2px solid var(--suzu);
     color: var(--namari);
 }
 
 .status-badge-small.open {
-    border-color: var(--suzu);
-    color: var(--namari);
+    border-color: var(--sei);
+    color: var(--aitetsu);
+    background: rgba(103, 178, 215, 0.05);
 }
 
 .status-badge-small.in-progress {
-    border-color: var(--sei);
-    color: var(--aitetsu);
+    border-color: var(--kintsugi);
+    color: #c9a432;
+    background: rgba(214, 172, 63, 0.05);
 }
 
 .status-badge-small.resolved {
     border-color: var(--sei);
     color: var(--sei);
+    background: rgba(103, 178, 215, 0.1);
 }
 
 /* ====================================
@@ -336,51 +210,56 @@
    ==================================== */
 .chat-container {
     background: white;
-    border-radius: 0 !important;
-    border: 1px solid rgba(149, 175, 192, 0.25);
-    box-shadow: 0 2px 16px rgba(149, 175, 192, 0.08);
+    border: 2px solid var(--suzu);
+    box-shadow: 0 2px 8px rgba(149, 175, 192, 0.08);
     display: flex;
     flex-direction: column;
-    height: calc(100vh - 22rem);
-    min-height: 600px;
+    height: calc(100vh - 16rem);
+    max-height: 700px;
 }
 
 .chat-header {
-    padding: 1.5rem;
-    border-bottom: 1px solid #f1f5f9;
+    padding: 1.25rem;
+    border-bottom: 2px solid var(--suzu);
+    background: var(--washi);
     display: flex;
     align-items: center;
     gap: 1rem;
 }
 
 .chat-header-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 0 !important;
-    background: var(--washi);
-    border: 1px solid rgba(149, 175, 192, 0.25);
+    width: 42px;
+    height: 42px;
+    background: white;
+    border: 2px solid var(--suzu);
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
 }
 
 .chat-header-icon i {
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
     color: var(--aitetsu);
 }
 
 .chat-title {
-    font-size: 1.25rem;
-    font-weight: 700;
+    font-family: 'Quantico', sans-serif;
+    font-size: 1.125rem;
+    font-weight: 400;
     color: var(--kurogane);
-    margin: 0 0 0.25rem 0;
+    margin: 0 0 0.125rem 0;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 .chat-subtitle {
-    font-size: 0.85rem;
+    font-family: 'Antartida', sans-serif;
+    font-size: 0.8125rem;
     color: var(--namari);
     margin: 0;
+    font-weight: 500;
 }
 
 /* ====================================
@@ -389,16 +268,16 @@
 .chat-messages {
     flex: 1;
     overflow-y: auto;
-    padding: 1.5rem;
+    padding: 1.25rem;
     display: flex;
     flex-direction: column;
-    gap: 1.25rem;
+    gap: 1rem;
     background: var(--washi);
 }
 
 .message {
     display: flex;
-    gap: 0.75rem;
+    gap: 0.625rem;
     animation: messageSlideIn 0.3s ease-out;
 }
 
@@ -407,7 +286,6 @@
         opacity: 0;
         transform: translateY(10px);
     }
-
     to {
         opacity: 1;
         transform: translateY(0);
@@ -420,16 +298,15 @@
 }
 
 .message-avatar {
-    width: 36px;
-    height: 36px;
-    border-radius: 0 !important;
+    width: 34px;
+    height: 34px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 700;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     flex-shrink: 0;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
 /* Admin/Support avatar */
@@ -453,7 +330,7 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    margin-bottom: 0.375rem;
+    margin-bottom: 0.25rem;
 }
 
 .message.customer .message-header {
@@ -461,41 +338,37 @@
 }
 
 .message-sender {
-    font-weight: 600;
-    font-size: 0.85rem;
+    font-weight: 700;
+    font-size: 0.8125rem;
     color: var(--kurogane);
 }
 
 .message-time {
-    font-size: 0.75rem;
+    font-size: 0.6875rem;
     color: var(--suzu);
+    font-weight: 500;
 }
 
 .message-bubble {
-    padding: 0.875rem 1rem;
-    border-radius: 0 !important;
-    font-size: 1rem;
+    padding: 0.75rem 0.875rem;
+    font-size: 0.9375rem;
     font-weight: 500;
     line-height: 1.6;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
 }
 
 /* Admin/Support bubble */
 .message.admin .message-bubble {
     background: white;
     color: var(--kurogane);
-    border: 1px solid #e2e8f0;
-    border-top-left-radius: 4px;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    border: 2px solid var(--suzu);
 }
 
 /* Customer/Buyer bubble - on the right */
 .message.customer .message-bubble {
     background: var(--aitetsu);
-    color: var(--washi);
-    border: none;
-    border-bottom-right-radius: 4px;
-    box-shadow: 0 2px 12px rgba(64, 84, 94, 0.18);
+    color: white;
+    border: 2px solid var(--aitetsu);
 }
 
 .message-attachments {
@@ -511,13 +384,12 @@
     gap: 0.625rem;
     padding: 0.625rem 0.75rem;
     background: rgba(255, 255, 255, 0.95);
-    border: 1px solid rgba(51, 65, 85, 0.2);
-    border-radius: 0 !important;
+    border: 2px solid var(--suzu);
     font-size: 0.875rem;
     color: var(--kurogane);
     text-decoration: none;
     transition: all 0.2s ease;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
 }
 
 .attachment-item.attachment-file {
@@ -526,21 +398,19 @@
 }
 
 .attachment-icon {
-    width: 34px;
-    height: 34px;
+    width: 32px;
+    height: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
     background: var(--aitetsu);
-    border-radius: 0 !important;
-    color: var(--washi);
+    color: white;
     flex-shrink: 0;
 }
 
 .attachment-icon i {
     width: 16px;
     height: 16px;
-    color: #ffffff;
 }
 
 .attachment-info {
@@ -552,9 +422,9 @@
 }
 
 .attachment-name {
-    font-weight: 600;
-    font-size: 0.85rem;
-    color: #1e293b;
+    font-weight: 700;
+    font-size: 0.8125rem;
+    color: var(--kurogane);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -562,9 +432,9 @@
 }
 
 .attachment-meta {
-    font-size: 0.7rem;
+    font-size: 0.6875rem;
     color: var(--namari);
-    font-weight: 500;
+    font-weight: 600;
 }
 
 .attachment-download {
@@ -573,11 +443,10 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #f1f5f9;
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    border-radius: 0 !important;
+    background: var(--washi);
+    border: 2px solid var(--suzu);
     flex-shrink: 0;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.25s ease;
     cursor: pointer;
 }
 
@@ -585,90 +454,53 @@
     width: 14px;
     height: 14px;
     color: var(--namari);
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.25s ease;
+}
+
+.attachment-item:hover {
+    background: white;
+    border-color: var(--aitetsu);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(149, 175, 192, 0.2);
+}
+
+.attachment-item:hover .attachment-download {
+    background: var(--aitetsu);
+    border-color: var(--aitetsu);
+}
+
+.attachment-item:hover .attachment-download i {
+    color: white;
 }
 
 /* Customer message attachments */
 .message.customer .attachment-item {
     background: white;
-    border: 1px solid rgba(71, 85, 105, 0.25);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    border: 2px solid var(--suzu);
 }
 
 .message.customer .attachment-icon {
     background: var(--aitetsu);
-    color: var(--washi);
-}
-
-.message.customer .attachment-icon i {
-    color: #ffffff;     
-}
-
-.message.customer .attachment-name {
-    color: #1e293b;
-}
-
-.message.customer .attachment-meta {
-    color: var(--namari);
-}
-
-.message.customer .attachment-download {
-    background: var(--washi);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-}
-
-.message.customer .attachment-download i {
-    color: var(--namari);
-}
-
-.attachment-item:hover {
-    background: white;
-    border-color: var(--sei);
-    transform: translateY(-1px);
-    box-shadow: 0 3px 10px rgba(149, 175, 192, 0.2);
-}
-
-.attachment-item:hover .attachment-download {
-    background: var(--aitetsu);
-    border-color: transparent;
-    transform: scale(1.1);
-    box-shadow: 0 4px 12px rgba(64, 84, 94, 0.4);
-}
-
-.attachment-item:hover .attachment-download i {
     color: white;
-    transform: translateY(1px);
 }
 
 .message.customer .attachment-item:hover {
-    background: var(--washi);
-    border-color: #334155;
-}
-
-.message.customer .attachment-item:hover .attachment-download {
-    background: var(--namari);
-    border-color: transparent;
-    transform: scale(1.1);
-    box-shadow: 0 4px 12px rgba(51, 65, 85, 0.4);
-}
-
-.message.customer .attachment-item:hover .attachment-download i {
-    color: white;
-    transform: translateY(1px);
+    border-color: var(--aitetsu);
 }
 
 /* ====================================
    CHAT INPUT
    ==================================== */
 .chat-input-container {
-    padding: 1.5rem;
-    border-top: 1px solid #f1f5f9;
+    padding: 1.25rem;
+    border-top: 2px solid var(--suzu);
     background: white;
+    flex-shrink: 0;
 }
 
 .chat-form {
     display: flex;
-    gap: 1rem;
+    gap: 0.75rem;
 }
 
 .chat-input-wrapper {
@@ -676,38 +508,41 @@
     display: flex;
     align-items: flex-end;
     gap: 0.5rem;
-    padding: 0.75rem 1rem;
+    padding: 0.625rem 0.875rem;
     background: var(--washi);
-    border: 1.5px solid rgba(149, 175, 192, 0.25);
-    border-radius: 0 !important;
+    border: 2px solid var(--suzu);
     transition: all 0.3s ease;
 }
 
 .chat-input-wrapper:focus-within {
-    border-color: var(--kintsugi);
+    border-color: var(--aitetsu);
     background: white;
-    box-shadow: 0 0 0 3px rgba(214, 172, 63, 0.12);
+    box-shadow: 0 0 0 3px rgba(64, 84, 94, 0.1);
 }
 
 .chat-input {
     flex: 1;
     border: none;
     background: transparent;
-    font-size: 0.95rem;
+    font-size: 0.9375rem;
     color: var(--kurogane);
     resize: none;
-    max-height: 120px;
-    font-family: inherit;
+    max-height: 100px;
+    font-family: 'Antartida', sans-serif;
+    font-weight: 500;
 }
 
 .chat-input:focus {
     outline: none;
 }
 
+.chat-input::placeholder {
+    color: var(--suzu);
+}
+
 .btn-attach {
-    width: 36px;
-    height: 36px;
-    border-radius: 0 !important;
+    width: 34px;
+    height: 34px;
     border: none;
     background: transparent;
     color: var(--namari);
@@ -716,10 +551,11 @@
     align-items: center;
     justify-content: center;
     transition: all 0.2s ease;
+    flex-shrink: 0;
 }
 
 .btn-attach:hover {
-    background: #e2e8f0;
+    background: white;
     color: var(--aitetsu);
 }
 
@@ -729,11 +565,10 @@
 }
 
 .btn-send {
-    padding: 0.75rem 1.5rem;
-    background: var(--kintsugi);
+    padding: 0.75rem 1.375rem;
+    background: var(--aitetsu);
     color: white;
-    border: 1.5px solid var(--kintsugi);
-    border-radius: 0 !important;
+    border: 2px solid var(--aitetsu);
     font-family: 'Quantico', sans-serif;
     font-size: 0.8125rem;
     font-weight: 400;
@@ -744,59 +579,67 @@
     align-items: center;
     gap: 0.5rem;
     transition: all 0.3s ease;
+    flex-shrink: 0;
 }
 
 .btn-send:hover {
-    background: #c9a432;
-    border-color: #c9a432;
+    background: var(--kurogane);
+    border-color: var(--kurogane);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(214, 172, 63, 0.3);
+    box-shadow: 0 4px 12px rgba(64, 84, 94, 0.3);
 }
 
 .btn-send i {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
 }
 
 /* ====================================
    RESPONSIVE DESIGN
    ==================================== */
+@media (max-width: 1200px) {
+    .claim-details-grid {
+        grid-template-columns: 300px 1fr;
+        gap: 1.25rem;
+    }
+}
+
 @media (max-width: 1024px) {
-    .claim-details-container {
+    .claim-details-grid {
         grid-template-columns: 1fr;
     }
 
-    .claim-info-card {
-        position: static;
-    }
-
     .chat-container {
-        height: 600px;
+        max-height: 600px;
     }
 }
 
 @media (max-width: 768px) {
-    .claim-header-bar {
-        padding: 6rem 0 1.5rem;
+    .claim-details-header-bar {
+        padding: 1.25rem 0 0.75rem;
     }
 
-    .claim-subject-header {
+    .claim-details-header-title {
         font-size: 1.5rem;
     }
 
-    .claim-header-info {
+    .chat-messages {
+        padding: 1rem;
+    }
+
+    .message-content {
+        max-width: 85%;
+    }
+
+    .chat-form {
         flex-direction: column;
     }
 
-    .claim-header-right {
-        flex-direction: row;
-        align-items: center;
+    .btn-send {
         width: 100%;
+        justify-content: center;
     }
-
-    .chat-messages {
-        padding: 1.5rem;
-    }
+}
 
     .message-content {
         max-width: 85%;

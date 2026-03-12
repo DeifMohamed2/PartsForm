@@ -8,104 +8,116 @@
      CLAIM DETAILS PAGE - CHAT INTERFACE
      ==================================== -->
 <div class="claim-details-page" data-claim-id="<%= claim ? claim._id : '' %>">
-  <!-- Claim Header with Animated Background -->
-  <div class="claim-header-bar">
-    <div class="claim-header-bg"></div>
-    <div class="buyer-container claim-header-inner">
-      <div class="claim-header-content">
-        <a href="/buyer/claim-support" class="btn-back-header">
-          <i data-lucide="arrow-left"></i>
-          <span><%= t('tickets.details.backToTickets') %></span>
-        </a>
-        
-        <div class="claim-header-info">
-          <div class="claim-header-left">
-            <span class="claim-id-header" id="claim-id-header">TKT-001</span>
-            <h1 class="claim-subject-header" id="claim-subject-header"><%= t('tickets.details.loading') %></h1>
-            <div class="claim-meta-header">
-              <span class="meta-item">
-                <i data-lucide="package"></i>
-                <span id="claim-order-header">ORD-2025-001</span>
-              </span>
-              <span class="meta-item">
-                <i data-lucide="calendar"></i>
-                <span id="claim-created-header">Dec 20, 2025</span>
-              </span>
-            </div>
-          </div>
-          <div class="claim-header-right">
-            <span class="status-badge-header" id="status-badge-header"><%= t('tickets.status') %></span>
-          </div>
+  <!-- Header Bar -->
+  <div class="claim-details-header-bar">
+    <div class="container">
+      <div class="claim-details-header-content">
+        <div class="claim-details-header-left">
+          <h1 class="claim-details-header-title">Claim Support</h1>
+          <p class="claim-details-header-subtitle">View and manage your claim ticket</p>
         </div>
       </div>
     </div>
   </div>
 
   <!-- Main Content -->
-  <div class="buyer-container">
-    <div class="claim-details-section">
-      <div class="claim-details-container">
-        <!-- Claim Info Card -->
-        <div class="claim-info-card">
-          <div class="info-card-header">
-            <h3 class="info-card-title"><%= t('tickets.details.ticketInfo') %></h3>
-          </div>
-          <div class="info-card-body">
-            <div class="info-item">
-              <span class="info-label"><%= t('tickets.details.category') %></span>
-              <span class="info-value" id="claim-category">
-                <i data-lucide="tag"></i>
-                <span><%= t('tickets.categories.shipping') %></span>
-              </span>
-            </div>
-            <div class="info-item">
-              <span class="info-label"><%= t('tickets.details.status') %></span>
-              <span class="info-value" id="claim-status-info">
-                <span class="status-badge-small" id="status-badge-small"><%= t('tickets.status') %></span>
-              </span>
-            </div>
-            <div class="info-item">
-              <span class="info-label"><%= t('tickets.details.lastUpdated') %></span>
-              <span class="info-value" id="claim-updated">2 hours ago</span>
-            </div>
-          </div>
-        </div>
+  <div class="claim-details-content">
+    <div class="container">
+      <div class="claim-details-section">
+        <div class="claim-details-container">
+          <!-- Back Button -->
+          <a href="/buyer/claim-support" class="btn-back">
+            <i data-lucide="arrow-left"></i>
+            <span>Back to Claims</span>
+          </a>
 
-        <!-- Chat Messages -->
-        <div class="chat-container">
-          <div class="chat-header">
-            <div class="chat-header-icon">
-              <i data-lucide="message-circle"></i>
-            </div>
-            <div class="chat-header-text">
-              <h3 class="chat-title"><%= t('tickets.details.conversation') %></h3>
-              <p class="chat-subtitle"><%= t('tickets.details.chatWithSupport') %></p>
-            </div>
-          </div>
-
-          <div class="chat-messages" id="chat-messages">
-            <!-- Messages will be populated by JavaScript -->
-          </div>
-
-          <div class="chat-input-container">
-            <form id="chat-form" class="chat-form">
-              <div class="chat-input-wrapper">
-                <textarea 
-                  id="message-input" 
-                  class="chat-input" 
-                  placeholder="<%= t('tickets.details.typePlaceholder') %>"
-                  rows="1"
-                ></textarea>
-                <button type="button" class="btn-attach" id="btn-attach">
-                  <i data-lucide="paperclip"></i>
-                </button>
-                <input type="file" id="file-input" multiple hidden>
+          <div class="claim-details-grid">
+            <!-- Claim Info Card -->
+            <div class="claim-info-card">
+              <div class="info-card-header">
+                <h3 class="info-card-title"><%= t('tickets.details.ticketInfo') %></h3>
               </div>
-              <button type="submit" class="btn-send">
-                <i data-lucide="send"></i>
-                <span><%= t('tickets.details.send') %></span>
-              </button>
-            </form>
+              <div class="info-card-body">
+                <!-- Ticket ID & Status -->
+                <div class="info-item">
+                  <span class="info-label">Ticket ID</span>
+                  <span class="info-value ticket-id" id="claim-id-header">TKT-001</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Subject</span>
+                  <span class="info-value" id="claim-subject-header"><%= t('tickets.details.loading') %></span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label"><%= t('tickets.details.category') %></span>
+                  <span class="info-value" id="claim-category">
+                    <i data-lucide="tag"></i>
+                    <span><%= t('tickets.categories.shipping') %></span>
+                  </span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label"><%= t('tickets.details.status') %></span>
+                  <span class="info-value" id="claim-status-info">
+                    <span class="status-badge-small" id="status-badge-small"><%= t('tickets.status') %></span>
+                  </span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Order Number</span>
+                  <span class="info-value" id="claim-order-header">
+                    <i data-lucide="package"></i>
+                    <span>ORD-2025-001</span>
+                  </span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Created</span>
+                  <span class="info-value" id="claim-created-header">
+                    <i data-lucide="calendar"></i>
+                    <span>Dec 20, 2025</span>
+                  </span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label"><%= t('tickets.details.lastUpdated') %></span>
+                  <span class="info-value" id="claim-updated">2 hours ago</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Chat Messages -->
+            <div class="chat-container">
+              <div class="chat-header">
+                <div class="chat-header-icon">
+                  <i data-lucide="message-circle"></i>
+                </div>
+                <div class="chat-header-text">
+                  <h3 class="chat-title"><%= t('tickets.details.conversation') %></h3>
+                  <p class="chat-subtitle"><%= t('tickets.details.chatWithSupport') %></p>
+                </div>
+              </div>
+
+              <div class="chat-messages" id="chat-messages">
+                <!-- Messages will be populated by JavaScript -->
+              </div>
+
+              <div class="chat-input-container">
+                <form id="chat-form" class="chat-form">
+                  <div class="chat-input-wrapper">
+                    <textarea 
+                      id="message-input" 
+                      class="chat-input" 
+                      placeholder="<%= t('tickets.details.typePlaceholder') %>"
+                      rows="1"
+                    ></textarea>
+                    <button type="button" class="btn-attach" id="btn-attach">
+                      <i data-lucide="paperclip"></i>
+                    </button>
+                    <input type="file" id="file-input" multiple hidden>
+                  </div>
+                  <button type="submit" class="btn-send">
+                    <i data-lucide="send"></i>
+                    <span><%= t('tickets.details.send') %></span>
+                  </button>
+                </form>
+              </div>
+            </div>
           </div>
         </div>
       </div>

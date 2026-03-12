@@ -2,17 +2,17 @@
      BUYER NAVIGATION BAR — Glassy, Brand System
      ==================================== -->
 <nav class="nav-bar" id="navbar">
-  <div class="container nav-container">
-    <!-- Logo: PNG for crisp display. Dark variant over hero, light variant when scrolled -->
-    <div class="nav-logo">
-      <a href="/">
-        <img src="/images/brand/logo-dark.png" alt="PartsForm" class="logo-image logo-for-hero">
-        <img src="/images/brand/logo-light.png" alt="PartsForm" class="logo-image logo-for-scrolled">
-      </a>
-    </div>
+    <div class="container nav-container">
+        <!-- Logo: PNG for crisp display. Dark variant over hero, light variant when scrolled -->
+        <div class="nav-logo">
+            <a href="/">
+                <img src="/images/brand/logo-dark.png" alt="PartsForm" class="logo-image logo-for-hero">
+                <img src="/images/brand/logo-light.png" alt="PartsForm" class="logo-image logo-for-scrolled">
+            </a>
+        </div>
 
-    <!-- Mobile Menu Toggle Button -->
-    <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle mobile menu" aria-expanded="false">
+        <!-- Mobile Menu Toggle Button -->
+        <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle mobile menu" aria-expanded="false">
       <span class="menu-icon">
         <span class="menu-line"></span>
         <span class="menu-line"></span>
@@ -20,216 +20,226 @@
       </span>
     </button>
 
-    <!-- Navigation Links -->
-    <div class="nav-links" id="navLinks">
-      <!-- Parts Search - Direct link to automotive -->
-      <a href="/buyer/search-automotive" class="nav-link" data-section="search">
-        <i data-lucide="search" class="nav-icon-search"></i>
-        <%= t('nav.search') %>
-      </a>
+        <!-- Navigation Links -->
+        <div class="nav-links" id="navLinks">
+            <!-- Parts Search - Direct link to automotive -->
+            <a href="/buyer/search-automotive" class="nav-link" data-section="search">
+                <i data-lucide="search" class="nav-icon-search"></i>
+                <%= t('nav.search') %>
+            </a>
 
-      <a href="/buyer/about-us" class="nav-link" data-section="about"><%= t('nav.aboutUs') || 'About Us' %></a>
+            <a href="/buyer/about-us" class="nav-link" data-section="about">
+                <%= t('nav.aboutUs') || 'About Us' %>
+            </a>
 
-      <a href="/buyer/orders" class="nav-link" data-section="orders"><%= t('nav.myOrders') %></a>
-      
-      <!-- Account Dropdown -->
-      <div class="nav-dropdown" id="accountDropdown">
-        <button class="nav-link dropdown-trigger" id="accountDropdownBtn">
+            <a href="/buyer/orders" class="nav-link" data-section="orders">
+                <%= t('nav.myOrders') %>
+            </a>
+
+            <!-- Account Dropdown -->
+            <div class="nav-dropdown" id="accountDropdown">
+                <button class="nav-link dropdown-trigger" id="accountDropdownBtn">
           <span><%= t('nav.account') || 'Account' %></span>
           <i data-lucide="chevron-down" class="dropdown-chevron"></i>
         </button>
-        <div class="nav-dropdown-menu" id="accountDropdownMenu">
-          <a href="/buyer/payment" class="nav-dropdown-item" data-section="payment">
-            <i data-lucide="credit-card"></i>
-            <div>
-              <span class="dropdown-item-title"><%= t('nav.payment') %></span>
-              <span class="dropdown-item-desc"><%= t('nav.paymentDesc') || 'Manage payment methods' %></span>
+                <div class="nav-dropdown-menu" id="accountDropdownMenu">
+                    <a href="/buyer/payment" class="nav-dropdown-item" data-section="payment">
+                        <i data-lucide="credit-card"></i>
+                        <div>
+                            <span class="dropdown-item-title"><%= t('nav.payment') %></span>
+                            <span class="dropdown-item-desc"><%= t('nav.paymentDesc') || 'Manage payment methods' %></span>
+                        </div>
+                    </a>
+                    <a href="/buyer/delivery" class="nav-dropdown-item" data-section="delivery">
+                        <i data-lucide="truck"></i>
+                        <div>
+                            <span class="dropdown-item-title"><%= t('nav.delivery') %></span>
+                            <span class="dropdown-item-desc"><%= t('nav.deliveryDesc') || 'Shipping addresses' %></span>
+                        </div>
+                    </a>
+                </div>
             </div>
-          </a>
-          <a href="/buyer/delivery" class="nav-dropdown-item" data-section="delivery">
-            <i data-lucide="truck"></i>
-            <div>
-              <span class="dropdown-item-title"><%= t('nav.delivery') %></span>
-              <span class="dropdown-item-desc"><%= t('nav.deliveryDesc') || 'Shipping addresses' %></span>
-            </div>
-          </a>
-        </div>
-      </div>
 
-      <!-- Support Dropdown -->
-      <div class="nav-dropdown" id="supportDropdown">
-        <button class="nav-link dropdown-trigger" id="supportDropdownBtn">
+            <!-- Support Dropdown -->
+            <div class="nav-dropdown" id="supportDropdown">
+                <button class="nav-link dropdown-trigger" id="supportDropdownBtn">
           <span><%= t('nav.support') || 'Support' %></span>
           <i data-lucide="chevron-down" class="dropdown-chevron"></i>
         </button>
-        <div class="nav-dropdown-menu" id="supportDropdownMenu">
-          <a href="/buyer/claim-support" class="nav-dropdown-item" data-section="tickets">
-            <i data-lucide="message-square"></i>
-            <div>
-              <span class="dropdown-item-title"><%= t('nav.tickets') %></span>
-              <span class="dropdown-item-desc"><%= t('nav.ticketsDesc') || 'Support claims' %></span>
+                <div class="nav-dropdown-menu" id="supportDropdownMenu">
+                    <a href="/buyer/claim-support" class="nav-dropdown-item" data-section="tickets">
+                        <i data-lucide="message-square"></i>
+                        <div>
+                            <span class="dropdown-item-title"><%= t('nav.tickets') %></span>
+                            <span class="dropdown-item-desc"><%= t('nav.ticketsDesc') || 'Support claims' %></span>
+                        </div>
+                    </a>
+                    <a href="/buyer/contacts" class="nav-dropdown-item" data-section="contacts">
+                        <i data-lucide="users"></i>
+                        <div>
+                            <span class="dropdown-item-title"><%= t('nav.contacts') %></span>
+                            <span class="dropdown-item-desc"><%= t('nav.contactsDesc') || 'Contact information' %></span>
+                        </div>
+                    </a>
+                </div>
             </div>
-          </a>
-          <a href="/buyer/contacts" class="nav-dropdown-item" data-section="contacts">
-            <i data-lucide="users"></i>
-            <div>
-              <span class="dropdown-item-title"><%= t('nav.contacts') %></span>
-              <span class="dropdown-item-desc"><%= t('nav.contactsDesc') || 'Contact information' %></span>
-            </div>
-          </a>
-        </div>
-      </div>
 
-      <a href="/buyer/affiliate" class="nav-link" data-section="affiliate"><%= t('nav.affiliate') %></a>
-      
-      <!-- More Dropdown for overflow items -->
-      <div class="nav-dropdown nav-more-dropdown hidden" id="moreDropdown">
-        <button class="nav-link dropdown-trigger" id="moreDropdownBtn">
+            <a href="/buyer/affiliate" class="nav-link" data-section="affiliate">
+                <%= t('nav.affiliate') %>
+            </a>
+
+            <!-- More Dropdown for overflow items -->
+            <div class="nav-dropdown nav-more-dropdown hidden" id="moreDropdown">
+                <button class="nav-link dropdown-trigger" id="moreDropdownBtn">
           <span><%= t('nav.more') %></span>
           <i data-lucide="chevron-down" class="dropdown-chevron"></i>
         </button>
-        <div class="nav-dropdown-menu" id="moreDropdownMenu">
-          <!-- Overflow items will be moved here dynamically -->
+                <div class="nav-dropdown-menu" id="moreDropdownMenu">
+                    <!-- Overflow items will be moved here dynamically -->
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
 
-    <!-- Action Buttons -->
-    <div class="nav-actions" id="navActions">
-      <!-- Shopping Cart Button - Always visible -->
-      <a href="/buyer/cart" class="btn-cart" id="cart-btn" title="<%= t('nav.cart') %>">
-        <i data-lucide="shopping-cart"></i>
-        <span class="cart-badge hidden" id="cart-badge">0</span>
-      </a>
+        <!-- Action Buttons -->
+        <div class="nav-actions" id="navActions">
+            <!-- Shopping Cart Button - Always visible -->
+            <a href="/buyer/cart" class="btn-cart" id="cart-btn" title="<%= t('nav.cart') %>">
+                <i data-lucide="shopping-cart"></i>
+                <span class="cart-badge hidden" id="cart-badge">0</span>
+            </a>
 
-      <!-- Tools Hamburger Menu -->
-      <div class="nav-tools-wrapper" id="navToolsWrapper">
-        <button class="btn-tools-hamburger" id="toolsHamburgerBtn" title="Tools & Settings" aria-expanded="false">
+            <!-- Tools Hamburger Menu -->
+            <div class="nav-tools-wrapper" id="navToolsWrapper">
+                <button class="btn-tools-hamburger" id="toolsHamburgerBtn" title="Tools & Settings" aria-expanded="false">
           <span class="tools-hamburger-icon">
             <span class="tools-line"></span>
             <span class="tools-line"></span>
             <span class="tools-line"></span>
           </span>
         </button>
-        
-        <div class="tools-dropdown-menu" id="toolsDropdownMenu">
-          <div class="tools-dropdown-arrow"></div>
-          
-          <!-- Quick Search -->
-          <div class="tools-dropdown-section">
-            <button class="tools-dropdown-item" id="quick-search-btn" title="<%= t('nav.quickSearch') %>">
+
+                <div class="tools-dropdown-menu" id="toolsDropdownMenu">
+                    <div class="tools-dropdown-arrow"></div>
+
+                    <!-- Quick Search -->
+                    <div class="tools-dropdown-section">
+                        <button class="tools-dropdown-item" id="quick-search-btn" title="<%= t('nav.quickSearch') %>">
               <i data-lucide="search"></i>
               <span><%= t('nav.quickSearch') || 'Quick Search' %></span>
               <span class="tools-item-shortcut">⌘K</span>
             </button>
-          </div>
+                    </div>
 
-          <div class="tools-dropdown-divider"></div>
+                    <div class="tools-dropdown-divider"></div>
 
-          <!-- Currency -->
-          <div class="tools-dropdown-section">
-            <div class="tools-section-label"><%= t('nav.currency') %></div>
-            <button class="tools-dropdown-item" id="currency-converter-btn" title="<%= t('nav.currencyConverter') %>">
+                    <!-- Currency -->
+                    <div class="tools-dropdown-section">
+                        <div class="tools-section-label">
+                            <%= t('nav.currency') %>
+                        </div>
+                        <button class="tools-dropdown-item" id="currency-converter-btn" title="<%= t('nav.currencyConverter') %>">
               <i data-lucide="repeat"></i>
               <span><%= t('nav.currencyConverter') || 'Converter' %></span>
               <span class="tools-item-badge" id="current-currency-code">USD</span>
             </button>
-            <div class="tools-dropdown-item tools-currency-select" id="toolsPreferredCurrency">
-              <i data-lucide="wallet"></i>
-              <span><%= t('nav.preferredCurrency') || 'Preferred' %></span>
-              <span class="tools-item-badge tools-currency-active" id="preferredCurrencyCode"><%= user && user.preferredCurrency ? user.preferredCurrency : 'USD' %></span>
-              <i data-lucide="chevron-right" class="tools-expand-icon"></i>
-            </div>
-            <div class="tools-currency-submenu" id="toolsCurrencySubmenu">
-              <div class="tools-currency-grid" id="preferredCurrencyList">
-                <!-- Popular currencies grid - populated by JS -->
-              </div>
-            </div>
-          </div>
+                        <div class="tools-dropdown-item tools-currency-select" id="toolsPreferredCurrency">
+                            <i data-lucide="wallet"></i>
+                            <span><%= t('nav.preferredCurrency') || 'Preferred' %></span>
+                            <span class="tools-item-badge tools-currency-active" id="preferredCurrencyCode"><%= user && user.preferredCurrency ? user.preferredCurrency : 'USD' %></span>
+                            <i data-lucide="chevron-right" class="tools-expand-icon"></i>
+                        </div>
+                        <div class="tools-currency-submenu" id="toolsCurrencySubmenu">
+                            <div class="tools-currency-grid" id="preferredCurrencyList">
+                                <!-- Popular currencies grid - populated by JS -->
+                            </div>
+                        </div>
+                    </div>
 
-          <div class="tools-dropdown-divider"></div>
+                    <div class="tools-dropdown-divider"></div>
 
-          <!-- Language -->
-          <div class="tools-dropdown-section">
-            <div class="tools-section-label"><%= t('nav.language') %></div>
-            <div class="tools-language-grid tools-language-grid-expanded" id="toolsLanguageGrid">
-              <button class="tools-lang-option" data-lang="en" data-flag="🇬🇧">
+                    <!-- Language -->
+                    <div class="tools-dropdown-section">
+                        <div class="tools-section-label">
+                            <%= t('nav.language') %>
+                        </div>
+                        <div class="tools-language-grid tools-language-grid-expanded" id="toolsLanguageGrid">
+                            <button class="tools-lang-option" data-lang="en" data-flag="🇬🇧">
                 <span class="lang-flag">🇬🇧</span>
                 <span class="lang-name">English</span>
               </button>
-              <button class="tools-lang-option" data-lang="de" data-flag="🇩🇪">
+                            <button class="tools-lang-option" data-lang="de" data-flag="🇩🇪">
                 <span class="lang-flag">🇩🇪</span>
                 <span class="lang-name">Deutsch</span>
               </button>
-              <button class="tools-lang-option" data-lang="fr" data-flag="🇫🇷">
+                            <button class="tools-lang-option" data-lang="fr" data-flag="🇫🇷">
                 <span class="lang-flag">🇫🇷</span>
                 <span class="lang-name">Français</span>
               </button>
-              <button class="tools-lang-option" data-lang="es" data-flag="🇪🇸">
+                            <button class="tools-lang-option" data-lang="es" data-flag="🇪🇸">
                 <span class="lang-flag">🇪🇸</span>
                 <span class="lang-name">Español</span>
               </button>
-              <button class="tools-lang-option" data-lang="it" data-flag="🇮🇹">
+                            <button class="tools-lang-option" data-lang="it" data-flag="🇮🇹">
                 <span class="lang-flag">🇮🇹</span>
                 <span class="lang-name">Italiano</span>
               </button>
-              <button class="tools-lang-option" data-lang="pt" data-flag="🇵🇹">
+                            <button class="tools-lang-option" data-lang="pt" data-flag="🇵🇹">
                 <span class="lang-flag">🇵🇹</span>
                 <span class="lang-name">Português</span>
               </button>
-              <button class="tools-lang-option" data-lang="ru" data-flag="🇷🇺">
+                            <button class="tools-lang-option" data-lang="ru" data-flag="🇷🇺">
                 <span class="lang-flag">🇷🇺</span>
                 <span class="lang-name">Русский</span>
               </button>
-              <button class="tools-lang-option" data-lang="ua" data-flag="🇺🇦">
+                            <button class="tools-lang-option" data-lang="ua" data-flag="🇺🇦">
                 <span class="lang-flag">🇺🇦</span>
                 <span class="lang-name">Українська</span>
               </button>
-              <button class="tools-lang-option" data-lang="pl" data-flag="🇵🇱">
+                            <button class="tools-lang-option" data-lang="pl" data-flag="🇵🇱">
                 <span class="lang-flag">🇵🇱</span>
                 <span class="lang-name">Polski</span>
               </button>
-              <button class="tools-lang-option" data-lang="nl" data-flag="🇳🇱">
+                            <button class="tools-lang-option" data-lang="nl" data-flag="🇳🇱">
                 <span class="lang-flag">🇳🇱</span>
                 <span class="lang-name">Nederlands</span>
               </button>
-              <button class="tools-lang-option" data-lang="tr" data-flag="🇹🇷">
+                            <button class="tools-lang-option" data-lang="tr" data-flag="🇹🇷">
                 <span class="lang-flag">🇹🇷</span>
                 <span class="lang-name">Türkçe</span>
               </button>
-              <button class="tools-lang-option" data-lang="zh" data-flag="🇨🇳">
+                            <button class="tools-lang-option" data-lang="zh" data-flag="🇨🇳">
                 <span class="lang-flag">🇨🇳</span>
                 <span class="lang-name">中文</span>
               </button>
-              <button class="tools-lang-option" data-lang="ja" data-flag="🇯🇵">
+                            <button class="tools-lang-option" data-lang="ja" data-flag="🇯🇵">
                 <span class="lang-flag">🇯🇵</span>
                 <span class="lang-name">日本語</span>
               </button>
-              <button class="tools-lang-option" data-lang="ko" data-flag="🇰🇷">
+                            <button class="tools-lang-option" data-lang="ko" data-flag="🇰🇷">
                 <span class="lang-flag">🇰🇷</span>
                 <span class="lang-name">한국어</span>
               </button>
-              <button class="tools-lang-option" data-lang="ar" data-flag="🇸🇦" data-rtl="true">
+                            <button class="tools-lang-option" data-lang="ar" data-flag="🇸🇦" data-rtl="true">
                 <span class="lang-flag">🇸🇦</span>
                 <span class="lang-name">العربية</span>
               </button>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
-        </div>
-      </div>
 
-      <!-- Sign In Button (shown when not logged in) -->
-      <% if (!user) { %>
-      <button class="btn-secondary btn-sign-in" id="sign-in-btn">
+            <!-- Sign In Button (shown when not logged in) -->
+            <% if (!user) { %>
+                <button class="btn-secondary btn-sign-in" id="sign-in-btn">
         <i data-lucide="user"></i>
         <span><%= t('nav.user.signIn') %></span>
       </button>
-      <% } %>
+                <% } %>
 
-      <!-- User Profile Dropdown (shown when logged in) -->
-      <% if (user) { %>
-      <div class="user-profile-dropdown" id="userProfileDropdown">
-        <button type="button" class="user-profile-btn user-profile-btn-compact" id="userProfileBtn" title="<%= user.firstName %> <%= user.lastName %>">
+                    <!-- User Profile Dropdown (shown when logged in) -->
+                    <% if (user) { %>
+                        <div class="user-profile-dropdown" id="userProfileDropdown">
+                            <button type="button" class="user-profile-btn user-profile-btn-compact" id="userProfileBtn" title="<%= user.firstName %> <%= user.lastName %>">
           <div class="user-avatar">
             <% if (user.avatar) { %>
               <img src="<%= user.avatar %>" alt="Avatar" class="avatar-image" />
@@ -238,33 +248,33 @@
             <% } %>
           </div>
         </button>
-        <div class="user-dropdown-menu" id="userDropdownMenu">
-          <div class="user-dropdown-header">
-            <span class="user-dropdown-name"><%= user.firstName %> <%= user.lastName %></span>
-            <span class="user-dropdown-email"><%= user.email %></span>
-          </div>
-          <div class="user-dropdown-divider"></div>
-          <a href="/buyer/profile" class="user-dropdown-item">
-            <i data-lucide="user"></i>
-            <span><%= t('nav.user.profile') %></span>
-          </a>
-          <a href="/buyer/settings" class="user-dropdown-item">
-            <i data-lucide="settings"></i>
-            <span><%= t('nav.user.settings') %></span>
-          </a>
-          <div class="user-dropdown-divider"></div>
-          <button class="user-dropdown-item user-dropdown-logout" id="logoutBtn">
+                            <div class="user-dropdown-menu" id="userDropdownMenu">
+                                <div class="user-dropdown-header">
+                                    <span class="user-dropdown-name"><%= user.firstName %> <%= user.lastName %></span>
+                                    <span class="user-dropdown-email"><%= user.email %></span>
+                                </div>
+                                <div class="user-dropdown-divider"></div>
+                                <a href="/buyer/profile" class="user-dropdown-item">
+                                    <i data-lucide="user"></i>
+                                    <span><%= t('nav.user.profile') %></span>
+                                </a>
+                                <a href="/buyer/settings" class="user-dropdown-item">
+                                    <i data-lucide="settings"></i>
+                                    <span><%= t('nav.user.settings') %></span>
+                                </a>
+                                <div class="user-dropdown-divider"></div>
+                                <button class="user-dropdown-item user-dropdown-logout" id="logoutBtn">
             <i data-lucide="log-out"></i>
             <span><%= t('nav.user.logout') %></span>
           </button>
+                            </div>
+                        </div>
+                        <% } else { %>
+                            <!-- Hidden dropdown for JS initialization when not logged in -->
+                            <div class="user-profile-dropdown hidden" id="userProfileDropdown"></div>
+                            <% } %>
         </div>
-      </div>
-      <% } else { %>
-      <!-- Hidden dropdown for JS initialization when not logged in -->
-      <div class="user-profile-dropdown hidden" id="userProfileDropdown"></div>
-      <% } %>
     </div>
-  </div>
 </nav>
 
 <!-- Mobile Menu Backdrop -->
@@ -272,123 +282,108 @@
 
 <!-- Currency Converter Modal -->
 <div class="currency-converter-modal" id="currencyConverterModal">
-  <div class="currency-converter-backdrop" id="currencyConverterBackdrop"></div>
-  <div class="currency-converter-container">
-    <button class="currency-converter-close" id="currencyConverterClose">
+    <div class="currency-converter-backdrop" id="currencyConverterBackdrop"></div>
+    <div class="currency-converter-container">
+        <button class="currency-converter-close" id="currencyConverterClose">
       <i data-lucide="x"></i>
     </button>
-    
-    <div class="currency-converter-content">
-      <!-- Header -->
-      <div class="currency-converter-header">
-        <span class="currency-badge">
+
+        <div class="currency-converter-content">
+            <!-- Header -->
+            <div class="currency-converter-header">
+                <span class="currency-badge">
           <i data-lucide="trending-up"></i>
           <%= t('nav.currencySettings.badge') %>
         </span>
-        <h2 class="currency-converter-title"><%= t('nav.currencySettings.title') %></h2>
-        <p class="currency-converter-subtitle"><%= t('nav.currencySettings.subtitle') %></p>
-      </div>
+                <h2 class="currency-converter-title">
+                    <%= t('nav.currencySettings.title') %>
+                </h2>
+                <p class="currency-converter-subtitle">
+                    <%= t('nav.currencySettings.subtitle') %>
+                </p>
+            </div>
 
-      <!-- Main Converter -->
-      <div class="currency-converter-main">
-        <!-- From Currency -->
-        <div class="currency-input-group">
-          <label class="currency-label"><%= t('nav.currencySettings.amount') %></label>
-          <div class="currency-input-wrapper">
-            <input 
-              type="number" 
-              class="currency-input" 
-              id="currencyAmount"
-              placeholder="0.00"
-              value="1"
-              min="0"
-              step="0.01"
-            >
-            <div class="currency-select-wrapper">
-              <button class="currency-select-btn" id="fromCurrencyBtn">
+            <!-- Main Converter -->
+            <div class="currency-converter-main">
+                <!-- From Currency -->
+                <div class="currency-input-group">
+                    <label class="currency-label"><%= t('nav.currencySettings.amount') %></label>
+                    <div class="currency-input-wrapper">
+                        <input type="number" class="currency-input" id="currencyAmount" placeholder="0.00" value="1" min="0" step="0.01">
+                        <div class="currency-select-wrapper">
+                            <button class="currency-select-btn" id="fromCurrencyBtn">
                 <span class="currency-flag" id="fromCurrencyFlag">🇺🇸</span>
                 <span class="currency-code" id="fromCurrencyCode">USD</span>
                 <i data-lucide="chevron-down" class="currency-chevron"></i>
               </button>
-            </div>
-          </div>
-        </div>
+                        </div>
+                    </div>
+                </div>
 
-        <!-- Swap Button -->
-        <button class="currency-swap-btn" id="currencySwapBtn" title="<%= t('nav.currencySettings.swap') %>">
+                <!-- Swap Button -->
+                <button class="currency-swap-btn" id="currencySwapBtn" title="<%= t('nav.currencySettings.swap') %>">
           <i data-lucide="arrow-down-up"></i>
         </button>
 
-        <!-- To Currency -->
-        <div class="currency-input-group">
-          <label class="currency-label"><%= t('nav.currencySettings.converted') %></label>
-          <div class="currency-input-wrapper">
-            <input 
-              type="text" 
-              class="currency-input currency-result" 
-              id="currencyResult"
-              placeholder="0.00"
-              readonly
-            >
-            <div class="currency-select-wrapper">
-              <button class="currency-select-btn" id="toCurrencyBtn">
+                <!-- To Currency -->
+                <div class="currency-input-group">
+                    <label class="currency-label"><%= t('nav.currencySettings.converted') %></label>
+                    <div class="currency-input-wrapper">
+                        <input type="text" class="currency-input currency-result" id="currencyResult" placeholder="0.00" readonly>
+                        <div class="currency-select-wrapper">
+                            <button class="currency-select-btn" id="toCurrencyBtn">
                 <span class="currency-flag" id="toCurrencyFlag">🇪🇺</span>
                 <span class="currency-code" id="toCurrencyCode">EUR</span>
                 <i data-lucide="chevron-down" class="currency-chevron"></i>
               </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Exchange Rate Info -->
+                <div class="exchange-rate-info" id="exchangeRateInfo">
+                    <div class="rate-indicator">
+                        <i data-lucide="activity"></i>
+                        <span id="rateText">1 USD = 0.00 EUR</span>
+                    </div>
+                    <div class="rate-updated">
+                        <i data-lucide="clock"></i>
+                        <span id="rateUpdated"><%= t('nav.currencySettings.updating') %></span>
+                    </div>
+                </div>
             </div>
-          </div>
-        </div>
 
-        <!-- Exchange Rate Info -->
-        <div class="exchange-rate-info" id="exchangeRateInfo">
-          <div class="rate-indicator">
-            <i data-lucide="activity"></i>
-            <span id="rateText">1 USD = 0.00 EUR</span>
-          </div>
-          <div class="rate-updated">
-            <i data-lucide="clock"></i>
-            <span id="rateUpdated"><%= t('nav.currencySettings.updating') %></span>
-          </div>
+            <!-- All Currencies Selection -->
+            <div class="all-currencies-dropdown" id="allCurrenciesDropdown">
+                <div class="currency-search-wrapper">
+                    <i data-lucide="search" class="currency-search-icon"></i>
+                    <input type="text" class="currency-search-input" id="currencySearchInput" placeholder="<%= t('nav.currencySettings.searchPlaceholder') %>">
+                </div>
+                <div class="currency-list" id="currencyList">
+                    <!-- Will be populated dynamically -->
+                </div>
+            </div>
         </div>
-      </div>
-
-      <!-- All Currencies Selection -->
-      <div class="all-currencies-dropdown" id="allCurrenciesDropdown">
-        <div class="currency-search-wrapper">
-          <i data-lucide="search" class="currency-search-icon"></i>
-          <input 
-            type="text" 
-            class="currency-search-input" 
-            id="currencySearchInput"
-            placeholder="<%= t('nav.currencySettings.searchPlaceholder') %>"
-          >
-        </div>
-        <div class="currency-list" id="currencyList">
-          <!-- Will be populated dynamically -->
-        </div>
-      </div>
     </div>
-  </div>
 </div>
 
 <!-- Navbar JavaScript -->
 <% if (user) { %>
-<script>
-  // Pass user data to client-side for auth state management
-  window.__USER_DATA__ = {
-    id: '<%= user._id %>',
-    firstName: '<%= user.firstName %>',
-    lastName: '<%= user.lastName %>',
-    email: '<%= user.email %>',
-    fullName: '<%= user.firstName %> <%= user.lastName %>',
-    companyName: '<%= user.companyName || "" %>',
-    avatar: '<%= user.avatar || "" %>',
-    preferredCurrency: '<%= user.preferredCurrency || "USD" %>'
-  };
-</script>
-<% } %>
-<script src="/js/i18n.js"></script>
-<script src="/js/navbar.js"></script>
-<script src="/js/currency-converter.js"></script>
-<script src="/js/buyer-auth.js"></script>
+    <script>
+        // Pass user data to client-side for auth state management
+        window.__USER_DATA__ = {
+            id: '<%= user._id %>',
+            firstName: '<%= user.firstName %>',
+            lastName: '<%= user.lastName %>',
+            email: '<%= user.email %>',
+            fullName: '<%= user.firstName %> <%= user.lastName %>',
+            companyName: '<%= user.companyName || "" %>',
+            avatar: '<%= user.avatar || "" %>',
+            preferredCurrency: '<%= user.preferredCurrency || "USD" %>'
+        };
+    </script>
+    <% } %>
+        <script src="/js/i18n.js"></script>
+        <script src="/js/navbar.js"></script>
+        <script src="/js/currency-converter.js"></script>
+        <script src="/js/buyer-auth.js"></script>

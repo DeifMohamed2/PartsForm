@@ -1,130 +1,371 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#2B2B2B">
-  <title>PartsForm | Access</title>
-  <link rel="icon" type="image/png" href="/images/brand/icon-light.png">
-  <link rel="stylesheet" href="/css/brand-system.css">
-<style>
-*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-html,body{height:100%;overflow:hidden}
-body{font-family:var(--font-body);font-weight:500;color:var(--washi)}
-
-.login-page{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
-
-.login-bg{position:absolute;inset:0;z-index:0}
-.login-bg__photo{position:absolute;inset:0;background:url('/images/brand/moodboard/warehouse-hero.png') center/cover no-repeat;filter:brightness(0.55) saturate(0.80)}
-.login-bg__overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,18,35,0.60) 0%,rgba(18,32,55,0.45) 50%,rgba(10,18,35,0.65) 100%)}
-
-.login-topbar{position:absolute;top:0;left:0;right:0;z-index:10;display:flex;align-items:center;justify-content:center;padding:28px 48px}
-.login-topbar__icon{height:140px;width:auto;display:block}
-.login-topbar__link{position:absolute;right:48px;top:50%;transform:translateY(-50%);font-family:var(--font-body);font-size:var(--text-small);font-weight:500;color:rgba(248,250,252,0.80);text-decoration:underline;text-underline-offset:4px;letter-spacing:0.01em;transition:color 0.2s ease}
-.login-topbar__link:hover{color:var(--washi)}
-.login-topbar__link-arrows{margin-right:4px;font-weight:700}
-
-.login-card{position:relative;z-index:5;width:400px;padding:64px 40px 60px;background:rgba(100,125,150,0.22);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);border:1px solid rgba(255,255,255,0.16);border-radius:0;box-shadow:0 20px 80px rgba(0,0,0,0.55),inset 0 1px 0 rgba(255,255,255,0.10);opacity:0.91}
-
-.login-brand{text-align:center;margin-bottom:32px;margin-top:-12px}
-.login-brand__logo{width:260px;height:auto;margin-bottom:0}
-
-.login-form{display:flex;flex-direction:column;gap:0}
-.login-field{display:flex;flex-direction:column;gap:5px;margin-bottom:6px}
-.login-field--spaced{margin-bottom:18px}
-.login-field__label{font-family:var(--font-body);font-size:var(--text-small);font-weight:600;color:rgba(248,250,252,0.85);letter-spacing:0.02em}
-.login-field__input{width:100%;height:48px;padding:0 16px;font-family:var(--font-body);font-size:1rem;font-weight:500;color:var(--washi);background:rgba(248,250,252,0.06);border:1px solid rgba(248,250,252,0.18);border-radius:0;outline:none;transition:border-color 0.2s ease,background 0.2s ease}
-.login-field__input::placeholder{color:rgba(248,250,252,0.30)}
-.login-field__input:focus{background:rgba(248,250,252,0.09);border-color:rgba(149,175,192,0.50)}
-
-.login-field__link{display:block;text-align:right;margin-top:7px;font-family:var(--font-body);font-size:var(--text-small);font-weight:500;color:rgba(248,250,252,0.70);text-decoration:underline;text-underline-offset:3px;transition:color 0.2s ease}
-.login-field__link:hover{color:var(--washi)}
-
-.login-btn{margin-top:24px;width:100%;height:54px;font-family:var(--font-display);font-size:1rem;font-weight:900;text-transform:uppercase;letter-spacing:0.12em;color:var(--kurogane);background:var(--kintsugi);border:none;border-radius:0;cursor:pointer;transition:background 0.2s ease,transform 0.15s ease}
-.login-btn:hover{background:var(--kintsugi-hover);transform:translateY(-2px)}
-.login-btn:active{background:var(--kintsugi-active);transform:translateY(0)}
-
-.login-error{display:none;padding:10px 14px;margin-bottom:10px;font-family:var(--font-body);font-size:var(--text-xs);font-weight:500;color:#fca5a5;background:rgba(220,38,38,0.12);border:1px solid rgba(220,38,38,0.25);border-radius:0}
-.login-error.show{display:block;animation:shake 0.4s ease}
-
-@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-4px)}40%,80%{transform:translateX(4px)}}
-
-.login-btn.loading{position:relative;color:transparent;pointer-events:none}
-.login-btn.loading::after{content:'';position:absolute;width:18px;height:18px;top:50%;left:50%;margin:-9px 0 0 -9px;border:2px solid transparent;border-top-color:var(--kurogane);border-radius:50%;animation:spin 0.5s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-
-@media(max-width:520px){
-  .login-card{width:calc(100% - 40px);max-width:400px;padding:48px 28px 44px}
-  .login-topbar{padding:20px 20px}
-  .login-topbar__icon{height:72px}
-  .login-topbar__link{right:20px;font-size:var(--text-xs)}
-}
-</style>
-</head>
-<body>
-  <div class="login-page">
-    <div class="login-bg">
-      <div class="login-bg__photo"></div>
-      <div class="login-bg__overlay"></div>
-    </div>
-    <div class="login-topbar">
-      <img src="/images/brand/icon-gold.svg" alt="PartsForm" class="login-topbar__icon">
-      <a href="/register" class="login-topbar__link"><span class="login-topbar__link-arrows">&raquo;</span> Go to Website</a>
-    </div>
-    <div class="login-card">
-      <div class="login-brand">
-        <img src="/images/brand/logo-tagline-dark.png" alt="PartsForm" class="login-brand__logo">
-      </div>
-      <div class="login-error" id="login-error"></div>
-      <form class="login-form" id="login-form" autocomplete="on">
-        <div class="login-field">
-          <label class="login-field__label" for="username">Username</label>
-          <input class="login-field__input" type="text" id="username" name="username" placeholder="Enter your username" autocomplete="username" required>
-          <a href="/register" class="login-field__link">Create Account</a>
-        </div>
-        <div class="login-field login-field--spaced">
-          <label class="login-field__label" for="password">Password</label>
-          <input class="login-field__input" type="password" id="password" name="password" placeholder="Enter your password" autocomplete="current-password" required>
-          <a href="/forgot-password" class="login-field__link">Forgot Password</a>
-        </div>
-        <button type="submit" class="login-btn" id="login-btn">Verify Access</button>
-      </form>
-    </div>
-  </div>
-  <script>
-    document.getElementById('login-form').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      var username = document.getElementById('username').value.trim();
-      var password = document.getElementById('password').value;
-      var errorEl  = document.getElementById('login-error');
-      var btn      = document.getElementById('login-btn');
-      errorEl.classList.remove('show');
-      if (!username || !password) {
-        errorEl.textContent = 'Please enter both username and password.';
-        errorEl.classList.add('show');
-        return;
-      }
-      btn.classList.add('loading');
-      try {
-        var res = await fetch('/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: username, password: password })
-        });
-        var data = await res.json();
-        if (res.ok && data.success) {
-          window.location.href = data.redirect || '/buyer';
-        } else {
-          errorEl.textContent = data.message || 'Invalid credentials. Please try again.';
-          errorEl.classList.add('show');
-          btn.classList.remove('loading');
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#2B2B2B">
+    <title>PartsForm | Access</title>
+    <link rel="icon" type="image/png" href="/images/brand/icon-light.png">
+    <link rel="stylesheet" href="/css/brand-system.css">
+    <style>
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
         }
-      } catch (err) {
-        errorEl.textContent = 'Connection error. Please try again.';
-        errorEl.classList.add('show');
-        btn.classList.remove('loading');
-      }
-    });
-  </script>
+        
+        html,
+        body {
+            height: 100%;
+            overflow: hidden
+        }
+        
+        body {
+            font-family: var(--font-body);
+            font-weight: 500;
+            color: var(--washi)
+        }
+        
+        .login-page {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center
+        }
+        
+        .login-bg {
+            position: absolute;
+            inset: 0;
+            z-index: 0
+        }
+        
+        .login-bg__photo {
+            position: absolute;
+            inset: 0;
+            background: url('/images/brand/moodboard/warehouse-hero.png') center/cover no-repeat;
+            filter: brightness(0.55) saturate(0.80)
+        }
+        
+        .login-bg__overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(10, 18, 35, 0.60) 0%, rgba(18, 32, 55, 0.45) 50%, rgba(10, 18, 35, 0.65) 100%)
+        }
+        
+        .login-topbar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 28px 48px
+        }
+        
+        .login-topbar__icon {
+            height: 140px;
+            width: auto;
+            display: block
+        }
+        
+        .login-topbar__link {
+            position: absolute;
+            right: 48px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-family: var(--font-body);
+            font-size: var(--text-small);
+            font-weight: 500;
+            color: rgba(248, 250, 252, 0.80);
+            text-decoration: underline;
+            text-underline-offset: 4px;
+            letter-spacing: 0.01em;
+            transition: color 0.2s ease
+        }
+        
+        .login-topbar__link:hover {
+            color: var(--washi)
+        }
+        
+        .login-topbar__link-arrows {
+            margin-right: 4px;
+            font-weight: 700
+        }
+        
+        .login-card {
+            position: relative;
+            z-index: 5;
+            width: 400px;
+            padding: 64px 40px 60px;
+            background: rgba(100, 125, 150, 0.22);
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            border-radius: 0;
+            box-shadow: 0 20px 80px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.10);
+            opacity: 0.91
+        }
+        
+        .login-brand {
+            text-align: center;
+            margin-bottom: 32px;
+            margin-top: -12px
+        }
+        
+        .login-brand__logo {
+            width: 260px;
+            height: auto;
+            margin-bottom: 0
+        }
+        
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 0
+        }
+        
+        .login-field {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            margin-bottom: 6px
+        }
+        
+        .login-field--spaced {
+            margin-bottom: 18px
+        }
+        
+        .login-field__label {
+            font-family: var(--font-body);
+            font-size: var(--text-small);
+            font-weight: 600;
+            color: rgba(248, 250, 252, 0.85);
+            letter-spacing: 0.02em
+        }
+        
+        .login-field__input {
+            width: 100%;
+            height: 48px;
+            padding: 0 16px;
+            font-family: var(--font-body);
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--washi);
+            background: rgba(248, 250, 252, 0.06);
+            border: 1px solid rgba(248, 250, 252, 0.18);
+            border-radius: 0;
+            outline: none;
+            transition: border-color 0.2s ease, background 0.2s ease
+        }
+        
+        .login-field__input::placeholder {
+            color: rgba(248, 250, 252, 0.30)
+        }
+        
+        .login-field__input:focus {
+            background: rgba(248, 250, 252, 0.09);
+            border-color: rgba(149, 175, 192, 0.50)
+        }
+        
+        .login-field__link {
+            display: block;
+            text-align: right;
+            margin-top: 7px;
+            font-family: var(--font-body);
+            font-size: var(--text-small);
+            font-weight: 500;
+            color: rgba(248, 250, 252, 0.70);
+            text-decoration: underline;
+            text-underline-offset: 3px;
+            transition: color 0.2s ease
+        }
+        
+        .login-field__link:hover {
+            color: var(--washi)
+        }
+        
+        .login-btn {
+            margin-top: 24px;
+            width: 100%;
+            height: 54px;
+            font-family: var(--font-display);
+            font-size: 1rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--kurogane);
+            background: var(--kintsugi);
+            border: none;
+            border-radius: 0;
+            cursor: pointer;
+            transition: background 0.2s ease, transform 0.15s ease
+        }
+        
+        .login-btn:hover {
+            background: var(--kintsugi-hover);
+            transform: translateY(-2px)
+        }
+        
+        .login-btn:active {
+            background: var(--kintsugi-active);
+            transform: translateY(0)
+        }
+        
+        .login-error {
+            display: none;
+            padding: 10px 14px;
+            margin-bottom: 10px;
+            font-family: var(--font-body);
+            font-size: var(--text-xs);
+            font-weight: 500;
+            color: #fca5a5;
+            background: rgba(220, 38, 38, 0.12);
+            border: 1px solid rgba(220, 38, 38, 0.25);
+            border-radius: 0
+        }
+        
+        .login-error.show {
+            display: block;
+            animation: shake 0.4s ease
+        }
+        
+        @keyframes shake {
+            0%,
+            100% {
+                transform: translateX(0)
+            }
+            20%,
+            60% {
+                transform: translateX(-4px)
+            }
+            40%,
+            80% {
+                transform: translateX(4px)
+            }
+        }
+        
+        .login-btn.loading {
+            position: relative;
+            color: transparent;
+            pointer-events: none
+        }
+        
+        .login-btn.loading::after {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            top: 50%;
+            left: 50%;
+            margin: -9px 0 0 -9px;
+            border: 2px solid transparent;
+            border-top-color: var(--kurogane);
+            border-radius: 50%;
+            animation: spin 0.5s linear infinite
+        }
+        
+        @keyframes spin {
+            to {
+                transform: rotate(360deg)
+            }
+        }
+        
+        @media(max-width:520px) {
+            .login-card {
+                width: calc(100% - 40px);
+                max-width: 400px;
+                padding: 48px 28px 44px
+            }
+            .login-topbar {
+                padding: 20px 20px
+            }
+            .login-topbar__icon {
+                height: 72px
+            }
+            .login-topbar__link {
+                right: 20px;
+                font-size: var(--text-xs)
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-page">
+        <div class="login-bg">
+            <div class="login-bg__photo"></div>
+            <div class="login-bg__overlay"></div>
+        </div>
+        <div class="login-topbar">
+            <img src="/images/brand/icon-gold.svg" alt="PartsForm" class="login-topbar__icon">
+            <a href="/register" class="login-topbar__link"><span class="login-topbar__link-arrows">&raquo;</span> Go to Website</a>
+        </div>
+        <div class="login-card">
+            <div class="login-brand">
+                <img src="/images/brand/logo-tagline-dark.png" alt="PartsForm" class="login-brand__logo">
+            </div>
+            <div class="login-error" id="login-error"></div>
+            <form class="login-form" id="login-form" autocomplete="on">
+                <div class="login-field">
+                    <label class="login-field__label" for="username">Username</label>
+                    <input class="login-field__input" type="text" id="username" name="username" placeholder="Enter your username" autocomplete="username" required>
+                    <a href="/register" class="login-field__link">Create Account</a>
+                </div>
+                <div class="login-field login-field--spaced">
+                    <label class="login-field__label" for="password">Password</label>
+                    <input class="login-field__input" type="password" id="password" name="password" placeholder="Enter your password" autocomplete="current-password" required>
+                    <a href="/forgot-password" class="login-field__link">Forgot Password</a>
+                </div>
+                <button type="submit" class="login-btn" id="login-btn">Verify Access</button>
+            </form>
+        </div>
+    </div>
+    <script>
+        document.getElementById('login-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            var username = document.getElementById('username').value.trim();
+            var password = document.getElementById('password').value;
+            var errorEl = document.getElementById('login-error');
+            var btn = document.getElementById('login-btn');
+            errorEl.classList.remove('show');
+            if (!username || !password) {
+                errorEl.textContent = 'Please enter both username and password.';
+                errorEl.classList.add('show');
+                return;
+            }
+            btn.classList.add('loading');
+            try {
+                var res = await fetch('/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: username,
+                        password: password
+                    })
+                });
+                var data = await res.json();
+                if (res.ok && data.success) {
+                    window.location.href = data.redirect || '/buyer';
+                } else {
+                    errorEl.textContent = data.message || 'Invalid credentials. Please try again.';
+                    errorEl.classList.add('show');
+                    btn.classList.remove('loading');
+                }
+            } catch (err) {
+                errorEl.textContent = 'Connection error. Please try again.';
+                errorEl.classList.add('show');
+                btn.classList.remove('loading');
+            }
+        });
+    </script>
 </body>
+
 </html>

@@ -4,7 +4,9 @@
    Aitetsu (#40545E), Moya (#829AB1), Sei (#95AFC0)
    ==================================== */
 
+
 /* CSS Variables - PartsForm Brand Code V1.2026 */
+
 :root {
     /* Foundation - Brand Code 2.0 */
     --v2-kurogane: #2B2B2B;
@@ -35,9 +37,11 @@
     --v2-shadow: rgba(0, 0, 0, 0.1);
 }
 
+
 /* ====================================
    GLOBAL VIEWPORT - No scrolling, fixed height
    ==================================== */
+
 html:has(.aboutus-page) {
     height: 100%;
     overflow: hidden;
@@ -50,9 +54,11 @@ body:has(.aboutus-page) {
     flex-direction: column;
 }
 
+
 /* ====================================
    PAGE CONTAINER - Fixed viewport, no scroll
    ==================================== */
+
 .aboutus-page {
     flex: 1;
     min-height: 0;
@@ -74,7 +80,9 @@ body:has(.aboutus-page) {
     flex-direction: column;
 }
 
+
 /* Site footer - always visible at bottom, compact on this page */
+
 body:has(.aboutus-page) footer.footer {
     flex: 0 0 auto;
     padding: 8px 60px 7px !important;
@@ -116,6 +124,7 @@ body:has(.aboutus-page) .footer-copyright-text {
     font-size: 11.5px !important;
 }
 
+
 /* ====================================
    NAVBAR — About Us Page
    Solid Kurogane (#2B2B2B) brand bar — always fully visible.
@@ -131,7 +140,9 @@ body:has(.aboutus-page) .nav-bar.scrolled {
     padding: 0 !important;
 }
 
+
 /* No top accent line */
+
 body:has(.aboutus-page) .nav-bar::before {
     display: none !important;
 }
@@ -141,7 +152,9 @@ body:has(.aboutus-page) .nav-container {
     gap: 2rem;
 }
 
+
 /* Logo — always use the hero (light) logo since bg is always dark */
+
 body:has(.aboutus-page) .logo-for-hero {
     opacity: 1 !important;
     display: block !important;
@@ -152,7 +165,9 @@ body:has(.aboutus-page) .logo-for-scrolled {
     display: none !important;
 }
 
+
 /* Nav links always light */
+
 body:has(.aboutus-page) .nav-link {
     color: rgba(255, 255, 255, 0.85) !important;
 }
@@ -161,9 +176,11 @@ body:has(.aboutus-page) .nav-link:hover {
     color: #FFFFFF !important;
 }
 
+
 /* ====================================
    HERO SECTION WITH STATS BANNER - Compact
    ==================================== */
+
 .aboutus-hero {
     position: relative;
     width: 100%;
@@ -183,7 +200,9 @@ body:has(.aboutus-page) .nav-link:hover {
     pointer-events: none;
 }
 
+
 /* Decorative geometric lines in background */
+
 .aboutus-hero::before {
     content: '';
     position: absolute;
@@ -192,21 +211,14 @@ body:has(.aboutus-page) .nav-link:hover {
     transform: translateX(-50%) rotate(45deg);
     width: 200%;
     height: 200%;
-    background: linear-gradient(90deg,
-            transparent 0%,
-            rgba(255, 255, 255, 0.03) 25%,
-            transparent 26%,
-            transparent 49%,
-            rgba(255, 255, 255, 0.03) 50%,
-            transparent 51%,
-            transparent 74%,
-            rgba(255, 255, 255, 0.03) 75%,
-            transparent 76%);
+    background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.03) 25%, transparent 26%, transparent 49%, rgba(255, 255, 255, 0.03) 50%, transparent 51%, transparent 74%, rgba(255, 255, 255, 0.03) 75%, transparent 76%);
     background-size: 200px 200px;
     pointer-events: none;
 }
 
+
 /* Tagline Top Right */
+
 .hero-tagline-aboutus {
     position: relative;
     text-align: right;
@@ -234,7 +246,9 @@ body:has(.aboutus-page) .nav-link:hover {
     color: var(--v2-gold);
 }
 
+
 /* Stats Banner - Rectangular Card - Compact */
+
 .stats-banner {
     position: relative;
     z-index: 5;
@@ -259,7 +273,9 @@ body:has(.aboutus-page) .nav-link:hover {
     margin: 0 auto;
 }
 
+
 /* Diagonal separator lines */
+
 .stats-container::before,
 .stats-container::after {
     content: '';
@@ -267,13 +283,7 @@ body:has(.aboutus-page) .nav-link:hover {
     top: 0;
     bottom: 0;
     width: 1px;
-    background: linear-gradient(135deg,
-            transparent 0%,
-            transparent 30%,
-            rgba(255, 255, 255, 0.25) 30%,
-            rgba(255, 255, 255, 0.25) 70%,
-            transparent 70%,
-            transparent 100%);
+    background: linear-gradient(135deg, transparent 0%, transparent 30%, rgba(255, 255, 255, 0.25) 30%, rgba(255, 255, 255, 0.25) 70%, transparent 70%, transparent 100%);
     transform: skewX(-20deg);
     z-index: 1;
 }
@@ -286,20 +296,16 @@ body:has(.aboutus-page) .nav-link:hover {
     left: 50%;
 }
 
+
 /* Third diagonal line using pseudo element on stat-divider */
+
 .stat-divider {
     position: absolute;
     top: 0;
     bottom: 0;
     left: 75%;
     width: 1px;
-    background: linear-gradient(135deg,
-            transparent 0%,
-            transparent 30%,
-            rgba(255, 255, 255, 0.25) 30%,
-            rgba(255, 255, 255, 0.25) 70%,
-            transparent 70%,
-            transparent 100%);
+    background: linear-gradient(135deg, transparent 0%, transparent 30%, rgba(255, 255, 255, 0.25) 30%, rgba(255, 255, 255, 0.25) 70%, transparent 70%, transparent 100%);
     transform: skewX(-20deg);
     z-index: 1;
     pointer-events: none;
@@ -332,8 +338,10 @@ body:has(.aboutus-page) .nav-link:hover {
     text-transform: capitalize;
 }
 
+
 /* ==================================== - Compact
    ==================================== */
+
 .large-banner-section {
     position: relative;
     width: 100%;
@@ -357,10 +365,7 @@ body:has(.aboutus-page) .nav-link:hover {
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(90deg,
-            rgba(43, 43, 43, 0.75) 0%,
-            rgba(43, 43, 43, 0.45) 50%,
-            rgba(43, 43, 43, 0.65) 100%);
+    background: linear-gradient(90deg, rgba(43, 43, 43, 0.75) 0%, rgba(43, 43, 43, 0.45) 50%, rgba(43, 43, 43, 0.65) 100%);
     pointer-events: none;
 }
 
@@ -426,9 +431,11 @@ body:has(.aboutus-page) .nav-link:hover {
     margin: 0;
 }
 
+
 /* ====================================
    GATEWAY SECTION - Compact
    ==================================== */
+
 .gateway-section {
     position: relative;
     width: 100%;
@@ -513,76 +520,76 @@ body:has(.aboutus-page) .nav-link:hover {
     box-shadow: 0 8px 20px rgba(212, 175, 55, 0.3);
 }
 
+
 /* ====================================
    RESPONSIVE DESIGN
    ==================================== */
 
+
 /* Tablet Landscape */
+
 @media (max-width32px 40px 32px 40px;
-    }
 
-    .hero-tagline-aboutus {
-        padding: 0 0 28px 0;
-    }
-
-    .stats-banner {
-        padding: 0;
-    }
-
-    .stats-container {
-        gap: 0;
-        max-width: 100%
-    .stats-container {
+}
+.hero-tagline-aboutus {
+    padding: 0 0 28px 0;
+}
+.stats-banner {
+    padding: 0;
+}
+.stats-container {
+    gap: 0;
+    max-width: 100% .stats-container {
         gap: 0;
     }
-
+    
     .stat-item {
         padding: 28px 20px;
     }
-
+    
     .stat-number {
         font-size: 42px;
     }
-
+    
     .stat-label {
         font-size: 12px;
     }
-
+    
     .large-banner-section {
         height: 240px;
         padding: 0 40px;
         margin: 24px 40px;
     }
-
+    
     .banner-title {
         font-size: 44px;
     }
-
+    
     .banner-subtitle {
         font-size: 14px;
     }
-
+    
     .gateway-section {
         padding: 32px 40px 24px 40px;
     }
-
+    
     .gateway-title {
         font-size: 32px;
         margin-bottom: 16px;
     }
-
+    
     .gateway-description {
         font-size: 14px;
     }
-
+    
     .gateway-container {
         gap: 40px;
     }
-
+    
     .cta-box {
         padding: 28px 28px;
     }
-
+    
     .cta-text {
         font-size: 13px;
         margin-bottom: 20px;
@@ -592,83 +599,78 @@ body:has(.aboutus-page) .nav-link:hover {
 /* Tablet Portrait */
 @media (max-width: 992px) {
     .aboutus-page28px 30px 28px 30px;
-    }
-
-    .hero-tagline-aboutus {
-        padding: 0 0 24px 0;
-    }
-
-    .stats-banner {
-        padding: 0;
-    }
-
-    .stats-container {
-        grid-template-columns: 1fr 1fr;
-        gap: 0;
-        padding: 0;
-        max-width: 100%
-
-    .stats-container {
+}
+.hero-tagline-aboutus {
+    padding: 0 0 24px 0;
+}
+.stats-banner {
+    padding: 0;
+}
+.stats-container {
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    padding: 0;
+    max-width: 100% .stats-container {
         grid-template-columns: 1fr 1fr;
         gap: 0;
         padding: 0;
     }
-
+    
     .stats-container::before {
         left: 50%;
     }
-
+    
     .stats-container::after,
     .stat-divider {
         display: none;
     }
-
+    
     .stat-item {
         padding: 24px 20px;
     }
-
+    
     .stat-item:nth-child(1),
     .stat-item:nth-child(2) {
         border-bottom: 1px solid rgba(255, 255, 255, 0.15);
     }
-
+    
     .large-banner-section {
         height: 200px;
         padding: 0 30px;
         margin: 20px 30px;
     }
-
+    
     .banner-title {
         font-size: 36px;
     }
-
+    
     .banner-subtitle {
         font-size: 13px;
     }
-
+    
     .banner-badge,
     .banner-badge-bottom {
         width: 36px;
         height: 36px;
     }
-
+    
     .badge-icon {
         font-size: 20px;
     }
-
+    
     .gateway-container {
         grid-template-columns: 1fr;
         gap: 32px;
     }
-
+    
     .gateway-section {
         padding: 28px 30px 20px 30px;
     }
-
+    
     .gateway-title {
         font-size: 28px;
     }
-
+    
     .cta-box {
         max-width: 100%;
         padding: 24px 24px;
@@ -680,60 +682,60 @@ body:has(.aboutus-page) .nav-link:hover {
     body:has(.aboutus-page) footer.footer {
         padding: 6px 24px 5px !important;
     }
-
+    
     body:has(.aboutus-page) .footer-nav-link {
         font-size: 11px !important;
     }
-
+    
     .aboutus-page {
         padding-top: 44px;
     }
-
+    
     .aboutus-hero {
         padding: 0 24px 16px 24px;
     }
-
+    
     .hero-tagline-aboutus {
         padding: 12px 0 16px 0;
     }
-
+    
     .hero-tagline-aboutus .tagline-top {
         font-size: 9px;
     }
-
+    
     .hero-tbanner {
         padding: 0 24px;
     }
-
+    
     .stats-container {
         grid-template-columns: 1fr 1fr;
     }
-
+    
     .stats-container::before {
         left: 50%;
     }
-
+    
     .stat-item {
         padding: 20px 16px;
     }
-
+    
     .stat-item:nth-child(1),
     .stat-item:nth-child(2) {
         border-bottom: 1px solid rgba(255, 255, 255, 0.15);
     }
-
+    
     .stat-number {
         font-size: 36px;
     }
-
+    
     .stat-label {
         font-size: 11px;
     }
-
+    
     .stat-label {
         font-size: 10px;
     }
-
+    
     .large-banner-section {
         height: 180px;
         padding: 0 24px;
@@ -741,60 +743,60 @@ body:has(.aboutus-page) .nav-link:hover {
         text-align: center;
         margin: 16px 24px;
     }
-
+    
     .banner-content {
         text-align: center;
         max-width: 100%;
     }
-
+    
     .banner-badge {
         margin-left: 0;
         margin-right: 0;
         margin-bottom: 12px;
     }
-
+    
     .banner-title {
         font-size: 28px;
     }
-
+    
     .banner-subtitle {
         font-size: 12px;
     }
-
+    
     .banner-badge-bottom {
         left: 24px;
         bottom: 16px;
         width: 32px;
         height: 32px;
     }
-
+    
     .badge-icon {
         font-size: 18px;
     }
-
+    
     .gateway-section {
         padding: 24px 24px 16px 24px;
     }
-
+    
     .gateway-title {
         font-size: 24px;
         margin-bottom: 12px;
     }
-
+    
     .gateway-description {
         font-size: 13px;
         line-height: 1.5;
     }
-
+    
     .cta-box {
         padding: 20px 20px;
     }
-
+    
     .cta-text {
         font-size: 12px;
         margin-bottom: 16px;
     }
-
+    
     .btn-become-partner {
         padding: 12px 28px;
         font-size: 12px;
@@ -803,48 +805,39 @@ body:has(.aboutus-page) .nav-link:hover {
 
 /* Small Mobile */
 @mediaboutus-hero {
-        padding: 20px 16px 20px 16px;
-    }
+    padding: 20px 16px 20px 16px;
+}
+.stats-banner {
+    padding: 0;
+}
+.stats-container {
+    grid-template-columns: 1fr;
+    max-width: 100% grid-template-columns: 1fr;
+}
+.stats-container::before,
+.stats-container::after,
+.stat-divider {
+    display: none;
+}
+.stat-item {
+    border-right: none !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 18px 16px;
+}
+.stat-item:last-child {
+    border-bottom: none;
+}
+.stat-number {
+    font-size: 32px;
+}
+.stat-label {
+    font-size: 11px;
+}
+.banner-title {
+    font-size: 24px;
+}
+.gateway-title {
+    font-size: 22px;
+}
 
-    .stats-banner {
-        padding: 0;
-    }
-
-    .stats-container {
-        grid-template-columns: 1fr;
-        max-width: 100%
-        grid-template-columns: 1fr;
-    }
-
-    .stats-container::before,
-    .stats-container::after,
-    .stat-divider {
-        display: none;
-    }
-
-    .stat-item {
-        border-right: none !important;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-        padding: 18px 16px;
-    }
-
-    .stat-item:last-child {
-        border-bottom: none;
-    }
-
-    .stat-number {
-        font-size: 32px;
-    }
-
-    .stat-label {
-        font-size: 11px;
-    }
-
-    .banner-title {
-        font-size: 24px;
-    }
-
-    .gateway-title {
-        font-size: 22px;
-    }
 }

@@ -1,430 +1,446 @@
 <%- include('partials/header') %>
-  <link rel="stylesheet" href="/css/buyerCSS/buyer-main.css">
-  <link rel="stylesheet" href="/css/buyerCSS/cart.css">
-  
-  <!-- Cropper.js for logo cropping -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
+    <link rel="stylesheet" href="/css/buyerCSS/buyer-main.css">
+    <link rel="stylesheet" href="/css/buyerCSS/cart.css">
 
-  <%- include('partials/navbar') %>
+    <!-- Cropper.js for logo cropping -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
 
-    <!-- ====================================
+    <%- include('partials/navbar') %>
+
+        <!-- ====================================
      SHOPPING CART PAGE - PROFESSIONAL DESIGN
      ==================================== -->
-    <div class="cart-page">
-      <!-- Header Bar -->
-      <div class="cart-header-bar">
-        <div class="container">
-          <div class="cart-header-content">
-            <div class="cart-header-left">
-              <h1 class="cart-header-title"><%= t('cart.title') %></h1>
-              <p class="cart-header-subtitle"><%= t('cart.subtitle') %></p>
+        <div class="cart-page">
+            <!-- Header Bar -->
+            <div class="cart-header-bar">
+                <div class="container">
+                    <div class="cart-header-content">
+                        <div class="cart-header-left">
+                            <h1 class="cart-header-title">
+                                <%= t('cart.title') %>
+                            </h1>
+                            <p class="cart-header-subtitle">
+                                <%= t('cart.subtitle') %>
+                            </p>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
-        </div>
-      </div>
 
-      <!-- Cart Content -->
-      <div class="cart-content">
-        <div class="container">
-          <!-- Empty Cart State - visible by default, JS hides when items exist -->
-          <div class="empty-cart" id="empty-cart-state">
-            <div class="empty-cart-icon">
-              <i data-lucide="shopping-cart" width="63" height="63" stroke-width="2.2"></i>
-            </div>
-            <h2 class="empty-cart-title"><%= t('cart.emptyState.title') %></h2>
-            <p class="empty-cart-text">
-              <%= t('cart.emptyState.text') %>
-            </p>
-            <div class="empty-cart-actions">
-              <a href="/buyer/search-automotive" class="btn-primary">
-                <i data-lucide="search"></i>
-                <span><%= t('cart.emptyState.searchAutomotive') %></span>
-              </a>
-            </div>
-          </div>
+            <!-- Cart Content -->
+            <div class="cart-content">
+                <div class="container">
+                    <!-- Empty Cart State - visible by default, JS hides when items exist -->
+                    <div class="empty-cart" id="empty-cart-state">
+                        <div class="empty-cart-icon">
+                            <i data-lucide="shopping-cart" width="63" height="63" stroke-width="2.2"></i>
+                        </div>
+                        <h2 class="empty-cart-title">
+                            <%= t('cart.emptyState.title') %>
+                        </h2>
+                        <p class="empty-cart-text">
+                            <%= t('cart.emptyState.text') %>
+                        </p>
+                        <div class="empty-cart-actions">
+                            <a href="/buyer/search-automotive" class="btn-primary">
+                                <i data-lucide="search"></i>
+                                <span><%= t('cart.emptyState.searchAutomotive') %></span>
+                            </a>
+                        </div>
+                    </div>
 
-          <!-- Cart Items -->
-          <div class="cart-items-container hidden" id="cart-items-container">
-            <!-- Cart Actions Bar -->
-            <div class="cart-actions-bar">
-              <div class="cart-actions-left">
-                <button class="btn-select-all" id="select-all-btn">
+                    <!-- Cart Items -->
+                    <div class="cart-items-container hidden" id="cart-items-container">
+                        <!-- Cart Actions Bar -->
+                        <div class="cart-actions-bar">
+                            <div class="cart-actions-left">
+                                <button class="btn-select-all" id="select-all-btn">
                   <i data-lucide="check-square"></i>
                   <span><%= t('cart.actions.selectAll') %></span>
                 </button>
-                <button class="btn-remove-selected" id="remove-selected-btn" disabled>
+                                <button class="btn-remove-selected" id="remove-selected-btn" disabled>
                   <i data-lucide="trash-2"></i>
                   <span><%= t('cart.actions.removeSelected') %></span>
                 </button>
-              </div>
-              <div class="cart-actions-right">
-                <button class="btn-create-quotation" id="create-quotation-btn">
+                            </div>
+                            <div class="cart-actions-right">
+                                <button class="btn-create-quotation" id="create-quotation-btn">
                   <i data-lucide="file-text"></i>
                   <span>Create Quotation</span>
                 </button>
-                <button class="btn-download-quotation-quick" id="download-quotation-quick-btn">
+                                <button class="btn-download-quotation-quick" id="download-quotation-quick-btn">
                   <i data-lucide="download"></i>
                   <span>Download Quotation</span>
                 </button>
-                <button class="btn-clear-cart" id="clear-cart-btn">
+                                <button class="btn-clear-cart" id="clear-cart-btn">
                   <i data-lucide="x-circle"></i>
                   <span><%= t('cart.actions.emptyCart') %></span>
                 </button>
-              </div>
-            </div>
+                            </div>
+                        </div>
 
-            <!-- Cart Table -->
-            <div class="cart-table-wrapper">
-              <table class="cart-table">
-                <thead>
-                  <tr>
-                    <th class="th-checkbox">
-                      <input type="checkbox" id="header-checkbox" class="cart-checkbox">
-                    </th>
-                    <th class="th-brand"><%= t('cart.table.brand') %></th>
-                    <th class="th-part-number"><%= t('cart.table.partNumber') %></th>
-                    <th class="th-description"><%= t('cart.table.description') %></th>
-                    <th class="th-stock"><%= t('cart.table.stock') %></th>
-                    <th class="th-qty"><%= t('cart.table.qty') %></th>
-                    <th class="th-price"><%= t('cart.table.price') %></th>
-                    <th class="th-amount"><%= t('cart.table.amount') %></th>
-                    <th class="th-actions"></th>
-                  </tr>
-                </thead>
-                <tbody id="cart-table-body">
-                  <!-- Cart items will be dynamically inserted here -->
-                </tbody>
-              </table>
-            </div>
+                        <!-- Cart Table -->
+                        <div class="cart-table-wrapper">
+                            <table class="cart-table">
+                                <thead>
+                                    <tr>
+                                        <th class="th-checkbox">
+                                            <input type="checkbox" id="header-checkbox" class="cart-checkbox">
+                                        </th>
+                                        <th class="th-brand">
+                                            <%= t('cart.table.brand') %>
+                                        </th>
+                                        <th class="th-part-number">
+                                            <%= t('cart.table.partNumber') %>
+                                        </th>
+                                        <th class="th-description">
+                                            <%= t('cart.table.description') %>
+                                        </th>
+                                        <th class="th-stock">
+                                            <%= t('cart.table.stock') %>
+                                        </th>
+                                        <th class="th-qty">
+                                            <%= t('cart.table.qty') %>
+                                        </th>
+                                        <th class="th-price">
+                                            <%= t('cart.table.price') %>
+                                        </th>
+                                        <th class="th-amount">
+                                            <%= t('cart.table.amount') %>
+                                        </th>
+                                        <th class="th-actions"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="cart-table-body">
+                                    <!-- Cart items will be dynamically inserted here -->
+                                </tbody>
+                            </table>
+                        </div>
 
-            <!-- Cart Summary -->
-            <div class="cart-summary">
-              <div class="cart-summary-left">
-                <div class="cart-summary-info">
-                  <p class="summary-text">
-                    <i data-lucide="shopping-cart" class="summary-icon"></i>
-                    <strong id="total-items-count">0</strong> <%= t('cart.summary.pcs') %>
-                    <span class="summary-separator">•</span>
-                    <%= t('cart.summary.total') %> <strong id="total-amount-text">0.00</strong> <span class="cart-currency-label">AED</span>
-                  </p>
-                  <p class="summary-note">
-                    <i data-lucide="clock" class="summary-icon-small"></i>
-                    <%= t('cart.summary.note') %>
-                    <span id="cart-expiry-text"><%= t('cart.summary.timeRemaining') %> --</span>
-                  </p>
-                </div>
-              </div>
-              <div class="cart-summary-right">
-                <div class="cart-total">
-                  <span class="total-label"><%= t('cart.summary.total') %></span>
-                  <div class="total-details">
-                    <span class="total-items"><strong id="total-items">0</strong> <%= t('cart.summary.pcs') %></span>
-                    <span class="total-amount"><strong id="total-amount">0.00</strong> <span class="cart-currency-label">AED</span></span>
-                  </div>
-                </div>
-                <button class="btn-checkout" id="checkout-btn" disabled>
+                        <!-- Cart Summary -->
+                        <div class="cart-summary">
+                            <div class="cart-summary-left">
+                                <div class="cart-summary-info">
+                                    <p class="summary-text">
+                                        <i data-lucide="shopping-cart" class="summary-icon"></i>
+                                        <strong id="total-items-count">0</strong>
+                                        <%= t('cart.summary.pcs') %>
+                                            <span class="summary-separator">•</span>
+                                            <%= t('cart.summary.total') %> <strong id="total-amount-text">0.00</strong> <span class="cart-currency-label">AED</span>
+                                    </p>
+                                    <p class="summary-note">
+                                        <i data-lucide="clock" class="summary-icon-small"></i>
+                                        <%= t('cart.summary.note') %>
+                                            <span id="cart-expiry-text"><%= t('cart.summary.timeRemaining') %> --</span>
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="cart-summary-right">
+                                <div class="cart-total">
+                                    <span class="total-label"><%= t('cart.summary.total') %></span>
+                                    <div class="total-details">
+                                        <span class="total-items"><strong id="total-items">0</strong> <%= t('cart.summary.pcs') %></span>
+                                        <span class="total-amount"><strong id="total-amount">0.00</strong> <span class="cart-currency-label">AED</span></span>
+                                    </div>
+                                </div>
+                                <button class="btn-checkout" id="checkout-btn" disabled>
                   <span><%= t('cart.checkout') %></span>
                   <i data-lucide="arrow-right"></i>
                 </button>
-              </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
+
+            <!-- Cart Alerts Container -->
+            <div class="cart-alerts" id="cart-alerts"></div>
+
+            <!-- Footer inside cart page for viewport lock -->
+            <footer class="footer cart-footer">
+                <div class="footer-nav">
+                    <div class="footer-nav-left">
+                        <a href="#about" class="footer-nav-link">ABOUT</a>
+                        <a href="#contact" class="footer-nav-link">CONTACT</a>
+                        <a href="#careers" class="footer-nav-link">CAREERS</a>
+                    </div>
+                    <div class="footer-logo-center">
+                        <img src="/images/brand/icon-light.png" alt="PARTSFORM" class="footer-logo-icon">
+                    </div>
+                    <div class="footer-nav-right">
+                        <a href="#how-it-works" class="footer-nav-link">HOW IT WORKS</a>
+                        <a href="#referral" class="footer-nav-link">REFERRAL PROGRAM</a>
+                        <a href="#support" class="footer-nav-link">SUPPORT</a>
+                    </div>
+                </div>
+                <div class="footer-copyright-bar">
+                    <span class="footer-copyright-text">©<%= new Date().getFullYear() %> - PartsForm | All right reserved</span>
+                </div>
+            </footer>
         </div>
-      </div>
 
-      <!-- Cart Alerts Container -->
-      <div class="cart-alerts" id="cart-alerts"></div>
+        <%- include('partials/quick-search') %>
 
-      <!-- Footer inside cart page for viewport lock -->
-      <footer class="footer cart-footer">
-        <div class="footer-nav">
-          <div class="footer-nav-left">
-            <a href="#about" class="footer-nav-link">ABOUT</a>
-            <a href="#contact" class="footer-nav-link">CONTACT</a>
-            <a href="#careers" class="footer-nav-link">CAREERS</a>
-          </div>
-          <div class="footer-logo-center">
-            <img src="/images/brand/icon-light.png" alt="PARTSFORM" class="footer-logo-icon">
-          </div>
-          <div class="footer-nav-right">
-            <a href="#how-it-works" class="footer-nav-link">HOW IT WORKS</a>
-            <a href="#referral" class="footer-nav-link">REFERRAL PROGRAM</a>
-            <a href="#support" class="footer-nav-link">SUPPORT</a>
-          </div>
-        </div>
-        <div class="footer-copyright-bar">
-          <span class="footer-copyright-text">©<%= new Date().getFullYear() %> - PartsForm | All right reserved</span>
-        </div>
-      </footer>
-    </div>
-
-    <%- include('partials/quick-search') %>
-
-      <!-- Quotation Invoice Modal -->
-      <div class="modal hidden" id="quotation-modal">
-        <div class="modal-backdrop" id="quotation-backdrop"></div>
-        <div class="modal-content modal-quotation">
-          <div class="modal-header">
-            <div class="modal-header-content">
-              <i data-lucide="file-text"></i>
-              <h2>Create Quotation Invoice</h2>
-            </div>
-            <button class="modal-close-btn" id="quotation-close-btn">
+            <!-- Quotation Invoice Modal -->
+            <div class="modal hidden" id="quotation-modal">
+                <div class="modal-backdrop" id="quotation-backdrop"></div>
+                <div class="modal-content modal-quotation">
+                    <div class="modal-header">
+                        <div class="modal-header-content">
+                            <i data-lucide="file-text"></i>
+                            <h2>Create Quotation Invoice</h2>
+                        </div>
+                        <button class="modal-close-btn" id="quotation-close-btn">
               <i data-lucide="x"></i>
             </button>
-          </div>
-          <div class="modal-body">
-            <!-- Quotation Configuration -->
-            <div class="quotation-config">
-              <!-- Company Branding Section -->
-              <div class="config-section">
-                <h3 class="config-section-title">
-                  <i data-lucide="building-2"></i>
-                  Your Company Branding
-                </h3>
-                <div class="config-grid">
-                  <div class="config-item logo-upload">
-                    <label>Company Logo</label>
-                    <div class="logo-upload-area" id="logo-upload-area">
-                      <input type="file" id="quotation-logo-input" accept="image/*" class="hidden">
-                      <div class="logo-preview hidden" id="logo-preview">
-                        <img id="logo-preview-img" src="" alt="Logo Preview">
-                        <button class="remove-logo-btn" id="remove-logo-btn">
+                    </div>
+                    <div class="modal-body">
+                        <!-- Quotation Configuration -->
+                        <div class="quotation-config">
+                            <!-- Company Branding Section -->
+                            <div class="config-section">
+                                <h3 class="config-section-title">
+                                    <i data-lucide="building-2"></i> Your Company Branding
+                                </h3>
+                                <div class="config-grid">
+                                    <div class="config-item logo-upload">
+                                        <label>Company Logo</label>
+                                        <div class="logo-upload-area" id="logo-upload-area">
+                                            <input type="file" id="quotation-logo-input" accept="image/*" class="hidden">
+                                            <div class="logo-preview hidden" id="logo-preview">
+                                                <img id="logo-preview-img" src="" alt="Logo Preview">
+                                                <button class="remove-logo-btn" id="remove-logo-btn">
                           <i data-lucide="x"></i>
                         </button>
-                      </div>
-                      <div class="logo-placeholder" id="logo-placeholder">
-                        <i data-lucide="image-plus"></i>
-                        <span>Click to upload logo</span>
-                        <small>PNG, JPG up to 2MB</small>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="config-item">
-                    <label for="quote-company-name">Company Name</label>
-                    <input type="text" id="quote-company-name" placeholder="Your Company Name">
-                  </div>
-                  <div class="config-item">
-                    <label for="quote-company-email">Email</label>
-                    <input type="email" id="quote-company-email" placeholder="contact@yourcompany.com">
-                  </div>
-                  <div class="config-item">
-                    <label for="quote-company-phone">Phone</label>
-                    <input type="tel" id="quote-company-phone" placeholder="+1 234 567 890">
-                  </div>
-                  <div class="config-item full-width">
-                    <label for="quote-company-address">Address</label>
-                    <textarea id="quote-company-address" rows="2" placeholder="123 Business St, City, Country"></textarea>
-                  </div>
-                </div>
-              </div>
-              
-              <!-- Customer Details Section -->
-              <div class="config-section">
-                <h3 class="config-section-title">
-                  <i data-lucide="user"></i>
-                  Customer Details (Optional)
-                </h3>
-                <div class="config-grid">
-                  <div class="config-item">
-                    <label for="quote-customer-name">Customer Name</label>
-                    <input type="text" id="quote-customer-name" placeholder="Customer/Company Name">
-                  </div>
-                  <div class="config-item">
-                    <label for="quote-customer-email">Customer Email</label>
-                    <input type="email" id="quote-customer-email" placeholder="customer@email.com">
-                  </div>
-                </div>
-              </div>
-              
-              <!-- Pricing & Markup Section -->
-              <div class="config-section">
-                <h3 class="config-section-title">
-                  <i data-lucide="percent"></i>
-                  Pricing Configuration
-                </h3>
-                <div class="config-grid">
-                  <div class="config-item">
-                    <label for="quote-markup">Markup Percentage (%)</label>
-                    <div class="markup-input-group">
-                      <input type="number" id="quote-markup" min="0" max="500" step="0.5" value="0" placeholder="0">
-                      <span class="markup-suffix">%</span>
-                    </div>
-                    <small class="config-hint">Applied to all items. Original prices hidden on quotation.</small>
-                  </div>
-                  <div class="config-item">
-                    <label for="quote-currency">Display Currency</label>
-                    <select id="quote-currency">
+                                            </div>
+                                            <div class="logo-placeholder" id="logo-placeholder">
+                                                <i data-lucide="image-plus"></i>
+                                                <span>Click to upload logo</span>
+                                                <small>PNG, JPG up to 2MB</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="config-item">
+                                        <label for="quote-company-name">Company Name</label>
+                                        <input type="text" id="quote-company-name" placeholder="Your Company Name">
+                                    </div>
+                                    <div class="config-item">
+                                        <label for="quote-company-email">Email</label>
+                                        <input type="email" id="quote-company-email" placeholder="contact@yourcompany.com">
+                                    </div>
+                                    <div class="config-item">
+                                        <label for="quote-company-phone">Phone</label>
+                                        <input type="tel" id="quote-company-phone" placeholder="+1 234 567 890">
+                                    </div>
+                                    <div class="config-item full-width">
+                                        <label for="quote-company-address">Address</label>
+                                        <textarea id="quote-company-address" rows="2" placeholder="123 Business St, City, Country"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Customer Details Section -->
+                            <div class="config-section">
+                                <h3 class="config-section-title">
+                                    <i data-lucide="user"></i> Customer Details (Optional)
+                                </h3>
+                                <div class="config-grid">
+                                    <div class="config-item">
+                                        <label for="quote-customer-name">Customer Name</label>
+                                        <input type="text" id="quote-customer-name" placeholder="Customer/Company Name">
+                                    </div>
+                                    <div class="config-item">
+                                        <label for="quote-customer-email">Customer Email</label>
+                                        <input type="email" id="quote-customer-email" placeholder="customer@email.com">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Pricing & Markup Section -->
+                            <div class="config-section">
+                                <h3 class="config-section-title">
+                                    <i data-lucide="percent"></i> Pricing Configuration
+                                </h3>
+                                <div class="config-grid">
+                                    <div class="config-item">
+                                        <label for="quote-markup">Markup Percentage (%)</label>
+                                        <div class="markup-input-group">
+                                            <input type="number" id="quote-markup" min="0" max="500" step="0.5" value="0" placeholder="0">
+                                            <span class="markup-suffix">%</span>
+                                        </div>
+                                        <small class="config-hint">Applied to all items. Original prices hidden on quotation.</small>
+                                    </div>
+                                    <div class="config-item">
+                                        <label for="quote-currency">Display Currency</label>
+                                        <select id="quote-currency">
                       <option value="AED">AED - UAE Dirham</option>
                       <option value="USD">USD - US Dollar</option>
                       <option value="EUR">EUR - Euro</option>
                       <option value="GBP">GBP - British Pound</option>
                       <option value="SAR">SAR - Saudi Riyal</option>
                     </select>
-                  </div>
-                  <div class="config-item">
-                    <label for="quote-validity">Quotation Validity (Days)</label>
-                    <input type="number" id="quote-validity" min="1" max="90" value="7">
-                  </div>
-                  <div class="config-item">
-                    <label for="quote-number">Quotation Number</label>
-                    <input type="text" id="quote-number" placeholder="Auto-generated" readonly>
-                  </div>
-                </div>
-              </div>
-              
-              <!-- Additional Notes Section -->
-              <div class="config-section">
-                <h3 class="config-section-title">
-                  <i data-lucide="message-square"></i>
-                  Additional Information
-                </h3>
-                <div class="config-grid">
-                  <div class="config-item full-width">
-                    <label for="quote-notes">Notes / Terms & Conditions</label>
-                    <textarea id="quote-notes" rows="3" placeholder="Enter any additional notes, payment terms, delivery conditions..."></textarea>
-                  </div>
-                </div>
-              </div>
-              
-              <!-- Items Preview -->
-              <div class="config-section">
-                <h3 class="config-section-title">
-                  <i data-lucide="package"></i>
-                  Items Preview
-                  <span class="items-count-badge" id="quote-items-count">0 items</span>
-                </h3>
-                <div class="quote-items-preview" id="quote-items-preview">
-                  <!-- Items will be populated dynamically -->
-                </div>
-                <div class="quote-totals" id="quote-totals">
-                  <div class="total-row">
-                    <span>Subtotal:</span>
-                    <span id="quote-subtotal">0.00 AED</span>
-                  </div>
-                  <div class="total-row markup-row">
-                    <span>Markup (<span id="markup-percent-display">0</span>%):</span>
-                    <span id="quote-markup-amount">+0.00 AED</span>
-                  </div>
-                  <div class="total-row grand-total-row">
-                    <span>Grand Total:</span>
-                    <span id="quote-grand-total">0.00 AED</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button class="btn-cancel" id="quotation-cancel-btn">Cancel</button>
-            <button class="btn-preview-quotation" id="preview-quotation-btn">
+                                    </div>
+                                    <div class="config-item">
+                                        <label for="quote-validity">Quotation Validity (Days)</label>
+                                        <input type="number" id="quote-validity" min="1" max="90" value="7">
+                                    </div>
+                                    <div class="config-item">
+                                        <label for="quote-number">Quotation Number</label>
+                                        <input type="text" id="quote-number" placeholder="Auto-generated" readonly>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Additional Notes Section -->
+                            <div class="config-section">
+                                <h3 class="config-section-title">
+                                    <i data-lucide="message-square"></i> Additional Information
+                                </h3>
+                                <div class="config-grid">
+                                    <div class="config-item full-width">
+                                        <label for="quote-notes">Notes / Terms & Conditions</label>
+                                        <textarea id="quote-notes" rows="3" placeholder="Enter any additional notes, payment terms, delivery conditions..."></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Items Preview -->
+                            <div class="config-section">
+                                <h3 class="config-section-title">
+                                    <i data-lucide="package"></i> Items Preview
+                                    <span class="items-count-badge" id="quote-items-count">0 items</span>
+                                </h3>
+                                <div class="quote-items-preview" id="quote-items-preview">
+                                    <!-- Items will be populated dynamically -->
+                                </div>
+                                <div class="quote-totals" id="quote-totals">
+                                    <div class="total-row">
+                                        <span>Subtotal:</span>
+                                        <span id="quote-subtotal">0.00 AED</span>
+                                    </div>
+                                    <div class="total-row markup-row">
+                                        <span>Markup (<span id="markup-percent-display">0</span>%):</span>
+                                        <span id="quote-markup-amount">+0.00 AED</span>
+                                    </div>
+                                    <div class="total-row grand-total-row">
+                                        <span>Grand Total:</span>
+                                        <span id="quote-grand-total">0.00 AED</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn-cancel" id="quotation-cancel-btn">Cancel</button>
+                        <button class="btn-preview-quotation" id="preview-quotation-btn">
               <i data-lucide="eye"></i>
               <span>Preview</span>
             </button>
-            <button class="btn-download-quotation" id="download-quotation-btn">
+                        <button class="btn-download-quotation" id="download-quotation-btn">
               <i data-lucide="download"></i>
               <span>Download PDF</span>
             </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Quotation Preview Modal -->
-      <div class="modal hidden" id="quotation-preview-modal">
-        <div class="modal-backdrop" id="preview-backdrop"></div>
-        <div class="modal-content modal-preview">
-          <div class="modal-header">
-            <div class="modal-header-content">
-              <i data-lucide="eye"></i>
-              <h2>Quotation Preview</h2>
+                    </div>
+                </div>
             </div>
-            <button class="modal-close-btn" id="preview-close-btn">
+
+            <!-- Quotation Preview Modal -->
+            <div class="modal hidden" id="quotation-preview-modal">
+                <div class="modal-backdrop" id="preview-backdrop"></div>
+                <div class="modal-content modal-preview">
+                    <div class="modal-header">
+                        <div class="modal-header-content">
+                            <i data-lucide="eye"></i>
+                            <h2>Quotation Preview</h2>
+                        </div>
+                        <button class="modal-close-btn" id="preview-close-btn">
               <i data-lucide="x"></i>
             </button>
-          </div>
-          <div class="modal-body preview-body">
-            <iframe id="quotation-preview-frame" class="iframe-reset"></iframe>
-          </div>
-          <div class="modal-footer">
-            <button class="btn-cancel" id="preview-back-btn">
+                    </div>
+                    <div class="modal-body preview-body">
+                        <iframe id="quotation-preview-frame" class="iframe-reset"></iframe>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn-cancel" id="preview-back-btn">
               <i data-lucide="arrow-left"></i>
               <span>Back to Editor</span>
             </button>
-            <button class="btn-download-quotation" id="preview-download-btn">
+                        <button class="btn-download-quotation" id="preview-download-btn">
               <i data-lucide="download"></i>
               <span>Download PDF</span>
             </button>
-          </div>
-        </div>
-      </div>
+                    </div>
+                </div>
+            </div>
 
-      <!-- Confirmation Modal -->
-      <div class="modal hidden" id="confirm-modal">
-        <div class="modal-backdrop" id="confirm-backdrop"></div>
-        <div class="modal-content modal-confirm">
-          <div class="modal-body">
-            <div class="confirm-icon">
-              <i data-lucide="alert-circle"></i>
+            <!-- Confirmation Modal -->
+            <div class="modal hidden" id="confirm-modal">
+                <div class="modal-backdrop" id="confirm-backdrop"></div>
+                <div class="modal-content modal-confirm">
+                    <div class="modal-body">
+                        <div class="confirm-icon">
+                            <i data-lucide="alert-circle"></i>
+                        </div>
+                        <h3 class="confirm-title" id="confirm-title">Confirm Action</h3>
+                        <p class="confirm-message" id="confirm-message">Are you sure?</p>
+                        <div class="confirm-actions">
+                            <button class="btn-cancel" id="confirm-cancel">Cancel</button>
+                            <button class="btn-confirm" id="confirm-ok">Confirm</button>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <h3 class="confirm-title" id="confirm-title">Confirm Action</h3>
-            <p class="confirm-message" id="confirm-message">Are you sure?</p>
-            <div class="confirm-actions">
-              <button class="btn-cancel" id="confirm-cancel">Cancel</button>
-              <button class="btn-confirm" id="confirm-ok">Confirm</button>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      <!-- Logo Cropper Modal -->
-      <div class="modal hidden" id="logo-cropper-modal">
-        <div class="modal-backdrop" id="cropper-backdrop"></div>
-        <div class="modal-content modal-cropper">
-          <div class="modal-header">
-            <div class="modal-header-content">
-              <i data-lucide="crop"></i>
-              <h2>Crop Your Logo</h2>
-            </div>
-            <button class="modal-close-btn" id="cropper-close-btn">
+            <!-- Logo Cropper Modal -->
+            <div class="modal hidden" id="logo-cropper-modal">
+                <div class="modal-backdrop" id="cropper-backdrop"></div>
+                <div class="modal-content modal-cropper">
+                    <div class="modal-header">
+                        <div class="modal-header-content">
+                            <i data-lucide="crop"></i>
+                            <h2>Crop Your Logo</h2>
+                        </div>
+                        <button class="modal-close-btn" id="cropper-close-btn">
               <i data-lucide="x"></i>
             </button>
-          </div>
-          <div class="modal-body cropper-body">
-            <div class="cropper-info">
-              <p><i data-lucide="info"></i> Adjust the crop area to fit your logo. Recommended aspect ratio is 3:1 (landscape) for best results on quotations.</p>
-            </div>
-            <div class="cropper-container">
-              <img id="cropper-image" src="" alt="Crop preview">
-            </div>
-            <div class="cropper-presets">
-              <span class="preset-label">Preset Ratios:</span>
-              <button class="preset-btn active" data-ratio="3">3:1 (Wide)</button>
-              <button class="preset-btn" data-ratio="2">2:1 (Standard)</button>
-              <button class="preset-btn" data-ratio="1">1:1 (Square)</button>
-              <button class="preset-btn" data-ratio="free">Free</button>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button class="btn-cancel" id="cropper-cancel-btn">Cancel</button>
-            <button class="btn-primary" id="cropper-apply-btn">
+                    </div>
+                    <div class="modal-body cropper-body">
+                        <div class="cropper-info">
+                            <p><i data-lucide="info"></i> Adjust the crop area to fit your logo. Recommended aspect ratio is 3:1 (landscape) for best results on quotations.</p>
+                        </div>
+                        <div class="cropper-container">
+                            <img id="cropper-image" src="" alt="Crop preview">
+                        </div>
+                        <div class="cropper-presets">
+                            <span class="preset-label">Preset Ratios:</span>
+                            <button class="preset-btn active" data-ratio="3">3:1 (Wide)</button>
+                            <button class="preset-btn" data-ratio="2">2:1 (Standard)</button>
+                            <button class="preset-btn" data-ratio="1">1:1 (Square)</button>
+                            <button class="preset-btn" data-ratio="free">Free</button>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn-cancel" id="cropper-cancel-btn">Cancel</button>
+                        <button class="btn-primary" id="cropper-apply-btn">
               <i data-lucide="check"></i>
               <span>Apply Crop</span>
             </button>
-          </div>
-        </div>
-      </div>
+                    </div>
+                </div>
+            </div>
 
-      <!-- Cropper.js Script -->
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+            <!-- Cropper.js Script -->
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
 
-      <script src="/js/animations.js"></script>
-      <script src="/js/main.js"></script>
-      <script src="/js/quick-search.js"></script>
-      <script src="/js/api-integration.js"></script>
-      <script src="/js/buyer-quotation.js"></script>
-      <script src="/js/cart.js"></script>
-      <script>
-        lucide.createIcons();
-        window.addEventListener('load', () => lucide.createIcons());
-      </script>
+            <script src="/js/animations.js"></script>
+            <script src="/js/main.js"></script>
+            <script src="/js/quick-search.js"></script>
+            <script src="/js/api-integration.js"></script>
+            <script src="/js/buyer-quotation.js"></script>
+            <script src="/js/cart.js"></script>
+            <script>
+                lucide.createIcons();
+                window.addEventListener('load', () => lucide.createIcons());
+            </script>
 
-      <%- include('partials/footer') %>
+            <%- include('partials/footer') %>

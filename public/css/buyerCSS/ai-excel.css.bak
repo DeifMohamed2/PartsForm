@@ -110,6 +110,7 @@
 
 .ai-excel-header .modal-close:hover {
   background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.05);
 }
 
 /* ====================================
@@ -207,9 +208,11 @@
   background: var(--kurogane);
   border-color: var(--kurogane);
   color: #fff;
+  transform: translateY(-1px);
 }
 
 .ai-browse-btn:active {
+  transform: translateY(0);
 }
 
 .ai-browse-btn i {
@@ -960,7 +963,7 @@
 }
 
 .part-remove-btn:hover {
-  background: #e2e8f0;
+  background: #fecaca;
 }
 
 .part-remove-btn i {
@@ -1268,9 +1271,9 @@
   align-items: center;
   gap: 0.625rem;
   padding: 0.75rem 1.5rem;
-  background: var(--aitetsu);
+  background: var(--kintsugi);
   color: #fff;
-  border: 2px solid var(--aitetsu);
+  border: none;
   border-radius: 0 !important;
   font-weight: 600;
   cursor: pointer;
@@ -1281,9 +1284,9 @@
 
 .ai-search-btn:hover,
 .ai-cart-btn:hover {
-  background: var(--kurogane);
-  border-color: var(--kurogane);
+  background: var(--aitetsu);
   box-shadow: 0 6px 16px rgba(64, 84, 94, 0.4);
+  transform: translateY(-1px);
 }
 
 .ai-search-btn:disabled,
@@ -1310,15 +1313,13 @@
 }
 
 .ai-cart-btn {
-  background: var(--aitetsu);
-  border-color: var(--aitetsu);
-  box-shadow: 0 4px 12px rgba(64, 84, 94, 0.3);
+  background: #22c55e;
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
 }
 
 .ai-cart-btn:hover {
-  background: var(--kurogane);
-  border-color: var(--kurogane);
-  box-shadow: 0 6px 16px rgba(64, 84, 94, 0.4);
+  background: #16a34a;
+  box-shadow: 0 6px 16px rgba(34, 197, 94, 0.4);
 }
 
 /* ====================================

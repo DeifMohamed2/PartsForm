@@ -309,6 +309,343 @@
                 </div>
             </div>
 
+            <!-- AI-Powered Excel Upload Modal -->
+            <div class="modal ai-excel-modal" id="excel-modal">
+                <div class="modal-overlay" id="excel-modal-overlay"></div>
+                <div class="modal-container ai-excel-container">
+                    <!-- Modal Header -->
+                    <div class="modal-header ai-excel-header">
+                        <div class="ai-excel-title-wrapper">
+                            <div class="ai-excel-icon">
+                                <i data-lucide="file-spreadsheet"></i>
+                            </div>
+                            <div class="ai-excel-title-content">
+                                <h3 class="modal-title">
+                                    <%= t('searchResults.excel.title') %>
+                                    <span class="ai-badge"><%= t('searchResults.excel.aiBadge') %></span>
+                                </h3>
+                                <p class="ai-excel-subtitle"><%= t('searchResults.excel.subtitle') %></p>
+                            </div>
+                        </div>
+                        <button class="modal-close" id="excel-modal-close">
+                            <i data-lucide="x"></i>
+                        </button>
+                    </div>
+
+                    <div class="modal-body ai-excel-body">
+                        <!-- Step 1: Upload Area -->
+                        <div class="ai-excel-step" id="excel-step-upload">
+                            <!-- Upload Error Banner -->
+                            <div class="ai-upload-error hidden" id="upload-error-banner">
+                                <div class="upload-error-icon">
+                                    <i data-lucide="alert-triangle"></i>
+                                </div>
+                                <div class="upload-error-content">
+                                    <h4 class="upload-error-title" id="upload-error-title"><%= t('searchResults.excel.fileTooLarge') %></h4>
+                                    <p class="upload-error-message" id="upload-error-message"></p>
+                                    <div class="upload-error-details" id="upload-error-details"></div>
+                                </div>
+                                <button class="upload-error-dismiss" id="upload-error-dismiss">
+                                    <i data-lucide="x"></i>
+                                </button>
+                            </div>
+
+                            <div class="upload-area ai-upload-area" id="upload-area">
+                                <input type="file" id="excel-file-input" accept=".xlsx,.xls,.csv" hidden>
+                                <div class="ai-upload-visual">
+                                    <div class="ai-upload-icon-wrapper">
+                                        <div class="ai-upload-glow"></div>
+                                        <i data-lucide="upload-cloud"></i>
+                                    </div>
+                                    <div class="ai-upload-sparkles">
+                                        <i data-lucide="sparkles" class="sparkle s1"></i>
+                                        <i data-lucide="sparkles" class="sparkle s2"></i>
+                                        <i data-lucide="sparkles" class="sparkle s3"></i>
+                                    </div>
+                                </div>
+                                
+                                <h4 class="upload-title"><%= t('searchResults.excel.dragDrop') %></h4>
+                                <p class="upload-subtitle"><%= t('searchResults.excel.aiExtract') %></p>
+                                
+                                <button class="btn-primary ai-browse-btn" id="browse-file-btn">
+                                    <i data-lucide="folder-open"></i>
+                                    <span><%= t('searchResults.excel.browseFiles') %></span>
+                                </button>
+                                
+                                <p class="upload-hint">
+                                    <i data-lucide="check-circle"></i>
+                                    <%= t('searchResults.excel.supportedFormats') %>
+                                </p>
+                            </div>
+
+                            <div class="sample-format ai-sample-format">
+                                <div class="sample-header">
+                                    <i data-lucide="info"></i>
+                                    <span><%= t('searchResults.excel.formatHint') %></span>
+                                </div>
+                                <a href="/api/download-sample-excel" class="download-sample" download>
+                                    <i data-lucide="download"></i>
+                                    <span><%= t('searchResults.excel.downloadSample') %></span>
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Step 2: AI Analyzing -->
+                        <div class="ai-excel-step hidden" id="excel-step-analyzing">
+                            <div class="ai-analyzing-container">
+                                <div class="ai-analyzing-visual">
+                                    <div class="ai-brain-pulse">
+                                        <i data-lucide="brain"></i>
+                                    </div>
+                                    <div class="ai-analyzing-rings">
+                                        <div class="ring r1"></div>
+                                        <div class="ring r2"></div>
+                                        <div class="ring r3"></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="ai-analyzing-content">
+                                    <h4 class="ai-analyzing-title"><%= t('searchResults.excel.analyzing') %></h4>
+                                    <p class="ai-analyzing-file" id="analyzing-file-name">processing file.xlsx</p>
+                                    
+                                    <div class="ai-analyzing-steps">
+                                        <div class="ai-step" id="ai-step-reading">
+                                            <div class="ai-step-icon"><i data-lucide="file-search"></i></div>
+                                            <span><%= t('searchResults.excel.readingData') %></span>
+                                            <div class="ai-step-status"><i data-lucide="loader-2" class="spin"></i></div>
+                                        </div>
+                                        <div class="ai-step" id="ai-step-detecting">
+                                            <div class="ai-step-icon"><i data-lucide="scan-search"></i></div>
+                                            <span><%= t('searchResults.excel.detectingParts') %></span>
+                                            <div class="ai-step-status"></div>
+                                        </div>
+                                        <div class="ai-step" id="ai-step-extracting">
+                                            <div class="ai-step-icon"><i data-lucide="wand-2"></i></div>
+                                            <span><%= t('searchResults.excel.extractingData') %></span>
+                                            <div class="ai-step-status"></div>
+                                        </div>
+                                        <div class="ai-step" id="ai-step-validating">
+                                            <div class="ai-step-icon"><i data-lucide="check-circle"></i></div>
+                                            <span><%= t('searchResults.excel.validating') %></span>
+                                            <div class="ai-step-status"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 3: AI Results Preview -->
+                        <div class="ai-excel-step hidden" id="excel-step-results">
+                            <!-- AI Summary Banner -->
+                            <div class="ai-results-summary">
+                                <div class="ai-summary-icon">
+                                    <i data-lucide="sparkles"></i>
+                                </div>
+                                <div class="ai-summary-content">
+                                    <h4 class="ai-summary-title" id="ai-summary-title"><%= t('searchResults.excel.analysisComplete') %></h4>
+                                    <p class="ai-summary-text" id="ai-summary-text"><%= t('searchResults.excel.partsReady') %></p>
+                                </div>
+                                <div class="ai-summary-badge" id="ai-summary-badge">
+                                    <i data-lucide="zap"></i>
+                                    <span><%= t('searchResults.excel.aiPowered') %></span>
+                                </div>
+                            </div>
+
+                            <!-- Data Quality Indicator -->
+                            <div class="ai-data-quality" id="ai-data-quality">
+                                <div class="quality-meter">
+                                    <div class="quality-label"><%= t('searchResults.excel.dataQuality') %></div>
+                                    <div class="quality-bar">
+                                        <div class="quality-fill" id="quality-fill"></div>
+                                    </div>
+                                    <div class="quality-text" id="quality-text"><%= t('searchResults.excel.qualityGood') %></div>
+                                </div>
+                                <div class="quality-issues hidden" id="quality-issues">
+                                    <i data-lucide="alert-circle"></i>
+                                    <span id="quality-issues-text"></span>
+                                </div>
+                            </div>
+
+                            <!-- Parts List Header -->
+                            <div class="ai-parts-header">
+                                <div class="parts-header-left">
+                                    <label class="select-all-checkbox">
+                                        <input type="checkbox" id="select-all-parts" checked>
+                                        <span class="checkbox-custom"></span>
+                                        <span class="checkbox-label"><%= t('searchResults.excel.selectAll') %></span>
+                                    </label>
+                                    <label class="select-all-checkbox select-first-option hidden" id="select-first-1000-label">
+                                        <input type="checkbox" id="select-first-1000">
+                                        <span class="checkbox-custom"></span>
+                                        <span class="checkbox-label"><%= t('searchResults.excel.selectFirst1000') %></span>
+                                    </label>
+                                    <span class="parts-count" id="parts-count"><%= t('searchResults.excel.partsSelected') %></span>
+                                </div>
+                                <div class="parts-header-right">
+                                    <div class="parts-filter">
+                                        <button class="filter-btn active" data-filter="all"><%= t('searchResults.excel.filterAll') %></button>
+                                        <button class="filter-btn" data-filter="high"><%= t('searchResults.excel.filterHigh') %></button>
+                                        <button class="filter-btn" data-filter="medium"><%= t('searchResults.excel.filterMedium') %></button>
+                                        <button class="filter-btn" data-filter="low"><%= t('searchResults.excel.filterLow') %></button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Parts List -->
+                            <div class="ai-parts-list" id="ai-parts-list">
+                                <!-- Parts will be dynamically inserted here -->
+                            </div>
+
+                            <!-- AI Suggestions -->
+                            <div class="ai-suggestions hidden" id="ai-suggestions">
+                                <div class="suggestions-header">
+                                    <i data-lucide="lightbulb"></i>
+                                    <span><%= t('searchResults.excel.aiSuggestions') %></span>
+                                </div>
+                                <ul class="suggestions-list" id="suggestions-list">
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Step 4: Search Results with Recommendations -->
+                        <div class="ai-excel-step hidden" id="excel-step-search-results">
+                            <!-- Analytics Summary -->
+                            <div class="excel-analytics" id="excel-analytics">
+                                <div class="analytics-header">
+                                    <h4><%= t('searchResults.excel.importAnalytics') %></h4>
+                                    <span class="analytics-filename" id="analytics-filename">file.xlsx</span>
+                                </div>
+                                
+                                <!-- Stats Cards -->
+                                <div class="analytics-stats">
+                                    <div class="stat-card stat-total">
+                                        <div class="stat-icon">
+                                            <i data-lucide="file-spreadsheet"></i>
+                                        </div>
+                                        <div class="stat-content">
+                                            <div class="stat-value" id="stat-total">0</div>
+                                            <div class="stat-label"><%= t('searchResults.excel.totalParts') %></div>
+                                        </div>
+                                    </div>
+                                    <div class="stat-card stat-found">
+                                        <div class="stat-icon">
+                                            <i data-lucide="check-circle"></i>
+                                        </div>
+                                        <div class="stat-content">
+                                            <div class="stat-value" id="stat-found">0</div>
+                                            <div class="stat-label"><%= t('searchResults.excel.found') %></div>
+                                        </div>
+                                        <div class="stat-percent stat-percent-found" id="stat-percent-found">0%</div>
+                                    </div>
+                                    <div class="stat-card stat-not-found">
+                                        <div class="stat-icon">
+                                            <i data-lucide="x-circle"></i>
+                                        </div>
+                                        <div class="stat-content">
+                                            <div class="stat-value" id="stat-not-found">0</div>
+                                            <div class="stat-label"><%= t('searchResults.excel.notFound') %></div>
+                                        </div>
+                                        <div class="stat-percent stat-percent-not-found" id="stat-percent-not-found">0%</div>
+                                    </div>
+                                    <div class="stat-card stat-duplicates hidden" id="stat-duplicates-card">
+                                        <div class="stat-icon">
+                                            <i data-lucide="copy"></i>
+                                        </div>
+                                        <div class="stat-content">
+                                            <div class="stat-value" id="stat-duplicates">0</div>
+                                            <div class="stat-label"><%= t('searchResults.excel.duplicates') %></div>
+                                        </div>
+                                        <div class="stat-note"><%= t('searchResults.excel.notCounted') %></div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Success Rate Bar -->
+                                <div class="success-rate-container">
+                                    <div class="success-rate-header">
+                                        <span class="success-rate-label"><%= t('searchResults.excel.successRate') %></span>
+                                        <span class="success-rate-value" id="success-rate-value">0%</span>
+                                    </div>
+                                    <div class="success-rate-bar">
+                                        <div class="success-rate-fill" id="success-rate-fill"></div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Not Found Parts List -->
+                                <div class="not-found-section hidden" id="not-found-section">
+                                    <div class="not-found-header">
+                                        <i data-lucide="alert-triangle"></i>
+                                        <span><%= t('searchResults.excel.partsNotFound') %></span>
+                                        <button class="not-found-toggle" id="not-found-toggle">
+                                            <i data-lucide="chevron-down"></i>
+                                        </button>
+                                    </div>
+                                    <div class="not-found-list" id="not-found-list">
+                                        <!-- Not found parts will be listed here -->
+                                    </div>
+                                </div>
+                                
+                                <!-- Duplicates Warning -->
+                                <div class="duplicates-section hidden" id="duplicates-section">
+                                    <div class="duplicates-header">
+                                        <i data-lucide="info"></i>
+                                        <span><%= t('searchResults.excel.duplicatesDetected') %></span>
+                                        <button class="duplicates-toggle" id="duplicates-toggle">
+                                            <i data-lucide="chevron-down"></i>
+                                        </button>
+                                    </div>
+                                    <div class="duplicates-list" id="duplicates-list">
+                                        <!-- Duplicates will be listed here -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="ai-search-header">
+                                <div class="search-header-left">
+                                    <h4><%= t('searchResults.excel.searchResultsTitle') %></h4>
+                                    <p class="search-summary" id="search-summary"><%= t('searchResults.excel.foundOptions') %></p>
+                                </div>
+                                <div class="search-header-right">
+                                    <button class="btn-secondary" id="back-to-parts-btn">
+                                        <i data-lucide="arrow-left"></i>
+                                        <span><%= t('searchResults.excel.backToParts') %></span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Recommendations List -->
+                            <div class="ai-recommendations-list" id="ai-recommendations-list">
+                                <!-- Recommendations will be dynamically inserted here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Modal Footer -->
+                    <div class="modal-footer ai-excel-footer">
+                        <div class="footer-left">
+                            <button class="btn-secondary hidden" id="excel-reset-btn">
+                                <i data-lucide="rotate-ccw"></i>
+                                <span><%= t('searchResults.excel.uploadNewFile') %></span>
+                            </button>
+                        </div>
+                        <div class="footer-right">
+                            <button class="btn-secondary" id="excel-cancel-btn">
+                                <%= t('common.cancel') %>
+                            </button>
+                            <button class="btn-primary ai-search-btn hidden" id="excel-search-btn">
+                                <i data-lucide="search"></i>
+                                <span><%= t('searchResults.excel.searchParts') %></span>
+                                <span class="search-count" id="excel-search-count">0</span>
+                            </button>
+                            <button class="btn-primary ai-cart-btn hidden" id="excel-add-cart-btn">
+                                <i data-lucide="shopping-cart"></i>
+                                <span><%= t('searchResults.excel.addToCartBtn') %></span>
+                                <span class="cart-count" id="excel-cart-count">0</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Sign In Modal -->
             <div class="modal" id="sign-in-modal">
                 <div class="modal-backdrop" id="modal-backdrop"></div>
