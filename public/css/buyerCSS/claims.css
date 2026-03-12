@@ -3,9 +3,11 @@
    PARTSFORM Buyer Portal
    ==================================== */
 
+
 /* ====================================
    VIEWPORT LOCK PATTERN
    ==================================== */
+
 html:has(.claims-page) {
     height: 100%;
     overflow: hidden;
@@ -18,14 +20,18 @@ body:has(.claims-page) {
     flex-direction: column;
 }
 
+
 /* Utility Class */
+
 .hidden {
     display: none !important;
 }
 
+
 /* ====================================
    PAGE LAYOUT
    ==================================== */
+
 .claims-page {
     flex: 1;
     min-height: 0;
@@ -37,114 +43,135 @@ body:has(.claims-page) {
     position: relative;
 }
 
+
+/* ====================================
+   CONTAINER OVERRIDE
+   ==================================== */
+
+/* Wider container for claims page */
+.claims-page .container {
+    max-width: 1600px;
+    padding: 0 1.5rem;
+}
+
+
 /* ====================================
    HEADER BAR
    ==================================== */
+
 .claims-header-bar {
-  background: linear-gradient(to bottom, var(--washi) 0%, rgba(149, 175, 192, 0.05) 100%);
-  padding: 1.5rem 0 1.25rem;
-  border-bottom: 1px solid rgba(149, 175, 192, 0.2);
-  margin-top: 1rem;
-  margin-bottom: 1rem;
-  position: relative;
+    background: linear-gradient(to bottom, var(--washi) 0%, rgba(149, 175, 192, 0.05) 100%);
+    padding: 1.5rem 0 1.25rem;
+    border-bottom: 1px solid rgba(149, 175, 192, 0.2);
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    position: relative;
+}
+
+.claims-header-bar .container {
+    padding-left: 0;
+    padding-right: var(--buyer-space-lg);
 }
 
 .claims-header-bar::before {
-  content: '';
-  position: absolute;
-  bottom: -1px;
-  left: 0;
-  width: 200px;
-  height: 2px;
-  background: linear-gradient(to right, var(--kintsugi), transparent);
-  animation: shimmer 3s ease-in-out infinite;
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 200px;
+    height: 2px;
+    background: linear-gradient(to right, var(--kintsugi), transparent);
+    animation: shimmer 3s ease-in-out infinite;
 }
 
 @keyframes shimmer {
-  0%, 100% {
-    opacity: 1;
-    transform: translateX(0);
-  }
-  50% {
-    opacity: 0.7;
-    transform: translateX(20px);
-  }
+    0%,
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    50% {
+        opacity: 0.7;
+        transform: translateX(20px);
+    }
 }
 
 .claims-header-content {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 2rem;
-  flex-wrap: wrap;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 2rem;
+    flex-wrap: wrap;
 }
 
 .claims-header-left {
-  flex: 1;
-  min-width: 300px;
+    flex: 1;
+    min-width: 300px;
 }
 
 .claims-header-title {
-  font-family: 'Quantico', sans-serif;
-  font-size: 2.25rem;
-  font-weight: 400;
-  color: var(--kurogane);
-  margin-bottom: 0.5rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  line-height: 1.1;
+    font-family: 'Quantico', sans-serif;
+    font-size: 2.25rem;
+    font-weight: 400;
+    color: var(--kurogane);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    line-height: 1.1;
 }
 
 .claims-header-subtitle {
-  font-family: 'Antartida', sans-serif;
-  font-size: 0.9375rem;
-  color: var(--namari);
-  font-weight: 400;
-  letter-spacing: 0.01em;
+    font-family: 'Antartida', sans-serif;
+    font-size: 0.9375rem;
+    color: var(--namari);
+    font-weight: 400;
+    letter-spacing: 0.01em;
 }
 
 .claims-header-right {
-  display: flex;
-  align-items: center;
-  gap: 1.25rem;
-  flex-wrap: wrap;
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    flex-wrap: wrap;
 }
 
 .btn-create-claim {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.875rem 1.75rem;
-  background: var(--aitetsu);
-  color: white;
-  border: 1.5px solid var(--aitetsu);
-  border-radius: 4px;
-  font-family: 'Quantico', sans-serif;
-  font-size: 0.875rem;
-  font-weight: 400;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  text-decoration: none;
-  white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.875rem 1.75rem;
+    background: var(--aitetsu);
+    color: white;
+    border: 1.5px solid var(--aitetsu);
+    border-radius: 4px;
+    font-family: 'Quantico', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    white-space: nowrap;
 }
 
 .btn-create-claim:hover {
-  background: #354550;
-  border-color: #354550;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(64, 84, 94, 0.3);
+    background: #354550;
+    border-color: #354550;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(64, 84, 94, 0.3);
 }
 
 .btn-create-claim i {
-  width: 18px;
-  height: 18px;
+    width: 18px;
+    height: 18px;
 }
+
 
 /* ====================================
    CLAIMS CONTENT
    ==================================== */
+
 .claims-content {
     flex: 1;
     min-height: 0;
@@ -161,98 +188,104 @@ body:has(.claims-page) {
     overflow-x: hidden;
 }
 
+
 /* ====================================
    CLAIMS LIST CONTAINER (SCROLLABLE BOX)
    ==================================== */
+
 .claims-list-container {
-  background: white;
-  border: 1px solid rgba(149, 175, 192, 0.25);
-  border-radius: 4px;
-  box-shadow: 0 2px 16px rgba(149, 175, 192, 0.08);
-  max-height: 600px;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding: 1.5rem;
+    background: white;
+    border: 1px solid rgba(149, 175, 192, 0.25);
+    border-radius: 4px;
+    box-shadow: 0 2px 16px rgba(149, 175, 192, 0.08);
+    max-height: 600px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 1.5rem;
 }
+
 
 /* ====================================
    CLAIMS STATS - MINIMAL STYLE (MATCHING ORDERS)
    ==================================== */
+
 .claims-stats-minimal {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-  padding: 0.75rem 1.75rem;
-  background: linear-gradient(135deg, rgba(149, 175, 192, 0.08) 0%, rgba(255, 255, 255, 0.95) 100%);
-  border: 1px solid rgba(149, 175, 192, 0.3);
-  border-radius: 4px;
-  box-shadow: 0 2px 12px rgba(149, 175, 192, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.5);
-  transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 0.75rem 1.75rem;
+    background: linear-gradient(135deg, rgba(149, 175, 192, 0.08) 0%, rgba(255, 255, 255, 0.95) 100%);
+    border: 1px solid rgba(149, 175, 192, 0.3);
+    border-radius: 4px;
+    box-shadow: 0 2px 12px rgba(149, 175, 192, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    transition: all 0.3s ease;
 }
 
 .claims-stats-minimal:hover {
-  box-shadow: 0 4px 16px rgba(149, 175, 192, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.5);
-  transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(149, 175, 192, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    transform: translateY(-2px);
 }
 
 .stat-minimal {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.25rem;
-  transition: transform 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    transition: transform 0.3s ease;
 }
 
 .claims-stats-minimal:hover .stat-minimal {
-  transform: scale(1.05);
+    transform: scale(1.05);
 }
 
 .stat-value {
-  font-family: 'Quantico', sans-serif;
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: var(--kurogane);
-  line-height: 1;
-  letter-spacing: 0.02em;
-  transition: color 0.3s ease;
+    font-family: 'Quantico', sans-serif;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--kurogane);
+    line-height: 1;
+    letter-spacing: 0.02em;
+    transition: color 0.3s ease;
 }
 
 .claims-stats-minimal:hover .stat-value {
-  color: var(--kintsugi);
+    color: var(--kintsugi);
 }
 
 .stat-label {
-  font-family: 'Antartida', sans-serif;
-  font-size: 0.6875rem;
-  color: var(--namari);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-weight: 400;
+    font-family: 'Antartida', sans-serif;
+    font-size: 0.6875rem;
+    color: var(--namari);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 400;
 }
 
 .stat-divider {
-  width: 2px;
-  height: 32px;
-  background: linear-gradient(to bottom, transparent 0%, var(--sei) 50%, transparent 100%);
+    width: 2px;
+    height: 32px;
+    background: linear-gradient(to bottom, transparent 0%, var(--sei) 50%, transparent 100%);
 }
+
 
 /* ====================================
    FILTERS
    ==================================== */
+
 .claims-filters {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 1rem;
-  background: linear-gradient(to right, rgba(149, 175, 192, 0.03) 0%, white 50%, rgba(149, 175, 192, 0.03) 100%);
-  border: 1px solid rgba(149, 175, 192, 0.25);
-  border-radius: 4px;
-  padding: 1.25rem 1.5rem;
-  box-shadow: 0 1px 8px rgba(149, 175, 192, 0.06);
-  transition: box-shadow 0.3s ease;
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    background: linear-gradient(to right, rgba(149, 175, 192, 0.03) 0%, white 50%, rgba(149, 175, 192, 0.03) 100%);
+    border: 1px solid rgba(149, 175, 192, 0.25);
+    border-radius: 4px;
+    padding: 1.25rem 1.5rem;
+    box-shadow: 0 1px 8px rgba(149, 175, 192, 0.06);
+    transition: box-shadow 0.3s ease;
 }
 
 .claims-filters:hover {
-  box-shadow: 0 2px 12px rgba(149, 175, 192, 0.1);
+    box-shadow: 0 2px 12px rgba(149, 175, 192, 0.1);
 }
 
 .filter-group {
@@ -273,22 +306,22 @@ body:has(.claims-page) {
 
 .filter-select,
 .filter-input {
-  padding: 0.75rem 1rem;
-  border: 1.5px solid rgba(149, 175, 192, 0.25);
-  border-radius: 4px;
-  font-family: 'Antartida', sans-serif;
-  font-size: 0.9375rem;
-  color: var(--kurogane);
-  background: var(--washi);
-  transition: all 0.3s ease;
+    padding: 0.75rem 1rem;
+    border: 1.5px solid rgba(149, 175, 192, 0.25);
+    border-radius: 4px;
+    font-family: 'Antartida', sans-serif;
+    font-size: 0.9375rem;
+    color: var(--kurogane);
+    background: var(--washi);
+    transition: all 0.3s ease;
 }
 
 .filter-select:focus,
 .filter-input:focus {
-  outline: none;
-  border-color: var(--sei);
-  background: white;
-  box-shadow: 0 0 0 3px rgba(149, 175, 192, 0.12);
+    outline: none;
+    border-color: var(--sei);
+    background: white;
+    box-shadow: 0 0 0 3px rgba(149, 175, 192, 0.12);
 }
 
 .filter-actions {
@@ -299,16 +332,16 @@ body:has(.claims-page) {
 
 .btn-filter,
 .btn-reset {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.25rem;
-  border: none;
-  border-radius: 4px;
-  font-weight: 600;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    border: none;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
 
 .btn-filter {
@@ -340,49 +373,55 @@ body:has(.claims-page) {
     height: 16px;
 }
 
+
 /* ====================================
    LOADING STATE
    ==================================== */
+
 .claims-list .loading-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 4rem 2rem;
-  gap: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    gap: 1rem;
 }
 
 .claims-list .loading-state i.spin,
 .claims-list .loading-state .spin {
-  animation: claims-spin 0.8s linear infinite;
-  display: inline-block;
+    animation: claims-spin 0.8s linear infinite;
+    display: inline-block;
 }
 
 @keyframes claims-spin {
-  to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
+
 
 /* ====================================
    CLAIMS LIST
    ==================================== */
+
 .claims-list {
     display: none;
     gap: 1rem;
 }
 
 .claim-card {
-  background: var(--washi);
-  border-radius: 4px;
-  border: 1px solid rgba(149, 175, 192, 0.2);
-  padding: 1.25rem;
-  transition: all 0.2s ease;
-  cursor: pointer;
-  box-shadow: 0 1px 3px rgba(149, 175, 192, 0.05);
+    background: var(--washi);
+    border-radius: 4px;
+    border: 1px solid rgba(149, 175, 192, 0.2);
+    padding: 1.25rem;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(149, 175, 192, 0.05);
 }
 
 .claim-card:hover {
-  box-shadow: 0 2px 8px rgba(149, 175, 192, 0.12);
-  border-color: rgba(149, 175, 192, 0.35);
+    box-shadow: 0 2px 8px rgba(149, 175, 192, 0.12);
+    border-color: rgba(149, 175, 192, 0.35);
 }
 
 .claim-card-header {
@@ -565,9 +604,11 @@ body:has(.claims-page) {
     height: 16px;
 }
 
+
 /* ====================================
    EMPTY STATE
    ==================================== */
+
 .claims-empty {
     text-align: center;
     padding: 4rem 2rem;
@@ -675,20 +716,20 @@ body:has(.claims-page) {
     height: 18px;
 }
 
+
 /* ====================================
    RESPONSIVE DESIGN
    ==================================== */
+
 @media (max-width: 1024px) {
     .claims-header-content {
         flex-direction: column;
         align-items: stretch;
     }
-
     .claims-stats-minimal {
         flex-wrap: wrap;
         gap: 1rem;
     }
-
     .btn-create-claim {
         width: 100%;
         justify-content: center;
@@ -699,21 +740,17 @@ body:has(.claims-page) {
     .claims-header-title {
         font-size: 1.5rem;
     }
-
     .claims-header-subtitle {
         font-size: 0.875rem;
     }
-
     .claims-stats-minimal {
         flex-direction: column;
         padding: 1rem;
         gap: 1rem;
     }
-
     .stat-divider {
         display: none;
     }
-
     .stat-minimal {
         flex-direction: row;
         justify-content: space-between;
@@ -721,57 +758,46 @@ body:has(.claims-page) {
         padding: 0.5rem;
         border-bottom: 1px solid rgba(149, 175, 192, 0.15);
     }
-
     .stat-minimal:last-child {
         border-bottom: none;
     }
-
     .stat-value {
         font-size: 1.5rem;
     }
-
     .claims-empty-actions {
         flex-direction: column;
         width: 100%;
     }
-
     .btn-empty-action {
         width: 100%;
         justify-content: center;
     }
-
     .claims-filters {
         flex-direction: column;
     }
-
     .filter-actions {
         flex-direction: column;
         align-items: stretch;
     }
-
     .btn-filter,
     .btn-reset {
         width: 100%;
         justify-content: center;
     }
-
     .claim-card-header {
         flex-direction: column;
         gap: 1rem;
     }
-
     .claim-card-right {
         flex-direction: row;
         align-items: center;
         width: 100%;
     }
-
     .claim-card-footer {
         flex-direction: column;
         gap: 1rem;
         align-items: stretch;
     }
-
     .claim-meta {
         flex-direction: column;
         gap: 0.75rem;
@@ -782,11 +808,9 @@ body:has(.claims-page) {
     .claims-header-bar {
         padding: 1rem 0;
     }
-
     .claims-header-title {
         font-size: 1.25rem;
     }
-
     .stat-value {
         font-size: 1.1rem;
     }

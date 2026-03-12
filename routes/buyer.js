@@ -5,134 +5,135 @@ const path = require('path');
 const fs = require('fs');
 const { requireAuth } = require('../middleware/auth');
 const {
-  getBuyerMain,
-  getAutomotiveSearchPage,
-  getSearchV2Page,
-  getAffiliatePage,
-  getOrdersPage,
-  getPaymentPage,
-  getDeliveryPage,
-  getContactsPage,
-  getCartPage,
-  getCheckoutPage,
-  getOrderDetailsPage,
-  getProfilePage,
-  getSettingsPage,
-  getClaimsPage,
-  getCreateClaimPage,
-  getClaimDetailsPage,
-  uploadAvatar,
-  updateProfile,
-  changePassword,
-  validateCartItems,
-  validateCheckout,
-  createOrder,
-  validateReferralCode,
-  getReferralStatus,
-  getOrders,
-  getOrderDetails,
-  cancelOrder,
-  processPayment,
-  // Address Management
-  getAddresses,
-  addAddress,
-  updateAddress,
-  deleteAddress,
-  setDefaultAddress,
-  // Claims API
-  getClaimsApi,
-  getClaimDetailsApi,
-  createClaim,
-  sendClaimMessage,
-  markClaimAsRead,
-  // Currency Preference API
-  getPreferredCurrency,
-  updatePreferredCurrency,
+    getBuyerMain,
+    getAutomotiveSearchPage,
+    getSearchV2Page,
+    getAffiliatePage,
+    getAboutUsPage,
+    getOrdersPage,
+    getPaymentPage,
+    getDeliveryPage,
+    getContactsPage,
+    getCartPage,
+    getCheckoutPage,
+    getOrderDetailsPage,
+    getProfilePage,
+    getSettingsPage,
+    getClaimsPage,
+    getCreateClaimPage,
+    getClaimDetailsPage,
+    uploadAvatar,
+    updateProfile,
+    changePassword,
+    validateCartItems,
+    validateCheckout,
+    createOrder,
+    validateReferralCode,
+    getReferralStatus,
+    getOrders,
+    getOrderDetails,
+    cancelOrder,
+    processPayment,
+    // Address Management
+    getAddresses,
+    addAddress,
+    updateAddress,
+    deleteAddress,
+    setDefaultAddress,
+    // Claims API
+    getClaimsApi,
+    getClaimDetailsApi,
+    createClaim,
+    sendClaimMessage,
+    markClaimAsRead,
+    // Currency Preference API
+    getPreferredCurrency,
+    updatePreferredCurrency,
 } = require('../controllers/buyerController');
 const {
-  searchParts,
-  autocomplete,
-  getFilterOptions,
-  getPartById,
-  getPartsByNumber,
-  getSearchStats,
-  searchMultipleParts,
-  aiSearch,
-  aiSuggestions,
-  aiAnalyze,
-  aiExcelAnalyze,
-  aiExcelSearch,
-  // AI Learning
-  recordSearchEngagement,
-  recordSearchRefinement,
-  recordSearchFeedback,
-  getLearningStats,
-  // New V2 Pipeline
-  aiSearchV2,
-  getPipelineMetrics,
-  aiSearchHybrid,
+    searchParts,
+    autocomplete,
+    getFilterOptions,
+    getPartById,
+    getPartsByNumber,
+    getSearchStats,
+    searchMultipleParts,
+    aiSearch,
+    aiSuggestions,
+    aiAnalyze,
+    aiExcelAnalyze,
+    aiExcelSearch,
+    // AI Learning
+    recordSearchEngagement,
+    recordSearchRefinement,
+    recordSearchFeedback,
+    getLearningStats,
+    // New V2 Pipeline
+    aiSearchV2,
+    getPipelineMetrics,
+    aiSearchHybrid,
 } = require('../controllers/searchController');
 const { handleProfileImageUpload } = require('../utils/fileUploader');
 
 // Configure multer for claim file uploads
 const claimUploadDir = path.join(__dirname, '../public/uploads/claims');
 if (!fs.existsSync(claimUploadDir)) {
-  fs.mkdirSync(claimUploadDir, { recursive: true });
+    fs.mkdirSync(claimUploadDir, { recursive: true });
 }
 
 const claimStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, claimUploadDir);
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    cb(null, 'claim-' + uniqueSuffix + path.extname(file.originalname));
-  },
+    destination: (req, file, cb) => {
+        cb(null, claimUploadDir);
+    },
+    filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+        cb(null, 'claim-' + uniqueSuffix + path.extname(file.originalname));
+    },
 });
 
 const claimUpload = multer({
-  storage: claimStorage,
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
-  fileFilter: (req, file, cb) => {
-    const allowedTypes = [
-      // Images
-      'image/jpeg',
-      'image/png',
-      'image/gif',
-      'image/webp',
-      'image/bmp',
-      'image/tiff',
-      'image/svg+xml',
-      'image/heic',
-      'image/heif',
-      // PDF
-      'application/pdf',
-      // Documents
-      'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      'text/plain',
-      // CSV and Excel
-      'text/csv',
-      'application/csv',
-      'application/vnd.ms-excel',
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      // Other common formats
-      'application/zip',
-      'application/x-zip-compressed',
-      'application/rtf',
-      'text/rtf',
-    ];
-    if (allowedTypes.includes(file.mimetype)) {
-      cb(null, true);
-    } else {
-      cb(
-        new Error(
-          'File type not allowed. Allowed: images, PDF, CSV, Excel, Word documents.',
-        ),
-        false,
-      );
-    }
-  },
+    storage: claimStorage,
+    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+    fileFilter: (req, file, cb) => {
+        const allowedTypes = [
+            // Images
+            'image/jpeg',
+            'image/png',
+            'image/gif',
+            'image/webp',
+            'image/bmp',
+            'image/tiff',
+            'image/svg+xml',
+            'image/heic',
+            'image/heif',
+            // PDF
+            'application/pdf',
+            // Documents
+            'application/msword',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'text/plain',
+            // CSV and Excel
+            'text/csv',
+            'application/csv',
+            'application/vnd.ms-excel',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            // Other common formats
+            'application/zip',
+            'application/x-zip-compressed',
+            'application/rtf',
+            'text/rtf',
+        ];
+        if (allowedTypes.includes(file.mimetype)) {
+            cb(null, true);
+        } else {
+            cb(
+                new Error(
+                    'File type not allowed. Allowed: images, PDF, CSV, Excel, Word documents.',
+                ),
+                false,
+            );
+        }
+    },
 });
 
 // Apply authentication middleware to all buyer routes
@@ -147,6 +148,7 @@ router.get('/checkout', getCheckoutPage);
 router.get('/orders', getOrdersPage);
 router.get('/orders/:orderNumber', getOrderDetailsPage);
 router.get('/affiliate', getAffiliatePage);
+router.get('/about-us', getAboutUsPage);
 router.get('/payment', getPaymentPage);
 router.get('/delivery', getDeliveryPage);
 router.get('/contacts', getContactsPage);
@@ -159,12 +161,12 @@ router.put('/profile', updateProfile);
 router.put('/profile/password', changePassword);
 
 // Parts search - Automotive only
-router.get('/search/automotive', getAutomotiveSearchPage);
-router.get('/search-automotive', getAutomotiveSearchPage);
-router.get('/search', getAutomotiveSearchPage); // Default search goes to automotive
+router.get('/search/automotive', getSearchV2Page);
+router.get('/search-automotive', getSearchV2Page);
+router.get('/search', getSearchV2Page); // Default search goes to search v2
 
-// Search V2 - New design test route
-router.get('/search-v2', getSearchV2Page);
+// Search V2
+router.get('/search-v2', getAutomotiveSearchPage);
 
 // Search API endpoints
 router.get('/api/search', searchParts);
@@ -220,9 +222,9 @@ router.get('/api/claims', getClaimsApi);
 router.post('/api/claims', claimUpload.array('attachments', 5), createClaim);
 router.get('/api/claims/:claimId', getClaimDetailsApi);
 router.post(
-  '/api/claims/:claimId/messages',
-  claimUpload.array('attachments', 5),
-  sendClaimMessage,
+    '/api/claims/:claimId/messages',
+    claimUpload.array('attachments', 5),
+    sendClaimMessage,
 );
 router.put('/api/claims/:claimId/read', markClaimAsRead);
 
@@ -240,33 +242,33 @@ router.put('/api/settings/currency', updatePreferredCurrency);
 // Quotation PDF Generation API
 const pdfGenerator = require('../services/pdfGeneratorService');
 
-router.post('/api/quotation/generate-pdf', async (req, res) => {
-  try {
-    const quotationData = req.body;
-    
-    if (!quotationData.items || quotationData.items.length === 0) {
-      return res.status(400).json({ 
-        success: false, 
-        error: 'No items provided for quotation' 
-      });
-    }
+router.post('/api/quotation/generate-pdf', async(req, res) => {
+    try {
+        const quotationData = req.body;
 
-    const pdfBuffer = await pdfGenerator.generateQuotationPDF(quotationData);
-    
-    const filename = `Quotation_${quotationData.quotationNumber || 'QUOTE'}.pdf`;
-    
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-    res.setHeader('Content-Length', pdfBuffer.length);
-    
-    res.send(pdfBuffer);
-  } catch (error) {
-    console.error('PDF generation error:', error);
-    res.status(500).json({ 
-      success: false, 
-      error: 'Failed to generate PDF' 
-    });
-  }
+        if (!quotationData.items || quotationData.items.length === 0) {
+            return res.status(400).json({
+                success: false,
+                error: 'No items provided for quotation'
+            });
+        }
+
+        const pdfBuffer = await pdfGenerator.generateQuotationPDF(quotationData);
+
+        const filename = `Quotation_${quotationData.quotationNumber || 'QUOTE'}.pdf`;
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        res.setHeader('Content-Length', pdfBuffer.length);
+
+        res.send(pdfBuffer);
+    } catch (error) {
+        console.error('PDF generation error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to generate PDF'
+        });
+    }
 });
 
 module.exports = router;

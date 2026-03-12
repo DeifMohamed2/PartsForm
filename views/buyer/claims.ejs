@@ -1,142 +1,152 @@
 <%- include('partials/header') %>
-<link rel="stylesheet" href="/css/buyerCSS/buyer-main.css">
-<link rel="stylesheet" href="/css/buyerCSS/claims.css">
+    <link rel="stylesheet" href="/css/buyerCSS/buyer-main.css">
+    <link rel="stylesheet" href="/css/buyerCSS/claims.css">
 
-<%- include('partials/navbar') %>
+    <%- include('partials/navbar') %>
 
-<!-- ====================================
+        <!-- ====================================
      Claims Page - PROFESSIONAL DESIGN
      ==================================== -->
-<div class="claims-page">
-  <!-- Header Bar -->
-  <div class="claims-header-bar">
-    <div class="container">
-      <div class="claims-header-content">
-        <div class="claims-header-left">
-          <h1 class="claims-header-title"><%= t('tickets.title') %></h1>
-          <p class="claims-header-subtitle"><%= t('tickets.subtitle') %></p>
-        </div>
-        <div class="claims-header-right">
-          <div class="claims-stats-minimal">
-            <div class="stat-minimal">
-              <span class="stat-value" id="stat-open">0</span>
-              <span class="stat-label"><%= t('tickets.stats.open') %></span>
+        <div class="claims-page">
+            <!-- Header Bar -->
+            <div class="claims-header-bar">
+                <div class="container">
+                    <div class="claims-header-content">
+                        <div class="claims-header-left">
+                            <h1 class="claims-header-title">
+                                <%= t('tickets.title') %>
+                            </h1>
+                            <p class="claims-header-subtitle">
+                                <%= t('tickets.subtitle') %>
+                            </p>
+                        </div>
+                        <div class="claims-header-right">
+                            <div class="claims-stats-minimal">
+                                <div class="stat-minimal">
+                                    <span class="stat-value" id="stat-open">0</span>
+                                    <span class="stat-label"><%= t('tickets.stats.open') %></span>
+                                </div>
+                                <div class="stat-divider"></div>
+                                <div class="stat-minimal">
+                                    <span class="stat-value" id="stat-in-progress">0</span>
+                                    <span class="stat-label"><%= t('tickets.stats.inProgress') %></span>
+                                </div>
+                                <div class="stat-divider"></div>
+                                <div class="stat-minimal">
+                                    <span class="stat-value" id="stat-resolved">0</span>
+                                    <span class="stat-label"><%= t('tickets.stats.resolved') %></span>
+                                </div>
+                            </div>
+                            <a href="/buyer/claim-support/create" class="btn-create-claim">
+                                <i data-lucide="plus-circle"></i>
+                                <span>Create Claim</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="stat-divider"></div>
-            <div class="stat-minimal">
-              <span class="stat-value" id="stat-in-progress">0</span>
-              <span class="stat-label"><%= t('tickets.stats.inProgress') %></span>
-            </div>
-            <div class="stat-divider"></div>
-            <div class="stat-minimal">
-              <span class="stat-value" id="stat-resolved">0</span>
-              <span class="stat-label"><%= t('tickets.stats.resolved') %></span>
-            </div>
-          </div>
-          <a href="/buyer/claim-support/create" class="btn-create-claim">
-            <i data-lucide="plus-circle"></i>
-            <span>Create Claim</span>
-          </a>
-        </div>
-      </div>
-    </div>
-  </div>
 
-  <!-- Claims Content -->
-  <div class="claims-content">
-    <div class="container">
-      <!-- Filters -->
-      <div class="claims-filters">
-        <div class="filter-group">
-          <label class="filter-label" for="filter-status"><%= t('tickets.filters.status') %></label>
-          <select class="filter-select" id="filter-status">
+            <!-- Claims Content -->
+            <div class="claims-content">
+                <div class="container">
+                    <!-- Filters -->
+                    <div class="claims-filters">
+                        <div class="filter-group">
+                            <label class="filter-label" for="filter-status"><%= t('tickets.filters.status') %></label>
+                            <select class="filter-select" id="filter-status">
             <option value=""><%= t('tickets.filters.allStatuses') %></option>
             <option value="open"><%= t('tickets.stats.open') %></option>
             <option value="in-progress"><%= t('tickets.stats.inProgress') %></option>
             <option value="resolved"><%= t('tickets.stats.resolved') %></option>
             <option value="closed"><%= t('tickets.stats.closed') %></option>
           </select>
-        </div>
-        <div class="filter-group">
-          <label class="filter-label" for="filter-search"><%= t('tickets.filters.search') %></label>
-          <input type="text" class="filter-input" id="filter-search" placeholder="<%= t('tickets.filters.searchPlaceholder') %>">
-        </div>
-        <div class="filter-actions">
-          <button class="btn-filter" id="btn-apply-filters">
+                        </div>
+                        <div class="filter-group">
+                            <label class="filter-label" for="filter-search"><%= t('tickets.filters.search') %></label>
+                            <input type="text" class="filter-input" id="filter-search" placeholder="<%= t('tickets.filters.searchPlaceholder') %>">
+                        </div>
+                        <div class="filter-actions">
+                            <button class="btn-filter" id="btn-apply-filters">
             <i data-lucide="filter"></i>
             <span><%= t('tickets.filters.apply') %></span>
           </button>
-          <button class="btn-reset" id="btn-reset-filters">
+                            <button class="btn-reset" id="btn-reset-filters">
             <i data-lucide="x"></i>
             <span><%= t('tickets.filters.reset') %></span>
           </button>
+                        </div>
+                    </div>
+
+                    <!-- Claims List Container (Scrollable) -->
+                    <div class="claims-list-container">
+                        <!-- Claims List -->
+                        <div class="claims-list" id="claims-list">
+                            <!-- Claims will be populated by JavaScript -->
+                        </div>
+
+                        <!-- Empty State -->
+                        <div class="claims-empty" id="claims-empty">
+                            <div class="claims-empty-icon">
+                                <i data-lucide="inbox"></i>
+                            </div>
+                            <h2 class="claims-empty-title">
+                                <%= t('tickets.empty.title') %>
+                            </h2>
+                            <p class="claims-empty-text">
+                                <%= t('tickets.empty.text') %>
+                            </p>
+                            <div class="claims-empty-actions">
+                                <a href="/buyer/claim-support/create" class="btn-empty-action primary">
+                                    <i data-lucide="plus-circle"></i>
+                                    <span><%= t('tickets.empty.createFirst') %></span>
+                                </a>
+                                <a href="/buyer" class="btn-empty-action secondary">
+                                    <i data-lucide="arrow-left"></i>
+                                    <span>Back to Main</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
 
-      <!-- Claims List Container (Scrollable) -->
-      <div class="claims-list-container">
-        <!-- Claims List -->
-        <div class="claims-list" id="claims-list">
-          <!-- Claims will be populated by JavaScript -->
-        </div>
+        <%- include('partials/quick-search') %>
+            <%- include('partials/footer') %>
 
-        <!-- Empty State -->
-        <div class="claims-empty" id="claims-empty">
-          <div class="claims-empty-icon">
-            <i data-lucide="inbox"></i>
-          </div>
-          <h2 class="claims-empty-title"><%= t('tickets.empty.title') %></h2>
-          <p class="claims-empty-text">
-            <%= t('tickets.empty.text') %>
-          </p>
-          <div class="claims-empty-actions">
-            <a href="/buyer/claim-support/create" class="btn-empty-action primary">
-              <i data-lucide="plus-circle"></i>
-              <span><%= t('tickets.empty.createFirst') %></span>
-            </a>
-            <a href="/buyer" class="btn-empty-action secondary">
-              <i data-lucide="arrow-left"></i>
-              <span>Back to Main</span>
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+                <script src="/js/main.js"></script>
+                <script src="/js/quick-search.js"></script>
+                <script src="/js/cart.js"></script>
+                <script src="/js/cart-badge-updater.js"></script>
+                <script src="/js/claims.js"></script>
+                <script>
+                    lucide.createIcons();
+                    window.addEventListener('load', () => lucide.createIcons());
 
-<%- include('partials/quick-search') %>
-<%- include('partials/footer') %>
-
-<script src="/js/main.js"></script>
-<script src="/js/quick-search.js"></script>
-<script src="/js/cart.js"></script>
-<script src="/js/cart-badge-updater.js"></script>
-<script src="/js/claims.js"></script>
-<script>
-  lucide.createIcons();
-  window.addEventListener('load', () => lucide.createIcons());
-  
-  // Force navbar to always stay white on claims page
-  document.addEventListener('DOMContentLoaded', () => {
-    const navbar = document.getElementById('navbar');
-    if (navbar) {
-      navbar.classList.add('scrolled');
-      // Prevent other scripts from removing the scrolled class
-      const observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-          if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-            if (!navbar.classList.contains('scrolled')) {
-              navbar.classList.add('scrolled');
-            }
-          }
-        });
-      });
-      observer.observe(navbar, { attributes: true, attributeFilter: ['class'] });
-      // Also ensure on scroll
-      const ensureScrolled = () => navbar.classList.add('scrolled');
-      window.addEventListener('scroll', ensureScrolled, { passive: true });
-    }
-  });
-</script>
-
+                    // Force navbar to always stay white on claims page
+                    document.addEventListener('DOMContentLoaded', () => {
+                        const navbar = document.getElementById('navbar');
+                        if (navbar) {
+                            navbar.classList.add('scrolled');
+                            // Prevent other scripts from removing the scrolled class
+                            const observer = new MutationObserver((mutations) => {
+                                mutations.forEach((mutation) => {
+                                    if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                                        if (!navbar.classList.contains('scrolled')) {
+                                            navbar.classList.add('scrolled');
+                                        }
+                                    }
+                                });
+                            });
+                            observer.observe(navbar, {
+                                attributes: true,
+                                attributeFilter: ['class']
+                            });
+                            // Also ensure on scroll
+                            const ensureScrolled = () => navbar.classList.add('scrolled');
+                            window.addEventListener('scroll', ensureScrolled, {
+                                passive: true
+                            });
+                        }
+                    });
+                </script>

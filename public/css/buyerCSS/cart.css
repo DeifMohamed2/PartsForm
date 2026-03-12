@@ -4,16 +4,38 @@
    ==================================== */
 
 /* ====================================
-   PAGE LAYOUT
+   PAGE LAYOUT - VIEWPORT LOCK
    ==================================== */
+
+html:has(.cart-page) {
+    overflow: hidden;
+    height: 100vh;
+}
+
+body:has(.cart-page) {
+    overflow: hidden;
+    height: 100vh;
+}
+
 .cart-page {
-  min-height: 100vh;
-  background: #f0f4f8;
-  padding-top: 0;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--washi);
+  padding-top: 44px;
   margin-top: 0;
   position: relative;
   display: flex;
   flex-direction: column;
+}
+
+/* ====================================
+   CONTAINER OVERRIDE
+   ==================================== */
+
+/* Wider container for cart page */
+.cart-page .container {
+    max-width: 1600px;
+    padding: 0 1.5rem;
 }
 
 /* Ensure navbar stays on top and visible */
@@ -22,11 +44,11 @@
   position: fixed !important;
   top: 0 !important;
   width: 100% !important;
-  background: var(--aitetsu) !important;
+  background: rgba(255, 255, 255, 0.98) !important;
   backdrop-filter: blur(20px) saturate(180%) !important;
   -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
-  border-bottom: none !important;
-  box-shadow: none !important;
+  border-bottom: 1px solid rgba(149, 175, 192, 0.2) !important;
+  box-shadow: 0 4px 20px rgba(43, 43, 43, 0.08), 0 2px 8px rgba(149, 175, 192, 0.05) !important;
   overflow: visible !important;
 }
 
@@ -35,91 +57,95 @@
   z-index: 10002 !important;
 }
 
-/* Ensure navbar links are visible on dark background */
+/* Ensure navbar links are visible */
 .cart-page .nav-link {
-  color: rgba(255, 255, 255, 0.88) !important;
-}
-
-.cart-page .nav-link:hover {
-  color: white !important;
+  color: var(--kurogane) !important;
 }
 
 .cart-page .nav-link.active {
-  color: white !important;
+  color: var(--aitetsu) !important;
 }
 
-/* Cart button styling for cart page */
-.cart-page .btn-cart {
-  background: rgba(255, 255, 255, 0.08) !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
-  color: rgba(255, 255, 255, 0.9) !important;
-}
-
-.cart-page .btn-cart:hover {
-  background: rgba(255, 255, 255, 0.15) !important;
-  border-color: rgba(255, 255, 255, 0.2) !important;
-}
-
-/* Hamburger button styling */
-.cart-page .btn-tools-hamburger {
-  background: rgba(255, 255, 255, 0.08) !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
-}
-
-.cart-page .btn-tools-hamburger .tools-line {
-  background: rgba(255, 255, 255, 0.9) !important;
-}
-
-/* Dropdown trigger styling */
-.cart-page .dropdown-trigger {
-  color: rgba(255, 255, 255, 0.88) !important;
-}
-
-.cart-page .dropdown-trigger:hover {
-  color: white !important;
-}
-
-/* Ensure logo is visible - use light version */
+/* Ensure logo is visible */
 .cart-page .nav-logo img {
-  filter: brightness(0) invert(1) !important;
+  filter: none !important;
   opacity: 1 !important;
 }
 
 /* ====================================
-   CART HERO SECTION - Expanded & Bold
+   HEADER BAR
    ==================================== */
-.cart-hero {
-  padding: 7.5rem 0 4rem;
-  background: var(--aitetsu);
-  margin-top: 0;
+.cart-header-bar {
+    background: linear-gradient(to bottom, var(--washi) 0%, rgba(149, 175, 192, 0.05) 100%);
+    padding: 1.5rem 0 1.25rem;
+    border-bottom: 1px solid rgba(149, 175, 192, 0.2);
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    position: relative;
 }
 
-.cart-hero-content {
-  text-align: center;
+.cart-header-bar .container {
+    padding-left: 0;
+    padding-right: var(--buyer-space-lg);
+}
+
+.cart-header-bar::before {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 200px;
+    height: 2px;
+    background: linear-gradient(to right, var(--kintsugi), transparent);
+    animation: shimmer 3s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+    0%,
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    50% {
+        opacity: 0.7;
+        transform: translateX(20px);
+    }
+}
+
+.cart-header-content {
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-start;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.cart-header-left {
+    flex: 1;
+    min-width: 300px;
+}
+
+.cart-header-title {
+    font-family: 'Quantico', sans-serif;
+    font-size: 2.25rem;
+    font-weight: 400;
+    color: var(--kurogane);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    line-height: 1.1;
+}
+
+.cart-header-subtitle {
+    font-family: 'Antartida', sans-serif;
+    font-size: 0.9375rem;
+    color: var(--namari);
+    font-weight: 400;
+    letter-spacing: 0.01em;
 }
 
 .cart-badge {
   display: none;
-}
-
-.cart-hero-title {
-  font-family: var(--font-display);
-  font-size: 2.25rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: white;
-  margin: 0 0 0.75rem 0;
-}
-
-.cart-hero-subtitle {
-  font-family: var(--font-body);
-  font-size: 1rem;
-  color: rgba(255, 255, 255, 0.75);
-  margin: 0;
-  max-width: 400px;
-  margin-left: auto;
-  margin-right: auto;
 }
 
 /* ====================================
@@ -127,43 +153,45 @@
    ==================================== */
 .cart-content {
   flex: 1;
-  padding: 0;
-  background: #f0f4f8;
+  min-height: 0;
+  overflow: hidden;
+  padding: 1rem 0 1rem;
+  background: var(--washi);
   display: flex;
-  align-items: stretch;
+  flex-direction: column;
 }
 
 .cart-content > .container {
   flex: 1;
-  max-width: 1400px;
+  min-height: 0;
   width: 100%;
   margin: 0 auto;
-  padding: 3rem 2rem;
+  padding: 0;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 /* ====================================
    EMPTY CART STATE - Modern Professional Design
    ==================================== */
 .empty-cart {
-  width: 90%;
-  max-width: 1200px;
+  width: 95%;
+  max-width: 1400px;
   min-width: 320px;
   background: white;
-  border-radius: 16px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 
-              0 4px 20px rgba(0, 0, 0, 0.08);
-  padding: 5rem 4rem;
+  border-radius: 0;
+  box-shadow: 0 2px 16px rgba(149, 175, 192, 0.08);
+  padding: 4rem 3rem;
   text-align: center;
-  border: 1px solid rgba(64, 84, 94, 0.08);
+  border: 2px solid rgba(149, 175, 192, 0.3);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  margin: 0;
+  margin: auto;
+  align-self: center;
   transition: all 0.3s ease;
 }
 
@@ -243,24 +271,25 @@
   justify-content: center;
   gap: 0.75rem;
   padding: 1.25rem 2.75rem;
-  background: var(--kintsugi);
-  color: var(--kurogane);
-  border: none;
-  border-radius: 10px;
-  font-family: var(--font-body);
-  font-size: 1.125rem;
+  background: var(--aitetsu);
+  color: white;
+  border: 2px solid var(--aitetsu);
+  border-radius: 0;
+  font-family: 'Antartida', sans-serif;
+  font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s ease;
   text-decoration: none;
-  box-shadow: 0 2px 8px rgba(212, 175, 55, 0.25);
+  box-shadow: none;
   letter-spacing: 0.01em;
 }
 
 .empty-cart-actions .btn-primary:hover {
-  background: #e0bc4a;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(212, 175, 55, 0.35);
+  background: var(--kurogane);
+  border-color: var(--kurogane);
+  transform: none;
+  box-shadow: none;
 }
 
 .empty-cart-actions .btn-primary:active {
@@ -393,9 +422,20 @@
 /* ====================================
    CART TABLE
    ==================================== */
+
+.cart-items-container {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
 .cart-table-wrapper {
   background: white;
   overflow-x: auto;
+  overflow-y: visible;
   border-radius: 0 0 var(--buyer-radius-lg) var(--buyer-radius-lg);
   margin-bottom: 1.5rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);

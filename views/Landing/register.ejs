@@ -1,587 +1,334 @@
-<%- include('partials/header') %>
-<%- include('partials/navbar-simple', { showLogin: true, showRegister: false }) %>
-<%- include('partials/login-modal') %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#2B2B2B">
+  <title>PartsForm | Create Account</title>
+  <link rel="icon" type="image/png" href="/images/brand/icon-light.png">
+  <link rel="stylesheet" href="/css/brand-system.css">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden}
+body{font-family:var(--font-body);font-weight:500;color:var(--washi)}
 
-<!-- ====================================
-     REGISTRATION PAGE - CLEAN PROFESSIONAL DESIGN
-     ==================================== -->
-<section class="register-section">
-  <div class="container register-container">
-    <!-- Registration Form - Centered -->
-    <div class="register-form-wrapper">
-      <div class="register-card">
-        <div class="register-card-header">
-          <div class="header-logo">
-            <img src="/images/PARTSFORM-LOGO.webp" alt="PartsForm" class="logo-img">
-          </div>
-          <h2>Create Your Account</h2>
-          <p>Fill in your details to get started with PartsForm</p>
-        </div>
+.reg-page{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
 
-        <!-- Error Message Display -->
-        <div class="form-message form-error" id="formError" style="display: none;">
-          <i data-lucide="alert-circle"></i>
-          <span id="errorMessage"></span>
-        </div>
+.reg-bg{position:absolute;inset:0;z-index:0}
+.reg-bg__photo{position:absolute;inset:0;background:url('/images/brand/moodboard/warehouse-hero.png') center/cover no-repeat;filter:brightness(0.55) saturate(0.80)}
+.reg-bg__overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,18,35,0.60) 0%,rgba(18,32,55,0.45) 50%,rgba(10,18,35,0.65) 100%)}
 
-        <!-- Success Message Display -->
-        <div class="form-message form-success" id="formSuccess" style="display: none;">
-          <i data-lucide="check-circle"></i>
-          <span id="successMessage"></span>
-        </div>
+.reg-topbar{position:absolute;top:0;left:0;right:0;z-index:10;display:flex;align-items:center;justify-content:center;padding:24px 48px}
+.reg-topbar__icon{height:140px;width:auto;display:block}
+.reg-topbar__link{position:absolute;left:48px;top:50%;transform:translateY(-50%);font-family:var(--font-body);font-size:var(--text-small);font-weight:500;color:rgba(248,250,252,0.80);text-decoration:underline;text-underline-offset:4px;letter-spacing:0.01em;transition:color 0.2s ease}
+.reg-topbar__link:hover{color:var(--washi)}
 
-        <form class="register-form" id="registerForm" action="/register" method="POST">
-          <!-- Personal Information Section -->
-          <div class="form-section">
-            <div class="form-section-title">
-              <i data-lucide="user"></i>
-              <span>Personal Information</span>
-            </div>
-            
-            <div class="form-row">
-              <div class="form-group">
-                <label for="firstName">First Name <span class="required">*</span></label>
-                <div class="input-wrapper">
-                  <i data-lucide="user" class="input-icon"></i>
-                  <input type="text" id="firstName" name="firstName" placeholder="Enter your first name" required>
-                </div>
-                <span class="field-error" id="firstNameError"></span>
-              </div>
-              
-              <div class="form-group">
-                <label for="lastName">Last Name <span class="required">*</span></label>
-                <div class="input-wrapper">
-                  <i data-lucide="user" class="input-icon"></i>
-                  <input type="text" id="lastName" name="lastName" placeholder="Enter your last name" required>
-                </div>
-                <span class="field-error" id="lastNameError"></span>
-              </div>
-            </div>
+.reg-card{position:relative;z-index:5;width:680px;padding:36px 52px 36px;background:rgba(100,125,150,0.22);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);border:1px solid rgba(255,255,255,0.16);border-radius:0;box-shadow:0 20px 80px rgba(0,0,0,0.55),inset 0 1px 0 rgba(255,255,255,0.10);opacity:0.93}
 
-            <div class="form-row">
-              <div class="form-group">
-                <label for="email">Email Address <span class="required">*</span></label>
-                <div class="input-wrapper">
-                  <i data-lucide="mail" class="input-icon"></i>
-                  <input type="email" id="email" name="email" placeholder="you@company.com" required>
-                </div>
-                <span class="field-error" id="emailError"></span>
-              </div>
-              
-              <div class="form-group">
-                <label for="phone">Phone Number <span class="required">*</span></label>
-                <div class="input-wrapper">
-                  <i data-lucide="phone" class="input-icon"></i>
-                  <input type="tel" id="phone" name="phone" placeholder="+1 (555) 000-0000" required>
-                </div>
-                <span class="field-error" id="phoneError"></span>
-              </div>
-            </div>
-          </div>
+.reg-brand{text-align:center;margin-bottom:18px}
+.reg-brand__logo{width:220px;height:auto}
 
-          <!-- Company Information Section -->
-          <div class="form-section">
-            <div class="form-section-title">
-              <i data-lucide="building-2"></i>
-              <span>Company Information</span>
-            </div>
-            
-            <div class="form-group full-width">
-              <label for="companyName">Company Name <span class="required">*</span></label>
-              <div class="input-wrapper">
-                <i data-lucide="building-2" class="input-icon"></i>
-                <input type="text" id="companyName" name="companyName" placeholder="Your company name" required>
-              </div>
-              <span class="field-error" id="companyNameError"></span>
-            </div>
+.reg-steps{display:flex;align-items:center;justify-content:center;margin-bottom:20px}
+.reg-step{display:flex;flex-direction:column;align-items:center;gap:4px}
+.reg-step__dot{width:32px;height:32px;display:flex;align-items:center;justify-content:center;border:2px solid rgba(248,250,252,0.22);font-family:var(--font-display);font-size:13px;font-weight:700;color:rgba(248,250,252,0.35);transition:all 0.3s ease}
+.reg-step__label{font-family:var(--font-body);font-size:10px;font-weight:600;color:rgba(248,250,252,0.32);letter-spacing:0.07em;text-transform:uppercase;transition:all 0.3s ease}
+.reg-step.active .reg-step__dot{border-color:var(--kintsugi);color:var(--kintsugi);background:rgba(212,175,55,0.10)}
+.reg-step.active .reg-step__label{color:var(--kintsugi)}
+.reg-step.done .reg-step__dot{border-color:rgba(212,175,55,0.45);color:rgba(212,175,55,0.55);background:rgba(212,175,55,0.06)}
+.reg-step.done .reg-step__label{color:rgba(212,175,55,0.50)}
+.reg-step__line{width:64px;height:1px;background:rgba(248,250,252,0.16);margin:0 8px;margin-bottom:16px}
 
-            <div class="form-row">
-              <div class="form-group">
-                <label for="country">Country <span class="required">*</span></label>
-                <div class="input-wrapper select-wrapper">
-                  <i data-lucide="globe" class="input-icon"></i>
-                  <select id="country" name="country" required>
-                    <option value="">Select your country</option>
-                    <option value="US">United States</option>
-                    <option value="CA">Canada</option>
-                    <option value="GB">United Kingdom</option>
-                    <option value="DE">Germany</option>
-                    <option value="FR">France</option>
-                    <option value="IT">Italy</option>
-                    <option value="ES">Spain</option>
-                    <option value="NL">Netherlands</option>
-                    <option value="BE">Belgium</option>
-                    <option value="AT">Austria</option>
-                    <option value="CH">Switzerland</option>
-                    <option value="PL">Poland</option>
-                    <option value="SE">Sweden</option>
-                    <option value="NO">Norway</option>
-                    <option value="DK">Denmark</option>
-                    <option value="FI">Finland</option>
-                    <option value="AU">Australia</option>
-                    <option value="NZ">New Zealand</option>
-                    <option value="JP">Japan</option>
-                    <option value="KR">South Korea</option>
-                    <option value="CN">China</option>
-                    <option value="IN">India</option>
-                    <option value="SG">Singapore</option>
-                    <option value="AE">United Arab Emirates</option>
-                    <option value="SA">Saudi Arabia</option>
-                    <option value="BR">Brazil</option>
-                    <option value="MX">Mexico</option>
-                    <option value="AR">Argentina</option>
-                    <option value="ZA">South Africa</option>
-                    <option value="RU">Russia</option>
-                    <option value="UA">Ukraine</option>
-                    <option value="TR">Turkey</option>
-                    <option value="EG">Egypt</option>
-                    <option value="IL">Israel</option>
-                    <option value="MY">Malaysia</option>
-                    <option value="TH">Thailand</option>
-                    <option value="VN">Vietnam</option>
-                    <option value="ID">Indonesia</option>
-                    <option value="PH">Philippines</option>
-                  </select>
-                  <i data-lucide="chevron-down" class="select-arrow"></i>
-                </div>
-                <span class="field-error" id="countryError"></span>
-              </div>
-              
-              <div class="form-group">
-                <label for="city">City <span class="required">*</span></label>
-                <div class="input-wrapper">
-                  <i data-lucide="map-pin" class="input-icon"></i>
-                  <input type="text" id="city" name="city" placeholder="Enter your city" required>
-                </div>
-                <span class="field-error" id="cityError"></span>
-              </div>
-            </div>
+.reg-error{display:none;padding:9px 14px;margin-bottom:10px;font-family:var(--font-body);font-size:var(--text-xs);font-weight:500;color:#fca5a5;background:rgba(220,38,38,0.12);border:1px solid rgba(220,38,38,0.25)}
+.reg-error.show{display:block}
 
-            <div class="form-group full-width">
-              <label for="shippingAddress">Shipping Address <span class="required">*</span></label>
-              <div class="input-wrapper textarea-wrapper">
-                <i data-lucide="map" class="input-icon textarea-icon"></i>
-                <textarea id="shippingAddress" name="shippingAddress" rows="3" placeholder="Enter your complete shipping address (min. 10 characters)" required minlength="10"></textarea>
-              </div>
-              <span class="field-error" id="shippingAddressError"></span>
-            </div>
-          </div>
+.reg-step-panel{display:none;flex-direction:column;gap:10px}
+.reg-step-panel.active{display:flex}
 
-          <!-- Security Section -->
-          <div class="form-section">
-            <div class="form-section-title">
-              <i data-lucide="lock"></i>
-              <span>Security</span>
-            </div>
-            
-            <div class="form-row">
-              <div class="form-group">
-                <label for="password">Password <span class="required">*</span></label>
-                <div class="input-wrapper password-wrapper">
-                  <i data-lucide="lock" class="input-icon"></i>
-                  <input type="password" id="password" name="password" placeholder="Create a strong password" required minlength="8">
-                  <button type="button" class="password-toggle" onclick="togglePassword('password')">
-                    <i data-lucide="eye" class="eye-icon"></i>
-                    <i data-lucide="eye-off" class="eye-off-icon" style="display: none;"></i>
-                  </button>
-                </div>
-                <span class="field-error" id="passwordError"></span>
-                <div class="password-strength" id="passwordStrength">
-                  <div class="strength-bar"><span></span></div>
-                  <p class="strength-text">Password strength</p>
-                </div>
-              </div>
-              
-              <div class="form-group">
-                <label for="confirmPassword">Confirm Password <span class="required">*</span></label>
-                <div class="input-wrapper password-wrapper">
-                  <i data-lucide="lock" class="input-icon"></i>
-                  <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm your password" required>
-                  <button type="button" class="password-toggle" onclick="togglePassword('confirmPassword')">
-                    <i data-lucide="eye" class="eye-icon"></i>
-                    <i data-lucide="eye-off" class="eye-off-icon" style="display: none;"></i>
-                  </button>
-                </div>
-                <span class="field-error" id="confirmPasswordError"></span>
-                <p class="password-match-text" id="passwordMatch"></p>
-              </div>
-            </div>
-          </div>
+.reg-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.reg-field{display:flex;flex-direction:column;gap:5px}
+.reg-field__label{font-family:var(--font-body);font-size:var(--text-small);font-weight:600;color:rgba(248,250,252,0.82);letter-spacing:0.02em}
+.reg-field__input{width:100%;height:48px;padding:0 14px;font-family:var(--font-body);font-size:0.95rem;font-weight:500;color:var(--washi);background:rgba(248,250,252,0.06);border:1px solid rgba(248,250,252,0.18);border-radius:0;outline:none;transition:border-color 0.2s ease,background 0.2s ease;-webkit-appearance:none;appearance:none}
+.reg-field__input::placeholder{color:rgba(248,250,252,0.28)}
+.reg-field__input:focus{background:rgba(248,250,252,0.09);border-color:rgba(149,175,192,0.50)}
+.reg-field__select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='rgba(248,250,252,0.45)' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+.reg-field__select option{background:#1a2840;color:#f8fafc}
+.reg-field__textarea{height:66px;padding:10px 13px;resize:none;line-height:1.45}
+.reg-optional{font-weight:400;color:rgba(248,250,252,0.38);font-size:11px}
 
-          <!-- Referral Code Section (Optional) -->
-          <div class="form-section referral-section">
-            <div class="form-section-title">
-              <i data-lucide="gift"></i>
-              <span>Referral Code <small style="font-weight: 400; color: #64748b;">(Optional)</small></span>
-            </div>
-            
-            <div class="form-group full-width">
-              <label for="referralCode">Have a referral code?</label>
-              <div class="input-wrapper referral-code-wrapper">
-                <i data-lucide="ticket" class="input-icon"></i>
-                <input type="text" 
-                       id="referralCode" 
-                       name="referralCode" 
-                       placeholder="Enter referral code for special discount"
-                       style="text-transform: uppercase;">
-                <button type="button" class="validate-code-btn" id="validateCodeBtn" onclick="validateReferralCode()">
-                  <i data-lucide="check-circle"></i>
-                  <span>Verify</span>
-                </button>
-              </div>
-              <div class="referral-code-status" id="referralCodeStatus" style="display: none;">
-                <div class="referral-valid" id="referralValid" style="display: none;">
-                  <i data-lucide="check-circle"></i>
-                  <span id="referralMessage">Valid code! You'll get discount on all orders.</span>
-                </div>
-                <div class="referral-invalid" id="referralInvalid" style="display: none;">
-                  <i data-lucide="x-circle"></i>
-                  <span id="referralErrorMessage">Invalid code</span>
-                </div>
-              </div>
-              <span class="form-hint">If a referral partner gave you a code, enter it here to get exclusive discounts on all your orders.</span>
-            </div>
-          </div>
+.reg-checks{display:flex;flex-direction:column;gap:8px;margin-top:2px}
+.reg-check{display:flex;align-items:flex-start;gap:9px;cursor:pointer}
+.reg-check input[type="checkbox"]{width:15px;height:15px;min-width:15px;margin-top:2px;accent-color:var(--kintsugi);cursor:pointer}
+.reg-check span{font-family:var(--font-body);font-size:var(--text-small);font-weight:500;color:rgba(248,250,252,0.62);line-height:1.45}
+.reg-check a{color:var(--kintsugi);text-underline-offset:3px}
 
-          <!-- Terms & Agreement -->
-          <div class="form-section terms-section">
-            <div class="form-checkbox">
-              <input type="checkbox" id="agreeTerms" name="agreeTerms" required>
-              <label for="agreeTerms">
-                I agree to the processing of my personal data and accept the 
-                <a href="/privacy-policy" target="_blank">Privacy Policy</a> and 
-                <a href="/terms" target="_blank">Terms of Service</a>.
-              </label>
-            </div>
-            
-            <div class="form-checkbox">
-              <input type="checkbox" id="newsletter" name="newsletter">
-              <label for="newsletter">
-                I would like to receive updates about new features and promotions.
-              </label>
-            </div>
-          </div>
+.reg-nav{display:flex;gap:12px;margin-top:4px}
+.reg-nav .reg-btn{flex:1;margin-top:0}
 
-          <!-- Submit Button -->
-          <button type="submit" class="register-submit-btn" id="registerSubmitBtn">
-            <span class="btn-text">Create Account</span>
-            <span class="btn-loader" style="display: none;">
-              <svg class="spinner" viewBox="0 0 24 24">
-                <circle class="spinner-circle" cx="12" cy="12" r="10" fill="none" stroke-width="3"></circle>
-              </svg>
-            </span>
-            <i data-lucide="arrow-right" class="btn-icon"></i>
-          </button>
+.reg-btn{width:100%;height:54px;font-family:var(--font-display);font-size:0.95rem;font-weight:900;text-transform:uppercase;letter-spacing:0.10em;color:var(--kurogane);background:var(--kintsugi);border:none;border-radius:0;cursor:pointer;transition:background 0.2s ease,transform 0.15s ease;margin-top:6px}
+.reg-btn:hover{background:var(--kintsugi-hover);transform:translateY(-1px)}
+.reg-btn:active{background:var(--kintsugi-active);transform:translateY(0)}
+.reg-btn--ghost{background:transparent;border:1px solid rgba(248,250,252,0.28);color:rgba(248,250,252,0.78)}
+.reg-btn--ghost:hover{background:rgba(248,250,252,0.07);transform:translateY(-1px)}
 
-          <!-- Login Link -->
-          <div class="register-login-link">
-            <p>Already have an account? <a href="#" id="open-login-modal">Sign In</a></p>
-          </div>
-        </form>
+.reg-btn.loading{position:relative;color:transparent;pointer-events:none}
+.reg-btn.loading::after{content:'';position:absolute;width:18px;height:18px;top:50%;left:50%;margin:-9px 0 0 -9px;border:2px solid transparent;border-top-color:var(--kurogane);border-radius:50%;animation:spin 0.5s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.reg-login-link{text-align:center;margin-top:8px;font-family:var(--font-body);font-size:var(--text-small);color:rgba(248,250,252,0.48)}
+.reg-login-link a{color:rgba(248,250,252,0.78);text-decoration:underline;text-underline-offset:3px}
+.reg-login-link a:hover{color:var(--washi)}
+
+@media(max-width:560px){
+  .reg-card{width:calc(100% - 28px);padding:26px 20px 26px}
+  .reg-row{grid-template-columns:1fr}
+  .reg-topbar__icon{height:80px}
+  .reg-topbar__link{left:20px}
+}
+</style>
+</head>
+<body>
+  <div class="reg-page">
+    <div class="reg-bg">
+      <div class="reg-bg__photo"></div>
+      <div class="reg-bg__overlay"></div>
+    </div>
+    <div class="reg-topbar">
+      <img src="/images/brand/icon-gold.svg" alt="PartsForm" class="reg-topbar__icon">
+      <a href="/" class="reg-topbar__link">&laquo; Back to Login</a>
+    </div>
+    <div class="reg-card">
+      <div class="reg-brand">
+        <img src="/images/brand/logo-tagline-dark.png" alt="PartsForm" class="reg-brand__logo">
       </div>
+      <div class="reg-steps">
+        <div class="reg-step active" id="step-dot-1">
+          <div class="reg-step__dot">1</div>
+          <div class="reg-step__label">Personal</div>
+        </div>
+        <div class="reg-step__line"></div>
+        <div class="reg-step" id="step-dot-2">
+          <div class="reg-step__dot">2</div>
+          <div class="reg-step__label">Company</div>
+        </div>
+        <div class="reg-step__line"></div>
+        <div class="reg-step" id="step-dot-3">
+          <div class="reg-step__dot">3</div>
+          <div class="reg-step__label">Access</div>
+        </div>
+      </div>
+      <div class="reg-error" id="reg-error"></div>
+      <form id="reg-form" autocomplete="on">
+
+        <!-- Step 1: Personal Info -->
+        <div class="reg-step-panel active" id="panel-1">
+          <div class="reg-row">
+            <div class="reg-field">
+              <label class="reg-field__label" for="firstName">First Name</label>
+              <input class="reg-field__input" type="text" id="firstName" name="firstName" placeholder="First name" autocomplete="given-name" required>
+            </div>
+            <div class="reg-field">
+              <label class="reg-field__label" for="lastName">Last Name</label>
+              <input class="reg-field__input" type="text" id="lastName" name="lastName" placeholder="Last name" autocomplete="family-name" required>
+            </div>
+          </div>
+          <div class="reg-row">
+            <div class="reg-field">
+              <label class="reg-field__label" for="email">Email Address</label>
+              <input class="reg-field__input" type="email" id="email" name="email" placeholder="you@company.com" autocomplete="email" required>
+            </div>
+            <div class="reg-field">
+              <label class="reg-field__label" for="phone">Phone Number</label>
+              <input class="reg-field__input" type="tel" id="phone" name="phone" placeholder="+1 555 000 0000" autocomplete="tel" required>
+            </div>
+          </div>
+          <button type="button" class="reg-btn" onclick="goStep(2)">Next Step &rarr;</button>
+          <p class="reg-login-link">Already have an account? <a href="/">Sign In</a></p>
+        </div>
+
+        <!-- Step 2: Company Info -->
+        <div class="reg-step-panel" id="panel-2">
+          <div class="reg-field">
+            <label class="reg-field__label" for="companyName">Company Name</label>
+            <input class="reg-field__input" type="text" id="companyName" name="companyName" placeholder="Your company name" autocomplete="organization" required>
+          </div>
+          <div class="reg-row">
+            <div class="reg-field">
+              <label class="reg-field__label" for="country">Country</label>
+              <select class="reg-field__input reg-field__select" id="country" name="country" required>
+                <option value="">Select country</option>
+                <option value="US">United States</option>
+                <option value="CA">Canada</option>
+                <option value="GB">United Kingdom</option>
+                <option value="DE">Germany</option>
+                <option value="FR">France</option>
+                <option value="IT">Italy</option>
+                <option value="ES">Spain</option>
+                <option value="NL">Netherlands</option>
+                <option value="BE">Belgium</option>
+                <option value="AT">Austria</option>
+                <option value="CH">Switzerland</option>
+                <option value="PL">Poland</option>
+                <option value="SE">Sweden</option>
+                <option value="NO">Norway</option>
+                <option value="DK">Denmark</option>
+                <option value="FI">Finland</option>
+                <option value="AU">Australia</option>
+                <option value="NZ">New Zealand</option>
+                <option value="JP">Japan</option>
+                <option value="KR">South Korea</option>
+                <option value="CN">China</option>
+                <option value="IN">India</option>
+                <option value="SG">Singapore</option>
+                <option value="AE">United Arab Emirates</option>
+                <option value="SA">Saudi Arabia</option>
+                <option value="BR">Brazil</option>
+                <option value="MX">Mexico</option>
+                <option value="AR">Argentina</option>
+                <option value="ZA">South Africa</option>
+                <option value="RU">Russia</option>
+                <option value="UA">Ukraine</option>
+                <option value="TR">Turkey</option>
+                <option value="EG">Egypt</option>
+                <option value="IL">Israel</option>
+                <option value="MY">Malaysia</option>
+                <option value="TH">Thailand</option>
+                <option value="VN">Vietnam</option>
+                <option value="ID">Indonesia</option>
+                <option value="PH">Philippines</option>
+              </select>
+            </div>
+            <div class="reg-field">
+              <label class="reg-field__label" for="city">City</label>
+              <input class="reg-field__input" type="text" id="city" name="city" placeholder="Your city" required>
+            </div>
+          </div>
+          <div class="reg-field">
+            <label class="reg-field__label" for="shippingAddress">Shipping Address</label>
+            <textarea class="reg-field__input reg-field__textarea" id="shippingAddress" name="shippingAddress" placeholder="Full shipping address (min. 10 characters)" required minlength="10"></textarea>
+          </div>
+          <div class="reg-nav">
+            <button type="button" class="reg-btn reg-btn--ghost" onclick="goStep(1)">&larr; Back</button>
+            <button type="button" class="reg-btn" onclick="goStep(3)">Next Step &rarr;</button>
+          </div>
+        </div>
+
+        <!-- Step 3: Security & Access -->
+        <div class="reg-step-panel" id="panel-3">
+          <div class="reg-row">
+            <div class="reg-field">
+              <label class="reg-field__label" for="password">Password</label>
+              <input class="reg-field__input" type="password" id="password" name="password" placeholder="Min. 8 characters" autocomplete="new-password" required minlength="8">
+            </div>
+            <div class="reg-field">
+              <label class="reg-field__label" for="confirmPassword">Confirm Password</label>
+              <input class="reg-field__input" type="password" id="confirmPassword" name="confirmPassword" placeholder="Repeat password" autocomplete="new-password" required>
+            </div>
+          </div>
+          <div class="reg-field">
+            <label class="reg-field__label" for="referralCode">Referral Code <span class="reg-optional">(optional)</span></label>
+            <input class="reg-field__input" type="text" id="referralCode" name="referralCode" placeholder="Enter code for exclusive discounts" style="text-transform:uppercase">
+          </div>
+          <div class="reg-checks">
+            <label class="reg-check">
+              <input type="checkbox" name="agreeTerms" id="agreeTerms" required>
+              <span>I agree to the <a href="/privacy-policy" target="_blank">Privacy Policy</a> &amp; <a href="/terms" target="_blank">Terms of Service</a></span>
+            </label>
+            <label class="reg-check">
+              <input type="checkbox" name="newsletter" id="newsletter">
+              <span>Receive updates and promotions</span>
+            </label>
+          </div>
+          <div class="reg-nav">
+            <button type="button" class="reg-btn reg-btn--ghost" onclick="goStep(2)">&larr; Back</button>
+            <button type="submit" class="reg-btn" id="reg-submit-btn">Create Account</button>
+          </div>
+        </div>
+
+      </form>
     </div>
   </div>
-</section>
-
-<!-- Registration Page Scripts -->
-<script>
-// Validate referral code function
-let validatedReferralCode = null;
-
-async function validateReferralCode() {
-  const input = document.getElementById('referralCode');
-  const btn = document.getElementById('validateCodeBtn');
-  const status = document.getElementById('referralCodeStatus');
-  const validDiv = document.getElementById('referralValid');
-  const invalidDiv = document.getElementById('referralInvalid');
-  const validMessage = document.getElementById('referralMessage');
-  const errorMessage = document.getElementById('referralErrorMessage');
-  
-  const code = input.value.trim().toUpperCase();
-  if (!code) {
-    status.style.display = 'none';
-    validatedReferralCode = null;
-    return;
-  }
-  
-  // Show loading state
-  btn.classList.add('loading');
-  btn.innerHTML = '<span>...</span>';
-  
-  try {
-    const response = await fetch('/api/referral/validate-registration', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify({ code })
-    });
-    
-    const result = await response.json();
-    
-    status.style.display = 'block';
-    
-    if (result.success && result.valid) {
-      // Valid code
-      validatedReferralCode = code;
-      validDiv.style.display = 'flex';
-      invalidDiv.style.display = 'none';
-      validMessage.textContent = `Valid! You'll get ${result.referral.discountRate}% discount on all orders (referred by ${result.referral.partnerName})`;
-      input.classList.add('valid');
-      input.classList.remove('invalid');
-    } else {
-      // Invalid code
-      validatedReferralCode = null;
-      validDiv.style.display = 'none';
-      invalidDiv.style.display = 'flex';
-      errorMessage.textContent = result.message || 'Invalid or expired referral code';
-      input.classList.add('invalid');
-      input.classList.remove('valid');
+  <script>
+    function goStep(n) {
+      var panels = document.querySelectorAll('.reg-step-panel');
+      var current = 1;
+      panels.forEach(function(p, i) { if (p.classList.contains('active')) current = i + 1; });
+      if (n > current && !validateStep(current)) return;
+      panels.forEach(function(p, i) { p.classList.toggle('active', i + 1 === n); });
+      document.querySelectorAll('.reg-step').forEach(function(d, i) {
+        d.classList.toggle('active', i + 1 === n);
+        d.classList.toggle('done', i + 1 < n);
+      });
+      document.getElementById('reg-error').classList.remove('show');
     }
-  } catch (error) {
-    console.error('Error validating code:', error);
-    status.style.display = 'block';
-    validDiv.style.display = 'none';
-    invalidDiv.style.display = 'flex';
-    errorMessage.textContent = 'Error validating code. Please try again.';
-  } finally {
-    btn.classList.remove('loading');
-    btn.innerHTML = '<i data-lucide="check-circle"></i><span>Verify</span>';
-    if (typeof lucide !== 'undefined') lucide.createIcons();
-  }
-}
 
-// Open login modal from link
-document.addEventListener('DOMContentLoaded', function() {
-  const openLoginLink = document.getElementById('open-login-modal');
-  if (openLoginLink) {
-    openLoginLink.addEventListener('click', function(e) {
-      e.preventDefault();
-      const modal = document.getElementById('sign-in-modal');
-      if (modal) {
-        modal.classList.add('active');
-        document.body.style.overflow = 'hidden';
-        if (typeof lucide !== 'undefined') {
-          lucide.createIcons();
+    function validateStep(step) {
+      if (step === 1) {
+        var fields = ['firstName','lastName','email','phone'];
+        for (var i = 0; i < fields.length; i++) {
+          var el = document.getElementById(fields[i]);
+          if (!el.value.trim()) { showError('Please fill in all required fields.'); el.focus(); return false; }
+        }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(document.getElementById('email').value.trim())) {
+          showError('Please enter a valid email address.'); return false;
         }
       }
+      if (step === 2) {
+        var fields2 = ['companyName','country','city','shippingAddress'];
+        for (var j = 0; j < fields2.length; j++) {
+          var el2 = document.getElementById(fields2[j]);
+          if (!el2.value.trim()) { showError('Please fill in all required fields.'); el2.focus(); return false; }
+        }
+        if (document.getElementById('shippingAddress').value.trim().length < 10) {
+          showError('Shipping address must be at least 10 characters.'); return false;
+        }
+      }
+      return true;
+    }
+
+    function showError(msg) {
+      var el = document.getElementById('reg-error');
+      el.textContent = msg;
+      el.classList.add('show');
+    }
+
+    document.getElementById('reg-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      var password = document.getElementById('password').value;
+      var confirm  = document.getElementById('confirmPassword').value;
+      if (password !== confirm) { showError('Passwords do not match.'); return; }
+      if (password.length < 8)  { showError('Password must be at least 8 characters.'); return; }
+      if (!document.getElementById('agreeTerms').checked) { showError('You must agree to the Terms of Service.'); return; }
+      var btn = document.getElementById('reg-submit-btn');
+      btn.classList.add('loading'); btn.disabled = true;
+      var formData = {
+        firstName:       document.getElementById('firstName').value.trim(),
+        lastName:        document.getElementById('lastName').value.trim(),
+        email:           document.getElementById('email').value.trim(),
+        phone:           document.getElementById('phone').value.trim(),
+        companyName:     document.getElementById('companyName').value.trim(),
+        country:         document.getElementById('country').value,
+        city:            document.getElementById('city').value.trim(),
+        shippingAddress: document.getElementById('shippingAddress').value.trim(),
+        password:        password,
+        confirmPassword: confirm,
+        referralCode:    document.getElementById('referralCode').value.trim().toUpperCase(),
+        agreeTerms:      'on',
+        newsletter:      document.getElementById('newsletter').checked ? 'on' : ''
+      };
+      try {
+        var res  = await fetch('/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(formData) });
+        var data = await res.json();
+        if (res.ok && data.success) {
+          window.location.href = data.redirect || '/buyer';
+        } else {
+          showError(data.message || 'Registration failed. Please try again.');
+          btn.classList.remove('loading'); btn.disabled = false;
+        }
+      } catch (err) {
+        showError('Connection error. Please try again.');
+        btn.classList.remove('loading'); btn.disabled = false;
+      }
     });
-  }
-});
-document.addEventListener('DOMContentLoaded', function() {
-  // Initialize Lucide icons
-  if (typeof lucide !== 'undefined') {
-    lucide.createIcons();
-  }
-
-  const form = document.getElementById('registerForm');
-  const passwordInput = document.getElementById('password');
-  const confirmPasswordInput = document.getElementById('confirmPassword');
-  const passwordStrength = document.getElementById('passwordStrength');
-  const passwordMatch = document.getElementById('passwordMatch');
-  const submitBtn = document.getElementById('registerSubmitBtn');
-  const formError = document.getElementById('formError');
-  const formSuccess = document.getElementById('formSuccess');
-  const errorMessage = document.getElementById('errorMessage');
-  const successMessage = document.getElementById('successMessage');
-
-  // Clear all errors
-  function clearErrors() {
-    formError.style.display = 'none';
-    formSuccess.style.display = 'none';
-    document.querySelectorAll('.field-error').forEach(el => el.textContent = '');
-    document.querySelectorAll('.input-wrapper').forEach(el => el.classList.remove('error'));
-  }
-
-  // Show error message
-  function showError(message, fieldErrors = {}) {
-    formSuccess.style.display = 'none';
-    formError.style.display = 'flex';
-    errorMessage.textContent = message;
-
-    // Show field-specific errors
-    Object.keys(fieldErrors).forEach(field => {
-      const errorEl = document.getElementById(`${field}Error`);
-      const inputWrapper = document.getElementById(field)?.closest('.input-wrapper');
-      if (errorEl) {
-        errorEl.textContent = fieldErrors[field];
-      }
-      if (inputWrapper) {
-        inputWrapper.classList.add('error');
-      }
-    });
-
-    // Scroll to error message
-    formError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-    // Re-initialize icons
-    if (typeof lucide !== 'undefined') {
-      lucide.createIcons();
-    }
-  }
-
-  // Show success message
-  function showSuccess(message) {
-    formError.style.display = 'none';
-    formSuccess.style.display = 'flex';
-    successMessage.textContent = message;
-
-    formSuccess.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-    if (typeof lucide !== 'undefined') {
-      lucide.createIcons();
-    }
-  }
-
-  // Set button loading state
-  function setLoading(loading) {
-    if (loading) {
-      submitBtn.classList.add('loading');
-      submitBtn.disabled = true;
-      submitBtn.querySelector('.btn-text').style.display = 'none';
-      submitBtn.querySelector('.btn-icon').style.display = 'none';
-      submitBtn.querySelector('.btn-loader').style.display = 'flex';
-    } else {
-      submitBtn.classList.remove('loading');
-      submitBtn.disabled = false;
-      submitBtn.querySelector('.btn-text').style.display = 'inline';
-      submitBtn.querySelector('.btn-icon').style.display = 'inline';
-      submitBtn.querySelector('.btn-loader').style.display = 'none';
-    }
-  }
-
-  // Password strength checker
-  passwordInput.addEventListener('input', function() {
-    const password = this.value;
-    const strengthBar = passwordStrength.querySelector('.strength-bar span');
-    const strengthText = passwordStrength.querySelector('.strength-text');
-    
-    let strength = 0;
-    if (password.length >= 8) strength++;
-    if (password.match(/[a-z]/) && password.match(/[A-Z]/)) strength++;
-    if (password.match(/\d/)) strength++;
-    if (password.match(/[^a-zA-Z\d]/)) strength++;
-
-    const strengthLevels = ['Weak', 'Fair', 'Good', 'Strong'];
-    const strengthColors = ['#dc2626', '#f59e0b', '#3b82f6', '#10b981'];
-    const strengthWidths = ['25%', '50%', '75%', '100%'];
-
-    if (password.length > 0) {
-      strengthBar.style.width = strengthWidths[strength - 1] || '0%';
-      strengthBar.style.background = strengthColors[strength - 1] || '#dc2626';
-      strengthText.textContent = strengthLevels[strength - 1] || 'Too short';
-      strengthText.style.color = strengthColors[strength - 1] || '#dc2626';
-    } else {
-      strengthBar.style.width = '0%';
-      strengthText.textContent = 'Password strength';
-      strengthText.style.color = '#64748b';
-    }
-
-    checkPasswordMatch();
-  });
-
-  // Password match checker
-  confirmPasswordInput.addEventListener('input', checkPasswordMatch);
-
-  function checkPasswordMatch() {
-    const password = passwordInput.value;
-    const confirmPassword = confirmPasswordInput.value;
-
-    if (confirmPassword.length > 0) {
-      if (password === confirmPassword) {
-        passwordMatch.textContent = '✓ Passwords match';
-        passwordMatch.style.color = '#10b981';
-        confirmPasswordInput.classList.remove('error');
-        confirmPasswordInput.classList.add('success');
-      } else {
-        passwordMatch.textContent = '✗ Passwords do not match';
-        passwordMatch.style.color = '#dc2626';
-        confirmPasswordInput.classList.remove('success');
-        confirmPasswordInput.classList.add('error');
-      }
-    } else {
-      passwordMatch.textContent = '';
-      confirmPasswordInput.classList.remove('error', 'success');
-    }
-  }
-
-  // Form submission
-  form.addEventListener('submit', async function(e) {
-    e.preventDefault();
-    clearErrors();
-
-    // Validate passwords match (client-side)
-    if (passwordInput.value !== confirmPasswordInput.value) {
-      showError('Passwords do not match', { confirmPassword: 'Passwords do not match' });
-      return;
-    }
-
-    // Validate password length
-    if (passwordInput.value.length < 8) {
-      showError('Password must be at least 8 characters long', { password: 'Password too short' });
-      return;
-    }
-
-    // Show loading state
-    setLoading(true);
-
-    try {
-      // Collect form data
-      const formData = new FormData(form);
-      const data = Object.fromEntries(formData.entries());
-
-      // Send registration request
-      const response = await fetch('/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-
-      const result = await response.json();
-
-      if (result.success) {
-        showSuccess(result.message || 'Account created successfully! Redirecting...');
-        
-        // Redirect after short delay
-        setTimeout(() => {
-          window.location.href = result.data?.redirectUrl || '/buyer';
-        }, 1500);
-      } else {
-        showError(result.message || 'Registration failed', result.errors || {});
-      }
-    } catch (error) {
-      console.error('Registration error:', error);
-      showError('An error occurred. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  });
-});
-
-// Toggle password visibility
-function togglePassword(inputId) {
-  const input = document.getElementById(inputId);
-  const wrapper = input.closest('.password-wrapper');
-  const eyeIcon = wrapper.querySelector('.eye-icon');
-  const eyeOffIcon = wrapper.querySelector('.eye-off-icon');
-
-  if (input.type === 'password') {
-    input.type = 'text';
-    eyeIcon.style.display = 'none';
-    eyeOffIcon.style.display = 'block';
-  } else {
-    input.type = 'password';
-    eyeIcon.style.display = 'block';
-    eyeOffIcon.style.display = 'none';
-  }
-}
-</script>
-
-<!-- Registration Page Styles -->
-<link rel="stylesheet" href="/css/register.css">
-
-<%- include('partials/footer') %>
+  </script>
+</body>
+</html>

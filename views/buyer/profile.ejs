@@ -1,656 +1,693 @@
 <%- include('partials/header') %>
-<link rel="stylesheet" href="/css/buyerCSS/buyer-main.css">
-<link rel="stylesheet" href="/css/buyerCSS/profile.css">
+    <link rel="stylesheet" href="/css/buyerCSS/buyer-main.css">
+    <link rel="stylesheet" href="/css/buyerCSS/profile.css">
 
-<%- include('partials/navbar') %>
+    <%- include('partials/navbar') %>
 
-<!-- ====================================
+        <!-- ====================================
      PROFILE PAGE - HEADER BAR DESIGN
      ==================================== -->
-<div class="profile-page">
-  <!-- Header Bar -->
-  <div class="profile-header-bar">
-    <div class="container">
-      <div class="profile-header-content">
-        <div class="profile-header-left">
-          <h1 class="profile-header-title"><%= t('profile.title') %></h1>
-          <p class="profile-header-subtitle"><%= t('profile.subtitle') %></p>
-        </div>
-        <div class="profile-header-right">
-          <button class="btn-edit-profile" id="editPersonalInfoBtn">
-            <i data-lucide="edit"></i>
-            <span><%= t('common.edit') %></span>
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
+        <div class="profile-page">
+            <!-- Header Bar -->
+            <div class="profile-header-bar">
+                <div class="container">
+                    <div class="profile-header-content">
+                        <div class="profile-header-left">
+                            <h1 class="profile-header-title">
+                                <%= t('profile.title') %>
+                            </h1>
+                            <p class="profile-header-subtitle">
+                                <%= t('profile.subtitle') %>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-  <!-- Main Content -->
-  <div class="profile-content">
-    <div class="container">
-    <div class="profile-section">
-      <div class="profile-layout">
-        <!-- Left Column - Profile Card -->
-        <div class="profile-card-main">
-          <div class="profile-avatar-section">
-            <div class="profile-avatar-wrapper">
-              <div class="profile-avatar" id="profileAvatar">
-                <% if (buyer.avatar) { %>
-                  <img src="<%= buyer.avatar %>" alt="Profile Avatar" class="avatar-image" id="avatarImage">
-                <% } else { %>
-                  <span class="avatar-initials" id="avatarInitials"><%= buyer.firstName.charAt(0).toUpperCase() %><%= buyer.lastName.charAt(0).toUpperCase() %></span>
-                <% } %>
-              </div>
-              <button class="avatar-edit-btn" id="avatarEditBtn" title="Change Avatar">
+            <!-- Main Content -->
+            <div class="profile-content">
+                <div class="container">
+                    <div class="profile-section">
+                        <div class="profile-layout">
+                            <!-- Left Column - Profile Card -->
+                            <div class="profile-card-main">
+                                <div class="profile-avatar-section">
+                                    <div class="profile-avatar-wrapper">
+                                        <div class="profile-avatar" id="profileAvatar">
+                                            <% if (buyer.avatar) { %>
+                                                <img src="<%= buyer.avatar %>" alt="Profile Avatar" class="avatar-image" id="avatarImage">
+                                                <% } else { %>
+                                                    <span class="avatar-initials" id="avatarInitials"><%= buyer.firstName.charAt(0).toUpperCase() %><%= buyer.lastName.charAt(0).toUpperCase() %></span>
+                                                    <% } %>
+                                        </div>
+                                        <button class="avatar-edit-btn" id="avatarEditBtn" title="Change Avatar">
                 <i data-lucide="camera"></i>
               </button>
-              <!-- Hidden file input for avatar upload -->
-              <input type="file" id="avatarInput" accept="image/jpeg,image/jpg,image/png,image/webp,image/gif" class="hidden">
-            </div>
-            <h2 class="profile-name" id="profileName"><%= buyer.fullName %></h2>
-            <p class="profile-email" id="profileEmail"><%= buyer.email %></p>
-            <p class="profile-company"><%= buyer.companyName %></p>
-            <div class="profile-status">
-              <% if (buyer.isActive) { %>
-              <span class="status-badge active">
+                                        <!-- Hidden file input for avatar upload -->
+                                        <input type="file" id="avatarInput" accept="image/jpeg,image/jpg,image/png,image/webp,image/gif" class="hidden">
+                                    </div>
+                                    <h2 class="profile-name" id="profileName">
+                                        <%= buyer.fullName %>
+                                    </h2>
+                                    <p class="profile-email" id="profileEmail">
+                                        <%= buyer.email %>
+                                    </p>
+                                    <p class="profile-company">
+                                        <%= buyer.companyName %>
+                                    </p>
+                                    <div class="profile-status">
+                                        <% if (buyer.isActive) { %>
+                                            <span class="status-badge active">
                 <i data-lucide="check-circle"></i>
                 <span><%= t('profile.activeAccount') %></span>
-              </span>
-              <% } else { %>
-              <span class="status-badge inactive">
+                                            </span>
+                                            <% } else { %>
+                                                <span class="status-badge inactive">
                 <i data-lucide="x-circle"></i>
                 <span><%= t('profile.inactive') %></span>
-              </span>
-              <% } %>
-            </div>
-          </div>
+                                                </span>
+                                                <% } %>
+                                    </div>
+                                </div>
 
-          <div class="profile-stats">
-            <div class="profile-stat-item">
-              <div class="stat-icon">
-                <i data-lucide="package"></i>
-              </div>
-              <div class="stat-content">
-                <span class="stat-value" id="totalOrders"><%= buyer.totalOrders || 0 %></span>
-                <span class="stat-label"><%= t('profile.totalOrders') %></span>
-              </div>
-            </div>
-            <div class="profile-stat-item">
-              <div class="stat-icon">
-                <i data-lucide="calendar"></i>
-              </div>
-              <div class="stat-content">
-                <span class="stat-value" id="memberSince"><%= buyer.memberSince %></span>
-                <span class="stat-label"><%= t('profile.memberSince') %></span>
-              </div>
-            </div>
-          </div>
-        </div>
+                                <div class="profile-stats">
+                                    <div class="profile-stat-item">
+                                        <div class="stat-icon">
+                                            <i data-lucide="package"></i>
+                                        </div>
+                                        <div class="stat-content">
+                                            <span class="stat-value" id="totalOrders"><%= buyer.totalOrders || 0 %></span>
+                                            <span class="stat-label"><%= t('profile.totalOrders') %></span>
+                                        </div>
+                                    </div>
+                                    <div class="profile-stat-item">
+                                        <div class="stat-icon">
+                                            <i data-lucide="calendar"></i>
+                                        </div>
+                                        <div class="stat-content">
+                                            <span class="stat-value" id="memberSince"><%= buyer.memberSince %></span>
+                                            <span class="stat-label"><%= t('profile.memberSince') %></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
-        <!-- Right Column - Profile Information -->
-        <div class="profile-info-section">
-          <!-- Personal Information Card -->
-          <div class="info-card">
-            <div class="info-card-header">
-              <div class="info-card-title-wrapper">
-                <i data-lucide="user"></i>
-                <h3 class="info-card-title"><%= t('profile.personalInfo') %></h3>
-              </div>
-              <button class="info-card-edit-btn" id="editPersonalInfoBtn">
+                            <!-- Right Column - Profile Information -->
+                            <div class="profile-info-section">
+                                <!-- Personal Information Card -->
+                                <div class="info-card">
+                                    <div class="info-card-header">
+                                        <div class="info-card-title-wrapper">
+                                            <i data-lucide="user"></i>
+                                            <h3 class="info-card-title">
+                                                <%= t('profile.personalInfo') %>
+                                            </h3>
+                                        </div>
+                                        <button class="info-card-edit-btn" id="editPersonalInfoBtn">
                 <i data-lucide="edit"></i>
-                <span><%= t('common.edit') %></span>
+                <span id="editBtnText"><%= t('common.edit') %></span>
               </button>
-            </div>
-            <div class="info-card-body">
-              <div class="info-row">
-                <div class="info-label">
-                  <i data-lucide="user"></i>
-                  <span><%= t('profile.fullName') %></span>
-                </div>
-                <div class="info-value" id="fullNameValue"><%= buyer.fullName %></div>
-              </div>
-              <div class="info-row">
-                <div class="info-label">
-                  <i data-lucide="mail"></i>
-                  <span><%= t('profile.emailAddress') %></span>
-                </div>
-                <div class="info-value" id="emailValue"><%= buyer.email %></div>
-              </div>
-              <div class="info-row">
-                <div class="info-label">
-                  <i data-lucide="phone"></i>
-                  <span><%= t('profile.phoneNumber') %></span>
-                </div>
-                <div class="info-value" id="phoneValue"><%= buyer.phone %></div>
-              </div>
-              <div class="info-row">
-                <div class="info-label">
-                  <i data-lucide="building-2"></i>
-                  <span><%= t('profile.company') %></span>
-                </div>
-                <div class="info-value" id="companyValue"><%= buyer.companyName %></div>
-              </div>
-            </div>
-          </div>
+                                    </div>
+                                    <div class="info-card-body" id="personalInfoForm">
+                                        <div class="info-row">
+                                            <div class="info-label">
+                                                <i data-lucide="user"></i>
+                                                <span><%= t('profile.fullName') %></span>
+                                            </div>
+                                            <div class="info-value-editable">
+                                                <span class="info-value-display" id="fullNameDisplay"><%= buyer.fullName %></span>
+                                                <input type="text" class="info-value-input" id="fullNameInput" value="<%= buyer.fullName %>" style="display: none;">
+                                            </div>
+                                        </div>
+                                        <div class="info-row">
+                                            <div class="info-label">
+                                                <i data-lucide="mail"></i>
+                                                <span><%= t('profile.emailAddress') %></span>
+                                            </div>
+                                            <div class="info-value-editable">
+                                                <span class="info-value-display" id="emailDisplay"><%= buyer.email %></span>
+                                                <input type="email" class="info-value-input" id="emailInput" value="<%= buyer.email %>" style="display: none;">
+                                            </div>
+                                        </div>
+                                        <div class="info-row">
+                                            <div class="info-label">
+                                                <i data-lucide="phone"></i>
+                                                <span><%= t('profile.phoneNumber') %></span>
+                                            </div>
+                                            <div class="info-value-editable">
+                                                <span class="info-value-display" id="phoneDisplay"><%= buyer.phone %></span>
+                                                <input type="tel" class="info-value-input" id="phoneInput" value="<%= buyer.phone %>" style="display: none;">
+                                            </div>
+                                        </div>
+                                        <div class="info-row">
+                                            <div class="info-label">
+                                                <i data-lucide="building-2"></i>
+                                                <span><%= t('profile.company') %></span>
+                                            </div>
+                                            <div class="info-value-editable">
+                                                <span class="info-value-display" id="companyDisplay"><%= buyer.companyName %></span>
+                                                <input type="text" class="info-value-input" id="companyInput" value="<%= buyer.companyName %>" style="display: none;">
+                                            </div>
+                                        </div>
+                                        <div class="info-row info-actions" id="editActions" style="display: none;">
+                                            <button class="info-action-btn btn-save" id="savePersonalInfoBtn">
+                                                <i data-lucide="check"></i>
+                                                <span><%= t('common.save') %></span>
+                                            </button>
+                                            <button class="info-action-btn btn-cancel" id="cancelEditBtn">
+                                                <i data-lucide="x"></i>
+                                                <span><%= t('common.cancel') %></span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
 
-          <!-- Address Information Card -->
-          <div class="info-card">
-            <div class="info-card-header">
-              <div class="info-card-title-wrapper">
-                <i data-lucide="map-pin"></i>
-                <h3 class="info-card-title"><%= t('profile.myAddresses') %></h3>
-              </div>
-              <a href="/buyer/delivery" class="info-card-edit-btn">
-                <i data-lucide="plus"></i>
-                <span><%= t('common.manage') %></span>
-              </a>
-            </div>
-            <div class="info-card-body">
-              <div class="addresses-container" id="addressesContainer">
-                <div class="addresses-loading">
-                  <div class="spinner"></div>
-                  <span><%= t('profile.loadingAddresses') %></span>
-                </div>
-              </div>
-            </div>
-          </div>
+                                <!-- Address Information Card -->
+                                <div class="info-card">
+                                    <div class="info-card-header">
+                                        <div class="info-card-title-wrapper">
+                                            <i data-lucide="map-pin"></i>
+                                            <h3 class="info-card-title">
+                                                <%= t('profile.myAddresses') %>
+                                            </h3>
+                                        </div>
+                                        <a href="/buyer/delivery" class="info-card-edit-btn">
+                                            <i data-lucide="plus"></i>
+                                            <span><%= t('common.manage') %></span>
+                                        </a>
+                                    </div>
+                                    <div class="info-card-body">
+                                        <div class="addresses-container" id="addressesContainer">
+                                            <div class="addresses-loading">
+                                                <div class="spinner"></div>
+                                                <span><%= t('profile.loadingAddresses') %></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
 
-          <!-- Account Security Card -->
-          <div class="info-card">
-            <div class="info-card-header">
-              <div class="info-card-title-wrapper">
-                <i data-lucide="shield"></i>
-                <h3 class="info-card-title"><%= t('profile.accountSecurity') %></h3>
-              </div>
-            </div>
-            <div class="info-card-body">
-              <div class="info-row">
-                <div class="info-label">
-                  <i data-lucide="lock"></i>
-                  <span><%= t('profile.password') %></span>
-                </div>
-                <div class="info-value-action">
-                  <span class="info-value-text"><%= t('profile.lastChanged', { days: buyer.passwordLastChanged }) %></span>
-                  <button class="info-action-btn" id="changePasswordBtn">
+                                <!-- Account Security Card -->
+                                <div class="info-card">
+                                    <div class="info-card-header">
+                                        <div class="info-card-title-wrapper">
+                                            <i data-lucide="shield"></i>
+                                            <h3 class="info-card-title">
+                                                <%= t('profile.accountSecurity') %>
+                                            </h3>
+                                        </div>
+                                    </div>
+                                    <div class="info-card-body">
+                                        <div class="info-row">
+                                            <div class="info-label">
+                                                <i data-lucide="lock"></i>
+                                                <span><%= t('profile.password') %></span>
+                                            </div>
+                                            <div class="info-value-action">
+                                                <span class="info-value-text"><%= t('profile.lastChanged', { days: buyer.passwordLastChanged }) %></span>
+                                                <button class="info-action-btn" id="changePasswordBtn">
                     <i data-lucide="key"></i>
                     <span><%= t('profile.changePassword') %></span>
                   </button>
+                                            </div>
+                                        </div>
+                                        <div class="info-row">
+                                            <div class="info-label">
+                                                <i data-lucide="mail-check"></i>
+                                                <span><%= t('profile.newsletter') %></span>
+                                            </div>
+                                            <div class="info-value-action">
+                                                <span class="info-value-text"><%= buyer.newsletter ? t('profile.subscribed') : t('profile.notSubscribed') %></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-              </div>
-              <div class="info-row">
-                <div class="info-label">
-                  <i data-lucide="smartphone"></i>
-                  <span><%= t('profile.twoFA') %></span>
-                </div>
-                <div class="info-value-action">
-                  <span class="info-value-text"><%= t('profile.notEnabled') %></span>
-                  <button class="info-action-btn" id="enable2FABtn">
-                    <i data-lucide="shield-check"></i>
-                    <span><%= t('profile.enable2FA') %></span>
-                  </button>
-                </div>
-              </div>
-              <div class="info-row">
-                <div class="info-label">
-                  <i data-lucide="mail-check"></i>
-                  <span><%= t('profile.newsletter') %></span>
-                </div>
-                <div class="info-value-action">
-                  <span class="info-value-text"><%= buyer.newsletter ? t('profile.subscribed') : t('profile.notSubscribed') %></span>
-                </div>
-              </div>
             </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
 
-<%- include('partials/quick-search') %>
-<%- include('partials/footer') %>
+            <%- include('partials/quick-search') %>
+                <%- include('partials/footer') %>
 
-<!-- Avatar Upload Modal -->
-<div class="avatar-upload-modal" id="avatarUploadModal">
-  <div class="avatar-modal-backdrop" id="avatarModalBackdrop"></div>
-  <div class="avatar-modal-content">
-    <button class="avatar-modal-close" id="avatarModalClose">
+                    <!-- Avatar Upload Modal -->
+                    <div class="avatar-upload-modal" id="avatarUploadModal">
+                        <div class="avatar-modal-backdrop" id="avatarModalBackdrop"></div>
+                        <div class="avatar-modal-content">
+                            <button class="avatar-modal-close" id="avatarModalClose">
       <i data-lucide="x"></i>
     </button>
-    <div class="avatar-modal-header">
-      <h3><%= t('profile.uploadPhoto') %></h3>
-      <p><%= t('profile.choosePhoto') %></p>
-    </div>
-    <div class="avatar-upload-area" id="avatarUploadArea">
-      <div class="upload-preview hidden" id="uploadPreview">
-        <img src="" alt="Preview" id="previewImage">
-      </div>
-      <div class="upload-placeholder" id="uploadPlaceholder">
-        <i data-lucide="image-plus"></i>
-        <span><%= t('profile.dropImage') %></span>
-        <span class="upload-hint"><%= t('profile.imageFormats') %></span>
-      </div>
-    </div>
-    <div class="avatar-modal-actions">
-      <button class="btn-cancel" id="avatarCancelBtn"><%= t('common.cancel') %></button>
-      <button class="btn-upload" id="avatarUploadBtn" disabled>
+                            <div class="avatar-modal-header">
+                                <h3>
+                                    <%= t('profile.uploadPhoto') %>
+                                </h3>
+                                <p>
+                                    <%= t('profile.choosePhoto') %>
+                                </p>
+                            </div>
+                            <div class="avatar-upload-area" id="avatarUploadArea">
+                                <div class="upload-preview hidden" id="uploadPreview">
+                                    <img src="" alt="Preview" id="previewImage">
+                                </div>
+                                <div class="upload-placeholder" id="uploadPlaceholder">
+                                    <i data-lucide="image-plus"></i>
+                                    <span><%= t('profile.dropImage') %></span>
+                                    <span class="upload-hint"><%= t('profile.imageFormats') %></span>
+                                </div>
+                            </div>
+                            <div class="avatar-modal-actions">
+                                <button class="btn-cancel" id="avatarCancelBtn"><%= t('common.cancel') %></button>
+                                <button class="btn-upload" id="avatarUploadBtn" disabled>
         <i data-lucide="upload"></i>
         <span><%= t('profile.uploadPhotoBtn') %></span>
       </button>
-    </div>
-    <div class="upload-progress hidden" id="uploadProgress">
-      <div class="progress-bar">
-        <div class="progress-fill" id="progressFill"></div>
-      </div>
-      <span class="progress-text" id="progressText"><%= t('profile.uploading') %></span>
-    </div>
-  </div>
-</div>
+                            </div>
+                            <div class="upload-progress hidden" id="uploadProgress">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="progressFill"></div>
+                                </div>
+                                <span class="progress-text" id="progressText"><%= t('profile.uploading') %></span>
+                            </div>
+                        </div>
+                    </div>
 
-<!-- Edit Profile Modal -->
-<div class="profile-modal" id="editProfileModal">
-  <div class="profile-modal-backdrop" id="editProfileBackdrop"></div>
-  <div class="profile-modal-content">
-    <button class="profile-modal-close" id="editProfileClose">
+                    <!-- Edit Profile Modal -->
+                    <div class="profile-modal" id="editProfileModal">
+                        <div class="profile-modal-backdrop" id="editProfileBackdrop"></div>
+                        <div class="profile-modal-content">
+                            <button class="profile-modal-close" id="editProfileClose">
       <i data-lucide="x"></i>
     </button>
-    <div class="profile-modal-header">
-      <div class="modal-icon">
-        <i data-lucide="user-pen"></i>
-      </div>
-      <h3><%= t('profile.editPersonalInfo') %></h3>
-      <p><%= t('profile.updateDetails') %></p>
-    </div>
-    <form id="editProfileForm" class="profile-form">
-      <div class="form-grid">
-        <div class="form-group">
-          <label for="editFirstName"><%= t('profile.form.firstName') %></label>
-          <input type="text" id="editFirstName" name="firstName" value="<%= buyer.firstName %>" required>
-        </div>
-        <div class="form-group">
-          <label for="editLastName"><%= t('profile.form.lastName') %></label>
-          <input type="text" id="editLastName" name="lastName" value="<%= buyer.lastName %>" required>
-        </div>
-      </div>
-      <div class="form-group">
-        <label for="editPhone"><%= t('profile.phoneNumber') %></label>
-        <input type="tel" id="editPhone" name="phone" value="<%= buyer.phone %>" required>
-      </div>
-      <div class="form-group">
-        <label for="editCompanyName"><%= t('profile.form.companyName') %></label>
-        <input type="text" id="editCompanyName" name="companyName" value="<%= buyer.companyName %>" required>
-      </div>
-      <div class="form-group">
-        <label for="editCity"><%= t('profile.form.city') %></label>
-        <input type="text" id="editCity" name="city" value="<%= buyer.city %>" required>
-      </div>
-      <div class="form-group">
-        <label for="editShippingAddress"><%= t('profile.form.shippingAddress') %></label>
-        <textarea id="editShippingAddress" name="shippingAddress" rows="3" required><%= buyer.shippingAddress %></textarea>
-      </div>
-      <div class="form-message" id="editProfileMessage"></div>
-      <div class="profile-modal-actions">
-        <button type="button" class="btn-cancel" id="editProfileCancelBtn"><%= t('common.cancel') %></button>
-        <button type="submit" class="btn-save" id="editProfileSaveBtn">
+                            <div class="profile-modal-header">
+                                <div class="modal-icon">
+                                    <i data-lucide="user-pen"></i>
+                                </div>
+                                <h3>
+                                    <%= t('profile.editPersonalInfo') %>
+                                </h3>
+                                <p>
+                                    <%= t('profile.updateDetails') %>
+                                </p>
+                            </div>
+                            <form id="editProfileForm" class="profile-form">
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="editFirstName"><%= t('profile.form.firstName') %></label>
+                                        <input type="text" id="editFirstName" name="firstName" value="<%= buyer.firstName %>" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="editLastName"><%= t('profile.form.lastName') %></label>
+                                        <input type="text" id="editLastName" name="lastName" value="<%= buyer.lastName %>" required>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="editPhone"><%= t('profile.phoneNumber') %></label>
+                                    <input type="tel" id="editPhone" name="phone" value="<%= buyer.phone %>" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="editCompanyName"><%= t('profile.form.companyName') %></label>
+                                    <input type="text" id="editCompanyName" name="companyName" value="<%= buyer.companyName %>" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="editCity"><%= t('profile.form.city') %></label>
+                                    <input type="text" id="editCity" name="city" value="<%= buyer.city %>" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="editShippingAddress"><%= t('profile.form.shippingAddress') %></label>
+                                    <textarea id="editShippingAddress" name="shippingAddress" rows="3" required><%= buyer.shippingAddress %></textarea>
+                                </div>
+                                <div class="form-message" id="editProfileMessage"></div>
+                                <div class="profile-modal-actions">
+                                    <button type="button" class="btn-cancel" id="editProfileCancelBtn"><%= t('common.cancel') %></button>
+                                    <button type="submit" class="btn-save" id="editProfileSaveBtn">
           <i data-lucide="check"></i>
           <span><%= t('common.saveChanges') %></span>
         </button>
-      </div>
-    </form>
-  </div>
-</div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
 
-<!-- Change Password Modal -->
-<div class="profile-modal" id="changePasswordModal">
-  <div class="profile-modal-backdrop" id="changePasswordBackdrop"></div>
-  <div class="profile-modal-content">
-    <button class="profile-modal-close" id="changePasswordClose">
+                    <!-- Change Password Modal -->
+                    <div class="profile-modal" id="changePasswordModal">
+                        <div class="profile-modal-backdrop" id="changePasswordBackdrop"></div>
+                        <div class="profile-modal-content">
+                            <button class="profile-modal-close" id="changePasswordClose">
       <i data-lucide="x"></i>
     </button>
-    <div class="profile-modal-header">
-      <div class="modal-icon warning">
-        <i data-lucide="key-round"></i>
-      </div>
-      <h3><%= t('profile.changePassword') %></h3>
-      <p><%= t('profile.changePasswordDesc') %></p>
-    </div>
-    <form id="changePasswordForm" class="profile-form">
-      <div class="form-group">
-        <label for="currentPassword"><%= t('profile.form.currentPassword') %></label>
-        <div class="password-input-wrapper">
-          <input type="password" id="currentPassword" name="currentPassword" required>
-          <button type="button" class="toggle-password" data-target="currentPassword">
+                            <div class="profile-modal-header">
+                                <div class="modal-icon warning">
+                                    <i data-lucide="key-round"></i>
+                                </div>
+                                <h3>
+                                    <%= t('profile.changePassword') %>
+                                </h3>
+                                <p>
+                                    <%= t('profile.changePasswordDesc') %>
+                                </p>
+                            </div>
+                            <form id="changePasswordForm" class="profile-form">
+                                <div class="form-group">
+                                    <label for="currentPassword"><%= t('profile.form.currentPassword') %></label>
+                                    <div class="password-input-wrapper">
+                                        <input type="password" id="currentPassword" name="currentPassword" required>
+                                        <button type="button" class="toggle-password" data-target="currentPassword">
             <i data-lucide="eye"></i>
           </button>
-        </div>
-      </div>
-      <div class="form-group">
-        <label for="newPassword"><%= t('profile.form.newPassword') %></label>
-        <div class="password-input-wrapper">
-          <input type="password" id="newPassword" name="newPassword" required minlength="8">
-          <button type="button" class="toggle-password" data-target="newPassword">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="newPassword"><%= t('profile.form.newPassword') %></label>
+                                    <div class="password-input-wrapper">
+                                        <input type="password" id="newPassword" name="newPassword" required minlength="8">
+                                        <button type="button" class="toggle-password" data-target="newPassword">
             <i data-lucide="eye"></i>
           </button>
-        </div>
-        <span class="form-hint"><%= t('profile.form.minChars') %></span>
-      </div>
-      <div class="form-group">
-        <label for="confirmPassword"><%= t('profile.form.confirmPassword') %></label>
-        <div class="password-input-wrapper">
-          <input type="password" id="confirmPassword" name="confirmPassword" required minlength="8">
-          <button type="button" class="toggle-password" data-target="confirmPassword">
+                                    </div>
+                                    <span class="form-hint"><%= t('profile.form.minChars') %></span>
+                                </div>
+                                <div class="form-group">
+                                    <label for="confirmPassword"><%= t('profile.form.confirmPassword') %></label>
+                                    <div class="password-input-wrapper">
+                                        <input type="password" id="confirmPassword" name="confirmPassword" required minlength="8">
+                                        <button type="button" class="toggle-password" data-target="confirmPassword">
             <i data-lucide="eye"></i>
           </button>
-        </div>
-      </div>
-      <div class="password-requirements">
-        <p class="requirements-title"><%= t('profile.passwordRequirements') %></p>
-        <ul>
-          <li id="reqLength"><i data-lucide="circle"></i> <%= t('profile.req.minLength') %></li>
-          <li id="reqMatch"><i data-lucide="circle"></i> <%= t('profile.req.match') %></li>
-        </ul>
-      </div>
-      <div class="form-message" id="changePasswordMessage"></div>
-      <div class="profile-modal-actions">
-        <button type="button" class="btn-cancel" id="changePasswordCancelBtn"><%= t('common.cancel') %></button>
-        <button type="submit" class="btn-save" id="changePasswordSaveBtn">
+                                    </div>
+                                </div>
+                                <div class="password-requirements">
+                                    <p class="requirements-title">
+                                        <%= t('profile.passwordRequirements') %>
+                                    </p>
+                                    <ul>
+                                        <li id="reqLength"><i data-lucide="circle"></i>
+                                            <%= t('profile.req.minLength') %>
+                                        </li>
+                                        <li id="reqMatch"><i data-lucide="circle"></i>
+                                            <%= t('profile.req.match') %>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="form-message" id="changePasswordMessage"></div>
+                                <div class="profile-modal-actions">
+                                    <button type="button" class="btn-cancel" id="changePasswordCancelBtn"><%= t('common.cancel') %></button>
+                                    <button type="submit" class="btn-save" id="changePasswordSaveBtn">
           <i data-lucide="lock"></i>
           <span><%= t('profile.updatePassword') %></span>
         </button>
-      </div>
-    </form>
-  </div>
-</div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
 
-<!-- Notification Toast -->
-<div class="notification-toast" id="notificationToast">
-  <div class="notification-icon">
-    <i data-lucide="check-circle"></i>
-  </div>
-  <div class="notification-content">
-    <span class="notification-message" id="notificationMessage"></span>
-  </div>
-  <button class="notification-close" id="notificationClose">
+                    <!-- Notification Toast -->
+                    <div class="notification-toast" id="notificationToast">
+                        <div class="notification-icon">
+                            <i data-lucide="check-circle"></i>
+                        </div>
+                        <div class="notification-content">
+                            <span class="notification-message" id="notificationMessage"></span>
+                        </div>
+                        <button class="notification-close" id="notificationClose">
     <i data-lucide="x"></i>
   </button>
-</div>
+                    </div>
 
-<script src="/js/main.js"></script>
-<script src="/js/quick-search.js"></script>
-<script src="/js/cart.js"></script>
-<script src="/js/cart-badge-updater.js"></script>
-<script>
-  lucide.createIcons();
-  window.addEventListener('load', () => lucide.createIcons());
+                    <script src="/js/main.js"></script>
+                    <script src="/js/quick-search.js"></script>
+                    <script src="/js/cart.js"></script>
+                    <script src="/js/cart-badge-updater.js"></script>
+                    <script>
+                        lucide.createIcons();
+                        window.addEventListener('load', () => lucide.createIcons());
 
-  // ====================================
-  // AVATAR UPLOAD FUNCTIONALITY
-  // ====================================
-  (function() {
-    'use strict';
+                        // ====================================
+                        // AVATAR UPLOAD FUNCTIONALITY
+                        // ====================================
+                        (function() {
+                            'use strict';
 
-    // Elements
-    const avatarEditBtn = document.getElementById('avatarEditBtn');
-    const avatarInput = document.getElementById('avatarInput');
-    const avatarUploadModal = document.getElementById('avatarUploadModal');
-    const avatarModalBackdrop = document.getElementById('avatarModalBackdrop');
-    const avatarModalClose = document.getElementById('avatarModalClose');
-    const avatarUploadArea = document.getElementById('avatarUploadArea');
-    const uploadPreview = document.getElementById('uploadPreview');
-    const previewImage = document.getElementById('previewImage');
-    const uploadPlaceholder = document.getElementById('uploadPlaceholder');
-    const avatarCancelBtn = document.getElementById('avatarCancelBtn');
-    const avatarUploadBtn = document.getElementById('avatarUploadBtn');
-    const uploadProgress = document.getElementById('uploadProgress');
-    const progressFill = document.getElementById('progressFill');
-    const progressText = document.getElementById('progressText');
-    const profileAvatar = document.getElementById('profileAvatar');
+                            // Elements
+                            const avatarEditBtn = document.getElementById('avatarEditBtn');
+                            const avatarInput = document.getElementById('avatarInput');
+                            const avatarUploadModal = document.getElementById('avatarUploadModal');
+                            const avatarModalBackdrop = document.getElementById('avatarModalBackdrop');
+                            const avatarModalClose = document.getElementById('avatarModalClose');
+                            const avatarUploadArea = document.getElementById('avatarUploadArea');
+                            const uploadPreview = document.getElementById('uploadPreview');
+                            const previewImage = document.getElementById('previewImage');
+                            const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+                            const avatarCancelBtn = document.getElementById('avatarCancelBtn');
+                            const avatarUploadBtn = document.getElementById('avatarUploadBtn');
+                            const uploadProgress = document.getElementById('uploadProgress');
+                            const progressFill = document.getElementById('progressFill');
+                            const progressText = document.getElementById('progressText');
+                            const profileAvatar = document.getElementById('profileAvatar');
 
-    let selectedFile = null;
+                            let selectedFile = null;
 
-    // Open modal
-    function openModal() {
-      avatarUploadModal.classList.add('active');
-      document.body.style.overflow = 'hidden';
-      lucide.createIcons();
-    }
+                            // Open modal
+                            function openModal() {
+                                avatarUploadModal.classList.add('active');
+                                document.body.style.overflow = 'hidden';
+                                lucide.createIcons();
+                            }
 
-    // Close modal
-    function closeModal() {
-      avatarUploadModal.classList.remove('active');
-      document.body.style.overflow = '';
-      resetUpload();
-    }
+                            // Close modal
+                            function closeModal() {
+                                avatarUploadModal.classList.remove('active');
+                                document.body.style.overflow = '';
+                                resetUpload();
+                            }
 
-    // Reset upload state
-    function resetUpload() {
-      selectedFile = null;
-      previewImage.src = '';
-      uploadPreview.classList.add('hidden');
-      uploadPlaceholder.classList.remove('hidden');
-      avatarUploadBtn.disabled = true;
-      uploadProgress.classList.add('hidden');
-      progressFill.style.width = '0%';
-      avatarInput.value = '';
-    }
+                            // Reset upload state
+                            function resetUpload() {
+                                selectedFile = null;
+                                previewImage.src = '';
+                                uploadPreview.classList.add('hidden');
+                                uploadPlaceholder.classList.remove('hidden');
+                                avatarUploadBtn.disabled = true;
+                                uploadProgress.classList.add('hidden');
+                                progressFill.style.width = '0%';
+                                avatarInput.value = '';
+                            }
 
-    // Handle file selection
-    function handleFileSelect(file) {
-      if (!file) return;
+                            // Handle file selection
+                            function handleFileSelect(file) {
+                                if (!file) return;
 
-      // Validate file type
-      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
-      if (!allowedTypes.includes(file.type)) {
-        alert('Invalid file type. Please upload a JPG, PNG, WebP, or GIF image.');
-        return;
-      }
+                                // Validate file type
+                                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
+                                if (!allowedTypes.includes(file.type)) {
+                                    alert('Invalid file type. Please upload a JPG, PNG, WebP, or GIF image.');
+                                    return;
+                                }
 
-      // Validate file size (5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        alert('File too large. Maximum size is 5MB.');
-        return;
-      }
+                                // Validate file size (5MB)
+                                if (file.size > 5 * 1024 * 1024) {
+                                    alert('File too large. Maximum size is 5MB.');
+                                    return;
+                                }
 
-      selectedFile = file;
+                                selectedFile = file;
 
-      // Show preview (use classList - .hidden has display:none !important which overrides inline styles)
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        previewImage.src = e.target.result;
-        uploadPreview.classList.remove('hidden');
-        uploadPlaceholder.classList.add('hidden');
-        avatarUploadBtn.disabled = false;
-      };
-      reader.readAsDataURL(file);
-    }
+                                // Show preview (use classList - .hidden has display:none !important which overrides inline styles)
+                                const reader = new FileReader();
+                                reader.onload = function(e) {
+                                    previewImage.src = e.target.result;
+                                    uploadPreview.classList.remove('hidden');
+                                    uploadPlaceholder.classList.add('hidden');
+                                    avatarUploadBtn.disabled = false;
+                                };
+                                reader.readAsDataURL(file);
+                            }
 
-    // Upload avatar
-    async function uploadAvatar() {
-      if (!selectedFile) return;
+                            // Upload avatar
+                            async function uploadAvatar() {
+                                if (!selectedFile) return;
 
-      const formData = new FormData();
-      formData.append('avatar', selectedFile);
+                                const formData = new FormData();
+                                formData.append('avatar', selectedFile);
 
-      // Show progress
-      avatarUploadBtn.disabled = true;
-      uploadProgress.classList.remove('hidden');
+                                // Show progress
+                                avatarUploadBtn.disabled = true;
+                                uploadProgress.classList.remove('hidden');
 
-      try {
-        const response = await fetch('/buyer/profile/avatar', {
-          method: 'POST',
-          body: formData,
-        });
+                                try {
+                                    const response = await fetch('/buyer/profile/avatar', {
+                                        method: 'POST',
+                                        body: formData,
+                                    });
 
-        const result = await response.json();
+                                    const result = await response.json();
 
-        if (result.success) {
-          progressFill.style.width = '100%';
-          progressText.textContent = 'Upload complete!';
+                                    if (result.success) {
+                                        progressFill.style.width = '100%';
+                                        progressText.textContent = 'Upload complete!';
 
-          // Update avatar display
-          const avatarInitials = document.getElementById('avatarInitials');
-          let avatarImage = document.getElementById('avatarImage');
+                                        // Update avatar display
+                                        const avatarInitials = document.getElementById('avatarInitials');
+                                        let avatarImage = document.getElementById('avatarImage');
 
-          if (avatarInitials) {
-            avatarInitials.style.display = 'none';
-          }
+                                        if (avatarInitials) {
+                                            avatarInitials.style.display = 'none';
+                                        }
 
-          if (!avatarImage) {
-            avatarImage = document.createElement('img');
-            avatarImage.id = 'avatarImage';
-            avatarImage.className = 'avatar-image';
-            avatarImage.alt = 'Profile Avatar';
-            profileAvatar.appendChild(avatarImage);
-          }
+                                        if (!avatarImage) {
+                                            avatarImage = document.createElement('img');
+                                            avatarImage.id = 'avatarImage';
+                                            avatarImage.className = 'avatar-image';
+                                            avatarImage.alt = 'Profile Avatar';
+                                            profileAvatar.appendChild(avatarImage);
+                                        }
 
-          avatarImage.src = result.data.avatar + '?t=' + Date.now();
-          avatarImage.style.display = 'block';
+                                        avatarImage.src = result.data.avatar + '?t=' + Date.now();
+                                        avatarImage.style.display = 'block';
 
-          // Close modal after delay
-          setTimeout(() => {
-            closeModal();
-          }, 1000);
-        } else {
-          throw new Error(result.message || 'Upload failed');
-        }
-      } catch (error) {
-        console.error('Upload error:', error);
-        progressText.textContent = 'Upload failed. Please try again.';
-        progressFill.style.background = '#ef4444';
-        avatarUploadBtn.disabled = false;
-        uploadProgress.classList.add('hidden');
-      }
-    }
+                                        // Close modal after delay
+                                        setTimeout(() => {
+                                            closeModal();
+                                        }, 1000);
+                                    } else {
+                                        throw new Error(result.message || 'Upload failed');
+                                    }
+                                } catch (error) {
+                                    console.error('Upload error:', error);
+                                    progressText.textContent = 'Upload failed. Please try again.';
+                                    progressFill.style.background = '#ef4444';
+                                    avatarUploadBtn.disabled = false;
+                                    uploadProgress.classList.add('hidden');
+                                }
+                            }
 
-    // Event listeners
-    if (avatarEditBtn) {
-      avatarEditBtn.addEventListener('click', openModal);
-    }
+                            // Event listeners
+                            if (avatarEditBtn) {
+                                avatarEditBtn.addEventListener('click', openModal);
+                            }
 
-    if (avatarModalBackdrop) {
-      avatarModalBackdrop.addEventListener('click', closeModal);
-    }
+                            if (avatarModalBackdrop) {
+                                avatarModalBackdrop.addEventListener('click', closeModal);
+                            }
 
-    if (avatarModalClose) {
-      avatarModalClose.addEventListener('click', closeModal);
-    }
+                            if (avatarModalClose) {
+                                avatarModalClose.addEventListener('click', closeModal);
+                            }
 
-    if (avatarCancelBtn) {
-      avatarCancelBtn.addEventListener('click', closeModal);
-    }
+                            if (avatarCancelBtn) {
+                                avatarCancelBtn.addEventListener('click', closeModal);
+                            }
 
-    if (avatarUploadBtn) {
-      avatarUploadBtn.addEventListener('click', uploadAvatar);
-    }
+                            if (avatarUploadBtn) {
+                                avatarUploadBtn.addEventListener('click', uploadAvatar);
+                            }
 
-    // File input change
-    if (avatarInput) {
-      avatarInput.addEventListener('change', (e) => {
-        if (e.target.files && e.target.files[0]) {
-          handleFileSelect(e.target.files[0]);
-        }
-      });
-    }
+                            // File input change
+                            if (avatarInput) {
+                                avatarInput.addEventListener('change', (e) => {
+                                    if (e.target.files && e.target.files[0]) {
+                                        handleFileSelect(e.target.files[0]);
+                                    }
+                                });
+                            }
 
-    // Click on upload area
-    if (avatarUploadArea) {
-      avatarUploadArea.addEventListener('click', () => {
-        avatarInput.click();
-      });
+                            // Click on upload area
+                            if (avatarUploadArea) {
+                                avatarUploadArea.addEventListener('click', () => {
+                                    avatarInput.click();
+                                });
 
-      // Drag and drop
-      avatarUploadArea.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        avatarUploadArea.classList.add('dragover');
-      });
+                                // Drag and drop
+                                avatarUploadArea.addEventListener('dragover', (e) => {
+                                    e.preventDefault();
+                                    avatarUploadArea.classList.add('dragover');
+                                });
 
-      avatarUploadArea.addEventListener('dragleave', () => {
-        avatarUploadArea.classList.remove('dragover');
-      });
+                                avatarUploadArea.addEventListener('dragleave', () => {
+                                    avatarUploadArea.classList.remove('dragover');
+                                });
 
-      avatarUploadArea.addEventListener('drop', (e) => {
-        e.preventDefault();
-        avatarUploadArea.classList.remove('dragover');
-        
-        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-          handleFileSelect(e.dataTransfer.files[0]);
-        }
-      });
-    }
+                                avatarUploadArea.addEventListener('drop', (e) => {
+                                    e.preventDefault();
+                                    avatarUploadArea.classList.remove('dragover');
 
-    // ESC key to close
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && avatarUploadModal.classList.contains('active')) {
-        closeModal();
-      }
-    });
-  })();
+                                    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                                        handleFileSelect(e.dataTransfer.files[0]);
+                                    }
+                                });
+                            }
 
-  // ====================================
-  // PROFILE EDITING FUNCTIONALITY
-  // ====================================
-  (function() {
-    'use strict';
+                            // ESC key to close
+                            document.addEventListener('keydown', (e) => {
+                                if (e.key === 'Escape' && avatarUploadModal.classList.contains('active')) {
+                                    closeModal();
+                                }
+                            });
+                        })();
 
-    // Wait for DOM to be ready
-    function init() {
-      // ====================================
-      // NOTIFICATION SYSTEM
-      // ====================================
-      function showNotification(message, type = 'success') {
-        const toast = document.getElementById('notificationToast');
-        const msgEl = document.getElementById('notificationMessage');
-        const iconEl = toast.querySelector('.notification-icon i');
-        
-        if (!toast || !msgEl) return;
+                        // ====================================
+                        // PROFILE EDITING FUNCTIONALITY
+                        // ====================================
+                        (function() {
+                                'use strict';
 
-        msgEl.textContent = message;
-        toast.className = 'notification-toast show ' + type;
-        
-        // Update icon based on type
-        if (iconEl) {
-          iconEl.setAttribute('data-lucide', type === 'success' ? 'check-circle' : type === 'error' ? 'x-circle' : 'alert-circle');
-          lucide.createIcons();
-        }
+                                // Wait for DOM to be ready
+                                function init() {
+                                    // ====================================
+                                    // NOTIFICATION SYSTEM
+                                    // ====================================
+                                    function showNotification(message, type = 'success') {
+                                        const toast = document.getElementById('notificationToast');
+                                        const msgEl = document.getElementById('notificationMessage');
+                                        const iconEl = toast.querySelector('.notification-icon i');
 
-        // Auto hide after 4 seconds
-        setTimeout(() => {
-          toast.classList.remove('show');
-        }, 4000);
-      }
+                                        if (!toast || !msgEl) return;
 
-      // Close notification
-      const notificationClose = document.getElementById('notificationClose');
-      if (notificationClose) {
-        notificationClose.addEventListener('click', () => {
-          document.getElementById('notificationToast').classList.remove('show');
-        });
-      }
+                                        msgEl.textContent = message;
+                                        toast.className = 'notification-toast show ' + type;
 
-      // ====================================
-      // LOAD ADDRESSES
-      // ====================================
-      async function loadAddresses() {
-        const container = document.getElementById('addressesContainer');
-        if (!container) {
-          console.error('Addresses container not found');
-          return;
-        }
+                                        // Update icon based on type
+                                        if (iconEl) {
+                                            iconEl.setAttribute('data-lucide', type === 'success' ? 'check-circle' : type === 'error' ? 'x-circle' : 'alert-circle');
+                                            lucide.createIcons();
+                                        }
 
-        try {
-          const response = await fetch('/buyer/api/addresses');
-          
-          if (!response.ok) {
-            throw new Error('Failed to fetch addresses');
-          }
-          
-          const result = await response.json();
+                                        // Auto hide after 4 seconds
+                                        setTimeout(() => {
+                                            toast.classList.remove('show');
+                                        }, 4000);
+                                    }
 
-          if (result.success && result.addresses && result.addresses.length > 0) {
-            renderAddresses(result.addresses);
-          } else {
-            container.innerHTML = `
+                                    // Close notification
+                                    const notificationClose = document.getElementById('notificationClose');
+                                    if (notificationClose) {
+                                        notificationClose.addEventListener('click', () => {
+                                            document.getElementById('notificationToast').classList.remove('show');
+                                        });
+                                    }
+
+                                    // ====================================
+                                    // LOAD ADDRESSES
+                                    // ====================================
+                                    async function loadAddresses() {
+                                        const container = document.getElementById('addressesContainer');
+                                        if (!container) {
+                                            console.error('Addresses container not found');
+                                            return;
+                                        }
+
+                                        try {
+                                            const response = await fetch('/buyer/api/addresses');
+
+                                            if (!response.ok) {
+                                                throw new Error('Failed to fetch addresses');
+                                            }
+
+                                            const result = await response.json();
+
+                                            if (result.success && result.addresses && result.addresses.length > 0) {
+                                                renderAddresses(result.addresses);
+                                            } else {
+                                                container.innerHTML = `
               <div class="no-addresses">
                 <i data-lucide="map-pin-off"></i>
                 <p>No saved addresses</p>
@@ -660,25 +697,25 @@
                 </a>
               </div>
             `;
-            lucide.createIcons();
-          }
-        } catch (error) {
-          console.error('Error loading addresses:', error);
-          container.innerHTML = `
+                                                lucide.createIcons();
+                                            }
+                                        } catch (error) {
+                                            console.error('Error loading addresses:', error);
+                                            container.innerHTML = `
             <div class="addresses-error">
               <i data-lucide="alert-triangle"></i>
               <p>Failed to load addresses</p>
             </div>
           `;
-          lucide.createIcons();
-        }
-      }
+                                            lucide.createIcons();
+                                        }
+                                    }
 
-      function renderAddresses(addresses) {
-        const container = document.getElementById('addressesContainer');
-        if (!container) return;
+                                    function renderAddresses(addresses) {
+                                        const container = document.getElementById('addressesContainer');
+                                        if (!container) return;
 
-        const html = addresses.map(addr => `
+                                        const html = addresses.map(addr => `
           <div class="address-item ${addr.isDefault ? 'default' : ''}">
             <div class="address-item-header">
               <span class="address-label">
@@ -705,15 +742,128 @@
       loadAddresses();
 
       // ====================================
-      // EDIT PROFILE MODAL
+      // INLINE EDIT PERSONAL INFO
       // ====================================
-      const editProfileModal = document.getElementById('editProfileModal');
-      const editProfileBackdrop = document.getElementById('editProfileBackdrop');
-      const editProfileClose = document.getElementById('editProfileClose');
-      const editProfileCancelBtn = document.getElementById('editProfileCancelBtn');
-      const editProfileForm = document.getElementById('editProfileForm');
-      const editProfileSaveBtn = document.getElementById('editProfileSaveBtn');
       const editPersonalInfoBtn = document.getElementById('editPersonalInfoBtn');
+      const editBtnText = document.getElementById('editBtnText');
+      const editActions = document.getElementById('editActions');
+      const savePersonalInfoBtn = document.getElementById('savePersonalInfoBtn');
+      const cancelEditBtn = document.getElementById('cancelEditBtn');
+      
+      let isEditMode = false;
+
+      function toggleEditMode() {
+        isEditMode = !isEditMode;
+        
+        const displays = document.querySelectorAll('.info-value-display');
+        const inputs = document.querySelectorAll('.info-value-input');
+        
+        if (isEditMode) {
+          // Switch to edit mode
+          displays.forEach(display => display.style.display = 'none');
+          inputs.forEach(input => input.style.display = 'block');
+          editActions.style.display = 'flex';
+          if (editBtnText) editBtnText.textContent = 'Editing...';
+          editPersonalInfoBtn.style.opacity = '0.5';
+          editPersonalInfoBtn.style.pointerEvents = 'none';
+        } else {
+          // Switch back to view mode
+          displays.forEach(display => display.style.display = 'block');
+          inputs.forEach(input => input.style.display = 'none');
+          editActions.style.display = 'none';
+          if (editBtnText) editBtnText.textContent = 'Edit';
+          editPersonalInfoBtn.style.opacity = '1';
+          editPersonalInfoBtn.style.pointerEvents = 'auto';
+        }
+        
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      }
+
+      if (editPersonalInfoBtn) {
+        editPersonalInfoBtn.addEventListener('click', toggleEditMode);
+      }
+
+      if (cancelEditBtn) {
+        cancelEditBtn.addEventListener('click', () => {
+          // Reset input values to original display values
+          document.getElementById('fullNameInput').value = document.getElementById('fullNameDisplay').textContent;
+          document.getElementById('emailInput').value = document.getElementById('emailDisplay').textContent;
+          document.getElementById('phoneInput').value = document.getElementById('phoneDisplay').textContent;
+          document.getElementById('companyInput').value = document.getElementById('companyDisplay').textContent;
+          toggleEditMode();
+        });
+      }
+
+      if (savePersonalInfoBtn) {
+        savePersonalInfoBtn.addEventListener('click', async () => {
+          const fullName = document.getElementById('fullNameInput').value.trim();
+          const email = document.getElementById('emailInput').value.trim();
+          const phone = document.getElementById('phoneInput').value.trim();
+          const companyName = document.getElementById('companyInput').value.trim();
+          
+          // Split full name into first and last name
+          const nameParts = fullName.split(' ');
+          const firstName = nameParts[0] || '';
+          const lastName = nameParts.slice(1).join(' ') || '';
+          
+          const formData = { firstName, lastName, email, phone, companyName };
+          
+          // Show loading
+          savePersonalInfoBtn.disabled = true;
+          const originalHTML = savePersonalInfoBtn.innerHTML;
+          savePersonalInfoBtn.innerHTML = '<div class=\"btn-spinner\"></div><span>Saving...</span>';
+          
+          try {
+            const response = await fetch('/buyer/profile', {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(formData)
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+              // Update display values
+              document.getElementById('fullNameDisplay').textContent = result.data.fullName;
+              document.getElementById('emailDisplay').textContent = result.data.email;
+              document.getElementById('phoneDisplay').textContent = result.data.phone;
+              document.getElementById('companyDisplay').textContent = result.data.companyName;
+              
+              // Update other places where info appears
+              const profileNameEl = document.getElementById('profileName');
+              if (profileNameEl) profileNameEl.textContent = result.data.fullName;
+              
+              const profileEmailEl = document.getElementById('profileEmail');
+              if (profileEmailEl) profileEmailEl.textContent = result.data.email;
+              
+              const profileCompanyEl = document.querySelector('.profile-company');
+              if (profileCompanyEl) profileCompanyEl.textContent = result.data.companyName;
+
+              if (typeof showNotification === 'function') {
+                showNotification('Profile updated successfully', 'success');
+              }
+              toggleEditMode();
+            } else {
+              throw new Error(result.message || 'Update failed');
+            }
+          } catch (error) {
+            console.error('Profile update error:', error);
+            if (typeof showNotification === 'function') {
+              showNotification(error.message || 'Failed to update profile', 'error');
+            } else {
+              alert(error.message || 'Failed to update profile');
+            }
+          } finally {
+            savePersonalInfoBtn.disabled = false;
+            savePersonalInfoBtn.innerHTML = originalHTML;
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+          }
+        });
+      }
+
+      /* ====================================
+      // EDIT PROFILE MODAL (DEPRECATED - COMMENTED OUT)
+      // ====================================
 
       function openEditProfileModal() {
         if (editProfileModal) {
@@ -727,7 +877,6 @@
         if (editProfileModal) {
           editProfileModal.classList.remove('active');
           document.body.style.overflow = '';
-          // Clear message
           const msg = document.getElementById('editProfileMessage');
           if (msg) msg.innerHTML = '';
         }
@@ -749,7 +898,6 @@
         editProfileCancelBtn.addEventListener('click', closeEditProfileModal);
       }
 
-    // Handle profile form submission
       if (editProfileForm) {
         editProfileForm.addEventListener('submit', async (e) => {
           e.preventDefault();
@@ -757,7 +905,6 @@
           const saveBtn = editProfileSaveBtn;
           const msgEl = document.getElementById('editProfileMessage');
           
-          // Show loading
           saveBtn.disabled = true;
           saveBtn.innerHTML = '<div class="btn-spinner"></div><span>Saving...</span>';
 
@@ -780,7 +927,6 @@
             const result = await response.json();
 
             if (result.success) {
-              // Update page values
               document.getElementById('fullNameValue').textContent = result.data.fullName;
               document.getElementById('phoneValue').textContent = result.data.phone;
               document.getElementById('companyValue').textContent = result.data.companyName;
@@ -804,6 +950,7 @@
           }
         });
       }
+      */
 
       // ====================================
       // CHANGE PASSWORD MODAL
@@ -999,4 +1146,4 @@
       init();
     }
   })();
-</script>
+                    </script>

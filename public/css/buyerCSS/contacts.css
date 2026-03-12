@@ -3,18 +3,12 @@
    PARTSFORM Buyer Portal
    ==================================== */
 
+
 /* ====================================
    PAGE LAYOUT - VIEWPORT LOCK
    ==================================== */
-html:has(.contacts-page) {
-    overflow: hidden;
-    height: 100vh;
-}
 
-body:has(.contacts-page) {
-    overflow: hidden;
-    height: 100vh;
-}
+/* Contacts page is scrollable - no viewport lock */
 
 .contacts-page {
     display: flex;
@@ -22,11 +16,12 @@ body:has(.contacts-page) {
     background: var(--washi);
     padding-top: 44px;
     position: relative;
-    height: 100vh;
-    overflow: hidden;
+    min-height: 100vh;
 }
 
+
 /* Ensure navbar stays on top and visible */
+
 .contacts-page .nav-bar {
     z-index: 10001 !important;
     position: fixed !important;
@@ -36,11 +31,12 @@ body:has(.contacts-page) {
     backdrop-filter: blur(20px) saturate(180%) !important;
     -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
     border-bottom: 1px solid rgba(64, 84, 94, 0.12) !important;
-    box-shadow: 0 4px 20px rgba(43, 43, 43, 0.08),
-        0 2px 8px rgba(64, 84, 94, 0.03) !important;
+    box-shadow: 0 4px 20px rgba(43, 43, 43, 0.08), 0 2px 8px rgba(64, 84, 94, 0.03) !important;
 }
 
+
 /* Ensure dropdown works on contacts page */
+
 .contacts-page .nav-dropdown-menu {
     z-index: 10002 !important;
 }
@@ -49,7 +45,9 @@ body:has(.contacts-page) {
     overflow: visible !important;
 }
 
+
 /* Ensure navbar links are visible */
+
 .contacts-page .nav-link {
     color: var(--kurogane) !important;
 }
@@ -58,99 +56,118 @@ body:has(.contacts-page) {
     color: var(--aitetsu) !important;
 }
 
+
 /* Ensure logo is visible */
+
 .contacts-page .nav-logo img {
     filter: none !important;
     opacity: 1 !important;
 }
 
+
+/* ====================================
+   CONTAINER OVERRIDE
+   ==================================== */
+
+/* Wider container for contacts page */
+.contacts-page .container {
+    max-width: 1600px;
+    padding: 0 1.5rem;
+}
+
+
 /* ====================================
    HEADER BAR
    ==================================== */
+
 .contacts-header-bar {
-  background: linear-gradient(to bottom, var(--washi) 0%, rgba(149, 175, 192, 0.05) 100%);
-  padding: 1.5rem 0 1.25rem;
-  border-bottom: 1px solid rgba(149, 175, 192, 0.2);
-  margin-top: 1rem;
-  margin-bottom: 1rem;
-  position: relative;
+    background: linear-gradient(to bottom, var(--washi) 0%, rgba(149, 175, 192, 0.05) 100%);
+    padding: 1.5rem 0 1.25rem;
+    border-bottom: 1px solid rgba(149, 175, 192, 0.2);
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    position: relative;
+}
+
+.contacts-header-bar .container {
+    padding-left: 0;
+    padding-right: var(--buyer-space-lg);
 }
 
 .contacts-header-bar::before {
-  content: '';
-  position: absolute;
-  bottom: -1px;
-  left: 0;
-  width: 200px;
-  height: 2px;
-  background: linear-gradient(to right, var(--kintsugi), transparent);
-  animation: shimmer 3s ease-in-out infinite;
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 200px;
+    height: 2px;
+    background: linear-gradient(to right, var(--kintsugi), transparent);
+    animation: shimmer 3s ease-in-out infinite;
 }
 
 @keyframes shimmer {
-  0%, 100% {
-    opacity: 1;
-    transform: translateX(0);
-  }
-  50% {
-    opacity: 0.7;
-    transform: translateX(20px);
-  }
+    0%,
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    50% {
+        opacity: 0.7;
+        transform: translateX(20px);
+    }
 }
 
 .contacts-header-content {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 2rem;
-  flex-wrap: wrap;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 2rem;
+    flex-wrap: wrap;
 }
 
 .contacts-header-left {
-  flex: 1;
-  min-width: 300px;
+    flex: 1;
+    min-width: 300px;
 }
 
 .contacts-header-title {
-  font-family: 'Quantico', sans-serif;
-  font-size: 2.25rem;
-  font-weight: 400;
-  color: var(--kurogane);
-  margin-bottom: 0.5rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  line-height: 1.1;
+    font-family: 'Quantico', sans-serif;
+    font-size: 2.25rem;
+    font-weight: 400;
+    color: var(--kurogane);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    line-height: 1.1;
 }
 
 .contacts-header-subtitle {
-  font-family: 'Antartida', sans-serif;
-  font-size: 0.9375rem;
-  color: var(--namari);
-  font-weight: 400;
-  letter-spacing: 0.01em;
+    font-family: 'Antartida', sans-serif;
+    font-size: 0.9375rem;
+    color: var(--namari);
+    font-weight: 400;
+    letter-spacing: 0.01em;
 }
+
 
 /* ====================================
    CONTACTS CONTENT
    ==================================== */
+
 .contacts-content {
     flex: 1;
-    min-height: 0;
-    overflow: hidden;
-    padding: 1rem 0 1rem;
+    padding: 1rem 0 2rem;
     display: flex;
     flex-direction: column;
 }
 
 .contacts-content .container {
-    flex: 1;
-    min-height: 0;
-    overflow-y: auto;
-    overflow-x: hidden;
-}
-    color: #ffffff;
+    width: 100%;
 }
 
+color: #ffffff;
+
+}
 .contacts-hero-title {
     font-size: 3rem;
     font-weight: 700;
@@ -161,8 +178,6 @@ body:has(.contacts-page) {
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     letter-spacing: -0.01em;
 }
-
-
 .contacts-hero-subtitle {
     font-size: 1.1rem;
     color: rgba(255, 255, 255, 0.9);
@@ -177,12 +192,10 @@ body:has(.contacts-page) {
 /* ====================================
    MAIN CONTENT SECTION
    ==================================== */
-
 .contacts-section {
     padding: 3rem 0;
     position: relative;
 }
-
 .contacts-two-column {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -197,51 +210,53 @@ body:has(.contacts-page) {
     background: white;
     border-radius: 0 !important;
     padding: 2rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 16px rgba(149, 175, 192, 0.08);
+    border: 2px solid rgba(149, 175, 192, 0.3);
     height: fit-content;
+    transition: border-color 0.2s ease;
 }
-
+.company-info-card-main:hover {
+    border-color: rgba(149, 175, 192, 0.45);
+}
 .company-name {
+    font-family: 'Quantico', sans-serif;
     font-size: 1.5rem;
-    font-weight: 700;
+    font-weight: 400;
     color: var(--kurogane);
     margin-bottom: 1.5rem;
     line-height: 1.3;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
 }
-
 .company-details {
     display: flex;
     flex-direction: column;
     gap: 1.25rem;
 }
-
 .company-detail-item {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
 }
-
 .detail-label {
+    font-family: 'Antartida', sans-serif;
     font-size: 0.9rem;
     font-weight: 600;
     color: var(--kurogane);
 }
-
 .detail-value {
+    font-family: 'Antartida', sans-serif;
     font-size: 0.95rem;
     color: var(--namari);
     line-height: 1.6;
 }
-
 .detail-value.link {
     color: var(--aitetsu);
     text-decoration: none;
     transition: color 0.2s ease;
 }
-
 .detail-value.link:hover {
-    color: #2563eb;
+    color: var(--kurogane);
     text-decoration: underline;
 }
 
@@ -252,19 +267,21 @@ body:has(.contacts-page) {
     background: white;
     border-radius: 0 !important;
     padding: 0;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 16px rgba(149, 175, 192, 0.08);
+    border: 2px solid rgba(149, 175, 192, 0.3);
     overflow: hidden;
-    height: 450px;
+    height: 350px;
+    transition: border-color 0.2s ease;
 }
-
+.maps-card-main:hover {
+    border-color: rgba(149, 175, 192, 0.45);
+}
 .maps-container-main {
     width: 100%;
     height: 100%;
     border-radius: 0 !important;
     overflow: hidden;
 }
-
 .maps-container-main iframe {
     display: block;
     width: 100%;
@@ -279,11 +296,14 @@ body:has(.contacts-page) {
     background: white;
     border-radius: 0 !important;
     padding: 2rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 16px rgba(149, 175, 192, 0.08);
+    border: 2px solid rgba(149, 175, 192, 0.3);
     margin-top: 2rem;
+    transition: border-color 0.2s ease;
 }
-
+.social-media-card:hover {
+    border-color: rgba(149, 175, 192, 0.45);
+}
 .social-media-container {
     display: flex;
     justify-content: center;
@@ -291,28 +311,35 @@ body:has(.contacts-page) {
     gap: 1rem;
     flex-wrap: wrap;
 }
-
 .social-media-link {
-    width: 50px;
-    height: 50px;
+    width: 48px;
+    height: 48px;
     border-radius: 0 !important;
     display: flex;
     align-items: center;
     justify-content: center;
     text-decoration: none;
     transition: all 0.2s ease;
-    background: var(--washi);
-    border: 1px solid #e2e8f0;
+    background: var(--aitetsu);
+    border: 2px solid var(--aitetsu);
 }
-
-.social-media-link i {
-    width: 22px;
-    height: 22px;
-    color: var(--namari);
+.social-media-link i,
+.social-media-link svg {
+    width: 20px;
+    height: 20px;
+    color: white !important;
+    stroke: white !important;
+    fill: none !important;
+    transition: all 0.2s ease;
 }
-
 .social-media-link:hover {
-    background: #e2e8f0;
+    background: var(--kurogane);
+    border-color: var(--kurogane);
+}
+.social-media-link:hover i,
+.social-media-link:hover svg {
+    color: white !important;
+    stroke: white !important;
 }
 
 /* ====================================
@@ -323,89 +350,87 @@ body:has(.contacts-page) {
         grid-template-columns: 1fr;
     }
 }
-
 @media (max-width: 768px) {
     .contacts-page {
         padding-top: 0;
     }
-
+    
     .contacts-hero {
         padding: 8rem 0 4rem;
     }
-
+    
     .contacts-hero-title {
         font-size: 2.5rem;
     }
-
+    
     .contacts-hero-subtitle {
         font-size: 1.1rem;
     }
-
+    
     .contacts-hero-description {
         font-size: 0.95rem;
     }
-
+    
     .company-info-card-main {
         padding: 1.5rem;
     }
-
+    
     .maps-card-main {
         height: 350px;
     }
-
+    
     .social-media-card {
         padding: 1.5rem;
     }
-
+    
     .social-media-link {
         width: 44px;
         height: 44px;
     }
-
+    
     .social-media-link i {
         width: 20px;
         height: 20px;
     }
 }
-
 @media (max-width: 480px) {
     .contacts-hero {
         padding: 7rem 0 3rem;
     }
-
+    
     .contacts-hero-title {
         font-size: 2rem;
     }
-
+    
     .contacts-hero-subtitle {
         font-size: 1rem;
     }
-
+    
     .contacts-hero-description {
         font-size: 0.9rem;
     }
-
+    
     .company-info-card-main {
         padding: 1.25rem;
     }
-
+    
     .company-name {
         font-size: 1.25rem;
     }
-
+    
     .maps-card-main {
         height: 300px;
     }
-
+    
     .social-media-card {
         padding: 1.25rem;
     }
-
+    
     .social-media-link {
         width: 40px;
         height: 40px;
     }
-
+    
     .social-media-link i {
         width: 18px;
         height: 18px;

@@ -3,1080 +3,1101 @@
    PARTSFORM Buyer Portal
    ==================================== */
 
+
 /* ====================================
    VIEWPORT LOCK - NON-SCROLLABLE PAGE
    ==================================== */
+
 html:has(.payment-page) {
-  height: 100%;
-  overflow: hidden;
+    height: 100%;
+    overflow: hidden;
 }
 
 body:has(.payment-page) {
-  height: 100vh;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
+
 
 /* ====================================
    PAGE LAYOUT
    ==================================== */
+
 .payment-page {
-  flex: 1;
-  min-height: 0;
-  overflow: hidden;
-  background: var(--washi);
-  display: flex;
-  flex-direction: column;
-  padding-top: 44px;
-  position: relative;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    background: var(--washi);
+    display: flex;
+    flex-direction: column;
+    padding-top: 44px;
+    position: relative;
 }
 
 .payment-page .container {
-  max-width: 1600px;
-  padding: 0 1.5rem;
+    max-width: 1600px;
+    padding: 0 1.5rem;
 }
 
 .payment-content {
-  flex: 1;
-  min-height: 0;
-  overflow: hidden;
-  padding: 1rem 0 1rem;
-  position: relative;
-  z-index: 3;
-  display: flex;
-  flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    padding: 1rem 0 1rem;
+    position: relative;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
 }
 
 .payment-content .container {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
+
 
 /* ====================================
    HEADER BAR - Match Orders
    ==================================== */
+
 .payment-header-bar {
-  background: linear-gradient(to bottom, var(--washi) 0%, rgba(149, 175, 192, 0.05) 100%);
-  padding: 1.5rem 0 1.25rem;
-  border-bottom: 1px solid rgba(149, 175, 192, 0.2);
-  margin-top: 1rem;
-  margin-bottom: 1rem;
-  position: relative;
+    background: linear-gradient(to bottom, var(--washi) 0%, rgba(149, 175, 192, 0.05) 100%);
+    padding: 1.5rem 0 1.25rem;
+    border-bottom: 1px solid rgba(149, 175, 192, 0.2);
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    position: relative;
 }
 
 .payment-header-bar::before {
-  content: '';
-  position: absolute;
-  bottom: -1px;
-  left: 0;
-  width: 200px;
-  height: 2px;
-  background: linear-gradient(to right, var(--kintsugi), transparent);
-  animation: paymentShimmer 3s ease-in-out infinite;
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 200px;
+    height: 2px;
+    background: linear-gradient(to right, var(--kintsugi), transparent);
+    animation: paymentShimmer 3s ease-in-out infinite;
 }
 
 @keyframes paymentShimmer {
-  0%, 100% { opacity: 1; transform: translateX(0); }
-  50% { opacity: 0.7; transform: translateX(20px); }
+    0%,
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    50% {
+        opacity: 0.7;
+        transform: translateX(20px);
+    }
 }
 
 .payment-header-content {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 2rem;
-  flex-wrap: wrap;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 2rem;
+    flex-wrap: wrap;
 }
 
 .payment-header-left {
-  flex: 1;
-  min-width: 300px;
+    flex: 1;
+    min-width: 300px;
 }
 
 .payment-header-title {
-  font-family: 'Quantico', sans-serif;
-  font-size: 2.25rem;
-  font-weight: 400;
-  color: var(--kurogane);
-  margin-bottom: 0.5rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  line-height: 1.1;
+    font-family: 'Quantico', sans-serif;
+    font-size: 2.25rem;
+    font-weight: 400;
+    color: var(--kurogane);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    line-height: 1.1;
 }
 
 .payment-header-subtitle {
-  font-family: 'Antartida', sans-serif;
-  font-size: 0.9375rem;
-  color: var(--namari);
-  font-weight: 400;
-  letter-spacing: 0.01em;
+    font-family: 'Antartida', sans-serif;
+    font-size: 0.9375rem;
+    color: var(--namari);
+    font-weight: 400;
+    letter-spacing: 0.01em;
 }
 
 .payment-header-right {
-  display: flex;
-  align-items: center;
+    display: flex;
+    align-items: center;
 }
 
 .btn-add-funds {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  border-radius: 0 !important;
-  font-family: 'Quantico', sans-serif;
-  font-size: 0.8125rem;
-  font-weight: 400;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  background: var(--sei);
-  color: white;
-  border: 1.5px solid var(--sei);
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0 !important;
+    font-family: 'Quantico', sans-serif;
+    font-size: 0.8125rem;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    background: var(--sei);
+    color: white;
+    border: 1.5px solid var(--sei);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .btn-add-funds:hover {
-  background: #85a0b0;
-  border-color: #85a0b0;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(149, 175, 192, 0.25);
+    background: #85a0b0;
+    border-color: #85a0b0;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(149, 175, 192, 0.25);
 }
 
 .btn-add-funds i {
-  width: 16px;
-  height: 16px;
+    width: 16px;
+    height: 16px;
 }
+
 
 /* ====================================
    SECTION HEADERS
    ==================================== */
+
 .balance-section,
 .payment-methods-section,
 .transactions-section {
-  margin-bottom: 1rem;
+    margin-bottom: 1rem;
 }
 
 .balance-header {
-  margin-bottom: 0.75rem;
+    margin-bottom: 0.75rem;
 }
 
 .section-header {
-  margin-bottom: 0.75rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 1rem;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
 }
 
 .section-title {
-  font-family: 'Quantico', sans-serif;
-  font-size: 1.25rem;
-  font-weight: 400;
-  color: var(--kurogane);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+    font-family: 'Quantico', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 400;
+    color: var(--kurogane);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
 }
+
 
 /* ====================================
    BALANCE CARDS - Neutral Design
    ==================================== */
+
 .balance-cards-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
 }
 
 .balance-card {
-  background: white;
-  border: 1px solid rgba(149, 175, 192, 0.25);
-  border-radius: 0 !important;
-  padding: 1rem 1.25rem;
-  box-shadow: 0 2px 16px rgba(149, 175, 192, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04);
-  transition: all 0.3s ease;
+    background: white;
+    border: 1px solid rgba(149, 175, 192, 0.25);
+    border-radius: 0 !important;
+    padding: 1rem 1.25rem;
+    box-shadow: 0 2px 16px rgba(149, 175, 192, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04);
+    transition: all 0.3s ease;
 }
 
 .balance-card:hover {
-  box-shadow: 0 4px 12px rgba(149, 175, 192, 0.12);
-  border-color: rgba(149, 175, 192, 0.35);
+    box-shadow: 0 4px 12px rgba(149, 175, 192, 0.12);
+    border-color: rgba(149, 175, 192, 0.35);
 }
 
 .balance-card.main-balance {
-  background: white;
-  border-color: rgba(149, 175, 192, 0.3);
-  border-left: 3px solid var(--aitetsu);
+    background: white;
+    border-color: rgba(149, 175, 192, 0.3);
+    border-left: 3px solid var(--aitetsu);
 }
 
 .balance-card-header {
-  display: flex;
-  align-items: center;
-  margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.75rem;
 }
 
 .balance-label {
-  font-family: 'Antartida', sans-serif;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: var(--namari);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+    font-family: 'Antartida', sans-serif;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--namari);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 .balance-amount {
-  font-family: 'Quantico', sans-serif;
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: var(--kurogane);
-  letter-spacing: 0.02em;
-  margin-bottom: 0.5rem;
+    font-family: 'Quantico', sans-serif;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--kurogane);
+    letter-spacing: 0.02em;
+    margin-bottom: 0.5rem;
 }
 
 .balance-amount.secondary {
-  font-size: 1.5rem;
+    font-size: 1.5rem;
 }
 
 .balance-footer {
-  padding-top: 0.5rem;
-  border-top: 1px solid rgba(149, 175, 192, 0.2);
+    padding-top: 0.5rem;
+    border-top: 1px solid rgba(149, 175, 192, 0.2);
 }
 
 .balance-note {
-  font-family: 'Antartida', sans-serif;
-  font-size: 0.8125rem;
-  color: var(--namari);
+    font-family: 'Antartida', sans-serif;
+    font-size: 0.8125rem;
+    color: var(--namari);
 }
+
 
 /* ====================================
    PAYMENT METHODS - Orders Table Style
    ==================================== */
+
 .btn-add-method {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  border-radius: 0 !important;
-  font-family: 'Quantico', sans-serif;
-  font-size: 0.8125rem;
-  font-weight: 400;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  background: white;
-  color: var(--aitetsu);
-  border: 1.5px solid var(--suzu);
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0 !important;
+    font-family: 'Quantico', sans-serif;
+    font-size: 0.8125rem;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    background: white;
+    color: var(--aitetsu);
+    border: 1.5px solid var(--suzu);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .btn-add-method:hover {
-  background: var(--washi);
-  border-color: var(--aitetsu);
-  color: var(--aitetsu);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(149, 175, 192, 0.15);
+    background: var(--washi);
+    border-color: var(--aitetsu);
+    color: var(--aitetsu);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(149, 175, 192, 0.15);
 }
 
 .btn-add-method i {
-  width: 16px;
-  height: 16px;
+    width: 16px;
+    height: 16px;
 }
 
 .payment-methods-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 1rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1rem;
 }
 
 .payment-method-card {
-  background: white;
-  border: 1px solid rgba(149, 175, 192, 0.25);
-  border-radius: 0 !important;
-  padding: 1.25rem;
-  box-shadow: 0 2px 16px rgba(149, 175, 192, 0.08);
-  transition: all 0.3s ease;
+    background: white;
+    border: 1px solid rgba(149, 175, 192, 0.25);
+    border-radius: 0 !important;
+    padding: 1.25rem;
+    box-shadow: 0 2px 16px rgba(149, 175, 192, 0.08);
+    transition: all 0.3s ease;
 }
 
 .payment-method-card:hover {
-  box-shadow: 0 4px 12px rgba(149, 175, 192, 0.12);
-  border-color: rgba(149, 175, 192, 0.35);
+    box-shadow: 0 4px 12px rgba(149, 175, 192, 0.12);
+    border-color: rgba(149, 175, 192, 0.35);
 }
 
 .payment-method-card.default {
-  border-left: 3px solid var(--aitetsu);
+    border-left: 3px solid var(--aitetsu);
 }
 
 .method-card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
 }
 
 .method-card-type {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
 }
 
 .method-type-icon {
-  width: 40px;
-  height: 40px;
-  background: var(--washi);
-  border: 1px solid rgba(149, 175, 192, 0.25);
-  border-radius: 0 !important;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: var(--washi);
+    border: 1px solid rgba(149, 175, 192, 0.25);
+    border-radius: 0 !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .method-type-icon i {
-  width: 20px;
-  height: 20px;
-  color: var(--aitetsu);
+    width: 20px;
+    height: 20px;
+    color: var(--aitetsu);
 }
 
 .method-type-name {
-  font-family: 'Quantico', sans-serif;
-  font-size: 0.9375rem;
-  font-weight: 400;
-  color: var(--kurogane);
+    font-family: 'Quantico', sans-serif;
+    font-size: 0.9375rem;
+    font-weight: 400;
+    color: var(--kurogane);
 }
 
+
 /* Default badge - neutral style like orders status */
+
 .default-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.375rem 0.875rem;
-  background: white;
-  color: var(--namari);
-  border: 1.5px solid var(--suzu);
-  border-radius: 0 !important;
-  font-family: 'Antartida', sans-serif;
-  font-size: 0.75rem;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.375rem 0.875rem;
+    background: white;
+    color: var(--namari);
+    border: 1.5px solid var(--suzu);
+    border-radius: 0 !important;
+    font-family: 'Antartida', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 .default-badge i {
-  width: 12px;
-  height: 12px;
+    width: 12px;
+    height: 12px;
 }
 
 .method-card-body {
-  margin-bottom: 1rem;
+    margin-bottom: 1rem;
 }
 
 .method-card-number {
-  font-family: 'Quantico', sans-serif;
-  font-size: 1rem;
-  font-weight: 400;
-  color: var(--kurogane);
-  margin-bottom: 0.5rem;
-  font-family: 'Courier New', monospace;
-  letter-spacing: 0.05em;
+    font-family: 'Quantico', sans-serif;
+    font-size: 1rem;
+    font-weight: 400;
+    color: var(--kurogane);
+    margin-bottom: 0.5rem;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 0.05em;
 }
 
 .method-card-expiry {
-  font-family: 'Antartida', sans-serif;
-  font-size: 0.8125rem;
-  color: var(--namari);
+    font-family: 'Antartida', sans-serif;
+    font-size: 0.8125rem;
+    color: var(--namari);
 }
 
 .method-card-footer {
-  display: flex;
-  gap: 0.5rem;
-  padding-top: 1rem;
-  border-top: 1px solid rgba(149, 175, 192, 0.2);
+    display: flex;
+    gap: 0.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(149, 175, 192, 0.2);
 }
 
 .btn-method-action {
-  flex: 1;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  border-radius: 0 !important;
-  font-family: 'Antartida', sans-serif;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  border: 1.5px solid;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  background: white;
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 0 !important;
+    font-family: 'Antartida', sans-serif;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    border: 1.5px solid;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: white;
 }
 
 .btn-method-action i {
-  width: 16px;
-  height: 16px;
+    width: 16px;
+    height: 16px;
 }
 
 .btn-method-action.edit {
-  color: var(--aitetsu);
-  border-color: rgba(149, 175, 192, 0.3);
+    color: var(--aitetsu);
+    border-color: rgba(149, 175, 192, 0.3);
 }
 
 .btn-method-action.edit:hover {
-  background: var(--washi);
-  border-color: var(--aitetsu);
-  box-shadow: 0 2px 8px rgba(149, 175, 192, 0.15);
+    background: var(--washi);
+    border-color: var(--aitetsu);
+    box-shadow: 0 2px 8px rgba(149, 175, 192, 0.15);
 }
 
 .btn-method-action.delete {
-  color: var(--namari);
-  border-color: var(--suzu);
+    color: var(--namari);
+    border-color: var(--suzu);
 }
 
 .btn-method-action.delete:hover {
-  background: var(--washi);
-  border-color: var(--namari);
+    background: var(--washi);
+    border-color: var(--namari);
 }
 
 .btn-method-action.set-default {
-  color: var(--sei);
-  border-color: var(--suzu);
+    color: var(--sei);
+    border-color: var(--suzu);
 }
 
 .btn-method-action.set-default:hover {
-  background: var(--washi);
-  border-color: var(--sei);
+    background: var(--washi);
+    border-color: var(--sei);
 }
+
 
 /* ====================================
    EMPTY STATE - Match Orders
    ==================================== */
+
 .payment-methods-empty,
 .transactions-empty {
-  text-align: center;
-  padding: 3rem 2rem;
-  background: white;
-  border: 1px solid rgba(149, 175, 192, 0.25);
-  border-radius: 0 !important;
-  box-shadow: 0 2px 12px rgba(149, 175, 192, 0.08);
-  display: none;
+    text-align: center;
+    padding: 3rem 2rem;
+    background: white;
+    border: 1px solid rgba(149, 175, 192, 0.25);
+    border-radius: 0 !important;
+    box-shadow: 0 2px 12px rgba(149, 175, 192, 0.08);
+    display: none;
 }
 
 .payment-methods-empty.show,
 .transactions-empty.show {
-  display: block;
+    display: block;
 }
 
 .payment-empty-icon {
-  width: 80px;
-  height: 80px;
-  margin: 0 auto 1.5rem;
-  background: var(--washi);
-  border: 1px solid rgba(149, 175, 192, 0.25);
-  border-radius: 0 !important;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 1.5rem;
+    background: var(--washi);
+    border: 1px solid rgba(149, 175, 192, 0.25);
+    border-radius: 0 !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .payment-empty-icon i {
-  width: 40px;
-  height: 40px;
-  color: var(--namari);
+    width: 40px;
+    height: 40px;
+    color: var(--namari);
 }
 
 .empty-title {
-  font-family: 'Quantico', sans-serif;
-  font-size: 1.5rem;
-  font-weight: 400;
-  color: var(--kurogane);
-  margin-bottom: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+    font-family: 'Quantico', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 400;
+    color: var(--kurogane);
+    margin-bottom: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
 }
 
 .empty-text {
-  font-family: 'Antartida', sans-serif;
-  font-size: 1rem;
-  color: var(--namari);
-  margin-bottom: 1.5rem;
-  line-height: 1.6;
+    font-family: 'Antartida', sans-serif;
+    font-size: 1rem;
+    color: var(--namari);
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
 }
 
 .btn-empty-action {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.875rem 1.75rem;
-  border-radius: 0 !important;
-  font-family: 'Quantico', sans-serif;
-  font-size: 0.875rem;
-  font-weight: 400;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  background: var(--sei);
-  color: white;
-  border: 1.5px solid var(--sei);
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.875rem 1.75rem;
+    border-radius: 0 !important;
+    font-family: 'Quantico', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    background: var(--sei);
+    color: white;
+    border: 1.5px solid var(--sei);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .btn-empty-action:hover {
-  background: #85a0b0;
-  border-color: #85a0b0;
-  box-shadow: 0 4px 12px rgba(149, 175, 192, 0.25);
+    background: #85a0b0;
+    border-color: #85a0b0;
+    box-shadow: 0 4px 12px rgba(149, 175, 192, 0.25);
 }
 
 .btn-empty-action i {
-  width: 18px;
-  height: 18px;
+    width: 18px;
+    height: 18px;
 }
+
 
 /* ====================================
    TRANSACTIONS - Orders Table Style
    ==================================== */
+
 .transaction-filters {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
 }
 
 .filter-btn {
-  padding: 0.625rem 1.25rem;
-  background: white;
-  color: var(--namari);
-  border: 1.5px solid var(--suzu);
-  border-radius: 0 !important;
-  font-family: 'Antartida', sans-serif;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  cursor: pointer;
-  transition: all 0.3s ease;
+    padding: 0.625rem 1.25rem;
+    background: white;
+    color: var(--namari);
+    border: 1.5px solid var(--suzu);
+    border-radius: 0 !important;
+    font-family: 'Antartida', sans-serif;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.3s ease;
 }
 
 .filter-btn:hover {
-  background: var(--washi);
-  border-color: rgba(149, 175, 192, 0.4);
+    background: var(--washi);
+    border-color: rgba(149, 175, 192, 0.4);
 }
 
 .filter-btn.active {
-  background: var(--aitetsu);
-  color: white;
-  border-color: var(--aitetsu);
+    background: var(--aitetsu);
+    color: white;
+    border-color: var(--aitetsu);
 }
 
 .transactions-card {
-  background: white;
-  border: 1px solid rgba(149, 175, 192, 0.25);
-  border-radius: 0 !important;
-  overflow: hidden;
-  box-shadow: 0 2px 16px rgba(149, 175, 192, 0.08);
+    background: white;
+    border: 1px solid rgba(149, 175, 192, 0.25);
+    border-radius: 0 !important;
+    overflow: hidden;
+    box-shadow: 0 2px 16px rgba(149, 175, 192, 0.08);
 }
 
 .transactions-table-wrapper {
-  overflow-x: auto;
-  overflow-y: auto;
-  max-height: 400px;
+    overflow-x: auto;
+    overflow-y: auto;
+    max-height: 400px;
 }
 
 .transactions-table {
-  width: 100%;
-  border-collapse: collapse;
+    width: 100%;
+    border-collapse: collapse;
 }
 
 .transactions-table thead {
-  background: linear-gradient(to bottom, var(--aitetsu) 0%, rgba(64, 84, 94, 0.92) 100%);
-  border-bottom: 2px solid var(--aitetsu);
+    background: linear-gradient(to bottom, var(--aitetsu) 0%, rgba(64, 84, 94, 0.92) 100%);
+    border-bottom: 2px solid var(--aitetsu);
 }
 
 .transactions-table th {
-  padding: 1rem 1.5rem;
-  text-align: left;
-  font-family: 'Quantico', sans-serif;
-  font-size: 0.75rem;
-  font-weight: 400;
-  color: white;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
+    padding: 1rem 1.5rem;
+    text-align: left;
+    font-family: 'Quantico', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
 }
 
 .transactions-table tbody tr {
-  border-bottom: 1px solid var(--suzu);
-  transition: all 0.3s ease;
+    border-bottom: 1px solid var(--suzu);
+    transition: all 0.3s ease;
 }
 
 .transactions-table tbody tr:hover {
-  background: linear-gradient(to right, rgba(214, 172, 63, 0.04) 0%, rgba(149, 175, 192, 0.04) 50%, white 100%);
+    background: linear-gradient(to right, rgba(214, 172, 63, 0.04) 0%, rgba(149, 175, 192, 0.04) 50%, white 100%);
 }
 
 .transactions-table tbody tr:last-child {
-  border-bottom: none;
+    border-bottom: none;
 }
 
 .transactions-table td {
-  padding: 1.25rem 1.5rem;
-  font-family: 'Antartida', sans-serif;
-  font-size: 0.9375rem;
-  color: var(--kurogane);
+    padding: 1.25rem 1.5rem;
+    font-family: 'Antartida', sans-serif;
+    font-size: 0.9375rem;
+    color: var(--kurogane);
 }
 
 .transaction-date {
-  color: var(--namari);
-  font-size: 0.875rem;
+    color: var(--namari);
+    font-size: 0.875rem;
 }
 
 .transaction-description {
-  font-weight: 500;
+    font-weight: 500;
 }
 
+
 /* Transaction type - neutral badge */
+
 .transaction-type {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.375rem 0.875rem;
-  border-radius: 0 !important;
-  font-family: 'Antartida', sans-serif;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  background: white;
-  color: var(--namari);
-  border: 1.5px solid var(--suzu);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.375rem 0.875rem;
+    border-radius: 0 !important;
+    font-family: 'Antartida', sans-serif;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    background: white;
+    color: var(--namari);
+    border: 1.5px solid var(--suzu);
 }
 
 .transaction-type.credit {
-  background: white;
-  color: var(--sei);
-  border-color: var(--sei);
+    background: white;
+    color: var(--sei);
+    border-color: var(--sei);
 }
 
 .transaction-type.debit {
-  background: white;
-  color: var(--namari);
-  border-color: var(--suzu);
+    background: white;
+    color: var(--namari);
+    border-color: var(--suzu);
 }
 
 .transaction-amount {
-  font-family: 'Quantico', sans-serif;
-  font-weight: 700;
-  font-size: 1rem;
-  color: var(--kurogane);
+    font-family: 'Quantico', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--kurogane);
 }
 
 .transaction-amount.positive {
-  color: var(--kurogane);
+    color: var(--kurogane);
 }
 
 .transaction-amount.negative {
-  color: var(--namari);
+    color: var(--namari);
 }
 
+
 /* Transaction status - neutral badge */
+
 .transaction-status {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.375rem 0.875rem;
-  border-radius: 0 !important;
-  font-family: 'Antartida', sans-serif;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  background: white;
-  color: var(--namari);
-  border: 1.5px solid var(--suzu);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.375rem 0.875rem;
+    border-radius: 0 !important;
+    font-family: 'Antartida', sans-serif;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    background: white;
+    color: var(--namari);
+    border: 1.5px solid var(--suzu);
 }
 
 .transaction-status.completed {
-  background: white;
-  color: var(--sei);
-  border-color: var(--sei);
+    background: white;
+    color: var(--sei);
+    border-color: var(--sei);
 }
 
 .transaction-status.pending {
-  background: white;
-  color: var(--namari);
-  border-color: var(--suzu);
+    background: white;
+    color: var(--namari);
+    border-color: var(--suzu);
 }
 
 .transaction-status.refunded {
-  background: white;
-  color: var(--namari);
-  border-color: var(--suzu);
+    background: white;
+    color: var(--namari);
+    border-color: var(--suzu);
 }
 
 .transaction-status i {
-  width: 12px;
-  height: 12px;
+    width: 12px;
+    height: 12px;
 }
 
 .btn-view-transaction {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.5rem 1rem;
-  background: white;
-  color: var(--aitetsu);
-  border: 1.5px solid rgba(149, 175, 192, 0.3);
-  border-radius: 0 !important;
-  font-family: 'Antartida', sans-serif;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.5rem 1rem;
+    background: white;
+    color: var(--aitetsu);
+    border: 1.5px solid rgba(149, 175, 192, 0.3);
+    border-radius: 0 !important;
+    font-family: 'Antartida', sans-serif;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
 }
 
 .btn-view-transaction:hover {
-  background: var(--washi);
-  border-color: var(--aitetsu);
-  box-shadow: 0 2px 8px rgba(149, 175, 192, 0.15);
+    background: var(--washi);
+    border-color: var(--aitetsu);
+    box-shadow: 0 2px 8px rgba(149, 175, 192, 0.15);
 }
 
 .btn-view-transaction i {
-  width: 14px;
-  height: 14px;
+    width: 14px;
+    height: 14px;
 }
+
 
 /* ====================================
    PAYMENT MODAL - Match Orders Style
    ==================================== */
+
 .payment-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 10003;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  visibility: hidden;
-  transition: all 0.3s ease;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10003;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
 }
 
 .payment-modal.active {
-  opacity: 1;
-  visibility: visible;
+    opacity: 1;
+    visibility: visible;
 }
 
 .payment-modal-backdrop {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(26, 43, 61, 0.8);
-  backdrop-filter: blur(8px);
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(26, 43, 61, 0.8);
+    backdrop-filter: blur(8px);
 }
 
 .payment-modal-container {
-  position: relative;
-  background: white;
-  border: 1px solid rgba(149, 175, 192, 0.25);
-  border-radius: 0 !important;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
-  max-width: 550px;
-  width: 90%;
-  max-height: 85vh;
-  overflow-y: auto;
-  transform: scale(0.9) translateY(20px);
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  z-index: 10004;
+    position: relative;
+    background: white;
+    border: 1px solid rgba(149, 175, 192, 0.25);
+    border-radius: 0 !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    max-width: 550px;
+    width: 90%;
+    max-height: 85vh;
+    overflow-y: auto;
+    transform: scale(0.9) translateY(20px);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 10004;
 }
 
 .payment-modal.active .payment-modal-container {
-  transform: scale(1) translateY(0);
+    transform: scale(1) translateY(0);
 }
 
 .payment-modal-close {
-  position: absolute;
-  top: 1.25rem;
-  right: 1.25rem;
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--washi);
-  border: 1px solid rgba(149, 175, 192, 0.25);
-  border-radius: 0 !important;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  z-index: 10;
+    position: absolute;
+    top: 1.25rem;
+    right: 1.25rem;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--washi);
+    border: 1px solid rgba(149, 175, 192, 0.25);
+    border-radius: 0 !important;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 10;
 }
 
 .payment-modal-close:hover {
-  background: var(--washi);
-  border-color: var(--namari);
+    background: var(--washi);
+    border-color: var(--namari);
 }
 
 .payment-modal-close i {
-  width: 18px;
-  height: 18px;
-  color: var(--namari);
+    width: 18px;
+    height: 18px;
+    color: var(--namari);
 }
 
 .payment-modal-content {
-  padding: 2.5rem;
+    padding: 2.5rem;
 }
 
 .payment-modal .modal-header {
-  background: transparent;
-  margin: 0 0 2rem 0;
-  padding: 0 0 1.5rem 0;
-  border-bottom: 1px solid rgba(149, 175, 192, 0.2);
+    background: transparent;
+    margin: 0 0 2rem 0;
+    padding: 0 0 1.5rem 0;
+    border-bottom: 1px solid rgba(149, 175, 192, 0.2);
 }
 
 .payment-modal .modal-header::before,
 .payment-modal .modal-header::after {
-  display: none;
+    display: none;
 }
 
 .payment-modal .modal-title {
-  font-family: 'Quantico', sans-serif;
-  font-size: 1.5rem;
-  font-weight: 400;
-  color: var(--kurogane);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+    font-family: 'Quantico', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 400;
+    color: var(--kurogane);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
 }
 
 .payment-modal .modal-subtitle {
-  font-family: 'Antartida', sans-serif;
-  font-size: 0.9375rem;
-  color: var(--namari);
+    font-family: 'Antartida', sans-serif;
+    font-size: 0.9375rem;
+    color: var(--namari);
 }
+
 
 /* ====================================
    PAYMENT FORM
    ==================================== */
+
 .payment-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
 }
 
 .payment-form .form-row {
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
 }
 
 .payment-form .form-group {
-  flex: 1;
-  min-width: 200px;
-  display: flex;
-  flex-direction: column;
+    flex: 1;
+    min-width: 200px;
+    display: flex;
+    flex-direction: column;
 }
 
 .payment-form .form-label {
-  font-family: 'Antartida', sans-serif;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: var(--aitetsu);
-  margin-bottom: 0.5rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+    font-family: 'Antartida', sans-serif;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--aitetsu);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 .payment-form .form-input,
 .payment-form .form-select {
-  padding: 0.75rem 1rem;
-  border: 1.5px solid rgba(149, 175, 192, 0.25);
-  border-radius: 0 !important;
-  font-family: 'Antartida', sans-serif;
-  font-size: 0.9375rem;
-  color: var(--kurogane);
-  background: var(--washi);
-  transition: all 0.3s ease;
+    padding: 0.75rem 1rem;
+    border: 1.5px solid rgba(149, 175, 192, 0.25);
+    border-radius: 0 !important;
+    font-family: 'Antartida', sans-serif;
+    font-size: 0.9375rem;
+    color: var(--kurogane);
+    background: var(--washi);
+    transition: all 0.3s ease;
 }
 
 .payment-form .form-input:focus,
 .payment-form .form-select:focus {
-  outline: none;
-  border-color: var(--kintsugi);
-  background: white;
-  box-shadow: 0 0 0 3px rgba(214, 172, 63, 0.12);
+    outline: none;
+    border-color: var(--kintsugi);
+    background: white;
+    box-shadow: 0 0 0 3px rgba(214, 172, 63, 0.12);
 }
 
 .amount-input-wrapper {
-  position: relative;
+    position: relative;
 }
 
 .currency-symbol {
-  position: absolute;
-  left: 1rem;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--namari);
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--namari);
 }
 
 .amount-input {
-  padding-left: 2.5rem;
-  font-size: 1.125rem;
+    padding-left: 2.5rem;
+    font-size: 1.125rem;
 }
 
 .quick-amounts {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0.75rem;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.75rem;
 }
 
 .quick-amount-btn {
-  padding: 0.75rem;
-  background: white;
-  color: var(--namari);
-  border: 1.5px solid var(--suzu);
-  border-radius: 0 !important;
-  font-family: 'Antartida', sans-serif;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
+    padding: 0.75rem;
+    background: white;
+    color: var(--namari);
+    border: 1.5px solid var(--suzu);
+    border-radius: 0 !important;
+    font-family: 'Antartida', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
 }
 
 .quick-amount-btn:hover {
-  background: var(--washi);
-  border-color: rgba(149, 175, 192, 0.4);
+    background: var(--washi);
+    border-color: rgba(149, 175, 192, 0.4);
 }
 
 .quick-amount-btn.active {
-  background: var(--aitetsu);
-  color: white;
-  border-color: var(--aitetsu);
+    background: var(--aitetsu);
+    color: white;
+    border-color: var(--aitetsu);
 }
 
 .payment-form .form-actions {
-  display: flex;
-  gap: 0.75rem;
-  margin-top: 1rem;
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1rem;
 }
 
 .payment-form .btn-cancel {
-  flex: 1;
-  padding: 0.75rem 1.5rem;
-  background: white;
-  color: var(--namari);
-  border: 1.5px solid var(--suzu);
-  border-radius: 0 !important;
-  font-family: 'Quantico', sans-serif;
-  font-size: 0.8125rem;
-  font-weight: 400;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  cursor: pointer;
-  transition: all 0.3s ease;
+    flex: 1;
+    padding: 0.75rem 1.5rem;
+    background: white;
+    color: var(--namari);
+    border: 1.5px solid var(--suzu);
+    border-radius: 0 !important;
+    font-family: 'Quantico', sans-serif;
+    font-size: 0.8125rem;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: all 0.3s ease;
 }
 
 .payment-form .btn-cancel:hover {
-  background: var(--washi);
-  border-color: var(--aitetsu);
-  color: var(--aitetsu);
+    background: var(--washi);
+    border-color: var(--aitetsu);
+    color: var(--aitetsu);
 }
 
 .payment-form .btn-save {
-  flex: 1;
-  padding: 0.75rem 1.5rem;
-  background: var(--sei);
-  color: white;
-  border: 1.5px solid var(--sei);
-  border-radius: 0 !important;
-  font-family: 'Quantico', sans-serif;
-  font-size: 0.8125rem;
-  font-weight: 400;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  cursor: pointer;
-  transition: all 0.3s ease;
+    flex: 1;
+    padding: 0.75rem 1.5rem;
+    background: var(--sei);
+    color: white;
+    border: 1.5px solid var(--sei);
+    border-radius: 0 !important;
+    font-family: 'Quantico', sans-serif;
+    font-size: 0.8125rem;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: all 0.3s ease;
 }
 
 .payment-form .btn-save:hover {
-  background: #85a0b0;
-  border-color: #85a0b0;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(149, 175, 192, 0.25);
+    background: #85a0b0;
+    border-color: #85a0b0;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(149, 175, 192, 0.25);
 }
 
 .payment-form .btn-cancel i,
 .payment-form .btn-save i {
-  width: 16px;
-  height: 16px;
+    width: 16px;
+    height: 16px;
 }
+
 
 /* ====================================
    RESPONSIVE
    ==================================== */
+
 @media (max-width: 768px) {
-  .payment-page {
-    padding-top: 4rem;
-  }
-
-  .payment-header-content {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .payment-header-right {
-    width: 100%;
-  }
-
-  .btn-add-funds {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .balance-cards-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .payment-methods-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .transaction-filters {
-    width: 100%;
-  }
-
-  .filter-btn {
-    flex: 1;
-    min-width: 80px;
-  }
-
-  .transactions-table th,
-  .transactions-table td {
-    padding: 0.875rem 1rem;
-  }
-
-  .payment-modal-content {
-    padding: 2rem 1.5rem;
-  }
-
-  .quick-amounts {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .section-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
+    .payment-page {
+        padding-top: 4rem;
+    }
+    .payment-header-content {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .payment-header-right {
+        width: 100%;
+    }
+    .btn-add-funds {
+        width: 100%;
+        justify-content: center;
+    }
+    .balance-cards-grid {
+        grid-template-columns: 1fr;
+    }
+    .payment-methods-grid {
+        grid-template-columns: 1fr;
+    }
+    .transaction-filters {
+        width: 100%;
+    }
+    .filter-btn {
+        flex: 1;
+        min-width: 80px;
+    }
+    .transactions-table th,
+    .transactions-table td {
+        padding: 0.875rem 1rem;
+    }
+    .payment-modal-content {
+        padding: 2rem 1.5rem;
+    }
+    .quick-amounts {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
 }
 
 @media (max-width: 480px) {
-  .payment-header-title {
-    font-size: 1.75rem;
-  }
-
-  .section-title {
-    font-size: 1.125rem;
-  }
-
-  .balance-amount {
-    font-size: 1.75rem;
-  }
-
-  .balance-amount.secondary {
-    font-size: 1.5rem;
-  }
+    .payment-header-title {
+        font-size: 1.75rem;
+    }
+    .section-title {
+        font-size: 1.125rem;
+    }
+    .balance-amount {
+        font-size: 1.75rem;
+    }
+    .balance-amount.secondary {
+        font-size: 1.5rem;
+    }
 }

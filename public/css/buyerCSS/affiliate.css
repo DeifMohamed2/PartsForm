@@ -4,18 +4,22 @@
    Quantico headlines | Antartida body
    ==================================== */
 
+
 /* Ensure dropdown works */
+
 .affiliate-page .nav-dropdown-menu {
-  z-index: 10002 !important;
+    z-index: 10002 !important;
 }
 
 .affiliate-page .nav-bar {
-  overflow: visible !important;
+    overflow: visible !important;
 }
+
 
 /* ====================================
    PAGE LAYOUT - VIEWPORT LOCK
    ==================================== */
+
 html:has(.affiliate-page) {
     overflow: hidden;
     height: 100vh;
@@ -27,109 +31,114 @@ body:has(.affiliate-page) {
 }
 
 .affiliate-page {
-  display: flex;
-  flex-direction: column;
-  background: var(--washi);
-  padding-top: 44px;
-  position: relative;
-  height: 100vh;
-  overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    background: var(--washi);
+    padding-top: 44px;
+    position: relative;
+    height: 100vh;
+    overflow: hidden;
 }
 
 .affiliate-page .nav-bar {
-  z-index: 10001 !important;
-  position: fixed !important;
-  top: 0 !important;
-  width: 100% !important;
-  background: rgba(255, 255, 255, 0.98) !important;
-  backdrop-filter: blur(20px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
-  border-bottom: 1px solid rgba(149, 175, 192, 0.2) !important;
-  box-shadow: 0 4px 20px rgba(43, 43, 43, 0.08), 0 2px 8px rgba(149, 175, 192, 0.05) !important;
+    z-index: 10001 !important;
+    position: fixed !important;
+    top: 0 !important;
+    width: 100% !important;
+    background: rgba(255, 255, 255, 0.98) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+    border-bottom: 1px solid rgba(149, 175, 192, 0.2) !important;
+    box-shadow: 0 4px 20px rgba(43, 43, 43, 0.08), 0 2px 8px rgba(149, 175, 192, 0.05) !important;
 }
 
 .affiliate-page .nav-link {
-  color: var(--kurogane) !important;
+    color: var(--kurogane) !important;
 }
 
 .affiliate-page .nav-link.active {
-  color: var(--aitetsu) !important;
+    color: var(--aitetsu) !important;
 }
 
 .affiliate-page .nav-logo img {
-  filter: none !important;
-  opacity: 1 !important;
+    filter: none !important;
+    opacity: 1 !important;
 }
+
 
 /* ====================================
    HEADER BAR
    ==================================== */
+
 .affiliate-header-bar {
-  background: linear-gradient(to bottom, var(--washi) 0%, rgba(149, 175, 192, 0.05) 100%);
-  padding: 1.5rem 0 1.25rem;
-  border-bottom: 1px solid rgba(149, 175, 192, 0.2);
-  margin-top: 1rem;
-  margin-bottom: 1rem;
-  position: relative;
+    background: linear-gradient(to bottom, var(--washi) 0%, rgba(149, 175, 192, 0.05) 100%);
+    padding: 1.5rem 0 1.25rem;
+    border-bottom: 1px solid rgba(149, 175, 192, 0.2);
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    position: relative;
 }
 
 .affiliate-header-bar::before {
-  content: '';
-  position: absolute;
-  bottom: -1px;
-  left: 0;
-  width: 200px;
-  height: 2px;
-  background: linear-gradient(to right, var(--kintsugi), transparent);
-  animation: shimmer 3s ease-in-out infinite;
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 200px;
+    height: 2px;
+    background: linear-gradient(to right, var(--kintsugi), transparent);
+    animation: shimmer 3s ease-in-out infinite;
 }
 
 @keyframes shimmer {
-  0%, 100% {
-    opacity: 1;
-    transform: translateX(0);
-  }
-  50% {
-    opacity: 0.7;
-    transform: translateX(20px);
-  }
+    0%,
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    50% {
+        opacity: 0.7;
+        transform: translateX(20px);
+    }
 }
 
 .affiliate-header-content {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 2rem;
-  flex-wrap: wrap;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 2rem;
+    flex-wrap: wrap;
 }
 
 .affiliate-header-left {
-  flex: 1;
-  min-width: 300px;
+    flex: 1;
+    min-width: 300px;
 }
 
 .affiliate-header-title {
-  font-family: 'Quantico', sans-serif;
-  font-size: 2.25rem;
-  font-weight: 400;
-  color: var(--kurogane);
-  margin-bottom: 0.5rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  line-height: 1.1;
+    font-family: 'Quantico', sans-serif;
+    font-size: 2.25rem;
+    font-weight: 400;
+    color: var(--kurogane);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    line-height: 1.1;
 }
 
 .affiliate-header-subtitle {
-  font-family: 'Antartida', sans-serif;
-  font-size: 0.9375rem;
-  color: var(--namari);
-  font-weight: 400;
-  letter-spacing: 0.01em;
+    font-family: 'Antartida', sans-serif;
+    font-size: 0.9375rem;
+    color: var(--namari);
+    font-weight: 400;
+    letter-spacing: 0.01em;
 }
+
 
 /* ====================================
    AFFILIATE CONTENT
    ==================================== */
+
 .affiliate-content {
     flex: 1;
     min-height: 0;
@@ -146,467 +155,491 @@ body:has(.affiliate-page) {
     overflow-x: hidden;
 }
 
+
 /* ====================================
    SECTION HEADERS (no decorative lines)
    ==================================== */
+
 .affiliate-section {
-  padding: 2rem 0 4rem;
+    padding: 2rem 0 4rem;
 }
 
 .section-header {
-  text-align: center;
-  max-width: 800px;
-  margin: 0 auto 3rem;
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto 3rem;
 }
 
 .section-title {
-  font-family: 'Quantico', sans-serif;
-  font-size: 1.5rem;
-  font-weight: 400;
-  color: var(--kurogane);
-  margin-bottom: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+    font-family: 'Quantico', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 400;
+    color: var(--kurogane);
+    margin-bottom: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
 }
 
 .section-subtitle {
-  font-family: 'Antartida', sans-serif;
-  font-size: 0.95rem;
-  color: var(--namari);
-  line-height: 1.6;
+    font-family: 'Antartida', sans-serif;
+    font-size: 0.95rem;
+    color: var(--namari);
+    line-height: 1.6;
 }
+
 
 /* ====================================
    TIER CARDS - Neutral Brand Colors
    ==================================== */
+
 .affiliate-tiers {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 3rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
 }
 
 .tier-card {
-  background: white;
-  border-radius: 0 !important;
-  padding: 1.75rem 1.5rem;
-  border: 2px solid rgba(149, 175, 192, 0.3);
-  box-shadow: 0 2px 16px rgba(149, 175, 192, 0.08);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-  overflow: hidden;
+    background: white;
+    border-radius: 0 !important;
+    padding: 1.75rem 1.5rem;
+    border: 2px solid rgba(149, 175, 192, 0.3);
+    box-shadow: 0 2px 16px rgba(149, 175, 192, 0.08);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    overflow: hidden;
 }
 
 .tier-card:hover {
-  border-color: rgba(149, 175, 192, 0.5);
-  box-shadow: 0 6px 28px rgba(149, 175, 192, 0.15);
+    border-color: rgba(149, 175, 192, 0.5);
+    box-shadow: 0 6px 28px rgba(149, 175, 192, 0.15);
 }
 
+
 /* Subtle tier accents (brand palette) */
-.tier-card.bronze { border-left: 4px solid rgba(149, 175, 192, 0.4); }
-.tier-card.silver { border-left: 4px solid rgba(149, 175, 192, 0.55); }
-.tier-card.gold { border-left: 4px solid rgba(201, 164, 50, 0.5); }
-.tier-card.platinum { border-left: 4px solid rgba(64, 84, 94, 0.55); }
-.tier-card.platinum-plus { border-left: 4px solid var(--aitetsu); }
+
+.tier-card.bronze {
+    border-left: 4px solid rgba(149, 175, 192, 0.4);
+}
+
+.tier-card.silver {
+    border-left: 4px solid rgba(149, 175, 192, 0.55);
+}
+
+.tier-card.gold {
+    border-left: 4px solid rgba(201, 164, 50, 0.5);
+}
+
+.tier-card.platinum {
+    border-left: 4px solid rgba(64, 84, 94, 0.55);
+}
+
+.tier-card.platinum-plus {
+    border-left: 4px solid var(--aitetsu);
+}
 
 .tier-header {
-  text-align: center;
-  margin-bottom: 1.5rem;
+    text-align: center;
+    margin-bottom: 1.5rem;
 }
 
 .tier-icon {
-  width: 48px;
-  height: 48px;
-  margin: 0 auto 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 0 !important;
-  background: var(--washi);
-  border: 2px solid rgba(149, 175, 192, 0.3);
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0 !important;
+    background: var(--washi);
+    border: 2px solid rgba(149, 175, 192, 0.3);
 }
 
 .tier-icon i {
-  width: 24px;
-  height: 24px;
-  color: var(--aitetsu);
+    width: 24px;
+    height: 24px;
+    color: var(--aitetsu);
 }
 
 .tier-name {
-  font-family: 'Quantico', sans-serif;
-  font-size: 1.125rem;
-  font-weight: 400;
-  color: var(--kurogane);
-  margin-bottom: 0.25rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+    font-family: 'Quantico', sans-serif;
+    font-size: 1.125rem;
+    font-weight: 400;
+    color: var(--kurogane);
+    margin-bottom: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 .tier-range {
-  font-family: 'Antartida', sans-serif;
-  font-size: 0.85rem;
-  color: var(--namari);
+    font-family: 'Antartida', sans-serif;
+    font-size: 0.85rem;
+    color: var(--namari);
 }
 
 .tier-revenue {
-  font-family: 'Antartida', sans-serif;
-  font-size: 0.8rem;
-  color: var(--suzu);
-  margin-top: 0.25rem;
+    font-family: 'Antartida', sans-serif;
+    font-size: 0.8rem;
+    color: var(--suzu);
+    margin-top: 0.25rem;
 }
+
 
 /* ====================================
    TIER STATS - Neutral
    ==================================== */
+
 .tier-stats {
-  background: var(--washi);
-  border-radius: 0 !important;
-  padding: 1rem;
-  margin-bottom: 1.5rem;
-  border: 2px solid rgba(149, 175, 192, 0.25);
+    background: var(--washi);
+    border-radius: 0 !important;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    border: 2px solid rgba(149, 175, 192, 0.25);
 }
 
 .tier-stat {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.5rem 0;
-  border-bottom: 1px solid rgba(149, 175, 192, 0.15);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(149, 175, 192, 0.15);
 }
 
 .tier-stat:last-child {
-  border-bottom: none;
+    border-bottom: none;
 }
 
 .stat-label {
-  font-family: 'Antartida', sans-serif;
-  font-size: 0.85rem;
-  color: var(--namari);
-  font-weight: 500;
+    font-family: 'Antartida', sans-serif;
+    font-size: 0.85rem;
+    color: var(--namari);
+    font-weight: 500;
 }
 
 .stat-value {
-  font-family: 'Antartida', sans-serif;
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: var(--kurogane);
+    font-family: 'Antartida', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--kurogane);
 }
 
 .stat-value.highlight {
-  color: var(--aitetsu);
+    color: var(--aitetsu);
 }
 
 .stat-value.success {
-  color: var(--sei);
+    color: var(--sei);
 }
+
 
 /* ====================================
    TIER BENEFITS
    ==================================== */
+
 .tier-benefits {
-  margin-bottom: 1.5rem;
+    margin-bottom: 1.5rem;
 }
 
 .tier-benefits-title {
-  font-family: 'Antartida', sans-serif;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--kurogane);
-  margin-bottom: 0.75rem;
+    font-family: 'Antartida', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--kurogane);
+    margin-bottom: 0.75rem;
 }
 
 .benefit-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.5rem;
-  padding: 0.5rem 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 0.5rem 0;
 }
 
 .benefit-icon {
-  width: 18px;
-  height: 18px;
-  flex-shrink: 0;
-  margin-top: 0.15rem;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    margin-top: 0.15rem;
 }
 
 .benefit-icon.available {
-  color: var(--sei);
+    color: var(--sei);
 }
 
 .benefit-icon.not-available {
-  color: var(--suzu);
+    color: var(--suzu);
 }
 
 .benefit-text {
-  font-family: 'Antartida', sans-serif;
-  font-size: 0.875rem;
-  color: var(--namari);
-  line-height: 1.5;
+    font-family: 'Antartida', sans-serif;
+    font-size: 0.875rem;
+    color: var(--namari);
+    line-height: 1.5;
 }
 
 .benefit-text.not-available {
-  color: var(--suzu);
-  text-decoration: line-through;
+    color: var(--suzu);
+    text-decoration: line-through;
 }
 
 .benefit-badge {
-  display: inline-block;
-  padding: 0.2rem 0.5rem;
-  background: rgba(149, 175, 192, 0.15);
-  color: var(--kurogane);
-  border: 1px solid rgba(149, 175, 192, 0.25);
-  border-radius: 0 !important;
-  font-size: 0.7rem;
-  font-weight: 600;
-  margin-left: 0.5rem;
+    display: inline-block;
+    padding: 0.2rem 0.5rem;
+    background: rgba(149, 175, 192, 0.15);
+    color: var(--kurogane);
+    border: 1px solid rgba(149, 175, 192, 0.25);
+    border-radius: 0 !important;
+    font-size: 0.7rem;
+    font-weight: 600;
+    margin-left: 0.5rem;
 }
+
 
 /* ====================================
    TIER ACTIONS - Kintsugi for primary only
    ==================================== */
+
 .tier-action {
-  width: 100%;
-  padding: 0.75rem 1rem;
-  border-radius: 0 !important;
-  font-family: 'Antartida', sans-serif;
-  font-weight: 600;
-  font-size: 0.9rem;
-  border: 1.5px solid;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  text-decoration: none;
-  color: white;
-  background: var(--kintsugi);
-  border-color: var(--kintsugi);
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: 0 !important;
+    font-family: 'Antartida', sans-serif;
+    font-weight: 600;
+    font-size: 0.9rem;
+    border: 1.5px solid;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    color: white;
+    background: var(--kintsugi);
+    border-color: var(--kintsugi);
 }
 
 .tier-action:hover {
-  background: var(--kintsugi-hover, #c9a432);
-  border-color: var(--kintsugi-hover, #c9a432);
+    background: var(--kintsugi-hover, #c9a432);
+    border-color: var(--kintsugi-hover, #c9a432);
 }
 
 .tier-action i {
-  width: 18px;
-  height: 18px;
+    width: 18px;
+    height: 18px;
 }
 
+
 /* Current level - neutral */
+
 .tier-card.bronze .tier-action {
-  background: white;
-  color: var(--kurogane);
-  border-color: rgba(149, 175, 192, 0.3);
+    background: white;
+    color: var(--kurogane);
+    border-color: rgba(149, 175, 192, 0.3);
 }
 
 .tier-card.bronze .tier-action:hover {
-  background: var(--washi);
-  border-color: var(--suzu);
+    background: var(--washi);
+    border-color: var(--suzu);
 }
+
 
 /* ====================================
    HOW IT WORKS - Photo Cards (moodboard)
    ==================================== */
+
 .affiliate-how-it-works {
-  padding: 2rem 0 3rem;
+    padding: 2rem 0 3rem;
 }
 
 .affiliate-how-it-works .section-header {
-  margin-bottom: 2.5rem;
+    margin-bottom: 2.5rem;
 }
 
 .how-it-works-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
 }
 
 .how-it-works-card {
-  position: relative;
-  border-radius: 0 !important;
-  overflow: hidden;
-  min-height: 280px;
-  border: 2px solid rgba(149, 175, 192, 0.35);
-  box-shadow: 0 4px 20px rgba(43, 43, 43, 0.12);
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+    position: relative;
+    border-radius: 0 !important;
+    overflow: hidden;
+    min-height: 280px;
+    border: 2px solid rgba(149, 175, 192, 0.35);
+    box-shadow: 0 4px 20px rgba(43, 43, 43, 0.12);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
 .how-it-works-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 30px rgba(43, 43, 43, 0.18);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(43, 43, 43, 0.18);
 }
 
 .how-it-works-bg {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-image: var(--card-bg);
-  background-size: cover;
-  background-position: center;
-  z-index: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: var(--card-bg);
+    background-size: cover;
+    background-position: center;
+    z-index: 0;
 }
 
 .how-it-works-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(to top, rgba(43, 43, 43, 0.92) 0%, rgba(43, 43, 43, 0.6) 40%, rgba(43, 43, 43, 0.3) 100%);
-  z-index: 1;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to top, rgba(43, 43, 43, 0.92) 0%, rgba(43, 43, 43, 0.6) 40%, rgba(43, 43, 43, 0.3) 100%);
+    z-index: 1;
 }
 
 .how-it-works-content {
-  position: relative;
-  z-index: 2;
-  padding: 2rem 1.5rem;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
+    position: relative;
+    z-index: 2;
+    padding: 2rem 1.5rem;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
 }
 
 .how-it-works-icon {
-  width: 48px;
-  height: 48px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(149, 175, 192, 0.2);
-  border: 2px solid rgba(149, 175, 192, 0.4);
-  border-radius: 0 !important;
-  margin-bottom: 1rem;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(149, 175, 192, 0.2);
+    border: 2px solid rgba(149, 175, 192, 0.4);
+    border-radius: 0 !important;
+    margin-bottom: 1rem;
 }
 
 .how-it-works-icon i {
-  width: 24px;
-  height: 24px;
-  color: var(--aitetsu);
+    width: 24px;
+    height: 24px;
+    color: var(--aitetsu);
 }
 
 .how-it-works-title {
-  font-family: 'Quantico', sans-serif;
-  font-size: 1.1rem;
-  font-weight: 400;
-  color: var(--washi);
-  margin-bottom: 0.5rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+    font-family: 'Quantico', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 400;
+    color: var(--washi);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 .how-it-works-text {
-  font-family: 'Antartida', sans-serif;
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.85);
-  line-height: 1.6;
+    font-family: 'Antartida', sans-serif;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.85);
+    line-height: 1.6;
 }
+
 
 /* ====================================
    DISCLAIMER - Neutral
    ==================================== */
+
 .affiliate-disclaimer {
-  background: white;
-  border: 2px solid rgba(149, 175, 192, 0.3);
-  border-radius: 0 !important;
-  padding: 1.5rem 2rem;
-  text-align: center;
-  margin-top: 2rem;
-  max-width: 800px;
-  margin-left: auto;
-  margin-right: auto;
+    background: white;
+    border: 2px solid rgba(149, 175, 192, 0.3);
+    border-radius: 0 !important;
+    padding: 1.5rem 2rem;
+    text-align: center;
+    margin-top: 2rem;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .disclaimer-icon {
-  width: 40px;
-  height: 40px;
-  margin: 0 auto 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--washi);
-  border: 2px solid rgba(149, 175, 192, 0.3);
-  border-radius: 0 !important;
-  color: var(--aitetsu);
+    width: 40px;
+    height: 40px;
+    margin: 0 auto 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--washi);
+    border: 2px solid rgba(149, 175, 192, 0.3);
+    border-radius: 0 !important;
+    color: var(--aitetsu);
 }
 
 .disclaimer-icon i {
-  width: 20px;
-  height: 20px;
+    width: 20px;
+    height: 20px;
 }
 
 .disclaimer-text {
-  font-family: 'Antartida', sans-serif;
-  font-size: 0.9rem;
-  color: var(--namari);
-  line-height: 1.7;
+    font-family: 'Antartida', sans-serif;
+    font-size: 0.9rem;
+    color: var(--namari);
+    line-height: 1.7;
 }
 
 .disclaimer-text strong {
-  color: var(--kurogane);
-  font-weight: 600;
+    color: var(--kurogane);
+    font-weight: 600;
 }
+
 
 /* ====================================
    RESPONSIVE
    ==================================== */
-@media (max-width: 1200px) {
-  .affiliate-tiers {
-    grid-template-columns: repeat(2, 1fr);
-  }
 
-  .how-it-works-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
+@media (max-width: 1200px) {
+    .affiliate-tiers {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .how-it-works-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 @media (max-width: 768px) {
-  .affiliate-hero {
-    padding: 6rem 0 3rem;
-  }
-
-  .affiliate-hero-title {
-    font-size: 1.75rem;
-  }
-
-  .affiliate-hero-subtitle {
-    font-size: 1rem;
-  }
-
-  .how-it-works-card {
-    min-height: 240px;
-  }
-
-  .affiliate-tiers {
-    grid-template-columns: 1fr;
-    gap: 1.25rem;
-  }
-
-  .how-it-works-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .tier-card {
-    padding: 1.5rem 1.25rem;
-  }
-
-  .section-title {
-    font-size: 1.25rem;
-  }
+    .affiliate-hero {
+        padding: 6rem 0 3rem;
+    }
+    .affiliate-hero-title {
+        font-size: 1.75rem;
+    }
+    .affiliate-hero-subtitle {
+        font-size: 1rem;
+    }
+    .how-it-works-card {
+        min-height: 240px;
+    }
+    .affiliate-tiers {
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
+    }
+    .how-it-works-grid {
+        grid-template-columns: 1fr;
+    }
+    .tier-card {
+        padding: 1.5rem 1.25rem;
+    }
+    .section-title {
+        font-size: 1.25rem;
+    }
 }
 
 @media (max-width: 480px) {
-  .affiliate-hero-title {
-    font-size: 1.5rem;
-  }
-
-  .tier-name {
-    font-size: 1rem;
-  }
-
-  .tier-stats {
-    padding: 0.875rem;
-  }
+    .affiliate-hero-title {
+        font-size: 1.5rem;
+    }
+    .tier-name {
+        font-size: 1rem;
+    }
+    .tier-stats {
+        padding: 0.875rem;
+    }
 }

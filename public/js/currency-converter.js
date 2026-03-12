@@ -137,9 +137,6 @@
       rateText: document.getElementById('rateText'),
       rateUpdated: document.getElementById('rateUpdated'),
       
-      // Popular currencies
-      popularCurrencyBtns: document.querySelectorAll('.popular-currency-btn'),
-      
       // All currencies dropdown
       allCurrenciesDropdown: document.getElementById('allCurrenciesDropdown'),
       currencySearchInput: document.getElementById('currencySearchInput'),
@@ -180,14 +177,6 @@
     // Swap currencies
     elements.swapBtn.addEventListener('click', swapCurrencies);
     
-    // Popular currency buttons
-    elements.popularCurrencyBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const currency = btn.getAttribute('data-currency');
-        selectTargetCurrency(currency);
-      });
-    });
-    
     // Currency search
     if (elements.currencySearchInput) {
       elements.currencySearchInput.addEventListener('input', debounce(filterCurrencies, 200));
@@ -212,6 +201,9 @@
       lucide.createIcons();
     }
     
+    // Populate currency list for both selectors
+    populateCurrencyList();
+    
     // Fetch rates if needed
     if (!state.exchangeRates || isRatesCacheExpired()) {
       fetchExchangeRates();
@@ -224,9 +216,10 @@
     elements.modal.classList.remove('active');
     document.body.style.overflow = '';
     
-    // Hide currency dropdown if open
-    if (elements.allCurrenciesDropdown) {
-      elements.allCurrenciesDropdown.style.display = 'none';
+    // Clear search input
+    if (elements.currencySearchInput) {
+      elements.currencySearchInput.value = '';
+      populateCurrencyList(); // Reset the list
     }
   }
 
@@ -324,16 +317,11 @@
   function openCurrencySelector(type) {
     state.currentSelector = type;
     
-    // Populate currency list
-    populateCurrencyList();
-    
-    // Show dropdown
-    elements.allCurrenciesDropdown.style.display = 'block';
-    
     // Focus search input
     if (elements.currencySearchInput) {
       elements.currencySearchInput.value = '';
       elements.currencySearchInput.focus();
+      populateCurrencyList();
     }
   }
 
@@ -366,7 +354,11 @@
       
       btn.addEventListener('click', () => {
         selectCurrency(code, state.currentSelector);
-        elements.allCurrenciesDropdown.style.display = 'none';
+        // Clear search after selection
+        if (elements.currencySearchInput) {
+          elements.currencySearchInput.value = '';
+          populateCurrencyList();
+        }
       });
       
       list.appendChild(btn);

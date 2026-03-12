@@ -1,301 +1,549 @@
 <%- include('partials/header') %>
-<link rel="stylesheet" href="/css/buyerCSS/buyer-main.css">
-<link rel="stylesheet" href="/css/buyerCSS/create-claim.css">
+    <link rel="stylesheet" href="/css/buyerCSS/buyer-main.css">
+    <link rel="stylesheet" href="/css/buyerCSS/create-claim.css">
 
-<%- include('partials/navbar') %>
+    <%- include('partials/navbar') %>
 
-<!-- ====================================
+        <!-- ====================================
      CREATE CLAIM PAGE - HEADER BAR DESIGN
      ==================================== -->
-<div class="create-claim-page">
-  <!-- Header Bar -->
-  <div class="create-claim-header-bar">
-    <div class="container">
-      <div class="create-claim-header-content">
-        <div class="create-claim-header-left">
-          <h1 class="create-claim-header-title">Create New Claim</h1>
-          <p class="create-claim-header-subtitle">Submit a claim for any issues with your orders or inquiries</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Main Content -->
-  <div class="create-claim-content">
-    <div class="container">
-    <div class="create-claim-section">
-      <div class="create-claim-container">
-        <!-- Back Button -->
-        <a href="/buyer/claim-support" class="btn-back">
-          <i data-lucide="arrow-left"></i>
-          <span>Back to Claims</span>
-        </a>
-
-        <!-- Form Card -->
-        <div class="create-claim-card">
-          <div class="card-header">
-            <h2 class="card-title">Claim Details</h2>
-            <p class="card-subtitle">Provide details about your claim and we'll assist you</p>
-          </div>
-
-          <form id="create-claim-form" class="claim-form">
-            <!-- Category (First to determine if order is needed) -->
-            <div class="form-group">
-              <label for="category" class="form-label">
-                <i data-lucide="tag"></i>
-                <span><%= t('tickets.create.category') %></span>
-                <span class="required"><%= t('tickets.create.required') %></span>
-              </label>
-              <select id="category" name="category" class="form-select" required>
-                <option value=""><%= t('tickets.create.selectCategoryPlaceholder') %></option>
-                <option value="Shipping Issue"><%= t('tickets.categories.shipping') %></option>
-                <option value="Order Issue"><%= t('tickets.categories.order') %></option>
-                <option value="Product Inquiry"><%= t('tickets.categories.product') %></option>
-                <option value="Payment"><%= t('tickets.categories.payment') %></option>
-                <option value="Documentation"><%= t('tickets.categories.documentation') %></option>
-                <option value="Technical Issue"><%= t('tickets.categories.technical') %></option>
-                <option value="General"><%= t('tickets.categories.other') %></option>
-              </select>
-              <span class="form-hint"><%= t('tickets.create.categoryHint') %></span>
-            </div>
-
-            <!-- Order Number (Optional - shown for order-related categories) -->
-            <div class="form-group" id="order-group">
-              <label for="order-number" class="form-label">
-                <i data-lucide="package"></i>
-                <span><%= t('tickets.create.relatedOrder') %></span>
-                <span class="optional"><%= t('tickets.create.optional') %></span>
-              </label>
-              <select 
-                id="order-number" 
-                name="orderNumber" 
-                class="form-select"
-              >
-                <option value=""><%= t('tickets.create.noSpecificOrder') %></option>
-                <% if (typeof orders !== 'undefined' && orders && orders.length > 0) { %>
-                  <% orders.forEach(function(order) { %>
-                    <option value="<%= order.orderNumber %>">
-                      <%= order.orderNumber %> - <%= order.status ? order.status.charAt(0).toUpperCase() + order.status.slice(1) : 'N/A' %> - <%= new Date(order.createdAt).toLocaleDateString() %>
-                    </option>
-                  <% }); %>
-                <% } %>
-              </select>
-              <span class="form-hint"><%= t('tickets.create.orderHint') %></span>
-              <% if (typeof orders !== 'undefined' && orders && orders.length === 0) { %>
-              <span class="form-hint form-hint-info"><%= t('tickets.create.noOrdersHint') || 'Orders with active claims are not listed. You can submit a general inquiry without selecting an order.' %></span>
-              <% } %>
-            </div>
-
-            <!-- Subject -->
-            <div class="form-group">
-              <label for="subject" class="form-label">
-                <i data-lucide="type"></i>
-                <span><%= t('tickets.create.subject') %></span>
-                <span class="required"><%= t('tickets.create.required') %></span>
-              </label>
-              <input 
-                type="text" 
-                id="subject" 
-                name="subject" 
-                class="form-input" 
-                placeholder="<%= t('tickets.create.subjectPlaceholder') %>"
-                required
-              >
-              <span class="form-hint"><%= t('tickets.create.subjectHint') %></span>
-            </div>
-
-            <!-- Description -->
-            <div class="form-group">
-              <label for="description" class="form-label">
-                <i data-lucide="file-text"></i>
-                <span><%= t('tickets.create.description') %></span>
-                <span class="required"><%= t('tickets.create.required') %></span>
-              </label>
-              <textarea 
-                id="description" 
-                name="description" 
-                class="form-textarea" 
-                rows="6"
-                placeholder="<%= t('tickets.create.descriptionPlaceholder') %>"
-                required
-              ></textarea>
-              <span class="form-hint"><%= t('tickets.create.descriptionHint') %></span>
-            </div>
-
-            <!-- File Attachments -->
-            <div class="form-group">
-              <label for="attachments" class="form-label">
-                <i data-lucide="paperclip"></i>
-                <span><%= t('tickets.create.attachmentsLabel') %></span>
-                <span class="optional"><%= t('tickets.create.optional') %></span>
-              </label>
-              <div class="file-upload-area" id="file-upload-area">
-                <input 
-                  type="file" 
-                  id="attachments" 
-                  name="attachments" 
-                  multiple 
-                  accept="image/*,.pdf,.doc,.docx"
-                  hidden
-                >
-                <div class="file-upload-content">
-                  <div class="file-upload-icon">
-                    <i data-lucide="upload-cloud"></i>
-                  </div>
-                  <p class="file-upload-text">
-                    <strong><%= t('tickets.create.clickToUpload') %></strong> <%= t('tickets.create.orDragDrop') %>
-                  </p>
-                  <p class="file-upload-hint">
-                    <%= t('tickets.create.fileTypes') %>
-                  </p>
+        <div class="create-claim-page">
+            <!-- Header Bar -->
+            <div class="create-claim-header-bar">
+                <div class="container">
+                    <div class="create-claim-header-content">
+                        <div class="create-claim-header-left">
+                            <h1 class="create-claim-header-title">Create New Claim</h1>
+                            <p class="create-claim-header-subtitle">Submit a claim for any issues with your orders or inquiries</p>
+                        </div>
+                    </div>
                 </div>
-              </div>
-              <div class="file-list" id="file-list"></div>
             </div>
 
-            <!-- Form Actions -->
-            <div class="form-actions">
-              <button type="button" class="btn-cancel" onclick="window.location.href='/buyer/claim-support'">
-                <i data-lucide="x"></i>
-                <span>Cancel</span>
-              </button>
-              <button type="submit" class="btn-submit">
-                <i data-lucide="send"></i>
-                <span>Submit Claim</span>
-              </button>
+            <!-- Main Content -->
+            <div class="create-claim-content">
+                <div class="container">
+                    <div class="create-claim-section">
+                        <div class="create-claim-container">
+                            <!-- Back Button -->
+                            <a href="/buyer/claim-support" class="btn-back">
+                                <i data-lucide="arrow-left"></i>
+                                <span>Back to Claims</span>
+                            </a>
+
+                            <!-- Multi-Step Form Card -->
+                            <div class="create-claim-card">
+                                <!-- Progress Stepper -->
+                                <div class="claim-stepper">
+                                    <div class="stepper-step active" data-step="1">
+                                        <div class="step-icon">
+                                            <i data-lucide="tag"></i>
+                                            <span class="step-number">1</span>
+                                        </div>
+                                        <div class="step-label">Category</div>
+                                    </div>
+                                    <div class="stepper-line"></div>
+                                    <div class="stepper-step" data-step="2">
+                                        <div class="step-icon">
+                                            <i data-lucide="package"></i>
+                                            <span class="step-number">2</span>
+                                        </div>
+                                        <div class="step-label">Order Info</div>
+                                    </div>
+                                    <div class="stepper-line"></div>
+                                    <div class="stepper-step" data-step="3">
+                                        <div class="step-icon">
+                                            <i data-lucide="file-text"></i>
+                                            <span class="step-number">3</span>
+                                        </div>
+                                        <div class="step-label">Details</div>
+                                    </div>
+                                    <div class="stepper-line"></div>
+                                    <div class="stepper-step" data-step="4">
+                                        <div class="step-icon">
+                                            <i data-lucide="paperclip"></i>
+                                            <span class="step-number">4</span>
+                                        </div>
+                                        <div class="step-label">Attachments</div>
+                                    </div>
+                                    <div class="stepper-line"></div>
+                                    <div class="stepper-step" data-step="5">
+                                        <div class="step-icon">
+                                            <i data-lucide="check-circle"></i>
+                                            <span class="step-number">5</span>
+                                        </div>
+                                        <div class="step-label">Review</div>
+                                    </div>
+                                </div>
+
+                                <form id="create-claim-form" class="claim-form-wizard">
+                                    <!-- Step 1: Category Selection -->
+                                    <div class="wizard-step active" data-step="1">
+                                        <div class="step-header">
+                                            <h2 class="step-title">Select Claim Category</h2>
+                                            <p class="step-subtitle">Choose the category that best describes your issue</p>
+                                        </div>
+                                        <div class="step-content">
+                                            <div class="category-grid">
+                                                <label class="category-card">
+                                                    <input type="radio" name="category" value="Shipping Issue" required>
+                                                    <div class="category-content">
+                                                        <i data-lucide="truck"></i>
+                                                        <h3>Shipping Issue</h3>
+                                                        <p>Delayed or damaged shipments</p>
+                                                    </div>
+                                                </label>
+                                                <label class="category-card">
+                                                    <input type="radio" name="category" value="Order Issue" required>
+                                                    <div class="category-content">
+                                                        <i data-lucide="shopping-cart"></i>
+                                                        <h3>Order Issue</h3>
+                                                        <p>Wrong items or quantities</p>
+                                                    </div>
+                                                </label>
+                                                <label class="category-card">
+                                                    <input type="radio" name="category" value="Product Inquiry" required>
+                                                    <div class="category-content">
+                                                        <i data-lucide="box"></i>
+                                                        <h3>Product Inquiry</h3>
+                                                        <p>Questions about products</p>
+                                                    </div>
+                                                </label>
+                                                <label class="category-card">
+                                                    <input type="radio" name="category" value="Payment" required>
+                                                    <div class="category-content">
+                                                        <i data-lucide="credit-card"></i>
+                                                        <h3>Payment</h3>
+                                                        <p>Billing or payment issues</p>
+                                                    </div>
+                                                </label>
+                                                <label class="category-card">
+                                                    <input type="radio" name="category" value="Documentation" required>
+                                                    <div class="category-content">
+                                                        <i data-lucide="file-text"></i>
+                                                        <h3>Documentation</h3>
+                                                        <p>Invoice or certificate requests</p>
+                                                    </div>
+                                                </label>
+                                                <label class="category-card">
+                                                    <input type="radio" name="category" value="Technical Issue" required>
+                                                    <div class="category-content">
+                                                        <i data-lucide="alert-triangle"></i>
+                                                        <h3>Technical Issue</h3>
+                                                        <p>Platform or system problems</p>
+                                                    </div>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Step 2: Order Selection -->
+                                    <div class="wizard-step" data-step="2">
+                                        <div class="step-header">
+                                            <h2 class="step-title">Related Order (Optional)</h2>
+                                            <p class="step-subtitle">Select an order if this claim is related to a specific purchase</p>
+                                        </div>
+                                        <div class="step-content">
+                                            <div class="order-selection">
+                                                <label class="order-card no-order">
+                                                    <input type="radio" name="orderNumber" value="" checked>
+                                                    <div class="order-content">
+                                                        <i data-lucide="help-circle"></i>
+                                                        <div>
+                                                            <h3>No Specific Order</h3>
+                                                            <p>This is a general inquiry</p>
+                                                        </div>
+                                                    </div>
+                                                </label>
+                                                <% if (typeof orders !== 'undefined' && orders && orders.length > 0) { %>
+                                                    <% orders.forEach(function(order) { %>
+                                                        <label class="order-card">
+                                                            <input type="radio" name="orderNumber" value="<%= order.orderNumber %>">
+                                                            <div class="order-content">
+                                                                <i data-lucide="package"></i>
+                                                                <div>
+                                                                    <h3><%= order.orderNumber %></h3>
+                                                                    <p><%= order.status ? order.status.charAt(0).toUpperCase() + order.status.slice(1) : 'N/A' %> • <%= new Date(order.createdAt).toLocaleDateString() %></p>
+                                                                </div>
+                                                            </div>
+                                                        </label>
+                                                    <% }); %>
+                                                <% } else { %>
+                                                    <div class="no-orders-message">
+                                                        <i data-lucide="info"></i>
+                                                        <p>No orders available or all orders have active claims. You can proceed with a general inquiry.</p>
+                                                    </div>
+                                                <% } %>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Step 3: Claim Details -->
+                                    <div class="wizard-step" data-step="3">
+                                        <div class="step-header">
+                                            <h2 class="step-title">Claim Details</h2>
+                                            <p class="step-subtitle">Provide a clear description of your issue</p>
+                                        </div>
+                                        <div class="step-content">
+                                            <div class="form-group-wizard">
+                                                <label for="subject" class="form-label-wizard">
+                                                    <i data-lucide="type"></i>
+                                                    <span>Subject</span>
+                                                    <span class="required">*</span>
+                                                </label>
+                                                <input type="text" id="subject" name="subject" class="form-input-wizard" placeholder="Brief description of your issue" required>
+                                            </div>
+                                            <div class="form-group-wizard">
+                                                <label for="description" class="form-label-wizard">
+                                                    <i data-lucide="align-left"></i>
+                                                    <span>Description</span>
+                                                    <span class="required">*</span>
+                                                </label>
+                                                <textarea id="description" name="description" class="form-textarea-wizard" rows="8" placeholder="Provide detailed information about your issue..." required></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Step 4: Attachments -->
+                                    <div class="wizard-step" data-step="4">
+                                        <div class="step-header">
+                                            <h2 class="step-title">Add Attachments (Optional)</h2>
+                                            <p class="step-subtitle">Upload relevant images or documents to support your claim</p>
+                                        </div>
+                                        <div class="step-content">
+                                            <div class="file-upload-area-wizard" id="file-upload-area">
+                                                <input type="file" id="attachments" name="attachments" multiple accept="image/*,.pdf,.doc,.docx" hidden>
+                                                <div class="file-upload-content-wizard">
+                                                    <div class="file-upload-icon-wizard">
+                                                        <i data-lucide="upload-cloud"></i>
+                                                    </div>
+                                                    <p class="file-upload-text-wizard">
+                                                        <strong>Click to upload</strong> or drag and drop
+                                                    </p>
+                                                    <p class="file-upload-hint-wizard">
+                                                        PNG, JPG, PDF, DOC (max 10MB each)
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div class="file-list-wizard" id="file-list"></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Step 5: Review -->
+                                    <div class="wizard-step" data-step="5">
+                                        <div class="step-header">
+                                            <h2 class="step-title">Review Your Claim</h2>
+                                            <p class="step-subtitle">Please verify all information before submitting</p>
+                                        </div>
+                                        <div class="step-content">
+                                            <div class="review-section">
+                                                <div class="review-item">
+                                                    <div class="review-label">
+                                                        <i data-lucide="tag"></i>
+                                                        <span>Category</span>
+                                                    </div>
+                                                    <div class="review-value" id="review-category">-</div>
+                                                </div>
+                                                <div class="review-item">
+                                                    <div class="review-label">
+                                                        <i data-lucide="package"></i>
+                                                        <span>Order Number</span>
+                                                    </div>
+                                                    <div class="review-value" id="review-order">-</div>
+                                                </div>
+                                                <div class="review-item">
+                                                    <div class="review-label">
+                                                        <i data-lucide="type"></i>
+                                                        <span>Subject</span>
+                                                    </div>
+                                                    <div class="review-value" id="review-subject">-</div>
+                                                </div>
+                                                <div class="review-item">
+                                                    <div class="review-label">
+                                                        <i data-lucide="align-left"></i>
+                                                        <span>Description</span>
+                                                    </div>
+                                                    <div class="review-value" id="review-description">-</div>
+                                                </div>
+                                                <div class="review-item">
+                                                    <div class="review-label">
+                                                        <i data-lucide="paperclip"></i>
+                                                        <span>Attachments</span>
+                                                    </div>
+                                                    <div class="review-value" id="review-attachments">No files attached</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Navigation Buttons -->
+                                    <div class="wizard-navigation">
+                                        <button type="button" class="btn-wizard btn-previous" id="btn-previous" style="display: none;">
+                                            <i data-lucide="arrow-left"></i>
+                                            <span>Previous</span>
+                                        </button>
+                                        <button type="button" class="btn-wizard btn-next" id="btn-next">
+                                            <span>Next</span>
+                                            <i data-lucide="arrow-right"></i>
+                                        </button>
+                                        <button type="submit" class="btn-wizard btn-submit-wizard" id="btn-submit" style="display: none;">
+                                            <i data-lucide="send"></i>
+                                            <span>Submit Claim</span>
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Container -->
             </div>
-          </form>
+            <!-- End create-claim-content -->
+
+            <!-- Footer inside create claim page for viewport lock -->
+            <footer class="footer create-claim-footer">
+                <div class="footer-nav">
+                    <div class="footer-nav-left">
+                        <a href="#about" class="footer-nav-link">ABOUT</a>
+                        <a href="#contact" class="footer-nav-link">CONTACT</a>
+                        <a href="#careers" class="footer-nav-link">CAREERS</a>
+                    </div>
+                    <div class="footer-logo-center">
+                        <img src="/images/brand/icon-light.png" alt="PARTSFORM" class="footer-logo-icon">
+                    </div>
+                    <div class="footer-nav-right">
+                        <a href="#how-it-works" class="footer-nav-link">HOW IT WORKS</a>
+                        <a href="#referral" class="footer-nav-link">REFERRAL PROGRAM</a>
+                        <a href="#support" class="footer-nav-link">SUPPORT</a>
+                    </div>
+                </div>
+                <div class="footer-copyright-bar">
+                    <span class="footer-copyright-text">©<%= new Date().getFullYear() %> - PartsForm | All right reserved</span>
+                </div>
+            </footer>
         </div>
+        <!-- End create-claim-page -->
 
-        <!-- Help Card -->
-        <div class="help-card">
-          <div class="help-icon">
-            <i data-lucide="info"></i>
-          </div>
-          <div class="help-content">
-            <h3 class="help-title"><%= t('tickets.create.helpTitle') %></h3>
-            <p class="help-text">
-              <%= t('tickets.create.helpText') %>
-            </p>
-            <div class="help-contacts">
-              <a href="mailto:support@partsform.com" class="help-contact">
-                <i data-lucide="mail"></i>
-                <span>support@partsform.com</span>
-              </a>
-              <a href="tel:+971-4-123-4567" class="help-contact">
-                <i data-lucide="phone"></i>
-                <span>+971 4 123 4567</span>
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    </div><!-- End Container -->
-  </div><!-- End create-claim-content -->
-</div><!-- End create-claim-page -->
+        <%- include('partials/quick-search') %>
 
-<%- include('partials/quick-search') %>
-<%- include('partials/footer') %>
+                <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+                <script src="/js/main.js"></script>
+                <script src="/js/quick-search.js"></script>
+                <script src="/js/cart.js"></script>
+                <script src="/js/cart-badge-updater.js"></script>
+                <script>
+                    lucide.createIcons();
+                    window.addEventListener('load', () => lucide.createIcons());
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="/js/main.js"></script>
-<script src="/js/quick-search.js"></script>
-<script src="/js/cart.js"></script>
-<script src="/js/cart-badge-updater.js"></script>
-<script>
-  lucide.createIcons();
-  window.addEventListener('load', () => lucide.createIcons());
-  
-  // Pre-populate order from URL parameter
-  const urlParams = new URLSearchParams(window.location.search);
-  const orderParam = urlParams.get('order');
-  if (orderParam) {
-    const orderSelect = document.getElementById('order-number');
-    if (orderSelect) {
-      orderSelect.value = orderParam;
-    }
-  }
-  
-  // Categories that typically require an order
-  const orderRelatedCategories = ['Shipping Issue', 'Order Issue', 'Payment', 'Return Request'];
-  
-  // Handle category change to show/hide order field hint
-  const categorySelect = document.getElementById('category');
-  const orderGroup = document.getElementById('order-group');
-  const orderSelect = document.getElementById('order-number');
-  
-  categorySelect.addEventListener('change', () => {
-    const category = categorySelect.value;
-    if (orderRelatedCategories.includes(category)) {
-      orderGroup.classList.add('order-recommended');
-      orderGroup.querySelector('.form-hint').textContent = 'Recommended: Select the related order for faster resolution';
-    } else {
-      orderGroup.classList.remove('order-recommended');
-      orderGroup.querySelector('.form-hint').textContent = 'Select an order if this issue is related to a specific order';
-    }
-  });
-  
-  // Force navbar to always stay white
-  document.addEventListener('DOMContentLoaded', () => {
-    const navbar = document.getElementById('navbar');
-    if (navbar) {
-      navbar.classList.add('scrolled');
-      const observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-          if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-            if (!navbar.classList.contains('scrolled')) {
-              navbar.classList.add('scrolled');
-            }
-          }
-        });
-      });
-      observer.observe(navbar, { attributes: true, attributeFilter: ['class'] });
-      const ensureScrolled = () => navbar.classList.add('scrolled');
-      window.addEventListener('scroll', ensureScrolled, { passive: true });
-    }
-  });
+                    // Wizard State
+                    let currentStep = 1;
+                    const totalSteps = 5;
 
-  // File upload handling
-  const fileUploadArea = document.getElementById('file-upload-area');
-  const fileInput = document.getElementById('attachments');
-  const fileList = document.getElementById('file-list');
-  let selectedFiles = [];
+                    // Pre-populate order from URL parameter
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const orderParam = urlParams.get('order');
+                    if (orderParam) {
+                        setTimeout(() => {
+                            const orderRadio = document.querySelector(`input[name="orderNumber"][value="${orderParam}"]`);
+                            if (orderRadio) {
+                                orderRadio.checked = true;
+                            }
+                        }, 100);
+                    }
 
-  fileUploadArea.addEventListener('click', () => fileInput.click());
+                    // Show specific step
+                    function showStep(step) {
+                        // Hide all steps
+                        document.querySelectorAll('.wizard-step').forEach(s => {
+                            s.classList.remove('active');
+                        });
 
-  fileUploadArea.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    fileUploadArea.classList.add('drag-over');
-  });
+                        // Show current step
+                        const currentStepEl = document.querySelector(`.wizard-step[data-step="${step}"]`);
+                        if (currentStepEl) {
+                            currentStepEl.classList.add('active');
+                        }
 
-  fileUploadArea.addEventListener('dragleave', () => {
-    fileUploadArea.classList.remove('drag-over');
-  });
+                        // Update stepper
+                        document.querySelectorAll('.stepper-step').forEach((s, index) => {
+                            const stepNumber = index + 1;
+                            s.classList.remove('active', 'completed');
+                            
+                            if (stepNumber < step) {
+                                s.classList.add('completed');
+                            } else if (stepNumber === step) {
+                                s.classList.add('active');
+                            }
+                        });
 
-  fileUploadArea.addEventListener('drop', (e) => {
-    e.preventDefault();
-    fileUploadArea.classList.remove('drag-over');
-    handleFiles(e.dataTransfer.files);
-  });
+                        // Update navigation buttons
+                        const btnPrevious = document.getElementById('btn-previous');
+                        const btnNext = document.getElementById('btn-next');
+                        const btnSubmit = document.getElementById('btn-submit');
 
-  fileInput.addEventListener('change', (e) => {
-    handleFiles(e.target.files);
-  });
+                        btnPrevious.style.display = step > 1 ? 'flex' : 'none';
+                        btnNext.style.display = step < totalSteps ? 'flex' : 'none';
+                        btnSubmit.style.display = step === totalSteps ? 'flex' : 'none';
 
-  function handleFiles(files) {
-    selectedFiles = Array.from(files);
-    renderFileList();
-    lucide.createIcons();
-  }
+                        // Re-render icons
+                        lucide.createIcons();
+                    }
 
-  function renderFileList() {
-    if (selectedFiles.length === 0) {
-      fileList.innerHTML = '';
-      return;
-    }
+                    // Validate current step
+                    function validateStep(step) {
+                        if (step === 1) {
+                            const category = document.querySelector('input[name="category"]:checked');
+                            if (!category) {
+                                Swal.fire({
+                                    icon: 'warning',
+                                    title: 'Category Required',
+                                    text: 'Please select a claim category',
+                                    confirmButtonColor: '#40545E'
+                                });
+                                return false;
+                            }
+                        }
 
-    fileList.innerHTML = selectedFiles.map((file, index) => `
+                        if (step === 3) {
+                            const subject = document.getElementById('subject').value.trim();
+                            const description = document.getElementById('description').value.trim();
+                            
+                            if (!subject) {
+                                Swal.fire({
+                                    icon: 'warning',
+                                    title: 'Subject Required',
+                                    text: 'Please enter a subject for your claim',
+                                    confirmButtonColor: '#40545E'
+                                });
+                                return false;
+                            }
+
+                            if (!description) {
+                                Swal.fire({
+                                    icon: 'warning',
+                                    title: 'Description Required',
+                                    text: 'Please provide a description of your issue',
+                                    confirmButtonColor: '#40545E'
+                                });
+                                return false;
+                            }
+                        }
+
+                        return true;
+                    }
+
+                    // Populate review step
+                    function populateReview() {
+                        // Category
+                        const category = document.querySelector('input[name="category"]:checked');
+                        document.getElementById('review-category').textContent = category ? category.value : '-';
+
+                        // Order
+                        const order = document.querySelector('input[name="orderNumber"]:checked');
+                        let orderText = 'No specific order';
+                        if (order && order.value) {
+                            orderText = order.value;
+                        }
+                        document.getElementById('review-order').textContent = orderText;
+
+                        // Subject
+                        const subject = document.getElementById('subject').value.trim();
+                        document.getElementById('review-subject').textContent = subject || '-';
+
+                        // Description
+                        const description = document.getElementById('description').value.trim();
+                        document.getElementById('review-description').textContent = description || '-';
+
+                        // Attachments
+                        const fileCount = selectedFiles.length;
+                        document.getElementById('review-attachments').textContent = 
+                            fileCount > 0 ? `${fileCount} file(s) attached` : 'No files attached';
+                    }
+
+                    // Navigation buttons
+                    document.getElementById('btn-next').addEventListener('click', () => {
+                        if (validateStep(currentStep)) {
+                            currentStep++;
+                            if (currentStep === totalSteps) {
+                                populateReview();
+                            }
+                            showStep(currentStep);
+                        }
+                    });
+
+                    document.getElementById('btn-previous').addEventListener('click', () => {
+                        currentStep--;
+                        showStep(currentStep);
+                    });
+
+                    // Initialize wizard
+                    showStep(1);
+
+                    // Force navbar to always stay white
+                    document.addEventListener('DOMContentLoaded', () => {
+                        const navbar = document.getElementById('navbar');
+                        if (navbar) {
+                            navbar.classList.add('scrolled');
+                            const observer = new MutationObserver((mutations) => {
+                                mutations.forEach((mutation) => {
+                                    if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                                        if (!navbar.classList.contains('scrolled')) {
+                                            navbar.classList.add('scrolled');
+                                        }
+                                    }
+                                });
+                            });
+                            observer.observe(navbar, {
+                                attributes: true,
+                                attributeFilter: ['class']
+                            });
+                            const ensureScrolled = () => navbar.classList.add('scrolled');
+                            window.addEventListener('scroll', ensureScrolled, {
+                                passive: true
+                            });
+                        }
+                    });
+
+                    // File upload handling
+                    const fileUploadArea = document.getElementById('file-upload-area');
+                    const fileInput = document.getElementById('attachments');
+                    const fileList = document.getElementById('file-list');
+                    let selectedFiles = [];
+
+                    fileUploadArea.addEventListener('click', () => fileInput.click());
+
+                    fileUploadArea.addEventListener('dragover', (e) => {
+                        e.preventDefault();
+                        fileUploadArea.classList.add('drag-over');
+                    });
+
+                    fileUploadArea.addEventListener('dragleave', () => {
+                        fileUploadArea.classList.remove('drag-over');
+                    });
+
+                    fileUploadArea.addEventListener('drop', (e) => {
+                        e.preventDefault();
+                        fileUploadArea.classList.remove('drag-over');
+                        handleFiles(e.dataTransfer.files);
+                    });
+
+                    fileInput.addEventListener('change', (e) => {
+                        handleFiles(e.target.files);
+                    });
+
+                    function handleFiles(files) {
+                        selectedFiles = Array.from(files);
+                        renderFileList();
+                        lucide.createIcons();
+                    }
+
+                    function renderFileList() {
+                        if (selectedFiles.length === 0) {
+                            fileList.innerHTML = '';
+                            return;
+                        }
+
+                        fileList.innerHTML = selectedFiles.map((file, index) => `
       <div class="file-item">
         <div class="file-info">
           <i data-lucide="file"></i>
@@ -307,97 +555,107 @@
         </button>
       </div>
     `).join('');
-  }
+                    }
 
-  function removeFile(index) {
-    selectedFiles.splice(index, 1);
-    renderFileList();
-    lucide.createIcons();
-  }
+                    function removeFile(index) {
+                        selectedFiles.splice(index, 1);
+                        renderFileList();
+                        lucide.createIcons();
+                    }
 
-  function formatFileSize(bytes) {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
-  }
+                    function formatFileSize(bytes) {
+                        if (bytes === 0) return '0 Bytes';
+                        const k = 1024;
+                        const sizes = ['Bytes', 'KB', 'MB'];
+                        const i = Math.floor(Math.log(bytes) / Math.log(k));
+                        return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+                    }
 
-  // Form submission
-  document.getElementById('create-claim-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const submitBtn = e.target.querySelector('.btn-submit');
-    const originalBtnText = submitBtn.innerHTML;
-    
-    // Disable button and show loading
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '<i data-lucide="loader-2" class="spin"></i><span>Creating...</span>';
-    lucide.createIcons();
-    
-    try {
-      const formData = new FormData();
-      formData.append('orderNumber', document.getElementById('order-number').value);
-      formData.append('subject', document.getElementById('subject').value);
-      formData.append('category', document.getElementById('category').value);
-      formData.append('description', document.getElementById('description').value);
-      
-      // Add all selected files
-      selectedFiles.forEach(file => {
-        formData.append('attachments', file);
-      });
+                    // Form submission
+                    document.getElementById('create-claim-form').addEventListener('submit', async(e) => {
+                        e.preventDefault();
 
-      const response = await fetch('/buyer/api/claims', {
-        method: 'POST',
-        body: formData
-      });
-      
-      const data = await response.json();
-      
-      if (data.success) {
-        await Swal.fire({
-          icon: 'success',
-          title: 'Claim Created',
-          html: '<p style="font-family: \'Antartida\', sans-serif; color: #8E9CA6; font-size: 0.95rem;">Your claim has been submitted successfully. Our support team will review it shortly.</p>',
-          confirmButtonText: 'View Claim',
-          confirmButtonColor: '#D4AF37',
-          customClass: {
-            popup: 'swal-claim-popup',
-            title: 'swal-claim-title',
-            confirmButton: 'swal-claim-btn'
-          }
-        });
-        window.location.href = '/buyer/claim-support/' + data.claim.id;
-      } else {
-        const errorMsg = data.error || data.message || 'Failed to create claim. Please try again.';
-        const hasClaimId = data.claimId;
-        await Swal.fire({
-          icon: 'error',
-          title: hasClaimId ? 'Order Already Has Claim' : 'Submission Failed',
-          text: errorMsg,
-          confirmButtonText: hasClaimId ? 'View Existing Claim' : 'OK',
-          confirmButtonColor: hasClaimId ? '#D4AF37' : '#40545E'
-        });
-        if (hasClaimId) {
-          window.location.href = '/buyer/claim-support/' + data.claimId;
-          return;
-        }
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = originalBtnText;
-        lucide.createIcons();
-      }
-    } catch (error) {
-      console.error('Error creating claim:', error);
-      await Swal.fire({
-        icon: 'error',
-        title: 'Something Went Wrong',
-        text: 'An error occurred. Please try again.',
-        confirmButtonText: 'OK',
-        confirmButtonColor: '#40545E'
-      });
-      submitBtn.disabled = false;
-      submitBtn.innerHTML = originalBtnText;
-      lucide.createIcons();
-    }
-  });
-</script>
+                        const submitBtn = document.getElementById('btn-submit');
+                        const originalBtnText = submitBtn.innerHTML;
+
+                        // Disable button and show loading
+                        submitBtn.disabled = true;
+                        submitBtn.innerHTML = '<i data-lucide="loader-2" class="spin"></i><span>Creating...</span>';
+                        lucide.createIcons();
+
+                        try {
+                            const formData = new FormData();
+                            
+                            // Get category
+                            const category = document.querySelector('input[name="category"]:checked');
+                            formData.append('category', category ? category.value : '');
+                            
+                            // Get order number
+                            const order = document.querySelector('input[name="orderNumber"]:checked');
+                            formData.append('orderNumber', order ? order.value : '');
+                            
+                            // Get subject and description
+                            formData.append('subject', document.getElementById('subject').value);
+                            formData.append('description', document.getElementById('description').value);
+
+                            // Add all selected files
+                            selectedFiles.forEach(file => {
+                                formData.append('attachments', file);
+                            });
+
+                            const response = await fetch('/buyer/api/claims', {
+                                method: 'POST',
+                                body: formData
+                            });
+
+                            const data = await response.json();
+
+                            if (data.success) {
+                                await Swal.fire({
+                                    icon: 'success',
+                                    title: 'Claim Created',
+                                    html: '<p style="font-family: \'Antartida\', sans-serif; color: #8E9CA6; font-size: 0.95rem;">Your claim has been submitted successfully. Our support team will review it shortly.</p>',
+                                    confirmButtonText: 'View Claim',
+                                    confirmButtonColor: '#40545E',
+                                    customClass: {
+                                        popup: 'swal-claim-popup',
+                                        title: 'swal-claim-title',
+                                        confirmButton: 'swal-claim-btn'
+                                    }
+                                });
+                                window.location.href = '/buyer/claim-support/' + data.claim.id;
+                            } else {
+                                const errorMsg = data.error || data.message || 'Failed to create claim. Please try again.';
+                                const hasClaimId = data.claimId;
+                                await Swal.fire({
+                                    icon: 'error',
+                                    title: hasClaimId ? 'Order Already Has Claim' : 'Submission Failed',
+                                    text: errorMsg,
+                                    confirmButtonText: hasClaimId ? 'View Existing Claim' : 'OK',
+                                    confirmButtonColor: hasClaimId ? '#40545E' : '#40545E'
+                                });
+                                if (hasClaimId) {
+                                    window.location.href = '/buyer/claim-support/' + data.claimId;
+                                    return;
+                                }
+                                submitBtn.disabled = false;
+                                submitBtn.innerHTML = originalBtnText;
+                                lucide.createIcons();
+                            }
+                        } catch (error) {
+                            console.error('Error creating claim:', error);
+                            await Swal.fire({
+                                icon: 'error',
+                                title: 'Something Went Wrong',
+                                text: 'An error occurred. Please try again.',
+                                confirmButtonText: 'OK',
+                                confirmButtonColor: '#40545E'
+                            });
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = originalBtnText;
+                            lucide.createIcons();
+                        }
+                    });
+                </script>
+</body>
+</html>

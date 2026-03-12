@@ -28,6 +28,8 @@
         <%= t('nav.search') %>
       </a>
 
+      <a href="/buyer/about-us" class="nav-link" data-section="about"><%= t('nav.aboutUs') || 'About Us' %></a>
+
       <a href="/buyer/orders" class="nav-link" data-section="orders"><%= t('nav.myOrders') %></a>
       
       <!-- Account Dropdown -->
@@ -281,17 +283,17 @@
       <div class="currency-converter-header">
         <span class="currency-badge">
           <i data-lucide="trending-up"></i>
-          <%= t('nav.currency.badge') %>
+          <%= t('nav.currencySettings.badge') %>
         </span>
-        <h2 class="currency-converter-title"><%= t('nav.currency.title') %></h2>
-        <p class="currency-converter-subtitle"><%= t('nav.currency.subtitle') %></p>
+        <h2 class="currency-converter-title"><%= t('nav.currencySettings.title') %></h2>
+        <p class="currency-converter-subtitle"><%= t('nav.currencySettings.subtitle') %></p>
       </div>
 
       <!-- Main Converter -->
       <div class="currency-converter-main">
         <!-- From Currency -->
         <div class="currency-input-group">
-          <label class="currency-label"><%= t('nav.currency.amount') %></label>
+          <label class="currency-label"><%= t('nav.currencySettings.amount') %></label>
           <div class="currency-input-wrapper">
             <input 
               type="number" 
@@ -313,13 +315,13 @@
         </div>
 
         <!-- Swap Button -->
-        <button class="currency-swap-btn" id="currencySwapBtn" title="<%= t('nav.currency.swap') %>">
+        <button class="currency-swap-btn" id="currencySwapBtn" title="<%= t('nav.currencySettings.swap') %>">
           <i data-lucide="arrow-down-up"></i>
         </button>
 
         <!-- To Currency -->
         <div class="currency-input-group">
-          <label class="currency-label"><%= t('nav.currency.converted') %></label>
+          <label class="currency-label"><%= t('nav.currencySettings.converted') %></label>
           <div class="currency-input-wrapper">
             <input 
               type="text" 
@@ -346,83 +348,20 @@
           </div>
           <div class="rate-updated">
             <i data-lucide="clock"></i>
-            <span id="rateUpdated"><%= t('nav.currency.updating') %></span>
+            <span id="rateUpdated"><%= t('nav.currencySettings.updating') %></span>
           </div>
         </div>
       </div>
 
-      <!-- Popular Currencies Quick Select -->
-      <div class="popular-currencies">
-        <label class="currency-label"><%= t('nav.currency.popular') %></label>
-        <div class="popular-currencies-grid">
-          <button class="popular-currency-btn" data-currency="USD" data-flag="🇺🇸">
-            <span class="currency-flag">🇺🇸</span>
-            <span class="currency-info">
-              <span class="currency-name">USD</span>
-              <span class="currency-full">US Dollar</span>
-            </span>
-          </button>
-          <button class="popular-currency-btn" data-currency="EUR" data-flag="🇪🇺">
-            <span class="currency-flag">🇪🇺</span>
-            <span class="currency-info">
-              <span class="currency-name">EUR</span>
-              <span class="currency-full">Euro</span>
-            </span>
-          </button>
-          <button class="popular-currency-btn" data-currency="GBP" data-flag="🇬🇧">
-            <span class="currency-flag">🇬🇧</span>
-            <span class="currency-info">
-              <span class="currency-name">GBP</span>
-              <span class="currency-full">British Pound</span>
-            </span>
-          </button>
-          <button class="popular-currency-btn" data-currency="AED" data-flag="🇦🇪">
-            <span class="currency-flag">🇦🇪</span>
-            <span class="currency-info">
-              <span class="currency-name">AED</span>
-              <span class="currency-full">UAE Dirham</span>
-            </span>
-          </button>
-          <button class="popular-currency-btn" data-currency="JPY" data-flag="🇯🇵">
-            <span class="currency-flag">🇯🇵</span>
-            <span class="currency-info">
-              <span class="currency-name">JPY</span>
-              <span class="currency-full">Japanese Yen</span>
-            </span>
-          </button>
-          <button class="popular-currency-btn" data-currency="CNY" data-flag="🇨🇳">
-            <span class="currency-flag">🇨🇳</span>
-            <span class="currency-info">
-              <span class="currency-name">CNY</span>
-              <span class="currency-full">Chinese Yuan</span>
-            </span>
-          </button>
-          <button class="popular-currency-btn" data-currency="RUB" data-flag="🇷🇺">
-            <span class="currency-flag">🇷🇺</span>
-            <span class="currency-info">
-              <span class="currency-name">RUB</span>
-              <span class="currency-full">Russian Ruble</span>
-            </span>
-          </button>
-          <button class="popular-currency-btn" data-currency="CAD" data-flag="🇨🇦">
-            <span class="currency-flag">🇨🇦</span>
-            <span class="currency-info">
-              <span class="currency-name">CAD</span>
-              <span class="currency-full">Canadian Dollar</span>
-            </span>
-          </button>
-        </div>
-      </div>
-
-      <!-- All Currencies Dropdown (Hidden by default) -->
-      <div class="all-currencies-dropdown hidden" id="allCurrenciesDropdown">
+      <!-- All Currencies Selection -->
+      <div class="all-currencies-dropdown" id="allCurrenciesDropdown">
         <div class="currency-search-wrapper">
           <i data-lucide="search" class="currency-search-icon"></i>
           <input 
             type="text" 
             class="currency-search-input" 
             id="currencySearchInput"
-            placeholder="<%= t('nav.currency.searchPlaceholder') %>"
+            placeholder="<%= t('nav.currencySettings.searchPlaceholder') %>"
           >
         </div>
         <div class="currency-list" id="currencyList">

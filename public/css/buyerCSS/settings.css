@@ -4,9 +4,11 @@
    Quantico headlines | Antartida body
    ==================================== */
 
+
 /* ====================================
    PAGE LAYOUT - VIEWPORT LOCK
    ==================================== */
+
 html:has(.settings-page) {
     overflow: hidden;
     height: 100vh;
@@ -25,6 +27,16 @@ body:has(.settings-page) {
     position: relative;
     height: 100vh;
     overflow: hidden;
+}
+
+/* ====================================
+   CONTAINER OVERRIDE
+   ==================================== */
+
+/* Wider container for settings page */
+.settings-page .container {
+    max-width: 1600px;
+    padding: 0 1.5rem;
 }
 
 .settings-page .nav-dropdown-menu {
@@ -57,76 +69,86 @@ body:has(.settings-page) {
     opacity: 1 !important;
 }
 
+
 /* ====================================
    HEADER BAR
    ==================================== */
+
 .settings-header-bar {
-  background: linear-gradient(to bottom, var(--washi) 0%, rgba(149, 175, 192, 0.05) 100%);
-  padding: 1.5rem 0 1.25rem;
-  border-bottom: 1px solid rgba(149, 175, 192, 0.2);
-  margin-top: 1rem;
-  margin-bottom: 1rem;
-  position: relative;
+    background: linear-gradient(to bottom, var(--washi) 0%, rgba(149, 175, 192, 0.05) 100%);
+    padding: 1.5rem 0 1.25rem;
+    border-bottom: 1px solid rgba(149, 175, 192, 0.2);
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    position: relative;
+}
+
+.settings-header-bar .container {
+    padding-left: 0;
+    padding-right: var(--buyer-space-lg);
 }
 
 .settings-header-bar::before {
-  content: '';
-  position: absolute;
-  bottom: -1px;
-  left: 0;
-  width: 200px;
-  height: 2px;
-  background: linear-gradient(to right, var(--kintsugi), transparent);
-  animation: shimmer 3s ease-in-out infinite;
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 200px;
+    height: 2px;
+    background: linear-gradient(to right, var(--kintsugi), transparent);
+    animation: shimmer 3s ease-in-out infinite;
 }
 
 @keyframes shimmer {
-  0%, 100% {
-    opacity: 1;
-    transform: translateX(0);
-  }
-  50% {
-    opacity: 0.7;
-    transform: translateX(20px);
-  }
+    0%,
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    50% {
+        opacity: 0.7;
+        transform: translateX(20px);
+    }
 }
 
 .settings-header-content {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 2rem;
-  flex-wrap: wrap;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 2rem;
+    flex-wrap: wrap;
 }
 
 .settings-header-left {
-  flex: 1;
-  min-width: 300px;
+    flex: 1;
+    min-width: 300px;
 }
 
 .settings-header-title {
-  font-family: 'Quantico', sans-serif;
-  font-size: 2.25rem;
-  font-weight: 400;
-  color: var(--kurogane);
-  margin-bottom: 0.5rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  line-height: 1.1;
+    font-family: 'Quantico', sans-serif;
+    font-size: 2.25rem;
+    font-weight: 400;
+    color: var(--kurogane);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    line-height: 1.1;
 }
 
 .settings-header-subtitle {
-  font-family: 'Antartida', sans-serif;
-  font-size: 0.9375rem;
-  color: var(--namari);
-  font-weight: 400;
-  letter-spacing: 0.01em;
+    font-family: 'Antartida', sans-serif;
+    font-size: 0.9375rem;
+    color: var(--namari);
+    font-weight: 400;
+    letter-spacing: 0.01em;
 }
 
+
 /* ====================================
-   SETTINGS CONTENT
+   SETTINGS CONTENT WRAPPER
    ==================================== */
-.settings-content {
+
+.settings-content-wrapper {
     flex: 1;
     min-height: 0;
     overflow: hidden;
@@ -135,36 +157,47 @@ body:has(.settings-page) {
     flex-direction: column;
 }
 
-.settings-content .container {
+.settings-content-wrapper .container {
     flex: 1;
     min-height: 0;
     overflow-y: auto;
     overflow-x: hidden;
+    margin: 0 auto;
 }
+
 
 /* ====================================
    MAIN CONTENT SECTION
    ==================================== */
 
 .settings-section {
-    padding: 3rem 0;
+    padding: 1.5rem 0;
     position: relative;
+    height: 100%;
+    overflow: visible;
 }
 
 .settings-layout {
     display: grid;
     grid-template-columns: 280px 1fr;
     gap: 2rem;
-    margin-top: 2rem;
+    margin-top: 0;
+    min-height: calc(100vh - 280px);
+    overflow: visible;
 }
+
 
 /* ====================================
    SETTINGS SIDEBAR
    ==================================== */
+
 .settings-sidebar {
     position: sticky;
-    top: 100px;
+    top: 20px;
+    align-self: flex-start;
     height: fit-content;
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
 }
 
 .settings-nav {
@@ -211,9 +244,11 @@ body:has(.settings-page) {
     flex-shrink: 0;
 }
 
+
 /* ====================================
-   SETTINGS CONTENT
+   SETTINGS RIGHT PANEL CONTENT
    ==================================== */
+
 .settings-content {
     display: flex;
     flex-direction: column;
@@ -235,8 +270,12 @@ body:has(.settings-page) {
 }
 
 @keyframes settingsFadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
 
 .settings-panel-header {
@@ -361,9 +400,11 @@ body:has(.settings-page) {
     height: 18px;
 }
 
+
 /* ====================================
    TOGGLE SWITCH
    ==================================== */
+
 .toggle-switch {
     position: relative;
     display: inline-block;
@@ -402,21 +443,23 @@ body:has(.settings-page) {
     box-shadow: 0 2px 4px rgba(43, 43, 43, 0.15);
 }
 
-.toggle-switch input:checked + .toggle-slider {
+.toggle-switch input:checked+.toggle-slider {
     background: var(--aitetsu);
 }
 
-.toggle-switch input:checked + .toggle-slider:before {
+.toggle-switch input:checked+.toggle-slider:before {
     transform: translateX(24px);
 }
 
-.toggle-switch input:focus + .toggle-slider {
+.toggle-switch input:focus+.toggle-slider {
     box-shadow: 0 0 0 2px rgba(149, 175, 192, 0.3);
 }
+
 
 /* ====================================
    SETTINGS ACTIONS
    ==================================== */
+
 .settings-actions {
     display: flex;
     gap: 1rem;
@@ -433,19 +476,20 @@ body:has(.settings-page) {
     align-items: center;
     gap: 0.75rem;
     padding: 0.875rem 2rem;
-    background: var(--kintsugi);
+    background: var(--aitetsu);
     color: white;
-    border: none;
+    border: 2px solid var(--aitetsu);
     border-radius: 0 !important;
     font-family: 'Antartida', sans-serif;
     font-weight: 600;
     font-size: 1rem;
     cursor: pointer;
-    transition: background 0.2s ease;
+    transition: all 0.2s ease;
 }
 
 .settings-save-btn:hover {
-    background: var(--kintsugi-hover, #c9a432);
+    background: var(--kurogane);
+    border-color: var(--kurogane);
 }
 
 .settings-save-btn i {
@@ -480,24 +524,23 @@ body:has(.settings-page) {
     height: 20px;
 }
 
+
 /* ====================================
    RESPONSIVE DESIGN
    ==================================== */
+
 @media (max-width: 1024px) {
     .settings-layout {
         grid-template-columns: 1fr;
     }
-
     .settings-sidebar {
         position: static;
     }
-
     .settings-nav {
         flex-direction: row;
         overflow-x: auto;
         padding: 0.75rem;
     }
-
     .settings-nav-item {
         white-space: nowrap;
         flex-shrink: 0;
@@ -508,39 +551,31 @@ body:has(.settings-page) {
     .settings-hero {
         padding: 6rem 0 3rem;
     }
-
     .settings-hero-title {
         font-size: 2rem;
     }
-
     .settings-hero-subtitle {
         font-size: 1rem;
     }
-
     .settings-panel {
         padding: 1.5rem;
     }
-
     .setting-item {
         flex-direction: column;
         align-items: flex-start;
         gap: 1rem;
     }
-
     .setting-control {
         width: 100%;
     }
-
     .setting-select {
         width: 100%;
         min-width: auto;
     }
-
     .settings-actions {
         flex-direction: column;
         padding: 1.5rem;
     }
-
     .settings-save-btn,
     .settings-reset-btn {
         width: 100%;
@@ -552,26 +587,19 @@ body:has(.settings-page) {
     .settings-hero {
         padding: 5.5rem 0 2.5rem;
     }
-
     .settings-hero-title {
         font-size: 1.5rem;
     }
-
     .settings-hero-subtitle {
         font-size: 0.95rem;
     }
-
     .settings-panel {
         padding: 1.25rem;
     }
-
     .settings-panel-title {
         font-size: 1.25rem;
     }
-
     .setting-item {
         padding: 1.25rem;
     }
 }
-
-

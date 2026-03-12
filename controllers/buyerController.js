@@ -23,7 +23,7 @@ try {
  */
 const getBuyerMain = async (req, res) => {
   try {
-    res.render('buyer/search-automotive', {
+    res.render('buyer/search-v2', {
       title: 'Buyer Portal - Main | PARTSFORM',
       industry: 'automotive',
       industryName: 'Automotive',
@@ -88,6 +88,23 @@ const getAffiliatePage = async (req, res) => {
     res.status(500).render('error', {
       title: 'Error | PARTSFORM',
       error: 'Failed to load affiliate page',
+    });
+  }
+};
+
+/**
+ * Get About Us page
+ */
+const getAboutUsPage = async (req, res) => {
+  try {
+    res.render('buyer/about-us', {
+      title: 'About Us | PARTSFORM',
+    });
+  } catch (error) {
+    console.error('Error in getAboutUsPage:', error);
+    res.status(500).render('error', {
+      title: 'Error | PARTSFORM',
+      error: 'Failed to load about us page',
     });
   }
 };
@@ -874,21 +891,28 @@ const uploadAvatar = async (req, res) => {
  */
 const updateProfile = async (req, res) => {
   try {
-    const buyer = req.user;
-    const { firstName, lastName, phone, companyName, city, shippingAddress } = req.body;
+    const { firstName, lastName, phone, companyName, city, shippingAddress, email } = req.body;
+
+    // Fetch the buyer document from database
+    const buyer = await Buyer.findById(req.user._id);
+    
+    if (!buyer) {
+      return res.status(404).json({
+        success: false,
+        message: 'Buyer not found',
+      });
+    }
 
     // Fields that can be updated
-    const allowedUpdates = {};
+    if (firstName) buyer.firstName = firstName.trim();
+    if (lastName) buyer.lastName = lastName.trim();
+    if (email) buyer.email = email.trim();
+    if (phone) buyer.phone = phone.trim();
+    if (companyName) buyer.companyName = companyName.trim();
+    if (city) buyer.city = city.trim();
+    if (shippingAddress) buyer.shippingAddress = shippingAddress.trim();
 
-    if (firstName) allowedUpdates.firstName = firstName.trim();
-    if (lastName) allowedUpdates.lastName = lastName.trim();
-    if (phone) allowedUpdates.phone = phone.trim();
-    if (companyName) allowedUpdates.companyName = companyName.trim();
-    if (city) allowedUpdates.city = city.trim();
-    if (shippingAddress) allowedUpdates.shippingAddress = shippingAddress.trim();
-
-    // Update buyer
-    Object.assign(buyer, allowedUpdates);
+    // Save the updated buyer
     await buyer.save();
 
     res.status(200).json({
@@ -898,6 +922,7 @@ const updateProfile = async (req, res) => {
         firstName: buyer.firstName,
         lastName: buyer.lastName,
         fullName: `${buyer.firstName} ${buyer.lastName}`,
+        email: buyer.email,
         phone: buyer.phone,
         companyName: buyer.companyName,
         city: buyer.city,
@@ -2233,6 +2258,7 @@ module.exports = {
   getAutomotiveSearchPage,
   getSearchV2Page,
   getAffiliatePage,
+  getAboutUsPage,
   getOrdersPage,
   getPaymentPage,
   getDeliveryPage,
