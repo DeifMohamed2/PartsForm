@@ -2321,11 +2321,10 @@
   top: calc(100% + 10px);
   right: 0;
   width: 340px;
-  background: var(--buyer-bg-primary);
-  border: 1px solid var(--buyer-border);
+  background: #2B2B2B !important;
+  border: 1px solid rgba(212, 175, 55, 0.25) !important;
   border-radius: 0 !important;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.14),
-    0 0 0 1px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45) !important;
   opacity: 0;
   visibility: hidden;
   transform: translateY(-8px) scale(0.97);
@@ -2349,8 +2348,8 @@
   right: 15px;
   width: 10px;
   height: 10px;
-  background: var(--buyer-bg-primary);
-  border: 1px solid var(--buyer-border);
+  background: #2B2B2B !important;
+  border: 1px solid rgba(212, 175, 55, 0.25) !important;
   border-bottom: none;
   border-right: none;
   transform: rotate(45deg);
@@ -2368,7 +2367,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: var(--buyer-text-subtle);
+  color: rgba(255, 255, 255, 0.4) !important;
 }
 
 /* Dropdown Items */
@@ -2384,26 +2383,26 @@
   font-family: var(--font-body);
   font-size: 0.84rem;
   font-weight: 500;
-  color: var(--buyer-text-primary);
+  color: rgba(255, 255, 255, 0.78) !important;
   transition: background 0.15s ease, color 0.15s ease;
   text-align: left;
   position: relative;
 }
 
 .tools-dropdown-item:hover {
-  background: var(--buyer-bg-accent);
-  color: var(--buyer-accent);
+  background: rgba(212, 175, 55, 0.1) !important;
+  color: var(--kintsugi, #D4AF37) !important;
 }
 
 .tools-dropdown-item i {
   width: 16px;
   height: 16px;
-  color: var(--buyer-text-muted);
+  color: rgba(255, 255, 255, 0.5);
   flex-shrink: 0;
 }
 
 .tools-dropdown-item:hover i {
-  color: var(--buyer-accent);
+  color: var(--kintsugi, #D4AF37);
 }
 
 .tools-item-shortcut {
@@ -2449,7 +2448,7 @@
 /* Dividers */
 .tools-dropdown-divider {
   height: 1px;
-  background: var(--buyer-border-light);
+  background: rgba(255, 255, 255, 0.08) !important;
   margin: 0.15rem 1.25rem;
 }
 
@@ -2489,8 +2488,8 @@
   justify-content: center;
   gap: 4px;
   padding: 10px 6px;
-  background: var(--buyer-bg-secondary);
-  border: 1.5px solid var(--buyer-border);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1.5px solid rgba(255, 255, 255, 0.08);
   border-radius: 0 !important;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -2498,14 +2497,14 @@
 }
 
 .tools-currency-grid .currency-grid-item:hover {
-  background: var(--buyer-bg-accent);
-  border-color: rgba(64, 84, 94, 0.15);
+  background: rgba(212, 175, 55, 0.1);
+  border-color: rgba(212, 175, 55, 0.3);
   transform: translateY(-1px);
 }
 
 .tools-currency-grid .currency-grid-item.active {
-  background: var(--buyer-accent);
-  border-color: var(--buyer-accent);
+  background: var(--kintsugi, #D4AF37);
+  border-color: var(--kintsugi, #D4AF37);
 }
 
 .tools-currency-grid .currency-grid-item .currency-flag {
@@ -2516,12 +2515,12 @@
 .tools-currency-grid .currency-grid-item .currency-code {
   font-size: 0.72rem;
   font-weight: 700;
-  color: var(--buyer-text-primary);
+  color: rgba(255, 255, 255, 0.78);
   letter-spacing: 0.02em;
 }
 
 .tools-currency-grid .currency-grid-item.active .currency-code {
-  color: #ffffff;
+  color: #2B2B2B;
 }
 
 .tools-currency-grid .currency-grid-item.original-item {
@@ -2614,25 +2613,27 @@
   font-family: var(--font-body);
   font-size: 0.78rem;
   font-weight: 500;
-  color: var(--buyer-text-primary);
+  color: rgba(255, 255, 255, 0.78) !important;
   transition: background 0.15s ease, color 0.15s ease;
   width: 100%;
   text-align: left;
 }
 
 .tools-lang-option:hover {
-  background: var(--buyer-bg-accent);
-  border-color: rgba(64, 84, 94, 0.12);
+  background: rgba(212, 175, 55, 0.1) !important;
+  border-color: transparent;
+  color: var(--kintsugi, #D4AF37) !important;
 }
 
 .tools-lang-option.active {
-  background: var(--buyer-accent);
-  color: #ffffff;
+  background: var(--kintsugi, #D4AF37) !important;
+  color: #2B2B2B !important;
   border-color: transparent;
+  font-weight: 600;
 }
 
 .tools-lang-option.active .lang-name {
-  color: #ffffff !important;
+  color: #2B2B2B !important;
   font-weight: 600;
 }
 
@@ -2648,11 +2649,15 @@
 .tools-lang-option .lang-name {
   font-size: 0.78rem;
   font-weight: 500;
-  color: var(--buyer-text-secondary);
+  color: rgba(255, 255, 255, 0.68);
 }
 
 .tools-lang-option:hover .lang-name {
-  color: var(--buyer-accent);
+  color: var(--kintsugi, #D4AF37);
+}
+
+.tools-lang-option.active:hover .lang-name {
+  color: #2B2B2B !important;
 }
 
 /* Scrollbar for dropdown */

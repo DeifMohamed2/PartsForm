@@ -5,25 +5,24 @@
 <%- include('partials/navbar') %>
 
 <!-- ====================================
-    AFFILIATE PROGRAM PAGE - Brand System
+    AFFILIATE PROGRAM PAGE - HEADER BAR DESIGN
     ==================================== -->
 <div class="affiliate-page">
-  <!-- Hero Section with Animated Background -->
-  <div class="affiliate-hero">
-    <div class="affiliate-hero-content">
-      <div class="affiliate-badge">
-        <i data-lucide="trophy"></i>
-        <span><%= t('affiliate.badge') %></span>
+  <!-- Header Bar -->
+  <div class="affiliate-header-bar">
+    <div class="container">
+      <div class="affiliate-header-content">
+        <div class="affiliate-header-left">
+          <h1 class="affiliate-header-title"><%= t('affiliate.title') %></h1>
+          <p class="affiliate-header-subtitle"><%= t('affiliate.subtitle') %></p>
+        </div>
       </div>
-      <h1 class="affiliate-hero-title"><%= t('affiliate.title') %></h1>
-      <p class="affiliate-hero-subtitle">
-        <%= t('affiliate.subtitle') %>
-      </p>
     </div>
   </div>
 
   <!-- Main Content -->
-  <div class="buyer-container">
+  <div class="affiliate-content">
+    <div class="container">
     <div class="affiliate-section">
       <div class="section-header">
         <h2 class="section-title"><%= t('affiliate.tiers.title') %></h2>

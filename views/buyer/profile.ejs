@@ -5,26 +5,30 @@
 <%- include('partials/navbar') %>
 
 <!-- ====================================
-     PROFILE PAGE - PROFESSIONAL DESIGN
+     PROFILE PAGE - HEADER BAR DESIGN
      ==================================== -->
 <div class="profile-page">
-  <!-- Hero Section -->
-  <div class="profile-hero">
-    <div class="profile-hero-content">
-      <div class="profile-badge">
-        <i data-lucide="user-circle"></i>
-        <span><%= t('profile.badge') %></span>
+  <!-- Header Bar -->
+  <div class="profile-header-bar">
+    <div class="container">
+      <div class="profile-header-content">
+        <div class="profile-header-left">
+          <h1 class="profile-header-title"><%= t('profile.title') %></h1>
+          <p class="profile-header-subtitle"><%= t('profile.subtitle') %></p>
+        </div>
+        <div class="profile-header-right">
+          <button class="btn-edit-profile" id="editPersonalInfoBtn">
+            <i data-lucide="edit"></i>
+            <span><%= t('common.edit') %></span>
+          </button>
+        </div>
       </div>
-
-      <h1 class="profile-hero-title"><%= t('profile.title') %></h1>
-      <p class="profile-hero-subtitle">
-        <%= t('profile.subtitle') %>
-      </p>
     </div>
   </div>
 
   <!-- Main Content -->
-  <div class="buyer-container">
+  <div class="profile-content">
+    <div class="container">
     <div class="profile-section">
       <div class="profile-layout">
         <!-- Left Column - Profile Card -->

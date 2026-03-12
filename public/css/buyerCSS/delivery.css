@@ -4,12 +4,32 @@
    ==================================== */
 
 /* ====================================
+   VIEWPORT LOCK - NON-SCROLLABLE PAGE
+   ==================================== */
+html:has(.delivery-page) {
+  height: 100%;
+  overflow: hidden;
+}
+
+body:has(.delivery-page) {
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ====================================
    PAGE LAYOUT
    ==================================== */
 .delivery-page {
-  min-height: 100vh;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
   background: var(--washi);
-  padding-top: 6rem;
+  display: flex;
+  flex-direction: column;
+  padding-top: 44px;
+  position: relative;
 }
 
 .delivery-page .container {
@@ -17,43 +37,22 @@
   padding: 0 1.5rem;
 }
 
-/* Ensure navbar stays on top - always white */
-.delivery-page .nav-bar,
-.delivery-page .nav-bar.scrolled,
-.delivery-page .nav-bar:not(.scrolled) {
-  z-index: 10001 !important;
-  position: fixed !important;
-  top: 0 !important;
-  width: 100% !important;
-  background: rgba(255, 255, 255, 0.98) !important;
-  backdrop-filter: blur(20px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
-  border-bottom: 1px solid rgba(149, 175, 192, 0.2) !important;
-  box-shadow: 0 4px 20px rgba(43, 43, 43, 0.08), 0 2px 8px rgba(149, 175, 192, 0.05) !important;
-  overflow: visible !important;
-}
-
-.delivery-page .nav-dropdown-menu {
-  z-index: 10002 !important;
-}
-
-.delivery-page .nav-link {
-  color: var(--kurogane) !important;
-}
-
-.delivery-page .nav-link.active {
-  color: var(--aitetsu) !important;
-}
-
-.delivery-page .nav-logo img {
-  filter: none !important;
-  opacity: 1 !important;
-}
-
 .delivery-content {
-  padding: 2rem 0 4rem;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  padding: 1rem 0 1rem;
   position: relative;
   z-index: 3;
+  display: flex;
+  flex-direction: column;
+}
+
+.delivery-content .container {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 /* ====================================
@@ -61,9 +60,10 @@
    ==================================== */
 .delivery-header-bar {
   background: linear-gradient(to bottom, var(--washi) 0%, rgba(149, 175, 192, 0.05) 100%);
-  padding: 2.5rem 0 2rem;
+  padding: 1.5rem 0 1.25rem;
   border-bottom: 1px solid rgba(149, 175, 192, 0.2);
-  margin-bottom: 2rem;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
   position: relative;
 }
 
@@ -131,18 +131,18 @@
   font-weight: 400;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  background: var(--kintsugi);
+  background: var(--aitetsu);
   color: white;
-  border: 1.5px solid var(--kintsugi);
+  border: 1.5px solid var(--aitetsu);
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .btn-add-address:hover {
-  background: #c9a432;
-  border-color: #c9a432;
+  background: #354550;
+  border-color: #354550;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(214, 172, 63, 0.3);
+  box-shadow: 0 4px 12px rgba(64, 84, 94, 0.3);
 }
 
 .btn-add-address i {
@@ -154,7 +154,7 @@
    SECTION HEADERS
    ==================================== */
 .section-header {
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.75rem;
 }
 
 .section-title {
@@ -177,13 +177,13 @@
    ADDRESSES SECTION - Orders Style
    ==================================== */
 .addresses-section {
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
 }
 
 .addresses-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 1.5rem;
+  gap: 1rem;
 }
 
 .address-card {
@@ -191,7 +191,7 @@
   background: white;
   border: 1px solid rgba(149, 175, 192, 0.25);
   border-radius: 0 !important;
-  padding: 1.5rem;
+  padding: 1.25rem;
   box-shadow: 0 2px 16px rgba(149, 175, 192, 0.08);
   transition: all 0.3s ease;
 }
@@ -347,7 +347,7 @@
    ==================================== */
 .addresses-empty {
   text-align: center;
-  padding: 6rem 2rem;
+  padding: 3rem 2rem;
   background: white;
   border: 1px solid rgba(149, 175, 192, 0.25);
   border-radius: 0 !important;
@@ -359,9 +359,9 @@
 }
 
 .delivery-empty-icon {
-  width: 100px;
-  height: 100px;
-  margin: 0 auto 2rem;
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 1.5rem;
   background: var(--washi);
   border: 1px solid rgba(149, 175, 192, 0.25);
   border-radius: 0 !important;
@@ -371,8 +371,8 @@
 }
 
 .delivery-empty-icon i {
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
   color: var(--namari);
 }
 
@@ -381,7 +381,7 @@
   font-size: 1.5rem;
   font-weight: 400;
   color: var(--kurogane);
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
@@ -390,7 +390,7 @@
   font-family: 'Antartida', sans-serif;
   font-size: 1rem;
   color: var(--namari);
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
   line-height: 1.6;
 }
 
@@ -405,16 +405,17 @@
   font-weight: 400;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  background: var(--kintsugi);
+  background: var(--aitetsu);
   color: white;
-  border: 1.5px solid var(--kintsugi);
+  border: 1.5px solid var(--aitetsu);
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .addresses-empty .btn-empty-action:hover {
-  background: #c9a432;
-  border-color: #c9a432;
+  background: #354550;
+  border-color: #354550;
+  box-shadow: 0 4px 12px rgba(64, 84, 94, 0.3);
 }
 
 .addresses-empty .btn-empty-action i {
@@ -426,14 +427,14 @@
    TRACKING SECTION - Orders Style
    ==================================== */
 .tracking-section {
-  margin-top: 2rem;
+  margin-top: 1rem;
 }
 
 .tracking-card {
   background: white;
   border: 1px solid rgba(149, 175, 192, 0.25);
   border-radius: 0 !important;
-  padding: 2rem;
+  padding: 1.25rem;
   box-shadow: 0 2px 16px rgba(149, 175, 192, 0.08);
 }
 
@@ -484,19 +485,19 @@
   font-weight: 400;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  background: var(--kintsugi);
+  background: var(--aitetsu);
   color: white;
-  border: 1.5px solid var(--kintsugi);
+  border: 1.5px solid var(--aitetsu);
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
 }
 
 .btn-track:hover {
-  background: #c9a432;
-  border-color: #c9a432;
+  background: #354550;
+  border-color: #354550;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(214, 172, 63, 0.3);
+  box-shadow: 0 4px 12px rgba(64, 84, 94, 0.3);
 }
 
 .btn-track i {
@@ -766,16 +767,16 @@
 }
 
 .btn-save {
-  background: var(--kintsugi);
+  background: var(--sei);
   color: white;
-  border-color: var(--kintsugi);
+  border-color: var(--sei);
 }
 
 .btn-save:hover {
-  background: #c9a432;
-  border-color: #c9a432;
+  background: #85a0b0;
+  border-color: #85a0b0;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(214, 172, 63, 0.3);
+  box-shadow: 0 4px 12px rgba(149, 175, 192, 0.25);
 }
 
 .btn-cancel i,

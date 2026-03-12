@@ -8,46 +8,43 @@
      Claims Page - PROFESSIONAL DESIGN
      ==================================== -->
 <div class="claims-page">
-  <!-- Hero Section -->
-  <div class="claims-hero">
-    <div class="claims-hero-content">
-      <div class="claim-badge">
-        <i data-lucide="headphones"></i>
-        <span><%= t('tickets.badge') %></span>
+  <!-- Header Bar -->
+  <div class="claims-header-bar">
+    <div class="container">
+      <div class="claims-header-content">
+        <div class="claims-header-left">
+          <h1 class="claims-header-title"><%= t('tickets.title') %></h1>
+          <p class="claims-header-subtitle"><%= t('tickets.subtitle') %></p>
+        </div>
+        <div class="claims-header-right">
+          <div class="claims-stats-minimal">
+            <div class="stat-minimal">
+              <span class="stat-value" id="stat-open">0</span>
+              <span class="stat-label"><%= t('tickets.stats.open') %></span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-minimal">
+              <span class="stat-value" id="stat-in-progress">0</span>
+              <span class="stat-label"><%= t('tickets.stats.inProgress') %></span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-minimal">
+              <span class="stat-value" id="stat-resolved">0</span>
+              <span class="stat-label"><%= t('tickets.stats.resolved') %></span>
+            </div>
+          </div>
+          <a href="/buyer/claim-support/create" class="btn-create-claim">
+            <i data-lucide="plus-circle"></i>
+            <span>Create Claim</span>
+          </a>
+        </div>
       </div>
-
-      <h1 class="claims-hero-title"><%= t('tickets.title') %></h1>
-      <p class="claims-hero-subtitle">
-        <%= t('tickets.subtitle') %>
-      </p>
     </div>
   </div>
 
-  <!-- Main Content -->
-  <div class="buyer-container">
-    <div class="claims-section">
-      <!-- Header with Stats and Create Button -->
-      <div class="claims-header">
-        <div class="claims-stats-grid">
-          <div class="claims-stat-card stat-open">
-            <span class="claims-stat-value" id="stat-open">0</span>
-            <span class="claims-stat-label"><%= t('tickets.stats.open') %></span>
-          </div>
-          <div class="claims-stat-card stat-in-progress">
-            <span class="claims-stat-value" id="stat-in-progress">0</span>
-            <span class="claims-stat-label"><%= t('tickets.stats.inProgress') %></span>
-          </div>
-          <div class="claims-stat-card stat-resolved">
-            <span class="claims-stat-value" id="stat-resolved">0</span>
-            <span class="claims-stat-label"><%= t('tickets.stats.resolved') %></span>
-          </div>
-        </div>
-        <a href="/buyer/claim-support/create" class="btn-create-claim">
-          <i data-lucide="plus"></i>
-          <span><%= t('tickets.createTicket') %></span>
-        </a>
-      </div>
-
+  <!-- Claims Content -->
+  <div class="claims-content">
+    <div class="container">
       <!-- Filters -->
       <div class="claims-filters">
         <div class="filter-group">
@@ -76,24 +73,33 @@
         </div>
       </div>
 
-      <!-- Claims List -->
-      <div class="claims-list" id="claims-list">
-        <!-- Claims will be populated by JavaScript -->
-      </div>
-
-      <!-- Empty State -->
-      <div class="claims-empty hidden" id="claims-empty">
-        <div class="claims-empty-icon">
-          <i data-lucide="inbox"></i>
+      <!-- Claims List Container (Scrollable) -->
+      <div class="claims-list-container">
+        <!-- Claims List -->
+        <div class="claims-list" id="claims-list">
+          <!-- Claims will be populated by JavaScript -->
         </div>
-        <h2 class="claims-empty-title"><%= t('tickets.empty.title') %></h2>
-        <p class="claims-empty-text">
-          <%= t('tickets.empty.text') %>
-        </p>
-        <a href="/buyer/claim-support/create" class="btn-empty-action">
-          <i data-lucide="plus-circle"></i>
-          <span><%= t('tickets.empty.createFirst') %></span>
-        </a>
+
+        <!-- Empty State -->
+        <div class="claims-empty" id="claims-empty">
+          <div class="claims-empty-icon">
+            <i data-lucide="inbox"></i>
+          </div>
+          <h2 class="claims-empty-title"><%= t('tickets.empty.title') %></h2>
+          <p class="claims-empty-text">
+            <%= t('tickets.empty.text') %>
+          </p>
+          <div class="claims-empty-actions">
+            <a href="/buyer/claim-support/create" class="btn-empty-action primary">
+              <i data-lucide="plus-circle"></i>
+              <span><%= t('tickets.empty.createFirst') %></span>
+            </a>
+            <a href="/buyer" class="btn-empty-action secondary">
+              <i data-lucide="arrow-left"></i>
+              <span>Back to Main</span>
+            </a>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -110,5 +116,27 @@
 <script>
   lucide.createIcons();
   window.addEventListener('load', () => lucide.createIcons());
+  
+  // Force navbar to always stay white on claims page
+  document.addEventListener('DOMContentLoaded', () => {
+    const navbar = document.getElementById('navbar');
+    if (navbar) {
+      navbar.classList.add('scrolled');
+      // Prevent other scripts from removing the scrolled class
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+            if (!navbar.classList.contains('scrolled')) {
+              navbar.classList.add('scrolled');
+            }
+          }
+        });
+      });
+      observer.observe(navbar, { attributes: true, attributeFilter: ['class'] });
+      // Also ensure on scroll
+      const ensureScrolled = () => navbar.classList.add('scrolled');
+      window.addEventListener('scroll', ensureScrolled, { passive: true });
+    }
+  });
 </script>
 

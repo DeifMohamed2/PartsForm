@@ -1,404 +1,392 @@
 /* ====================================
-   BUYER NAVBAR — Glassy, Brand System
-   BRAND: 60% Washi/Suzu | 30% Kurogane/Blues | 10% Gold/Sei
+   BUYER NAVBAR — Dark Solid Theme
+   BRAND: Kurogane (#2B2B2B) with Kintsugi Gold accents
    ==================================== */
 
-/* --- Base: Transparent, minimal height, glassy --- */
+
+/* --- Base: Solid dark background --- */
+
 .nav-bar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 10000;
-  background: rgba(248, 250, 252, 0.04);
-  backdrop-filter: blur(20px) saturate(120%);
-  -webkit-backdrop-filter: blur(20px) saturate(120%);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-  padding: 0.35rem 0;
-  transition: background 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-    border-color 0.4s ease,
-    box-shadow 0.4s ease,
-    padding 0.3s ease;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 10000;
+    background: #2B2B2B !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border-bottom: none !important;
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.35) !important;
+    padding: 0 !important;
+    transition: background 0.4s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.4s ease, box-shadow 0.4s ease, padding 0.3s ease;
 }
 
-/* --- Scrolled: Frosted glass, compact --- */
+
+/* --- Scrolled: Same solid dark --- */
+
 .nav-bar.scrolled {
-  background: rgba(248, 250, 252, 0.88);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  border-bottom: 1px solid var(--suzu);
-  box-shadow: 0 2px 16px rgba(43, 43, 43, 0.06);
-  padding: 0.375rem 0;
+    background: #2B2B2B !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border-bottom: none !important;
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.35) !important;
+    padding: 0 !important;
 }
 
-/* --- Top accent line (Sei, subtle) --- */
+
+/* --- No top accent line --- */
+
 .nav-bar::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: var(--suzu);
-  opacity: 0;
-  transition: opacity 0.4s ease;
+    display: none !important;
 }
 
 .nav-bar.scrolled::before {
-  opacity: 0.5;
+    display: none !important;
 }
+
 
 /* --- Container: compact --- */
+
 .nav-container {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.25rem 1.5rem;
-  max-width: 100%;
-  margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.3rem 2rem !important;
+    max-width: 100%;
+    margin: 0 auto;
+    gap: 2rem;
 }
 
+
 /* --- Logo: PNG, hero of the nav --- */
+
 .nav-logo {
-  display: flex;
-  align-items: center;
-  flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
 }
 
 .nav-logo a {
-  display: flex;
-  align-items: center;
-  text-decoration: none;
-  position: relative;
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    position: relative;
 }
 
+
 /* Logo over hero: light PNG (logo-dark.png) */
+
 .logo-for-hero {
-  height: 72px;
-  min-width: 160px;
-  width: auto;
-  max-width: 240px;
-  object-fit: contain;
-  object-position: left center;
-  transition: opacity 0.3s ease, transform 0.3s ease;
-  opacity: 0.98;
+    height: 52px !important;
+    min-width: 160px;
+    width: auto;
+    max-width: 240px;
+    object-fit: contain;
+    object-position: left center;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    opacity: 0.98;
+    display: block !important;
 }
 
 .nav-bar.scrolled .logo-for-hero {
-  display: none !important;
+    display: block !important;
 }
 
+
 /* Logo when scrolled: dark PNG (logo-light.png) */
+
 .logo-for-scrolled {
-  display: none !important;
-  height: 48px;
-  min-width: 140px;
-  max-width: 200px;
-  object-fit: contain;
-  object-position: left center;
-  transition: opacity 0.3s ease, transform 0.3s ease;
+    display: none !important;
+    height: 48px;
+    min-width: 140px;
+    max-width: 200px;
+    object-fit: contain;
+    object-position: left center;
+    transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
 .nav-bar.scrolled .logo-for-scrolled {
-  display: block !important;
+    display: none !important;
 }
 
 .logo-image:hover {
-  opacity: 1;
-  transform: scale(1.03);
+    opacity: 1;
+    transform: scale(1.03);
 }
 
 .nav-bar.scrolled .logo-image:hover {
-  opacity: 0.88;
+    opacity: 0.88;
 }
 
+
 /* --- Nav links --- */
+
 .nav-links {
-  display: flex;
-  align-items: center;
-  gap: 3rem;
-  padding: 0 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 3rem;
+    padding: 0 1.25rem;
 }
 
 .nav-link {
-  font-family: var(--font-display);
-  font-size: 0.8125rem;
-  font-weight: 400;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.88);
-  text-decoration: none;
-  position: relative;
-  padding: 0.625rem 0;
-  transition: color 0.25s ease;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+    font-family: var(--font-display);
+    font-size: 0.75rem !important;
+    font-weight: 400;
+    letter-spacing: 0.09em !important;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.82) !important;
+    text-decoration: none;
+    position: relative;
+    padding: 0.3rem 0 !important;
+    transition: color 0.2s ease !important;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .nav-bar.scrolled .nav-link {
-  color: var(--aitetsu);
+    color: rgba(255, 255, 255, 0.82) !important;
 }
 
 .nav-link:hover,
 .nav-link.active {
-  color: var(--washi);
+    color: var(--kintsugi, #D4AF37) !important;
 }
 
 .nav-bar.scrolled .nav-link:hover,
 .nav-bar.scrolled .nav-link.active {
-  color: var(--kurogane);
+    color: var(--kintsugi, #D4AF37) !important;
 }
 
+
 /* Underline accent */
+
 .nav-link::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 0;
-  height: 2px;
-  background: var(--kintsugi);
-  transition: width 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--kintsugi, #D4AF37) !important;
+    transition: width 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .nav-link:hover::after,
 .nav-link.active::after {
-  width: 100%;
+    width: 100%;
 }
+
 
 /* --- Actions --- */
+
 .nav-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
 }
 
+
 /* Cart button */
+
 .btn-cart {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 42px;
-  height: 42px;
-  border-radius: 0 !important;
-  background: rgba(255, 255, 255, 0.08) !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
-  color: rgba(255, 255, 255, 0.9) !important;
-  text-decoration: none;
-  transition: all 0.25s ease;
-  position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    color: rgba(255, 255, 255, 0.88) !important;
+    text-decoration: none;
+    transition: all 0.25s ease;
+    position: relative;
 }
 
 .nav-bar.scrolled .btn-cart {
-  background: rgba(64, 84, 94, 0.06) !important;
-  border-color: rgba(209, 213, 219, 0.5) !important;
-  color: var(--aitetsu) !important;
+    background: transparent !important;
+    border: none !important;
+    color: rgba(255, 255, 255, 0.88) !important;
 }
 
 .btn-cart:hover {
-  background: rgba(212, 175, 55, 0.15) !important;
-  border-color: rgba(212, 175, 55, 0.35) !important;
-  color: var(--kintsugi) !important;
+    background: transparent !important;
+    border: none !important;
+    color: var(--sei, #95AFC0) !important;
 }
 
 .nav-bar.scrolled .btn-cart:hover {
-  background: rgba(212, 175, 55, 0.12) !important;
-  border-color: rgba(212, 175, 55, 0.3) !important;
-  color: var(--kintsugi) !important;
+    background: transparent !important;
+    border: none !important;
+    color: var(--sei, #95AFC0) !important;
 }
 
 .btn-cart i {
-  width: 1.25rem;
-  height: 1.25rem;
+    width: 1.25rem;
+    height: 1.25rem;
 }
 
 .cart-badge {
-  position: absolute;
-  top: -4px;
-  right: -4px;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 5px;
-  font-size: 0.7rem;
-  font-weight: 700;
-  background: var(--kintsugi);
-  color: var(--kurogane);
-  border-radius: 0 !important;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    background: var(--kintsugi, #D4AF37) !important;
+    color: #2B2B2B !important;
+    border-radius: 0 !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .cart-badge.hidden {
-  display: none;
+    display: none;
 }
 
+
 /* Tools hamburger */
+
 .btn-tools-hamburger {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 42px;
-  height: 42px;
-  border-radius: 0 !important;
-  background: rgba(255, 255, 255, 0.08) !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
-  color: rgba(255, 255, 255, 0.9) !important;
-  cursor: pointer;
-  transition: all 0.25s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    color: rgba(255, 255, 255, 0.88) !important;
+    cursor: pointer;
+    transition: all 0.25s ease;
 }
 
 .nav-bar.scrolled .btn-tools-hamburger {
-  background: rgba(64, 84, 94, 0.06) !important;
-  border-color: rgba(209, 213, 219, 0.5) !important;
-  color: var(--aitetsu) !important;
+    background: transparent !important;
+    border: none !important;
+    color: rgba(255, 255, 255, 0.88) !important;
 }
 
 .btn-tools-hamburger:hover {
-  background: rgba(212, 175, 55, 0.15) !important;
-  border-color: rgba(212, 175, 55, 0.35) !important;
-  color: var(--kintsugi) !important;
+    background: transparent !important;
+    border: none !important;
+    color: var(--sei, #95AFC0) !important;
 }
 
 .nav-bar.scrolled .btn-tools-hamburger:hover {
-  background: rgba(212, 175, 55, 0.12) !important;
-  border-color: rgba(212, 175, 55, 0.3) !important;
-  color: var(--kintsugi) !important;
+    background: transparent !important;
+    border: none !important;
+    color: var(--sei, #95AFC0) !important;
 }
 
 .tools-line {
-  background: rgba(255, 255, 255, 0.85) !important;
+    background: rgba(255, 255, 255, 0.85) !important;
 }
 
 .nav-bar.scrolled .tools-line {
-  background: var(--aitetsu) !important;
+    background: rgba(255, 255, 255, 0.85) !important;
 }
 
 .btn-tools-hamburger:hover .tools-line {
-  background: var(--kintsugi) !important;
+    background: var(--sei, #95AFC0) !important;
 }
 
+
 /* Sign in button */
+
 .btn-sign-in {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1.25rem;
-  font-family: var(--font-body);
-  font-size: 0.9375rem;
-  font-weight: 600;
-  background: rgba(255, 255, 255, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 0 !important;
-  color: var(--washi);
-  cursor: pointer;
-  transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1.25rem;
+    font-family: var(--font-body);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 0 !important;
+    color: var(--washi);
+    cursor: pointer;
+    transition: all 0.3s ease;
 }
 
 .btn-sign-in:hover {
-  background: rgba(255, 255, 255, 0.25);
-  border-color: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.5);
 }
 
 .nav-bar.scrolled .btn-sign-in {
-  background: var(--aitetsu);
-  border-color: var(--aitetsu);
-  color: var(--washi);
+    background: var(--aitetsu);
+    border-color: var(--aitetsu);
+    color: var(--washi);
 }
 
 .nav-bar.scrolled .btn-sign-in:hover {
-  background: var(--kurogane);
-  border-color: var(--kurogane);
+    background: var(--kurogane);
+    border-color: var(--kurogane);
 }
 
-/* User avatar (scrolled) */
-.nav-bar.scrolled .user-profile-btn-compact .user-avatar {
-  background: var(--aitetsu);
-  border-color: rgba(64, 84, 94, 0.2);
+
+/* User avatar */
+
+.user-profile-btn-compact .user-avatar {
+    background: var(--aitetsu, #40545E) !important;
+    border: 2px solid rgba(212, 175, 55, 0.5) !important;
+    color: #fff !important;
+    font-size: 11px !important;
 }
 
-.nav-bar.scrolled .user-profile-btn-compact:hover .user-avatar {
-  border-color: var(--sei);
+.user-profile-btn-compact:hover .user-avatar {
+    border-color: rgba(212, 175, 55, 0.75) !important;
 }
 
-/* --- Pages without hero: always solid --- */
-body:not(:has(.search2-hero)):not(:has(.searchv2-hero)) .nav-bar,
-body:not(:has(.search2-page)):not(:has(.searchv2-page)) .nav-bar {
-  background: rgba(248, 250, 252, 0.95);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--suzu);
+.user-name,
+.user-display-name {
+    color: rgba(255, 255, 255, 0.88) !important;
+    font-size: 0.78rem !important;
 }
 
-/* Pages without hero: show dark logo only */
-body:not(:has(.search2-hero)):not(:has(.searchv2-hero)) .logo-for-hero,
-body:not(:has(.search2-page)):not(:has(.searchv2-page)) .logo-for-hero {
-  display: none !important;
+
+/* Icon color */
+
+.nav-icon-search {
+    color: var(--kintsugi, #D4AF37) !important;
 }
 
-body:not(:has(.search2-hero)):not(:has(.searchv2-hero)) .logo-for-scrolled,
-body:not(:has(.search2-page)):not(:has(.searchv2-page)) .logo-for-scrolled {
-  display: block !important;
-}
 
-body:not(:has(.search2-hero)):not(:has(.searchv2-hero)) .nav-link,
-body:not(:has(.search2-page)):not(:has(.searchv2-page)) .nav-link {
-  color: var(--kurogane);
-}
+/* --- Mobile menu button --- */
 
-body:not(:has(.search2-hero)):not(:has(.searchv2-hero)) .nav-link:hover,
-body:not(:has(.search2-hero)):not(:has(.searchv2-hero)) .nav-link.active,
-body:not(:has(.search2-page)):not(:has(.searchv2-page)) .nav-link:hover,
-body:not(:has(.search2-page)):not(:has(.searchv2-page)) .nav-link.active {
-  color: var(--aitetsu);
-}
-
-body:not(:has(.search2-hero)):not(:has(.searchv2-hero)) .btn-cart,
-body:not(:has(.search2-page)):not(:has(.searchv2-page)) .btn-cart {
-  background: rgba(64, 84, 94, 0.06) !important;
-  border-color: rgba(209, 213, 219, 0.5) !important;
-  color: var(--aitetsu) !important;
-}
-
-body:not(:has(.search2-hero)):not(:has(.searchv2-hero)) .btn-tools-hamburger,
-body:not(:has(.search2-page)):not(:has(.searchv2-page)) .btn-tools-hamburger {
-  background: rgba(64, 84, 94, 0.06) !important;
-  border-color: rgba(209, 213, 219, 0.5) !important;
-  color: var(--aitetsu) !important;
-}
-
-body:not(:has(.search2-hero)):not(:has(.searchv2-hero)) .tools-line,
-body:not(:has(.search2-page)):not(:has(.searchv2-page)) .tools-line {
-  background: var(--aitetsu) !important;
-}
-
-/* --- Mobile menu button: visible on transparent nav --- */
 .mobile-menu-btn {
-  background: rgba(255, 255, 255, 0.12) !important;
-  border-color: rgba(255, 255, 255, 0.25) !important;
+    background: transparent !important;
+    border: none !important;
 }
 
 .mobile-menu-btn .menu-line {
-  background: rgba(255, 255, 255, 0.9) !important;
+    background: rgba(255, 255, 255, 0.85) !important;
 }
 
-.nav-bar.scrolled .mobile-menu-btn {
-  background: rgba(255, 255, 255, 0.95) !important;
-  border-color: rgba(149, 175, 192, 0.25) !important;
+.mobile-menu-btn:hover {
+    background: transparent !important;
+    color: var(--sei, #95AFC0) !important;
 }
 
-.nav-bar.scrolled .mobile-menu-btn .menu-line {
-  background: var(--aitetsu) !important;
+.mobile-menu-btn:hover .menu-line {
+    background: var(--sei, #95AFC0) !important;
 }
+
 
 /* --- Dropdown trigger chevron --- */
+
 .dropdown-chevron {
-  width: 1rem;
-  height: 1rem;
-  transition: transform 0.3s ease;
+    width: 1rem;
+    height: 1rem;
+    transition: transform 0.3s ease;
 }
 
 .nav-dropdown.open .dropdown-chevron {
-  transform: rotate(180deg);
+    transform: rotate(180deg);
 }

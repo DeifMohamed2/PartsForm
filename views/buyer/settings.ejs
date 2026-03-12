@@ -5,26 +5,24 @@
 <%- include('partials/navbar') %>
 
 <!-- ====================================
-     SETTINGS PAGE - PROFESSIONAL DESIGN
+     SETTINGS PAGE - HEADER BAR DESIGN
      ==================================== -->
 <div class="settings-page">
-  <!-- Hero Section -->
-  <div class="settings-hero">
-    <div class="settings-hero-content">
-      <div class="settings-badge">
-        <i data-lucide="settings"></i>
-        <span><%= t('settings.badge') %></span>
+  <!-- Header Bar -->
+  <div class="settings-header-bar">
+    <div class="container">
+      <div class="settings-header-content">
+        <div class="settings-header-left">
+          <h1 class="settings-header-title"><%= t('settings.title') %></h1>
+          <p class="settings-header-subtitle"><%= t('settings.subtitle') %></p>
+        </div>
       </div>
-
-      <h1 class="settings-hero-title"><%= t('settings.title') %></h1>
-      <p class="settings-hero-subtitle">
-        <%= t('settings.subtitle') %>
-      </p>
     </div>
   </div>
 
   <!-- Main Content -->
-  <div class="buyer-container">
+  <div class="settings-content">
+    <div class="container">
     <div class="settings-section">
       <div class="settings-layout">
         <!-- Settings Navigation -->

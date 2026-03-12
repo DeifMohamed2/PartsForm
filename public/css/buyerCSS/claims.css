@@ -4,259 +4,255 @@
    ==================================== */
 
 /* ====================================
+   VIEWPORT LOCK PATTERN
+   ==================================== */
+html:has(.claims-page) {
+    height: 100%;
+    overflow: hidden;
+}
+
+body:has(.claims-page) {
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Utility Class */
+.hidden {
+    display: none !important;
+}
+
+/* ====================================
    PAGE LAYOUT
    ==================================== */
 .claims-page {
-    min-height: 100vh;
-    background: var(--washi);
-    padding-top: 0;
-    position: relative;
-}
-
-/* Ensure navbar stays on top and visible */
-.claims-page .nav-bar {
-    z-index: 10001 !important;
-    position: fixed !important;
-    top: 0 !important;
-    width: 100% !important;
-    background: rgba(255, 255, 255, 0.98) !important;
-    backdrop-filter: blur(20px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
-    border-bottom: 1px solid rgba(64, 84, 94, 0.2) !important;
-    box-shadow: 0 4px 20px rgba(43, 43, 43, 0.08),
-        0 2px 8px rgba(64, 84, 94, 0.05) !important;
-}
-
-/* ====================================
-   HERO SECTION
-   ==================================== */
-.claims-hero {
-    padding: 8rem 0 4rem;
-    position: relative;
-    overflow: hidden;
-    background: var(--kurogane);
-    margin-top: 0;
-    border-radius: 0 !important;
-    box-shadow: 0 10px 30px rgba(43, 43, 43, 0.2);
-}
-
-/* Background overlay - industrial/tech imagery */
-.claims-hero::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-image: url('https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80');
-    background-size: cover;
-    background-position: center;
-    background-blend-mode: overlay;
-    opacity: 0.25;
-    z-index: 1;
-    pointer-events: none;
-    animation: claimsHeroShift 25s ease-in-out infinite;
-}
-
-@keyframes claimsHeroShift {
-    0%, 100% { background-position: center center; }
-    33% { background-position: center 20%; }
-    66% { background-position: center 80%; }
-}
-
-/* Solid overlay - Aitetsu tint (30% Kurogane/Blues) */
-.claims-hero::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(180deg, rgba(64, 84, 94, 0.75) 0%, rgba(43, 43, 43, 0.85) 100%);
-    z-index: 1;
-    pointer-events: none;
-}
-
-.claims-hero-content {
-    position: relative;
-    z-index: 2;
-    text-align: center;
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 0 2rem;
-}
-
-.claim-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    background: rgba(149, 175, 192, 0.15);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(149, 175, 192, 0.35);
-    border-radius: 0 !important;
-    color: var(--washi);
-    font-family: 'Antartida', sans-serif;
-    font-weight: 500;
-    font-size: 0.8125rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: 2rem;
-    animation: fadeInUp 0.6s ease-out forwards;
-}
-
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.claim-badge i {
-    width: 16px;
-    height: 16px;
-    color: #ffffff;
-}
-
-.claims-hero-title {
-    font-family: 'Quantico', sans-serif;
-    font-size: 2.5rem;
-    font-weight: 400;
-    color: var(--washi);
-    margin-bottom: 1rem;
-    line-height: 1.2;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    animation: fadeInUp 0.6s ease-out 0.1s backwards;
-}
-
-.claims-hero-subtitle {
-    font-family: 'Antartida', sans-serif;
-    font-size: 1rem;
-    color: rgba(248, 250, 252, 0.9);
-    line-height: 1.6;
-    animation: fadeInUp 0.6s ease-out 0.2s backwards;
-    font-weight: 400;
-    max-width: 600px;
-    margin: 0 auto;
-}
-
-/* ====================================
-   CLAIMS SECTION
-   ==================================== */
-.claims-section {
-    padding: 3rem 0;
-}
-
-/* ====================================
-   CLAIMS HEADER WITH STATS
-   ==================================== */
-.claims-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-    gap: 2rem;
-}
-
-/* Stats - Individual cards with clear separation */
-.claims-stats-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
     flex: 1;
-}
-
-.claims-stat-card {
+    min-height: 0;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
-    padding: 1.5rem 1.75rem;
-    background: white;
-    border-radius: 0 !important;
-    border: 1px solid rgba(149, 175, 192, 0.25);
-    box-shadow: 0 2px 16px rgba(149, 175, 192, 0.08);
+    background: var(--washi);
+    padding-top: 44px;
+    position: relative;
 }
 
-.claims-stat-card.stat-open {
-    border-left: 4px solid var(--suzu);
+/* ====================================
+   HEADER BAR
+   ==================================== */
+.claims-header-bar {
+  background: linear-gradient(to bottom, var(--washi) 0%, rgba(149, 175, 192, 0.05) 100%);
+  padding: 1.5rem 0 1.25rem;
+  border-bottom: 1px solid rgba(149, 175, 192, 0.2);
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  position: relative;
 }
 
-.claims-stat-card.stat-in-progress {
-    border-left: 4px solid var(--aitetsu);
+.claims-header-bar::before {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 200px;
+  height: 2px;
+  background: linear-gradient(to right, var(--kintsugi), transparent);
+  animation: shimmer 3s ease-in-out infinite;
 }
 
-.claims-stat-card.stat-resolved {
-    border-left: 4px solid var(--sei);
+@keyframes shimmer {
+  0%, 100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  50% {
+    opacity: 0.7;
+    transform: translateX(20px);
+  }
 }
 
-.claims-stat-value {
-    font-family: 'Quantico', sans-serif;
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--kurogane);
-    line-height: 1;
+.claims-header-content {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 2rem;
+  flex-wrap: wrap;
 }
 
-.claims-stat-label {
-    font-family: 'Antartida', sans-serif;
-    font-size: 0.8rem;
-    color: var(--namari);
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
+.claims-header-left {
+  flex: 1;
+  min-width: 300px;
 }
 
-/* Create Claim Button */
+.claims-header-title {
+  font-family: 'Quantico', sans-serif;
+  font-size: 2.25rem;
+  font-weight: 400;
+  color: var(--kurogane);
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  line-height: 1.1;
+}
+
+.claims-header-subtitle {
+  font-family: 'Antartida', sans-serif;
+  font-size: 0.9375rem;
+  color: var(--namari);
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+
+.claims-header-right {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
 .btn-create-claim {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1.5rem;
-    background: var(--kintsugi);
-    color: white;
-    border: 1.5px solid var(--kintsugi);
-    border-radius: 0 !important;
-    font-family: 'Quantico', sans-serif;
-    font-size: 0.8125rem;
-    font-weight: 400;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1.75rem;
+  background: var(--aitetsu);
+  color: white;
+  border: 1.5px solid var(--aitetsu);
+  border-radius: 4px;
+  font-family: 'Quantico', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  white-space: nowrap;
 }
 
 .btn-create-claim:hover {
-    background: #c9a432;
-    border-color: #c9a432;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(214, 172, 63, 0.3);
+  background: #354550;
+  border-color: #354550;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(64, 84, 94, 0.3);
 }
 
 .btn-create-claim i {
-    width: 18px;
-    height: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+/* ====================================
+   CLAIMS CONTENT
+   ==================================== */
+.claims-content {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    padding: 1rem 0 1rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.claims-content .container {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* ====================================
+   CLAIMS LIST CONTAINER (SCROLLABLE BOX)
+   ==================================== */
+.claims-list-container {
+  background: white;
+  border: 1px solid rgba(149, 175, 192, 0.25);
+  border-radius: 4px;
+  box-shadow: 0 2px 16px rgba(149, 175, 192, 0.08);
+  max-height: 600px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 1.5rem;
+}
+
+/* ====================================
+   CLAIMS STATS - MINIMAL STYLE (MATCHING ORDERS)
+   ==================================== */
+.claims-stats-minimal {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 0.75rem 1.75rem;
+  background: linear-gradient(135deg, rgba(149, 175, 192, 0.08) 0%, rgba(255, 255, 255, 0.95) 100%);
+  border: 1px solid rgba(149, 175, 192, 0.3);
+  border-radius: 4px;
+  box-shadow: 0 2px 12px rgba(149, 175, 192, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  transition: all 0.3s ease;
+}
+
+.claims-stats-minimal:hover {
+  box-shadow: 0 4px 16px rgba(149, 175, 192, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  transform: translateY(-2px);
+}
+
+.stat-minimal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  transition: transform 0.3s ease;
+}
+
+.claims-stats-minimal:hover .stat-minimal {
+  transform: scale(1.05);
+}
+
+.stat-value {
+  font-family: 'Quantico', sans-serif;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--kurogane);
+  line-height: 1;
+  letter-spacing: 0.02em;
+  transition: color 0.3s ease;
+}
+
+.claims-stats-minimal:hover .stat-value {
+  color: var(--kintsugi);
+}
+
+.stat-label {
+  font-family: 'Antartida', sans-serif;
+  font-size: 0.6875rem;
+  color: var(--namari);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 400;
+}
+
+.stat-divider {
+  width: 2px;
+  height: 32px;
+  background: linear-gradient(to bottom, transparent 0%, var(--sei) 50%, transparent 100%);
 }
 
 /* ====================================
    FILTERS
    ==================================== */
 .claims-filters {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 2rem;
-    background: white;
-    padding: 1.5rem;
-    border-radius: 0 !important;
-    border: 1px solid rgba(149, 175, 192, 0.25);
-    box-shadow: 0 2px 16px rgba(149, 175, 192, 0.08);
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  background: linear-gradient(to right, rgba(149, 175, 192, 0.03) 0%, white 50%, rgba(149, 175, 192, 0.03) 100%);
+  border: 1px solid rgba(149, 175, 192, 0.25);
+  border-radius: 4px;
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 1px 8px rgba(149, 175, 192, 0.06);
+  transition: box-shadow 0.3s ease;
+}
+
+.claims-filters:hover {
+  box-shadow: 0 2px 12px rgba(149, 175, 192, 0.1);
 }
 
 .filter-group {
@@ -277,22 +273,22 @@
 
 .filter-select,
 .filter-input {
-    padding: 0.75rem 1rem;
-    border: 1.5px solid rgba(149, 175, 192, 0.25);
-    border-radius: 0 !important;
-    font-family: 'Antartida', sans-serif;
-    font-size: 0.9375rem;
-    color: var(--kurogane);
-    background: var(--washi);
-    transition: all 0.3s ease;
+  padding: 0.75rem 1rem;
+  border: 1.5px solid rgba(149, 175, 192, 0.25);
+  border-radius: 4px;
+  font-family: 'Antartida', sans-serif;
+  font-size: 0.9375rem;
+  color: var(--kurogane);
+  background: var(--washi);
+  transition: all 0.3s ease;
 }
 
 .filter-select:focus,
 .filter-input:focus {
-    outline: none;
-    border-color: var(--kintsugi);
-    background: white;
-    box-shadow: 0 0 0 3px rgba(214, 172, 63, 0.12);
+  outline: none;
+  border-color: var(--sei);
+  background: white;
+  box-shadow: 0 0 0 3px rgba(149, 175, 192, 0.12);
 }
 
 .filter-actions {
@@ -303,33 +299,33 @@
 
 .btn-filter,
 .btn-reset {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1.25rem;
-    border: none;
-    border-radius: 0 !important;
-    font-weight: 600;
-    font-size: 0.9rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  border: none;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .btn-filter {
-    background: var(--kintsugi);
+    background: var(--aitetsu);
     color: white;
-    border: 1.5px solid var(--kintsugi);
+    border: 1.5px solid var(--aitetsu);
 }
 
 .btn-filter:hover {
-    background: #c9a432;
-    border-color: #c9a432;
+    background: #354550;
+    border-color: #354550;
 }
 
 .btn-reset {
     background: white;
     color: var(--namari);
-    border: 1.5px solid var(--suzu);
+    border: 1.5px solid rgba(149, 175, 192, 0.3);
 }
 
 .btn-reset:hover {
@@ -370,24 +366,23 @@
    CLAIMS LIST
    ==================================== */
 .claims-list {
-    display: grid;
-    gap: 1.25rem;
+    display: none;
+    gap: 1rem;
 }
 
 .claim-card {
-    background: white;
-    border-radius: 0 !important;
-    border: 1px solid rgba(149, 175, 192, 0.25);
-    padding: 1.5rem;
-    transition: all 0.3s ease;
-    cursor: pointer;
-    box-shadow: 0 2px 16px rgba(149, 175, 192, 0.08);
+  background: var(--washi);
+  border-radius: 4px;
+  border: 1px solid rgba(149, 175, 192, 0.2);
+  padding: 1.25rem;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(149, 175, 192, 0.05);
 }
 
 .claim-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(149, 175, 192, 0.12);
-    border-color: rgba(149, 175, 192, 0.35);
+  box-shadow: 0 2px 8px rgba(149, 175, 192, 0.12);
+  border-color: rgba(149, 175, 192, 0.35);
 }
 
 .claim-card-header {
@@ -438,7 +433,7 @@
 
 .claim-status-badge {
     padding: 0.375rem 0.875rem;
-    border-radius: 0 !important;
+    border-radius: 4px !important;
     font-size: 0.8rem;
     font-weight: 600;
     text-transform: capitalize;
@@ -476,7 +471,7 @@
 
 .claim-priority-badge {
     padding: 0.25rem 0.75rem;
-    border-radius: 0 !important;
+    border-radius: 4px !important;
     font-family: 'Antartida', sans-serif;
     font-size: 0.75rem;
     font-weight: 500;
@@ -508,7 +503,7 @@
     gap: 0.5rem;
     padding: 0.5rem 1rem;
     background: var(--washi);
-    border-radius: 0 !important;
+    border-radius: 4px !important;
     font-size: 0.85rem;
     color: var(--namari);
     font-weight: 500;
@@ -552,7 +547,7 @@
     padding: 0.5rem 1rem;
     background: var(--washi);
     border: 1px solid #e2e8f0;
-    border-radius: 0 !important;
+    border-radius: 4px !important;
     color: var(--aitetsu);
     font-weight: 600;
     font-size: 0.85rem;
@@ -575,28 +570,32 @@
    ==================================== */
 .claims-empty {
     text-align: center;
-    padding: 6rem 2rem;
-    background: white;
-    border-radius: 0 !important;
-    border: 1px solid rgba(149, 175, 192, 0.25);
-    box-shadow: 0 2px 12px rgba(149, 175, 192, 0.08);
+    padding: 4rem 2rem;
+    background: var(--washi);
+    border-radius: 4px;
+    border: 1px dashed rgba(149, 175, 192, 0.3);
 }
 
 .claims-empty-icon {
-    width: 100px;
-    height: 100px;
-    margin: 0 auto 2rem;
-    background: var(--washi);
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 1.25rem;
+    background: white;
     border: 1px solid rgba(149, 175, 192, 0.25);
-    border-radius: 0 !important;
+    border-radius: 4px;
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: transform 0.3s ease;
+}
+
+.claims-empty:hover .claims-empty-icon {
+    transform: scale(1.05);
 }
 
 .claims-empty-icon i {
-    width: 48px;
-    height: 48px;
+    width: 40px;
+    height: 40px;
     color: var(--namari);
 }
 
@@ -605,20 +604,27 @@
     font-size: 1.5rem;
     font-weight: 400;
     color: var(--kurogane);
-    margin-bottom: 1rem;
+    margin-bottom: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.08em;
 }
 
 .claims-empty-text {
     font-family: 'Antartida', sans-serif;
-    font-size: 1rem;
+    font-size: 0.9375rem;
     color: var(--namari);
     margin-bottom: 2rem;
-    max-width: 400px;
+    max-width: 500px;
     margin-left: auto;
     margin-right: auto;
     line-height: 1.6;
+}
+
+.claims-empty-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    align-items: center;
 }
 
 .btn-empty-action {
@@ -626,23 +632,42 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.875rem 1.75rem;
-    background: var(--kintsugi);
-    color: white;
-    border: 1.5px solid var(--kintsugi);
-    border-radius: 0 !important;
     font-family: 'Quantico', sans-serif;
     font-size: 0.875rem;
     font-weight: 400;
     text-transform: uppercase;
     letter-spacing: 0.08em;
     cursor: pointer;
-    transition: background 0.15s ease, border-color 0.15s ease;
+    transition: all 0.2s ease;
     text-decoration: none;
+    border-radius: 4px;
 }
 
-.btn-empty-action:hover {
-    background: #c9a432;
-    border-color: #c9a432;
+.btn-empty-action.primary {
+    background: var(--aitetsu);
+    color: white;
+    border: 1.5px solid var(--aitetsu);
+}
+
+.btn-empty-action.primary:hover {
+    background: #354550;
+    border-color: #354550;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(64, 84, 94, 0.3);
+}
+
+.btn-empty-action.secondary {
+    background: white;
+    color: var(--kurogane);
+    border: 1.5px solid rgba(149, 175, 192, 0.3);
+}
+
+.btn-empty-action.secondary:hover {
+    background: rgba(149, 175, 192, 0.05);
+    border-color: var(--sei);
+    color: var(--sei);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(149, 175, 192, 0.15);
 }
 
 .btn-empty-action i {
@@ -654,13 +679,14 @@
    RESPONSIVE DESIGN
    ==================================== */
 @media (max-width: 1024px) {
-    .claims-header {
+    .claims-header-content {
         flex-direction: column;
         align-items: stretch;
     }
 
-    .claims-stats-grid {
-        grid-template-columns: repeat(2, 1fr);
+    .claims-stats-minimal {
+        flex-wrap: wrap;
+        gap: 1rem;
     }
 
     .btn-create-claim {
@@ -670,28 +696,48 @@
 }
 
 @media (max-width: 768px) {
-    .claims-hero {
-        padding: 7rem 0 3rem;
+    .claims-header-title {
+        font-size: 1.5rem;
     }
 
-    .claims-hero-title {
-        font-size: 2.5rem;
+    .claims-header-subtitle {
+        font-size: 0.875rem;
     }
 
-    .claims-hero-subtitle {
-        font-size: 1rem;
+    .claims-stats-minimal {
+        flex-direction: column;
+        padding: 1rem;
+        gap: 1rem;
     }
 
-    .claims-stats-grid {
-        grid-template-columns: 1fr;
+    .stat-divider {
+        display: none;
     }
 
-    .claims-stat-card {
-        padding: 1.25rem 1.5rem;
+    .stat-minimal {
+        flex-direction: row;
+        justify-content: space-between;
+        width: 100%;
+        padding: 0.5rem;
+        border-bottom: 1px solid rgba(149, 175, 192, 0.15);
     }
 
-    .claims-stat-value {
-        font-size: 1.75rem;
+    .stat-minimal:last-child {
+        border-bottom: none;
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+    }
+
+    .claims-empty-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .btn-empty-action {
+        width: 100%;
+        justify-content: center;
     }
 
     .claims-filters {
@@ -733,15 +779,15 @@
 }
 
 @media (max-width: 480px) {
-    .claims-hero {
-        padding: 6rem 0 2.5rem;
+    .claims-header-bar {
+        padding: 1rem 0;
     }
 
-    .claims-hero-title {
-        font-size: 2rem;
+    .claims-header-title {
+        font-size: 1.25rem;
     }
 
-    .claims-stat-value {
-        font-size: 1.5rem;
+    .stat-value {
+        font-size: 1.1rem;
     }
 }

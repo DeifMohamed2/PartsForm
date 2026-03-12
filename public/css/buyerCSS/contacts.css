@@ -1,16 +1,29 @@
 /* ====================================
-   CONTACT PAGE - PROFESSIONAL HERO DESIGN
+   CONTACT PAGE - HEADER BAR DESIGN
    PARTSFORM Buyer Portal
    ==================================== */
 
 /* ====================================
-   PAGE LAYOUT
+   PAGE LAYOUT - VIEWPORT LOCK
    ==================================== */
+html:has(.contacts-page) {
+    overflow: hidden;
+    height: 100vh;
+}
+
+body:has(.contacts-page) {
+    overflow: hidden;
+    height: 100vh;
+}
+
 .contacts-page {
-    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
     background: var(--washi);
-    padding-top: 0;
+    padding-top: 44px;
     position: relative;
+    height: 100vh;
+    overflow: hidden;
 }
 
 /* Ensure navbar stays on top and visible */
@@ -52,112 +65,89 @@
 }
 
 /* ====================================
-   HERO SECTION
+   HEADER BAR
    ==================================== */
-
-.contacts-hero {
-    padding: 8rem 0 4rem;
-    position: relative;
-    overflow: hidden;
-    background: var(--kurogane);
-    margin-top: 0;
-    border-radius: 0 !important;
-    box-shadow: 0 10px 30px rgba(43, 43, 43, 0.2);
+.contacts-header-bar {
+  background: linear-gradient(to bottom, var(--washi) 0%, rgba(149, 175, 192, 0.05) 100%);
+  padding: 1.5rem 0 1.25rem;
+  border-bottom: 1px solid rgba(149, 175, 192, 0.2);
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  position: relative;
 }
 
-/* Background Image Overlay */
-.contacts-hero::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-image: url('https://images.unsplash.com/photo-1423666639041-f56000c27a9a?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80');
-    background-size: cover;
-    background-position: center;
-    background-blend-mode: overlay;
-    opacity: 0.3;
-    z-index: 1;
-    pointer-events: none;
-    animation: subtleShift 20s ease-in-out infinite;
+.contacts-header-bar::before {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 200px;
+  height: 2px;
+  background: linear-gradient(to right, var(--kintsugi), transparent);
+  animation: shimmer 3s ease-in-out infinite;
 }
 
-@keyframes subtleShift {
-
-    0%,
-    100% {
-        background-position: center center;
-    }
-
-    50% {
-        background-position: center bottom;
-    }
-}
-
-/* Solid overlay for better text readability */
-.contacts-hero::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(26, 43, 61, 0.5);
-    z-index: 1;
-    pointer-events: none;
-}
-
-.contacts-hero-content {
-    position: relative;
-    z-index: 2;
-    text-align: center;
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 0 2rem;
-}
-
-.contact-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    background: rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    border-radius: 0 !important;
-    color: #ffffff;
-    font-weight: 500;
-    font-size: 0.85rem;
-    margin-bottom: 2rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    position: relative;
+@keyframes shimmer {
+  0%, 100% {
     opacity: 1;
-    transform: translateY(0);
-    animation: fadeInUp 0.6s ease-out forwards;
+    transform: translateX(0);
+  }
+  50% {
+    opacity: 0.7;
+    transform: translateX(20px);
+  }
 }
 
-
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+.contacts-header-content {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 2rem;
+  flex-wrap: wrap;
 }
 
-.contact-badge i {
-    width: 16px;
-    height: 16px;
-    color: #ffffff;
+.contacts-header-left {
+  flex: 1;
+  min-width: 300px;
 }
 
-.contact-badge span {
+.contacts-header-title {
+  font-family: 'Quantico', sans-serif;
+  font-size: 2.25rem;
+  font-weight: 400;
+  color: var(--kurogane);
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  line-height: 1.1;
+}
+
+.contacts-header-subtitle {
+  font-family: 'Antartida', sans-serif;
+  font-size: 0.9375rem;
+  color: var(--namari);
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+
+/* ====================================
+   CONTACTS CONTENT
+   ==================================== */
+.contacts-content {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    padding: 1rem 0 1rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.contacts-content .container {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
     color: #ffffff;
 }
 

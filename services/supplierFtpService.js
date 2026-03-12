@@ -3,7 +3,12 @@
  * Provides FTP server functionality for suppliers to upload their data files
  * Uses ftp-srv package to create a virtual FTP server
  */
-const FtpSrv = require('ftp-srv');
+let FtpSrv;
+try {
+  FtpSrv = require('ftp-srv');
+} catch (_error) {
+  FtpSrv = null;
+}
 const path = require('path');
 const fs = require('fs').promises;
 const fsSync = require('fs');
@@ -57,6 +62,12 @@ class SupplierFtpService extends EventEmitter {
     if (this.isRunning) {
       logger.warn('FTP server is already running');
       return;
+    }
+
+    if (!FtpSrv) {
+      const message = 'ftp-srv package is not installed. Supplier FTP server is disabled for security.';
+      logger.error(message);
+      throw new Error(message);
     }
 
     try {

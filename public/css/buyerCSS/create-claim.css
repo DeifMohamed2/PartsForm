@@ -1,24 +1,37 @@
 /* ====================================
-   CREATE CLAIM PAGE - PROFESSIONAL DESIGN
+   CREATE CLAIM PAGE - HEADER BAR DESIGN
    PARTSFORM Buyer Portal
    ==================================== */
+
+/* ====================================
+   VIEWPORT LOCK
+   ==================================== */
+html:has(.create-claim-page) {
+    overflow: hidden;
+    height: 100vh;
+}
+
+body:has(.create-claim-page) {
+    overflow: hidden;
+    height: 100vh;
+}
 
 /* ====================================
    PAGE LAYOUT
    ==================================== */
 .create-claim-page {
-    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
     background: var(--washi);
-    padding-top: 0;
-    position: relative;
+    overflow: hidden;
 }
 
 /* Ensure navbar stays on top */
 .create-claim-page .nav-bar {
     z-index: 10001 !important;
-    position: fixed !important;
-    top: 0 !important;
-    width: 100% !important;
+    position: relative !important;
+    flex-shrink: 0;
     background: rgba(255, 255, 255, 0.98) !important;
     backdrop-filter: blur(20px) saturate(180%) !important;
     -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
@@ -27,126 +40,95 @@
 }
 
 /* ====================================
-   HERO SECTION
+   HEADER BAR
    ==================================== */
-.create-claim-hero {
-    padding: 8rem 0 4rem;
+.create-claim-header-bar {
+    padding: 1.5rem 0;
+    background: linear-gradient(to bottom, var(--washi) 0%, rgba(149, 175, 192, 0.05) 100%);
+    border-bottom: 1px solid rgba(149, 175, 192, 0.2);
+    flex-shrink: 0;
     position: relative;
     overflow: hidden;
-    background: var(--kurogane);
-    margin-top: 0;
-    border-radius: 0 !important;
-    box-shadow: 0 10px 30px rgba(43, 43, 43, 0.2);
 }
 
-.create-claim-hero::before {
+.create-claim-header-bar::before {
     content: '';
     position: absolute;
     top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-image: url('https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80');
-    background-size: cover;
-    background-position: center;
-    background-blend-mode: overlay;
-    opacity: 0.25;
-    z-index: 1;
-    pointer-events: none;
-    animation: createClaimHeroShift 25s ease-in-out infinite;
+    left: -200px;
+    width: 200px;
+    height: 2px;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        var(--kintsugi-gold) 50%,
+        transparent 100%
+    );
+    animation: shimmer 3s ease-in-out infinite;
+    z-index: 3;
 }
 
-@keyframes createClaimHeroShift {
-    0%, 100% { background-position: center center; }
-    33% { background-position: center 25%; }
-    66% { background-position: center 75%; }
+@keyframes shimmer {
+    0%, 100% {
+        left: -200px;
+    }
+    50% {
+        left: calc(100% + 200px);
+    }
 }
 
-.create-claim-hero::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(180deg, rgba(64, 84, 94, 0.75) 0%, rgba(43, 43, 43, 0.85) 100%);
-    z-index: 1;
-    pointer-events: none;
-}
-
-.create-claim-hero-content {
-    position: relative;
-    z-index: 2;
-    text-align: center;
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 0 2rem;
-}
-
-.hero-badge {
-    display: inline-flex;
+.create-claim-header-content {
+    display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    background: rgba(149, 175, 192, 0.15);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(149, 175, 192, 0.35);
-    border-radius: 0 !important;
-    color: var(--washi);
-    font-family: 'Antartida', sans-serif;
-    font-weight: 500;
-    font-size: 0.8125rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: 2rem;
-    animation: fadeInUp 0.6s ease-out forwards;
+    justify-content: space-between;
+    gap: 2rem;
 }
 
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+.create-claim-header-left {
+    flex: 1;
 }
 
-.hero-badge i {
-    width: 16px;
-    height: 16px;
-}
-
-.create-claim-hero-title {
+.create-claim-header-title {
     font-family: 'Quantico', sans-serif;
-    font-size: 2.5rem;
+    font-size: 2.25rem;
     font-weight: 400;
-    color: var(--washi);
-    margin-bottom: 1rem;
+    color: var(--kurogane);
+    margin: 0 0 0.5rem 0;
     line-height: 1.2;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    animation: fadeInUp 0.6s ease-out 0.1s backwards;
 }
 
-.create-claim-hero-subtitle {
+.create-claim-header-subtitle {
     font-family: 'Antartida', sans-serif;
-    font-size: 1rem;
-    color: rgba(248, 250, 252, 0.9);
-    line-height: 1.6;
-    animation: fadeInUp 0.6s ease-out 0.2s backwards;
-    font-weight: 400;
-    max-width: 600px;
-    margin: 0 auto;
+    font-size: 0.9375rem;
+    color: rgba(43, 43, 43, 0.7);
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* ====================================
+   SCROLLABLE CONTENT
+   ==================================== */
+.create-claim-content {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.create-claim-content .container {
+    flex: 1;
+    overflow-y: auto;
+    padding-top: 2rem;
+    padding-bottom: 3rem;
 }
 
 /* ====================================
    MAIN CONTENT
    ==================================== */
 .create-claim-section {
-    padding: 3rem 0;
+    padding: 2rem 0;
 }
 
 .create-claim-container {
@@ -190,9 +172,9 @@
     background: white;
     border-radius: 0 !important;
     border: 1px solid rgba(149, 175, 192, 0.25);
-    padding: 2.5rem;
+    padding: 1.75rem;
     box-shadow: 0 2px 16px rgba(149, 175, 192, 0.08);
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
 }
 
 .card-header {
@@ -563,16 +545,16 @@
 }
 
 .btn-submit {
-    background: var(--kintsugi);
+    background: var(--aitetsu);
     color: white;
-    border: 1.5px solid var(--kintsugi);
+    border: 1.5px solid var(--aitetsu);
 }
 
 .btn-submit:hover {
-    background: #c9a432;
-    border-color: #c9a432;
+    background: #354550;
+    border-color: #354550;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(214, 172, 63, 0.3);
+    box-shadow: 0 4px 12px rgba(64, 84, 94, 0.3);
 }
 
 .btn-cancel i,
@@ -588,9 +570,9 @@
     background: rgba(149, 175, 192, 0.06);
     border-radius: 0 !important;
     border: 1px solid rgba(149, 175, 192, 0.25);
-    padding: 2rem;
+    padding: 1.25rem;
     display: flex;
-    gap: 1.5rem;
+    gap: 1rem;
 }
 
 .help-icon {
