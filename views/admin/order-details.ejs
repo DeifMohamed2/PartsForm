@@ -2,11 +2,18 @@
 <link rel="stylesheet" href="/css/adminCSS/admin-dashboard.css">
 <link rel="stylesheet" href="/css/adminCSS/admin-orders.css">
 <style>
-  /* Override - All icons with colored backgrounds should be white */
+  /* Override - Icons inherit badge color for contrast */
   .status-badge i,
   .status-badge svg,
   .priority-badge i,
-  .priority-badge svg,
+  .priority-badge svg { color: inherit !important; stroke: inherit !important; }
+  /* Solid background icons use white for contrast */
+  .status-badge.processing i,
+  .status-badge.processing svg,
+  .status-badge.shipped i,
+  .status-badge.shipped svg,
+  .status-badge.cancelled i,
+  .status-badge.cancelled svg,
   .timeline-step.active .timeline-icon i,
   .timeline-step.active .timeline-icon svg,
   .timeline-step.completed .timeline-icon i,
@@ -25,17 +32,17 @@
     stroke: #fff !important;
   }
   
-  /* Status badges with solid backgrounds */
-  .status-badge.pending { background: #f59e0b; color: #fff; }
-  .status-badge.processing { background: #3b82f6; color: #fff; }
-  .status-badge.shipped { background: #8b5cf6; color: #fff; }
-  .status-badge.delivered { background: #10b981; color: #fff; }
-  .status-badge.completed { background: #10b981; color: #fff; }
-  .status-badge.cancelled { background: #ef4444; color: #fff; }
+  /* Status badges — Brand colors */
+  .status-badge.pending { background: var(--kintsugi); color: var(--kurogane); }
+  .status-badge.processing { background: var(--aitetsu); color: var(--washi); }
+  .status-badge.shipped { background: var(--namari); color: var(--washi); }
+  .status-badge.delivered { background: var(--sei); color: var(--kurogane); }
+  .status-badge.completed { background: var(--sei); color: var(--kurogane); }
+  .status-badge.cancelled { background: var(--namari); color: var(--washi); }
   
-  /* Priority badges with solid backgrounds */
-  .priority-badge.urgent { background: #ef4444; color: #fff; }
-  .priority-badge.high { background: #f59e0b; color: #fff; }
+  /* Priority badges — Brand colors */
+  .priority-badge.urgent { background: var(--namari); color: var(--washi); }
+  .priority-badge.high { background: var(--kintsugi); color: var(--kurogane); }
   
   /* Professional Order Details Styles - Clean Design */
   .order-details-page {
@@ -107,7 +114,7 @@
     width: 42px;
     height: 42px;
     border-radius: 10px;
-    background: #3b82f6;
+    background: var(--aitetsu);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -178,7 +185,7 @@
   .timeline-card-header h3 i {
     width: 18px;
     height: 18px;
-    color: #3b82f6;
+    color: var(--aitetsu);
   }
   
   .order-timeline {
@@ -230,8 +237,8 @@
   }
   
   .timeline-step.completed .timeline-icon {
-    background: #10b981;
-    border-color: #10b981;
+    background: var(--sei);
+    border-color: var(--sei);
   }
   
   .timeline-step.completed .timeline-icon i {
@@ -239,9 +246,9 @@
   }
   
   .timeline-step.active .timeline-icon {
-    background: #3b82f6;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+    background: var(--aitetsu);
+    border-color: var(--aitetsu);
+    box-shadow: 0 0 0 4px rgba(64, 84, 94, 0.15);
   }
   
   .timeline-step.active .timeline-icon i {
@@ -249,8 +256,8 @@
   }
   
   .timeline-step.cancelled .timeline-icon {
-    background: #ef4444;
-    border-color: #ef4444;
+    background: var(--namari);
+    border-color: var(--namari);
   }
   
   .timeline-step.cancelled .timeline-icon i {
@@ -320,7 +327,7 @@
     width: 32px;
     height: 32px;
     border-radius: 8px;
-    background: #3b82f6;
+    background: var(--aitetsu);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -336,7 +343,7 @@
   .details-card-header h3 i:not(.card-header-icon i) {
     width: 16px;
     height: 16px;
-    color: #3b82f6;
+    color: var(--aitetsu);
   }
   
   .details-card-body {
@@ -407,7 +414,7 @@
   .item-image {
     width: 48px;
     height: 48px;
-    background: #3b82f6;
+    background: var(--aitetsu);
     border-radius: 10px;
     display: flex;
     align-items: center;
@@ -440,8 +447,8 @@
     font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
     font-size: 0.8rem;
     font-weight: 600;
-    color: #3b82f6;
-    background: #eff6ff;
+    color: var(--aitetsu);
+    background: rgba(64, 84, 94, 0.08);
     padding: 0.2rem 0.5rem;
     border-radius: 4px;
     width: fit-content;
@@ -506,10 +513,10 @@
     letter-spacing: 0.3px;
   }
   .source-badge i { width: 11px; height: 11px; }
-  .source-badge.integration { background: linear-gradient(135deg, #dbeafe, #bfdbfe); color: #1d4ed8; }
-  .source-badge.supplier-upload { background: linear-gradient(135deg, #d1fae5, #a7f3d0); color: #047857; }
-  .source-badge.api { background: linear-gradient(135deg, #fae8ff, #f5d0fe); color: #9333ea; }
-  .source-badge.manual { background: linear-gradient(135deg, #fef3c7, #fde68a); color: #b45309; }
+  .source-badge.integration { background: rgba(64, 84, 94, 0.12); color: var(--aitetsu); }
+  .source-badge.supplier-upload { background: rgba(149, 175, 192, 0.2); color: var(--sei); }
+  .source-badge.api { background: var(--kintsugi-light); color: var(--kintsugi); }
+  .source-badge.manual { background: var(--kintsugi-light); color: var(--namari); }
   .source-badge.unknown { background: #f1f5f9; color: #64748b; }
   
   /* Source Summary Card */
@@ -541,7 +548,7 @@
   .source-summary-header h4 i {
     width: 16px;
     height: 16px;
-    color: #3b82f6;
+    color: var(--aitetsu);
   }
   
   .source-groups {
@@ -576,14 +583,14 @@
     flex-shrink: 0;
   }
   
-  .source-group-icon.integration { background: #dbeafe; }
-  .source-group-icon.integration i { color: #2563eb; }
-  .source-group-icon.supplier-upload { background: #d1fae5; }
-  .source-group-icon.supplier-upload i { color: #059669; }
-  .source-group-icon.api { background: #f3e8ff; }
-  .source-group-icon.api i { color: #9333ea; }
-  .source-group-icon.manual { background: #fef3c7; }
-  .source-group-icon.manual i { color: #d97706; }
+  .source-group-icon.integration { background: rgba(64, 84, 94, 0.12); }
+  .source-group-icon.integration i { color: var(--aitetsu); }
+  .source-group-icon.supplier-upload { background: rgba(149, 175, 192, 0.2); }
+  .source-group-icon.supplier-upload i { color: var(--sei); }
+  .source-group-icon.api { background: var(--kintsugi-light); }
+  .source-group-icon.api i { color: var(--kintsugi); }
+  .source-group-icon.manual { background: var(--kintsugi-light); }
+  .source-group-icon.manual i { color: var(--namari); }
   .source-group-icon.unknown { background: #f1f5f9; }
   .source-group-icon.unknown i { color: #64748b; }
   .source-group-icon i { width: 16px; height: 16px; }
@@ -609,7 +616,7 @@
   }
   
   .source-group-meta a {
-    color: #3b82f6;
+    color: var(--aitetsu);
     text-decoration: none;
   }
   
@@ -631,8 +638,8 @@
     align-items: center;
     gap: 0.35rem;
     padding: 0.4rem 0.75rem;
-    background: #3b82f6;
-    color: white;
+    background: var(--aitetsu);
+    color: var(--washi);
     border-radius: 6px;
     font-size: 0.7rem;
     font-weight: 500;
@@ -641,7 +648,7 @@
   }
   
   .source-contact-btn:hover {
-    background: #2563eb;
+    background: var(--admin-primary-dark);
     transform: translateY(-1px);
   }
   
@@ -717,7 +724,7 @@
     width: 56px;
     height: 56px;
     border-radius: 12px;
-    background: #3b82f6;
+    background: var(--aitetsu);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -813,23 +820,23 @@
   }
   
   .payment-status.paid {
-    background: #dcfce7;
-    color: #16a34a;
+    background: var(--color-success-bg);
+    color: var(--color-success-text);
   }
   
   .payment-status.pending {
-    background: #fef3c7;
-    color: #d97706;
+    background: var(--kintsugi-light);
+    color: var(--kintsugi);
   }
   
   .payment-status.partial {
-    background: #dbeafe;
-    color: #2563eb;
+    background: rgba(64, 84, 94, 0.12);
+    color: var(--aitetsu);
   }
   
   .payment-status.failed {
-    background: #fee2e2;
-    color: #dc2626;
+    background: var(--color-error-bg);
+    color: var(--color-error-text);
   }
   
   .payment-status i {
@@ -891,19 +898,19 @@
     height: 18px;
   }
   
-  /* Activity Icon with solid background and white icons */
-  .activity-icon.pending { background: #f59e0b; }
-  .activity-icon.pending i { color: #fff; }
-  .activity-icon.processing { background: #8b5cf6; }
-  .activity-icon.processing i { color: #fff; }
-  .activity-icon.shipped { background: #3b82f6; }
-  .activity-icon.shipped i { color: #fff; }
-  .activity-icon.delivered { background: #10b981; }
-  .activity-icon.delivered i { color: #fff; }
-  .activity-icon.cancelled { background: #ef4444; }
-  .activity-icon.cancelled i { color: #fff; }
-  .activity-icon.default { background: #64748b; }
-  .activity-icon.default i { color: #fff; }
+  /* Activity Icon — Brand colors */
+  .activity-icon.pending { background: var(--kintsugi); }
+  .activity-icon.pending i { color: var(--kurogane); }
+  .activity-icon.processing { background: var(--aitetsu); }
+  .activity-icon.processing i { color: var(--washi); }
+  .activity-icon.shipped { background: var(--namari); }
+  .activity-icon.shipped i { color: var(--washi); }
+  .activity-icon.delivered { background: var(--sei); }
+  .activity-icon.delivered i { color: var(--kurogane); }
+  .activity-icon.cancelled { background: var(--namari); }
+  .activity-icon.cancelled i { color: var(--washi); }
+  .activity-icon.default { background: var(--namari); }
+  .activity-icon.default i { color: var(--washi); }
   
   .activity-content {
     flex: 1;
@@ -1011,7 +1018,7 @@
   
   .status-option.selected {
     border-color: var(--module-primary, var(--admin-primary));
-    background: rgba(59, 130, 246, 0.05);
+    background: rgba(64, 84, 94, 0.06);
   }
   
   .status-option input {
@@ -1715,8 +1722,8 @@
       <div class="status-options">
         <label class="status-option" data-status="pending">
           <input type="radio" name="newStatus" value="pending" <%= order.status === 'pending' ? 'checked' : '' %>>
-          <div class="status-option-icon" style="background: rgba(245, 158, 11, 0.12);">
-            <i data-lucide="clock" style="color: #f59e0b;"></i>
+          <div class="status-option-icon" style="background: var(--kintsugi-light);">
+            <i data-lucide="clock" style="color: var(--kintsugi);"></i>
           </div>
           <div class="status-option-content">
             <div class="status-option-label">Pending</div>
@@ -1725,8 +1732,8 @@
         </label>
         <label class="status-option" data-status="processing">
           <input type="radio" name="newStatus" value="processing" <%= order.status === 'processing' ? 'checked' : '' %>>
-          <div class="status-option-icon" style="background: rgba(139, 92, 246, 0.12);">
-            <i data-lucide="settings" style="color: #8b5cf6;"></i>
+          <div class="status-option-icon" style="background: rgba(64, 84, 94, 0.12);">
+            <i data-lucide="settings" style="color: var(--aitetsu);"></i>
           </div>
           <div class="status-option-content">
             <div class="status-option-label">Processing</div>
@@ -1735,8 +1742,8 @@
         </label>
         <label class="status-option" data-status="shipped">
           <input type="radio" name="newStatus" value="shipped" <%= order.status === 'shipped' ? 'checked' : '' %>>
-          <div class="status-option-icon" style="background: rgba(59, 130, 246, 0.12);">
-            <i data-lucide="truck" style="color: #3b82f6;"></i>
+          <div class="status-option-icon" style="background: rgba(142, 156, 166, 0.15);">
+            <i data-lucide="truck" style="color: var(--namari);"></i>
           </div>
           <div class="status-option-content">
             <div class="status-option-label">Shipped</div>
@@ -1745,8 +1752,8 @@
         </label>
         <label class="status-option" data-status="delivered">
           <input type="radio" name="newStatus" value="delivered" <%= order.status === 'delivered' ? 'checked' : '' %>>
-          <div class="status-option-icon" style="background: rgba(16, 185, 129, 0.12);">
-            <i data-lucide="check-circle" style="color: #10b981;"></i>
+          <div class="status-option-icon" style="background: rgba(149, 175, 192, 0.2);">
+            <i data-lucide="check-circle" style="color: var(--sei);"></i>
           </div>
           <div class="status-option-content">
             <div class="status-option-label">Delivered</div>
@@ -1779,8 +1786,8 @@
         <div class="status-options" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin-bottom: 0;">
           <label class="status-option selected" data-note-type="update" style="padding: 0.6rem 0.75rem;">
             <input type="radio" name="noteType" value="update" checked>
-            <div class="status-option-icon" style="background: rgba(59, 130, 246, 0.12); width: 28px; height: 28px;">
-              <i data-lucide="refresh-cw" style="color: #3b82f6; width: 14px; height: 14px;"></i>
+            <div class="status-option-icon" style="background: rgba(64, 84, 94, 0.12); width: 28px; height: 28px;">
+              <i data-lucide="refresh-cw" style="color: var(--aitetsu); width: 14px; height: 14px;"></i>
             </div>
             <div class="status-option-content">
               <div class="status-option-label" style="font-size: 0.8rem;">Update</div>
@@ -1788,8 +1795,8 @@
           </label>
           <label class="status-option" data-note-type="delay" style="padding: 0.6rem 0.75rem;">
             <input type="radio" name="noteType" value="delay">
-            <div class="status-option-icon" style="background: rgba(245, 158, 11, 0.12); width: 28px; height: 28px;">
-              <i data-lucide="clock" style="color: #f59e0b; width: 14px; height: 14px;"></i>
+            <div class="status-option-icon" style="background: var(--kintsugi-light); width: 28px; height: 28px;">
+              <i data-lucide="clock" style="color: var(--kintsugi); width: 14px; height: 14px;"></i>
             </div>
             <div class="status-option-content">
               <div class="status-option-label" style="font-size: 0.8rem;">Delay</div>
@@ -1797,8 +1804,8 @@
           </label>
           <label class="status-option" data-note-type="issue" style="padding: 0.6rem 0.75rem;">
             <input type="radio" name="noteType" value="issue">
-            <div class="status-option-icon" style="background: rgba(239, 68, 68, 0.12); width: 28px; height: 28px;">
-              <i data-lucide="alert-triangle" style="color: #ef4444; width: 14px; height: 14px;"></i>
+            <div class="status-option-icon" style="background: var(--color-error-bg); width: 28px; height: 28px;">
+              <i data-lucide="alert-triangle" style="color: var(--color-error-text); width: 14px; height: 14px;"></i>
             </div>
             <div class="status-option-content">
               <div class="status-option-label" style="font-size: 0.8rem;">Issue</div>
@@ -1806,8 +1813,8 @@
           </label>
           <label class="status-option" data-note-type="info" style="padding: 0.6rem 0.75rem;">
             <input type="radio" name="noteType" value="info">
-            <div class="status-option-icon" style="background: rgba(99, 102, 241, 0.12); width: 28px; height: 28px;">
-              <i data-lucide="info" style="color: #6366f1; width: 14px; height: 14px;"></i>
+            <div class="status-option-icon" style="background: rgba(64, 84, 94, 0.08); width: 28px; height: 28px;">
+              <i data-lucide="info" style="color: var(--aitetsu); width: 14px; height: 14px;"></i>
             </div>
             <div class="status-option-content">
               <div class="status-option-label" style="font-size: 0.8rem;">Info</div>
@@ -1815,8 +1822,8 @@
           </label>
           <label class="status-option" data-note-type="action" style="padding: 0.6rem 0.75rem;">
             <input type="radio" name="noteType" value="action">
-            <div class="status-option-icon" style="background: rgba(139, 92, 246, 0.12); width: 28px; height: 28px;">
-              <i data-lucide="alert-circle" style="color: #8b5cf6; width: 14px; height: 14px;"></i>
+            <div class="status-option-icon" style="background: var(--kintsugi-light); width: 28px; height: 28px;">
+              <i data-lucide="alert-circle" style="color: var(--kintsugi); width: 14px; height: 14px;"></i>
             </div>
             <div class="status-option-content">
               <div class="status-option-label" style="font-size: 0.8rem;">Action</div>
@@ -1824,8 +1831,8 @@
           </label>
           <label class="status-option" data-note-type="resolution" style="padding: 0.6rem 0.75rem;">
             <input type="radio" name="noteType" value="resolution">
-            <div class="status-option-icon" style="background: rgba(16, 185, 129, 0.12); width: 28px; height: 28px;">
-              <i data-lucide="check-square" style="color: #10b981; width: 14px; height: 14px;"></i>
+            <div class="status-option-icon" style="background: rgba(149, 175, 192, 0.2); width: 28px; height: 28px;">
+              <i data-lucide="check-square" style="color: var(--sei); width: 14px; height: 14px;"></i>
             </div>
             <div class="status-option-content">
               <div class="status-option-label" style="font-size: 0.8rem;">Resolved</div>

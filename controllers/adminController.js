@@ -803,17 +803,21 @@ const getOrderDetails = async (req, res) => {
         .render('error', { title: 'Error', error: 'Order not found' });
     }
 
-    // Lookup source info from Parts collection based on part numbers
+    // Lookup source info from Parts collection based on part numbers (use partNumber - indexed)
     const partNumbers = [...new Set(order.items?.map(item => item.partNumber).filter(Boolean))];
-    const partsWithSource = await Part.find(
-      { code: { $in: partNumbers } },
-      { code: 1, source: 1, integrationName: 1, fileName: 1 }
-    ).populate('source.supplierId', 'code companyName email phone').lean();
+    const partsWithSource = partNumbers.length > 0
+      ? await Part.find(
+          { partNumber: { $in: partNumbers } },
+          { partNumber: 1, source: 1, integrationName: 1, fileName: 1 }
+        )
+        .populate('source.supplierId', 'code companyName email phone')
+        .lean()
+      : [];
     
     // Create a map of partNumber -> source info
     const partSourceMap = {};
     for (const part of partsWithSource) {
-      partSourceMap[part.code] = {
+      partSourceMap[part.partNumber] = {
         sourceType: part.source?.type || 'unknown',
         integrationName: part.source?.integrationName || part.integrationName || '',
         fileName: part.fileName || '',

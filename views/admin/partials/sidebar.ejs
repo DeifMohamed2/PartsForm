@@ -27,7 +27,7 @@
       <a href="/admin/parts-analytics" class="sidebar-nav-item <%= typeof activePage !== 'undefined' && activePage === 'parts-analytics' ? 'active' : '' %>">
         <i data-lucide="bar-chart-3"></i>
         <span>Parts Analytics</span>
-        <span class="sidebar-nav-badge" style="background: var(--aitetsu);">AI</span>
+        <span class="sidebar-nav-badge">AI</span>
       </a>
     </div>
 
@@ -45,7 +45,7 @@
         <i data-lucide="mail"></i>
         <span>Email Inquiries</span>
         <% if (typeof sidebarCounts !== 'undefined' && sidebarCounts.unreadInquiries > 0) { %>
-        <span class="sidebar-nav-badge" style="background: var(--aitetsu);" id="sidebarInquiriesBadge"><%= sidebarCounts.unreadInquiries %></span>
+        <span class="sidebar-nav-badge" id="sidebarInquiriesBadge"><%= sidebarCounts.unreadInquiries %></span>
         <% } %>
       </a>
       <a href="/admin/claims" class="sidebar-nav-item <%= typeof activePage !== 'undefined' && activePage === 'claims' ? 'active' : '' %>">
@@ -104,7 +104,7 @@
       <a href="/admin/server-status" class="sidebar-nav-item <%= typeof activePage !== 'undefined' && activePage === 'server-status' ? 'active' : '' %>">
         <i data-lucide="server"></i>
         <span>Server Status</span>
-        <span class="sidebar-nav-badge" style="background: var(--aitetsu);">Live</span>
+        <span class="sidebar-nav-badge">Live</span>
       </a>
       <% } %>
     </div>

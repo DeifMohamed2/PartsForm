@@ -91,7 +91,7 @@
     align-items: center;
     gap: 1rem;
     padding: 1rem 1.25rem;
-    background: var(--admin-bg-secondary);
+    background: rgba(64, 84, 94, 0.04);
     border: 1px solid var(--admin-border);
     border-radius: 0;
     margin-bottom: 1.5rem;
@@ -274,8 +274,8 @@
 .orders-table-header .orders-count {
     font-size: 0.75rem;
     padding: 0.2rem 0.5rem;
-    background: var(--aitetsu);
-    color: white;
+    background: var(--kurogane);
+    color: var(--washi);
     border-radius: 0;
     font-weight: 600;
 }
@@ -317,7 +317,7 @@
 }
 
 .orders-table thead {
-    background: var(--admin-bg-tertiary);
+    background: rgba(64, 84, 94, 0.06);
 }
 
 .orders-table th {
@@ -370,16 +370,18 @@
 /* Order ID Cell */
 .order-id-cell {
     font-weight: 600;
-    color: var(--aitetsu);
+    color: var(--kurogane);
     font-size: 0.9rem;
 }
 
 .order-id-cell a {
     color: inherit;
     text-decoration: none;
+    transition: color 0.2s;
 }
 
 .order-id-cell a:hover {
+    color: var(--kintsugi);
     text-decoration: underline;
 }
 
@@ -672,9 +674,9 @@
 }
 
 .pagination-btn.active {
-    background: var(--aitetsu);
-    border-color: var(--sei);
-    color: white;
+    background: var(--kurogane);
+    border-color: var(--kurogane);
+    color: var(--washi);
 }
 
 .pagination-btn i {

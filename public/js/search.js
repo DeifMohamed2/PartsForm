@@ -118,6 +118,10 @@
     if (elements.emptyState) elements.emptyState.classList.add('hidden');
     if (elements.noResultsState) elements.noResultsState.classList.add('hidden');
 
+    // Show "Start your search" overlay placeholder when no results yet (search-v2 / automotive)
+    const resultsEmptyPlaceholder = document.getElementById('results-empty-placeholder');
+    if (resultsEmptyPlaceholder) resultsEmptyPlaceholder.classList.remove('hidden');
+
     // Show placeholder row in empty table
     showTablePlaceholder();
   }
@@ -517,12 +521,14 @@
     }
 
     // Show/hide clear button
-    if (query.length > 0) {
-      elements.clearBtn.style.display = 'flex';
-    } else {
-      elements.clearBtn.style.display = 'none';
-      hideAutocomplete();
+    if (elements.clearBtn) {
+      if (query.length > 0) {
+        elements.clearBtn.style.display = 'flex';
+      } else {
+        elements.clearBtn.style.display = 'none';
+      }
     }
+    if (query.length === 0) hideAutocomplete();
 
     // Show autocomplete suggestions from first character
     if (query.length >= 1) {
@@ -1269,6 +1275,10 @@
       elements.advancedFilterTrigger.classList.remove('hidden');
     }
 
+    // Hide "Start your search" overlay placeholder when results exist (search-v2 / automotive)
+    const resultsEmptyPlaceholder = document.getElementById('results-empty-placeholder');
+    if (resultsEmptyPlaceholder) resultsEmptyPlaceholder.classList.add('hidden');
+
     // Update count — show total and page range
     elements.resultsCount.textContent = totalResults;
     // Also update the footer results count
@@ -1586,6 +1596,10 @@
       elements.advancedFilterTrigger.classList.add('hidden');
     }
 
+    // Hide "Start your search" overlay when showing no-results state
+    const resultsEmptyPlaceholder = document.getElementById('results-empty-placeholder');
+    if (resultsEmptyPlaceholder) resultsEmptyPlaceholder.classList.add('hidden');
+
     elements.resultsHeader.classList.add('hidden');
     // Keep table visible with placeholder
     const tableContainer = document.getElementById('results-table-container');
@@ -1625,6 +1639,9 @@
     if (tableContainer) tableContainer.classList.remove('hidden');
     elements.noResultsState.classList.add('hidden');
     elements.emptyState.classList.add('hidden');
+    // Show "Start your search" overlay when empty state
+    const resultsEmptyPlaceholder = document.getElementById('results-empty-placeholder');
+    if (resultsEmptyPlaceholder) resultsEmptyPlaceholder.classList.remove('hidden');
     showTablePlaceholder();
   }
 

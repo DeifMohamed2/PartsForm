@@ -85,7 +85,7 @@
             <span><%= t('search.aiSmartFilter') %></span>
             <span class="ai-chip">AI</span>
           </button>
-          <button class="quick-action-btn hidden" id="advanced-filter-trigger">
+          <button class="quick-action-btn" id="advanced-filter-trigger">
             <i data-lucide="sliders-horizontal"></i>
             <span><%= t('search.advancedFilters') %></span>
           </button>
@@ -94,11 +94,21 @@
     </div>
   </div>
 
-  <!-- Results Section -->
-  <%- include('partials/search-results') %>
+  <!-- Results Section with overlay placeholder (like search-v2) -->
+  <div class="search2-results-wrapper automotive-results-wrapper">
+    <%- include('partials/search-results') %>
+    <!-- Empty State Placeholder — overlays table, hidden when results exist -->
+    <div class="results-empty-placeholder automotive-placeholder" id="results-empty-placeholder">
+      <div class="empty-placeholder-content">
+        <i data-lucide="search" class="empty-icon"></i>
+        <h3 class="empty-title"><%= t('searchResults.emptyState.title') %></h3>
+        <p class="empty-desc"><%= t('searchResults.emptyState.description') %></p>
+      </div>
+    </div>
+  </div>
 
-  <!-- Pre-Search Placeholder — Visible before any search -->
-  <div class="search2-placeholder" id="search2-placeholder">
+  <!-- Legacy placeholder (hidden in automotive - we use results-empty-placeholder above) -->
+  <div class="search2-placeholder hidden" id="search2-placeholder">
     <div class="placeholder-content">
       <div class="placeholder-icon-ring">
         <div class="placeholder-icon-inner">
