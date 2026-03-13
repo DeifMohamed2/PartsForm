@@ -360,6 +360,7 @@ body:has(.searchv2-page) .tools-section-label {
 
 .searchv2-hero {
     position: relative;
+    z-index: 100;
     flex: 0 0 auto;
     width: 100%;
     margin: 44px 0 6px 0;
@@ -641,15 +642,19 @@ body:has(.searchv2-page) .tools-section-label {
     background: var(--v2-white);
     border-radius: 0 !important;
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
-    z-index: 100;
+    z-index: 99999;
     display: none;
     max-height: 400px;
     overflow-y: auto;
     border: 1px solid var(--v2-border);
 }
 
+.search2-autocomplete.show,
 .search2-autocomplete.active {
     display: block;
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
 }
 
 .autocomplete-item {
@@ -758,6 +763,8 @@ body:has(.searchv2-page) .tools-section-label {
    ==================================== */
 
 .searchv2-results {
+    position: relative;
+    z-index: 1;
     flex: 1;
     min-height: 0;
     display: flex;

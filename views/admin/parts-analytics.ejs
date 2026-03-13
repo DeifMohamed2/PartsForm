@@ -144,7 +144,7 @@
             <div class="analytics-card">
               <div class="analytics-card-header">
                 <div class="analytics-card-title">
-                  <div class="analytics-card-title-icon" style="background: #ef4444;">
+                  <div class="analytics-card-title-icon missed-opportunities-icon">
                     <i data-lucide="alert-triangle"></i>
                   </div>
                   <div>
@@ -168,7 +168,7 @@
           <div class="analytics-card" style="margin-bottom: 2rem;">
             <div class="analytics-card-header">
               <div class="analytics-card-title">
-                <div class="analytics-card-title-icon" style="background: #8b5cf6;">
+                <div class="analytics-card-title-icon" style="background: var(--namari);">
                   <i data-lucide="activity"></i>
                 </div>
                 <div>
@@ -197,7 +197,7 @@
           
           <!-- Top Purchased Parts Grid -->
           <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--admin-text-primary); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem;">
-            <i data-lucide="trophy" style="width: 24px; height: 24px; color: #f59e0b;"></i>
+            <i data-lucide="trophy" style="width: 24px; height: 24px; color: var(--kintsugi);"></i>
             Top Purchased Parts
           </h3>
           
@@ -213,7 +213,7 @@
             <div class="analytics-card">
               <div class="analytics-card-header">
                 <div class="analytics-card-title">
-                  <div class="analytics-card-title-icon" style="background: #10b981;">
+                  <div class="analytics-card-title-icon" style="background: var(--sei); color: var(--kurogane);">
                     <i data-lucide="pie-chart"></i>
                   </div>
                   <div>
@@ -232,7 +232,7 @@
             <div class="analytics-card">
               <div class="analytics-card-header">
                 <div class="analytics-card-title">
-                  <div class="analytics-card-title-icon" style="background: #f59e0b;">
+                  <div class="analytics-card-title-icon" style="background: var(--kintsugi); color: var(--kurogane);">
                     <i data-lucide="bar-chart-2"></i>
                   </div>
                   <div>
@@ -283,7 +283,7 @@
             <div class="prediction-chart-card">
               <div class="analytics-card-header">
                 <div class="analytics-card-title">
-                  <div class="analytics-card-title-icon" style="background: #3b82f6;">
+                  <div class="analytics-card-title-icon" style="background: var(--aitetsu);">
                     <i data-lucide="trending-up"></i>
                   </div>
                   <div>
@@ -293,11 +293,11 @@
                 </div>
                 <div style="display: flex; gap: 0.75rem;">
                   <div style="display: flex; align-items: center; gap: 0.375rem;">
-                    <div style="width: 12px; height: 12px; background: #3b82f6; border-radius: 2px;"></div>
+                    <div style="width: 12px; height: 12px; background: #40545E; border-radius: 2px;"></div>
                     <span style="font-size: 0.75rem; color: var(--admin-text-muted);">Historical</span>
                   </div>
                   <div style="display: flex; align-items: center; gap: 0.375rem;">
-                    <div style="width: 12px; height: 12px; background: #10b981; border-radius: 2px;"></div>
+                    <div style="width: 12px; height: 12px; background: #95AFC0; border-radius: 2px;"></div>
                     <span style="font-size: 0.75rem; color: var(--admin-text-muted);">Forecast</span>
                   </div>
                 </div>
@@ -313,7 +313,7 @@
             <div class="prediction-sidebar">
               <div class="prediction-metric-card">
                 <div class="prediction-metric-header">
-                  <div class="prediction-metric-icon" style="background: rgba(16, 185, 129, 0.12); color: #10b981;">
+                  <div class="prediction-metric-icon" style="background: rgba(149, 175, 192, 0.2); color: #95AFC0;">
                     <i data-lucide="trending-up"></i>
                   </div>
                   <div class="prediction-metric-title">Expected Orders</div>
@@ -327,7 +327,7 @@
               
               <div class="prediction-metric-card">
                 <div class="prediction-metric-header">
-                  <div class="prediction-metric-icon" style="background: rgba(59, 130, 246, 0.12); color: #3b82f6;">
+                  <div class="prediction-metric-icon" style="background: rgba(64, 84, 94, 0.12); color: #40545E;">
                     <i data-lucide="dollar-sign"></i>
                   </div>
                   <div class="prediction-metric-title">Projected Revenue</div>
@@ -341,7 +341,7 @@
               
               <div class="prediction-metric-card">
                 <div class="prediction-metric-header">
-                  <div class="prediction-metric-icon" style="background: rgba(245, 158, 11, 0.12); color: #f59e0b;">
+                  <div class="prediction-metric-icon" style="background: rgba(212, 175, 55, 0.12); color: #D4AF37;">
                     <i data-lucide="package"></i>
                   </div>
                   <div class="prediction-metric-title">Stock Needed</div>
@@ -355,7 +355,7 @@
               
               <div class="prediction-metric-card">
                 <div class="prediction-metric-header">
-                  <div class="prediction-metric-icon" style="background: rgba(139, 92, 246, 0.12); color: #8b5cf6;">
+                  <div class="prediction-metric-icon" style="background: rgba(142, 156, 166, 0.15); color: #8E9CA6;">
                     <i data-lucide="target"></i>
                   </div>
                   <div class="prediction-metric-title">Model Accuracy</div>
@@ -373,7 +373,7 @@
           <div class="analytics-card" style="margin-top: 1.5rem;">
             <div class="analytics-card-header">
               <div class="analytics-card-title">
-                  <div class="analytics-card-title-icon" style="background: #ef4444;">
+                  <div class="analytics-card-title-icon" style="background: var(--namari);">
                     <i data-lucide="flame"></i>
                   </div>
                 <div>
@@ -770,7 +770,7 @@
       if (missed.length === 0) {
         container.innerHTML = `
           <div style="text-align: center; padding: 2rem; color: var(--admin-text-muted);">
-            <i data-lucide="check-circle" style="width: 48px; height: 48px; opacity: 0.3; color: #10b981;"></i>
+            <i data-lucide="check-circle" style="width: 48px; height: 48px; opacity: 0.3; color: #95AFC0;"></i>
             <p style="margin-top: 1rem;">Great! No significant missed opportunities detected.</p>
           </div>
         `;
@@ -856,7 +856,7 @@
         return;
       }
       
-      const colors = ['#3b82f6', '#10b981', '#8b5cf6'];
+      const colors = ['#40545E', '#95AFC0', '#8E9CA6'];
       
       // Calculate total orders for percentage calculation
       const totalOrders = parts.reduce((sum, p) => sum + (p.orders || 0), 0);
@@ -978,7 +978,7 @@
         const displayName = item.partNumber || 'Unknown';
         const displayDesc = item.description && item.description !== item.partNumber ? item.description : '';
         const trendIcon = item.trend === 'rising' ? 'trending-up' : item.trend === 'falling' ? 'trending-down' : 'minus';
-        const trendColor = item.trend === 'rising' ? '#ef4444' : item.trend === 'falling' ? '#3b82f6' : '#6b7280';
+        const trendColor = item.trend === 'rising' ? '#8E9CA6' : item.trend === 'falling' ? '#40545E' : '#6b7280';
         
         return `
         <tr>
@@ -1002,7 +1002,7 @@
             </div>
           </td>
           <td>
-            <span style="font-weight: 700; color: ${item.forecast7Days > item.thisWeekOrders ? '#10b981' : '#6b7280'};">
+            <span style="font-weight: 700; color: ${item.forecast7Days > item.thisWeekOrders ? '#95AFC0' : '#6b7280'};">
               ${formatNumber(item.forecast7Days)}
             </span>
           </td>
@@ -1042,7 +1042,7 @@
         sidebar.innerHTML = `
           <div class="prediction-metric-card">
             <div class="prediction-metric-header">
-              <div class="prediction-metric-icon" style="background: rgba(16, 185, 129, 0.12); color: #10b981;">
+              <div class="prediction-metric-icon" style="background: rgba(149, 175, 192, 0.2); color: #95AFC0;">
                 <i data-lucide="trending-up"></i>
               </div>
               <div class="prediction-metric-title">This Week Orders</div>
@@ -1056,7 +1056,7 @@
           
           <div class="prediction-metric-card">
             <div class="prediction-metric-header">
-              <div class="prediction-metric-icon" style="background: rgba(59, 130, 246, 0.12); color: #3b82f6;">
+              <div class="prediction-metric-icon" style="background: rgba(64, 84, 94, 0.12); color: #40545E;">
                 <i data-lucide="dollar-sign"></i>
               </div>
               <div class="prediction-metric-title">Month Revenue</div>
@@ -1070,7 +1070,7 @@
           
           <div class="prediction-metric-card">
             <div class="prediction-metric-header">
-              <div class="prediction-metric-icon" style="background: rgba(245, 158, 11, 0.12); color: #f59e0b;">
+              <div class="prediction-metric-icon" style="background: rgba(212, 175, 55, 0.12); color: #D4AF37;">
                 <i data-lucide="package"></i>
               </div>
               <div class="prediction-metric-title">7-Day Forecast</div>
@@ -1084,7 +1084,7 @@
           
           <div class="prediction-metric-card">
             <div class="prediction-metric-header">
-              <div class="prediction-metric-icon" style="background: rgba(139, 92, 246, 0.12); color: #8b5cf6;">
+              <div class="prediction-metric-icon" style="background: rgba(142, 156, 166, 0.15); color: #8E9CA6;">
                 <i data-lucide="target"></i>
               </div>
               <div class="prediction-metric-title">Unique Parts</div>
@@ -1121,8 +1121,8 @@
       const chartData = data.length > 0 ? data : Array(30).fill(0);
       
       const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 300);
-      gradient.addColorStop(0, 'rgba(59, 130, 246, 0.3)');
-      gradient.addColorStop(1, 'rgba(59, 130, 246, 0.02)');
+      gradient.addColorStop(0, 'rgba(64, 84, 94, 0.25)');
+      gradient.addColorStop(1, 'rgba(64, 84, 94, 0.02)');
       
       if (window.searchTrendsChartInstance) {
         window.searchTrendsChartInstance.destroy();
@@ -1135,12 +1135,12 @@
           datasets: [{
             label: 'Searches',
             data: chartData,
-            borderColor: '#3b82f6',
+            borderColor: '#40545E',
             backgroundColor: gradient,
             borderWidth: 3,
             fill: true,
             tension: 0.4,
-            pointBackgroundColor: '#3b82f6',
+            pointBackgroundColor: '#40545E',
             pointBorderColor: '#fff',
             pointBorderWidth: 2,
             pointRadius: 0,
@@ -1178,7 +1178,7 @@
             labels: labels,
             datasets: [{
               data: data,
-              backgroundColor: ['#ef4444', '#3b82f6', '#10b981', '#8b5cf6', '#f59e0b', '#06b6d4'],
+              backgroundColor: ['#8E9CA6', '#40545E', '#95AFC0', '#8E9CA6', '#D4AF37', '#95AFC0'],
               borderWidth: 0,
               hoverOffset: 10
             }]
@@ -1205,7 +1205,7 @@
           type: 'bar',
           data: {
             labels: labels,
-            datasets: [{ label: 'Customers', data: data, backgroundColor: ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b'], borderRadius: 8 }]
+            datasets: [{ label: 'Customers', data: data, backgroundColor: ['#40545E', '#8E9CA6', '#95AFC0', '#D4AF37'], borderRadius: 8 }]
           },
           options: {
             responsive: true,
@@ -1248,12 +1248,12 @@
       if (window.demandForecastChartInstance) window.demandForecastChartInstance.destroy();
       
       const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 320);
-      gradient.addColorStop(0, 'rgba(59, 130, 246, 0.2)');
-      gradient.addColorStop(1, 'rgba(59, 130, 246, 0.02)');
+      gradient.addColorStop(0, 'rgba(64, 84, 94, 0.2)');
+      gradient.addColorStop(1, 'rgba(64, 84, 94, 0.02)');
       
       const forecastGradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 320);
-      forecastGradient.addColorStop(0, 'rgba(16, 185, 129, 0.3)');
-      forecastGradient.addColorStop(1, 'rgba(16, 185, 129, 0.02)');
+      forecastGradient.addColorStop(0, 'rgba(149, 175, 192, 0.25)');
+      forecastGradient.addColorStop(1, 'rgba(149, 175, 192, 0.02)');
       
       window.demandForecastChartInstance = new Chart(ctx, {
         type: 'line',
@@ -1263,12 +1263,12 @@
             {
               label: 'Historical',
               data: historicalData.slice(-10),
-              borderColor: '#3b82f6',
+              borderColor: '#40545E',
               backgroundColor: gradient,
               borderWidth: 3,
               fill: true,
               tension: 0.4,
-              pointBackgroundColor: '#3b82f6',
+              pointBackgroundColor: '#40545E',
               pointBorderColor: '#fff',
               pointBorderWidth: 2,
               pointRadius: 5
@@ -1276,13 +1276,13 @@
             {
               label: 'Forecast',
               data: forecastData.slice(-10),
-              borderColor: '#10b981',
+              borderColor: '#95AFC0',
               backgroundColor: forecastGradient,
               borderWidth: 3,
               borderDash: [5, 5],
               fill: true,
               tension: 0.4,
-              pointBackgroundColor: '#10b981',
+              pointBackgroundColor: '#95AFC0',
               pointBorderColor: '#fff',
               pointBorderWidth: 2,
               pointRadius: 5
@@ -1495,11 +1495,11 @@
     
     function getCategoryColor(category) {
       const cat = (category || '').toLowerCase();
-      if (cat.includes('brake')) return '#ef4444';
-      if (cat.includes('engine')) return '#3b82f6';
-      if (cat.includes('electric')) return '#f59e0b';
-      if (cat.includes('suspens')) return '#8b5cf6';
-      if (cat.includes('filter')) return '#10b981';
+      if (cat.includes('brake')) return '#8E9CA6';
+      if (cat.includes('engine')) return '#40545E';
+      if (cat.includes('electric')) return '#D4AF37';
+      if (cat.includes('suspens')) return '#8E9CA6';
+      if (cat.includes('filter')) return '#95AFC0';
       return '#64748b';
     }
     

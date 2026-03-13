@@ -51,6 +51,7 @@
     autocompleteContainer: document.getElementById('search2-autocomplete'),
     resultsTableContainer: document.getElementById('results-table-container'),
     resultsTableBody: document.getElementById('results-table-body'),
+    resultsEmptyPlaceholder: document.getElementById('results-empty-placeholder'),
     paginationContainer: document.getElementById('results-pagination'),
     pageContainer: document.querySelector('.searchv2-page'),
     noResultsState: document.getElementById('no-results-state'),
@@ -60,6 +61,10 @@
     addToCartBtn: document.getElementById('add-to-cart-btn'),
     excelUploadTrigger: document.getElementById('excel-upload-trigger'),
     aiFilterTrigger: document.getElementById('ai-filter-trigger'),
+    advancedFilterTrigger: document.getElementById('advanced-filter-trigger'),
+    filtersPanel: document.getElementById('filters-sidebar'),
+    filtersPanelClose: document.getElementById('filters-close'),
+    filtersBackdrop: document.getElementById('filters-backdrop'),
   };
 
   // ====================================
@@ -148,6 +153,17 @@
     if (elements.addToCartBtn) {
       elements.addToCartBtn.addEventListener('click', handleAddToCart);
     }
+
+    // Advanced filter sidebar
+    elements.advancedFilterTrigger?.addEventListener('click', () => {
+      if (typeof window.BuyerAuth !== 'undefined' && !window.BuyerAuth.isLoggedIn()) {
+        if (typeof window.showLoginModal === 'function') window.showLoginModal();
+        return;
+      }
+      showFiltersPanel();
+    });
+    elements.filtersPanelClose?.addEventListener('click', hideFiltersPanel);
+    elements.filtersBackdrop?.addEventListener('click', hideFiltersPanel);
 
     // Sortable headers
     document.querySelectorAll('.results-table-v2 thead th.sortable').forEach(th => {
@@ -401,7 +417,7 @@
               item.addEventListener('click', () => selectAutocompleteItem(index));
             });
 
-          elements.autocompleteContainer.classList.add('active');
+          elements.autocompleteContainer.classList.add('show');
           if (typeof lucide !== 'undefined') lucide.createIcons();
         } else {
           hideAutocomplete();
@@ -415,7 +431,7 @@
 
   function hideAutocomplete() {
     if (elements.autocompleteContainer) {
-      elements.autocompleteContainer.classList.remove('active');
+      elements.autocompleteContainer.classList.remove('show');
     }
     state.autocompleteIndex = -1;
   }
@@ -458,6 +474,7 @@
       return;
     }
     setScrollLock(false);
+    hidePlaceholder();
     hideNoResults();
 
     const totalResults = results.length;
@@ -540,6 +557,7 @@
 
   function showLoading(message = 'Searching...') {
     setScrollLock(false);
+    hidePlaceholder();
     hideNoResults();
     if (elements.resultsTableBody) {
       elements.resultsTableBody.innerHTML = `
@@ -562,6 +580,18 @@
           </td>
         </tr>
       `;
+    }
+  }
+
+  function hidePlaceholder() {
+    if (elements.resultsEmptyPlaceholder) {
+      elements.resultsEmptyPlaceholder.classList.add('hidden');
+    }
+  }
+
+  function showPlaceholder() {
+    if (elements.resultsEmptyPlaceholder) {
+      elements.resultsEmptyPlaceholder.classList.remove('hidden');
     }
   }
 
@@ -810,28 +840,47 @@
     const row = document.querySelector(`tr[data-part-index="${globalIndex}"]`);
     const qty = row ? parseInt(row.querySelector('.qty-input')?.value) || 1 : 1;
 
-    const cartItem = {
-      id: part._id || part.id || part.partNumber,
-      partNumber: part.partNumber || part.vendorCode || part.code,
-      brand: part.brand,
-      description: part.description,
-      price: part.price || part.unitPrice,
-      currency: part.currency || 'USD',
-      quantity: qty,
-      stockCode: part.stockCode,
-      deliveryDays: part.deliveryDays,
-      supplierId: part.supplierId,
-    };
+    const cartItem = buildCartItem(part, qty);
 
-    if (typeof window.Cart !== 'undefined' && window.Cart.addItem) {
-      window.Cart.addItem(cartItem);
-      showCartAlert('success', 'Added to Cart', `${cartItem.partNumber} added to cart`);
+    if (typeof window.PartsFormCart !== 'undefined' && window.PartsFormCart.addToCart) {
+      window.PartsFormCart.addToCart(cartItem);
+      if (typeof window.PartsFormCart.updateBadge === 'function') {
+        window.PartsFormCart.updateBadge();
+      }
+    } else {
+      showCartAlert('error', 'Error', 'Shopping cart is not available');
     }
   };
 
+  function buildCartItem(part, quantity) {
+    const stockValue = part.stockCode || part.stockStatus || part.stock || 'N/A';
+    const deliveryTerms = part.deliveryTime || (part.deliveryDays != null ? String(part.deliveryDays) : '') || part.terms || 'N/A';
+    return {
+      _id: part._id || null,
+      code: part.partNumber || part.vendorCode || part.code || 'N/A',
+      brand: part.brand || 'N/A',
+      description: part.description || 'N/A',
+      supplier: part.supplier || part.integrationName || 'N/A',
+      terms: deliveryTerms,
+      weight: parseFloat(part.weight) || 0,
+      stock: stockValue,
+      aircraftType: part.aircraftType || part.category || 'general',
+      quantity: quantity,
+      price: parseFloat(part.price || part.unitPrice) || 0,
+      currency: part.currency || 'USD',
+      reference: '',
+      category: 'general',
+    };
+  }
+
   function handleAddToCart() {
+    if (typeof window.PartsFormCart === 'undefined') {
+      showCartAlert('error', 'Error', 'Shopping cart is not available');
+      return;
+    }
+
     const results = state.filteredResults.length > 0 ? state.filteredResults : state.currentResults;
-    const items = [];
+    let addedCount = 0;
 
     state.selectedItems.forEach(({ qty }, globalIndex) => {
       const part = results[globalIndex];
@@ -840,34 +889,26 @@
       const visibleRow = document.querySelector(`tr[data-part-index="${globalIndex}"]`);
       const liveQty = visibleRow ? (parseInt(visibleRow.querySelector('.qty-input')?.value) || qty) : qty;
 
-      items.push({
-        id: part._id || part.id || part.partNumber,
-        partNumber: part.partNumber || part.vendorCode || part.code,
-        brand: part.brand,
-        description: part.description,
-        price: part.price || part.unitPrice,
-        currency: part.currency || 'USD',
-        quantity: liveQty,
-        stockCode: part.stockCode,
-        deliveryDays: part.deliveryDays,
-        supplierId: part.supplierId,
-      });
+      const cartItem = buildCartItem(part, liveQty);
+      window.PartsFormCart.addToCart(cartItem);
+      addedCount++;
     });
 
-    if (items.length === 0) {
+    if (addedCount === 0) {
       showCartAlert('warning', 'No Items Selected', 'Please select items to add to cart');
       return;
     }
 
-    if (typeof window.Cart !== 'undefined' && window.Cart.addItems) {
-      window.Cart.addItems(items);
-      showCartAlert('success', 'Added to Cart', `${items.length} items added to cart`);
-      
-      // Clear selections
-      state.selectedItems.clear();
-      document.querySelectorAll('.row-checkbox:checked').forEach(cb => cb.checked = false);
-      updateSelectedTotal();
+    if (typeof window.PartsFormCart.updateBadge === 'function') {
+      window.PartsFormCart.updateBadge();
     }
+
+    showCartAlert('success', 'Added to Cart', `${addedCount} item(s) added successfully`);
+
+    // Clear selections
+    state.selectedItems.clear();
+    document.querySelectorAll('.row-checkbox:checked').forEach(cb => cb.checked = false);
+    updateSelectedTotal();
   }
 
   // ====================================
@@ -889,9 +930,37 @@
   function showCartAlert(type, title, message) {
     if (typeof window.showCartAlert === 'function') {
       window.showCartAlert(type, title, message);
-    } else {
-      console.log(`[${type}] ${title}: ${message}`);
+      return;
     }
+    // Fallback: create simple toast for error/warning feedback
+    let container = document.getElementById('searchv2-alerts');
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'searchv2-alerts';
+      container.style.cssText = 'position:fixed;top:100px;right:2rem;z-index:99999;max-width:400px;';
+      document.body.appendChild(container);
+    }
+    const alert = document.createElement('div');
+    alert.className = 'cart-alert ' + type;
+    alert.style.cssText = 'padding:1rem 1.5rem;margin-bottom:0.5rem;background:#fff;border-radius:6px;box-shadow:0 4px 20px rgba(0,0,0,0.15);border-left:4px solid #40545E;';
+    alert.innerHTML = '<strong>' + (title || '') + '</strong><p style="margin:0.25rem 0 0;font-size:0.9rem;">' + (message || '') + '</p>';
+    container.appendChild(alert);
+    setTimeout(function() { if (alert.parentNode) alert.remove(); }, 4000);
+  }
+
+  // ====================================
+  // ADVANCED FILTER SIDEBAR
+  // ====================================
+  function showFiltersPanel() {
+    elements.filtersPanel?.classList.add('active');
+    elements.filtersBackdrop?.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function hideFiltersPanel() {
+    elements.filtersPanel?.classList.remove('active');
+    elements.filtersBackdrop?.classList.remove('active');
+    document.body.style.overflow = '';
   }
 
   // Initialize on DOM ready

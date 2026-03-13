@@ -515,14 +515,8 @@
       <td class="th-description">
         <span class="part-description">${escapeHtml(item.description)}</span>
       </td>
-      <td class="th-terms">
-        <span class="terms-text">${escapeHtml(item.terms || 'N/A')}</span>
-      </td>
       <td class="th-stock">
         <span class="stock-code-badge">${escapeHtml(stockDisplay)}</span>
-      </td>
-      <td class="th-weight">
-        <span class="weight-text">${item.weight ? parseFloat(item.weight).toFixed(2) + ' kg' : 'N/A'}</span>
       </td>
       <td class="th-qty">
         <div class="qty-controls">

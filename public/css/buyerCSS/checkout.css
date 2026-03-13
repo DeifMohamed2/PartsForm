@@ -4,6 +4,23 @@
    ==================================== */
 
 /* ====================================
+   VIEWPORT LOCK - NON-SCROLLABLE PAGE
+   (Matches delivery, orders - no body scroll)
+   ==================================== */
+
+html:has(.checkout-page) {
+  height: 100%;
+  overflow: hidden;
+}
+
+body:has(.checkout-page) {
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ====================================
    CHECKOUT HERO SECTION
    ==================================== */
 
@@ -94,14 +111,20 @@
    ==================================== */
 
 .checkout-page {
-  min-height: 100vh;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
   background: var(--washi);
-  padding-top: 6rem; /* Ensure content clears fixed navbar */
+  padding-top: 4.5rem;
+  display: flex;
+  flex-direction: column;
 }
 
 .checkout-content {
-  padding: 4rem 0 4rem; /* Slightly more top padding under hero */
-  margin-top: 0; /* Remove overlap with hero */
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 0.75rem 0 1rem;
   position: relative;
   z-index: 3;
 }
@@ -111,8 +134,9 @@
    ==================================== */
 .checkout-header-bar {
   background: rgba(241, 245, 249, 0.95);
-  padding: 1rem 0;
+  padding: 0.5rem 0;
   border-bottom: 1px solid #e2e8f0;
+  flex-shrink: 0;
 }
 
 .header-bar-content {
@@ -123,13 +147,13 @@
 }
 
 .header-title {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 700;
   color: var(--kurogane);
 }
 
 .header-subtitle {
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   color: var(--namari);
 }
 
@@ -142,8 +166,8 @@
 
 .checkout-grid {
   display: grid;
-  grid-template-columns: 1fr 400px;
-  gap: 2rem;
+  grid-template-columns: 1fr 360px;
+  gap: 1.5rem;
   align-items: start;
 }
 
@@ -154,8 +178,8 @@
 .checkout-steps {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 3rem;
-  padding: 2rem;
+  margin-bottom: 1rem;
+  padding: 1rem 1.25rem;
   background: white;
   border-radius: var(--radius-sm);
   box-shadow: 0 4px 20px rgba(43, 43, 43, 0.08);
@@ -172,7 +196,7 @@
 .step-item:not(:last-child)::after {
   content: '';
   position: absolute;
-  top: 20px;
+  top: 16px;
   left: calc(100% - 1rem);
   width: calc(100% - 4rem);
   height: 2px;
@@ -189,8 +213,8 @@
 }
 
 .step-number {
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   background: #e2e8f0;
   color: var(--suzu);
@@ -198,7 +222,7 @@
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  font-size: 1.1rem;
+  font-size: 0.9rem;
   position: relative;
   z-index: 1;
   transition: all 0.3s ease;
@@ -212,7 +236,7 @@
 }
 
 .step-item.completed .step-number {
-  background: #10b981;
+  background: var(--aitetsu);
   color: white;
 }
 
@@ -244,9 +268,9 @@
 .checkout-section {
   background: white;
   border-radius: var(--radius-sm);
-  padding: 2.5rem;
+  padding: 1.25rem 1.5rem;
   box-shadow: 0 4px 20px rgba(43, 43, 43, 0.08);
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
   animation: fadeInUp 0.5s ease;
 }
 
@@ -262,8 +286,8 @@
 }
 
 .section-header {
-  margin-bottom: 2rem;
-  padding-bottom: 1.5rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
   border-bottom: 2px solid #f1f5f9;
 }
 
@@ -271,10 +295,10 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  font-size: 1.75rem;
+  font-size: 1.25rem;
   font-weight: 700;
   color: var(--kurogane);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.25rem;
 }
 
 .section-title i {
@@ -300,12 +324,103 @@
   margin-bottom: 2rem;
 }
 
+.payment-types-single {
+  grid-template-columns: 1fr;
+  max-width: 480px;
+}
+
+.payment-methods-single {
+  max-width: 480px;
+}
+
+/* ====================================
+   WIRE TRANSFER CARD (Enhanced single step)
+   ==================================== */
+
+.wire-transfer-card {
+  background: linear-gradient(135deg, var(--washi) 0%, rgba(149, 175, 192, 0.06) 100%);
+  border: 2px solid var(--sei);
+  border-radius: var(--radius-sm);
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.wire-transfer-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.wire-transfer-info {
+  flex: 1;
+}
+
+.wire-transfer-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--kurogane);
+  margin-bottom: 0.5rem;
+}
+
+.wire-transfer-desc {
+  font-size: 0.95rem;
+  color: var(--namari);
+  line-height: 1.5;
+  margin-bottom: 1rem;
+}
+
+.wire-transfer-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.wire-transfer-detail-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--namari);
+}
+
+.wire-transfer-detail-item .detail-label {
+  font-weight: 500;
+  color: var(--kurogane);
+}
+
+.wire-transfer-detail-item .detail-value {
+  color: var(--namari);
+  font-size: 0.85rem;
+}
+
+.wire-transfer-amount {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  background: var(--kintsugi-light);
+  border: 1px solid var(--kintsugi-border);
+  border-radius: var(--radius-sm);
+}
+
+.wire-transfer-amount .amount-label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--kurogane);
+}
+
+.wire-transfer-amount .amount-value {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--aitetsu);
+}
+
 .payment-type-card {
   position: relative;
   background: var(--washi);
   border: 2px solid #e2e8f0;
   border-radius: var(--radius-sm);
-  padding: 2rem;
+  padding: 1.25rem;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -513,7 +628,7 @@
   background: white;
   border: 2px solid #e2e8f0;
   border-radius: var(--radius-sm);
-  padding: 1.5rem;
+  padding: 1rem 1.25rem;
   cursor: pointer;
   transition: all 0.3s ease;
 }
@@ -809,8 +924,8 @@
   background: var(--washi);
   border: 1px solid #e2e8f0;
   border-radius: var(--radius-sm);
-  padding: 2rem;
-  margin-bottom: 1.5rem;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
 }
 
 .confirmation-title {
@@ -943,9 +1058,9 @@
 
 .section-actions {
   display: flex;
-  gap: 1rem;
+  gap: 0.75rem;
   justify-content: flex-end;
-  padding-top: 1.5rem;
+  padding-top: 1rem;
   border-top: 2px solid #f1f5f9;
 }
 
@@ -954,11 +1069,11 @@
 .btn-complete {
   display: inline-flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 1rem 2rem;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
   border-radius: var(--radius-sm);
   font-weight: 600;
-  font-size: 1rem;
+  font-size: 0.9rem;
   border: none;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -973,19 +1088,19 @@
 
 .btn-next:hover,
 .btn-complete:hover {
-  background: #2563eb;
+  background: var(--kintsugi-hover);
   box-shadow: 0 6px 20px rgba(64, 84, 94, 0.4);
   transform: translateY(-2px);
 }
 
 .btn-complete {
-  background: #10b981;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  background: var(--aitetsu);
+  box-shadow: 0 4px 12px rgba(64, 84, 94, 0.3);
 }
 
 .btn-complete:hover {
-  background: #059669;
-  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+  background: var(--kurogane);
+  box-shadow: 0 6px 20px rgba(64, 84, 94, 0.4);
 }
 
 .btn-complete:disabled {
@@ -1038,25 +1153,25 @@
 .order-summary {
   background: white;
   border-radius: var(--radius-sm);
-  padding: 2rem;
+  padding: 1.25rem;
   box-shadow: 0 4px 20px rgba(43, 43, 43, 0.08);
   border: 1px solid #e2e8f0;
 }
 
 .order-summary.sticky {
   position: sticky;
-  top: 100px;
+  top: 0.5rem;
 }
 
 .summary-title {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  font-size: 1.35rem;
+  gap: 0.5rem;
+  font-size: 1.1rem;
   font-weight: 700;
   color: var(--kurogane);
-  margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
   border-bottom: 2px solid #f1f5f9;
 }
 
@@ -1067,18 +1182,18 @@
 }
 
 .summary-items {
-  max-height: 300px;
+  max-height: 180px;
   overflow-y: auto;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
 }
 
 .summary-item {
   display: flex;
-  gap: 1rem;
-  padding: 1rem;
+  gap: 0.75rem;
+  padding: 0.625rem 0.75rem;
   background: var(--washi);
   border-radius: var(--radius-sm);
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.5rem;
 }
 
 .summary-item-info {
@@ -1222,10 +1337,11 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.5rem;
-  background: #f0f9ff;
+  padding: 1rem;
+  background: var(--kintsugi-light);
   border-radius: var(--radius-sm);
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
+  border: 1px solid var(--kintsugi-border);
 }
 
 .total-label {
@@ -1245,11 +1361,11 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 1rem;
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
+  padding: 0.625rem;
+  background: var(--kintsugi-light);
+  border: 1px solid var(--kintsugi-border);
   border-radius: 0.5rem;
-  color: #15803d;
+  color: var(--kurogane);
   font-size: 0.85rem;
   font-weight: 600;
 }
@@ -1257,7 +1373,7 @@
 .summary-security i {
   width: 18px;
   height: 18px;
-  color: #10b981;
+  color: var(--aitetsu);
 }
 
 /* ====================================
@@ -1496,41 +1612,42 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 4rem 2rem;
-  gap: 1rem;
+  padding: 2rem 1.5rem;
+  gap: 0.75rem;
   text-align: center;
   background: var(--washi);
-  border-radius: 16px;
+  border-radius: 12px;
   border: 2px dashed #e2e8f0;
 }
 
 .no-addresses-icon {
-  width: 80px;
-  height: 80px;
-  background: #fee2e2;
+  width: 56px;
+  height: 56px;
+  background: var(--kintsugi-light);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  border: 1px solid var(--kintsugi-border);
 }
 
 .no-addresses-icon i {
-  width: 40px;
-  height: 40px;
-  color: #ef4444;
+  width: 28px;
+  height: 28px;
+  color: var(--aitetsu);
 }
 
 .no-addresses-title {
-  font-size: 1.5rem;
+  font-size: 1.15rem;
   font-weight: 700;
   color: var(--kurogane);
   margin: 0;
 }
 
 .no-addresses-text {
-  font-size: 1rem;
+  font-size: 0.9rem;
   color: var(--namari);
-  max-width: 400px;
+  max-width: 360px;
 }
 
 .btn-add-address-link {
@@ -1569,11 +1686,11 @@
 
 .shipping-address-card {
   display: flex;
-  gap: 1rem;
-  padding: 1.25rem;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
   background: white;
   border: 2px solid #e2e8f0;
-  border-radius: 16px;
+  border-radius: 12px;
   cursor: pointer;
   transition: all 0.3s ease;
   position: relative;
@@ -1660,11 +1777,12 @@
   align-items: center;
   gap: 0.25rem;
   padding: 0.25rem 0.625rem;
-  background: #d1fae5;
-  color: #059669;
+  background: var(--kintsugi-light);
+  color: var(--kurogane);
   border-radius: 6px;
   font-size: 0.75rem;
   font-weight: 600;
+  border: 1px solid var(--kintsugi-border);
 }
 
 .address-default-badge i {
@@ -1743,7 +1861,7 @@
 
 /* Confirmation Shipping Summary */
 .shipping-summary {
-  border-left: 4px solid #10b981;
+  border-left: 4px solid var(--aitetsu);
 }
 
 .shipping-summary .confirmation-title {
@@ -1755,7 +1873,7 @@
 .shipping-summary .confirmation-title i {
   width: 20px;
   height: 20px;
-  color: #10b981;
+  color: var(--aitetsu);
 }
 
 .shipping-address-summary {

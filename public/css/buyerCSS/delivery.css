@@ -412,13 +412,14 @@ body:has(.delivery-page) {
     font-weight: 500;
 }
 
-/* Truncate long lines */
+/* Allow full address to display - wrap long lines */
 
 .address-info-item span {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    max-width: 210px;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
+    white-space: normal;
+    max-width: 100%;
 }
 
 /* Hide notes in compact view */

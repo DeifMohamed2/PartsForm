@@ -19,7 +19,7 @@
   const PAYMENT_FEES = {
     card: { type: 'percentage', value: 2.9, fixed: 1.5, name: 'Credit/Debit Card' },
     'bank-dubai': { type: 'fixed', value: 0, name: 'Bank Transfer (UAE)' },
-    'bank-international': { type: 'fixed', value: 35, name: 'International Bank Transfer' },
+    'bank-international': { type: 'fixed', value: 35, name: 'Wire Transfer' },
     paypal: { type: 'percentage', value: 3.9, fixed: 1.5, name: 'PayPal' },
     cod: { type: 'fixed', value: 15, name: 'Cash on Delivery' }
   };
@@ -30,7 +30,7 @@
   let orderTotal = 0;
   let selectedAddress = null;
   let selectedPaymentType = 'full';
-  let selectedPaymentMethod = 'card';
+  let selectedPaymentMethod = 'bank-international'; // Wire transfer only
   let isSubmitting = false;
   
   // Referral state
@@ -154,12 +154,18 @@
       if (skeleton) skeleton.style.display = 'none';
 
       if (addresses.length === 0) {
-        if (noAddresses) noAddresses.style.display = 'flex';
-        if (container) container.style.display = 'none';
-        if (addSection) addSection.style.display = 'none';
+        if (noAddresses) {
+          noAddresses.classList.remove('hidden');
+          noAddresses.style.display = 'flex';
+        }
+        if (container) container.classList.add('hidden');
+        if (addSection) addSection.classList.add('hidden');
         return;
       }
 
+      // Remove hidden class so addresses are visible (.hidden uses display:none !important)
+      if (container) container.classList.remove('hidden');
+      if (noAddresses) noAddresses.classList.add('hidden');
       renderAddresses();
       
       // Auto-select default or first address
@@ -170,10 +176,12 @@
       console.error('Error loading addresses:', error);
       if (skeleton) skeleton.style.display = 'none';
       if (noAddresses) {
+        noAddresses.classList.remove('hidden');
         noAddresses.style.display = 'flex';
         const textEl = noAddresses.querySelector('.no-addresses-text');
         if (textEl) textEl.textContent = 'Failed to load addresses. Please refresh.';
       }
+      if (container) container.classList.add('hidden');
     }
   }
 
@@ -186,8 +194,12 @@
     
     if (!container) return;
     
+    container.classList.remove('hidden');
     container.style.display = 'grid';
-    if (addSection) addSection.style.display = 'block';
+    if (addSection) {
+      addSection.classList.remove('hidden');
+      addSection.style.display = 'block';
+    }
 
     container.innerHTML = addresses.map(addr => `
       <div class="shipping-address-card ${addr.isDefault ? 'default' : ''}" 
@@ -199,12 +211,12 @@
         <div class="address-content">
           <div class="address-header">
             <span class="address-label">${escapeHtml(addr.label)}</span>
-            ${addr.isDefault ? '<span class="address-default-badge"><i data-lucide="star"></i> Default</span>' : ''}
+            ${addr.isDefault ? '<span class="address-default-badge">Default</span>' : ''}
           </div>
           <div class="address-details">
-            <div class="address-row"><i data-lucide="user"></i><strong>${escapeHtml(addr.fullName)}</strong></div>
-            <div class="address-row"><i data-lucide="phone"></i><span>${escapeHtml(addr.phone)}</span></div>
-            <div class="address-row"><i data-lucide="map-pin"></i><span>${escapeHtml(addr.street)}, ${escapeHtml(addr.city)}, ${escapeHtml(addr.state)}, ${escapeHtml(addr.country)}${addr.postalCode ? ' ' + escapeHtml(addr.postalCode) : ''}</span></div>
+            <div class="address-row"><strong>${escapeHtml(addr.fullName)}</strong></div>
+            <div class="address-row"><span>${escapeHtml(addr.phone)}</span></div>
+            <div class="address-row"><span>${escapeHtml(addr.street)}, ${escapeHtml(addr.city)}, ${escapeHtml(addr.state)}, ${escapeHtml(addr.country)}${addr.postalCode ? ' ' + escapeHtml(addr.postalCode) : ''}</span></div>
           </div>
         </div>
       </div>
@@ -219,7 +231,10 @@
     const content = document.getElementById('summary-content');
 
     if (skeleton) skeleton.style.display = 'none';
-    if (content) content.style.display = 'block';
+    if (content) {
+      content.classList.remove('hidden');
+      content.style.display = 'block';
+    }
 
     if (!itemsContainer) return;
 
@@ -504,10 +519,13 @@
       return;
     }
 
-    // Hide all steps
-    for (let i = 1; i <= 4; i++) {
+    // Hide all steps (add hidden class - .hidden uses display:none !important)
+    for (let i = 1; i <= 3; i++) {
       const stepEl = document.getElementById(`step-${i}`);
-      if (stepEl) stepEl.style.display = 'none';
+      if (stepEl) {
+        stepEl.classList.add('hidden');
+        stepEl.style.display = 'none';
+      }
     }
 
     // Update step indicators
@@ -517,14 +535,15 @@
       else if (index === step - 1) indicator.classList.add('active');
     });
 
-    // Show target step
+    // Show target step (remove hidden so it becomes visible)
     const targetStep = document.getElementById(`step-${step}`);
     if (targetStep) {
+      targetStep.classList.remove('hidden');
       targetStep.style.display = 'block';
       targetStep.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
-    if (step === 4) updateConfirmation();
+    if (step === 3) updateConfirmation();
     if (typeof lucide !== 'undefined') lucide.createIcons();
   }
 
@@ -727,19 +746,7 @@
     document.getElementById('btn-to-step-1-back')?.addEventListener('click', () => goToStep(1));
     document.getElementById('btn-to-step-3')?.addEventListener('click', () => goToStep(3));
     document.getElementById('btn-to-step-2-back')?.addEventListener('click', () => goToStep(2));
-    document.getElementById('btn-to-step-4')?.addEventListener('click', () => goToStep(4));
-    document.getElementById('btn-to-step-3-back')?.addEventListener('click', () => goToStep(3));
     document.getElementById('btn-change-address')?.addEventListener('click', () => goToStep(1));
-
-    // Payment type selection
-    document.querySelectorAll('.payment-type-card').forEach(card => {
-      card.addEventListener('click', () => selectPaymentType(card.dataset.type));
-    });
-
-    // Payment method selection
-    document.querySelectorAll('.payment-method-card').forEach(card => {
-      card.addEventListener('click', () => selectPaymentMethod(card.dataset.method));
-    });
 
     // Terms checkbox
     const termsCheckbox = document.getElementById('terms-checkbox');
@@ -756,20 +763,7 @@
     // Note: Referral codes are now applied at registration, not checkout
     // The referral section is read-only and auto-populated from buyer's registration data
 
-    // Initialize default selections
-    const firstTypeCard = document.querySelector('.payment-type-card');
-    if (firstTypeCard) {
-      firstTypeCard.classList.add('selected');
-      const radio = firstTypeCard.querySelector('input[type="radio"]');
-      if (radio) radio.checked = true;
-    }
-
-    const firstMethodCard = document.querySelector('.payment-method-card');
-    if (firstMethodCard) {
-      firstMethodCard.classList.add('selected');
-      const radio = firstMethodCard.querySelector('input[type="radio"]');
-      if (radio) radio.checked = true;
-    }
+    // Wire transfer only - payment method pre-selected (bank-international)
   }
 
   // ====================================
