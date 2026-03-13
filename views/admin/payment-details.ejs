@@ -22,7 +22,7 @@
           <div class="payment-details-header">
             <div class="payment-details-info">
               <h1>
-                <i data-lucide="receipt" style="color: #8b5cf6;"></i>
+                <i data-lucide="receipt" class="chart-title-icon purple"></i>
                 <%= payment.id %>
               </h1>
               <div class="payment-details-meta">
@@ -44,7 +44,7 @@
                 Download Receipt
               </button>
               <% if (payment.status === 'completed') { %>
-              <button class="admin-btn" style="background: rgba(239, 68, 68, 0.12); color: #ef4444;" onclick="openRefundModal()">
+              <button class="admin-btn admin-btn-danger-outline" onclick="openRefundModal()">
                 <i data-lucide="rotate-ccw"></i>
                 Refund
               </button>
@@ -331,7 +331,7 @@
                 </div>
                 <div class="payment-info-row">
                   <span class="payment-info-label">Order ID</span>
-                  <span class="payment-info-value"><a href="/admin/orders/ORD-001" style="color: #8b5cf6; text-decoration: none;">ORD-001</a></span>
+                  <span class="payment-info-value"><a href="/admin/orders/ORD-001" style="color: var(--aitetsu); text-decoration: none;">ORD-001</a></span>
                 </div>
                 <div class="payment-info-row">
                   <span class="payment-info-label">Items</span>
@@ -339,7 +339,7 @@
                 </div>
                 <div class="payment-info-row">
                   <span class="payment-info-label">Order Status</span>
-                  <span class="payment-info-value" style="color: #10b981;">Shipped</span>
+                  <span class="payment-info-value" style="color: var(--color-success);">Shipped</span>
                 </div>
               </div>
             </div>
@@ -366,7 +366,7 @@
                 </div>
                 <div class="payment-info-row">
                   <span class="payment-info-label">Status</span>
-                  <span class="payment-info-value" style="color: <%= payment.status === 'completed' ? '#10b981' : (payment.status === 'pending' ? '#f59e0b' : '#0ea5e9') %>;">
+                  <span class="payment-info-value" style="color: <%= payment.status === 'completed' ? 'var(--color-success)' : (payment.status === 'pending' ? 'var(--color-warning)' : 'var(--aitetsu)') %>;">
                     <%= payment.status.charAt(0).toUpperCase() + payment.status.slice(1) %>
                   </span>
                 </div>
@@ -428,7 +428,7 @@
   <div class="modal-overlay" id="refundModal">
     <div class="modal-content" style="max-width: 420px;">
       <div class="modal-header">
-        <div class="modal-icon" style="background: rgba(239, 68, 68, 0.12); color: #ef4444;">
+        <div class="modal-icon modal-icon-danger">
           <i data-lucide="rotate-ccw"></i>
         </div>
         <div>
@@ -452,7 +452,7 @@
       </div>
       <div class="modal-footer">
         <button class="admin-btn admin-btn-secondary" onclick="closeModal()">Cancel</button>
-        <button class="admin-btn" style="background: #ef4444; color: white;" onclick="confirmRefund()">
+        <button class="admin-btn admin-btn-danger-solid" onclick="confirmRefund()">
           <i data-lucide="rotate-ccw"></i>
           Process Refund
         </button>

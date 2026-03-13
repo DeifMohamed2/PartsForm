@@ -4,22 +4,20 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Supplier Login | PARTSFORM</title>
-  <link rel="icon" type="image/png" href="/images/PARTSFORM-LOGO.png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="/images/brand/icon-gold.png">
+  <link rel="stylesheet" href="/css/brand-system.css">
   <script src="https://unpkg.com/lucide@0.294.0/dist/umd/lucide.min.js"></script>
   <style>
     :root {
-      --primary: #0c4a6e;
-      --primary-light: #0ea5e9;
-      --primary-dark: #082f49;
-      --danger: #ef4444;
-      --success: #10b981;
-      --bg: #f8fafc;
-      --text: #1e293b;
-      --text-secondary: #64748b;
-      --border: #e2e8f0;
+      --primary: var(--aitetsu);
+      --primary-light: var(--sei);
+      --primary-dark: #2F3F49;
+      --danger: var(--namari);
+      --success: var(--sei);
+      --bg: var(--washi);
+      --text: var(--kurogane);
+      --text-secondary: var(--namari);
+      --border: var(--suzu);
     }
     
     * {
@@ -29,10 +27,10 @@
     }
     
     body {
-      font-family: 'Inter', sans-serif;
+      font-family: var(--font-body), sans-serif;
       min-height: 100vh;
       display: flex;
-      background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 50%, var(--primary-light) 100%);
+      background: var(--aitetsu);
     }
     
     .login-container {
@@ -84,7 +82,7 @@
       width: 40px;
       height: 40px;
       background: rgba(255,255,255,0.2);
-      border-radius: 10px;
+      border-radius: 0;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -133,11 +131,11 @@
     .form-header .first-login-notice {
       margin-top: 16px;
       padding: 12px 16px;
-      background: rgba(245, 158, 11, 0.1);
-      border-radius: 8px;
-      border-left: 3px solid #f59e0b;
+      background: var(--kintsugi-light);
+      border-radius: 0;
+      border-left: 3px solid var(--kintsugi);
       font-size: 13px;
-      color: #92400e;
+      color: var(--kurogane);
     }
     
 .form-group {
@@ -156,15 +154,15 @@
       width: 100%;
       padding: 12px 16px;
       border: 1px solid var(--border);
-      border-radius: 8px;
+      border-radius: 0;
       font-size: 15px;
       transition: all 0.2s;
     }
     
     .form-input:focus {
       outline: none;
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(12, 74, 110, 0.1);
+      border-color: var(--sei);
+      box-shadow: 0 0 0 3px var(--color-focus-ring);
     }
     
     .form-input.error {
@@ -239,7 +237,7 @@
       width: 100%;
       padding: 14px;
       border: none;
-      border-radius: 8px;
+      border-radius: 0;
       font-size: 16px;
       font-weight: 600;
       cursor: pointer;
@@ -270,12 +268,12 @@
     }
     
     .btn-success:hover {
-      background: #059669;
+      background: var(--primary-dark);
     }
     
     .alert {
       padding: 14px 16px;
-      border-radius: 8px;
+      border-radius: 0;
       margin-bottom: 20px;
       display: none;
       align-items: center;
@@ -288,22 +286,22 @@
     }
     
     .alert-error {
-      background: #fef2f2;
-      color: var(--danger);
-      border: 1px solid #fecaca;
+      background: rgba(142, 156, 166, 0.2);
+      color: var(--namari);
+      border: 1px solid var(--namari);
     }
     
     .alert-success {
-      background: #f0fdf4;
-      color: #16a34a;
-      border: 1px solid #bbf7d0;
+      background: rgba(149, 175, 192, 0.2);
+      color: var(--aitetsu);
+      border: 1px solid var(--sei);
     }
     
     .password-requirements {
       margin-top: 12px;
       padding: 12px;
       background: var(--bg);
-      border-radius: 8px;
+      border-radius: 0;
       font-size: 13px;
     }
     
@@ -374,7 +372,7 @@
 <body>
   <div class="login-container">
     <div class="login-brand">
-      <img src="/images/PARTSFORM-LOGO.png" alt="PARTSFORM" class="brand-logo">
+      <img src="/images/brand/logo-light.png" alt="PARTSFORM" class="brand-logo">
       <h1 class="brand-title">Supplier Portal</h1>
       <p class="brand-subtitle">Manage your data with ease</p>
       
@@ -729,8 +727,8 @@
         // Show success and redirect
         document.getElementById('changePasswordSection').innerHTML = `
           <div style="text-align: center; padding: 32px 0;">
-            <div style="width: 64px; height: 64px; background: rgba(16, 185, 129, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px;">
-              <i data-lucide="check" style="width: 32px; height: 32px; color: #10b981;"></i>
+            <div style="width: 64px; height: 64px; background: rgba(149, 175, 192, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px;">
+              <i data-lucide="check" style="width: 32px; height: 32px; color: var(--sei);"></i>
             </div>
             <h2 style="font-size: 24px; font-weight: 700; margin-bottom: 8px; color: var(--text);">Password Updated!</h2>
             <p style="color: var(--text-secondary); margin-bottom: 24px;">Your password has been changed successfully.</p>

@@ -7,6 +7,7 @@ const {
   getCurrentUser,
   getRegisterPage,
   validateReferralCodeForRegistration,
+  unifiedLogin,
 } = require('../controllers/authController');
 const {
   getForgotPasswordPage,
@@ -20,12 +21,17 @@ const { redirectIfAuthenticated, requireAuth } = require('../middleware/auth');
 // Page routes (redirect if already logged in)
 router.get('/register', redirectIfAuthenticated, getRegisterPage);
 
-// Forgot Password Page
+// Forgot Password Pages
 router.get('/forgot-password', redirectIfAuthenticated, getForgotPasswordPage);
+router.get('/forgot-password/partner', (req, res) => res.render('Landing/forgot-password-partner'));
+router.get('/forgot-password/supplier', (req, res) => res.render('Landing/forgot-password-supplier'));
 
 // API routes
 router.post('/register', register);
 router.post('/login', login);
+
+// Unified login — handles admin, buyer, partner, and supplier from one endpoint
+router.post('/api/unified-login', unifiedLogin);
 router.get('/logout', logout);
 router.post('/logout', logout);
 

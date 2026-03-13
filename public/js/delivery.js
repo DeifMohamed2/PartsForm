@@ -249,13 +249,24 @@ function renderAddresses() {
     return;
   }
 
-  grid.style.display = 'grid';
+  grid.style.display = 'flex';
   emptyState.style.display = 'none';
 
   grid.innerHTML = addresses.map(address => createAddressCard(address)).join('');
   
   // Reinitialize Lucide icons
   lucide.createIcons();
+
+  // Show/hide scroll indicator based on whether grid overflows
+  const scrollIndicator = document.getElementById('scroll-indicator');
+  if (scrollIndicator) {
+    const hasOverflow = grid.scrollWidth > grid.clientWidth;
+    scrollIndicator.style.display = hasOverflow ? 'flex' : 'none';
+    grid.addEventListener('scroll', () => {
+      const atEnd = grid.scrollLeft + grid.clientWidth >= grid.scrollWidth - 8;
+      scrollIndicator.style.opacity = atEnd ? '0' : '1';
+    }, { passive: true });
+  }
 
   // Add event listeners to action buttons
   addresses.forEach(address => {

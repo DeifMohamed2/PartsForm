@@ -1,0 +1,213 @@
+/* ====================================
+   PARTNER DASHBOARD CSS
+   Dashboard-specific styling — Brand System
+   ==================================== */
+
+/* ====================================
+   WELCOME BANNER — Same as search-v2 hero
+   Background photo + overlay, white text
+   ==================================== */
+.partner-welcome-banner {
+  background: var(--sei);
+  border-radius: 0 !important;
+  padding: var(--partner-space-xl);
+  color: white;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: var(--partner-space-lg);
+}
+
+/* Hero Background Image — warehouse-hero.webp (same as search-v2) */
+.partner-welcome-banner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url('/images/brand/moodboard/warehouse-hero.webp') center/cover no-repeat;
+  filter: brightness(0.38) saturate(0.55) contrast(1.05);
+  z-index: 1;
+  opacity: 0.80;
+  border-radius: 0 !important;
+}
+
+/* Gradient overlay — Sei/Aitetsu brand tone (same as search-v2 hero-bg-overlay) */
+.partner-welcome-bg-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(160deg, rgba(149, 175, 192, 0.80) 0%,
+      rgba(100, 130, 150, 0.68) 55%,
+      rgba(64, 84, 94, 0.55) 100%
+    );
+  z-index: 2;
+  border-radius: 0 !important;
+}
+
+.partner-welcome-text {
+  position: relative;
+  z-index: 3;
+}
+
+.partner-welcome-text h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: white;
+}
+
+.partner-welcome-text p {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+/* ====================================
+   REFERRAL BOX
+   ==================================== */
+.partner-referral-box {
+  position: relative;
+  z-index: 3;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0 !important;
+  padding: 1rem 1.5rem;
+  margin-top: var(--partner-space-md);
+}
+
+.partner-referral-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 0.5rem;
+}
+
+.partner-referral-code {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-family: 'SF Mono', monospace;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: white;
+}
+
+.partner-referral-code.no-code {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.partner-referral-hint {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin-left: 0.5rem;
+}
+
+/* ====================================
+   CONTENT GRID
+   ==================================== */
+.partner-content-grid {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: var(--partner-space-lg);
+  margin-bottom: var(--partner-space-lg);
+}
+
+@media (max-width: 1024px) {
+  .partner-content-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ====================================
+   RATE CARDS
+   ==================================== */
+.partner-rate-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.partner-rate-card {
+  background: var(--partner-bg-secondary);
+  border: 1px solid var(--partner-border-light);
+  border-radius: 0 !important;
+  padding: 1.25rem 1.5rem;
+}
+
+.partner-rate-card-title {
+  font-size: 0.8125rem;
+  color: var(--partner-text-muted);
+  margin-bottom: 0.375rem;
+}
+
+.partner-rate-card-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--partner-text-primary);
+}
+
+.partner-rate-card-value span {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--partner-text-muted);
+}
+
+/* ====================================
+   STAT ICONS — Brand colors
+   ==================================== */
+.partner-stat-icon.blue {
+  background: rgba(64, 84, 94, 0.12);
+  color: var(--aitetsu);
+}
+
+.partner-stat-icon.yellow {
+  background: rgba(142, 156, 166, 0.2);
+  color: var(--namari);
+}
+
+.partner-stat-icon.green {
+  background: rgba(149, 175, 192, 0.2);
+  color: var(--sei);
+}
+
+.partner-stat-icon.purple {
+  background: rgba(64, 84, 94, 0.12);
+  color: var(--aitetsu);
+}
+
+/* ====================================
+   STAT HEADER / CHANGE
+   ==================================== */
+.partner-stat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.partner-stat-change {
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.partner-stat-change.neutral {
+  color: var(--partner-text-muted);
+}
+
+.partner-stat-change.positive {
+  color: var(--sei);
+}
+
+.partner-stat-change.negative {
+  color: var(--namari);
+}
+
+/* ====================================
+   CARD BODY NO PADDING (for tables)
+   ==================================== */
+.partner-card-body.no-padding {
+  padding: 0;
+}
+
+.partner-card-body.no-padding .partner-table th,
+.partner-card-body.no-padding .partner-table td {
+  padding: 1rem 1.25rem;
+}

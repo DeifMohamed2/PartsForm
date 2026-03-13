@@ -1,313 +1,6 @@
 <%- include('../partials/header') %>
 <link rel="stylesheet" href="/css/adminCSS/admin-referrals.css">
-<style>
-  /* Enhanced Dashboard Styles */
-  .referrals-dashboard-grid {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 1.5rem;
-    margin-bottom: 1.5rem;
-  }
-  
-  @media (max-width: 1200px) {
-    .referrals-dashboard-grid {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  /* Analytics Card */
-  .analytics-card {
-    background: white;
-    border: 1px solid var(--admin-border);
-    border-radius: var(--admin-radius-xl);
-    overflow: hidden;
-  }
-  .analytics-card-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1.25rem 1.5rem;
-    border-bottom: 1px solid var(--admin-border);
-  }
-  .analytics-card-header h3 {
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--admin-text-primary);
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-  .analytics-card-header h3 i { width: 18px; height: 18px; color: #8b5cf6; }
-  .analytics-card-body { padding: 1.5rem; }
-
-  /* Summary Stats Row */
-  .summary-stats-row {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-  }
-  @media (max-width: 992px) {
-    .summary-stats-row { grid-template-columns: repeat(2, 1fr); }
-  }
-  .summary-stat-card {
-    background: white;
-    border: 1px solid var(--admin-border);
-    border-radius: var(--admin-radius-lg);
-    padding: 1.25rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-  .summary-stat-card.highlight {
-    background: linear-gradient(135deg, rgba(139, 92, 246, 0.08), rgba(168, 85, 247, 0.04));
-    border-color: rgba(139, 92, 246, 0.2);
-  }
-  .summary-stat-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .summary-stat-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .summary-stat-icon i { width: 20px; height: 20px; }
-  .summary-stat-icon.purple { background: rgba(139, 92, 246, 0.12); color: #8b5cf6; }
-  .summary-stat-icon.green { background: rgba(16, 185, 129, 0.12); color: #10b981; }
-  .summary-stat-icon.blue { background: rgba(59, 130, 246, 0.12); color: #3b82f6; }
-  .summary-stat-icon.orange { background: rgba(245, 158, 11, 0.12); color: #f59e0b; }
-  .summary-stat-icon.teal { background: rgba(20, 184, 166, 0.12); color: #14b8a6; }
-  .summary-stat-value {
-    font-size: 1.75rem;
-    font-weight: 800;
-    color: var(--admin-text-primary);
-    line-height: 1;
-  }
-  .summary-stat-value small { font-size: 0.9rem; font-weight: 600; color: var(--admin-text-muted); }
-  .summary-stat-label {
-    font-size: 0.8rem;
-    color: var(--admin-text-muted);
-  }
-
-  /* Top Partners Table */
-  .top-partners-table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  .top-partners-table th {
-    text-align: left;
-    padding: 0.75rem 1rem;
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--admin-text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    border-bottom: 1px solid var(--admin-border);
-  }
-  .top-partners-table td {
-    padding: 1rem;
-    border-bottom: 1px solid var(--admin-border);
-  }
-  .top-partners-table tr:last-child td { border-bottom: none; }
-  .partner-rank {
-    width: 28px;
-    height: 28px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    font-size: 0.8rem;
-  }
-  .partner-rank.gold { background: linear-gradient(135deg, #fbbf24, #f59e0b); color: white; }
-  .partner-rank.silver { background: linear-gradient(135deg, #94a3b8, #64748b); color: white; }
-  .partner-rank.bronze { background: linear-gradient(135deg, #d97706, #b45309); color: white; }
-  .partner-rank.default { background: #f1f5f9; color: #64748b; }
-  .partner-info {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-  .partner-info .name { font-weight: 600; color: var(--admin-text-primary); }
-  .partner-info .email { font-size: 0.75rem; color: var(--admin-text-muted); }
-  .partner-stats {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    text-align: right;
-  }
-  .partner-stats .value { font-weight: 700; color: var(--admin-text-primary); }
-  .partner-stats .label { font-size: 0.7rem; color: var(--admin-text-muted); }
-
-  /* Commission Breakdown */
-  .commission-breakdown {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-  .breakdown-item {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-  }
-  .breakdown-bar-container {
-    flex: 1;
-    height: 8px;
-    background: #f1f5f9;
-    border-radius: 4px;
-    overflow: hidden;
-  }
-  .breakdown-bar {
-    height: 100%;
-    border-radius: 4px;
-    transition: width 0.5s ease;
-  }
-  .breakdown-bar.paid { background: linear-gradient(90deg, #10b981, #059669); }
-  .breakdown-bar.approved { background: linear-gradient(90deg, #3b82f6, #2563eb); }
-  .breakdown-bar.pending { background: linear-gradient(90deg, #f59e0b, #d97706); }
-  .breakdown-bar.rejected { background: linear-gradient(90deg, #ef4444, #dc2626); }
-  .breakdown-label {
-    width: 80px;
-    font-size: 0.8rem;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .breakdown-label .dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-  }
-  .breakdown-label .dot.paid { background: #10b981; }
-  .breakdown-label .dot.approved { background: #3b82f6; }
-  .breakdown-label .dot.pending { background: #f59e0b; }
-  .breakdown-label .dot.rejected { background: #ef4444; }
-  .breakdown-value {
-    width: 100px;
-    text-align: right;
-    font-weight: 600;
-    font-size: 0.85rem;
-  }
-
-  /* Recent Orders */
-  .recent-orders-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-  .recent-order-item {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 0.75rem 1rem;
-    background: #f8fafc;
-    border-radius: 10px;
-    transition: all 0.2s ease;
-  }
-  .recent-order-item:hover { background: #f1f5f9; }
-  .recent-order-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
-    background: linear-gradient(135deg, #8b5cf6, #a855f7);
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    font-size: 0.85rem;
-  }
-  .recent-order-info {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-  .recent-order-info .order-number { font-weight: 600; color: var(--admin-text-primary); font-size: 0.85rem; }
-  .recent-order-info .customer-name { font-size: 0.75rem; color: var(--admin-text-muted); }
-  .recent-order-amount {
-    text-align: right;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-  .recent-order-amount .amount { font-weight: 700; color: var(--admin-text-primary); }
-  .recent-order-amount .commission { font-size: 0.7rem; color: #10b981; }
-
-  /* Monthly Trend Chart */
-  .trend-chart-container {
-    height: 200px;
-    display: flex;
-    align-items: flex-end;
-    gap: 8px;
-    padding: 1rem 0;
-  }
-  .trend-bar-wrapper {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-  }
-  .trend-bar {
-    width: 100%;
-    max-width: 40px;
-    background: linear-gradient(180deg, #8b5cf6, #a855f7);
-    border-radius: 6px 6px 0 0;
-    min-height: 20px;
-    transition: height 0.5s ease;
-  }
-  .trend-bar-label {
-    font-size: 0.7rem;
-    color: var(--admin-text-muted);
-    font-weight: 500;
-  }
-  .trend-bar-value {
-    font-size: 0.7rem;
-    font-weight: 600;
-    color: var(--admin-text-primary);
-  }
-
-  /* All-Time Stats */
-  .all-time-stats {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
-  }
-  .all-time-stat {
-    padding: 1rem;
-    background: #f8fafc;
-    border-radius: 10px;
-    text-align: center;
-  }
-  .all-time-stat .value {
-    font-size: 1.25rem;
-    font-weight: 800;
-    color: var(--admin-text-primary);
-  }
-  .all-time-stat .value small { font-size: 0.75rem; color: var(--admin-text-muted); }
-  .all-time-stat .label {
-    font-size: 0.75rem;
-    color: var(--admin-text-muted);
-    margin-top: 4px;
-  }
-
-  /* Empty State */
-  .analytics-empty {
-    text-align: center;
-    padding: 2rem;
-    color: var(--admin-text-muted);
-  }
-  .analytics-empty i { width: 48px; height: 48px; margin-bottom: 1rem; opacity: 0.5; }
-  .analytics-empty p { font-size: 0.9rem; }
-</style>
+<link rel="stylesheet" href="/css/adminCSS/admin-referrals-dashboard.css">
 </head>
 
 <body>
@@ -366,17 +59,86 @@
           </div>
         </div>
 
+        <!-- Quick Actions (moved up for better discoverability) -->
+        <div class="referrals-section-header">
+          <h3>Quick Actions</h3>
+        </div>
+        <div class="referrals-quick-actions">
+          <% if (stats.pendingApplications > 0) { %>
+          <a href="/admin/referrals/applications" class="referrals-quick-action-card highlight-card">
+            <div class="referrals-quick-action-icon amber">
+              <i data-lucide="user-plus"></i>
+            </div>
+            <div class="referrals-quick-action-content">
+              <h4>Review Applications <span class="badge"><%= stats.pendingApplications %></span></h4>
+              <p>New partner applications waiting for review</p>
+            </div>
+            <i data-lucide="chevron-right" class="referrals-quick-action-arrow"></i>
+          </a>
+          <% } %>
+          <a href="/admin/referrals/partners" class="referrals-quick-action-card">
+            <div class="referrals-quick-action-icon blue">
+              <i data-lucide="users"></i>
+            </div>
+            <div class="referrals-quick-action-content">
+              <h4>Manage Partners</h4>
+              <p>View, create, and manage referral partner accounts</p>
+            </div>
+            <i data-lucide="chevron-right" class="referrals-quick-action-arrow"></i>
+          </a>
+          <a href="/admin/referrals/partners/create" class="referrals-quick-action-card">
+            <div class="referrals-quick-action-icon green">
+              <i data-lucide="user-plus"></i>
+            </div>
+            <div class="referrals-quick-action-content">
+              <h4>Add New Partner</h4>
+              <p>Create a new referral partner account with unique code</p>
+            </div>
+            <i data-lucide="chevron-right" class="referrals-quick-action-arrow"></i>
+          </a>
+          <a href="/admin/referrals/commissions" class="referrals-quick-action-card">
+            <div class="referrals-quick-action-icon orange">
+              <i data-lucide="receipt"></i>
+            </div>
+            <div class="referrals-quick-action-content">
+              <h4>Review Commissions</h4>
+              <p>Review and approve pending commission requests</p>
+            </div>
+            <i data-lucide="chevron-right" class="referrals-quick-action-arrow"></i>
+          </a>
+          <a href="/admin/referrals/payouts" class="referrals-quick-action-card">
+            <div class="referrals-quick-action-icon purple">
+              <i data-lucide="wallet"></i>
+            </div>
+            <div class="referrals-quick-action-content">
+              <h4>Process Payouts</h4>
+              <p>Create and process monthly payout batches</p>
+            </div>
+            <i data-lucide="chevron-right" class="referrals-quick-action-arrow"></i>
+          </a>
+          <button type="button" onclick="resyncStats()" class="referrals-quick-action-card referrals-quick-action-btn" id="resyncBtn">
+            <div class="referrals-quick-action-icon teal">
+              <i data-lucide="refresh-cw"></i>
+            </div>
+            <div class="referrals-quick-action-content">
+              <h4>Resync Partner Stats</h4>
+              <p>Recalculate all partner statistics from commission data</p>
+            </div>
+            <i data-lucide="chevron-right" class="referrals-quick-action-arrow"></i>
+          </button>
+        </div>
+
         <!-- Main Dashboard Grid -->
         <div class="referrals-dashboard-grid">
           <!-- Left Column -->
           <div class="dashboard-left">
             <!-- Top Performing Partners -->
-            <div class="analytics-card" style="margin-bottom: 1.5rem;">
+            <div class="analytics-card referrals-dashboard-card">
               <div class="analytics-card-header">
                 <h3><i data-lucide="trophy"></i> Top Performing Partners</h3>
                 <a href="/admin/referrals/partners" class="referrals-link-btn">View All</a>
               </div>
-              <div class="analytics-card-body" style="padding: 0;">
+              <div class="analytics-card-body analytics-card-body-table">
                 <% if (topPartners && topPartners.length > 0) { %>
                 <table class="top-partners-table">
                   <thead>
@@ -416,7 +178,7 @@
                       </td>
                       <td>
                         <div class="partner-stats">
-                          <span class="value" style="color: #10b981;"><%= (partner.totalCommission || 0).toFixed(2) %></span>
+                          <span class="value commission-value"><%= (partner.totalCommission || 0).toFixed(2) %></span>
                           <span class="label">AED</span>
                         </div>
                       </td>
@@ -466,7 +228,7 @@
           <!-- Right Column -->
           <div class="dashboard-right">
             <!-- Commission Status Breakdown -->
-            <div class="analytics-card" style="margin-bottom: 1.5rem;">
+            <div class="analytics-card referrals-dashboard-card">
               <div class="analytics-card-header">
                 <h3><i data-lucide="pie-chart"></i> Commission Status</h3>
               </div>
@@ -515,7 +277,7 @@
             </div>
 
             <!-- All-Time Stats -->
-            <div class="analytics-card" style="margin-bottom: 1.5rem;">
+            <div class="analytics-card referrals-dashboard-card">
               <div class="analytics-card-header">
                 <h3><i data-lucide="infinity"></i> All-Time Statistics</h3>
               </div>
@@ -578,81 +340,6 @@
             </div>
           </div>
         </div>
-
-        <!-- Quick Actions Section -->
-        <div class="referrals-section-header">
-          <h3>Quick Actions</h3>
-        </div>
-
-        <div class="referrals-quick-actions">
-          <% if (stats.pendingApplications > 0) { %>
-          <a href="/admin/referrals/applications" class="referrals-quick-action-card highlight-card">
-            <div class="referrals-quick-action-icon amber">
-              <i data-lucide="user-plus"></i>
-            </div>
-            <div class="referrals-quick-action-content">
-              <h4>Review Applications <span class="badge"><%= stats.pendingApplications %></span></h4>
-              <p>New partner applications waiting for review</p>
-            </div>
-            <i data-lucide="chevron-right" class="referrals-quick-action-arrow"></i>
-          </a>
-          <% } %>
-
-          <a href="/admin/referrals/partners" class="referrals-quick-action-card">
-            <div class="referrals-quick-action-icon blue">
-              <i data-lucide="users"></i>
-            </div>
-            <div class="referrals-quick-action-content">
-              <h4>Manage Partners</h4>
-              <p>View, create, and manage referral partner accounts</p>
-            </div>
-            <i data-lucide="chevron-right" class="referrals-quick-action-arrow"></i>
-          </a>
-
-          <a href="/admin/referrals/partners/create" class="referrals-quick-action-card">
-            <div class="referrals-quick-action-icon green">
-              <i data-lucide="user-plus"></i>
-            </div>
-            <div class="referrals-quick-action-content">
-              <h4>Add New Partner</h4>
-              <p>Create a new referral partner account with unique code</p>
-            </div>
-            <i data-lucide="chevron-right" class="referrals-quick-action-arrow"></i>
-          </a>
-
-          <a href="/admin/referrals/commissions" class="referrals-quick-action-card">
-            <div class="referrals-quick-action-icon orange">
-              <i data-lucide="receipt"></i>
-            </div>
-            <div class="referrals-quick-action-content">
-              <h4>Review Commissions</h4>
-              <p>Review and approve pending commission requests</p>
-            </div>
-            <i data-lucide="chevron-right" class="referrals-quick-action-arrow"></i>
-          </a>
-
-          <a href="/admin/referrals/payouts" class="referrals-quick-action-card">
-            <div class="referrals-quick-action-icon purple">
-              <i data-lucide="wallet"></i>
-            </div>
-            <div class="referrals-quick-action-content">
-              <h4>Process Payouts</h4>
-              <p>Create and process monthly payout batches</p>
-            </div>
-            <i data-lucide="chevron-right" class="referrals-quick-action-arrow"></i>
-          </a>
-
-          <button type="button" onclick="resyncStats()" class="referrals-quick-action-card" id="resyncBtn" style="width: 100%; text-align: left; border: none; cursor: pointer;">
-            <div class="referrals-quick-action-icon teal">
-              <i data-lucide="refresh-cw"></i>
-            </div>
-            <div class="referrals-quick-action-content">
-              <h4>Resync Partner Stats</h4>
-              <p>Recalculate all partner statistics from commission data</p>
-            </div>
-            <i data-lucide="chevron-right" class="referrals-quick-action-arrow"></i>
-          </button>
-        </div>
       </div>
     </main>
   </div>
@@ -707,7 +394,7 @@
       } catch (error) {
         console.error('Resync error:', error);
         btn.innerHTML = `
-          <div class="referrals-quick-action-icon" style="background: rgba(239, 68, 68, 0.12); color: #ef4444;">
+          <div class="referrals-quick-action-icon error">
             <i data-lucide="x-circle"></i>
           </div>
           <div class="referrals-quick-action-content">

@@ -4,6 +4,7 @@
  */
 
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const ReferralPartner = require('../models/ReferralPartner');
 const ReferralCommission = require('../models/ReferralCommission');
 const ReferralPayout = require('../models/ReferralPayout');
@@ -131,7 +132,7 @@ const logout = (req, res) => {
     expires: new Date(0), 
     httpOnly: true 
   });
-  res.redirect('/partner/login');
+  res.redirect('/');
 };
 
 /**
@@ -230,9 +231,11 @@ const getDashboard = async (req, res) => {
 const getCommissions = async (req, res) => {
   try {
     const partner = req.user;
-    const page = parseInt(req.query.page) || 1;
+    const page = Math.max(1, parseInt(req.query.page) || 1);
     const limit = 20;
-    const status = req.query.status || '';
+    const statusParam = req.query.status || '';
+    // Treat 'all' or empty as no status filter
+    const status = (statusParam === 'all' || statusParam === '') ? '' : statusParam;
 
     // Build query
     const query = { referralPartner: partner._id };
@@ -242,6 +245,7 @@ const getCommissions = async (req, res) => {
 
     // Get commissions with pagination
     const total = await ReferralCommission.countDocuments(query);
+    const totalPages = Math.max(1, Math.ceil(total / limit));
     const commissions = await ReferralCommission.find(query)
       .populate('order', 'orderNumber pricing.total status createdAt')
       .populate('buyer', 'firstName lastName email')
@@ -250,14 +254,42 @@ const getCommissions = async (req, res) => {
       .limit(limit)
       .lean();
 
+    // Map orderTotal for view (commission has orderTotal, order has pricing.total)
+    const commissionsForView = commissions.map(c => ({
+      ...c,
+      orderAmount: c.orderTotal ?? c.order?.pricing?.total ?? 0
+    }));
+
+    // Get summary stats (all-time, not filtered)
+    const statsAgg = await ReferralCommission.aggregate([
+      { $match: { referralPartner: partner._id } },
+      {
+        $group: {
+          _id: null,
+          totalReferrals: { $sum: 1 },
+          pendingAmount: { $sum: { $cond: [{ $eq: ['$status', 'pending'] }, '$commissionAmount', 0] } },
+          approvedAmount: { $sum: { $cond: [{ $eq: ['$status', 'approved'] }, '$commissionAmount', 0] } },
+          paidAmount: { $sum: { $cond: [{ $eq: ['$status', 'paid'] }, '$commissionAmount', 0] } }
+        }
+      }
+    ]);
+    const stats = statsAgg[0] || { totalReferrals: 0, pendingAmount: 0, approvedAmount: 0, paidAmount: 0 };
+
     res.render('partner/commissions', {
       title: 'My Commissions | PARTSFORM',
       partner,
-      commissions,
-      currentPage: page,
-      totalPages: Math.ceil(total / limit),
-      total,
-      status
+      commissions: commissionsForView,
+      stats,
+      status: status || 'all',
+      pagination: {
+        currentPage: page,
+        totalPages,
+        total,
+        hasPrev: page > 1,
+        hasNext: page < totalPages,
+        prevPage: page - 1,
+        nextPage: page + 1
+      }
     });
   } catch (error) {
     console.error('Error in getCommissions:', error);
@@ -274,19 +306,23 @@ const getCommissions = async (req, res) => {
 const getPayouts = async (req, res) => {
   try {
     const partner = req.user;
-    const page = parseInt(req.query.page) || 1;
+    const page = Math.max(1, parseInt(req.query.page) || 1);
     const limit = 20;
 
     // Get payouts with pagination
     const total = await ReferralPayout.countDocuments({ referralPartner: partner._id });
+    const totalPages = Math.max(1, Math.ceil(total / limit));
     const payouts = await ReferralPayout.find({ referralPartner: partner._id })
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
       .lean();
 
-    // Calculate totals
-    const totals = await ReferralPayout.aggregate([
+    // Map payoutAmount to amount for view compatibility
+    const payoutsForView = payouts.map(p => ({ ...p, amount: p.payoutAmount }));
+
+    // Calculate payout totals (completed + pending)
+    const totalsAgg = await ReferralPayout.aggregate([
       { $match: { referralPartner: partner._id } },
       {
         $group: {
@@ -300,15 +336,34 @@ const getPayouts = async (req, res) => {
         }
       }
     ]);
+    const totals = totalsAgg[0] || { totalPaid: 0, totalPending: 0 };
+
+    // Available balance = sum of approved commissions (ready for payout)
+    const approvedAgg = await ReferralCommission.aggregate([
+      { $match: { referralPartner: partner._id, status: 'approved' } },
+      { $group: { _id: null, availableBalance: { $sum: '$commissionAmount' } } }
+    ]);
+    const availableBalance = approvedAgg[0]?.availableBalance ?? 0;
+
+    const stats = {
+      availableBalance,
+      totalPaid: totals.totalPaid ?? 0
+    };
 
     res.render('partner/payouts', {
       title: 'My Payouts | PARTSFORM',
       partner,
-      payouts,
-      currentPage: page,
-      totalPages: Math.ceil(total / limit),
-      total,
-      totals: totals[0] || { totalPaid: 0, totalPending: 0 }
+      payouts: payoutsForView,
+      stats,
+      pagination: {
+        currentPage: page,
+        totalPages,
+        total,
+        hasPrev: page > 1,
+        hasNext: page < totalPages,
+        prevPage: page - 1,
+        nextPage: page + 1
+      }
     });
   } catch (error) {
     console.error('Error in getPayouts:', error);
@@ -498,6 +553,81 @@ const getStats = async (req, res) => {
   }
 };
 
+/**
+ * Request partner password reset — sends a reset-link email
+ * POST /api/partner/forgot-password
+ */
+const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ success: false, message: 'Email is required.' });
+    }
+
+    const partner = await ReferralPartner.findOne({ email: email.toLowerCase() });
+
+    // Always respond the same way to avoid user enumeration
+    if (!partner) {
+      return res.json({
+        success: true,
+        message: 'If a partner account exists with this email, a reset link has been sent.',
+      });
+    }
+
+    const rawToken = partner.createPasswordResetToken();
+    await partner.save({ validateBeforeSave: false });
+
+    // TODO: send email with link containing rawToken
+    console.info(`[Partner FP] reset token for ${email}: ${rawToken}`);
+
+    res.json({
+      success: true,
+      message: 'If a partner account exists with this email, a reset link has been sent.',
+    });
+  } catch (error) {
+    console.error('Partner forgotPassword error:', error);
+    res.status(500).json({ success: false, message: 'Failed to process request. Please try again.' });
+  }
+};
+
+/**
+ * Reset partner password using token from email link
+ * POST /api/partner/reset-password
+ */
+const resetPassword = async (req, res) => {
+  try {
+    const { token, password } = req.body;
+
+    if (!token || !password) {
+      return res.status(400).json({ success: false, message: 'Token and new password are required.' });
+    }
+    if (password.length < 8) {
+      return res.status(400).json({ success: false, message: 'Password must be at least 8 characters.' });
+    }
+
+    const hashed = crypto.createHash('sha256').update(token).digest('hex');
+
+    const partner = await ReferralPartner.findOne({
+      passwordResetToken: hashed,
+      passwordResetExpires: { $gt: Date.now() },
+    }).select('+passwordResetToken');
+
+    if (!partner) {
+      return res.status(400).json({ success: false, message: 'Reset link is invalid or has expired.' });
+    }
+
+    partner.password = password;
+    partner.passwordResetToken = undefined;
+    partner.passwordResetExpires = undefined;
+    await partner.save();
+
+    res.json({ success: true, message: 'Password reset successful. You can now sign in with your new password.' });
+  } catch (error) {
+    console.error('Partner resetPassword error:', error);
+    res.status(500).json({ success: false, message: 'Failed to reset password. Please try again.' });
+  }
+};
+
 module.exports = {
   getLoginPage,
   login,
@@ -508,5 +638,7 @@ module.exports = {
   getProfile,
   updateProfile,
   changePassword,
+  forgotPassword,
+  resetPassword,
   getStats
 };

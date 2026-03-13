@@ -1,25 +1,24 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="partner-page">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#2B5278">
+  <meta name="theme-color" content="#2B2B2B">
   <title><%= typeof title !== 'undefined' ? title : 'Partner Portal - PARTSFORM' %></title>
   
   <!-- Favicon -->
-  <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
-  <link rel="icon" type="image/png" href="/images/PARTSFORM-LOGO.png">
+  <link rel="icon" type="image/png" href="/images/brand/icon-dark.png">
   
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Brand System - PARTSFORM Shibui Design -->
+  <link rel="stylesheet" href="/css/brand-system.css">
   
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@0.294.0/dist/umd/lucide.min.js"></script>
   
-  <!-- Partner Portal Stylesheet -->
+  <!-- Partner Portal Stylesheets -->
   <link rel="stylesheet" href="/css/partnerCSS/partner-main.css">
+  <link rel="stylesheet" href="/css/partnerCSS/partner-dashboard.css">
+  <link rel="stylesheet" href="/css/partnerCSS/partner-overrides.css">
 </head>
 <body>
   <div class="partner-layout">
@@ -27,11 +26,7 @@
     <aside class="partner-sidebar" id="partnerSidebar">
       <div class="partner-sidebar-header">
         <a href="/partner/dashboard" class="partner-sidebar-logo">
-          <img src="/images/PARTSFORM-LOGO.png" alt="PARTSFORM">
-          <div class="partner-sidebar-logo-text">
-            <span>PARTSFORM</span>
-            <small>Partner Portal</small>
-          </div>
+          <img src="/images/brand/logo-dark.png" alt="PARTSFORM">
         </a>
       </div>
 
@@ -81,6 +76,9 @@
         </a>
       </div>
     </aside>
+
+    <!-- Sidebar overlay (mobile) -->
+    <div class="partner-sidebar-overlay" id="partnerSidebarOverlay" aria-hidden="true"></div>
 
     <!-- Main Area -->
     <main class="partner-main-shell">

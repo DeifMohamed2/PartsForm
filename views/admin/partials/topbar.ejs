@@ -18,8 +18,8 @@
     <!-- Enhanced Search Bar -->
     <div style="position: relative; display: flex; align-items: center;">
       <i data-lucide="search" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; color: #94a3b8; pointer-events: none; z-index: 2;"></i>
-      <input type="text" id="globalSearchInput" placeholder="Search orders, users, tickets..." autocomplete="off" style="width: 280px; padding: 0.7rem 3.5rem 0.7rem 2.75rem; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 12px; color: #1e293b; font-size: 0.9rem; outline: none; transition: all 0.2s;">
-      <span style="position: absolute; right: 14px; top: 50%; transform: translateY(-50%); font-size: 0.65rem; padding: 0.2rem 0.4rem; background: #e2e8f0; border-radius: 4px; color: #64748b; font-weight: 600; pointer-events: none;">⌘K</span>
+      <input type="text" id="globalSearchInput" placeholder="Search orders, users, tickets..." autocomplete="off" style="width: 280px; padding: 0.7rem 3.5rem 0.7rem 2.75rem; background: var(--admin-bg-tertiary); border: 1px solid var(--admin-border); border-radius: 0; color: var(--admin-text-primary); font-size: 0.9rem; outline: none; transition: all 0.2s;">
+      <span style="position: absolute; right: 14px; top: 50%; transform: translateY(-50%); font-size: 0.65rem; padding: 0.2rem 0.4rem; background: var(--admin-border); border-radius: 0; color: var(--admin-text-muted); font-weight: 600; pointer-events: none;">⌘K</span>
     </div>
 
     <!-- Notifications with Dropdown -->
@@ -86,14 +86,14 @@
             </div>
           </div>
           <div class="topbar-dropdown-item unread">
-            <div class="dropdown-item-avatar" style="background: #0ea5e9;">AT</div>
+            <div class="dropdown-item-avatar" style="background: var(--aitetsu);">AT</div>
             <div class="dropdown-item-content">
               <div class="dropdown-item-text"><strong>AutoParts Express</strong> sent a new inquiry</div>
               <div class="dropdown-item-time">20 minutes ago</div>
             </div>
           </div>
           <div class="topbar-dropdown-item">
-            <div class="dropdown-item-avatar" style="background: #10b981;">SM</div>
+            <div class="dropdown-item-avatar" style="background: var(--color-success);">SM</div>
             <div class="dropdown-item-content">
               <div class="dropdown-item-text"><strong>Premium Motors Inc</strong> confirmed order details</div>
               <div class="dropdown-item-time">2 hours ago</div>
@@ -140,9 +140,9 @@
   transform: translateY(-50%);
   font-size: 0.65rem;
   padding: 0.2rem 0.4rem;
-  background: rgba(43, 82, 120, 0.1);
+  background: var(--admin-bg-tertiary);
   border: 1px solid var(--admin-border);
-  border-radius: 4px;
+  border-radius: 0;
   color: var(--admin-text-muted);
   font-weight: 500;
   pointer-events: none;
@@ -164,8 +164,8 @@
   width: 340px;
   background: var(--admin-bg-primary);
   border: 1px solid var(--admin-border);
-  border-radius: var(--admin-radius-lg);
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  border-radius: 0;
+  box-shadow: var(--admin-shadow-xl);
   opacity: 0;
   visibility: hidden;
   transform: translateY(-10px);
@@ -190,7 +190,7 @@
 }
 .topbar-dropdown-action {
   font-size: 0.75rem;
-  color: var(--admin-primary);
+  color: var(--aitetsu);
   background: none;
   border: none;
   cursor: pointer;
@@ -224,7 +224,7 @@
   top: 0;
   bottom: 0;
   width: 3px;
-  background: var(--admin-primary);
+  background: var(--aitetsu);
 }
 .topbar-dropdown-item {
   position: relative;
@@ -232,25 +232,25 @@
 .dropdown-item-icon {
   width: 36px;
   height: 36px;
-  border-radius: 50%;
+  border-radius: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  background: rgba(59, 130, 246, 0.1);
-  color: #3b82f6;
+  background: var(--color-info-bg);
+  color: var(--aitetsu);
 }
 .dropdown-item-icon.success {
-  background: rgba(16, 185, 129, 0.1);
-  color: #10b981;
+  background: var(--color-success-bg);
+  color: var(--color-success);
 }
 .dropdown-item-icon.warning {
-  background: rgba(245, 158, 11, 0.1);
-  color: #f59e0b;
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
 }
 .dropdown-item-icon.info {
-  background: rgba(59, 130, 246, 0.1);
-  color: #3b82f6;
+  background: var(--color-info-bg);
+  color: var(--aitetsu);
 }
 .dropdown-item-icon i {
   width: 18px;
@@ -259,13 +259,13 @@
 .dropdown-item-avatar {
   width: 36px;
   height: 36px;
-  border-radius: 50%;
+  border-radius: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  background: var(--admin-primary);
-  color: white;
+  background: var(--aitetsu);
+  color: var(--washi);
   font-size: 0.75rem;
   font-weight: 600;
 }
@@ -289,7 +289,7 @@
   text-align: center;
   font-size: 0.85rem;
   font-weight: 500;
-  color: var(--admin-primary);
+  color: var(--aitetsu);
   text-decoration: none;
   border-top: 1px solid var(--admin-border);
 }
@@ -319,7 +319,7 @@
 }
 .logout-modal {
   background: var(--admin-bg-primary);
-  border-radius: var(--admin-radius-xl);
+  border-radius: 0;
   padding: 2rem;
   width: 380px;
   text-align: center;
@@ -332,13 +332,13 @@
 .logout-modal-icon {
   width: 60px;
   height: 60px;
-  background: rgba(239, 68, 68, 0.1);
-  border-radius: 50%;
+  background: rgba(64, 84, 94, 0.12);
+  border-radius: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 auto 1rem;
-  color: #ef4444;
+  color: var(--aitetsu);
 }
 .logout-modal-icon i {
   width: 28px;
@@ -362,7 +362,7 @@
 .logout-modal-btn {
   flex: 1;
   padding: 0.75rem 1rem;
-  border-radius: var(--admin-radius-lg);
+  border-radius: 0;
   font-weight: 600;
   font-size: 0.9rem;
   cursor: pointer;
@@ -377,12 +377,12 @@
   background: var(--admin-border);
 }
 .logout-modal-btn.confirm {
-  background: #ef4444;
+  background: var(--aitetsu);
   border: none;
-  color: white;
+  color: var(--washi);
 }
 .logout-modal-btn.confirm:hover {
-  background: #dc2626;
+  background: #2F3F49;
 }
 </style>
 

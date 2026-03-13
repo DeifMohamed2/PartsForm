@@ -27,18 +27,18 @@
         </div>
 
         <!-- Default Markup Banner -->
-        <div class="default-markup-banner" style="margin-bottom: 1.25rem; background: linear-gradient(135deg, rgba(139, 92, 246, 0.08), rgba(59, 130, 246, 0.08)); border: 1px solid rgba(139, 92, 246, 0.2); border-radius: 14px; padding: 1rem 1.25rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem;">
-          <div style="display: flex; align-items: center; gap: 0.75rem;">
-            <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(139, 92, 246, 0.15); display: flex; align-items: center; justify-content: center;">
-              <i data-lucide="percent" style="width: 20px; height: 20px; color: #8b5cf6;"></i>
+        <div class="default-markup-banner">
+          <div class="default-markup-banner-inner">
+            <div class="default-markup-banner-icon">
+              <i data-lucide="percent"></i>
             </div>
             <div>
-              <div style="font-size: 0.85rem; font-weight: 600; color: var(--admin-text-primary);">Default Price Markup</div>
-              <div style="font-size: 0.75rem; color: var(--admin-text-muted);">Applied to users without a custom markup. Change in <a href="/admin/settings" style="color: #8b5cf6;">Settings</a>.</div>
+              <div class="default-markup-banner-title">Default Price Markup</div>
+              <div class="default-markup-banner-desc">Applied to users without a custom markup. Change in <a href="/admin/settings" class="default-markup-link">Settings</a>.</div>
             </div>
           </div>
-          <div style="display: flex; align-items: center; gap: 0.5rem;">
-            <span style="font-size: 1.5rem; font-weight: 700; color: #8b5cf6;" id="defaultMarkupValue"><%= typeof defaultMarkup !== 'undefined' ? defaultMarkup : 0 %>%</span>
+          <div class="default-markup-banner-value">
+            <span id="defaultMarkupValue"><%= typeof defaultMarkup !== 'undefined' ? defaultMarkup : 0 %>%</span>
           </div>
         </div>
 
@@ -517,81 +517,6 @@
     }
   </script>
 
-  <style>
-    /* Markup badges */
-    .markup-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.25rem;
-      padding: 0.25rem 0.6rem;
-      border-radius: 8px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      white-space: nowrap;
-    }
-
-    .markup-badge.custom {
-      background: rgba(139, 92, 246, 0.12);
-      color: #8b5cf6;
-    }
-
-    .markup-badge.default {
-      background: var(--admin-bg-tertiary, rgba(100, 116, 139, 0.1));
-      color: var(--admin-text-muted, #64748b);
-    }
-
-    .markup-badge small {
-      font-size: 0.65rem;
-      opacity: 0.7;
-    }
-
-    /* Pending status badge */
-    .user-status-badge.pending {
-      background: rgba(245, 158, 11, 0.12);
-      color: #d97706;
-    }
-
-    .user-status-badge.rejected {
-      background: rgba(239, 68, 68, 0.12);
-      color: #dc2626;
-    }
-
-    /* Approve/Reject/Activate/Deactivate buttons */
-    .user-action-btn.approve,
-    .user-action-btn.activate {
-      background: rgba(16, 185, 129, 0.1);
-      color: #10b981;
-    }
-
-    .user-action-btn.approve:hover,
-    .user-action-btn.activate:hover {
-      background: #10b981;
-      color: white;
-    }
-
-    .user-action-btn.reject,
-    .user-action-btn.deactivate {
-      background: rgba(239, 68, 68, 0.1);
-      color: #ef4444;
-    }
-
-    .user-action-btn.reject:hover,
-    .user-action-btn.deactivate:hover {
-      background: #ef4444;
-      color: white;
-    }
-
-    /* Bulk action success button */
-    .bulk-action-btn.success {
-      background: rgba(16, 185, 129, 0.1);
-      color: #10b981;
-    }
-
-    .bulk-action-btn.success:hover {
-      background: #10b981;
-      color: white;
-    }
-  </style>
 
   <!-- Approve User Modal with Markup Settings -->
   <div class="approve-modal-overlay" id="approveModalOverlay" onclick="closeApproveModal()">

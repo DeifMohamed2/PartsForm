@@ -9,7 +9,7 @@
     justify-content: space-between;
     background: white;
     border: 1px solid var(--admin-border);
-    border-radius: var(--admin-radius-xl);
+    border-radius: 0;
     padding: 1.5rem 2rem;
     margin-bottom: 1.5rem;
     position: relative;
@@ -22,7 +22,7 @@
     left: 10%;
     width: 80%;
     height: 3px;
-    background: linear-gradient(90deg, #f59e0b, #3b82f6, #8b5cf6, #10b981);
+    background: linear-gradient(90deg, var(--kintsugi), var(--aitetsu), var(--namari), var(--sei));
     opacity: 0.15;
     transform: translateY(-50%);
     z-index: 0;
@@ -39,7 +39,7 @@
   .pipeline-stage-icon {
     width: 56px;
     height: 56px;
-    border-radius: 50%;
+    border-radius: 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -52,26 +52,26 @@
     content: '';
     position: absolute;
     inset: -3px;
-    border-radius: 50%;
+    border-radius: 0;
     border: 2px solid transparent;
   }
-  .pipeline-stage.pending .pipeline-stage-icon { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
-  .pipeline-stage.pending .pipeline-stage-icon::after { border-color: rgba(245, 158, 11, 0.3); }
-  .pipeline-stage.processing .pipeline-stage-icon { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
-  .pipeline-stage.processing .pipeline-stage-icon::after { border-color: rgba(59, 130, 246, 0.3); }
-  .pipeline-stage.shipped .pipeline-stage-icon { background: rgba(139, 92, 246, 0.15); color: #8b5cf6; }
-  .pipeline-stage.shipped .pipeline-stage-icon::after { border-color: rgba(139, 92, 246, 0.3); }
-  .pipeline-stage.delivered .pipeline-stage-icon { background: rgba(16, 185, 129, 0.15); color: #10b981; }
-  .pipeline-stage.delivered .pipeline-stage-icon::after { border-color: rgba(16, 185, 129, 0.3); }
+  .pipeline-stage.pending .pipeline-stage-icon { background: var(--kintsugi-light); color: var(--kintsugi); }
+  .pipeline-stage.pending .pipeline-stage-icon::after { border-color: var(--kintsugi-border); }
+  .pipeline-stage.processing .pipeline-stage-icon { background: var(--color-info-bg); color: var(--aitetsu); }
+  .pipeline-stage.processing .pipeline-stage-icon::after { border-color: rgba(64, 84, 94, 0.3); }
+  .pipeline-stage.shipped .pipeline-stage-icon { background: var(--kintsugi-light); color: var(--namari); }
+  .pipeline-stage.shipped .pipeline-stage-icon::after { border-color: var(--kintsugi-border); }
+  .pipeline-stage.delivered .pipeline-stage-icon { background: rgba(149, 175, 192, 0.2); color: var(--sei); }
+  .pipeline-stage.delivered .pipeline-stage-icon::after { border-color: rgba(149, 175, 192, 0.4); }
   .pipeline-stage-count {
     font-size: 1.5rem;
     font-weight: 800;
     margin-bottom: 0.25rem;
   }
-  .pipeline-stage.pending .pipeline-stage-count { color: #f59e0b; }
-  .pipeline-stage.processing .pipeline-stage-count { color: #3b82f6; }
-  .pipeline-stage.shipped .pipeline-stage-count { color: #8b5cf6; }
-  .pipeline-stage.delivered .pipeline-stage-count { color: #10b981; }
+  .pipeline-stage.pending .pipeline-stage-count { color: var(--kintsugi); }
+  .pipeline-stage.processing .pipeline-stage-count { color: var(--aitetsu); }
+  .pipeline-stage.shipped .pipeline-stage-count { color: var(--namari); }
+  .pipeline-stage.delivered .pipeline-stage-count { color: var(--sei); }
   .pipeline-stage-label {
     font-size: 0.8rem;
     color: var(--admin-text-muted);
@@ -96,7 +96,7 @@
   .summary-stat {
     background: white;
     border: 1px solid var(--admin-border);
-    border-radius: var(--admin-radius-lg);
+    border-radius: 0;
     padding: 1.25rem;
     display: flex;
     align-items: center;
@@ -105,16 +105,16 @@
   .summary-stat-icon {
     width: 48px;
     height: 48px;
-    border-radius: var(--admin-radius-md);
+    border-radius: 0;
     display: flex;
     align-items: center;
     justify-content: center;
   }
   .summary-stat-icon i { width: 24px; height: 24px; }
-  .summary-stat-icon.total { background: rgba(14, 165, 233, 0.12); color: #0ea5e9; }
-  .summary-stat-icon.value { background: rgba(16, 185, 129, 0.12); color: #10b981; }
-  .summary-stat-icon.avg { background: rgba(139, 92, 246, 0.12); color: #8b5cf6; }
-  .summary-stat-icon.rate { background: rgba(245, 158, 11, 0.12); color: #f59e0b; }
+  .summary-stat-icon.total { background: var(--color-info-bg); color: var(--aitetsu); }
+  .summary-stat-icon.value { background: rgba(149, 175, 192, 0.2); color: var(--sei); }
+  .summary-stat-icon.avg { background: var(--kintsugi-light); color: var(--namari); }
+  .summary-stat-icon.rate { background: var(--kintsugi-light); color: var(--kintsugi); }
   .summary-stat-content h4 {
     font-size: 1.5rem;
     font-weight: 800;
@@ -132,21 +132,21 @@
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(168, 85, 247, 0.1));
-    color: #8b5cf6;
+    background: var(--kintsugi-light);
+    color: var(--aitetsu);
     padding: 4px 10px;
-    border-radius: 12px;
+    border-radius: 0;
     font-size: 0.7rem;
     font-weight: 600;
-    border: 1px solid rgba(139, 92, 246, 0.2);
+    border: 1px solid var(--kintsugi-border);
   }
   .referral-badge i { width: 12px; height: 12px; }
   .referral-badge .discount-amount {
     background: rgba(255,255,255,0.8);
     padding: 1px 5px;
-    border-radius: 6px;
+    border-radius: 0;
     font-weight: 700;
-    color: #7c3aed;
+    color: var(--aitetsu);
   }
   
   /* Referral Stats Row */
@@ -155,20 +155,20 @@
     gap: 1rem;
     margin-bottom: 1rem;
     padding: 1rem 1.5rem;
-    background: linear-gradient(135deg, rgba(139, 92, 246, 0.08), rgba(168, 85, 247, 0.04));
-    border: 1px solid rgba(139, 92, 246, 0.15);
-    border-radius: var(--admin-radius-lg);
+    background: var(--kintsugi-light);
+    border: 1px solid var(--kintsugi-border);
+    border-radius: 0;
   }
   .referral-stat-item {
     display: flex;
     align-items: center;
     gap: 0.75rem;
     padding-right: 1.5rem;
-    border-right: 1px solid rgba(139, 92, 246, 0.15);
+    border-right: 1px solid var(--kintsugi-border);
   }
   .referral-stat-item:last-child { border-right: none; padding-right: 0; }
-  .referral-stat-item i { width: 18px; height: 18px; color: #8b5cf6; }
-  .referral-stat-item .stat-value { font-weight: 700; color: #7c3aed; }
+  .referral-stat-item i { width: 18px; height: 18px; color: var(--aitetsu); }
+  .referral-stat-item .stat-value { font-weight: 700; color: var(--aitetsu); }
   .referral-stat-item .stat-label { font-size: 0.8rem; color: var(--admin-text-muted); }
   
   /* Amount cell with discount */
@@ -188,7 +188,7 @@
   }
   .amount-with-discount .discount-info {
     font-size: 0.7rem;
-    color: #10b981;
+    color: var(--sei);
   }
 </style>
 </head>

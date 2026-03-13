@@ -4,64 +4,66 @@
    Matching Admin/Buyer Design Language
    ==================================== */
 
-/* Import Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+/* ====================================
+   PARTNER MAIN CSS - Brand System
+   PARTSFORM Shibui Design (same as supplier/admin)
+   ==================================== */
 
 /* ====================================
-   CSS VARIABLES - Blue Theme (Matching Admin/Buyer)
+   CSS VARIABLES - Brand Mapping
    ==================================== */
 :root {
-  /* Primary Brand Colors - Same as Admin/Buyer */
-  --partner-primary: #2b5278;
-  --partner-primary-dark: #1e3a54;
-  --partner-primary-light: #3d6a96;
-  --partner-accent: #3b82f6;
-  --partner-accent-dark: #2563eb;
-  --partner-accent-light: #60a5fa;
+  /* Primary — Aitetsu */
+  --partner-primary: var(--aitetsu);
+  --partner-primary-dark: #2F3F49;
+  --partner-primary-light: var(--sei);
+  --partner-accent: var(--aitetsu);
+  --partner-accent-dark: #2F3F49;
+  --partner-accent-light: var(--sei);
 
-  /* Background Colors - Light Mode */
-  --partner-bg-primary: #ffffff;
-  --partner-bg-secondary: #f8fafc;
-  --partner-bg-tertiary: #f1f5f9;
-  --partner-bg-accent: #e0effa;
+  /* Backgrounds */
+  --partner-bg-primary: var(--color-bg-card);
+  --partner-bg-secondary: var(--washi);
+  --partner-bg-tertiary: var(--color-bg-subtle);
+  --partner-bg-accent: rgba(149, 175, 192, 0.12);
 
-  /* Text Colors */
-  --partner-text-primary: #1a2b3d;
-  --partner-text-secondary: #475569;
-  --partner-text-muted: #64748b;
-  --partner-text-subtle: #94a3b8;
+  /* Text */
+  --partner-text-primary: var(--kurogane);
+  --partner-text-secondary: var(--namari);
+  --partner-text-muted: var(--namari);
+  --partner-text-subtle: var(--suzu);
 
-  /* Status Colors */
-  --partner-success: #10b981;
-  --partner-success-light: #d1fae5;
-  --partner-warning: #f59e0b;
-  --partner-warning-light: #fef3c7;
-  --partner-danger: #ef4444;
-  --partner-danger-light: #fee2e2;
-  --partner-info: #3b82f6;
-  --partner-info-light: #dbeafe;
+  /* Status — Brand (no green) */
+  --partner-success: var(--sei);
+  --partner-success-light: rgba(149, 175, 192, 0.2);
+  --partner-warning: var(--kintsugi);
+  --partner-warning-light: var(--kintsugi-light);
+  --partner-danger: var(--namari);
+  --partner-danger-light: rgba(142, 156, 166, 0.2);
+  --partner-info: var(--aitetsu);
+  --partner-info-light: rgba(64, 84, 94, 0.12);
 
-  /* Border Colors */
-  --partner-border: rgba(43, 82, 120, 0.12);
-  --partner-border-light: rgba(43, 82, 120, 0.08);
-  --partner-border-medium: rgba(43, 82, 120, 0.16);
+  /* Borders */
+  --partner-border: var(--suzu);
+  --partner-border-light: var(--color-border-light);
+  --partner-border-medium: var(--color-border);
 
   /* Shadows */
-  --partner-shadow-sm: 0 2px 8px rgba(43, 82, 120, 0.06);
-  --partner-shadow-md: 0 4px 16px rgba(43, 82, 120, 0.1);
-  --partner-shadow-lg: 0 8px 24px rgba(43, 82, 120, 0.12);
-  --partner-shadow-xl: 0 12px 40px rgba(43, 82, 120, 0.15);
-  --partner-shadow-hover: 0 16px 48px rgba(43, 82, 120, 0.2);
+  --partner-shadow-sm: var(--shadow-sm);
+  --partner-shadow-md: var(--shadow-md);
+  --partner-shadow-lg: var(--shadow-lg);
+  --partner-shadow-xl: var(--shadow-xl);
+  --partner-shadow-hover: var(--shadow-xl);
 
-  /* Border Radius */
-  --partner-radius-sm: 0.5rem;
-  --partner-radius-md: 0.75rem;
-  --partner-radius-lg: 1rem;
-  --partner-radius-xl: 1.5rem;
+  /* NO BORDER RADIUS */
+  --partner-radius-sm: 0;
+  --partner-radius-md: 0;
+  --partner-radius-lg: 0;
+  --partner-radius-xl: 0;
 
   /* Transitions */
-  --partner-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  --partner-transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --partner-transition: var(--transition-base);
+  --partner-transition-fast: var(--transition-fast);
 
   /* Spacing */
   --partner-space-xs: 0.5rem;
@@ -81,7 +83,7 @@
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: var(--font-body), -apple-system, BlinkMacSystemFont, sans-serif;
   background: var(--partner-bg-secondary);
   color: var(--partner-text-primary);
   line-height: 1.6;
@@ -108,6 +110,7 @@ a {
   display: flex;
   flex-direction: column;
   background: linear-gradient(135deg, var(--partner-bg-secondary) 0%, var(--partner-bg-tertiary) 100%);
+  transition: margin-left var(--partner-transition);
 }
 
 .partner-content {
@@ -126,51 +129,31 @@ a {
   left: 0;
   width: 260px;
   height: 100vh;
-  background: linear-gradient(180deg, #0c4a6e 0%, #082f49 100%);
+  background: var(--aitetsu);
   color: white;
   display: flex;
   flex-direction: column;
   box-shadow: var(--partner-shadow-lg);
   z-index: 1000;
-  transition: var(--partner-transition);
+  transition: transform var(--partner-transition);
 }
 
 .partner-sidebar-header {
-  padding: var(--partner-space-md);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 20px;
+  border-bottom: 1px solid rgba(130, 154, 177, 0.3);
 }
 
 .partner-sidebar-logo {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  justify-content: center;
   text-decoration: none;
 }
 
 .partner-sidebar-logo img {
-  width: 40px;
   height: 40px;
-  border-radius: 0 !important;
-  background: white;
-  padding: 6px;
-}
-
-.partner-sidebar-logo-text {
-  display: flex;
-  flex-direction: column;
-}
-
-.partner-sidebar-logo-text span {
-  font-size: 1.05rem;
-  font-weight: 700;
-  letter-spacing: -0.03em;
-}
-
-.partner-sidebar-logo-text small {
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  opacity: 0.7;
+  width: auto;
+  object-fit: contain;
 }
 
 .partner-sidebar-nav {
@@ -189,7 +172,7 @@ a {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  color: rgba(255, 255, 255, 0.55);
+  color: #829AB1;
   margin-bottom: 0.35rem;
 }
 
@@ -198,7 +181,7 @@ a {
   align-items: center;
   gap: 0.75rem;
   padding: 0.7rem var(--partner-space-md);
-  color: rgba(255, 255, 255, 0.8);
+  color: #829AB1;
   font-size: 0.875rem;
   font-weight: 500;
   border-left: 3px solid transparent;
@@ -211,19 +194,19 @@ a {
 }
 
 .partner-sidebar-link:hover {
-  background: rgba(148, 163, 184, 0.25);
-  color: white;
+  background: rgba(130, 154, 177, 0.25);
+  color: var(--washi);
 }
 
 .partner-sidebar-link.active {
-  background: rgba(148, 163, 184, 0.35);
-  border-left-color: #38bdf8;
-  color: #e0f2fe;
+  background: rgba(212, 175, 55, 0.15);
+  border-left-color: var(--kintsugi);
+  color: var(--kintsugi);
 }
 
 .partner-sidebar-footer {
   padding: var(--partner-space-md);
-  border-top: 1px solid rgba(148, 163, 184, 0.35);
+  border-top: 1px solid rgba(130, 154, 177, 0.3);
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
@@ -239,7 +222,7 @@ a {
   width: 36px;
   height: 36px;
   border-radius: 0 !important;
-  background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+  background: var(--aitetsu);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -261,7 +244,7 @@ a {
 
 .partner-sidebar-user-email {
   font-size: 0.75rem;
-  opacity: 0.75;
+  color: #829AB1;
 }
 
 .partner-sidebar-logout {
@@ -272,11 +255,12 @@ a {
   gap: 0.5rem;
   padding: 0.7rem;
   border-radius: 0 !important;
-  background: rgba(248, 113, 113, 0.12);
-  color: #fecaca;
+  background: rgba(130, 154, 177, 0.2);
+  color: #829AB1;
   font-size: 0.85rem;
   font-weight: 500;
   transition: var(--partner-transition-fast);
+  text-decoration: none;
 }
 
 .partner-sidebar-logout i {
@@ -285,23 +269,23 @@ a {
 }
 
 .partner-sidebar-logout:hover {
-  background: rgba(248, 113, 113, 0.22);
+  background: rgba(130, 154, 177, 0.35);
+  color: var(--washi);
 }
 
-/* Topbar */
+/* Topbar — Same as buyer about-us (solid Kurogane #2B2B2B) */
 .partner-topbar {
   position: sticky;
   top: 0;
   z-index: 900;
   height: 64px;
-  background: rgba(255, 255, 255, 0.96);
-  backdrop-filter: blur(14px);
-  border-bottom: 1px solid var(--partner-border);
+  background: #2B2B2B !important;
+  border-bottom: none !important;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 1.75rem;
-  box-shadow: var(--partner-shadow-sm);
+  padding: 0.5rem 2rem;
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.35) !important;
 }
 
 .partner-topbar-left {
@@ -312,28 +296,30 @@ a {
 
 .partner-topbar-toggle {
   display: none;
+  align-items: center;
+  justify-content: center;
   width: 38px;
   height: 38px;
   border-radius: 0 !important;
-  border: 1px solid var(--partner-border);
-  background: white;
+  border: none;
+  background: transparent;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: var(--partner-transition-fast);
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .partner-topbar-toggle i {
   width: 18px;
   height: 18px;
-  color: var(--partner-text-secondary);
 }
 
 .partner-topbar-title h1 {
   font-size: 1.25rem;
   font-weight: 700;
-  color: var(--partner-text-primary);
+  color: rgba(255, 255, 255, 0.95);
 }
 
 .partner-topbar-right {
@@ -346,24 +332,24 @@ a {
   width: 36px;
   height: 36px;
   border-radius: 0 !important;
-  border: 1px solid var(--partner-border);
-  background: var(--partner-bg-primary);
+  border: none;
+  background: transparent;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: var(--partner-transition-fast);
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .partner-topbar-icon-btn i {
   width: 16px;
   height: 16px;
-  color: var(--partner-text-secondary);
 }
 
 .partner-topbar-icon-btn:hover {
-  background: var(--partner-bg-accent);
-  border-color: var(--partner-primary);
+  background: rgba(255, 255, 255, 0.1);
+  color: #FFFFFF;
 }
 
 .partner-topbar-user {
@@ -379,12 +365,58 @@ a {
 .partner-topbar-user-name {
   font-size: 0.85rem;
   font-weight: 600;
-  color: var(--partner-text-primary);
+  color: rgba(255, 255, 255, 0.95);
 }
 
 .partner-topbar-user-email {
   font-size: 0.75rem;
-  color: var(--partner-text-muted);
+  color: #829AB1;
+}
+
+/* ====================================
+   RESPONSIVE — Sidebar Toggle
+   ==================================== */
+@media (max-width: 1024px) {
+  .partner-sidebar {
+    transform: translateX(-100%);
+  }
+  .partner-sidebar.open {
+    transform: translateX(0);
+  }
+  .partner-main-shell {
+    margin-left: 0;
+  }
+  .partner-topbar-toggle {
+    display: inline-flex;
+  }
+  .partner-sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    opacity: 0;
+    transition: opacity var(--partner-transition-fast);
+  }
+  .partner-sidebar-overlay.active {
+    display: block;
+    opacity: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .partner-content {
+    padding: var(--partner-space-md);
+  }
+  .partner-topbar {
+    padding: 0 1rem;
+  }
+  .partner-topbar-user-text {
+    display: none;
+  }
 }
 
 /* ====================================
@@ -544,14 +576,15 @@ a {
 }
 
 .partner-btn-primary {
-  background: linear-gradient(135deg, var(--partner-primary) 0%, var(--partner-primary-dark) 100%);
+  background: var(--partner-primary);
   color: white;
-  box-shadow: 0 2px 8px rgba(43, 82, 120, 0.25);
+  box-shadow: 0 1px 3px rgba(43, 43, 43, 0.06);
 }
 
 .partner-btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(43, 82, 120, 0.35);
+  background: var(--partner-primary-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(43, 43, 43, 0.08);
 }
 
 .partner-btn-secondary {
@@ -640,22 +673,22 @@ a {
 
 .partner-badge-success {
   background: var(--partner-success-light);
-  color: #065f46;
+  color: var(--aitetsu);
 }
 
 .partner-badge-warning {
   background: var(--partner-warning-light);
-  color: #92400e;
+  color: var(--kintsugi);
 }
 
 .partner-badge-danger {
   background: var(--partner-danger-light);
-  color: #991b1b;
+  color: var(--namari);
 }
 
 .partner-badge-info {
   background: var(--partner-info-light);
-  color: #1e40af;
+  color: var(--aitetsu);
 }
 
 /* ====================================
@@ -762,26 +795,26 @@ a {
 
 .partner-alert-success {
   background: var(--partner-success-light);
-  color: #065f46;
-  border: 1px solid #a7f3d0;
+  color: var(--aitetsu);
+  border: 1px solid var(--sei);
 }
 
 .partner-alert-error {
   background: var(--partner-danger-light);
-  color: #991b1b;
-  border: 1px solid #fecaca;
+  color: var(--namari);
+  border: 1px solid var(--namari);
 }
 
 .partner-alert-warning {
   background: var(--partner-warning-light);
-  color: #92400e;
-  border: 1px solid #fde68a;
+  color: var(--kintsugi);
+  border: 1px solid var(--kintsugi-border);
 }
 
 .partner-alert-info {
   background: var(--partner-info-light);
-  color: #1e40af;
-  border: 1px solid #93c5fd;
+  color: var(--aitetsu);
+  border: 1px solid var(--aitetsu);
 }
 
 /* ====================================
@@ -861,6 +894,12 @@ a {
   height: 16px;
 }
 
+.partner-pagination-info {
+  font-size: 0.875rem;
+  color: var(--partner-text-muted);
+  padding: 0 1rem;
+}
+
 /* ====================================
    PARTNER TOAST
    ==================================== */
@@ -931,7 +970,7 @@ a {
 
 .partner-info-box {
   background: var(--partner-bg-accent);
-  border: 1px solid rgba(43, 82, 120, 0.15);
+  border: 1px solid rgba(64, 84, 94, 0.15);
   border-radius: 0 !important;
   padding: 1.25rem 1.5rem;
   display: flex;
@@ -942,7 +981,7 @@ a {
 .partner-info-box > i {
   width: 22px;
   height: 22px;
-  color: var(--partner-primary);
+  color: var(--aitetsu);
   flex-shrink: 0;
   margin-top: 2px;
 }
@@ -950,13 +989,13 @@ a {
 .partner-info-box-content h4 {
   font-size: 0.9375rem;
   font-weight: 600;
-  color: var(--partner-primary-dark);
+  color: var(--kurogane);
   margin-bottom: 0.375rem;
 }
 
 .partner-info-box-content p {
   font-size: 0.8125rem;
-  color: var(--partner-primary);
+  color: var(--namari);
   line-height: 1.6;
 }
 
@@ -968,17 +1007,17 @@ a {
   align-items: center;
   gap: 1rem;
   padding: 1.25rem;
-  background: linear-gradient(135deg, var(--partner-bg-accent) 0%, #dbeafe 100%);
+  background: linear-gradient(135deg, rgba(64, 84, 94, 0.08) 0%, rgba(149, 175, 192, 0.12) 100%);
   border-radius: 0 !important;
-  border: 1px solid rgba(43, 82, 120, 0.15);
+  border: 1px solid rgba(64, 84, 94, 0.15);
 }
 
 .partner-referral-code-text {
   font-size: 1.75rem;
   font-weight: 700;
-  font-family: 'Courier New', monospace;
+  font-family: 'SF Mono', monospace;
   letter-spacing: 0.15em;
-  color: var(--partner-primary-dark);
+  color: var(--kurogane);
 }
 
 .partner-btn-copy {
@@ -987,8 +1026,8 @@ a {
   gap: 0.5rem;
   padding: 0.625rem 1rem;
   background: white;
-  color: var(--partner-primary);
-  border: 1.5px solid var(--partner-primary);
+  color: var(--aitetsu);
+  border: 1.5px solid var(--aitetsu);
   border-radius: 0 !important;
   font-size: 0.8125rem;
   font-weight: 600;
@@ -1368,11 +1407,11 @@ a {
 .partner-footer-logo {
   font-size: 1.125rem;
   font-weight: 700;
-  color: var(--partner-primary);
+  color: var(--aitetsu);
 }
 
 .partner-footer-logo span {
-  color: var(--partner-accent);
+  color: var(--kurogane);
 }
 
 .partner-footer-divider {
@@ -1398,7 +1437,7 @@ a {
 }
 
 .partner-footer-links a:hover {
-  color: var(--partner-primary);
+  color: var(--aitetsu);
 }
 
 .partner-footer-copyright {

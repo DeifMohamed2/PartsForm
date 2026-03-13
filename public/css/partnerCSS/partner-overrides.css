@@ -1,0 +1,123 @@
+/* ====================================
+   PARTNER OVERRIDES — Brand System
+   Shibui (渋い) — Silent Strength
+   No green/gold • Sharp corners • Antartida
+   ==================================== */
+
+/* === GLOBAL: NO BORDER RADIUS — Industrial sharp edges === */
+html.partner-page .partner-layout,
+html.partner-page .partner-layout *,
+html.partner-page .partner-sidebar,
+html.partner-page .partner-sidebar *,
+html.partner-page .partner-main,
+html.partner-page .partner-main *,
+html.partner-page .partner-content,
+html.partner-page .partner-content *,
+html.partner-page .partner-topbar,
+html.partner-page .partner-topbar * {
+  border-radius: 0 !important;
+}
+
+/* === GLOBAL TYPOGRAPHY — Antartida body font === */
+html.partner-page,
+html.partner-page body {
+  font-family: var(--font-body) !important;
+}
+
+/* === SIDEBAR — Aitetsu solid === */
+html.partner-page .partner-sidebar {
+  background: var(--aitetsu) !important;
+}
+
+/* === STAT ICONS — Brand colors (no green, no gold) === */
+html.partner-page .partner-stat-icon.blue {
+  background: rgba(64, 84, 94, 0.12) !important;
+  color: var(--aitetsu) !important;
+}
+html.partner-page .partner-stat-icon.green {
+  background: rgba(149, 175, 192, 0.2) !important;
+  color: var(--sei) !important;
+}
+html.partner-page .partner-stat-icon.yellow {
+  background: rgba(142, 156, 166, 0.2) !important;
+  color: var(--namari) !important;
+}
+html.partner-page .partner-stat-icon.purple {
+  background: rgba(64, 84, 94, 0.12) !important;
+  color: var(--aitetsu) !important;
+}
+
+/* === PRIMARY BUTTON — Aitetsu (like admin/supplier) === */
+html.partner-page .partner-btn-primary {
+  background: var(--aitetsu) !important;
+  color: var(--washi) !important;
+  box-shadow: 0 1px 3px rgba(43, 43, 43, 0.06) !important;
+}
+html.partner-page .partner-btn-primary:hover {
+  background: #2F3F49 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(43, 43, 43, 0.08) !important;
+}
+
+/* === ACCENT / FOCUS — Sei === */
+html.partner-page .partner-form-input:focus {
+  border-color: var(--sei) !important;
+  box-shadow: 0 0 0 3px var(--color-focus-ring) !important;
+}
+html.partner-page .partner-btn-secondary:hover,
+html.partner-page .partner-card-title i {
+  color: var(--aitetsu) !important;
+}
+html.partner-page .partner-btn-secondary:hover {
+  border-color: var(--aitetsu) !important;
+}
+
+/* === SUCCESS → Sei (no green) === */
+html.partner-page .partner-badge.approved,
+html.partner-page .partner-badge.active,
+html.partner-page .partner-badge.paid {
+  background: rgba(149, 175, 192, 0.2) !important;
+  border-color: var(--sei) !important;
+  color: var(--aitetsu) !important;
+}
+html.partner-page .partner-stat-change.positive {
+  color: var(--sei) !important;
+}
+
+/* === DANGER / ERROR → Namari === */
+html.partner-page .partner-badge.expired,
+html.partner-page .partner-badge.inactive {
+  background: rgba(142, 156, 166, 0.2) !important;
+  border-color: var(--namari) !important;
+  color: var(--namari) !important;
+}
+html.partner-page .partner-stat-change.negative {
+  color: var(--namari) !important;
+}
+
+/* === WARNING → Kintsugi (minimal use) === */
+html.partner-page .partner-badge.pending {
+  background: var(--kintsugi-light) !important;
+  border-color: var(--kintsugi-border) !important;
+  color: var(--kintsugi) !important;
+}
+
+/* === USER AVATAR → Aitetsu === */
+html.partner-page .partner-sidebar-avatar {
+  background: var(--aitetsu) !important;
+}
+
+/* === RATE CARD / REFERRAL BOX — Brand gradient === */
+html.partner-page .partner-rate-card:first-child {
+  background: linear-gradient(135deg, var(--sei) 0%, rgba(149, 175, 192, 0.15) 100%) !important;
+}
+html.partner-page .partner-referral-code-display {
+  background: linear-gradient(135deg, rgba(64, 84, 94, 0.08) 0%, rgba(149, 175, 192, 0.12) 100%) !important;
+  border-color: rgba(64, 84, 94, 0.15) !important;
+}
+
+/* === TOAST === */
+html.partner-page .toast-notification {
+  background: var(--aitetsu) !important;
+  border-radius: 0 !important;
+}

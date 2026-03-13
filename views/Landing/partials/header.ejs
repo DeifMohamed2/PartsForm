@@ -11,21 +11,64 @@
   <title><%= typeof title !== 'undefined' ? title : 'PARTSFORM - Global Industrial Parts Sourcing' %></title>
 
   <!-- Favicon -->
-  <link rel="icon" type="image/png" href="/images/PARTSFORM-LOGO.png">
-
-  <!-- Google Fonts - Exact same as Parts Form 3 -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="/images/brand/icon-gold.png">
 
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@0.294.0/dist/umd/lucide.min.js"></script>
 
-  <!-- Main Stylesheet -->
+  <!-- Brand System (Quantico + Antartida self-hosted fonts + design tokens) -->
   <link rel="stylesheet" href="/css/brand-system.css">
   <link rel="stylesheet" href="/css/styles.css">
   <link rel="stylesheet" href="/css/landing.css">
   <link rel="stylesheet" href="/css/styles-enhanced.css">
+
+  <!-- Self-hosted brand fonts — explicit declarations matching buyer pages -->
+  <style>
+    @font-face {
+      font-family: 'Quantico';
+      src: url('/fonts/Quantico/Quantico-Regular.ttf') format('truetype');
+      font-weight: 400; font-style: normal; font-display: swap;
+    }
+    @font-face {
+      font-family: 'Quantico';
+      src: url('/fonts/Quantico/Quantico-Bold.ttf') format('truetype');
+      font-weight: 700; font-style: normal; font-display: swap;
+    }
+    @font-face {
+      font-family: 'Antartida';
+      src: url('/fonts/Antartida/Antartida-Light.otf') format('opentype');
+      font-weight: 300; font-style: normal; font-display: swap;
+    }
+    @font-face {
+      font-family: 'Antartida';
+      src: url('/fonts/Antartida/Antartida-Medium.otf') format('opentype');
+      font-weight: 500; font-style: normal; font-display: swap;
+    }
+    @font-face {
+      font-family: 'Antartida';
+      src: url('/fonts/Antartida/Antartida-Bold.otf') format('opentype');
+      font-weight: 700; font-style: normal; font-display: swap;
+    }
+    @font-face {
+      font-family: 'Antartida';
+      src: url('/fonts/Antartida/Antartida-Black.otf') format('opentype');
+      font-weight: 900; font-style: normal; font-display: swap;
+    }
+
+    html, body {
+      font-family: 'Antartida', sans-serif !important;
+      -webkit-font-smoothing: antialiased !important;
+      -moz-osx-font-smoothing: grayscale !important;
+    }
+    p, span, li, td, th, div, section, article, aside, nav, footer,
+    input, textarea, select, button, a, label {
+      font-family: 'Antartida', sans-serif !important;
+    }
+    h1, h2, h3, h4, h5, h6,
+    .heading, .section-title, .page-title, .hero-title, .font-display {
+      font-family: 'Quantico', sans-serif !important;
+    }
+  </style>
 </head>
 
 <body class="<%= typeof pageClass !== 'undefined' ? pageClass : '' %>">

@@ -2,6 +2,114 @@
 /* Professional styling for users management pages */
 
 /* ================================
+   Default Markup Banner
+   ================================ */
+.default-markup-banner {
+    margin-bottom: 1.25rem;
+    background: rgba(64, 84, 94, 0.06);
+    border: 1px solid rgba(64, 84, 94, 0.2);
+    border-radius: 0 !important;
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.default-markup-banner-inner {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.default-markup-banner-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 0 !important;
+    background: rgba(64, 84, 94, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.default-markup-banner-icon i {
+    width: 20px;
+    height: 20px;
+    color: var(--aitetsu);
+}
+
+.default-markup-banner-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--admin-text-primary);
+}
+
+.default-markup-banner-desc {
+    font-size: 0.75rem;
+    color: var(--admin-text-muted);
+}
+
+.default-markup-link {
+    color: var(--aitetsu);
+    text-decoration: none;
+}
+
+.default-markup-link:hover {
+    text-decoration: underline;
+}
+
+.default-markup-banner-value {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.default-markup-banner-value span {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--aitetsu);
+}
+
+/* ================================
+   Stat Cards Override (Users page - brand colors)
+   ================================ */
+.admin-content .stat-card.green .stat-icon {
+    background: rgba(149, 175, 192, 0.2);
+    color: var(--sei);
+}
+
+.admin-content .stat-card.green {
+    --stat-color: var(--sei);
+}
+
+.admin-content .stat-card.orange .stat-icon {
+    background: var(--kintsugi-light);
+    color: var(--kintsugi);
+}
+
+.admin-content .stat-card.orange {
+    --stat-color: var(--kintsugi);
+}
+
+.admin-content .stat-card.purple .stat-icon {
+    background: rgba(142, 156, 166, 0.2);
+    color: var(--namari);
+}
+
+.admin-content .stat-card.purple {
+    --stat-color: var(--namari);
+}
+
+.admin-content .stat-card.module-themed .stat-icon {
+    background: rgba(64, 84, 94, 0.12);
+    color: var(--aitetsu);
+}
+
+.admin-content .stat-card.module-themed {
+    --stat-color: var(--aitetsu);
+}
+
+/* ================================
    Users Page Layout
    ================================ */
 .users-page-header {
@@ -61,8 +169,8 @@
 }
 
 .users-search-container input:focus {
-    border-color: var(--module-primary, var(--admin-primary));
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    border-color: var(--aitetsu);
+    box-shadow: 0 0 0 3px rgba(64, 84, 94, 0.15);
 }
 
 /* ================================
@@ -118,10 +226,10 @@
     align-items: center;
     gap: 1rem;
     padding: 0.875rem 1.25rem;
-    background: linear-gradient(135deg, var(--module-primary, #3b82f6), var(--module-primary-dark, #2563eb));
+    background: var(--aitetsu);
     border-radius: 0 !important;
     margin-bottom: 1rem;
-    color: white;
+    color: var(--washi);
     animation: slideDown 0.25s ease;
 }
 
@@ -164,7 +272,7 @@
     background: rgba(255, 255, 255, 0.15);
     border: 1px solid rgba(255, 255, 255, 0.3);
     border-radius: 0 !important;
-    color: white;
+    color: var(--washi);
     font-size: 0.85rem;
     font-weight: 500;
     cursor: pointer;
@@ -184,12 +292,12 @@
 }
 
 .bulk-action-btn.danger {
-    background: rgba(56, 189, 248, 0.3);
-    border-color: rgba(56, 189, 248, 0.5);
+    background: rgba(142, 156, 166, 0.2);
+    border-color: rgba(142, 156, 166, 0.4);
 }
 
 .bulk-action-btn.danger:hover {
-    background: rgba(56, 189, 248, 0.5);
+    background: rgba(142, 156, 166, 0.35);
 }
 
 /* ================================
@@ -251,7 +359,7 @@
 }
 
 .users-table tbody tr.selected {
-    background: rgba(59, 130, 246, 0.05);
+    background: rgba(64, 84, 94, 0.06);
 }
 
 /* Custom Checkbox */
@@ -269,19 +377,19 @@
 }
 
 .user-checkbox:hover {
-    border-color: var(--module-primary, #3b82f6);
+    border-color: var(--aitetsu);
 }
 
 .user-checkbox.checked {
-    background: var(--module-primary, #3b82f6);
-    border-color: var(--module-primary, #3b82f6);
+    background: var(--aitetsu);
+    border-color: var(--aitetsu);
 }
 
 .user-checkbox.checked::after {
     content: '';
     width: 6px;
     height: 10px;
-    border: solid white;
+    border: solid var(--washi);
     border-width: 0 2px 2px 0;
     transform: rotate(45deg);
     margin-bottom: 2px;
@@ -297,12 +405,12 @@
 .user-avatar {
     width: 42px;
     height: 42px;
-    background: linear-gradient(135deg, var(--module-primary, #3b82f6), var(--module-primary-dark, #2563eb));
     border-radius: 0 !important;
+    background: var(--aitetsu);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
+    color: var(--washi);
     font-weight: 700;
     font-size: 1rem;
     flex-shrink: 0;
@@ -355,13 +463,13 @@
 }
 
 .user-status-badge.active {
-    background: rgba(16, 185, 129, 0.12);
-    color: #059669;
+    background: rgba(149, 175, 192, 0.2);
+    color: var(--sei);
 }
 
 .user-status-badge.inactive {
-    background: rgba(56, 189, 248, 0.12);
-    color: #0ea5e9;
+    background: rgba(142, 156, 166, 0.2);
+    color: var(--namari);
 }
 
 /* Actions */
@@ -395,13 +503,84 @@
 }
 
 .user-action-btn.view:hover {
-    color: #3b82f6;
-    background: rgba(59, 130, 246, 0.1);
+    color: var(--aitetsu);
+    background: rgba(64, 84, 94, 0.1);
 }
 
 .user-action-btn.edit:hover {
-    color: #f59e0b;
-    background: rgba(245, 158, 11, 0.1);
+    color: var(--kintsugi);
+    background: var(--kintsugi-light);
+}
+
+.user-action-btn.approve,
+.user-action-btn.activate {
+    background: rgba(149, 175, 192, 0.2);
+    color: var(--sei);
+}
+
+.user-action-btn.approve:hover,
+.user-action-btn.activate:hover {
+    background: var(--sei);
+    color: var(--washi);
+}
+
+.user-action-btn.reject,
+.user-action-btn.deactivate {
+    background: rgba(142, 156, 166, 0.2);
+    color: var(--namari);
+}
+
+.user-action-btn.reject:hover,
+.user-action-btn.deactivate:hover {
+    background: var(--namari);
+    color: var(--washi);
+}
+
+.bulk-action-btn.success {
+    background: rgba(149, 175, 192, 0.2);
+    color: var(--sei);
+}
+
+.bulk-action-btn.success:hover {
+    background: var(--sei);
+    color: var(--washi);
+}
+
+/* Markup badges */
+.markup-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 0 !important;
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.markup-badge.custom {
+    background: rgba(64, 84, 94, 0.12);
+    color: var(--aitetsu);
+}
+
+.markup-badge.default {
+    background: var(--admin-bg-tertiary);
+    color: var(--admin-text-muted);
+}
+
+.markup-badge small {
+    font-size: 0.65rem;
+    opacity: 0.7;
+}
+
+.user-status-badge.pending {
+    background: var(--kintsugi-light);
+    color: var(--kintsugi);
+}
+
+.user-status-badge.rejected {
+    background: rgba(142, 156, 166, 0.2);
+    color: var(--namari);
 }
 
 /* ================================
@@ -421,12 +600,12 @@
 .user-details-avatar {
     width: 80px;
     height: 80px;
-    background: linear-gradient(135deg, var(--module-primary, #3b82f6), var(--module-primary-dark, #2563eb));
+    background: var(--aitetsu);
     border-radius: 0 !important;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
+    color: var(--washi);
     font-weight: 700;
     font-size: 2rem;
     flex-shrink: 0;
@@ -513,7 +692,7 @@
 }
 
 .user-tab.active {
-    background: var(--module-primary, #3b82f6);
+    background: var(--aitetsu);
     color: white;
 }
 
@@ -555,7 +734,7 @@
 .user-detail-card-header i {
     width: 20px;
     height: 20px;
-    color: var(--module-primary, #3b82f6);
+    color: var(--aitetsu);
 }
 
 .user-detail-card-header h3 {
@@ -642,7 +821,7 @@
 .user-form-card-header i {
     width: 20px;
     height: 20px;
-    color: var(--module-primary, #3b82f6);
+    color: var(--aitetsu);
 }
 
 .user-form-card-header h3 {
@@ -679,7 +858,7 @@
 }
 
 .user-form-group label .required {
-    color: #38bdf8;
+    color: var(--aitetsu);
 }
 
 .user-form-input {
@@ -694,8 +873,8 @@
 
 .user-form-input:focus {
     outline: none;
-    border-color: var(--module-primary, #3b82f6);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    border-color: var(--aitetsu);
+    box-shadow: 0 0 0 3px rgba(64, 84, 94, 0.15);
 }
 
 .user-form-select {
@@ -733,7 +912,7 @@
 }
 
 .status-toggle-switch.active {
-    background: var(--admin-success, #10b981);
+    background: var(--sei);
 }
 
 .status-toggle-switch::after {
@@ -743,7 +922,7 @@
     left: 3px;
     width: 20px;
     height: 20px;
-    background: white;
+    background: var(--washi);
     border-radius: 0 !important;
     transition: all 0.25s ease;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);

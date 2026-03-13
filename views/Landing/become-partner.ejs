@@ -1,254 +1,812 @@
-<%- include('../partner/partials/header-public') %>
+<!DOCTYPE html>
+<html lang="en">
 
-<link rel="stylesheet" href="/css/partnerCSS/partner-login.css">
-<link rel="stylesheet" href="/css/partnerCSS/partner-application.css">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#2B2B2B">
+    <title>PartsForm | Become a Partner</title>
+    <link rel="icon" type="image/png" href="/images/brand/icon-gold.png">
+    <link rel="stylesheet" href="/css/brand-system.css">
+    <script src="https://unpkg.com/lucide@0.294.0/dist/umd/lucide.min.js"></script>
+    <style>
+        @font-face { font-family: 'Quantico'; src: url('/fonts/Quantico/Quantico-Regular.ttf') format('truetype'); font-weight: 400; font-display: swap; }
+        @font-face { font-family: 'Quantico'; src: url('/fonts/Quantico/Quantico-Bold.ttf') format('truetype'); font-weight: 700; font-display: swap; }
+        @font-face { font-family: 'Antartida'; src: url('/fonts/Antartida/Antartida-Light.otf') format('opentype'); font-weight: 300; font-display: swap; }
+        @font-face { font-family: 'Antartida'; src: url('/fonts/Antartida/Antartida-Medium.otf') format('opentype'); font-weight: 500; font-display: swap; }
+        @font-face { font-family: 'Antartida'; src: url('/fonts/Antartida/Antartida-Bold.otf') format('opentype'); font-weight: 700; font-display: swap; }
+        @font-face { font-family: 'Antartida'; src: url('/fonts/Antartida/Antartida-Black.otf') format('opentype'); font-weight: 900; font-display: swap; }
 
-<%- include('../partner/partials/navbar-public', { activePage: 'apply' }) %>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box }
 
-<div class="partner-login-page-wrapper">
-<section class="partner-apply-section">
-  <div class="partner-apply-container">
-    <!-- Header -->
-    <div class="partner-apply-header">
-      <div class="partner-apply-badge">
-        <i data-lucide="handshake"></i>
-        <span>Partner Program</span>
-      </div>
-      <h1>Become a Referral Partner</h1>
-      <p>Join our partner network and earn commissions by referring customers to PARTSFORM.</p>
+        html, body { height: 100%; overflow: hidden }
+
+        body { font-family: 'Antartida', sans-serif; font-weight: 500; color: var(--washi); -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale }
+
+        .bp-page {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center
+        }
+
+        .bp-bg { position: absolute; inset: 0; z-index: 0 }
+
+        .bp-bg__photo {
+            position: absolute;
+            inset: 0;
+            background: url('/images/brand/moodboard/warehouse-hero.webp') center/cover no-repeat;
+            filter: brightness(0.55) saturate(0.80)
+        }
+
+        .bp-bg__overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(10,18,35,.60) 0%, rgba(18,32,55,.45) 50%, rgba(10,18,35,.65) 100%)
+        }
+
+        .bp-topbar {
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 48px
+        }
+
+        .bp-topbar__icon { height: 140px; width: auto; display: block }
+
+        .bp-topbar__link {
+            position: absolute;
+            left: 48px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-family: 'Antartida', sans-serif;
+            font-size: var(--text-small);
+            font-weight: 500;
+            color: rgba(248,250,252,.80);
+            text-decoration: underline;
+            text-underline-offset: 4px;
+            letter-spacing: .01em;
+            transition: color .2s ease
+        }
+
+        .bp-topbar__link:hover { color: var(--washi) }
+
+        .bp-card-wrapper {
+            position: relative;
+            z-index: 5;
+            width: 680px;
+            max-height: calc(100vh - 180px);
+            overflow-y: auto;
+            scrollbar-width: none
+        }
+
+        .bp-card-wrapper::-webkit-scrollbar { display: none }
+
+        .bp-card {
+            padding: 36px 52px 36px;
+            background: rgba(100,125,150,.22);
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
+            border: 1px solid rgba(255,255,255,.16);
+            border-radius: 0;
+            box-shadow: 0 20px 80px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.10);
+            opacity: .93
+        }
+
+        .bp-brand { text-align: center; margin-bottom: 18px }
+        .bp-brand__logo { width: 220px; height: auto }
+
+        /* Steps */
+        .bp-steps {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px
+        }
+
+        .bp-step { display: flex; flex-direction: column; align-items: center; gap: 4px }
+
+        .bp-step__dot {
+            width: 32px; height: 32px;
+            display: flex; align-items: center; justify-content: center;
+            border: 2px solid rgba(248,250,252,.22);
+            font-family: 'Quantico', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            color: rgba(248,250,252,.35);
+            transition: all .3s ease
+        }
+
+        .bp-step__label {
+            font-family: 'Antartida', sans-serif;
+            font-size: 10px;
+            font-weight: 600;
+            color: rgba(248,250,252,.32);
+            letter-spacing: .07em;
+            text-transform: uppercase;
+            transition: all .3s ease
+        }
+
+        .bp-step.active .bp-step__dot {
+            border-color: var(--kintsugi);
+            color: var(--kintsugi);
+            background: rgba(212,175,55,.10)
+        }
+
+        .bp-step.active .bp-step__label { color: var(--kintsugi) }
+
+        .bp-step.done .bp-step__dot {
+            border-color: rgba(212,175,55,.45);
+            color: rgba(212,175,55,.55);
+            background: rgba(212,175,55,.06)
+        }
+
+        .bp-step.done .bp-step__label { color: rgba(212,175,55,.50) }
+
+        .bp-step__line {
+            width: 64px; height: 1px;
+            background: rgba(248,250,252,.16);
+            margin: 0 8px;
+            margin-bottom: 16px
+        }
+
+        /* Error / Success messages */
+        .bp-msg {
+            display: none;
+            padding: 9px 14px;
+            margin-bottom: 12px;
+            font-family: 'Antartida', sans-serif;
+            font-size: var(--text-xs);
+            font-weight: 500;
+            align-items: flex-start;
+            gap: 8px
+        }
+
+        .bp-msg.show { display: flex }
+        .bp-msg svg { width: 16px; height: 16px; flex-shrink: 0; margin-top: 1px }
+
+        .bp-msg--error {
+            color: #fca5a5;
+            background: rgba(220,38,38,.12);
+            border: 1px solid rgba(220,38,38,.25)
+        }
+
+        .bp-msg--success {
+            color: #6ee7b7;
+            background: rgba(52,211,153,.10);
+            border: 1px solid rgba(52,211,153,.25)
+        }
+
+        /* Panels */
+        .bp-panel { display: none; flex-direction: column; gap: 10px }
+        .bp-panel.active { display: flex }
+
+        /* Panel header */
+        .bp-panel-header { margin-bottom: 4px }
+
+        .bp-panel-header h2 {
+            font-family: 'Quantico', sans-serif;
+            font-size: 1.0rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            color: var(--washi);
+            margin-bottom: 3px
+        }
+
+        .bp-panel-header p {
+            font-family: 'Antartida', sans-serif;
+            font-size: var(--text-small);
+            color: rgba(248,250,252,.48)
+        }
+
+        /* Row / Field */
+        .bp-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px
+        }
+
+        .bp-field { display: flex; flex-direction: column; gap: 5px }
+
+        .bp-field__label {
+            font-family: 'Quantico', sans-serif;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: rgba(248,250,252,.82);
+            letter-spacing: 0.07em;
+            text-transform: uppercase
+        }
+
+        .bp-optional {
+            font-weight: 400;
+            color: rgba(248,250,252,.32);
+            font-size: 11px
+        }
+
+        .bp-field__input {
+            width: 100%;
+            height: 48px;
+            padding: 0 14px;
+            font-family: 'Antartida', sans-serif;
+            font-size: .95rem;
+            font-weight: 500;
+            color: var(--washi);
+            background: rgba(248,250,252,.06);
+            border: 1px solid rgba(248,250,252,.18);
+            border-radius: 0;
+            outline: none;
+            transition: border-color .2s ease, background .2s ease;
+            -webkit-appearance: none;
+            appearance: none
+        }
+
+        .bp-field__input::placeholder { color: rgba(248,250,252,.28) }
+
+        .bp-field__input:focus {
+            background: rgba(248,250,252,.09);
+            border-color: rgba(149,175,192,.50)
+        }
+
+        .bp-field__textarea {
+            height: 72px;
+            padding: 10px 14px;
+            resize: none;
+            line-height: 1.5
+        }
+
+        .bp-field__error {
+            font-size: var(--text-xs);
+            color: #fca5a5;
+            min-height: 1rem
+        }
+
+        /* Channels grid */
+        .bp-channels-label {
+            font-family: 'Quantico', sans-serif;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: rgba(248,250,252,.82);
+            letter-spacing: 0.07em;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            display: block
+        }
+
+        .bp-channels-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px
+        }
+
+        .bp-channel-item { position: relative }
+
+        .bp-channel-item input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
+            width: 0; height: 0
+        }
+
+        .bp-channel-label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            padding: 12px 8px;
+            border: 1px solid rgba(248,250,252,.16);
+            cursor: pointer;
+            transition: all .2s;
+            color: rgba(248,250,252,.48);
+            font-family: 'Antartida', sans-serif;
+            font-size: var(--text-xs);
+            font-weight: 600;
+            text-align: center;
+            letter-spacing: .04em;
+            background: rgba(248,250,252,.03)
+        }
+
+        .bp-channel-label svg { width: 20px; height: 20px }
+
+        .bp-channel-label:hover {
+            border-color: rgba(212,175,55,.40);
+            color: rgba(248,250,252,.75);
+            background: rgba(212,175,55,.04)
+        }
+
+        .bp-channel-item input:checked + .bp-channel-label {
+            border-color: var(--kintsugi);
+            background: rgba(212,175,55,.08);
+            color: var(--kintsugi)
+        }
+
+        /* Terms / Checks */
+        .bp-checks { display: flex; flex-direction: column; gap: 8px; margin-top: 2px }
+
+        .bp-check {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            cursor: pointer
+        }
+
+        .bp-check input[type="checkbox"] {
+            width: 15px; height: 15px;
+            min-width: 15px;
+            margin-top: 2px;
+            accent-color: var(--kintsugi);
+            cursor: pointer
+        }
+
+        .bp-check span {
+            font-family: 'Antartida', sans-serif;
+            font-size: var(--text-small);
+            font-weight: 500;
+            color: rgba(248,250,252,.60);
+            line-height: 1.45
+        }
+
+        .bp-check a { color: var(--kintsugi); text-underline-offset: 3px }
+
+        /* Benefits */
+        .bp-benefits {
+            display: flex;
+            gap: 16px;
+            padding: 10px 14px;
+            background: rgba(212,175,55,.06);
+            border: 1px solid rgba(212,175,55,.15)
+        }
+
+        .bp-benefit {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-family: 'Antartida', sans-serif;
+            font-size: var(--text-xs);
+            font-weight: 600;
+            color: rgba(212,175,55,.80);
+            flex: 1;
+            justify-content: center
+        }
+
+        .bp-benefit svg { width: 14px; height: 14px; color: var(--kintsugi) }
+
+        /* Buttons */
+        .bp-btn {
+            width: 100%;
+            height: 54px;
+            font-family: 'Quantico', sans-serif;
+            font-size: .95rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: .10em;
+            color: var(--kurogane);
+            background: var(--kintsugi);
+            border: none;
+            border-radius: 0;
+            cursor: pointer;
+            transition: background .2s ease, transform .15s ease;
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-decoration: none
+        }
+
+        .bp-btn:hover { background: var(--kintsugi-hover); transform: translateY(-1px) }
+        .bp-btn:active { background: var(--kintsugi-active); transform: translateY(0) }
+        .bp-btn:disabled { opacity: .6; cursor: not-allowed; transform: none }
+
+        .bp-btn--ghost {
+            background: transparent;
+            border: 1px solid rgba(248,250,252,.28);
+            color: rgba(248,250,252,.78)
+        }
+
+        .bp-btn--ghost:hover { background: rgba(248,250,252,.07); transform: translateY(-1px) }
+
+        .bp-btn.loading {
+            position: relative;
+            color: transparent;
+            pointer-events: none
+        }
+
+        .bp-btn.loading::after {
+            content: '';
+            position: absolute;
+            width: 18px; height: 18px;
+            top: 50%; left: 50%;
+            margin: -9px 0 0 -9px;
+            border: 2px solid transparent;
+            border-top-color: var(--kurogane);
+            border-radius: 50%;
+            animation: spin .5s linear infinite
+        }
+
+        @keyframes spin { to { transform: rotate(360deg) } }
+
+        .bp-nav { display: flex; gap: 12px; margin-top: 4px }
+        .bp-nav .bp-btn { flex: 1; margin-top: 0 }
+
+        /* Footer link */
+        .bp-foot {
+            text-align: center;
+            font-family: 'Antartida', sans-serif;
+            font-size: var(--text-small);
+            color: rgba(248,250,252,.42);
+            margin-top: 2px
+        }
+
+        .bp-foot a {
+            color: rgba(248,250,252,.68);
+            text-decoration: underline;
+            text-underline-offset: 3px
+        }
+
+        .bp-foot a:hover { color: var(--washi) }
+
+        /* Success */
+        .bp-success-icon {
+            text-align: center;
+            margin: 8px 0 14px;
+            color: #34d399
+        }
+
+        .bp-success-icon svg { width: 52px; height: 52px }
+
+        .bp-success-header { text-align: center; margin-bottom: 8px }
+
+        .bp-success-header h2 {
+            font-family: 'Quantico', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            color: var(--washi);
+            margin-bottom: 5px
+        }
+
+        .bp-success-header p {
+            font-family: 'Antartida', sans-serif;
+            font-size: var(--text-small);
+            color: rgba(248,250,252,.50);
+            line-height: 1.5
+        }
+
+        @media(max-width: 680px) {
+            .bp-card-wrapper { width: calc(100% - 28px) }
+            .bp-card { padding: 26px 20px }
+            .bp-row { grid-template-columns: 1fr }
+            .bp-topbar { padding: 16px 20px }
+            .bp-topbar__icon { height: 80px }
+            .bp-topbar__link { left: 20px; font-size: var(--text-xs) }
+            .bp-channels-grid { grid-template-columns: repeat(2, 1fr) }
+            .bp-benefits { flex-direction: column; gap: 8px }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bp-page">
+        <div class="bp-bg">
+            <div class="bp-bg__photo"></div>
+            <div class="bp-bg__overlay"></div>
     </div>
 
-    <!-- Application Card -->
-    <div class="partner-apply-card">
-      <!-- Success Message -->
-      <div class="partner-apply-message success" id="formSuccess" style="display: none;">
-        <i data-lucide="check-circle"></i>
-        <div>
-          <strong>Application Submitted Successfully!</strong>
-          <span>We'll review your application and get back to you within 2-3 business days. You'll receive your login credentials via email once approved.</span>
+        <div class="bp-topbar">
+            <img src="/images/brand/icon-gold.svg" alt="PartsForm" class="bp-topbar__icon">
+            <a href="/" class="bp-topbar__link">&laquo; Back to Login</a>
+        </div>
+
+        <div class="bp-card-wrapper">
+            <div class="bp-card">
+
+                <div class="bp-brand">
+                    <img src="/images/brand/logo-tagline-dark.png" alt="PartsForm" class="bp-brand__logo">
+                </div>
+
+                <div class="bp-steps">
+                    <div class="bp-step active" id="step-dot-1">
+                        <div class="bp-step__dot">1</div>
+                        <div class="bp-step__label">Personal</div>
+                    </div>
+                    <div class="bp-step__line"></div>
+                    <div class="bp-step" id="step-dot-2">
+                        <div class="bp-step__dot">2</div>
+                        <div class="bp-step__label">Channels</div>
+                    </div>
+                    <div class="bp-step__line"></div>
+                    <div class="bp-step" id="step-dot-3">
+                        <div class="bp-step__dot">3</div>
+                        <div class="bp-step__label">Submit</div>
         </div>
       </div>
 
-      <!-- Error Message -->
-      <div class="partner-apply-message error" id="formError" style="display: none;">
+                <!-- Messages -->
+                <div class="bp-msg bp-msg--error" id="formError">
         <i data-lucide="alert-circle"></i>
         <span id="errorMessage"></span>
       </div>
 
-      <form class="partner-apply-form" id="partnerApplicationForm">
-        <!-- Personal Information Section -->
-        <div class="partner-apply-form-section">
-          <div class="partner-apply-section-header">
-            <i data-lucide="user"></i>
-            <span>Personal Information</span>
+                <form id="partnerApplicationForm" autocomplete="on">
+
+                    <!-- Step 1: Personal Information -->
+                    <div class="bp-panel active" id="panel-1">
+                        <div class="bp-panel-header">
+                            <h2>Become a Referral Partner</h2>
+                            <p>Join our network and earn up to 15% commission by referring customers to PARTSFORM.</p>
           </div>
 
-          <div class="partner-apply-form-grid">
-            <div class="partner-apply-form-group">
-              <label>
-                <i data-lucide="user"></i>
-                First Name <span class="required">*</span>
-              </label>
-              <input type="text" class="partner-apply-input" id="firstName" name="firstName" placeholder="John" required>
-              <span class="partner-apply-field-error" id="firstNameError"></span>
+                        <div class="bp-benefits">
+                            <div class="bp-benefit">
+                                <i data-lucide="trending-up"></i>
+                                Up to 15% commission
+                            </div>
+                            <div class="bp-benefit">
+                                <i data-lucide="calendar"></i>
+                                Monthly payouts
+                            </div>
+                            <div class="bp-benefit">
+                                <i data-lucide="bar-chart-2"></i>
+                                Real-time dashboard
+                            </div>
             </div>
 
-            <div class="partner-apply-form-group">
-              <label>
-                <i data-lucide="user"></i>
-                Last Name <span class="required">*</span>
-              </label>
-              <input type="text" class="partner-apply-input" id="lastName" name="lastName" placeholder="Doe" required>
-              <span class="partner-apply-field-error" id="lastNameError"></span>
+                        <div class="bp-row">
+                            <div class="bp-field">
+                                <label class="bp-field__label" for="firstName">First Name</label>
+                                <input type="text" class="bp-field__input" id="firstName" name="firstName" placeholder="First name" autocomplete="given-name" required>
+                                <span class="bp-field__error" id="firstNameError"></span>
+                            </div>
+                            <div class="bp-field">
+                                <label class="bp-field__label" for="lastName">Last Name</label>
+                                <input type="text" class="bp-field__input" id="lastName" name="lastName" placeholder="Last name" autocomplete="family-name" required>
+                                <span class="bp-field__error" id="lastNameError"></span>
+                            </div>
             </div>
 
-            <div class="partner-apply-form-group">
-              <label>
-                <i data-lucide="mail"></i>
-                Email Address <span class="required">*</span>
-              </label>
-              <input type="email" class="partner-apply-input" id="email" name="email" placeholder="john@example.com" required>
-              <span class="partner-apply-field-error" id="emailError"></span>
+                        <div class="bp-row">
+                            <div class="bp-field">
+                                <label class="bp-field__label" for="email">Email Address</label>
+                                <input type="email" class="bp-field__input" id="email" name="email" placeholder="you@company.com" autocomplete="email" required>
+                                <span class="bp-field__error" id="emailError"></span>
+                            </div>
+                            <div class="bp-field">
+                                <label class="bp-field__label" for="phone">Phone Number</label>
+                                <input type="tel" class="bp-field__input" id="phone" name="phone" placeholder="+1 555 000 0000" autocomplete="tel" required>
+                                <span class="bp-field__error" id="phoneError"></span>
+                            </div>
             </div>
 
-            <div class="partner-apply-form-group">
-              <label>
-                <i data-lucide="phone"></i>
-                Phone Number <span class="required">*</span>
-              </label>
-              <input type="tel" class="partner-apply-input" id="phone" name="phone" placeholder="+1 (555) 000-0000" required>
-              <span class="partner-apply-field-error" id="phoneError"></span>
+                        <button type="button" class="bp-btn" onclick="goStep(2)">Next Step &rarr;</button>
+                        <p class="bp-foot">Already a partner? <a href="/partner/login">Sign in to your dashboard</a></p>
             </div>
 
-            <div class="partner-apply-form-group">
-              <label>
-                <i data-lucide="building-2"></i>
-                Company <span class="optional">(optional)</span>
-              </label>
-              <input type="text" class="partner-apply-input" id="companyName" name="companyName" placeholder="Your company name">
+                    <!-- Step 2: Business & Channels -->
+                    <div class="bp-panel" id="panel-2">
+                        <div class="bp-panel-header">
+                            <h2>Business & Marketing</h2>
+                            <p>Tell us about your business and how you plan to promote PARTSFORM.</p>
             </div>
 
-            <div class="partner-apply-form-group">
-              <label>
-                <i data-lucide="globe"></i>
-                Website <span class="optional">(optional)</span>
-              </label>
-              <input type="url" class="partner-apply-input" id="website" name="website" placeholder="https://yoursite.com">
+                        <div class="bp-row">
+                            <div class="bp-field">
+                                <label class="bp-field__label" for="companyName">Company <span class="bp-optional">(optional)</span></label>
+                                <input type="text" class="bp-field__input" id="companyName" name="companyName" placeholder="Your company name" autocomplete="organization">
             </div>
+                            <div class="bp-field">
+                                <label class="bp-field__label" for="website">Website <span class="bp-optional">(optional)</span></label>
+                                <input type="url" class="bp-field__input" id="website" name="website" placeholder="https://yoursite.com">
           </div>
         </div>
 
-        <!-- Marketing Channels Section -->
-        <div class="partner-apply-form-section">
-          <div class="partner-apply-section-header">
-            <i data-lucide="megaphone"></i>
-            <span>Marketing Channels</span>
-          </div>
-
-          <div class="partner-apply-form-group">
-            <label style="margin-bottom: 1rem; display: block;">
-              How will you promote PARTSFORM? <span class="required">*</span>
-            </label>
-            <div class="partner-apply-channels-grid">
-              <div class="partner-apply-channel-item">
+                        <div class="bp-field">
+                            <span class="bp-channels-label">How will you promote PARTSFORM? <span style="color:#fca5a5">*</span></span>
+                            <div class="bp-channels-grid">
+                                <div class="bp-channel-item">
                 <input type="checkbox" name="marketingChannels" value="website" id="channel_website">
-                <label for="channel_website" class="partner-apply-channel-label">
+                                    <label for="channel_website" class="bp-channel-label">
                   <i data-lucide="globe"></i>
-                  <span>Website</span>
+                                        Website
                 </label>
               </div>
-              <div class="partner-apply-channel-item">
+                                <div class="bp-channel-item">
                 <input type="checkbox" name="marketingChannels" value="social_media" id="channel_social">
-                <label for="channel_social" class="partner-apply-channel-label">
+                                    <label for="channel_social" class="bp-channel-label">
                   <i data-lucide="share-2"></i>
-                  <span>Social Media</span>
+                                        Social Media
                 </label>
               </div>
-              <div class="partner-apply-channel-item">
+                                <div class="bp-channel-item">
                 <input type="checkbox" name="marketingChannels" value="email" id="channel_email">
-                <label for="channel_email" class="partner-apply-channel-label">
+                                    <label for="channel_email" class="bp-channel-label">
                   <i data-lucide="mail"></i>
-                  <span>Email</span>
+                                        Email
                 </label>
               </div>
-              <div class="partner-apply-channel-item">
+                                <div class="bp-channel-item">
                 <input type="checkbox" name="marketingChannels" value="content" id="channel_content">
-                <label for="channel_content" class="partner-apply-channel-label">
+                                    <label for="channel_content" class="bp-channel-label">
                   <i data-lucide="file-text"></i>
-                  <span>Content</span>
+                                        Content
                 </label>
               </div>
-              <div class="partner-apply-channel-item">
+                                <div class="bp-channel-item">
                 <input type="checkbox" name="marketingChannels" value="ppc" id="channel_ppc">
-                <label for="channel_ppc" class="partner-apply-channel-label">
+                                    <label for="channel_ppc" class="bp-channel-label">
                   <i data-lucide="mouse-pointer-click"></i>
-                  <span>Paid Ads</span>
+                                        Paid Ads
                 </label>
               </div>
-              <div class="partner-apply-channel-item">
+                                <div class="bp-channel-item">
                 <input type="checkbox" name="marketingChannels" value="offline" id="channel_offline">
-                <label for="channel_offline" class="partner-apply-channel-label">
+                                    <label for="channel_offline" class="bp-channel-label">
                   <i data-lucide="store"></i>
-                  <span>Offline</span>
+                                        Offline
                 </label>
               </div>
             </div>
-            <span class="partner-apply-field-error" id="marketingChannelsError"></span>
+                            <span class="bp-field__error" id="marketingChannelsError"></span>
           </div>
 
-          <div class="partner-apply-form-group" style="margin-top: 1.5rem;">
-            <label style="margin-bottom: 0.625rem; display: block;">
-              <i data-lucide="message-square"></i>
-              Tell us about yourself <span class="optional">(optional)</span>
-            </label>
-            <textarea class="partner-apply-input partner-apply-textarea" id="motivation" name="motivation" 
-              placeholder="Share your experience or how you plan to promote PARTSFORM..." rows="4"></textarea>
+                        <div class="bp-nav">
+                            <button type="button" class="bp-btn bp-btn--ghost" onclick="goStep(1)">&larr; Back</button>
+                            <button type="button" class="bp-btn" onclick="goStep(3)">Next Step &rarr;</button>
           </div>
         </div>
 
-        <!-- Terms -->
-        <div class="partner-apply-terms">
-          <input type="checkbox" id="agreeTerms" name="agreeTerms" required>
-          <span class="partner-apply-terms-text">
-            I agree to the <a href="/privacy#terms" target="_blank">Terms of Service</a> and 
-            <a href="/privacy" target="_blank">Privacy Policy</a>
-          </span>
-        </div>
-        <span class="partner-apply-field-error" id="agreeTermsError" style="margin-left: 1rem;"></span>
-      </form>
+                    <!-- Step 3: Tell Us & Terms -->
+                    <div class="bp-panel" id="panel-3">
+                        <div class="bp-panel-header">
+                            <h2>Almost There</h2>
+                            <p>Share a bit about yourself and agree to our terms to submit your application.</p>
+                        </div>
 
-      <!-- Submit Button -->
-      <div class="partner-apply-submit-wrapper">
-        <button type="submit" form="partnerApplicationForm" class="partner-apply-submit-btn" id="submitBtn">
-          <span class="default">
-            <i data-lucide="send"></i>
+                        <div class="bp-field">
+                            <label class="bp-field__label" for="motivation">Tell us about yourself <span class="bp-optional">(optional)</span></label>
+                            <textarea class="bp-field__input bp-field__textarea" id="motivation" name="motivation"
+                                placeholder="Share your experience or how you plan to promote PARTSFORM..." rows="4"></textarea>
+                        </div>
+
+                        <div class="bp-checks">
+                            <label class="bp-check">
+                                <input type="checkbox" name="agreeTerms" id="agreeTerms" required>
+                                <span>I agree to the <a href="/privacy#terms" target="_blank">Terms of Service</a> and <a href="/privacy" target="_blank">Privacy Policy</a></span>
+                            </label>
+        </div>
+                        <span class="bp-field__error" id="agreeTermsError" style="margin-left:24px"></span>
+
+                        <div class="bp-nav">
+                            <button type="button" class="bp-btn bp-btn--ghost" onclick="goStep(2)">&larr; Back</button>
+                            <button type="submit" class="bp-btn" id="submitBtn">
+                                <span class="btn-text">
+                                    <i data-lucide="send" style="width:17px;height:17px"></i>
             Submit Application
           </span>
-          <span class="loading">
-            <svg class="partner-apply-spinner" width="20" height="20" viewBox="0 0 24 24" fill="none">
-              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" opacity="0.25"/>
-              <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
-            </svg>
-            Submitting...
-          </span>
+                                <span class="btn-loader" style="display:none">Submitting...</span>
         </button>
-      </div>
-
-      <!-- Login Prompt -->
-      <div class="partner-apply-login-prompt">
-        Already a partner? <a href="/partner/login">Sign in to your dashboard</a>
       </div>
     </div>
 
-    <!-- Quick Benefits -->
-    <div class="partner-apply-benefits">
-      <div class="partner-apply-benefit">
-        <i data-lucide="check-circle"></i>
-        Up to 15% commission
+                    <!-- Step 4: Success (shown after submission) -->
+                    <div class="bp-panel" id="panel-success">
+                        <div class="bp-success-icon">
+                            <i data-lucide="check-circle-2"></i>
+                        </div>
+                        <div class="bp-success-header">
+                            <h2>Application Submitted!</h2>
+                            <p>We'll review your application and get back to you within 2–3 business days. You'll receive your login credentials via email once approved.</p>
       </div>
-      <div class="partner-apply-benefit">
-        <i data-lucide="check-circle"></i>
-        Monthly payouts
+                        <a href="/" class="bp-btn">
+                            <i data-lucide="home" style="width:18px;height:18px"></i>
+                            Back to Home
+                        </a>
+                        <a href="/partner/login" class="bp-btn bp-btn--ghost" style="margin-top:8px">
+                            <i data-lucide="log-in" style="width:18px;height:18px"></i>
+                            Partner Login
+                        </a>
       </div>
-      <div class="partner-apply-benefit">
-        <i data-lucide="check-circle"></i>
-        Real-time dashboard
+
+                </form>
+
       </div>
     </div>
   </div>
-</section>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  if (typeof lucide !== 'undefined') {
-    lucide.createIcons();
-  }
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    });
 
-  const form = document.getElementById('partnerApplicationForm');
-  const submitBtn = document.getElementById('submitBtn');
-  const formError = document.getElementById('formError');
-  const formSuccess = document.getElementById('formSuccess');
+    function goStep(n) {
+        const panels = document.querySelectorAll('.bp-panel');
+        let current = 1;
+        panels.forEach(function(p, i) {
+            if (p.classList.contains('active')) current = i + 1;
+        });
 
-  form.addEventListener('submit', async function(e) {
+        if (n > current && !validateStep(current)) return;
+
+        // Only toggle numbered panels (not success panel)
+        const numberedPanels = ['panel-1', 'panel-2', 'panel-3'];
+        numberedPanels.forEach(function(id, i) {
+            const panel = document.getElementById(id);
+            if (panel) panel.classList.toggle('active', i + 1 === n);
+        });
+        document.getElementById('panel-success').classList.remove('active');
+
+        document.querySelectorAll('.bp-step').forEach(function(d, i) {
+            d.classList.toggle('active', i + 1 === n);
+            d.classList.toggle('done', i + 1 < n);
+        });
+
+        clearErrors();
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function validateStep(step) {
+        clearErrors();
+        if (step === 1) {
+            const fields = ['firstName', 'lastName', 'email', 'phone'];
+            for (let i = 0; i < fields.length; i++) {
+                const el = document.getElementById(fields[i]);
+                if (!el.value.trim()) {
+                    showFieldError(fields[i] + 'Error', 'This field is required');
+                    el.focus();
+                    return false;
+                }
+            }
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(document.getElementById('email').value.trim())) {
+                showFieldError('emailError', 'Please enter a valid email address');
+                return false;
+            }
+        }
+        if (step === 2) {
+            const selected = document.querySelectorAll('input[name="marketingChannels"]:checked');
+            if (selected.length === 0) {
+                showFieldError('marketingChannelsError', 'Please select at least one channel');
+                return false;
+            }
+        }
+        return true;
+    }
+
+    function showFieldError(id, message) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = message;
+    }
+
+    function clearErrors() {
+        document.querySelectorAll('.bp-field__error').forEach(function(el) {
+            el.textContent = '';
+        });
+        document.getElementById('formError').classList.remove('show');
+    }
+
+    document.getElementById('partnerApplicationForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     
-    // Clear previous errors
-    document.querySelectorAll('.partner-apply-field-error').forEach(el => el.textContent = '');
-    formError.style.display = 'none';
-    formSuccess.style.display = 'none';
+        if (!validateStep(3)) return;
 
-    // Validate at least one marketing channel selected
-    const marketingChannels = document.querySelectorAll('input[name="marketingChannels"]:checked');
-    if (marketingChannels.length === 0) {
-      document.getElementById('marketingChannelsError').textContent = 'Please select at least one channel';
+        if (!document.getElementById('agreeTerms').checked) {
+            showFieldError('agreeTermsError', 'You must agree to the Terms of Service');
       return;
     }
 
-    // Show loading state
-    submitBtn.disabled = true;
-    submitBtn.classList.add('is-loading');
+        const submitBtn = document.getElementById('submitBtn');
+        const btnText = submitBtn.querySelector('.btn-text');
+        const btnLoader = submitBtn.querySelector('.btn-loader');
 
-    // Collect form data
+    submitBtn.disabled = true;
+        submitBtn.classList.add('loading');
+        if (btnText) btnText.style.display = 'none';
+        if (btnLoader) btnLoader.style.display = 'inline';
+
+        const marketingChannels = document.querySelectorAll('input[name="marketingChannels"]:checked');
     const formData = {
       firstName: document.getElementById('firstName').value.trim(),
       lastName: document.getElementById('lastName').value.trim(),
@@ -256,7 +814,7 @@ document.addEventListener('DOMContentLoaded', function() {
       phone: document.getElementById('phone').value.trim(),
       companyName: document.getElementById('companyName').value.trim(),
       website: document.getElementById('website').value.trim(),
-      marketingChannels: Array.from(marketingChannels).map(cb => cb.value),
+            marketingChannels: Array.from(marketingChannels).map(function(cb) { return cb.value; }),
       motivation: document.getElementById('motivation').value.trim()
     };
 
@@ -270,33 +828,44 @@ document.addEventListener('DOMContentLoaded', function() {
       const data = await response.json();
 
       if (data.success) {
-        formSuccess.style.display = 'flex';
-        form.reset();
-        form.style.display = 'none';
-        document.querySelector('.partner-apply-submit-wrapper').style.display = 'none';
-        formSuccess.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                // Show success panel
+                document.querySelectorAll('.bp-panel').forEach(function(p) { p.classList.remove('active'); });
+                document.getElementById('panel-success').classList.add('active');
+                // Mark all steps as done
+                document.querySelectorAll('.bp-step').forEach(function(d) {
+                    d.classList.remove('active');
+                    d.classList.add('done');
+                });
+                if (typeof lucide !== 'undefined') lucide.createIcons();
       } else {
         if (data.errors) {
-          Object.keys(data.errors).forEach(field => {
+                    Object.keys(data.errors).forEach(function(field) {
             const errorEl = document.getElementById(field + 'Error');
             if (errorEl) errorEl.textContent = data.errors[field];
           });
         } else {
-          document.getElementById('errorMessage').textContent = data.message || 'Something went wrong. Please try again.';
-          formError.style.display = 'flex';
-        }
+                    const errorEl = document.getElementById('errorMessage');
+                    const formError = document.getElementById('formError');
+                    errorEl.textContent = data.message || 'Something went wrong. Please try again.';
+                    formError.classList.add('show');
+                }
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('loading');
+                if (btnText) btnText.style.display = 'inline-flex';
+                if (btnLoader) btnLoader.style.display = 'none';
       }
     } catch (error) {
-      console.error('Application error:', error);
-      document.getElementById('errorMessage').textContent = 'Network error. Please check your connection.';
-      formError.style.display = 'flex';
-    } finally {
+            const errorEl = document.getElementById('errorMessage');
+            const formError = document.getElementById('formError');
+            errorEl.textContent = 'Network error. Please check your connection.';
+            formError.classList.add('show');
       submitBtn.disabled = false;
-      submitBtn.classList.remove('is-loading');
+            submitBtn.classList.remove('loading');
+            if (btnText) btnText.style.display = 'inline-flex';
+            if (btnLoader) btnLoader.style.display = 'none';
     }
-  });
 });
 </script>
+</body>
 
-<%- include('../partner/partials/footer-public') %>
-</div>
+</html>

@@ -3,7 +3,7 @@ const router = express.Router();
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-const { requireAuth } = require('../middleware/auth');
+const { requireAuth, attachUser } = require('../middleware/auth');
 const {
     getBuyerMain,
     getAutomotiveSearchPage,
@@ -136,6 +136,9 @@ const claimUpload = multer({
     },
 });
 
+// Public route — no login required; user is optionally attached if already signed in
+router.get('/about-us', attachUser, getAboutUsPage);
+
 // Apply authentication middleware to all buyer routes
 router.use(requireAuth);
 
@@ -148,7 +151,6 @@ router.get('/checkout', getCheckoutPage);
 router.get('/orders', getOrdersPage);
 router.get('/orders/:orderNumber', getOrderDetailsPage);
 router.get('/affiliate', getAffiliatePage);
-router.get('/about-us', getAboutUsPage);
 router.get('/payment', getPaymentPage);
 router.get('/delivery', getDeliveryPage);
 router.get('/contacts', getContactsPage);

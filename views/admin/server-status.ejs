@@ -3,36 +3,17 @@
 <style>
   /* Server Status Page - Unique Premium Design */
   
-  /* Hero Banner Matching Dashboard */
+  /* Hero Banner — Aitetsu (same as admin dashboard) */
   .server-status-hero {
-    background: linear-gradient(135deg, #1e3a5f 0%, #2b5278 50%, #3d6a96 100%);
-    border-radius: var(--admin-radius-xl);
+    background: var(--aitetsu);
+    border-radius: 0 !important;
     padding: 2rem;
     margin-bottom: 2rem;
     color: white;
     position: relative;
     overflow: hidden;
   }
-  .server-status-hero::before {
-    content: '';
-    position: absolute;
-    top: -50px;
-    right: -50px;
-    width: 200px;
-    height: 200px;
-    background: rgba(255,255,255,0.05);
-    border-radius: 50%;
-  }
-  .server-status-hero::after {
-    content: '';
-    position: absolute;
-    bottom: -30px;
-    left: 30%;
-    width: 150px;
-    height: 150px;
-    background: rgba(255,255,255,0.03);
-    border-radius: 50%;
-  }
+
   .hero-content {
     display: flex;
     justify-content: space-between;
@@ -61,22 +42,22 @@
     gap: 0.5rem;
     padding: 0.75rem 1.25rem;
     background: rgba(255,255,255,0.1);
-    border-radius: var(--admin-radius-lg);
+    border-radius: 0 !important;
     backdrop-filter: blur(10px);
     font-weight: 600;
   }
-  .health-badge.healthy { background: rgba(16, 185, 129, 0.25); }
-  .health-badge.warning { background: rgba(245, 158, 11, 0.25); }
-  .health-badge.critical { background: rgba(239, 68, 68, 0.25); }
+  .health-badge.healthy { background: rgba(149, 175, 192, 0.25); }
+  .health-badge.warning { background: var(--kintsugi-light); }
+  .health-badge.critical { background: rgba(142, 156, 166, 0.25); }
   .health-dot {
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    background: #10b981;
+    background: var(--sei);
     animation: pulse 2s infinite;
   }
-  .health-badge.warning .health-dot { background: #f59e0b; }
-  .health-badge.critical .health-dot { background: #ef4444; }
+  .health-badge.warning .health-dot { background: var(--kintsugi); }
+  .health-badge.critical .health-dot { background: var(--namari); }
   
   @keyframes pulse {
     0%, 100% { opacity: 1; transform: scale(1); }
@@ -90,7 +71,7 @@
     padding: 0.75rem 1.25rem;
     background: rgba(255,255,255,0.15);
     border: 1px solid rgba(255,255,255,0.2);
-    border-radius: var(--admin-radius-lg);
+    border-radius: 0 !important;
     color: white;
     font-weight: 600;
     cursor: pointer;
@@ -118,7 +99,7 @@
   .quick-stat-card {
     background: var(--admin-bg-primary);
     border: 1px solid var(--admin-border);
-    border-radius: var(--admin-radius-xl);
+    border-radius: 0 !important;
     padding: 1.5rem;
     text-align: center;
     transition: all 0.3s ease;
@@ -140,10 +121,10 @@
     box-shadow: var(--admin-shadow-lg);
     border-color: var(--stat-color, var(--admin-primary));
   }
-  .quick-stat-card.cpu { --stat-color: #3b82f6; }
-  .quick-stat-card.memory { --stat-color: #8b5cf6; }
-  .quick-stat-card.disk { --stat-color: #10b981; }
-  .quick-stat-card.uptime { --stat-color: #f59e0b; }
+  .quick-stat-card.cpu { --stat-color: var(--aitetsu); }
+  .quick-stat-card.memory { --stat-color: var(--aitetsu); }
+  .quick-stat-card.disk { --stat-color: var(--sei); }
+  .quick-stat-card.uptime { --stat-color: var(--kintsugi); }
   
   .stat-icon-wrap {
     width: 60px;
@@ -210,7 +191,7 @@
   .server-card {
     background: var(--admin-bg-primary);
     border: 1px solid var(--admin-border);
-    border-radius: var(--admin-radius-xl);
+    border-radius: 0 !important;
     overflow: hidden;
     transition: all 0.3s ease;
     box-shadow: var(--admin-shadow-sm);
@@ -249,7 +230,7 @@
   .card-badge {
     padding: 0.35rem 0.75rem;
     background: var(--admin-bg-tertiary);
-    border-radius: var(--admin-radius-full);
+    border-radius: 0 !important;
     font-size: 0.75rem;
     font-weight: 600;
     color: var(--admin-text-secondary);
@@ -269,7 +250,7 @@
     flex-direction: column;
     padding: 1rem;
     background: var(--admin-bg-secondary);
-    border-radius: var(--admin-radius-lg);
+    border-radius: 0 !important;
     border: 1px solid var(--admin-border);
   }
   .info-label {
@@ -299,7 +280,7 @@
   .service-card {
     background: var(--admin-bg-primary);
     border: 1px solid var(--admin-border);
-    border-radius: var(--admin-radius-xl);
+    border-radius: 0 !important;
     padding: 1.5rem;
     display: flex;
     align-items: flex-start;
@@ -319,9 +300,9 @@
     background: var(--admin-text-muted);
     transition: background 0.3s;
   }
-  .service-card.healthy::before { background: #10b981; }
-  .service-card.warning::before { background: #f59e0b; }
-  .service-card.error::before { background: #ef4444; }
+  .service-card.healthy::before { background: var(--sei); }
+  .service-card.warning::before { background: var(--kintsugi); }
+  .service-card.error::before { background: var(--namari); }
   
   .service-card:hover {
     transform: translateX(4px);
@@ -330,19 +311,19 @@
   .service-icon {
     width: 56px;
     height: 56px;
-    border-radius: var(--admin-radius-lg);
+    border-radius: 0 !important;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
   }
   .service-icon.mongodb {
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.05));
-    color: #10b981;
+    background: rgba(149, 175, 192, 0.2);
+    color: var(--sei);
   }
   .service-icon.elasticsearch {
-    background: linear-gradient(135deg, rgba(251, 191, 36, 0.15), rgba(251, 191, 36, 0.05));
-    color: #f59e0b;
+    background: var(--kintsugi-light);
+    color: var(--kintsugi);
   }
   .service-icon i {
     width: 26px;
@@ -368,22 +349,22 @@
     align-items: center;
     gap: 0.35rem;
     padding: 0.35rem 0.75rem;
-    border-radius: var(--admin-radius-full);
+    border-radius: 0 !important;
     font-size: 0.75rem;
     font-weight: 600;
     text-transform: uppercase;
   }
   .service-status-badge.healthy {
-    background: rgba(16, 185, 129, 0.12);
-    color: #059669;
+    background: rgba(149, 175, 192, 0.2);
+    color: var(--aitetsu);
   }
   .service-status-badge.warning {
-    background: rgba(245, 158, 11, 0.12);
-    color: #d97706;
+    background: var(--kintsugi-light);
+    color: var(--kintsugi);
   }
   .service-status-badge.error {
-    background: rgba(239, 68, 68, 0.12);
-    color: #dc2626;
+    background: rgba(142, 156, 166, 0.2);
+    color: var(--namari);
   }
   .service-details {
     display: flex;
@@ -415,9 +396,9 @@
     border-color: var(--admin-primary);
     box-shadow: var(--admin-shadow-sm);
   }
-  .pm2-card.online { border-left: 4px solid #10b981; }
-  .pm2-card.stopped { border-left: 4px solid #ef4444; }
-  .pm2-card.errored { border-left: 4px solid #f59e0b; }
+  .pm2-card.online { border-left: 4px solid var(--sei); }
+  .pm2-card.stopped { border-left: 4px solid var(--namari); }
+  .pm2-card.errored { border-left: 4px solid var(--kintsugi); }
   
   .pm2-header {
     display: flex;
@@ -437,9 +418,9 @@
     font-weight: 700;
     text-transform: uppercase;
   }
-  .pm2-status.online { background: rgba(16, 185, 129, 0.15); color: #059669; }
-  .pm2-status.stopped { background: rgba(239, 68, 68, 0.15); color: #dc2626; }
-  .pm2-status.errored { background: rgba(245, 158, 11, 0.15); color: #d97706; }
+  .pm2-status.online { background: rgba(149, 175, 192, 0.2); color: var(--aitetsu); }
+  .pm2-status.stopped { background: rgba(142, 156, 166, 0.2); color: var(--namari); }
+  .pm2-status.errored { background: var(--kintsugi-light); color: var(--kintsugi); }
   
   .pm2-metrics {
     display: grid;
@@ -522,12 +503,12 @@
   }
   .disk-progress-fill {
     height: 100%;
-    border-radius: var(--admin-radius-full);
-    background: linear-gradient(90deg, #10b981, #34d399);
+    border-radius: 0 !important;
+    background: var(--sei);
     transition: width 0.5s ease;
   }
-  .disk-progress-fill.warning { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
-  .disk-progress-fill.critical { background: linear-gradient(90deg, #ef4444, #f87171); }
+  .disk-progress-fill.warning { background: var(--kintsugi); }
+  .disk-progress-fill.critical { background: var(--namari); }
   .disk-stats {
     display: flex;
     justify-content: space-between;
@@ -620,7 +601,7 @@
     background: var(--admin-bg-secondary);
   }
   .processes-table .high-usage {
-    color: #ef4444;
+    color: var(--namari);
     font-weight: 600;
   }
   .processes-table .command-cell {
@@ -714,9 +695,9 @@
     color: var(--admin-primary);
   }
   .log-action-btn.paused {
-    background: rgba(239, 68, 68, 0.1);
-    border-color: #ef4444;
-    color: #ef4444;
+    background: rgba(142, 156, 166, 0.2);
+    border-color: var(--namari);
+    color: var(--namari);
   }
   .log-action-btn i {
     width: 16px;
@@ -746,10 +727,10 @@
     flex-shrink: 0;
     font-weight: 600;
   }
-  .log-line.info .log-level { color: #58a6ff; }
-  .log-line.warn .log-level { color: #d29922; }
-  .log-line.error .log-level { color: #f85149; }
-  .log-line.debug .log-level { color: #8b949e; }
+  .log-line.info .log-level { color: var(--sei); }
+  .log-line.warn .log-level { color: var(--kintsugi); }
+  .log-line.error .log-level { color: var(--namari); }
+  .log-line.debug .log-level { color: var(--namari); }
   .log-message {
     color: #c9d1d9;
     word-break: break-word;
@@ -762,7 +743,7 @@
     align-items: center;
     padding: 1rem 1.5rem;
     background: var(--admin-bg-secondary);
-    border-radius: var(--admin-radius-lg);
+    border-radius: 0 !important;
     border: 1px solid var(--admin-border);
     font-size: 0.85rem;
     color: var(--admin-text-muted);
@@ -806,7 +787,7 @@
     transition: 0.3s;
   }
   .toggle-switch input:checked + .toggle-slider {
-    background: var(--admin-primary);
+    background: var(--aitetsu);
   }
   .toggle-switch input:checked + .toggle-slider::before {
     transform: translateX(20px);
@@ -1396,7 +1377,7 @@
       }
       detailsEl.innerHTML = html;
     } else if (service.error) {
-      detailsEl.innerHTML = `<span class="service-detail" style="color:#ef4444;">${service.error}</span>`;
+      detailsEl.innerHTML = `<span class="service-detail" style="color:var(--namari);">${service.error}</span>`;
     }
   }
 

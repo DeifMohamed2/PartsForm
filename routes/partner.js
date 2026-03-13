@@ -16,6 +16,8 @@ const {
   getProfile,
   updateProfile,
   changePassword,
+  forgotPassword,
+  resetPassword,
   getStats
 } = require('../controllers/partnerController');
 
@@ -23,9 +25,14 @@ const {
 // PUBLIC ROUTES (No auth required)
 // ====================================
 
-// Login page
-router.get('/login', getLoginPage);
+// Login page — redirect to unified login
+router.get('/login', (req, res) => res.redirect('/'));
+// Keep POST /partner/login for backward compatibility (existing cookie-based flows)
 router.post('/login', login);
+
+// Partner forgot / reset password APIs (public)
+router.post('/api/forgot-password', forgotPassword);
+router.post('/api/reset-password', resetPassword);
 
 // ====================================
 // PROTECTED ROUTES (Auth required)

@@ -1,0 +1,483 @@
+/* ====================================
+   ADMIN OVERRIDES — No Inline Colors
+   All admin design uses brand CSS variables
+   Load after page-specific CSS
+   ==================================== */
+
+/* === GLOBAL: NO BORDER RADIUS — Industrial sharp edges (all admin pages) === */
+html.admin-page .admin-wrapper,
+html.admin-page .admin-wrapper *,
+html.admin-page .admin-main,
+html.admin-page .admin-main *,
+html.admin-page .admin-content,
+html.admin-page .admin-content *,
+html.admin-page .admin-sidebar,
+html.admin-page .admin-sidebar *,
+html.admin-page .admin-topbar,
+html.admin-page .admin-topbar * {
+  border-radius: 0 !important;
+}
+
+/* === GLOBAL TYPOGRAPHY — Antartida body font (BRAND SYSTEM) 100% === */
+html.admin-page,
+html.admin-page body {
+  font-family: var(--font-body) !important;
+}
+
+/* === DASHBOARD HERO — Solid brand color === */
+.dashboard-hero {
+  background: var(--aitetsu);
+  padding: 1.5rem 2rem;
+  margin-bottom: 1.5rem;
+  color: var(--washi);
+  position: relative;
+  overflow: hidden;
+  border-radius: 0;
+}
+.dashboard-hero h2 {
+  color: #FFFFFF !important;
+  font-family: var(--font-body) !important;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 1.5rem;
+}
+.dashboard-hero p { font-size: 0.9rem; }
+.dashboard-hero-orb {
+  display: none;
+}
+.dashboard-hero-stat {
+  text-align: center;
+  padding: 0.75rem 1.25rem;
+  background: rgba(255,255,255,0.1);
+  border-radius: 0;
+  backdrop-filter: blur(10px);
+}
+.dashboard-hero-stat > div:first-child { font-size: 1.4rem !important; }
+.dashboard-hero-stat > div:last-child { font-size: 0.7rem !important; }
+
+/* === STAT CARDS (4-column grid) — Smaller, solid colors === */
+.dashboard-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.dashboard-stat-card {
+  padding: 1rem 1.25rem;
+  text-align: center;
+  border: 2px solid;
+  border-radius: 0;
+}
+.dashboard-stat-card.orders {
+  background: var(--admin-bg-primary);
+  border-color: rgba(64, 84, 94, 0.3);
+}
+.dashboard-stat-card.revenue {
+  background: var(--admin-bg-primary);
+  border-color: rgba(149, 175, 192, 0.4);
+}
+.dashboard-stat-card.pipeline {
+  background: var(--admin-bg-primary);
+  border-color: var(--kintsugi-border);
+}
+.dashboard-stat-card.customers {
+  background: var(--admin-bg-primary);
+  border-color: rgba(64, 84, 94, 0.3);
+}
+.dashboard-stat-card.fulfillment-success {
+  background: var(--admin-bg-primary);
+  border-color: rgba(149, 175, 192, 0.4);
+}
+.dashboard-stat-card.fulfillment-warning {
+  background: var(--admin-bg-primary);
+  border-color: var(--kintsugi-border);
+}
+.dashboard-stat-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 0.75rem;
+  color: var(--washi);
+  border-radius: 0;
+}
+.dashboard-stat-icon i { width: 20px !important; height: 20px !important; }
+.dashboard-stat-card.orders .dashboard-stat-icon,
+.dashboard-stat-card.customers .dashboard-stat-icon { background: var(--aitetsu); }
+.dashboard-stat-card.revenue .dashboard-stat-icon { background: var(--sei); }
+.dashboard-stat-card.pipeline .dashboard-stat-icon { background: var(--kintsugi); }
+.dashboard-stat-card.fulfillment-success .dashboard-stat-icon { background: var(--sei); }
+.dashboard-stat-card.fulfillment-warning .dashboard-stat-icon { background: var(--kintsugi); }
+.dashboard-stat-value { font-size: 1.4rem; font-weight: 800; }
+.dashboard-stat-card.orders .dashboard-stat-value,
+.dashboard-stat-card.customers .dashboard-stat-value { color: var(--aitetsu); }
+.dashboard-stat-card.revenue .dashboard-stat-value { color: var(--sei); }
+.dashboard-stat-card.pipeline .dashboard-stat-value { color: var(--kintsugi); }
+.dashboard-stat-card.fulfillment-success .dashboard-stat-value { color: var(--sei); }
+.dashboard-stat-card.fulfillment-warning .dashboard-stat-value { color: var(--kintsugi); }
+.dashboard-stat-label { font-size: 0.8rem; color: var(--admin-text-muted); }
+.dashboard-stat-sublabel { font-size: 0.65rem; margin-top: 0.25rem; }
+.dashboard-stat-card.pipeline .dashboard-stat-sublabel,
+.dashboard-stat-card.fulfillment-warning .dashboard-stat-sublabel { color: var(--kintsugi); }
+
+/* === PLATFORM HEALTH CARD — Matches dashboard hero (solid color) === */
+.platform-health-card {
+  background: var(--aitetsu);
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+  color: var(--washi);
+  border-radius: 0;
+}
+.platform-health-card h4 {
+  font-size: 0.9rem;
+  margin-bottom: 0.75rem;
+  color: #FFFFFF !important;
+  font-family: var(--font-body);
+}
+.platform-health-stat-value { font-size: 1.25rem !important; }
+.platform-health-stat-label { font-size: 0.65rem !important; }
+
+/* === CHART LEGEND DOTS === */
+.legend-dot { width: 8px; height: 8px; border-radius: 0; }
+.legend-dot.pending { background: var(--kintsugi); }
+.legend-dot.processing { background: var(--aitetsu); }
+.legend-dot.shipped { background: var(--namari); }
+.legend-dot.completed { background: var(--sei); }
+
+/* === ORDER ROW - Industry & Status === */
+.order-industry-icon {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0;
+}
+.order-industry-icon.automotive { background: var(--color-error-bg); color: var(--color-error); }
+.order-industry-icon.aviation { background: var(--color-info-bg); color: var(--aitetsu); }
+.order-industry-icon.machinery { background: var(--kintsugi-light); color: var(--kintsugi); }
+.order-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 0;
+}
+.order-status-badge.pending { background: var(--kintsugi-light); color: var(--kintsugi); }
+.order-status-badge.processing { background: var(--color-info-bg); color: var(--aitetsu); }
+.order-status-badge.shipped { background: var(--kintsugi-light); color: var(--kintsugi-hover); }
+.order-status-badge.delivered,
+.order-status-badge.completed { background: rgba(149, 175, 192, 0.2); color: var(--sei); }
+
+/* === CLAIM PRIORITY BADGE === */
+.claim-priority-badge {
+  font-size: 0.65rem;
+  padding: 0.15rem 0.4rem;
+  border-radius: 0;
+  font-weight: 600;
+}
+.claim-priority-badge.urgent { background: rgba(142, 156, 166, 0.2); color: var(--namari); }
+.claim-priority-badge.high { background: var(--kintsugi-light); color: var(--kintsugi); }
+.claim-priority-badge.medium,
+.claim-priority-badge.low { background: var(--color-info-bg); color: var(--aitetsu); }
+
+/* === TOP BUYERS RANK === */
+.buyer-rank-row { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; margin-bottom: 0.5rem; border-radius: 0; }
+.buyer-rank-row.rank-1 { background: var(--kintsugi-light); border: 1px solid var(--kintsugi-border); }
+.buyer-rank-row.rank-2 { background: rgba(142, 156, 166, 0.08); border: 1px solid var(--admin-border); }
+.buyer-rank-row.rank-3 { background: rgba(194, 120, 3, 0.08); border: 1px solid var(--admin-border); }
+.buyer-rank-row.rank-default { border: 1px solid var(--admin-border); }
+.buyer-rank-badge {
+  width: 28px; height: 28px;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 0.75rem;
+  flex-shrink: 0; border-radius: 0;
+}
+.buyer-rank-badge.rank-1 { background: var(--kintsugi); color: var(--kurogane); }
+.buyer-rank-badge.rank-2 { background: var(--namari); color: var(--washi); }
+.buyer-rank-badge.rank-3 { background: #cd7f32; color: var(--washi); }
+.buyer-rank-badge.rank-default { background: var(--admin-bg-tertiary); color: var(--admin-text-muted); width: 24px; height: 24px; font-size: 0.7rem; }
+.buyer-avatar { width: 44px; height: 44px; overflow: hidden; flex-shrink: 0; border-radius: 0; border: 2px solid; }
+.buyer-avatar.rank-1 { border-color: var(--kintsugi); }
+.buyer-avatar.rank-2 { border-color: var(--namari); }
+.buyer-avatar.rank-3 { border-color: #cd7f32; }
+.buyer-avatar.rank-default { border-color: var(--admin-border); }
+.buyer-avatar-fallback { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: var(--aitetsu); color: var(--washi); font-weight: 700; font-size: 1rem; }
+.buyer-orders-badge { padding: 0.1rem 0.35rem; border-radius: 0; font-weight: 600; font-size: 0.7rem; }
+.buyer-orders-badge.pending { background: var(--kintsugi-light); color: var(--kintsugi); }
+.buyer-orders-badge.completed { background: rgba(149, 175, 192, 0.2); color: var(--sei); }
+.buyer-revenue { font-weight: 800; font-size: 1rem; }
+.buyer-revenue.pending { color: var(--kintsugi); }
+.buyer-revenue.completed { color: var(--sei); }
+
+/* === MOST WANTED PARTS === */
+.part-item {
+  display: flex; align-items: center; gap: 1rem;
+  padding: 0.875rem 1rem; margin-bottom: 0.625rem;
+  border: 1px solid var(--admin-border);
+  background: var(--admin-bg-primary);
+  border-radius: 0;
+  transition: var(--admin-transition);
+}
+.part-item:hover { border-color: var(--sei); box-shadow: var(--admin-shadow-md); }
+.part-rank { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; border-radius: 0; }
+.part-rank.n1 { background: var(--color-info-bg); color: var(--aitetsu); }
+.part-rank.n2 { background: rgba(149, 175, 192, 0.2); color: var(--sei); }
+.part-rank.n3 { background: var(--kintsugi-light); color: var(--namari); }
+.part-rank.n4 { background: var(--kintsugi-light); color: var(--kintsugi); }
+.part-rank.n5 { background: rgba(236, 72, 153, 0.12); color: #ec4899; }
+.part-icon-wrap { width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border-radius: 0; }
+.part-icon-wrap.n1 { background: var(--color-info-bg); }
+.part-icon-wrap.n2 { background: rgba(149, 175, 192, 0.2); }
+.part-icon-wrap.n3 { background: var(--kintsugi-light); }
+.part-icon-wrap.n4 { background: var(--kintsugi-light); }
+.part-icon-wrap.n5 { background: rgba(236, 72, 153, 0.12); }
+.part-icon-wrap.n1 i { color: var(--aitetsu); }
+.part-icon-wrap.n2 i { color: var(--sei); }
+.part-icon-wrap.n3 i { color: var(--namari); }
+.part-icon-wrap.n4 i { color: var(--kintsugi); }
+.part-icon-wrap.n5 i { color: #ec4899; }
+.part-order-count.n1 { color: var(--aitetsu); }
+.part-order-count.n2 { color: var(--sei); }
+.part-order-count.n3 { color: var(--namari); }
+.part-order-count.n4 { color: var(--kintsugi); }
+.part-order-count.n5 { color: #ec4899; }
+.part-revenue { color: var(--sei); font-weight: 600; }
+
+/* === ORDER PIPELINE STATS === */
+.pipeline-stat { text-align: center; padding: 1.5rem; border-radius: 0; border: 1px solid; }
+.pipeline-stat.pending { background: var(--kintsugi-light); border-color: var(--kintsugi-border); }
+.pipeline-stat.processing { background: var(--color-info-bg); border-color: rgba(64, 84, 94, 0.3); }
+.pipeline-stat.shipped { background: var(--kintsugi-light); border-color: var(--kintsugi-border); }
+.pipeline-stat.completed { background: rgba(149, 175, 192, 0.2); border-color: rgba(149, 175, 192, 0.4); }
+.pipeline-stat-icon { width: 28px; height: 28px; margin-bottom: 0.5rem; }
+.pipeline-stat.pending .pipeline-stat-icon { color: var(--kintsugi); }
+.pipeline-stat.processing .pipeline-stat-icon { color: var(--aitetsu); }
+.pipeline-stat.shipped .pipeline-stat-icon { color: var(--kintsugi); }
+.pipeline-stat.completed .pipeline-stat-icon { color: var(--sei); }
+.pipeline-stat-value { font-size: 1.5rem; font-weight: 800; }
+.pipeline-stat.pending .pipeline-stat-value { color: var(--kintsugi); }
+.pipeline-stat.processing .pipeline-stat-value { color: var(--aitetsu); }
+.pipeline-stat.shipped .pipeline-stat-value { color: var(--kintsugi); }
+.pipeline-stat.completed .pipeline-stat-value { color: var(--sei); }
+
+/* === CHART TITLE ICONS === */
+.chart-title-icon { width: 16px; height: 16px; }
+.chart-title-icon.purple { color: var(--namari); }
+.chart-title-icon.blue { color: var(--aitetsu); }
+.chart-title-icon.gold { color: var(--kintsugi); }
+.chart-title-icon.red { color: var(--kintsugi); }
+
+/* === EMPTY STATE === */
+.dashboard-empty-state {
+  padding: 2.5rem; text-align: center;
+  color: var(--admin-text-muted);
+  background: var(--admin-bg-secondary);
+  border: 1px dashed var(--admin-border);
+  border-radius: 0;
+}
+
+/* === TABLE HEADER ROW === */
+.orders-table-header {
+  display: flex; align-items: center;
+  padding: 0.75rem 1rem;
+  border-bottom: 2px solid var(--admin-border);
+  background: var(--admin-bg-secondary);
+  gap: 1rem;
+  position: sticky; top: 0;
+}
+.orders-table-header > div { font-weight: 600; font-size: 0.7rem; text-transform: uppercase; color: var(--admin-text-muted); letter-spacing: 0.5px; }
+
+/* === ORDER ROW LAYOUT === */
+.order-row-flex {
+  display: flex; align-items: center;
+  padding: 0.875rem 1rem;
+  border-bottom: 1px solid var(--admin-border);
+  gap: 1rem;
+}
+
+/* === AI INTELLIGENCE HUB — Same as dashboard hero (solid aitetsu) === */
+.ai-hub-banner {
+  background: var(--aitetsu);
+  padding: 0;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(64, 84, 94, 0.5);
+  border-radius: 0;
+}
+.ai-hub-banner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+}
+.ai-hub-icon {
+  width: 64px;
+  height: 64px;
+  background: var(--aitetsu);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0;
+  color: var(--washi);
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.1);
+}
+.ai-hub-badge-live {
+  padding: 0.25rem 0.75rem;
+  background: var(--kintsugi);
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--kurogane);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: 0;
+}
+.ai-hub-model-active {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: rgba(212, 175, 55, 0.2);
+  border: 1px solid var(--kintsugi-border);
+  border-radius: 0;
+}
+.ai-hub-model-active .dot {
+  width: 8px;
+  height: 8px;
+  background: var(--kintsugi);
+  border-radius: 0;
+  animation: blink 2s ease-in-out infinite;
+}
+.ai-hub-refresh-btn {
+  padding: 0.625rem 1.25rem;
+  background: var(--aitetsu);
+  border: none;
+  border-radius: 0;
+  color: var(--washi);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: var(--admin-transition);
+}
+.ai-hub-refresh-btn:hover {
+  background: #2F3F49;
+}
+.ai-hub-metric {
+  text-align: center;
+}
+.ai-hub-metric-value {
+  font-size: 1.75rem;
+  font-weight: 800;
+}
+.ai-hub-metric-value.accuracy { color: var(--kintsugi); }
+.ai-hub-metric-value.data { color: var(--sei); }
+.ai-hub-metric-value.insights { color: var(--namari); }
+.ai-hub-metric-value.revenue { color: var(--kintsugi); }
+.ai-hub-metric-value.actions { color: var(--aitetsu); }
+.ai-hub-metric-label {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.5);
+  margin-top: 0.25rem;
+}
+.ai-hub-tabs {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+  padding: 0.5rem;
+  background: var(--admin-bg-primary);
+  border: 1px solid var(--admin-border);
+  border-radius: 0;
+  box-shadow: var(--admin-shadow-sm);
+}
+.ai-hub-tab {
+  flex: 1;
+  padding: 0.875rem 1.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 0;
+  transition: var(--admin-transition);
+  background: transparent;
+  color: var(--admin-text-muted);
+}
+.ai-hub-tab.active {
+  background: var(--aitetsu);
+  color: var(--washi);
+}
+.ai-hub-tab:hover:not(.active) {
+  background: var(--admin-bg-tertiary);
+  color: var(--admin-text-primary);
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* AI Hub content — brand colors (no green/red) */
+.ai-hub-pred-badge-hist { background: var(--kintsugi-light); color: var(--kintsugi); }
+.ai-hub-pred-badge-pred { background: rgba(149, 175, 192, 0.2); color: var(--sei); }
+.ai-hub-card-success { border-color: var(--kintsugi-border); }
+.ai-hub-card-success .ai-hub-card-icon { background: var(--kintsugi); }
+.ai-hub-card-urgent { border-color: var(--kintsugi-border); }
+.ai-hub-card-urgent .ai-hub-card-icon { background: var(--kintsugi); }
+.ai-hub-card-cross { border-color: rgba(149, 175, 192, 0.4); }
+.ai-hub-card-cross .ai-hub-card-icon { background: var(--sei); }
+.ai-hub-priority-banner { background: var(--kintsugi-light); border: 2px solid var(--kintsugi-border); }
+.ai-hub-priority-banner .ai-hub-priority-icon { background: var(--kintsugi); }
+.ai-hub-btn-primary { background: var(--aitetsu); color: var(--washi); }
+.ai-hub-btn-success { background: var(--kintsugi); color: var(--kurogane); }
+.ai-hub-btn-accent { background: var(--kintsugi); color: var(--kurogane); }
+.ai-hub-text-success { color: var(--kintsugi); }
+.ai-hub-text-accent { color: var(--kintsugi); }
+.ai-hub-text-muted { color: var(--namari); }
+.ai-hub-avatar-1 { background: var(--aitetsu); }
+.ai-hub-avatar-2 { background: var(--sei); }
+.ai-hub-avatar-3 { background: var(--kintsugi); }
+
+/* === DANGER / ERROR BUTTONS & MODALS === */
+.admin-btn-danger-outline {
+  background: var(--color-error-bg);
+  color: var(--color-error);
+  border: none;
+}
+.admin-btn-danger-outline:hover {
+  background: rgba(220, 38, 38, 0.2);
+}
+.admin-btn-danger-solid {
+  background: var(--color-error);
+  color: white;
+  border: none;
+}
+.modal-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 0;
+}
+.modal-icon-danger {
+  background: var(--color-error-bg);
+  color: var(--color-error);
+}
+.status-modal-icon.danger {
+  background: var(--color-error-bg);
+}
+.status-modal-icon.danger i {
+  color: var(--color-error);
+}

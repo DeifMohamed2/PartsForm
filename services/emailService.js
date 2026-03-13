@@ -7,6 +7,7 @@ const Imap = require('imap');
 const { simpleParser } = require('mailparser');
 const logger = require('../utils/logger');
 const nodemailer = require('nodemailer');
+const brand = require('../utils/emailBrand');
 const fs = require('fs').promises;
 const path = require('path');
 const ExcelJS = require('exceljs');
@@ -830,8 +831,8 @@ PartsForm`,
   <meta name="color-scheme" content="light dark">
   <meta name="supported-color-schemes" content="light dark">
 </head>
-<body style="margin: 0; padding: 0; background-color: #f1f5f9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #f1f5f9;">
+<body style="margin: 0; padding: 0; background-color: ${brand.pageBg}; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: ${brand.pageBg};">
     <tr>
       <td align="center" style="padding: 40px 20px;">
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width: 480px;">
@@ -839,43 +840,43 @@ PartsForm`,
           <!-- Logo/Brand Header -->
           <tr>
             <td style="text-align: center; padding-bottom: 24px;">
-              <span style="font-size: 28px; font-weight: 700; color: #2b5278; letter-spacing: -0.5px;">PartsForm</span>
+              <span style="font-size: 28px; font-weight: 700; color: ${brand.aitetsu}; letter-spacing: -0.5px;">PartsForm</span>
             </td>
           </tr>
           
           <!-- Main Card -->
           <tr>
             <td>
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(43, 82, 120, 0.12);">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: ${brand.cardBg}; overflow: hidden; box-shadow: 0 4px 24px rgba(43, 43, 43, 0.10);">
                 
                 <!-- Success Icon Header -->
                 <tr>
-                  <td style="background-color: #2b5278; padding: 48px 32px; text-align: center;">
+                  <td style="background-color: ${brand.aitetsu}; padding: 48px 32px; text-align: center;">
                     <table role="presentation" cellpadding="0" cellspacing="0" style="margin: 0 auto;">
                       <tr>
-                        <td style="width: 72px; height: 72px; background-color: rgba(255,255,255,0.15); border-radius: 50%; text-align: center; vertical-align: middle;">
-                          <span style="font-size: 36px; line-height: 72px;">✓</span>
+                        <td style="width: 72px; height: 72px; background-color: rgba(255,255,255,0.15); text-align: center; vertical-align: middle;">
+                          <span style="font-size: 36px; line-height: 72px; color: ${brand.washi};">✓</span>
                         </td>
                       </tr>
                     </table>
-                    <p style="margin: 20px 0 0 0; font-size: 22px; font-weight: 600; color: #ffffff;">Inquiry Received</p>
+                    <p style="margin: 20px 0 0 0; font-size: 22px; font-weight: 600; color: ${brand.washi};">Inquiry Received</p>
                   </td>
                 </tr>
                 
                 <!-- Content -->
                 <tr>
                   <td style="padding: 32px;">
-                    <p style="margin: 0 0 20px 0; font-size: 17px; color: #1a2b3d; line-height: 1.5;">
+                    <p style="margin: 0 0 20px 0; font-size: 17px; color: ${brand.kurogane}; line-height: 1.5;">
                       Hi <strong>${firstName}</strong>, we're preparing your quotation now.
                     </p>
                     
                     <!-- Time Badge -->
-                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #f0fdf4; border-radius: 12px; border: 1px solid #bbf7d0;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: ${brand.kintsugiLight}; border: 1px solid ${brand.kintsugi};">
                       <tr>
                         <td style="padding: 20px; text-align: center;">
                           <span style="font-size: 32px;">⚡</span>
-                          <p style="margin: 8px 0 0 0; font-size: 15px; color: #166534; font-weight: 600;">
-                            Your quote in <span style="color: #15803d; font-size: 18px;">under 2 min</span>
+                          <p style="margin: 8px 0 0 0; font-size: 15px; color: ${brand.kurogane}; font-weight: 600;">
+                            Your quote in <span style="color: ${brand.kintsugi}; font-size: 18px;">under 2 min</span>
                           </p>
                         </td>
                       </tr>
@@ -890,7 +891,7 @@ PartsForm`,
           <!-- Footer -->
           <tr>
             <td style="padding: 24px; text-align: center;">
-              <p style="margin: 0; font-size: 13px; color: #64748b;">
+              <p style="margin: 0; font-size: 13px; color: ${brand.namari};">
                 Questions? Just reply to this email.
               </p>
             </td>
@@ -921,8 +922,8 @@ PartsForm`,
   <meta name="color-scheme" content="light dark">
   <meta name="supported-color-schemes" content="light dark">
 </head>
-<body style="margin: 0; padding: 0; background-color: #f1f5f9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; direction: rtl;">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #f1f5f9;">
+<body style="margin: 0; padding: 0; background-color: ${brand.pageBg}; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; direction: rtl;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: ${brand.pageBg};">
     <tr>
       <td align="center" style="padding: 40px 20px;">
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width: 480px;">
@@ -930,43 +931,43 @@ PartsForm`,
           <!-- Logo/Brand Header -->
           <tr>
             <td style="text-align: center; padding-bottom: 24px;">
-              <span style="font-size: 28px; font-weight: 700; color: #2b5278; letter-spacing: -0.5px;">بارتسفورم</span>
+              <span style="font-size: 28px; font-weight: 700; color: ${brand.aitetsu}; letter-spacing: -0.5px;">بارتسفورم</span>
             </td>
           </tr>
           
           <!-- Main Card -->
           <tr>
             <td>
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(43, 82, 120, 0.12);">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: ${brand.cardBg}; overflow: hidden; box-shadow: 0 4px 24px rgba(43, 43, 43, 0.10);">
                 
                 <!-- Success Icon Header -->
                 <tr>
-                  <td style="background-color: #2b5278; padding: 48px 32px; text-align: center;">
+                  <td style="background-color: ${brand.aitetsu}; padding: 48px 32px; text-align: center;">
                     <table role="presentation" cellpadding="0" cellspacing="0" style="margin: 0 auto;">
                       <tr>
-                        <td style="width: 72px; height: 72px; background-color: rgba(255,255,255,0.15); border-radius: 50%; text-align: center; vertical-align: middle;">
-                          <span style="font-size: 36px; line-height: 72px;">✓</span>
+                        <td style="width: 72px; height: 72px; background-color: rgba(255,255,255,0.15); text-align: center; vertical-align: middle;">
+                          <span style="font-size: 36px; line-height: 72px; color: ${brand.washi};">✓</span>
                         </td>
                       </tr>
                     </table>
-                    <p style="margin: 20px 0 0 0; font-size: 22px; font-weight: 600; color: #ffffff;">تم استلام الطلب</p>
+                    <p style="margin: 20px 0 0 0; font-size: 22px; font-weight: 600; color: ${brand.washi};">تم استلام الطلب</p>
                   </td>
                 </tr>
                 
                 <!-- Content -->
                 <tr>
                   <td style="padding: 32px;">
-                    <p style="margin: 0 0 20px 0; font-size: 17px; color: #1a2b3d; line-height: 1.6;">
+                    <p style="margin: 0 0 20px 0; font-size: 17px; color: ${brand.kurogane}; line-height: 1.6;">
                       مرحباً <strong>${firstName}</strong>، نقوم بإعداد عرض الأسعار الآن.
                     </p>
                     
                     <!-- Time Badge -->
-                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #f0fdf4; border-radius: 12px; border: 1px solid #bbf7d0;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: ${brand.kintsugiLight}; border: 1px solid ${brand.kintsugi};">
                       <tr>
                         <td style="padding: 20px; text-align: center;">
                           <span style="font-size: 32px;">⚡</span>
-                          <p style="margin: 8px 0 0 0; font-size: 15px; color: #166534; font-weight: 600;">
-                            عرض السعر خلال <span style="color: #15803d; font-size: 18px;">أقل من دقيقتين</span>
+                          <p style="margin: 8px 0 0 0; font-size: 15px; color: ${brand.kurogane}; font-weight: 600;">
+                            عرض السعر خلال <span style="color: ${brand.kintsugi}; font-size: 18px;">أقل من دقيقتين</span>
                           </p>
                         </td>
                       </tr>
@@ -981,7 +982,7 @@ PartsForm`,
           <!-- Footer -->
           <tr>
             <td style="padding: 24px; text-align: center;">
-              <p style="margin: 0; font-size: 13px; color: #64748b;">
+              <p style="margin: 0; font-size: 13px; color: ${brand.namari};">
                 لديك أسئلة؟ رد على هذا البريد.
               </p>
             </td>

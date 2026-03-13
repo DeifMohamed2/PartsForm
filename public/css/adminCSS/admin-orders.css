@@ -53,7 +53,7 @@
     padding: 0.7rem 2.5rem 0.7rem 2.75rem;
     background: var(--admin-bg-secondary);
     border: 1px solid var(--admin-border);
-    border-radius: 12px;
+    border-radius: 0;
     color: var(--admin-text-primary);
     font-size: 0.9rem;
     outline: none;
@@ -61,8 +61,8 @@
 }
 
 .orders-search-container input:focus {
-    border-color: var(--module-primary, var(--admin-primary));
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    border-color: var(--sei);
+    box-shadow: 0 0 0 3px var(--color-focus-ring);
 }
 
 .orders-search-container input::placeholder {
@@ -77,7 +77,7 @@
     font-size: 0.65rem;
     padding: 0.2rem 0.4rem;
     background: var(--admin-bg-tertiary);
-    border-radius: 4px;
+    border-radius: 0;
     color: var(--admin-text-muted);
     font-weight: 600;
     pointer-events: none;
@@ -93,7 +93,7 @@
     padding: 1rem 1.25rem;
     background: var(--admin-bg-secondary);
     border: 1px solid var(--admin-border);
-    border-radius: 12px;
+    border-radius: 0;
     margin-bottom: 1.5rem;
     flex-wrap: wrap;
 }
@@ -116,7 +116,7 @@
     padding: 0.5rem 2rem 0.5rem 0.75rem;
     background: var(--admin-bg-primary);
     border: 1px solid var(--admin-border);
-    border-radius: 8px;
+    border-radius: 0;
     color: var(--admin-text-primary);
     font-size: 0.85rem;
     cursor: pointer;
@@ -128,13 +128,13 @@
 }
 
 .filter-group select:hover {
-    border-color: var(--module-primary, var(--admin-primary));
+    border-color: var(--sei);
 }
 
 .filter-group select:focus {
     outline: none;
-    border-color: var(--module-primary, var(--admin-primary));
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    border-color: var(--sei);
+    box-shadow: 0 0 0 3px var(--color-focus-ring);
 }
 
 .filter-divider {
@@ -151,7 +151,7 @@
     padding: 0.5rem 1rem;
     background: transparent;
     border: 1px solid var(--admin-border);
-    border-radius: 8px;
+    border-radius: 0;
     color: var(--admin-text-secondary);
     font-size: 0.85rem;
     cursor: pointer;
@@ -184,7 +184,7 @@
 .orders-stat-card {
     background: var(--admin-bg-secondary);
     border: 1px solid var(--admin-border);
-    border-radius: 12px;
+    border-radius: 0;
     padding: 1rem 1.25rem;
     display: flex;
     align-items: center;
@@ -194,7 +194,7 @@
 .orders-stat-icon {
     width: 44px;
     height: 44px;
-    border-radius: 10px;
+    border-radius: 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -206,23 +206,23 @@
 }
 
 .orders-stat-icon.pending {
-    background: rgba(245, 158, 11, 0.12);
-    color: #f59e0b;
+    background: var(--kintsugi-light);
+    color: var(--kintsugi);
 }
 
 .orders-stat-icon.processing {
-    background: rgba(59, 130, 246, 0.12);
-    color: #3b82f6;
+    background: rgba(64, 84, 94, 0.12);
+    color: var(--aitetsu);
 }
 
 .orders-stat-icon.shipped {
-    background: rgba(139, 92, 246, 0.12);
-    color: #8b5cf6;
+    background: var(--kintsugi-light);
+    color: var(--namari);
 }
 
 .orders-stat-icon.delivered {
-    background: rgba(16, 185, 129, 0.12);
-    color: #10b981;
+    background: rgba(149, 175, 192, 0.2);
+    color: var(--sei);
 }
 
 .orders-stat-content {
@@ -248,7 +248,7 @@
 .orders-table-card {
     background: var(--admin-bg-secondary);
     border: 1px solid var(--admin-border);
-    border-radius: 16px;
+    border-radius: 0;
     overflow: hidden;
 }
 
@@ -274,9 +274,9 @@
 .orders-table-header .orders-count {
     font-size: 0.75rem;
     padding: 0.2rem 0.5rem;
-    background: var(--module-primary, var(--admin-primary));
+    background: var(--aitetsu);
     color: white;
-    border-radius: 10px;
+    border-radius: 0;
     font-weight: 600;
 }
 
@@ -289,7 +289,7 @@
     padding: 0.5rem 0.75rem;
     background: var(--admin-bg-primary);
     border: 1px solid var(--admin-border);
-    border-radius: 8px;
+    border-radius: 0;
     color: var(--admin-text-secondary);
     font-size: 0.8rem;
     cursor: pointer;
@@ -302,7 +302,7 @@
 .orders-table-actions button:hover {
     background: var(--admin-bg-secondary);
     color: var(--admin-text-primary);
-    border-color: var(--module-primary, var(--admin-primary));
+    border-color: var(--sei);
 }
 
 .orders-table-actions button i {
@@ -370,7 +370,7 @@
 /* Order ID Cell */
 .order-id-cell {
     font-weight: 600;
-    color: var(--module-primary, var(--admin-primary));
+    color: var(--aitetsu);
     font-size: 0.9rem;
 }
 
@@ -426,7 +426,7 @@
     gap: 0.3rem;
     padding: 0.35rem 0.65rem;
     background: var(--admin-bg-tertiary);
-    border-radius: 20px;
+    border-radius: 0;
     font-size: 0.8rem;
     font-weight: 600;
     color: var(--admin-text-secondary);
@@ -450,7 +450,7 @@
     align-items: center;
     gap: 0.35rem;
     padding: 0.35rem 0.65rem;
-    border-radius: 20px;
+    border-radius: 0;
     font-size: 0.75rem;
     font-weight: 600;
     text-transform: capitalize;
@@ -463,12 +463,12 @@
 
 .industry-badge.automotive {
     background: rgba(14, 165, 233, 0.12);
-    color: #0ea5e9;
+    color: var(--aitetsu);
 }
 
 .industry-badge.aviation {
     background: rgba(14, 165, 233, 0.12);
-    color: #0ea5e9;
+    color: var(--aitetsu);
 }
 
 .industry-badge.machinery {
@@ -482,7 +482,7 @@
     align-items: center;
     gap: 0.3rem;
     padding: 0.3rem 0.6rem;
-    border-radius: 6px;
+    border-radius: 0;
     font-size: 0.7rem;
     font-weight: 600;
     text-transform: uppercase;
@@ -495,8 +495,8 @@
 }
 
 .priority-badge.urgent {
-    background: rgba(245, 158, 11, 0.15);
-    color: #d97706;
+    background: var(--kintsugi-light);
+    color: var(--kintsugi);
 }
 
 .priority-badge i {
@@ -510,7 +510,7 @@
     align-items: center;
     gap: 0.35rem;
     padding: 0.4rem 0.75rem;
-    border-radius: 20px;
+    border-radius: 0;
     font-size: 0.75rem;
     font-weight: 600;
     text-transform: capitalize;
@@ -522,16 +522,16 @@
 }
 
 .status-badge.pending {
-    background: #f59e0b;
-    color: #fff;
+    background: var(--kintsugi);
+    color: var(--kurogane);
 }
 
 .status-badge.pending i {
-    color: #fff;
+    color: var(--kurogane);
 }
 
 .status-badge.processing {
-    background: #3b82f6;
+    background: var(--aitetsu);
     color: #fff;
 }
 
@@ -540,7 +540,7 @@
 }
 
 .status-badge.shipped {
-    background: #8b5cf6;
+    background: var(--namari);
     color: #fff;
 }
 
@@ -549,21 +549,21 @@
 }
 
 .status-badge.delivered {
-    background: #10b981;
-    color: #fff;
+    background: var(--sei);
+    color: var(--washi);
 }
 
 .status-badge.delivered i {
-    color: #fff;
+    color: var(--washi);
 }
 
 .status-badge.cancelled {
-    background: #ef4444;
-    color: #fff;
+    background: var(--namari);
+    color: var(--washi);
 }
 
 .status-badge.cancelled i {
-    color: #fff;
+    color: var(--washi);
 }
 
 /* Actions Cell */
@@ -581,7 +581,7 @@
     height: 32px;
     border: none;
     background: transparent;
-    border-radius: 8px;
+    border-radius: 0;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -601,18 +601,18 @@
 }
 
 .action-btn.view:hover {
-    color: #3b82f6;
-    background: rgba(59, 130, 246, 0.1);
+    color: var(--aitetsu);
+    background: rgba(64, 84, 94, 0.1);
 }
 
 .action-btn.edit:hover {
-    color: #f59e0b;
-    background: rgba(245, 158, 11, 0.1);
+    color: var(--kintsugi);
+    background: var(--kintsugi-light);
 }
 
 .action-btn.delete:hover {
-    color: #38bdf8;
-    background: rgba(56, 189, 248, 0.1);
+    color: var(--namari);
+    background: rgba(142, 156, 166, 0.15);
 }
 
 /* ================================
@@ -648,7 +648,7 @@
     height: 36px;
     border: 1px solid var(--admin-border);
     background: var(--admin-bg-primary);
-    border-radius: 8px;
+    border-radius: 0;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -662,7 +662,7 @@
 
 .pagination-btn:hover:not(:disabled) {
     background: var(--admin-bg-secondary);
-    border-color: var(--module-primary, var(--admin-primary));
+    border-color: var(--sei);
     color: var(--admin-text-primary);
 }
 
@@ -672,8 +672,8 @@
 }
 
 .pagination-btn.active {
-    background: var(--module-primary, var(--admin-primary));
-    border-color: var(--module-primary, var(--admin-primary));
+    background: var(--aitetsu);
+    border-color: var(--sei);
     color: white;
 }
 
@@ -708,7 +708,7 @@
 
 .delete-modal {
     background: var(--admin-bg-primary);
-    border-radius: 16px;
+    border-radius: 0;
     width: 100%;
     max-width: 420px;
     padding: 2rem;
@@ -725,7 +725,7 @@
     width: 64px;
     height: 64px;
     background: rgba(56, 189, 248, 0.1);
-    border-radius: 50%;
+    border-radius: 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -764,7 +764,7 @@
 
 .delete-modal-actions button {
     padding: 0.75rem 1.5rem;
-    border-radius: 10px;
+    border-radius: 0;
     font-size: 0.9rem;
     font-weight: 600;
     cursor: pointer;
@@ -788,7 +788,7 @@
 }
 
 .delete-modal-confirm:hover {
-    background: #0ea5e9;
+    background: var(--aitetsu);
 }
 
 /* ================================
@@ -803,7 +803,7 @@
     width: 80px;
     height: 80px;
     background: var(--admin-bg-tertiary);
-    border-radius: 50%;
+    border-radius: 0;
     display: flex;
     align-items: center;
     justify-content: center;

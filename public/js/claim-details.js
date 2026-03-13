@@ -104,6 +104,8 @@ async function loadClaimData() {
     console.error('Error loading claim:', error);
     showError('Failed to load claim');
   }
+}
+
 /**
  * Enable or disable the chat input UI for buyer
  */
@@ -136,12 +138,12 @@ function setChatEnabled(enabled) {
 
     const notice = document.createElement('div');
     notice.className = 'claim-closed-notice';
-    notice.style.padding = '0.75rem 1rem';
-    notice.style.background = 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)';
-    notice.style.border = '1px solid #bfdbfe';
-    notice.style.borderRadius = '8px';
-    notice.style.color = '#1e3a8a';
+    notice.style.padding = '0.5rem 0.75rem';
+    notice.style.background = 'rgba(149, 175, 192, 0.1)';
+    notice.style.border = '1.5px solid var(--suzu)';
+    notice.style.color = 'var(--namari)';
     notice.style.fontWeight = '600';
+    notice.style.fontSize = '0.8125rem';
     notice.style.marginBottom = '0.75rem';
     notice.textContent = 'This claim has been resolved/closed. You cannot send new messages.';
     chatInputContainer.insertBefore(notice, chatInputContainer.firstChild);
@@ -158,7 +160,6 @@ function setChatEnabled(enabled) {
       sendBtn.classList.remove('disabled');
     }
   }
-}
 }
 
 /**
@@ -220,14 +221,27 @@ function handleTyping() {
  * Update claim header
  */
 function updateClaimHeader() {
-  document.getElementById('claim-id-header').textContent = currentClaim.id;
-  document.getElementById('claim-subject-header').textContent = currentClaim.subject;
-  document.getElementById('claim-order-header').textContent = currentClaim.orderNumber || 'N/A';
-  document.getElementById('claim-created-header').textContent = formatDate(currentClaim.createdAt);
-  
-  const statusBadge = document.getElementById('status-badge-header');
-  statusBadge.textContent = formatStatus(currentClaim.status);
-  statusBadge.className = 'status-badge-header ' + currentClaim.status;
+  const idEl = document.getElementById('claim-id-header');
+  if (idEl) idEl.textContent = currentClaim.id;
+
+  const subjectEl = document.getElementById('claim-subject-header');
+  if (subjectEl) subjectEl.textContent = currentClaim.subject;
+
+  // Order header has icon + span child — update the span
+  const orderEl = document.getElementById('claim-order-header');
+  if (orderEl) {
+    const span = orderEl.querySelector('span');
+    if (span) span.textContent = currentClaim.orderNumber || 'N/A';
+    else orderEl.lastChild.textContent = currentClaim.orderNumber || 'N/A';
+  }
+
+  // Created header has icon + span child — update the span
+  const createdEl = document.getElementById('claim-created-header');
+  if (createdEl) {
+    const span = createdEl.querySelector('span');
+    if (span) span.textContent = formatDate(currentClaim.createdAt);
+    else createdEl.lastChild.textContent = formatDate(currentClaim.createdAt);
+  }
 }
 
 /**

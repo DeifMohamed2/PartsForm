@@ -65,9 +65,16 @@ body:has(.affiliate-page) {
     opacity: 1 !important;
 }
 
+/* Wider container - fills the screen */
+
+.affiliate-page .container {
+    max-width: 1600px;
+    padding: 0 1.5rem;
+}
+
 
 /* ====================================
-   HEADER BAR
+   HEADER BAR - Orders style
    ==================================== */
 
 .affiliate-header-bar {
@@ -75,8 +82,8 @@ body:has(.affiliate-page) {
     padding: 1.5rem 0 1.25rem;
     border-bottom: 1px solid rgba(149, 175, 192, 0.2);
     margin-top: 1rem;
-    margin-bottom: 1rem;
     position: relative;
+    flex-shrink: 0;
 }
 
 .affiliate-header-bar::before {
@@ -122,7 +129,6 @@ body:has(.affiliate-page) {
     color: var(--kurogane);
     margin-bottom: 0.5rem;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
     line-height: 1.1;
 }
 
@@ -131,7 +137,71 @@ body:has(.affiliate-page) {
     font-size: 0.9375rem;
     color: var(--namari);
     font-weight: 400;
-    letter-spacing: 0.01em;
+}
+
+.affiliate-header-right {
+    display: flex;
+    align-items: center;
+}
+
+/* Program Stats Panel — mirrors orders stats */
+
+.affiliate-program-stats {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 0.75rem 1.75rem;
+    background: linear-gradient(135deg, rgba(149, 175, 192, 0.08) 0%, rgba(255, 255, 255, 0.95) 100%);
+    border: 1px solid rgba(149, 175, 192, 0.3);
+    border-radius: 4px;
+    box-shadow: 0 2px 12px rgba(149, 175, 192, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    transition: all 0.3s ease;
+}
+
+.affiliate-program-stats:hover {
+    box-shadow: 0 4px 16px rgba(149, 175, 192, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    transform: translateY(-2px);
+}
+
+.aff-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    transition: transform 0.3s ease;
+}
+
+.affiliate-program-stats:hover .aff-stat {
+    transform: scale(1.05);
+}
+
+.aff-stat-num {
+    font-family: 'Quantico', sans-serif;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--kurogane);
+    line-height: 1;
+    transition: color 0.3s ease;
+}
+
+.affiliate-program-stats:hover .aff-stat-num {
+    color: var(--kintsugi);
+}
+
+.aff-stat-label {
+    font-family: 'Antartida', sans-serif;
+    font-size: 0.6875rem;
+    color: var(--namari);
+    text-transform: uppercase;
+    font-weight: 400;
+    white-space: nowrap;
+}
+
+.aff-stat-divider {
+    width: 2px;
+    height: 32px;
+    background: linear-gradient(to bottom, transparent 0%, var(--sei) 50%, transparent 100%);
+    flex-shrink: 0;
 }
 
 
@@ -143,7 +213,7 @@ body:has(.affiliate-page) {
     flex: 1;
     min-height: 0;
     overflow: hidden;
-    padding: 1rem 0 1rem;
+    padding: 0.5rem 0 0;
     display: flex;
     flex-direction: column;
 }
@@ -151,157 +221,221 @@ body:has(.affiliate-page) {
 .affiliate-content .container {
     flex: 1;
     min-height: 0;
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 
 /* ====================================
-   SECTION HEADERS (no decorative lines)
+   SECTION HEADERS
    ==================================== */
 
 .affiliate-section {
-    padding: 2rem 0 4rem;
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 0.75rem 0 0;
 }
 
 .section-header {
     text-align: center;
     max-width: 800px;
-    margin: 0 auto 3rem;
+    margin: 0 auto 1rem;
+    flex-shrink: 0;
 }
 
 .section-title {
     font-family: 'Quantico', sans-serif;
-    font-size: 1.5rem;
+    font-size: 1.35rem;
     font-weight: 400;
     color: var(--kurogane);
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.5rem;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
 }
 
 .section-subtitle {
     font-family: 'Antartida', sans-serif;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     color: var(--namari);
     line-height: 1.6;
 }
 
 
 /* ====================================
-   TIER CARDS - Neutral Brand Colors
+   TIER CARDS — 5-column compact grid
    ==================================== */
 
 .affiliate-tiers {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 3rem;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: 1fr;
+    gap: 0.875rem;
+    flex: 1;
+    min-height: 0;
+    margin-bottom: 0;
 }
 
 .tier-card {
     background: white;
     border-radius: 0 !important;
-    padding: 1.75rem 1.5rem;
-    border: 2px solid rgba(149, 175, 192, 0.3);
-    box-shadow: 0 2px 16px rgba(149, 175, 192, 0.08);
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    padding: 1.25rem 1rem;
+    border: 1.5px solid rgba(149, 175, 192, 0.2);
+    box-shadow: 0 2px 12px rgba(149, 175, 192, 0.06);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
 }
 
 .tier-card:hover {
     border-color: rgba(149, 175, 192, 0.5);
-    box-shadow: 0 6px 28px rgba(149, 175, 192, 0.15);
+    box-shadow: 0 6px 24px rgba(149, 175, 192, 0.15);
+    transform: translateY(-2px);
 }
 
-
-/* Subtle tier accents (brand palette) */
+/* Tier top-border accents using brand palette */
 
 .tier-card.bronze {
-    border-left: 4px solid rgba(149, 175, 192, 0.4);
+    border-top: 3px solid rgba(149, 175, 192, 0.6);
 }
 
 .tier-card.silver {
-    border-left: 4px solid rgba(149, 175, 192, 0.55);
+    border-top: 3px solid rgba(136, 153, 166, 0.75);
 }
 
 .tier-card.gold {
-    border-left: 4px solid rgba(201, 164, 50, 0.5);
+    border-top: 3px solid var(--kintsugi);
 }
 
 .tier-card.platinum {
-    border-left: 4px solid rgba(64, 84, 94, 0.55);
+    border-top: 3px solid var(--aitetsu);
 }
 
 .tier-card.platinum-plus {
-    border-left: 4px solid var(--aitetsu);
+    border-top: 3px solid var(--kurogane);
+    background: linear-gradient(160deg, white 0%, rgba(43, 43, 43, 0.025) 100%);
 }
+
+
+/* ====================================
+   TIER HEADER
+   ==================================== */
 
 .tier-header {
     text-align: center;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.875rem;
+    border-bottom: 1px solid rgba(149, 175, 192, 0.12);
 }
 
 .tier-icon {
-    width: 48px;
-    height: 48px;
-    margin: 0 auto 1rem;
+    width: 38px;
+    height: 38px;
+    margin: 0 auto 0.625rem;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 0 !important;
     background: var(--washi);
-    border: 2px solid rgba(149, 175, 192, 0.3);
+    border: 1.5px solid rgba(149, 175, 192, 0.25);
+}
+
+.tier-card.bronze .tier-icon {
+    border-color: rgba(149, 175, 192, 0.4);
+}
+
+.tier-card.silver .tier-icon {
+    border-color: rgba(136, 153, 166, 0.45);
+}
+
+.tier-card.gold .tier-icon {
+    background: rgba(212, 177, 55, 0.07);
+    border-color: rgba(212, 177, 55, 0.4);
+}
+
+.tier-card.platinum .tier-icon {
+    background: rgba(64, 112, 144, 0.07);
+    border-color: rgba(64, 112, 144, 0.4);
+}
+
+.tier-card.platinum-plus .tier-icon {
+    background: rgba(43, 43, 43, 0.07);
+    border-color: rgba(43, 43, 43, 0.3);
 }
 
 .tier-icon i {
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
+    color: var(--suzu);
+}
+
+.tier-card.bronze .tier-icon i {
+    color: var(--suzu);
+}
+
+.tier-card.silver .tier-icon i {
+    color: var(--namari);
+}
+
+.tier-card.gold .tier-icon i {
+    color: var(--kintsugi);
+}
+
+.tier-card.platinum .tier-icon i {
     color: var(--aitetsu);
+}
+
+.tier-card.platinum-plus .tier-icon i {
+    color: var(--kurogane);
 }
 
 .tier-name {
     font-family: 'Quantico', sans-serif;
-    font-size: 1.125rem;
+    font-size: 0.9375rem;
     font-weight: 400;
     color: var(--kurogane);
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.2rem;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
 }
 
 .tier-range {
     font-family: 'Antartida', sans-serif;
-    font-size: 0.85rem;
+    font-size: 0.775rem;
     color: var(--namari);
 }
 
 .tier-revenue {
     font-family: 'Antartida', sans-serif;
-    font-size: 0.8rem;
+    font-size: 0.725rem;
     color: var(--suzu);
-    margin-top: 0.25rem;
+    margin-top: 0.15rem;
 }
 
 
 /* ====================================
-   TIER STATS - Neutral
+   TIER STATS — Compact row list
    ==================================== */
 
 .tier-stats {
     background: var(--washi);
     border-radius: 0 !important;
-    padding: 1rem;
-    margin-bottom: 1.5rem;
-    border: 2px solid rgba(149, 175, 192, 0.25);
+    padding: 0.625rem 0.75rem;
+    margin-bottom: 0.75rem;
+    border: 1.5px solid rgba(149, 175, 192, 0.18);
+    flex-shrink: 0;
+    overflow: hidden;
 }
 
 .tier-stat {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.5rem 0;
-    border-bottom: 1px solid rgba(149, 175, 192, 0.15);
+    padding: 0.3rem 0;
+    border-bottom: 1px solid rgba(149, 175, 192, 0.1);
+    gap: 0.5rem;
 }
 
 .tier-stat:last-child {
@@ -310,16 +444,17 @@ body:has(.affiliate-page) {
 
 .stat-label {
     font-family: 'Antartida', sans-serif;
-    font-size: 0.85rem;
+    font-size: 0.72rem;
     color: var(--namari);
     font-weight: 500;
 }
 
 .stat-value {
     font-family: 'Antartida', sans-serif;
-    font-size: 0.95rem;
+    font-size: 0.775rem;
     font-weight: 600;
     color: var(--kurogane);
+    text-align: right;
 }
 
 .stat-value.highlight {
@@ -332,33 +467,35 @@ body:has(.affiliate-page) {
 
 
 /* ====================================
-   TIER BENEFITS
+   TIER BENEFITS — Compact checklist
    ==================================== */
 
 .tier-benefits {
-    margin-bottom: 1.5rem;
+    margin-bottom: 0.875rem;
+    flex: 1;
 }
 
 .tier-benefits-title {
     font-family: 'Antartida', sans-serif;
-    font-size: 0.9rem;
+    font-size: 0.72rem;
     font-weight: 600;
     color: var(--kurogane);
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
 }
 
 .benefit-item {
     display: flex;
-    align-items: flex-start;
-    gap: 0.5rem;
-    padding: 0.5rem 0;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.22rem 0;
 }
 
 .benefit-icon {
-    width: 18px;
-    height: 18px;
+    width: 13px;
+    height: 13px;
     flex-shrink: 0;
-    margin-top: 0.15rem;
 }
 
 .benefit-icon.available {
@@ -366,56 +503,75 @@ body:has(.affiliate-page) {
 }
 
 .benefit-icon.not-available {
-    color: var(--suzu);
+    color: rgba(149, 175, 192, 0.45);
 }
 
 .benefit-text {
     font-family: 'Antartida', sans-serif;
-    font-size: 0.875rem;
+    font-size: 0.75rem;
     color: var(--namari);
-    line-height: 1.5;
+    line-height: 1.4;
+    flex: 1;
 }
 
 .benefit-text.not-available {
-    color: var(--suzu);
+    color: rgba(149, 175, 192, 0.55);
     text-decoration: line-through;
 }
 
 .benefit-badge {
     display: inline-block;
-    padding: 0.2rem 0.5rem;
-    background: rgba(149, 175, 192, 0.15);
+    padding: 0.1rem 0.35rem;
+    background: rgba(149, 175, 192, 0.12);
     color: var(--kurogane);
-    border: 1px solid rgba(149, 175, 192, 0.25);
+    border: 1px solid rgba(149, 175, 192, 0.22);
     border-radius: 0 !important;
-    font-size: 0.7rem;
+    font-size: 0.6rem;
     font-weight: 600;
-    margin-left: 0.5rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+/* Gold badge */
+
+.tier-card.gold .benefit-badge {
+    background: rgba(212, 177, 55, 0.1);
+    border-color: rgba(212, 177, 55, 0.3);
+    color: #8a6b00;
+}
+
+/* Platinum+ badge */
+
+.tier-card.platinum-plus .benefit-badge {
+    background: rgba(43, 43, 43, 0.07);
+    border-color: rgba(43, 43, 43, 0.2);
+    color: var(--kurogane);
 }
 
 
 /* ====================================
-   TIER ACTIONS - Kintsugi for primary only
+   TIER ACTIONS
    ==================================== */
 
 .tier-action {
     width: 100%;
-    padding: 0.75rem 1rem;
+    padding: 0.5rem 0.75rem;
     border-radius: 0 !important;
     font-family: 'Antartida', sans-serif;
     font-weight: 600;
-    font-size: 0.9rem;
+    font-size: 0.775rem;
     border: 1.5px solid;
     cursor: pointer;
     transition: all 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
+    gap: 0.375rem;
     text-decoration: none;
     color: white;
     background: var(--kintsugi);
     border-color: var(--kintsugi);
+    margin-top: auto;
 }
 
 .tier-action:hover {
@@ -424,17 +580,16 @@ body:has(.affiliate-page) {
 }
 
 .tier-action i {
-    width: 18px;
-    height: 18px;
+    width: 13px;
+    height: 13px;
 }
 
-
-/* Current level - neutral */
+/* Bronze — current level, neutral */
 
 .tier-card.bronze .tier-action {
     background: white;
     color: var(--kurogane);
-    border-color: rgba(149, 175, 192, 0.3);
+    border-color: rgba(149, 175, 192, 0.35);
 }
 
 .tier-card.bronze .tier-action:hover {
@@ -442,38 +597,67 @@ body:has(.affiliate-page) {
     border-color: var(--suzu);
 }
 
+/* Platinum — deep blue */
+
+.tier-card.platinum .tier-action {
+    background: var(--aitetsu);
+    border-color: var(--aitetsu);
+}
+
+.tier-card.platinum .tier-action:hover {
+    background: #2d5f80;
+    border-color: #2d5f80;
+}
+
+/* Platinum+ — dark premium */
+
+.tier-card.platinum-plus .tier-action {
+    background: var(--kurogane);
+    border-color: var(--kurogane);
+}
+
+.tier-card.platinum-plus .tier-action:hover {
+    background: var(--aitetsu);
+    border-color: var(--aitetsu);
+}
+
 
 /* ====================================
-   HOW IT WORKS - Photo Cards (moodboard)
+   HOW IT WORKS — Photo Cards (hidden in non-scroll layout)
    ==================================== */
 
+.affiliate-how-it-works,
+.affiliate-disclaimer {
+    display: none;
+}
+
 .affiliate-how-it-works {
-    padding: 2rem 0 3rem;
+    padding: 1rem 0 2rem;
 }
 
 .affiliate-how-it-works .section-header {
-    margin-bottom: 2.5rem;
+    margin-bottom: 1.5rem;
 }
 
 .how-it-works-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
+    gap: 1rem;
 }
 
 .how-it-works-card {
     position: relative;
     border-radius: 0 !important;
     overflow: hidden;
-    min-height: 280px;
-    border: 2px solid rgba(149, 175, 192, 0.35);
-    box-shadow: 0 4px 20px rgba(43, 43, 43, 0.12);
+    min-height: 210px;
+    border: 1.5px solid rgba(149, 175, 192, 0.3);
+    box-shadow: 0 4px 16px rgba(43, 43, 43, 0.1);
     transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
 .how-it-works-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 30px rgba(43, 43, 43, 0.18);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 28px rgba(43, 43, 43, 0.18);
 }
 
 .how-it-works-bg {
@@ -494,14 +678,14 @@ body:has(.affiliate-page) {
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(to top, rgba(43, 43, 43, 0.92) 0%, rgba(43, 43, 43, 0.6) 40%, rgba(43, 43, 43, 0.3) 100%);
+    background: linear-gradient(to top, rgba(43, 43, 43, 0.92) 0%, rgba(43, 43, 43, 0.55) 40%, rgba(43, 43, 43, 0.22) 100%);
     z-index: 1;
 }
 
 .how-it-works-content {
     position: relative;
     z-index: 2;
-    padding: 2rem 1.5rem;
+    padding: 1.5rem 1.25rem;
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -509,80 +693,83 @@ body:has(.affiliate-page) {
 }
 
 .how-it-works-icon {
-    width: 48px;
-    height: 48px;
+    width: 38px;
+    height: 38px;
     display: flex;
     align-items: center;
     justify-content: center;
     background: rgba(149, 175, 192, 0.2);
-    border: 2px solid rgba(149, 175, 192, 0.4);
+    border: 1.5px solid rgba(149, 175, 192, 0.4);
     border-radius: 0 !important;
-    margin-bottom: 1rem;
+    margin-bottom: 0.75rem;
 }
 
 .how-it-works-icon i {
-    width: 24px;
-    height: 24px;
-    color: var(--aitetsu);
+    width: 18px;
+    height: 18px;
+    color: #95AFC0;
 }
 
 .how-it-works-title {
     font-family: 'Quantico', sans-serif;
-    font-size: 1.1rem;
+    font-size: 1rem;
     font-weight: 400;
     color: var(--washi);
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.375rem;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
 }
 
 .how-it-works-text {
     font-family: 'Antartida', sans-serif;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     color: rgba(255, 255, 255, 0.85);
-    line-height: 1.6;
+    line-height: 1.5;
 }
 
 
 /* ====================================
-   DISCLAIMER - Neutral
+   DISCLAIMER — Inline style
    ==================================== */
 
 .affiliate-disclaimer {
     background: white;
-    border: 2px solid rgba(149, 175, 192, 0.3);
+    border: 1.5px solid rgba(149, 175, 192, 0.22);
     border-radius: 0 !important;
-    padding: 1.5rem 2rem;
-    text-align: center;
-    margin-top: 2rem;
-    max-width: 800px;
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    max-width: 900px;
     margin-left: auto;
     margin-right: auto;
 }
 
 .disclaimer-icon {
-    width: 40px;
-    height: 40px;
-    margin: 0 auto 1rem;
+    width: 30px;
+    height: 30px;
+    flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--washi);
-    border: 2px solid rgba(149, 175, 192, 0.3);
+    background: rgba(64, 112, 144, 0.07);
+    border: 1.5px solid rgba(64, 112, 144, 0.2);
     border-radius: 0 !important;
     color: var(--aitetsu);
+    margin-top: 0.1rem;
 }
 
 .disclaimer-icon i {
-    width: 20px;
-    height: 20px;
+    width: 15px;
+    height: 15px;
 }
 
 .disclaimer-text {
     font-family: 'Antartida', sans-serif;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     color: var(--namari);
-    line-height: 1.7;
+    line-height: 1.65;
+    flex: 1;
 }
 
 .disclaimer-text strong {
@@ -595,51 +782,79 @@ body:has(.affiliate-page) {
    RESPONSIVE
    ==================================== */
 
-@media (max-width: 1200px) {
+@media (max-width: 1400px) {
+    .affiliate-tiers {
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: auto;
+    }
+
+    /* Re-enable scroll on smaller screens — 5 cols won't fit */
+    .affiliate-content .container {
+        overflow-y: auto;
+    }
+
+    .affiliate-how-it-works,
+    .affiliate-disclaimer {
+        display: block;
+    }
+
+    .affiliate-how-it-works {
+        padding: 1rem 0 2rem;
+    }
+
+    .affiliate-tiers {
+        flex: none;
+        margin-bottom: 2rem;
+    }
+
+    .affiliate-section {
+        padding: 1rem 0 2rem;
+    }
+}
+
+@media (max-width: 1000px) {
     .affiliate-tiers {
         grid-template-columns: repeat(2, 1fr);
     }
+
     .how-it-works-grid {
         grid-template-columns: repeat(2, 1fr);
     }
 }
 
 @media (max-width: 768px) {
-    .affiliate-hero {
-        padding: 6rem 0 3rem;
-    }
-    .affiliate-hero-title {
-        font-size: 1.75rem;
-    }
-    .affiliate-hero-subtitle {
-        font-size: 1rem;
-    }
-    .how-it-works-card {
-        min-height: 240px;
-    }
     .affiliate-tiers {
         grid-template-columns: 1fr;
-        gap: 1.25rem;
+        gap: 1rem;
     }
+
     .how-it-works-grid {
         grid-template-columns: 1fr;
     }
-    .tier-card {
-        padding: 1.5rem 1.25rem;
+
+    .how-it-works-card {
+        min-height: 200px;
     }
-    .section-title {
-        font-size: 1.25rem;
+
+    .affiliate-header-title {
+        font-size: 1.75rem;
+    }
+
+    .affiliate-header-right {
+        display: none;
     }
 }
 
 @media (max-width: 480px) {
-    .affiliate-hero-title {
+    .affiliate-header-title {
         font-size: 1.5rem;
     }
+
     .tier-name {
-        font-size: 1rem;
+        font-size: 0.875rem;
     }
+
     .tier-stats {
-        padding: 0.875rem;
+        padding: 0.5rem 0.625rem;
     }
 }

@@ -184,7 +184,7 @@ function createClaimCard(claim) {
   const categoryIcon = getCategoryIcon(claim.category);
   const hasUnread = claim.unreadCount > 0;
 
-  return '<div class="claim-card' + (hasUnread ? ' has-unread' : '') + '" data-claim-id="' + claim.id + '">' +
+  return '<div class="claim-card' + (hasUnread ? ' has-unread' : '') + '" data-claim-id="' + claim.id + '" data-status="' + claim.status + '">' +
     '<div class="claim-card-header">' +
       '<div class="claim-card-left">' +
         '<div class="claim-id">' + escapeHtml(claim.id) + '</div>' +

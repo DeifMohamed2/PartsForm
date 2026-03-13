@@ -5,6 +5,7 @@
 const crypto = require('crypto');
 const Buyer = require('../models/Buyer');
 const emailService = require('../services/emailService');
+const brand = require('../utils/emailBrand');
 
 /**
  * Rate limiting configuration for password reset
@@ -147,8 +148,31 @@ const requestPasswordReset = async (req, res) => {
     const buyer = await Buyer.findOne({ email: normalizedEmail })
       .select('+passwordResetAttempts +passwordResetLastAttempt +passwordResetBlockedUntil +passwordResetToken +passwordResetExpires');
 
-    // Show error if email not found
+    // If not found as buyer, check if email belongs to another account type
     if (!buyer) {
+      const ReferralPartner = require('../models/ReferralPartner');
+      const Supplier = require('../models/Supplier');
+
+      const isPartner  = await ReferralPartner.exists({ email: normalizedEmail });
+      const isSupplier = await Supplier.exists({ email: normalizedEmail });
+
+      if (isPartner) {
+        return res.status(404).json({
+          success: false,
+          message: 'This email is registered as a Partner account. Please use the Partner password reset instead.',
+          accountType: 'partner',
+          redirectUrl: '/forgot-password/partner',
+        });
+      }
+      if (isSupplier) {
+        return res.status(404).json({
+          success: false,
+          message: 'This email is registered as a Supplier account. Please use the Supplier password reset instead.',
+          accountType: 'supplier',
+          redirectUrl: '/forgot-password/supplier',
+        });
+      }
+
       return res.status(404).json({
         success: false,
         message: 'No account found with this email address. Please check your email or create a new account.',
@@ -407,7 +431,7 @@ const resendVerificationCode = async (req, res) => {
     if (!buyer) {
       return res.status(404).json({
         success: false,
-        message: 'No account found with this email address.',
+        message: 'No buyer account found with this email address.',
       });
     }
 
@@ -507,8 +531,8 @@ const sendPasswordResetEmail = async (email, firstName, code) => {
   <meta name="color-scheme" content="light dark">
   <meta name="supported-color-schemes" content="light dark">
 </head>
-<body style="margin: 0; padding: 0; background-color: #f1f5f9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #f1f5f9;">
+<body style="margin: 0; padding: 0; background-color: ${brand.pageBg}; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: ${brand.pageBg};">
     <tr>
       <td align="center" style="padding: 40px 20px;">
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width: 520px;">
@@ -518,8 +542,8 @@ const sendPasswordResetEmail = async (email, firstName, code) => {
             <td style="text-align: center; padding-bottom: 32px;">
               <table role="presentation" cellpadding="0" cellspacing="0" style="margin: 0 auto;">
                 <tr>
-                  <td style="background-color: #2b5278; border-radius: 10px; padding: 14px 32px;">
-                    <span style="font-size: 22px; font-weight: 800; color: #ffffff; letter-spacing: 3px; text-transform: uppercase; font-family: 'Arial Black', Arial, sans-serif; text-decoration: none;">PARTSFORM</span>
+                  <td style="background-color: ${brand.aitetsu}; padding: 14px 32px;">
+                    <span style="font-size: 22px; font-weight: 800; color: ${brand.washi}; letter-spacing: 3px; text-transform: uppercase; font-family: 'Arial Black', Arial, sans-serif; text-decoration: none;">PARTSFORM</span>
                   </td>
                 </tr>
               </table>
@@ -529,32 +553,32 @@ const sendPasswordResetEmail = async (email, firstName, code) => {
           <!-- Main Card -->
           <tr>
             <td>
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(43, 82, 120, 0.12);">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: ${brand.cardBg}; overflow: hidden; box-shadow: 0 4px 24px rgba(43, 43, 43, 0.10);">
                 
                 <!-- Header Banner -->
                 <tr>
-                  <td style="background: linear-gradient(135deg, #2b5278 0%, #3a6d9e 100%); padding: 48px 32px; text-align: center;">
-                    <p style="margin: 0; font-size: 24px; font-weight: 600; color: #ffffff; letter-spacing: 0.5px;">Password Reset</p>
-                    <p style="margin: 12px 0 0 0; font-size: 14px; color: rgba(255,255,255,0.8);">Secure verification code</p>
+                  <td style="background-color: ${brand.aitetsu}; padding: 48px 32px; text-align: center;">
+                    <p style="margin: 0; font-size: 24px; font-weight: 600; color: ${brand.washi}; letter-spacing: 0.5px;">Password Reset</p>
+                    <p style="margin: 12px 0 0 0; font-size: 14px; color: rgba(248,250,252,0.8);">Secure verification code</p>
                   </td>
                 </tr>
                 
                 <!-- Content -->
                 <tr>
                   <td style="padding: 36px 32px;">
-                    <p style="margin: 0 0 20px 0; font-size: 17px; color: #1a2b3d; line-height: 1.6;">
+                    <p style="margin: 0 0 20px 0; font-size: 17px; color: ${brand.kurogane}; line-height: 1.6;">
                       Hi <strong>${name}</strong>,
                     </p>
-                    <p style="margin: 0 0 28px 0; font-size: 15px; color: #4b5563; line-height: 1.7;">
+                    <p style="margin: 0 0 28px 0; font-size: 15px; color: ${brand.namari}; line-height: 1.7;">
                       We received a request to reset your password. Use the verification code below to proceed with the password reset.
                     </p>
                     
                     <!-- Verification Code Box -->
-                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-radius: 12px; border: 2px solid #bae6fd;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background: ${brand.kintsugiLight}; border: 2px solid ${brand.kintsugi};">
                       <tr>
                         <td style="padding: 32px; text-align: center;">
-                          <p style="margin: 0 0 12px 0; font-size: 12px; color: #0369a1; text-transform: uppercase; letter-spacing: 2px; font-weight: 700;">Your Verification Code</p>
-                          <p style="margin: 0; font-size: 40px; font-weight: 700; color: #2b5278; letter-spacing: 10px; font-family: 'SF Mono', Monaco, 'Courier New', monospace;">${code}</p>
+                          <p style="margin: 0 0 12px 0; font-size: 12px; color: ${brand.kintsugi}; text-transform: uppercase; letter-spacing: 2px; font-weight: 700;">Your Verification Code</p>
+                          <p style="margin: 0; font-size: 40px; font-weight: 700; color: ${brand.kurogane}; letter-spacing: 10px; font-family: 'SF Mono', Monaco, 'Courier New', monospace;">${code}</p>
                         </td>
                       </tr>
                     </table>
@@ -562,8 +586,8 @@ const sendPasswordResetEmail = async (email, firstName, code) => {
                     <!-- Expiry Notice -->
                     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top: 24px;">
                       <tr>
-                        <td style="padding: 16px 20px; background-color: #fef3c7; border-radius: 10px; border-left: 4px solid #f59e0b;">
-                          <p style="margin: 0; font-size: 14px; color: #92400e; line-height: 1.5;">
+                        <td style="padding: 16px 20px; background-color: ${brand.warningBg}; border-left: 4px solid ${brand.warning};">
+                          <p style="margin: 0; font-size: 14px; color: ${brand.warningText}; line-height: 1.5;">
                             <strong style="display: block; margin-bottom: 4px;">This code expires in 15 minutes.</strong>
                             <span style="font-size: 13px;">If you didn't request this reset, please ignore this email.</span>
                           </p>
@@ -572,7 +596,7 @@ const sendPasswordResetEmail = async (email, firstName, code) => {
                     </table>
                     
                     <!-- Security Notice -->
-                    <p style="margin: 28px 0 0 0; font-size: 13px; color: #6b7280; line-height: 1.6; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+                    <p style="margin: 28px 0 0 0; font-size: 13px; color: ${brand.namari}; line-height: 1.6; padding-top: 20px; border-top: 1px solid ${brand.suzu};">
                       For security reasons, never share this code with anyone. PartsForm will never ask you for this code via phone or chat.
                     </p>
                   </td>
@@ -580,9 +604,9 @@ const sendPasswordResetEmail = async (email, firstName, code) => {
                 
                 <!-- Footer -->
                 <tr>
-                  <td style="padding: 24px 32px; background-color: #f8fafc; border-top: 1px solid #e2e8f0;">
-                    <p style="margin: 0; font-size: 13px; color: #64748b; text-align: center;">
-                      Need help? Contact us at <a href="mailto:support@partsform.com" style="color: #2b5278; text-decoration: none; font-weight: 600;">support@partsform.com</a>
+                  <td style="padding: 24px 32px; background-color: ${brand.footerBg}; border-top: 1px solid ${brand.suzu};">
+                    <p style="margin: 0; font-size: 13px; color: ${brand.namari}; text-align: center;">
+                      Need help? Contact us at <a href="mailto:support@partsform.com" style="color: ${brand.sei}; text-decoration: none; font-weight: 600;">support@partsform.com</a>
                     </p>
                   </td>
                 </tr>
@@ -594,10 +618,10 @@ const sendPasswordResetEmail = async (email, firstName, code) => {
           <!-- Footer Links -->
           <tr>
             <td style="padding: 28px 20px; text-align: center;">
-              <p style="margin: 0 0 8px 0; font-size: 12px; color: #64748b;">
+              <p style="margin: 0 0 8px 0; font-size: 12px; color: ${brand.namari};">
                 © ${new Date().getFullYear()} PartsForm. All rights reserved.
               </p>
-              <p style="margin: 0; font-size: 11px; color: #94a3b8;">
+              <p style="margin: 0; font-size: 11px; color: ${brand.namari}; opacity: 0.8;">
                 This is an automated message, please do not reply directly.
               </p>
             </td>
@@ -650,8 +674,8 @@ const sendPasswordChangedEmail = async (email, firstName) => {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
-<body style="margin: 0; padding: 0; background-color: #f1f5f9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #f1f5f9;">
+<body style="margin: 0; padding: 0; background-color: ${brand.pageBg}; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: ${brand.pageBg};">
     <tr>
       <td align="center" style="padding: 40px 20px;">
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width: 520px;">
@@ -661,8 +685,8 @@ const sendPasswordChangedEmail = async (email, firstName) => {
             <td style="text-align: center; padding-bottom: 32px;">
               <table role="presentation" cellpadding="0" cellspacing="0" style="margin: 0 auto;">
                 <tr>
-                  <td style="background-color: #2b5278; border-radius: 10px; padding: 14px 32px;">
-                    <span style="font-size: 22px; font-weight: 800; color: #ffffff; letter-spacing: 3px; text-transform: uppercase; font-family: 'Arial Black', Arial, sans-serif; text-decoration: none;">PARTSFORM</span>
+                  <td style="background-color: ${brand.aitetsu}; padding: 14px 32px;">
+                    <span style="font-size: 22px; font-weight: 800; color: ${brand.washi}; letter-spacing: 3px; text-transform: uppercase; font-family: 'Arial Black', Arial, sans-serif; text-decoration: none;">PARTSFORM</span>
                   </td>
                 </tr>
               </table>
@@ -672,38 +696,38 @@ const sendPasswordChangedEmail = async (email, firstName) => {
           <!-- Main Card -->
           <tr>
             <td>
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(43, 82, 120, 0.12);">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: ${brand.cardBg}; overflow: hidden; box-shadow: 0 4px 24px rgba(43, 43, 43, 0.10);">
                 
                 <!-- Header Banner -->
                 <tr>
-                  <td style="background: linear-gradient(135deg, #059669 0%, #10b981 100%); padding: 48px 32px; text-align: center;">
+                  <td style="background-color: ${brand.success}; padding: 48px 32px; text-align: center;">
                     <table role="presentation" cellpadding="0" cellspacing="0" style="margin: 0 auto;">
                       <tr>
-                        <td style="width: 64px; height: 64px; background-color: rgba(255,255,255,0.2); border-radius: 50%; text-align: center; vertical-align: middle;">
+                        <td style="width: 64px; height: 64px; background-color: rgba(255,255,255,0.2); text-align: center; vertical-align: middle;">
                           <span style="font-size: 28px; line-height: 64px; color: #ffffff;">&#10003;</span>
                         </td>
                       </tr>
                     </table>
                     <p style="margin: 16px 0 0 0; font-size: 24px; font-weight: 600; color: #ffffff; letter-spacing: 0.5px;">Password Changed</p>
-                    <p style="margin: 8px 0 0 0; font-size: 14px; color: rgba(255,255,255,0.85);">Your account is now secured</p>
+                    <p style="margin: 8px 0 0 0; font-size: 14px; color: rgba(255,255,255,0.9);">Your account is now secured</p>
                   </td>
                 </tr>
                 
                 <!-- Content -->
                 <tr>
                   <td style="padding: 36px 32px;">
-                    <p style="margin: 0 0 20px 0; font-size: 17px; color: #1a2b3d; line-height: 1.6;">
+                    <p style="margin: 0 0 20px 0; font-size: 17px; color: ${brand.kurogane}; line-height: 1.6;">
                       Hi <strong>${name}</strong>,
                     </p>
-                    <p style="margin: 0 0 28px 0; font-size: 15px; color: #4b5563; line-height: 1.7;">
+                    <p style="margin: 0 0 28px 0; font-size: 15px; color: ${brand.namari}; line-height: 1.7;">
                       Your password has been successfully changed. You can now log in with your new password.
                     </p>
                     
                     <!-- Success Box -->
-                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #f0fdf4; border-radius: 12px; border: 1px solid #bbf7d0;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: ${brand.successBg}; border: 1px solid ${brand.successBorder};">
                       <tr>
                         <td style="padding: 24px; text-align: center;">
-                          <p style="margin: 0; font-size: 15px; color: #166534; font-weight: 600; line-height: 1.5;">
+                          <p style="margin: 0; font-size: 15px; color: ${brand.successText}; font-weight: 600; line-height: 1.5;">
                             Your account is now secured with your new password
                           </p>
                         </td>
@@ -713,8 +737,8 @@ const sendPasswordChangedEmail = async (email, firstName) => {
                     <!-- Security Notice -->
                     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top: 24px;">
                       <tr>
-                        <td style="padding: 16px 20px; background-color: #fef2f2; border-radius: 10px; border-left: 4px solid #ef4444;">
-                          <p style="margin: 0; font-size: 14px; color: #991b1b; line-height: 1.5;">
+                        <td style="padding: 16px 20px; background-color: ${brand.errorBg}; border-left: 4px solid ${brand.error};">
+                          <p style="margin: 0; font-size: 14px; color: ${brand.errorText}; line-height: 1.5;">
                             <strong style="display: block; margin-bottom: 4px;">Didn't make this change?</strong>
                             <span style="font-size: 13px;">If you didn't change your password, please contact our support team immediately.</span>
                           </p>
@@ -726,9 +750,9 @@ const sendPasswordChangedEmail = async (email, firstName) => {
                 
                 <!-- Footer -->
                 <tr>
-                  <td style="padding: 24px 32px; background-color: #f8fafc; border-top: 1px solid #e2e8f0;">
-                    <p style="margin: 0; font-size: 13px; color: #64748b; text-align: center;">
-                      Need help? Contact us at <a href="mailto:support@partsform.com" style="color: #2b5278; text-decoration: none; font-weight: 600;">support@partsform.com</a>
+                  <td style="padding: 24px 32px; background-color: ${brand.footerBg}; border-top: 1px solid ${brand.suzu};">
+                    <p style="margin: 0; font-size: 13px; color: ${brand.namari}; text-align: center;">
+                      Need help? Contact us at <a href="mailto:support@partsform.com" style="color: ${brand.sei}; text-decoration: none; font-weight: 600;">support@partsform.com</a>
                     </p>
                   </td>
                 </tr>
@@ -740,7 +764,7 @@ const sendPasswordChangedEmail = async (email, firstName) => {
           <!-- Footer Links -->
           <tr>
             <td style="padding: 28px 20px; text-align: center;">
-              <p style="margin: 0; font-size: 12px; color: #94a3b8;">
+              <p style="margin: 0; font-size: 12px; color: ${brand.namari};">
                 © ${new Date().getFullYear()} PartsForm. All rights reserved.
               </p>
             </td>

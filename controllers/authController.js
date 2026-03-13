@@ -1,6 +1,8 @@
 const jwt = require('jsonwebtoken');
 const Buyer = require('../models/Buyer');
 const Admin = require('../models/Admin');
+const ReferralPartner = require('../models/ReferralPartner');
+const Supplier = require('../models/Supplier');
 const referralService = require('../services/referralService');
 
 // JWT Configuration - MUST be set via environment variables
@@ -547,6 +549,179 @@ const validateReferralCodeForRegistration = async (req, res) => {
   }
 };
 
+/**
+ * Handle partner login (used by unified login)
+ */
+const handlePartnerLogin = async (partner, password, res) => {
+  const isMatch = await partner.comparePassword(password);
+  if (!isMatch) {
+    return res.status(401).json({ success: false, message: 'Invalid email or password' });
+  }
+
+  if (partner.status !== 'active') {
+    return res.status(403).json({
+      success: false,
+      message: 'Your partner account is not active. Please contact support.',
+    });
+  }
+
+  const token = jwt.sign(
+    { id: partner._id, role: 'referral_partner', email: partner.email },
+    JWT_SECRET,
+    { expiresIn: '7d' }
+  );
+
+  partner.lastLogin = new Date();
+  await partner.save();
+
+  res.cookie('partner_token', token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  });
+
+  return res.json({
+    success: true,
+    message: 'Login successful',
+    data: { role: 'partner', redirectUrl: '/partner/dashboard' },
+  });
+};
+
+/**
+ * Handle supplier login (used by unified login)
+ */
+const handleSupplierLogin = async (supplier, password, res) => {
+  if (typeof supplier.isLocked === 'function' && supplier.isLocked()) {
+    const lockRemaining = Math.ceil((supplier.lockUntil - Date.now()) / 60000);
+    return res.status(423).json({
+      success: false,
+      message: `Account is temporarily locked. Try again in ${lockRemaining} minute${lockRemaining === 1 ? '' : 's'}.`,
+    });
+  }
+
+  if (!supplier.isActive) {
+    return res.status(403).json({
+      success: false,
+      message: 'Your account has been deactivated. Please contact your administrator.',
+    });
+  }
+
+  const isValidPassword = await supplier.comparePassword(password);
+  if (!isValidPassword) {
+    supplier.loginAttempts = (supplier.loginAttempts || 0) + 1;
+    if (supplier.loginAttempts >= 5) {
+      supplier.lockUntil = new Date(Date.now() + 30 * 60 * 1000);
+    }
+    await supplier.save();
+    const remaining = Math.max(0, 5 - supplier.loginAttempts);
+    return res.status(401).json({
+      success: false,
+      message: remaining > 0
+        ? `Invalid email or password. ${remaining} attempt${remaining === 1 ? '' : 's'} remaining before lockout.`
+        : 'Invalid email or password',
+    });
+  }
+
+  // First-login: must change temporary password
+  if (supplier.mustChangePassword) {
+    const tempToken = jwt.sign(
+      { id: supplier._id, mustChangePassword: true },
+      JWT_SECRET,
+      { expiresIn: '15m' }
+    );
+    return res.status(200).json({
+      success: true,
+      requirePasswordChange: true,
+      message: 'Please set a new password to continue.',
+      tempToken,
+    });
+  }
+
+  supplier.loginAttempts = 0;
+  supplier.lockUntil = undefined;
+  supplier.lastLogin = new Date();
+  await supplier.save();
+
+  const token = jwt.sign(
+    {
+      id: supplier._id,
+      role: 'supplier',
+      supplierRole: supplier.role,
+      companyCode: supplier.companyCode,
+    },
+    JWT_SECRET,
+    { expiresIn: JWT_EXPIRES_IN }
+  );
+
+  res.cookie('supplierToken', token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  });
+
+  return res.json({
+    success: true,
+    message: 'Login successful',
+    data: { role: 'supplier', redirectUrl: '/supplier' },
+  });
+};
+
+/**
+ * Unified login — resolves admin, buyer, partner, and supplier from a single endpoint.
+ * POST /api/unified-login
+ *
+ * Security notes:
+ * - Checks DBs sequentially; if email matches a user, only that user type is attempted.
+ *   A wrong password stops the chain — it will NOT cascade to another type.
+ * - Returns the same generic message for "not found" and "wrong password" to prevent
+ *   user enumeration across account types.
+ * - Account locking is enforced at the model level for admin, buyer, and supplier.
+ */
+const unifiedLogin = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email and password are required.',
+      });
+    }
+
+    const normalizedEmail = email.toLowerCase().trim();
+
+    // 1 — Admin (highest privilege, check first)
+    const admin = await Admin.findByEmailWithPassword(normalizedEmail);
+    if (admin) return handleAdminLogin(admin, password, res);
+
+    // 2 — Buyer
+    const buyer = await Buyer.findByEmailWithPassword(normalizedEmail);
+    if (buyer) return handleBuyerLogin(buyer, password, res);
+
+    // 3 — Referral Partner
+    const partner = await ReferralPartner.findOne({ email: normalizedEmail }).select('+password');
+    if (partner) return handlePartnerLogin(partner, password, res);
+
+    // 4 — Supplier
+    const supplier = await Supplier.findOne({ email: normalizedEmail }).select('+password');
+    if (supplier) return handleSupplierLogin(supplier, password, res);
+
+    // No match across any account type
+    return res.status(401).json({
+      success: false,
+      message: 'Invalid email or password.',
+    });
+  } catch (error) {
+    console.error('Unified login error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'An error occurred during login. Please try again.',
+    });
+  }
+};
+
 module.exports = {
   register,
   login,
@@ -554,6 +729,7 @@ module.exports = {
   getCurrentUser,
   getRegisterPage,
   validateReferralCodeForRegistration,
+  unifiedLogin,
   generateToken,
   JWT_SECRET,
 };

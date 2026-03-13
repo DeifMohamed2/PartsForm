@@ -11,8 +11,7 @@
   <!-- Sidebar Header -->
   <div class="sidebar-header">
     <a href="/admin" class="sidebar-logo">
-      <img src="/images/PARTSFORM-LOGO.webp" alt="PartsForm Logo">
-      <span class="sidebar-logo-badge">Admin</span>
+      <img src="/images/brand/logo-light.png" alt="PARTSFORM">
     </a>
   </div>
 
@@ -28,7 +27,7 @@
       <a href="/admin/parts-analytics" class="sidebar-nav-item <%= typeof activePage !== 'undefined' && activePage === 'parts-analytics' ? 'active' : '' %>">
         <i data-lucide="bar-chart-3"></i>
         <span>Parts Analytics</span>
-        <span class="sidebar-nav-badge" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">AI</span>
+        <span class="sidebar-nav-badge" style="background: var(--aitetsu);">AI</span>
       </a>
     </div>
 
@@ -46,7 +45,7 @@
         <i data-lucide="mail"></i>
         <span>Email Inquiries</span>
         <% if (typeof sidebarCounts !== 'undefined' && sidebarCounts.unreadInquiries > 0) { %>
-        <span class="sidebar-nav-badge" style="background: linear-gradient(135deg, #667eea, #764ba2);" id="sidebarInquiriesBadge"><%= sidebarCounts.unreadInquiries %></span>
+        <span class="sidebar-nav-badge" style="background: var(--aitetsu);" id="sidebarInquiriesBadge"><%= sidebarCounts.unreadInquiries %></span>
         <% } %>
       </a>
       <a href="/admin/claims" class="sidebar-nav-item <%= typeof activePage !== 'undefined' && activePage === 'claims' ? 'active' : '' %>">
@@ -69,14 +68,14 @@
       <a href="/admin/referrals" class="sidebar-nav-item <%= typeof activePage !== 'undefined' && activePage === 'referrals' ? 'active' : '' %>">
         <i data-lucide="gift"></i>
         <span>Referrals</span>
-        <span class="sidebar-nav-badge" style="background: linear-gradient(135deg, #10b981, #059669);">New</span>
+        <span class="sidebar-nav-badge" style="background: var(--kintsugi); color: var(--kurogane);">New</span>
       </a>
       <% if (typeof userPermissions === 'undefined' || userPermissions.canManageUsers || userPermissions.isSuperAdmin) { %>
       <a href="/admin/suppliers" class="sidebar-nav-item <%= typeof activePage !== 'undefined' && activePage === 'suppliers' ? 'active' : '' %>">
         <i data-lucide="building-2"></i>
         <span>Suppliers</span>
         <% if (typeof sidebarCounts !== 'undefined' && sidebarCounts.pendingSuppliers > 0) { %>
-        <span class="sidebar-nav-badge" style="background: linear-gradient(135deg, #f59e0b, #d97706);" id="sidebarSuppliersBadge"><%= sidebarCounts.pendingSuppliers %></span>
+        <span class="sidebar-nav-badge" style="background: var(--kintsugi); color: var(--kurogane);" id="sidebarSuppliersBadge"><%= sidebarCounts.pendingSuppliers %></span>
         <% } %>
       </a>
       <% } %>
@@ -105,7 +104,7 @@
       <a href="/admin/server-status" class="sidebar-nav-item <%= typeof activePage !== 'undefined' && activePage === 'server-status' ? 'active' : '' %>">
         <i data-lucide="server"></i>
         <span>Server Status</span>
-        <span class="sidebar-nav-badge" style="background: linear-gradient(135deg, #ef4444, #dc2626);">Live</span>
+        <span class="sidebar-nav-badge" style="background: var(--aitetsu);">Live</span>
       </a>
       <% } %>
     </div>
@@ -160,7 +159,7 @@
 .sidebar-user {
   cursor: pointer;
   transition: background 0.2s;
-  border-radius: var(--admin-radius-lg);
+  border-radius: 0;
   padding: 0.5rem;
   margin: -0.5rem;
 }
@@ -185,8 +184,8 @@
   right: 0;
   background: var(--admin-bg-primary);
   border: 1px solid var(--admin-border);
-  border-radius: var(--admin-radius-lg);
-  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.12);
+  border-radius: 0;
+  box-shadow: 0 -10px 40px rgba(43, 43, 43, 0.12);
   padding: 0.5rem;
   opacity: 0;
   visibility: hidden;
@@ -205,7 +204,7 @@
   align-items: center;
   gap: 0.75rem;
   padding: 0.625rem 0.75rem;
-  border-radius: var(--admin-radius-md);
+  border-radius: 0;
   color: var(--admin-text-primary);
   text-decoration: none;
   font-size: 0.875rem;
@@ -229,15 +228,15 @@
 }
 
 .sidebar-user-menu-item.logout {
-  color: #ef4444;
+  color: var(--color-error);
 }
 
 .sidebar-user-menu-item.logout i {
-  color: #ef4444;
+  color: var(--color-error);
 }
 
 .sidebar-user-menu-item.logout:hover {
-  background: rgba(239, 68, 68, 0.08);
+  background: var(--color-error-bg);
 }
 
 .sidebar-user-menu-divider {
@@ -400,7 +399,7 @@ document.addEventListener('DOMContentLoaded', function() {
           const badge = document.createElement('span');
           badge.className = 'sidebar-nav-badge';
           badge.id = 'sidebarInquiriesBadge';
-          badge.style.background = 'linear-gradient(135deg, #667eea, #764ba2)';
+          badge.style.background = 'var(--aitetsu)';
           badge.textContent = unreadInquiries;
           inquiriesNavItem.appendChild(badge);
         }

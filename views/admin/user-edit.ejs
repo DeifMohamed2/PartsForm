@@ -22,7 +22,7 @@
         <!-- Page Header -->
         <div class="users-page-header">
           <h2>Edit User: <%= user.name %></h2>
-          <button class="admin-btn" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: none;" onclick="confirmDelete()">
+          <button class="admin-btn admin-btn-danger-outline" onclick="confirmDelete()">
             <i data-lucide="trash-2"></i>
             Delete User
           </button>
@@ -164,8 +164,8 @@
   <div class="status-modal-overlay" id="deleteModalOverlay" onclick="closeDeleteModal()">
     <div class="status-modal" onclick="event.stopPropagation()" style="max-width: 400px;">
       <div class="status-modal-header">
-        <div class="status-modal-icon" style="background: rgba(239, 68, 68, 0.1);">
-          <i data-lucide="trash-2" style="color: #ef4444;"></i>
+        <div class="status-modal-icon danger">
+          <i data-lucide="trash-2"></i>
         </div>
         <div>
           <h3>Delete User</h3>
@@ -180,7 +180,7 @@
       </div>
       <div class="status-modal-footer">
         <button class="admin-btn admin-btn-secondary" onclick="closeDeleteModal()">Cancel</button>
-        <button class="admin-btn" style="background: #ef4444; color: white; border: none;" onclick="deleteUser()">
+        <button class="admin-btn admin-btn-danger-solid" onclick="deleteUser()">
           <i data-lucide="trash-2"></i>
           Delete User
         </button>

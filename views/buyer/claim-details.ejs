@@ -35,10 +35,11 @@
             <!-- Claim Info Card -->
             <div class="claim-info-card">
               <div class="info-card-header">
-                <h3 class="info-card-title"><%= t('tickets.details.ticketInfo') %></h3>
+                <h3 class="info-card-title">
+                  <%= t('tickets.details.ticketInfo') %>
+                </h3>
               </div>
               <div class="info-card-body">
-                <!-- Ticket ID & Status -->
                 <div class="info-item">
                   <span class="info-label">Ticket ID</span>
                   <span class="info-value ticket-id" id="claim-id-header">TKT-001</span>
@@ -88,24 +89,22 @@
                   <i data-lucide="message-circle"></i>
                 </div>
                 <div class="chat-header-text">
-                  <h3 class="chat-title"><%= t('tickets.details.conversation') %></h3>
-                  <p class="chat-subtitle"><%= t('tickets.details.chatWithSupport') %></p>
+                  <h3 class="chat-title">
+                    <%= t('tickets.details.conversation') %>
+                  </h3>
+                  <p class="chat-subtitle">
+                    <%= t('tickets.details.chatWithSupport') %>
+                  </p>
                 </div>
               </div>
 
               <div class="chat-messages" id="chat-messages">
-                <!-- Messages will be populated by JavaScript -->
               </div>
 
               <div class="chat-input-container">
                 <form id="chat-form" class="chat-form">
                   <div class="chat-input-wrapper">
-                    <textarea 
-                      id="message-input" 
-                      class="chat-input" 
-                      placeholder="<%= t('tickets.details.typePlaceholder') %>"
-                      rows="1"
-                    ></textarea>
+                    <textarea id="message-input" class="chat-input" placeholder="<%= t('tickets.details.typePlaceholder') %>" rows="1"></textarea>
                     <button type="button" class="btn-attach" id="btn-attach">
                       <i data-lucide="paperclip"></i>
                     </button>
@@ -137,5 +136,23 @@
 <script>
   lucide.createIcons();
   window.addEventListener('load', () => lucide.createIcons());
+  
+  document.addEventListener('DOMContentLoaded', () => {
+    const navbar = document.getElementById('navbar');
+    if (navbar) {
+      navbar.classList.add('scrolled');
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+            if (!navbar.classList.contains('scrolled')) {
+              navbar.classList.add('scrolled');
+            }
+          }
+        });
+      });
+      observer.observe(navbar, { attributes: true, attributeFilter: ['class'] });
+      const ensureScrolled = () => navbar.classList.add('scrolled');
+      window.addEventListener('scroll', ensureScrolled, { passive: true });
+    }
+  });
 </script>
-

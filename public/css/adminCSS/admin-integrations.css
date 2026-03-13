@@ -77,7 +77,7 @@
 .sync-progress-bar {
     height: 100%;
     width: 100%;
-    background: linear-gradient(90deg, #3b82f6, #8b5cf6, #3b82f6);
+    background: linear-gradient(90deg, var(--aitetsu), var(--namari), var(--aitetsu));
     background-size: 200% 100%;
     animation: progressPulse 1.5s ease-in-out infinite;
     border-radius: 3px;
@@ -104,8 +104,8 @@
 }
 
 .sync-icon {
-    background: rgba(59, 130, 246, 0.12) !important;
-    color: #3b82f6 !important;
+    background: rgba(64, 84, 94, 0.12) !important;
+    color: var(--aitetsu) !important;
 }
 
 .spin-icon {
@@ -563,23 +563,23 @@
 }
 
 .conn-stat-icon.green {
-    background: rgba(16, 185, 129, 0.12);
-    color: #10b981;
+    background: rgba(149, 175, 192, 0.2);
+    color: var(--sei);
 }
 
 .conn-stat-icon.blue {
-    background: rgba(59, 130, 246, 0.12);
-    color: #3b82f6;
+    background: rgba(64, 84, 94, 0.12);
+    color: var(--aitetsu);
 }
 
 .conn-stat-icon.purple {
-    background: rgba(139, 92, 246, 0.12);
-    color: #8b5cf6;
+    background: rgba(142, 156, 166, 0.2);
+    color: var(--namari);
 }
 
 .conn-stat-icon.orange {
-    background: rgba(245, 158, 11, 0.12);
-    color: #f59e0b;
+    background: var(--kintsugi-light);
+    color: var(--kintsugi);
 }
 
 .conn-stat-value {
@@ -631,8 +631,8 @@
 }
 
 .intg-tab.active {
-    background: var(--module-primary, #3b82f6);
-    color: white;
+    background: var(--aitetsu);
+    color: var(--washi);
 }
 
 .intg-tab-content {
@@ -676,11 +676,11 @@
 }
 
 .connection-card.connected .conn-status-indicator {
-    background: #10b981;
+    background: var(--sei);
 }
 
 .connection-card.error .conn-status-indicator {
-    background: #38bdf8;
+    background: var(--namari);
 }
 
 .conn-icon {
@@ -701,8 +701,8 @@
 }
 
 .conn-icon.api {
-    background: rgba(139, 92, 246, 0.12);
-    color: #8b5cf6;
+    background: rgba(64, 84, 94, 0.12);
+    color: var(--aitetsu);
 }
 
 .conn-main-info {

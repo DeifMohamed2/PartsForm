@@ -228,18 +228,10 @@
                 </div>
             </div>
 
-            <!-- Sign In Button (shown when not logged in) -->
-            <% if (!user) { %>
-                <button class="btn-secondary btn-sign-in" id="sign-in-btn">
-        <i data-lucide="user"></i>
-        <span><%= t('nav.user.signIn') %></span>
-      </button>
-                <% } %>
-
-                    <!-- User Profile Dropdown (shown when logged in) -->
-                    <% if (user) { %>
-                        <div class="user-profile-dropdown" id="userProfileDropdown">
-                            <button type="button" class="user-profile-btn user-profile-btn-compact" id="userProfileBtn" title="<%= user.firstName %> <%= user.lastName %>">
+            <!-- User Profile Dropdown (shown when logged in) -->
+            <% if (user) { %>
+                <div class="user-profile-dropdown" id="userProfileDropdown">
+                    <button type="button" class="user-profile-btn user-profile-btn-compact" id="userProfileBtn" title="<%= user.firstName %> <%= user.lastName %>">
           <div class="user-avatar">
             <% if (user.avatar) { %>
               <img src="<%= user.avatar %>" alt="Avatar" class="avatar-image" />
@@ -248,31 +240,52 @@
             <% } %>
           </div>
         </button>
-                            <div class="user-dropdown-menu" id="userDropdownMenu">
-                                <div class="user-dropdown-header">
-                                    <span class="user-dropdown-name"><%= user.firstName %> <%= user.lastName %></span>
-                                    <span class="user-dropdown-email"><%= user.email %></span>
-                                </div>
-                                <div class="user-dropdown-divider"></div>
-                                <a href="/buyer/profile" class="user-dropdown-item">
-                                    <i data-lucide="user"></i>
-                                    <span><%= t('nav.user.profile') %></span>
-                                </a>
-                                <a href="/buyer/settings" class="user-dropdown-item">
-                                    <i data-lucide="settings"></i>
-                                    <span><%= t('nav.user.settings') %></span>
-                                </a>
-                                <div class="user-dropdown-divider"></div>
-                                <button class="user-dropdown-item user-dropdown-logout" id="logoutBtn">
+                    <div class="user-dropdown-menu" id="userDropdownMenu">
+                        <div class="user-dropdown-header">
+                            <span class="user-dropdown-name"><%= user.firstName %> <%= user.lastName %></span>
+                            <span class="user-dropdown-email"><%= user.email %></span>
+                        </div>
+                        <div class="user-dropdown-divider"></div>
+                        <a href="/buyer/profile" class="user-dropdown-item">
+                            <i data-lucide="user"></i>
+                            <span><%= t('nav.user.profile') %></span>
+                        </a>
+                        <a href="/buyer/settings" class="user-dropdown-item">
+                            <i data-lucide="settings"></i>
+                            <span><%= t('nav.user.settings') %></span>
+                        </a>
+                        <div class="user-dropdown-divider"></div>
+                        <button class="user-dropdown-item user-dropdown-logout" id="logoutBtn">
             <i data-lucide="log-out"></i>
             <span><%= t('nav.user.logout') %></span>
           </button>
-                            </div>
+                    </div>
+                </div>
+            <% } else { %>
+                <!-- Guest Profile Dropdown (shown when not logged in) -->
+                <div class="user-profile-dropdown" id="userProfileDropdown">
+                    <button type="button" class="user-profile-btn user-profile-btn-compact" id="userProfileBtn" title="Guest Visitor">
+          <div class="user-avatar user-avatar--guest">
+            <i data-lucide="user-round" class="avatar-guest-icon"></i>
+          </div>
+        </button>
+                    <div class="user-dropdown-menu" id="userDropdownMenu">
+                        <div class="user-dropdown-header">
+                            <span class="user-dropdown-name">Guest Visitor</span>
+                            <span class="user-dropdown-email">Sign in to access your account</span>
                         </div>
-                        <% } else { %>
-                            <!-- Hidden dropdown for JS initialization when not logged in -->
-                            <div class="user-profile-dropdown hidden" id="userProfileDropdown"></div>
-                            <% } %>
+                        <div class="user-dropdown-divider"></div>
+                        <a href="/" class="user-dropdown-item">
+                            <i data-lucide="log-in"></i>
+                            <span><%= t('nav.user.signIn') || 'Sign In' %></span>
+                        </a>
+                        <a href="/register" class="user-dropdown-item">
+                            <i data-lucide="user-plus"></i>
+                            <span>Create Account</span>
+                        </a>
+                    </div>
+                </div>
+            <% } %>
         </div>
     </div>
 </nav>

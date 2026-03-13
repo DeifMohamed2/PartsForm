@@ -1,0 +1,143 @@
+/* ====================================
+   SUPPLIER OVERRIDES — Brand System
+   Shibui (渋い) — Silent Strength
+   No green/gold • Sharp corners • Antartida
+   ==================================== */
+
+/* === GLOBAL: NO BORDER RADIUS — Industrial sharp edges === */
+html.supplier-page .supplier-layout,
+html.supplier-page .supplier-layout *,
+html.supplier-page .supplier-sidebar,
+html.supplier-page .supplier-sidebar *,
+html.supplier-page .supplier-main,
+html.supplier-page .supplier-main *,
+html.supplier-page .supplier-content,
+html.supplier-page .supplier-content *,
+html.supplier-page .supplier-topbar,
+html.supplier-page .supplier-topbar * {
+  border-radius: 0 !important;
+}
+
+/* === GLOBAL TYPOGRAPHY — Antartida body font === */
+html.supplier-page,
+html.supplier-page body {
+  font-family: var(--font-body) !important;
+}
+
+/* === SIDEBAR — Aitetsu solid === */
+html.supplier-page .supplier-sidebar {
+  background: var(--aitetsu) !important;
+}
+
+/* === STAT ICONS — Brand colors (no green, no gold) === */
+html.supplier-page .stat-icon.blue {
+  background: rgba(64, 84, 94, 0.12) !important;
+  color: var(--aitetsu) !important;
+}
+html.supplier-page .stat-icon.green {
+  background: rgba(149, 175, 192, 0.2) !important;
+  color: var(--sei) !important;
+}
+html.supplier-page .stat-icon.orange {
+  background: rgba(142, 156, 166, 0.2) !important;
+  color: var(--namari) !important;
+}
+html.supplier-page .stat-icon.purple {
+  background: rgba(64, 84, 94, 0.12) !important;
+  color: var(--aitetsu) !important;
+}
+html.supplier-page .stat-icon.red {
+  background: rgba(142, 156, 166, 0.2) !important;
+  color: var(--namari) !important;
+}
+
+/* === PRIMARY BUTTON — Aitetsu (like admin) === */
+html.supplier-page .btn-primary {
+  background: var(--aitetsu) !important;
+  color: var(--washi) !important;
+  box-shadow: 0 1px 3px rgba(43, 43, 43, 0.06) !important;
+}
+html.supplier-page .btn-primary:hover {
+  background: #2F3F49 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(43, 43, 43, 0.08) !important;
+}
+
+/* === ACCENT / FOCUS — Sei === */
+html.supplier-page .form-input:focus,
+html.supplier-page .form-select:focus {
+  border-color: var(--sei) !important;
+  box-shadow: 0 0 0 3px var(--color-focus-ring) !important;
+}
+html.supplier-page .btn-secondary:hover,
+html.supplier-page .card-title i {
+  color: var(--aitetsu) !important;
+}
+html.supplier-page .btn-secondary:hover {
+  border-color: var(--aitetsu) !important;
+}
+
+/* === SUCCESS → Sei (no green) === */
+html.supplier-page .badge-success,
+html.supplier-page .toast-success,
+html.supplier-page .alert-success {
+  background: rgba(149, 175, 192, 0.2) !important;
+  border-color: var(--sei) !important;
+  color: var(--aitetsu) !important;
+}
+html.supplier-page .stat-trend.up {
+  color: var(--sei) !important;
+}
+
+/* === DANGER / ERROR → Namari === */
+html.supplier-page .badge-danger,
+html.supplier-page .toast-error,
+html.supplier-page .alert-danger {
+  background: rgba(142, 156, 166, 0.2) !important;
+  border-color: var(--namari) !important;
+  color: var(--namari) !important;
+}
+html.supplier-page .stat-trend.down {
+  color: var(--namari) !important;
+}
+
+/* === WARNING → Kintsugi (minimal use) === */
+html.supplier-page .badge-warning,
+html.supplier-page .toast-warning,
+html.supplier-page .alert-warning {
+  background: var(--kintsugi-light) !important;
+  border-color: var(--kintsugi-border) !important;
+  color: var(--kintsugi) !important;
+}
+
+/* === USER AVATAR / GRADIENTS → Aitetsu === */
+html.supplier-page .user-avatar,
+html.supplier-page .avatar {
+  background: var(--aitetsu) !important;
+}
+
+/* === QUICK ACTION CARDS — Brand icon colors === */
+html.supplier-page .quick-action-icon.primary,
+html.supplier-page .quick-action-icon.info {
+  background: rgba(64, 84, 94, 0.12) !important;
+  color: var(--aitetsu) !important;
+}
+html.supplier-page .quick-action-icon.success {
+  background: rgba(149, 175, 192, 0.2) !important;
+  color: var(--sei) !important;
+}
+html.supplier-page .quick-action-icon.warning {
+  background: rgba(142, 156, 166, 0.2) !important;
+  color: var(--namari) !important;
+}
+
+/* === SPINNER === */
+html.supplier-page .spinner {
+  border-top-color: var(--aitetsu) !important;
+}
+
+/* === TAB ACTIVE === */
+html.supplier-page .tab.active {
+  color: var(--aitetsu) !important;
+  border-bottom-color: var(--aitetsu) !important;
+}

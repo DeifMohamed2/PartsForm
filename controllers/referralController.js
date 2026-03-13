@@ -11,6 +11,7 @@ const ReferralCode = require('../models/ReferralCode');
 const Order = require('../models/Order');
 const Buyer = require('../models/Buyer');
 const emailService = require('../services/emailService');
+const brand = require('../utils/emailBrand');
 
 // ==========================================
 // ADMIN - REFERRAL PARTNER MANAGEMENT
@@ -550,8 +551,8 @@ const createPartner = async (req, res) => {
   <meta name="color-scheme" content="light dark">
   <meta name="supported-color-schemes" content="light dark">
 </head>
-<body style="margin: 0; padding: 0; background-color: #f1f5f9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #f1f5f9;">
+<body style="margin: 0; padding: 0; background-color: ${brand.pageBg}; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: ${brand.pageBg};">
     <tr>
       <td align="center" style="padding: 40px 20px;">
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width: 520px;">
@@ -559,13 +560,13 @@ const createPartner = async (req, res) => {
           <!-- Main Card -->
           <tr>
             <td>
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(43, 82, 120, 0.12);">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: ${brand.cardBg}; overflow: hidden; box-shadow: 0 4px 24px rgba(43, 43, 43, 0.10);">
                 
                 <!-- Logo Header -->
                 <tr>
-                  <td style="background-color: #2b5278; padding: 40px 32px; text-align: center;">
+                  <td style="background-color: ${brand.aitetsu}; padding: 40px 32px; text-align: center;">
                     <img src="${baseUrl}/images/PARTSFORM-LOGO.png" alt="PARTSFORM" width="200" style="display: block; margin: 0 auto 20px; max-width: 200px; height: auto;">
-                    <p style="margin: 0; font-size: 22px; font-weight: 600; color: #ffffff;">Welcome to PARTSFORM!</p>
+                    <p style="margin: 0; font-size: 22px; font-weight: 600; color: ${brand.washi};">Welcome to PARTSFORM!</p>
                     <p style="margin: 8px 0 0 0; font-size: 15px; color: rgba(255, 255, 255, 0.85);">Your Partner Account is Ready</p>
                   </td>
                 </tr>
@@ -573,43 +574,43 @@ const createPartner = async (req, res) => {
                 <!-- Content -->
                 <tr>
                   <td style="padding: 32px;">
-                    <p style="margin: 0 0 20px 0; font-size: 17px; color: #1a2b3d; line-height: 1.5;">
+                    <p style="margin: 0 0 20px 0; font-size: 17px; color: ${brand.kurogane}; line-height: 1.5;">
                       Hi <strong>${partner.firstName}</strong>,
                     </p>
                     
-                    <p style="margin: 0 0 24px 0; font-size: 15px; color: #475569; line-height: 1.6;">
+                    <p style="margin: 0 0 24px 0; font-size: 15px; color: ${brand.namari}; line-height: 1.6;">
                       Welcome to the PARTSFORM Partner Program! Your account has been created and you can now start earning commissions by sharing your referral code.
                     </p>
                     
                     <!-- Credentials Box -->
-                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #f0fdf4; border-radius: 12px; border: 1px solid #bbf7d0; margin-bottom: 24px;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: ${brand.kintsugiLight}; border: 1px solid ${brand.kintsugi}; margin-bottom: 24px;">
                       <tr>
                         <td style="padding: 20px;">
-                          <p style="margin: 0 0 16px 0; font-size: 13px; font-weight: 600; color: #166534; text-transform: uppercase; letter-spacing: 0.5px;">Your Login Credentials</p>
+                          <p style="margin: 0 0 16px 0; font-size: 13px; font-weight: 600; color: ${brand.kurogane}; text-transform: uppercase; letter-spacing: 0.5px;">Your Login Credentials</p>
                           
                           <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
                             <tr>
-                              <td style="padding: 8px 0; border-bottom: 1px solid #dcfce7;">
-                                <span style="font-size: 14px; color: #166534;">Email:</span>
+                              <td style="padding: 8px 0; border-bottom: 1px solid ${brand.suzu};">
+                                <span style="font-size: 14px; color: ${brand.namari};">Email:</span>
                               </td>
-                              <td style="padding: 8px 0; text-align: right; border-bottom: 1px solid #dcfce7;">
-                                <strong style="font-size: 14px; color: #15803d;">${partner.email}</strong>
+                              <td style="padding: 8px 0; text-align: right; border-bottom: 1px solid ${brand.suzu};">
+                                <strong style="font-size: 14px; color: ${brand.kurogane};">${partner.email}</strong>
                               </td>
                             </tr>
                             <tr>
-                              <td style="padding: 8px 0; border-bottom: 1px solid #dcfce7;">
-                                <span style="font-size: 14px; color: #166534;">Password:</span>
+                              <td style="padding: 8px 0; border-bottom: 1px solid ${brand.suzu};">
+                                <span style="font-size: 14px; color: ${brand.namari};">Password:</span>
                               </td>
-                              <td style="padding: 8px 0; text-align: right; border-bottom: 1px solid #dcfce7;">
-                                <code style="font-size: 14px; color: #15803d; background-color: rgba(255, 255, 255, 0.6); padding: 4px 8px; border-radius: 4px;">${password}</code>
+                              <td style="padding: 8px 0; text-align: right; border-bottom: 1px solid ${brand.suzu};">
+                                <code style="font-size: 14px; color: ${brand.kurogane}; background-color: rgba(255, 255, 255, 0.6); padding: 4px 8px;">${password}</code>
                               </td>
                             </tr>
                             <tr>
                               <td style="padding: 8px 0;">
-                                <span style="font-size: 14px; color: #166534;">Referral Code:</span>
+                                <span style="font-size: 14px; color: ${brand.namari};">Referral Code:</span>
                               </td>
                               <td style="padding: 8px 0; text-align: right;">
-                                <strong style="font-size: 14px; color: #15803d;">${referralCodeString}</strong>
+                                <strong style="font-size: 14px; color: ${brand.kintsugi};">${referralCodeString}</strong>
                               </td>
                             </tr>
                           </table>
@@ -621,27 +622,27 @@ const createPartner = async (req, res) => {
                     <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
                       <tr>
                         <td style="text-align: center; padding-bottom: 24px;">
-                          <a href="${loginUrl}" target="_blank" style="display: inline-block; background-color: #2b5278; color: #ffffff; font-size: 16px; font-weight: 600; text-decoration: none; padding: 14px 32px; border-radius: 10px; box-shadow: 0 4px 14px rgba(43, 82, 120, 0.3);">
+                          <a href="${loginUrl}" target="_blank" style="display: inline-block; background-color: ${brand.kintsugi}; color: ${brand.kurogane}; font-size: 16px; font-weight: 600; text-decoration: none; padding: 14px 32px; box-shadow: 0 4px 14px rgba(212, 175, 55, 0.3);">
                             Log In to Your Dashboard →
                           </a>
                         </td>
                       </tr>
                     </table>
                     
-                    <p style="margin: 0 0 20px 0; font-size: 14px; color: #64748b; line-height: 1.6;">
+                    <p style="margin: 0 0 20px 0; font-size: 14px; color: ${brand.namari}; line-height: 1.6;">
                       <strong>Important:</strong> For security, we recommend changing your password after your first login.
                     </p>
                     
                     <!-- Commission Info -->
-                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: ${brand.footerBg}; border: 1px solid ${brand.suzu};">
                       <tr>
                         <td style="padding: 20px;">
-                          <p style="margin: 0 0 12px 0; font-size: 14px; font-weight: 600; color: #1a2b3d;">Your Partner Benefits:</p>
+                          <p style="margin: 0 0 12px 0; font-size: 14px; font-weight: 600; color: ${brand.kurogane};">Your Partner Benefits:</p>
                           <table role="presentation" cellpadding="0" cellspacing="0">
-                            <tr><td style="padding: 4px 0; font-size: 14px; color: #475569;">• <strong>${partner.commissionRate}%</strong> commission on referred orders</td></tr>
-                            <tr><td style="padding: 4px 0; font-size: 14px; color: #475569;">• <strong>${partner.buyerDiscountRate}%</strong> discount for your referrals</td></tr>
-                            <tr><td style="padding: 4px 0; font-size: 14px; color: #475569;">• Real-time tracking dashboard</td></tr>
-                            <tr><td style="padding: 4px 0; font-size: 14px; color: #475569;">• Monthly payouts</td></tr>
+                            <tr><td style="padding: 4px 0; font-size: 14px; color: ${brand.namari};">• <strong>${partner.commissionRate}%</strong> commission on referred orders</td></tr>
+                            <tr><td style="padding: 4px 0; font-size: 14px; color: ${brand.namari};">• <strong>${partner.buyerDiscountRate}%</strong> discount for your referrals</td></tr>
+                            <tr><td style="padding: 4px 0; font-size: 14px; color: ${brand.namari};">• Real-time tracking dashboard</td></tr>
+                            <tr><td style="padding: 4px 0; font-size: 14px; color: ${brand.namari};">• Monthly payouts</td></tr>
                           </table>
                         </td>
                       </tr>
@@ -796,8 +797,8 @@ const updatePartner = async (req, res) => {
   <meta name="color-scheme" content="light dark">
   <meta name="supported-color-schemes" content="light dark">
 </head>
-<body style="margin: 0; padding: 0; background-color: #f1f5f9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #f1f5f9;">
+<body style="margin: 0; padding: 0; background-color: ${brand.pageBg}; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: ${brand.pageBg};">
     <tr>
       <td align="center" style="padding: 40px 20px;">
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width: 520px;">
@@ -805,13 +806,13 @@ const updatePartner = async (req, res) => {
           <!-- Main Card -->
           <tr>
             <td>
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(43, 82, 120, 0.12);">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: ${brand.cardBg}; overflow: hidden; box-shadow: 0 4px 24px rgba(43, 43, 43, 0.10);">
                 
                 <!-- Logo Header -->
                 <tr>
-                  <td style="background-color: #2b5278; padding: 40px 32px; text-align: center;">
+                  <td style="background-color: ${brand.aitetsu}; padding: 40px 32px; text-align: center;">
                     <img src="${baseUrl}/images/PARTSFORM-LOGO.png" alt="PARTSFORM" width="200" style="display: block; margin: 0 auto 20px; max-width: 200px; height: auto;">
-                    <p style="margin: 0; font-size: 22px; font-weight: 600; color: #ffffff;">Password Updated</p>
+                    <p style="margin: 0; font-size: 22px; font-weight: 600; color: ${brand.washi};">Password Updated</p>
                     <p style="margin: 8px 0 0 0; font-size: 15px; color: rgba(255, 255, 255, 0.85);">Your account credentials have been changed</p>
                   </td>
                 </tr>
@@ -819,35 +820,35 @@ const updatePartner = async (req, res) => {
                 <!-- Content -->
                 <tr>
                   <td style="padding: 32px;">
-                    <p style="margin: 0 0 20px 0; font-size: 17px; color: #1a2b3d; line-height: 1.5;">
+                    <p style="margin: 0 0 20px 0; font-size: 17px; color: ${brand.kurogane}; line-height: 1.5;">
                       Hi <strong>${partner.firstName}</strong>,
                     </p>
                     
-                    <p style="margin: 0 0 24px 0; font-size: 15px; color: #475569; line-height: 1.6;">
+                    <p style="margin: 0 0 24px 0; font-size: 15px; color: ${brand.namari}; line-height: 1.6;">
                       Your partner portal password has been updated by an administrator. Please use the new credentials below to access your dashboard.
                     </p>
                     
                     <!-- Credentials Box -->
-                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #f0fdf4; border-radius: 12px; border: 1px solid #bbf7d0; margin-bottom: 24px;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: ${brand.kintsugiLight}; border: 1px solid ${brand.kintsugi}; margin-bottom: 24px;">
                       <tr>
                         <td style="padding: 20px;">
-                          <p style="margin: 0 0 16px 0; font-size: 13px; font-weight: 600; color: #166534; text-transform: uppercase; letter-spacing: 0.5px;">Your New Credentials</p>
+                          <p style="margin: 0 0 16px 0; font-size: 13px; font-weight: 600; color: ${brand.kurogane}; text-transform: uppercase; letter-spacing: 0.5px;">Your New Credentials</p>
                           
                           <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
                             <tr>
-                              <td style="padding: 8px 0; border-bottom: 1px solid #dcfce7;">
-                                <span style="font-size: 14px; color: #166534;">Email:</span>
+                              <td style="padding: 8px 0; border-bottom: 1px solid ${brand.suzu};">
+                                <span style="font-size: 14px; color: ${brand.namari};">Email:</span>
                               </td>
-                              <td style="padding: 8px 0; text-align: right; border-bottom: 1px solid #dcfce7;">
-                                <strong style="font-size: 14px; color: #15803d;">${partner.email}</strong>
+                              <td style="padding: 8px 0; text-align: right; border-bottom: 1px solid ${brand.suzu};">
+                                <strong style="font-size: 14px; color: ${brand.kurogane};">${partner.email}</strong>
                               </td>
                             </tr>
                             <tr>
                               <td style="padding: 8px 0;">
-                                <span style="font-size: 14px; color: #166534;">New Password:</span>
+                                <span style="font-size: 14px; color: ${brand.namari};">New Password:</span>
                               </td>
                               <td style="padding: 8px 0; text-align: right;">
-                                <code style="font-size: 14px; color: #15803d; background-color: rgba(255, 255, 255, 0.6); padding: 4px 8px; border-radius: 4px;">${newPassword}</code>
+                                <code style="font-size: 14px; color: ${brand.kurogane}; background-color: rgba(255, 255, 255, 0.6); padding: 4px 8px;">${newPassword}</code>
                               </td>
                             </tr>
                           </table>
@@ -859,14 +860,14 @@ const updatePartner = async (req, res) => {
                     <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
                       <tr>
                         <td style="text-align: center; padding-bottom: 24px;">
-                          <a href="${loginUrl}" target="_blank" style="display: inline-block; background-color: #2b5278; color: #ffffff; font-size: 16px; font-weight: 600; text-decoration: none; padding: 14px 32px; border-radius: 10px; box-shadow: 0 4px 14px rgba(43, 82, 120, 0.3);">
+                          <a href="${loginUrl}" target="_blank" style="display: inline-block; background-color: ${brand.kintsugi}; color: ${brand.kurogane}; font-size: 16px; font-weight: 600; text-decoration: none; padding: 14px 32px; box-shadow: 0 4px 14px rgba(212, 175, 55, 0.3);">
                             Log In to Your Dashboard →
                           </a>
                         </td>
                       </tr>
                     </table>
                     
-                    <p style="margin: 0; font-size: 14px; color: #64748b; line-height: 1.6;">
+                    <p style="margin: 0; font-size: 14px; color: ${brand.namari}; line-height: 1.6;">
                       If you did not request this change, please contact us immediately.
                     </p>
                   </td>
@@ -879,7 +880,7 @@ const updatePartner = async (req, res) => {
           <!-- Footer -->
           <tr>
             <td style="padding: 24px; text-align: center;">
-              <p style="margin: 0; font-size: 12px; color: #94a3b8;">
+              <p style="margin: 0; font-size: 12px; color: ${brand.namari};">
                 © ${new Date().getFullYear()} PARTSFORM. All rights reserved.
               </p>
             </td>
@@ -2222,8 +2223,8 @@ const approveApplication = async (req, res) => {
   <meta name="color-scheme" content="light dark">
   <meta name="supported-color-schemes" content="light dark">
 </head>
-<body style="margin: 0; padding: 0; background-color: #f1f5f9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #f1f5f9;">
+<body style="margin: 0; padding: 0; background-color: ${brand.pageBg}; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: ${brand.pageBg};">
     <tr>
       <td align="center" style="padding: 40px 20px;">
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width: 520px;">
@@ -2231,13 +2232,13 @@ const approveApplication = async (req, res) => {
           <!-- Main Card -->
           <tr>
             <td>
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(43, 82, 120, 0.12);">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: ${brand.cardBg}; overflow: hidden; box-shadow: 0 4px 24px rgba(43, 43, 43, 0.10);">
                 
                 <!-- Logo Header -->
                 <tr>
-                  <td style="background-color: #2b5278; padding: 40px 32px; text-align: center;">
+                  <td style="background-color: ${brand.aitetsu}; padding: 40px 32px; text-align: center;">
                     <img src="${baseUrl}/images/PARTSFORM-LOGO.png" alt="PARTSFORM" width="200" style="display: block; margin: 0 auto 20px; max-width: 200px; height: auto;">
-                    <p style="margin: 0; font-size: 22px; font-weight: 600; color: #ffffff;">Partner Account Approved!</p>
+                    <p style="margin: 0; font-size: 22px; font-weight: 600; color: ${brand.washi};">Partner Account Approved!</p>
                     <p style="margin: 8px 0 0 0; font-size: 15px; color: rgba(255, 255, 255, 0.85);">Welcome to the PARTSFORM Partner Program</p>
                   </td>
                 </tr>
@@ -2245,43 +2246,43 @@ const approveApplication = async (req, res) => {
                 <!-- Content -->
                 <tr>
                   <td style="padding: 32px;">
-                    <p style="margin: 0 0 20px 0; font-size: 17px; color: #1a2b3d; line-height: 1.5;">
+                    <p style="margin: 0 0 20px 0; font-size: 17px; color: ${brand.kurogane}; line-height: 1.5;">
                       Hi <strong>${partner.firstName}</strong>,
                     </p>
                     
-                    <p style="margin: 0 0 24px 0; font-size: 15px; color: #475569; line-height: 1.6;">
+                    <p style="margin: 0 0 24px 0; font-size: 15px; color: ${brand.namari}; line-height: 1.6;">
                       Great news! Your application has been approved. You can now log in to your partner dashboard and start earning commissions.
                     </p>
                     
                     <!-- Credentials Box -->
-                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #f0fdf4; border-radius: 12px; border: 1px solid #bbf7d0; margin-bottom: 24px;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: ${brand.kintsugiLight}; border: 1px solid ${brand.kintsugi}; margin-bottom: 24px;">
                       <tr>
                         <td style="padding: 20px;">
-                          <p style="margin: 0 0 16px 0; font-size: 13px; font-weight: 600; color: #166534; text-transform: uppercase; letter-spacing: 0.5px;">Your Login Credentials</p>
+                          <p style="margin: 0 0 16px 0; font-size: 13px; font-weight: 600; color: ${brand.kurogane}; text-transform: uppercase; letter-spacing: 0.5px;">Your Login Credentials</p>
                           
                           <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
                             <tr>
-                              <td style="padding: 8px 0; border-bottom: 1px solid #dcfce7;">
-                                <span style="font-size: 14px; color: #166534;">Email:</span>
+                              <td style="padding: 8px 0; border-bottom: 1px solid ${brand.suzu};">
+                                <span style="font-size: 14px; color: ${brand.namari};">Email:</span>
                               </td>
-                              <td style="padding: 8px 0; text-align: right; border-bottom: 1px solid #dcfce7;">
-                                <strong style="font-size: 14px; color: #15803d;">${partner.email}</strong>
+                              <td style="padding: 8px 0; text-align: right; border-bottom: 1px solid ${brand.suzu};">
+                                <strong style="font-size: 14px; color: ${brand.kurogane};">${partner.email}</strong>
                               </td>
                             </tr>
                             <tr>
-                              <td style="padding: 8px 0; border-bottom: 1px solid #dcfce7;">
-                                <span style="font-size: 14px; color: #166534;">Password:</span>
+                              <td style="padding: 8px 0; border-bottom: 1px solid ${brand.suzu};">
+                                <span style="font-size: 14px; color: ${brand.namari};">Password:</span>
                               </td>
-                              <td style="padding: 8px 0; text-align: right; border-bottom: 1px solid #dcfce7;">
-                                <code style="font-size: 14px; color: #15803d; background-color: rgba(255, 255, 255, 0.6); padding: 4px 8px; border-radius: 4px;">${password}</code>
+                              <td style="padding: 8px 0; text-align: right; border-bottom: 1px solid ${brand.suzu};">
+                                <code style="font-size: 14px; color: ${brand.kurogane}; background-color: rgba(255, 255, 255, 0.6); padding: 4px 8px;">${password}</code>
                               </td>
                             </tr>
                             <tr>
                               <td style="padding: 8px 0;">
-                                <span style="font-size: 14px; color: #166534;">Referral Code:</span>
+                                <span style="font-size: 14px; color: ${brand.namari};">Referral Code:</span>
                               </td>
                               <td style="padding: 8px 0; text-align: right;">
-                                <strong style="font-size: 14px; color: #15803d;">${defaultCodeString}</strong>
+                                <strong style="font-size: 14px; color: ${brand.kintsugi};">${defaultCodeString}</strong>
                               </td>
                             </tr>
                           </table>
@@ -2293,27 +2294,27 @@ const approveApplication = async (req, res) => {
                     <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
                       <tr>
                         <td style="text-align: center; padding-bottom: 24px;">
-                          <a href="${loginUrl}" target="_blank" style="display: inline-block; background-color: #2b5278; color: #ffffff; font-size: 16px; font-weight: 600; text-decoration: none; padding: 14px 32px; border-radius: 10px; box-shadow: 0 4px 14px rgba(43, 82, 120, 0.3);">
+                          <a href="${loginUrl}" target="_blank" style="display: inline-block; background-color: ${brand.kintsugi}; color: ${brand.kurogane}; font-size: 16px; font-weight: 600; text-decoration: none; padding: 14px 32px; box-shadow: 0 4px 14px rgba(212, 175, 55, 0.3);">
                             Log In to Your Dashboard →
                           </a>
                         </td>
                       </tr>
                     </table>
                     
-                    <p style="margin: 0 0 20px 0; font-size: 14px; color: #64748b; line-height: 1.6;">
+                    <p style="margin: 0 0 20px 0; font-size: 14px; color: ${brand.namari}; line-height: 1.6;">
                       <strong>Important:</strong> For security, we recommend changing your password after your first login.
                     </p>
                     
                     <!-- Commission Info -->
-                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: ${brand.footerBg}; border: 1px solid ${brand.suzu};">
                       <tr>
                         <td style="padding: 20px;">
-                          <p style="margin: 0 0 12px 0; font-size: 14px; font-weight: 600; color: #1a2b3d;">Your Partner Benefits:</p>
+                          <p style="margin: 0 0 12px 0; font-size: 14px; font-weight: 600; color: ${brand.kurogane};">Your Partner Benefits:</p>
                           <table role="presentation" cellpadding="0" cellspacing="0">
-                            <tr><td style="padding: 4px 0; font-size: 14px; color: #475569;">• <strong>${partner.commissionRate}%</strong> commission on referred orders</td></tr>
-                            <tr><td style="padding: 4px 0; font-size: 14px; color: #475569;">• <strong>${partner.buyerDiscountRate}%</strong> discount for your referrals</td></tr>
-                            <tr><td style="padding: 4px 0; font-size: 14px; color: #475569;">• Real-time tracking dashboard</td></tr>
-                            <tr><td style="padding: 4px 0; font-size: 14px; color: #475569;">• Monthly payouts</td></tr>
+                            <tr><td style="padding: 4px 0; font-size: 14px; color: ${brand.namari};">• <strong>${partner.commissionRate}%</strong> commission on referred orders</td></tr>
+                            <tr><td style="padding: 4px 0; font-size: 14px; color: ${brand.namari};">• <strong>${partner.buyerDiscountRate}%</strong> discount for your referrals</td></tr>
+                            <tr><td style="padding: 4px 0; font-size: 14px; color: ${brand.namari};">• Real-time tracking dashboard</td></tr>
+                            <tr><td style="padding: 4px 0; font-size: 14px; color: ${brand.namari};">• Monthly payouts</td></tr>
                           </table>
                         </td>
                       </tr>
@@ -2328,10 +2329,10 @@ const approveApplication = async (req, res) => {
           <!-- Footer -->
           <tr>
             <td style="padding: 24px; text-align: center;">
-              <p style="margin: 0 0 8px 0; font-size: 13px; color: #64748b;">
+              <p style="margin: 0 0 8px 0; font-size: 13px; color: ${brand.namari};">
                 Questions? Just reply to this email.
               </p>
-              <p style="margin: 0; font-size: 12px; color: #94a3b8;">
+              <p style="margin: 0; font-size: 12px; color: ${brand.namari};">
                 © ${new Date().getFullYear()} PARTSFORM. All rights reserved.
               </p>
             </td>

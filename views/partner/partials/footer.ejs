@@ -31,12 +31,25 @@
 
       const sidebar = document.getElementById('partnerSidebar');
       const toggle = document.getElementById('partnerSidebarToggle');
+      const overlay = document.getElementById('partnerSidebarOverlay');
 
-      if (sidebar && toggle) {
-        toggle.addEventListener('click', function() {
-          sidebar.classList.toggle('open');
-        });
+      function closeSidebar() {
+        if (sidebar) sidebar.classList.remove('open');
+        if (overlay) overlay.classList.remove('active');
       }
+
+      function openSidebar() {
+        if (sidebar) sidebar.classList.add('open');
+        if (overlay) overlay.classList.add('active');
+      }
+
+      function toggleSidebar() {
+        sidebar.classList.toggle('open');
+        overlay.classList.toggle('active');
+      }
+
+      if (toggle) toggle.addEventListener('click', toggleSidebar);
+      if (overlay) overlay.addEventListener('click', closeSidebar);
     });
   </script>
 </body>

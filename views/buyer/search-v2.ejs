@@ -322,9 +322,11 @@
                             <div class="ai-excel-title-content">
                                 <h3 class="modal-title">
                                     <%= t('searchResults.excel.title') %>
-                                    <span class="ai-badge"><%= t('searchResults.excel.aiBadge') %></span>
+                                        <span class="ai-badge"><%= t('searchResults.excel.aiBadge') %></span>
                                 </h3>
-                                <p class="ai-excel-subtitle"><%= t('searchResults.excel.subtitle') %></p>
+                                <p class="ai-excel-subtitle">
+                                    <%= t('searchResults.excel.subtitle') %>
+                                </p>
                             </div>
                         </div>
                         <button class="modal-close" id="excel-modal-close">
@@ -341,7 +343,9 @@
                                     <i data-lucide="alert-triangle"></i>
                                 </div>
                                 <div class="upload-error-content">
-                                    <h4 class="upload-error-title" id="upload-error-title"><%= t('searchResults.excel.fileTooLarge') %></h4>
+                                    <h4 class="upload-error-title" id="upload-error-title">
+                                        <%= t('searchResults.excel.fileTooLarge') %>
+                                    </h4>
                                     <p class="upload-error-message" id="upload-error-message"></p>
                                     <div class="upload-error-details" id="upload-error-details"></div>
                                 </div>
@@ -363,15 +367,19 @@
                                         <i data-lucide="sparkles" class="sparkle s3"></i>
                                     </div>
                                 </div>
-                                
-                                <h4 class="upload-title"><%= t('searchResults.excel.dragDrop') %></h4>
-                                <p class="upload-subtitle"><%= t('searchResults.excel.aiExtract') %></p>
-                                
+
+                                <h4 class="upload-title">
+                                    <%= t('searchResults.excel.dragDrop') %>
+                                </h4>
+                                <p class="upload-subtitle">
+                                    <%= t('searchResults.excel.aiExtract') %>
+                                </p>
+
                                 <button class="btn-primary ai-browse-btn" id="browse-file-btn">
                                     <i data-lucide="folder-open"></i>
                                     <span><%= t('searchResults.excel.browseFiles') %></span>
                                 </button>
-                                
+
                                 <p class="upload-hint">
                                     <i data-lucide="check-circle"></i>
                                     <%= t('searchResults.excel.supportedFormats') %>
@@ -403,11 +411,13 @@
                                         <div class="ring r3"></div>
                                     </div>
                                 </div>
-                                
+
                                 <div class="ai-analyzing-content">
-                                    <h4 class="ai-analyzing-title"><%= t('searchResults.excel.analyzing') %></h4>
+                                    <h4 class="ai-analyzing-title">
+                                        <%= t('searchResults.excel.analyzing') %>
+                                    </h4>
                                     <p class="ai-analyzing-file" id="analyzing-file-name">processing file.xlsx</p>
-                                    
+
                                     <div class="ai-analyzing-steps">
                                         <div class="ai-step" id="ai-step-reading">
                                             <div class="ai-step-icon"><i data-lucide="file-search"></i></div>
@@ -442,8 +452,12 @@
                                     <i data-lucide="sparkles"></i>
                                 </div>
                                 <div class="ai-summary-content">
-                                    <h4 class="ai-summary-title" id="ai-summary-title"><%= t('searchResults.excel.analysisComplete') %></h4>
-                                    <p class="ai-summary-text" id="ai-summary-text"><%= t('searchResults.excel.partsReady') %></p>
+                                    <h4 class="ai-summary-title" id="ai-summary-title">
+                                        <%= t('searchResults.excel.analysisComplete') %>
+                                    </h4>
+                                    <p class="ai-summary-text" id="ai-summary-text">
+                                        <%= t('searchResults.excel.partsReady') %>
+                                    </p>
                                 </div>
                                 <div class="ai-summary-badge" id="ai-summary-badge">
                                     <i data-lucide="zap"></i>
@@ -454,11 +468,15 @@
                             <!-- Data Quality Indicator -->
                             <div class="ai-data-quality" id="ai-data-quality">
                                 <div class="quality-meter">
-                                    <div class="quality-label"><%= t('searchResults.excel.dataQuality') %></div>
+                                    <div class="quality-label">
+                                        <%= t('searchResults.excel.dataQuality') %>
+                                    </div>
                                     <div class="quality-bar">
                                         <div class="quality-fill" id="quality-fill"></div>
                                     </div>
-                                    <div class="quality-text" id="quality-text"><%= t('searchResults.excel.qualityGood') %></div>
+                                    <div class="quality-text" id="quality-text">
+                                        <%= t('searchResults.excel.qualityGood') %>
+                                    </div>
                                 </div>
                                 <div class="quality-issues hidden" id="quality-issues">
                                     <i data-lucide="alert-circle"></i>
@@ -512,10 +530,12 @@
                             <!-- Analytics Summary -->
                             <div class="excel-analytics" id="excel-analytics">
                                 <div class="analytics-header">
-                                    <h4><%= t('searchResults.excel.importAnalytics') %></h4>
+                                    <h4>
+                                        <%= t('searchResults.excel.importAnalytics') %>
+                                    </h4>
                                     <span class="analytics-filename" id="analytics-filename">file.xlsx</span>
                                 </div>
-                                
+
                                 <!-- Stats Cards -->
                                 <div class="analytics-stats">
                                     <div class="stat-card stat-total">
@@ -524,7 +544,9 @@
                                         </div>
                                         <div class="stat-content">
                                             <div class="stat-value" id="stat-total">0</div>
-                                            <div class="stat-label"><%= t('searchResults.excel.totalParts') %></div>
+                                            <div class="stat-label">
+                                                <%= t('searchResults.excel.totalParts') %>
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="stat-card stat-found">
@@ -533,7 +555,9 @@
                                         </div>
                                         <div class="stat-content">
                                             <div class="stat-value" id="stat-found">0</div>
-                                            <div class="stat-label"><%= t('searchResults.excel.found') %></div>
+                                            <div class="stat-label">
+                                                <%= t('searchResults.excel.found') %>
+                                            </div>
                                         </div>
                                         <div class="stat-percent stat-percent-found" id="stat-percent-found">0%</div>
                                     </div>
@@ -543,7 +567,9 @@
                                         </div>
                                         <div class="stat-content">
                                             <div class="stat-value" id="stat-not-found">0</div>
-                                            <div class="stat-label"><%= t('searchResults.excel.notFound') %></div>
+                                            <div class="stat-label">
+                                                <%= t('searchResults.excel.notFound') %>
+                                            </div>
                                         </div>
                                         <div class="stat-percent stat-percent-not-found" id="stat-percent-not-found">0%</div>
                                     </div>
@@ -553,12 +579,16 @@
                                         </div>
                                         <div class="stat-content">
                                             <div class="stat-value" id="stat-duplicates">0</div>
-                                            <div class="stat-label"><%= t('searchResults.excel.duplicates') %></div>
+                                            <div class="stat-label">
+                                                <%= t('searchResults.excel.duplicates') %>
+                                            </div>
                                         </div>
-                                        <div class="stat-note"><%= t('searchResults.excel.notCounted') %></div>
+                                        <div class="stat-note">
+                                            <%= t('searchResults.excel.notCounted') %>
+                                        </div>
                                     </div>
                                 </div>
-                                
+
                                 <!-- Success Rate Bar -->
                                 <div class="success-rate-container">
                                     <div class="success-rate-header">
@@ -569,7 +599,7 @@
                                         <div class="success-rate-fill" id="success-rate-fill"></div>
                                     </div>
                                 </div>
-                                
+
                                 <!-- Not Found Parts List -->
                                 <div class="not-found-section hidden" id="not-found-section">
                                     <div class="not-found-header">
@@ -583,7 +613,7 @@
                                         <!-- Not found parts will be listed here -->
                                     </div>
                                 </div>
-                                
+
                                 <!-- Duplicates Warning -->
                                 <div class="duplicates-section hidden" id="duplicates-section">
                                     <div class="duplicates-header">
@@ -601,8 +631,12 @@
 
                             <div class="ai-search-header">
                                 <div class="search-header-left">
-                                    <h4><%= t('searchResults.excel.searchResultsTitle') %></h4>
-                                    <p class="search-summary" id="search-summary"><%= t('searchResults.excel.foundOptions') %></p>
+                                    <h4>
+                                        <%= t('searchResults.excel.searchResultsTitle') %>
+                                    </h4>
+                                    <p class="search-summary" id="search-summary">
+                                        <%= t('searchResults.excel.foundOptions') %>
+                                    </p>
                                 </div>
                                 <div class="search-header-right">
                                     <button class="btn-secondary" id="back-to-parts-btn">

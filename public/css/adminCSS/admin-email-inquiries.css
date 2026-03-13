@@ -2,6 +2,77 @@
 /* Professional styling for email inquiries management pages */
 
 /* ================================
+   Page Header & Search
+   ================================ */
+.tickets-page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.tickets-page-header h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--admin-text-primary);
+    margin: 0;
+}
+
+.tickets-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.tickets-search-container {
+    position: relative;
+    display: flex;
+    width: 280px;
+}
+
+.tickets-search-container .search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    color: var(--admin-text-muted);
+    pointer-events: none;
+}
+
+.tickets-search-container input {
+    width: 100%;
+    padding: 0.7rem 1rem 0.7rem 2.75rem;
+    background: var(--admin-bg-primary);
+    border: 1px solid var(--admin-border);
+    border-radius: 0 !important;
+    color: var(--admin-text-primary);
+    font-size: 0.9rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.tickets-search-container input:focus {
+    outline: none;
+    border-color: var(--aitetsu);
+    box-shadow: 0 0 0 3px rgba(64, 84, 94, 0.15);
+}
+
+.tickets-search-container input::placeholder {
+    color: var(--admin-text-muted);
+}
+
+.tickets-filters {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+/* ================================
    Stats Grid - Dashboard Style
    ================================ */
 .inquiry-stats-grid {
@@ -22,7 +93,7 @@
 }
 
 .inquiry-stat-card:hover {
-    border-color: var(--admin-border-medium, #cbd5e1);
+    border-color: var(--aitetsu);
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
@@ -44,19 +115,22 @@
 }
 
 .inquiry-stat-icon.orange {
-    background: linear-gradient(135deg, #f59e0b, #d97706);
+    background: var(--kintsugi);
+    color: var(--kurogane);
 }
 
 .inquiry-stat-icon.blue {
-    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    background: var(--aitetsu);
 }
 
 .inquiry-stat-icon.green {
-    background: linear-gradient(135deg, #10b981, #059669);
+    background: var(--sei);
+    color: var(--washi);
 }
 
 .inquiry-stat-icon.purple {
-    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    background: var(--namari);
+    color: var(--washi);
 }
 
 .inquiry-stat-value {
@@ -102,12 +176,12 @@
     width: 12px;
     height: 12px;
     border-radius: 0 !important;
-    background: #ef4444;
+    background: var(--namari);
     flex-shrink: 0;
 }
 
 .scheduler-status .status-dot.running {
-    background: #10b981;
+    background: var(--sei);
     animation: statusPulse 2s infinite;
 }
 
@@ -157,14 +231,14 @@
 }
 
 .inquiry-card:hover {
-    border-color: var(--module-primary, var(--admin-primary));
+    border-color: var(--aitetsu);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     transform: translateY(-1px);
 }
 
 .inquiry-card.unread {
-    background: linear-gradient(90deg, rgba(43, 82, 120, 0.04), transparent);
-    border-left: 4px solid var(--module-primary, #2b5278);
+    background: linear-gradient(90deg, rgba(64, 84, 94, 0.06), transparent);
+    border-left: 4px solid var(--aitetsu);
 }
 
 /* Inquiry Header */
@@ -179,7 +253,7 @@
     width: 44px;
     height: 44px;
     border-radius: 0 !important;
-    background: var(--module-primary, #2b5278);
+    background: var(--aitetsu);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -238,17 +312,17 @@
     letter-spacing: 0.02em;
 }
 
-.inquiry-badge.status-received { background: #fef3c7; color: #92400e; }
-.inquiry-badge.status-acknowledged { background: #dbeafe; color: #1e40af; }
-.inquiry-badge.status-processing { background: #e0e7ff; color: #3730a3; }
-.inquiry-badge.status-searching { background: #f3e8ff; color: #6b21a8; }
-.inquiry-badge.status-quotation_ready { background: #d1fae5; color: #065f46; }
-.inquiry-badge.status-quotation_sent { background: #10b981; color: white; }
-.inquiry-badge.status-failed { background: #fee2e2; color: #991b1b; }
-.inquiry-badge.status-spam { background: #f3f4f6; color: #6b7280; }
+.inquiry-badge.status-received { background: var(--kintsugi-light); color: var(--kintsugi); }
+.inquiry-badge.status-acknowledged { background: rgba(64, 84, 94, 0.15); color: var(--aitetsu); }
+.inquiry-badge.status-processing { background: rgba(64, 84, 94, 0.15); color: var(--aitetsu); }
+.inquiry-badge.status-searching { background: rgba(142, 156, 166, 0.2); color: var(--namari); }
+.inquiry-badge.status-quotation_ready { background: rgba(149, 175, 192, 0.2); color: var(--sei); }
+.inquiry-badge.status-quotation_sent { background: var(--sei); color: var(--washi); }
+.inquiry-badge.status-failed { background: rgba(142, 156, 166, 0.2); color: var(--namari); }
+.inquiry-badge.status-spam { background: rgba(248, 250, 252, 0.9); color: var(--namari); }
 
-.inquiry-badge.urgency-urgent { background: #fee2e2; color: #991b1b; }
-.inquiry-badge.urgency-high { background: #ffedd5; color: #9a3412; }
+.inquiry-badge.urgency-urgent { background: rgba(142, 156, 166, 0.2); color: var(--namari); }
+.inquiry-badge.urgency-high { background: var(--kintsugi-light); color: var(--kintsugi); }
 
 /* Inquiry Footer */
 .inquiry-footer {
@@ -256,7 +330,7 @@
     align-items: center;
     gap: 1rem;
     padding-top: 0.75rem;
-    border-top: 1px solid var(--admin-border-light, #f3f4f6);
+    border-top: 1px solid var(--admin-border);
     margin-top: 0.75rem;
 }
 
@@ -279,13 +353,13 @@
     height: 14px;
 }
 
-.inquiry-stat .found { color: #10b981; }
-.inquiry-stat .not-found { color: #ef4444; }
+.inquiry-stat .found { color: var(--sei); }
+.inquiry-stat .not-found { color: var(--namari); }
 
 .inquiry-amount {
     font-weight: 700;
     font-size: 1rem;
-    color: var(--module-primary, #2b5278);
+    color: var(--aitetsu);
 }
 
 /* ================================
@@ -321,8 +395,8 @@
 
 .filter-select:focus {
     outline: none;
-    border-color: var(--module-primary, #2b5278);
-    box-shadow: 0 0 0 3px rgba(43, 82, 120, 0.1);
+    border-color: var(--aitetsu);
+    box-shadow: 0 0 0 3px rgba(64, 84, 94, 0.15);
 }
 
 /* ================================
@@ -333,8 +407,8 @@
     align-items: center;
     gap: 0.4rem;
     padding: 0.5rem 1rem;
-    background: var(--module-primary, #2b5278);
-    color: white;
+    background: var(--aitetsu);
+    color: var(--washi);
     border-radius: 0 !important;
     font-size: 0.85rem;
     font-weight: 600;
@@ -400,13 +474,13 @@
 }
 
 .inquiry-pagination .pagination-btn:hover:not(:disabled) {
-    border-color: var(--module-primary, #2b5278);
-    color: var(--module-primary, #2b5278);
+    border-color: var(--aitetsu);
+    color: var(--aitetsu);
 }
 
 .inquiry-pagination .pagination-btn.active {
-    background: var(--module-primary, #2b5278);
-    border-color: var(--module-primary, #2b5278);
+    background: var(--aitetsu);
+    border-color: var(--aitetsu);
     color: white;
 }
 
@@ -438,7 +512,7 @@
     width: 64px;
     height: 64px;
     border-radius: 0 !important;
-    background: var(--module-primary, #2b5278);
+    background: var(--aitetsu);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -532,7 +606,7 @@
 .detail-card-header i {
     width: 18px;
     height: 18px;
-    color: var(--module-primary, #2b5278);
+    color: var(--aitetsu);
 }
 
 .detail-card-body {
@@ -601,29 +675,28 @@
 
 .part-status.found,
 .part-status.in-stock {
-    background: linear-gradient(135deg, #10b981, #059669);
-    color: #ffffff;
-    box-shadow: 0 2px 6px rgba(16, 185, 129, 0.35);
+    background: var(--sei);
+    color: var(--washi);
+    box-shadow: 0 2px 6px rgba(149, 175, 192, 0.35);
 }
 
 .part-status.not-found,
 .part-status.out-of-stock {
-    background: linear-gradient(135deg, #ef4444, #dc2626);
-    color: #ffffff;
-    box-shadow: 0 2px 6px rgba(239, 68, 68, 0.35);
+    background: var(--namari);
+    color: var(--washi);
+    box-shadow: 0 2px 6px rgba(142, 156, 166, 0.35);
 }
 
 .part-status.low-stock {
-    background: linear-gradient(135deg, #f59e0b, #d97706);
-    color: #ffffff;
-    box-shadow: 0 2px 6px rgba(245, 158, 11, 0.35);
+    background: var(--kintsugi);
+    color: var(--kurogane);
+    box-shadow: 0 2px 6px rgba(212, 175, 55, 0.35);
 }
 
 .part-status.pending,
 .part-status.tbd {
-    background: linear-gradient(135deg, #6b7280, #4b5563);
-    color: #ffffff;
-    box-shadow: 0 2px 6px rgba(107, 114, 128, 0.35);
+    background: var(--namari);
+    color: var(--washi);
 }
 
 .part-status i {
@@ -670,7 +743,7 @@
    Quotation Summary
    ================================ */
 .quotation-summary {
-    background: rgba(43, 82, 120, 0.06);
+    background: rgba(64, 84, 94, 0.06);
     padding: 1rem;
     border-radius: 0 !important;
     margin-bottom: 1rem;
@@ -679,7 +752,7 @@
 .quotation-total {
     font-size: 1.75rem;
     font-weight: 700;
-    color: var(--module-primary, #2b5278);
+    color: var(--aitetsu);
 }
 
 .quotation-meta {
@@ -709,7 +782,7 @@
 .attachment-item i {
     width: 20px;
     height: 20px;
-    color: var(--module-primary, #2b5278);
+    color: var(--aitetsu);
 }
 
 .attachment-info {
@@ -738,8 +811,8 @@
     font-weight: 600;
 }
 
-.attachment-badge.processed { background: #d1fae5; color: #065f46; }
-.attachment-badge.pending { background: #fef3c7; color: #92400e; }
+.attachment-badge.processed { background: rgba(149, 175, 192, 0.2); color: var(--sei); }
+.attachment-badge.pending { background: var(--kintsugi-light); color: var(--kintsugi); }
 
 /* ================================
    Notes
@@ -752,7 +825,7 @@
 
 .note-item {
     padding: 0.75rem;
-    border-left: 3px solid var(--module-primary, #2b5278);
+    border-left: 3px solid var(--aitetsu);
     background: var(--admin-bg-tertiary, #f9fafb);
     margin-bottom: 0.75rem;
     border-radius: 0 !important;
@@ -790,7 +863,7 @@
 
 .add-note-form textarea:focus {
     outline: none;
-    border-color: var(--module-primary, #2b5278);
+    border-color: var(--aitetsu);
 }
 
 /* ================================
@@ -831,12 +904,12 @@
 }
 
 .timeline-dot.completed {
-    background: #10b981;
-    color: white;
+    background: var(--sei);
+    color: var(--washi);
 }
 
 .timeline-dot.active {
-    background: var(--module-primary, #2b5278);
+    background: var(--aitetsu);
     color: white;
 }
 
@@ -862,11 +935,11 @@
    Error Box
    ================================ */
 .error-box {
-    background: #fee2e2;
-    border: 1px solid #fecaca;
+    background: rgba(142, 156, 166, 0.15);
+    border: 1px solid var(--namari);
     border-radius: 0 !important;
     padding: 1rem;
-    color: #991b1b;
+    color: var(--namari);
 }
 
 .error-box h4 {
@@ -896,86 +969,86 @@
 
 /* Enhanced Status Badges with Gradients */
 .badge-received { 
-    background: linear-gradient(135deg, #fbbf24, #f59e0b); 
-    color: #ffffff;
-    box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);
+    background: var(--kintsugi);
+    color: var(--kurogane);
+    box-shadow: 0 2px 4px rgba(212, 175, 55, 0.3);
 }
 
 .badge-acknowledged { 
-    background: linear-gradient(135deg, #60a5fa, #3b82f6); 
-    color: #ffffff;
-    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+    background: var(--aitetsu);
+    color: var(--washi);
+    box-shadow: 0 2px 4px rgba(64, 84, 94, 0.3);
 }
 
 .badge-processing { 
-    background: linear-gradient(135deg, #818cf8, #6366f1); 
-    color: #ffffff;
-    box-shadow: 0 2px 4px rgba(99, 102, 241, 0.3);
+    background: var(--sei);
+    color: var(--washi);
+    box-shadow: 0 2px 4px rgba(149, 175, 192, 0.3);
 }
 
 .badge-searching { 
-    background: linear-gradient(135deg, #a78bfa, #8b5cf6); 
-    color: #ffffff;
-    box-shadow: 0 2px 4px rgba(139, 92, 246, 0.3);
+    background: var(--namari);
+    color: var(--washi);
+    box-shadow: 0 2px 4px rgba(142, 156, 166, 0.3);
 }
 
 .badge-quotation_ready { 
-    background: linear-gradient(135deg, #34d399, #10b981); 
-    color: #ffffff;
-    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
+    background: var(--sei);
+    color: var(--washi);
+    box-shadow: 0 2px 4px rgba(149, 175, 192, 0.3);
 }
 
 .badge-quotation_sent { 
-    background: linear-gradient(135deg, #10b981, #059669); 
-    color: #ffffff;
-    box-shadow: 0 2px 4px rgba(5, 150, 105, 0.3);
+    background: var(--sei);
+    color: var(--washi);
+    box-shadow: 0 2px 4px rgba(149, 175, 192, 0.3);
 }
 
 .badge-failed { 
-    background: linear-gradient(135deg, #f87171, #ef4444); 
-    color: #ffffff;
-    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+    background: var(--namari);
+    color: var(--washi);
+    box-shadow: 0 2px 4px rgba(142, 156, 166, 0.3);
 }
 
 .badge-urgent { 
-    background: linear-gradient(135deg, #f87171, #ef4444); 
-    color: #ffffff;
-    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+    background: var(--kintsugi);
+    color: var(--kurogane);
+    box-shadow: 0 2px 4px rgba(212, 175, 55, 0.3);
 }
 
 .badge-high { 
-    background: linear-gradient(135deg, #fb923c, #f97316); 
-    color: #ffffff;
-    box-shadow: 0 2px 4px rgba(249, 115, 22, 0.3);
+    background: var(--kintsugi);
+    color: var(--kurogane);
+    box-shadow: 0 2px 4px rgba(212, 175, 55, 0.3);
 }
 
 .badge-primary { 
-    background: linear-gradient(135deg, #3b82f6, #2b5278); 
-    color: #ffffff;
-    box-shadow: 0 2px 4px rgba(43, 82, 120, 0.3);
+    background: var(--aitetsu);
+    color: var(--washi);
+    box-shadow: 0 2px 4px rgba(64, 84, 94, 0.3);
 }
 
 /* ================================
    Button Variants
    ================================ */
 .admin-btn-success {
-    background: #10b981;
-    color: white;
+    background: var(--sei);
+    color: var(--washi);
     border: none;
 }
 
 .admin-btn-success:hover {
-    background: #059669;
+    background: var(--aitetsu);
 }
 
 .admin-btn-danger {
-    background: #ef4444;
-    color: white;
+    background: var(--namari);
+    color: var(--washi);
     border: none;
 }
 
 .admin-btn-danger:hover {
-    background: #dc2626;
+    background: var(--aitetsu);
 }
 
 /* ================================
@@ -1112,11 +1185,11 @@
 }
 
 .parts-found {
-    color: #10b981;
+    color: var(--sei);
     font-weight: 600;
 }
 
 .parts-not-found {
-    color: #ef4444;
+    color: var(--namari);
     font-weight: 600;
 }

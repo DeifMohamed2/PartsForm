@@ -1,16 +1,16 @@
 /* ====================================
-   PARTNER LOGIN - Professional Split Layout
-   Matches Supplier Login Quality
+   PARTNER LOGIN - Brand System
+   Shibui (渋い) — Same as Supplier
    ==================================== */
 
 :root {
-  --partner-primary: #0c4a6e;
-  --partner-primary-light: #0ea5e9;
-  --partner-primary-dark: #082f49;
-  --partner-text: #1e293b;
-  --partner-text-secondary: #64748b;
-  --partner-border: #e2e8f0;
-  --partner-bg: #f8fafc;
+  --partner-primary: var(--aitetsu);
+  --partner-primary-light: var(--sei);
+  --partner-primary-dark: #2F3F49;
+  --partner-text: var(--kurogane);
+  --partner-text-secondary: var(--namari);
+  --partner-border: var(--suzu);
+  --partner-bg: var(--washi);
 }
 
 * {
@@ -20,9 +20,9 @@
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: var(--font-body), -apple-system, BlinkMacSystemFont, sans-serif;
   min-height: 100vh;
-  background: var(--partner-bg);
+  background: var(--aitetsu);
 }
 
 /* ====================================
@@ -45,7 +45,7 @@ body {
   align-items: center;
   padding: 48px;
   color: white;
-  background: linear-gradient(135deg, var(--partner-primary-dark) 0%, var(--partner-primary) 50%, var(--partner-primary-light) 100%);
+  background: var(--aitetsu);
   position: relative;
   overflow: hidden;
 }
@@ -66,7 +66,6 @@ body {
   width: 80px;
   height: auto;
   margin-bottom: 24px;
-  filter: brightness(0) invert(1);
   position: relative;
   z-index: 1;
 }
@@ -170,9 +169,9 @@ body {
   align-items: center;
   gap: 12px;
   padding: 14px 16px;
-  background: #fef2f2;
-  color: #b91c1c;
-  border: 1px solid #fecaca;
+  background: rgba(142, 156, 166, 0.2);
+  color: var(--namari);
+  border: 1px solid var(--namari);
   border-radius: 0 !important;
   margin-bottom: 24px;
   font-size: 14px;
@@ -235,8 +234,8 @@ body {
 
 .partner-form-input:focus {
   outline: none;
-  border-color: var(--partner-primary);
-  box-shadow: 0 0 0 3px rgba(12, 74, 110, 0.1);
+  border-color: var(--sei);
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
 }
 
 .partner-form-input::placeholder {
@@ -271,7 +270,7 @@ body {
 .partner-login-submit {
   width: 100%;
   padding: 14px;
-  background: linear-gradient(135deg, var(--partner-primary) 0%, var(--partner-primary-dark) 100%);
+  background: var(--aitetsu);
   color: white;
   border: none;
   border-radius: 0 !important;
@@ -287,9 +286,9 @@ body {
 }
 
 .partner-login-submit:hover {
-  background: linear-gradient(135deg, var(--partner-primary-dark) 0%, #0c3d5d 100%);
-  box-shadow: 0 4px 16px rgba(12, 74, 110, 0.35);
-  transform: translateY(-2px);
+  background: #2F3F49;
+  box-shadow: 0 4px 12px rgba(43, 43, 43, 0.08);
+  transform: translateY(-1px);
 }
 
 .partner-login-submit:active {
@@ -509,7 +508,7 @@ body {
 }
 
 .partner-public-footer-logo span {
-  color: #0ea5e9;
+  color: var(--kurogane);
 }
 
 .partner-public-footer-divider {
@@ -537,7 +536,7 @@ body {
 }
 
 .partner-public-footer-links a:hover {
-  color: #0c4a6e;
+  color: var(--aitetsu);
 }
 
 .partner-public-footer-copyright {

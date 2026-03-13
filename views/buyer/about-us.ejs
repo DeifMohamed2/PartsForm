@@ -21,42 +21,123 @@
                         <span class="tagline-bottom">Powered by Intelligence.</span>
                     </div>
 
-                    <!-- Stats Banner -->
-                    <div class="stats-banner">
-                        <div class="stats-container">
-                            <div class="stat-item">
-                                <div class="stat-number">50M+</div>
-                                <div class="stat-label">Components<br>Indexed</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-number">$2.8B</div>
-                                <div class="stat-label">Transactions<br>Secured</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-number">2,400+</div>
-                                <div class="stat-label">Verified<br>Suppliers</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-number">40+</div>
-                                <div class="stat-label">Countries<br>Connected</div>
-                            </div>
-                            <div class="stat-divider"></div>
+                <!-- Stats Ticker Banner -->
+                <div class="stats-banner">
+                    <!-- Stats grid -->
+                    <div class="stats-container" id="statsContainer">
+                        <div class="stat-item">
+                            <div class="stat-number" id="stat-num-0">50M+</div>
+                            <div class="stat-label" id="stat-lbl-0">Components<br>Indexed</div>
                         </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="stat-num-1">$2.8B</div>
+                            <div class="stat-label" id="stat-lbl-1">Transactions<br>Secured</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="stat-num-2">2,400+</div>
+                            <div class="stat-label" id="stat-lbl-2">Verified<br>Suppliers</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="stat-num-3">40+</div>
+                            <div class="stat-label" id="stat-lbl-3">Countries<br>Connected</div>
+                        </div>
+                        <div class="stat-divider"></div>
                     </div>
+                </div>
+
+                <script>
+                (function () {
+                    var slides = [
+                        [
+                            { num: '50M+',    lbl: 'Components\nIndexed' },
+                            { num: '$2.8B',   lbl: 'Transactions\nSecured' },
+                            { num: '2,400+',  lbl: 'Verified\nSuppliers' },
+                            { num: '40+',     lbl: 'Countries\nConnected' }
+                        ],
+                        [
+                            { num: '1.2M+',   lbl: 'Active\nSKUs Live' },
+                            { num: '$480M',   lbl: 'Annual\nProcurement' },
+                            { num: '97%',     lbl: 'Supplier\nRating' },
+                            { num: '72h',     lbl: 'Max Delivery\nTime' }
+                        ],
+                        [
+                            { num: '98.7%',   lbl: 'Search\nAccuracy' },
+                            { num: '850+',    lbl: 'New Suppliers\nPer Year' },
+                            { num: '120+',    lbl: 'Cities\nReached' },
+                            { num: '24/7',    lbl: 'Global\nSupport' }
+                        ],
+                        [
+                            { num: '180+',    lbl: 'Part\nCategories' },
+                            { num: '<24h',    lbl: 'Average\nFulfillment' },
+                            { num: '15+',     lbl: 'Industries\nServed' },
+                            { num: '4.9',    lbl: 'Platform\nRating' }
+                        ]
+                    ];
+
+                    var DURATION = 5000;
+                    var current = 0;
+                    var startTime = null;
+                    var rafId = null;
+
+                    function setSlide(idx, animate) {
+                        var s = slides[idx];
+                        for (var i = 0; i < 4; i++) {
+                            var numEl = document.getElementById('stat-num-' + i);
+                            var lblEl = document.getElementById('stat-lbl-' + i);
+                            if (!numEl || !lblEl) continue;
+                            if (animate) {
+                                numEl.classList.add('stat-exit');
+                                lblEl.classList.add('stat-exit');
+                                (function (n, l, si, ii) {
+                                    setTimeout(function () {
+                                        n.textContent = si[ii].num;
+                                        l.innerHTML = si[ii].lbl.replace('\n', '<br>');
+                                        n.classList.remove('stat-exit');
+                                        l.classList.remove('stat-exit');
+                                        n.classList.add('stat-enter');
+                                        l.classList.add('stat-enter');
+                                        setTimeout(function () {
+                                            n.classList.remove('stat-enter');
+                                            l.classList.remove('stat-enter');
+                                        }, 500);
+                                    }, 260);
+                                })(numEl, lblEl, s, i);
+                            } else {
+                                numEl.textContent = s[i].num;
+                                lblEl.innerHTML = s[i].lbl.replace('\n', '<br>');
+                            }
+                        }
+                    }
+
+                    function tick(ts) {
+                        if (!startTime) startTime = ts;
+                        var elapsed = ts - startTime;
+                        if (elapsed >= DURATION) {
+                            current = (current + 1) % slides.length;
+                            setSlide(current, true);
+                            startTime = ts;
+                        }
+                        rafId = requestAnimationFrame(tick);
+                    }
+
+                    // Start automatically
+                    setSlide(0, false);
+                    rafId = requestAnimationFrame(tick);
+                })();
+                </script>
                 </section>
 
                 <!-- Large Banner Section -->
                 <section class="large-banner-section">
-                    <div class="banner-overlay-gradient"></div>
-                    <div class="banner-content">
-                        <div class="banner-badge">
-                            <div class="badge-icon">⊕</div>
+                    <div class="banner-image-side">
+                        <div class="banner-overlay-gradient"></div>
+                        <div class="banner-badge-bottom">
+                            <img src="/images/brand/icon-gold.svg" alt="PartsForm Icon" class="badge-icon-img">
                         </div>
-                        <h2 class="banner-title">OVER 1.2 MILLION<br>ACTIVE SKUS</h2>
-                        <p class="banner-subtitle">With Real-Time Stock Verification.</p>
                     </div>
-                    <div class="banner-badge-bottom">
-                        <div class="badge-icon">⊕</div>
+                    <div class="banner-content-side">
+                        <h2 class="banner-title">OVER 1.2 MILLION<br>ACTIVE SKUS</h2>
+                        <p class="banner-subtitle">With <strong>Real-Time Stock</strong> Verification.</p>
                     </div>
                 </section>
 

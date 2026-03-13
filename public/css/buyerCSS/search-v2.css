@@ -94,7 +94,6 @@ body:has(.searchv2-page) .footer-logo-icon {
 
 body:has(.searchv2-page) .footer-nav-link {
     font-size: 13px !important;
-    letter-spacing: 0.08em !important;
 }
 
 body:has(.searchv2-page) .footer-nav-left,
@@ -173,7 +172,6 @@ body:has(.searchv2-page) .nav-bar.scrolled .nav-link,
 body:has(.searchv2-page) .nav-bar.scrolled .nav-dropdown .dropdown-trigger {
     color: rgba(255, 255, 255, 0.82) !important;
     font-size: 0.75rem !important;
-    letter-spacing: 0.09em !important;
     padding: 0.3rem 0 !important;
     transition: color 0.2s ease !important;
 }
@@ -294,32 +292,32 @@ body:has(.searchv2-page) .nav-total-investment {
 }
 
 
-/* Dropdown menus — match dark theme */
+/* Dropdown menus — match default white theme (same as other pages) */
 
 body:has(.searchv2-page) .nav-dropdown-menu,
 body:has(.searchv2-page) .tools-dropdown-menu {
-    background: #2B2B2B !important;
-    border: 1px solid rgba(212, 175, 55, 0.25) !important;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45) !important;
+    background: #ffffff !important;
+    border: 1px solid rgba(209, 213, 219, 0.5) !important;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.06) !important;
 }
 
 body:has(.searchv2-page) .nav-dropdown-item,
 body:has(.searchv2-page) .tools-dropdown-item {
-    color: rgba(255, 255, 255, 0.78) !important;
+    color: var(--kurogane, #2B2B2B) !important;
 }
 
 body:has(.searchv2-page) .nav-dropdown-item:hover,
 body:has(.searchv2-page) .tools-dropdown-item:hover {
-    background: rgba(212, 175, 55, 0.1) !important;
+    background: rgba(212, 175, 55, 0.06) !important;
     color: var(--v2-gold, #D4AF37) !important;
 }
 
 body:has(.searchv2-page) .tools-dropdown-divider {
-    border-color: rgba(255, 255, 255, 0.08) !important;
+    border-color: rgba(209, 213, 219, 0.4) !important;
 }
 
 body:has(.searchv2-page) .tools-section-label {
-    color: rgba(255, 255, 255, 0.4) !important;
+    color: rgba(43, 43, 43, 0.5) !important;
 }
 
 
@@ -418,7 +416,7 @@ body:has(.searchv2-page) .tools-section-label {
     content: '';
     position: absolute;
     inset: 0;
-    background: url('/images/brand/moodboard/warehouse-hero.png') center/cover no-repeat;
+    background: url('/images/brand/moodboard/warehouse-hero.webp') center/cover no-repeat;
     filter: brightness(0.38) saturate(0.55) contrast(1.05);
     z-index: 1;
     opacity: 0.80;
@@ -431,10 +429,13 @@ body:has(.searchv2-page) .tools-section-label {
 .hero-bg-overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient( 160deg, rgba(149, 175, 192, 0.80) 0%, /* Sei #95AFC0 — full weight */
-    rgba(100, 130, 150, 0.68) 55%, /* mid-tone Sei transition */
-    rgba(64, 84, 94, 0.55) 100%/* anchor to Aitetsu at edge */
-    );
+    background: linear-gradient(160deg, rgba(149, 175, 192, 0.80) 0%,
+            /* Sei #95AFC0 — full weight */
+            rgba(100, 130, 150, 0.68) 55%,
+            /* mid-tone Sei transition */
+            rgba(64, 84, 94, 0.55) 100%
+            /* anchor to Aitetsu at edge */
+        );
     z-index: 2;
     border-radius: 0 !important;
 }
@@ -462,7 +463,6 @@ body:has(.searchv2-page) .tools-section-label {
     font-size: 11.5px;
     font-weight: 700;
     color: var(--v2-white);
-    letter-spacing: 0.05em;
     text-transform: uppercase;
 }
 
@@ -472,7 +472,6 @@ body:has(.searchv2-page) .tools-section-label {
     font-size: 10.5px;
     font-weight: 400;
     color: rgba(255, 255, 255, 0.65);
-    letter-spacing: 0.02em;
     margin-top: 2px;
 }
 
@@ -498,7 +497,6 @@ body:has(.searchv2-page) .tools-section-label {
     font-weight: 700;
     color: #0e0e0ede;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
     margin: 0 0 12px 0;
     text-shadow: 0 2px 20px rgba(30, 50, 65, 0.65);
     /* deeper shadow — readable over Sei blue */
@@ -563,7 +561,6 @@ body:has(.searchv2-page) .tools-section-label {
     color: #FFFFFF;
     padding: 0.625rem 0;
     min-width: 0;
-    letter-spacing: 0.01em;
     font-style: italic;
 }
 
@@ -606,7 +603,6 @@ body:has(.searchv2-page) .tools-section-label {
     font-size: 13px;
     font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 0.14em;
     cursor: pointer;
     transition: none;
     white-space: nowrap;
@@ -736,7 +732,6 @@ body:has(.searchv2-page) .tools-section-label {
     transition: opacity 0.2s ease;
     padding: 6px 0;
     border-radius: 0 !important;
-    letter-spacing: 0.04em;
     text-transform: uppercase;
 }
 
@@ -755,7 +750,6 @@ body:has(.searchv2-page) .tools-section-label {
     opacity: 0.75;
     background: transparent;
     transform: none;
-    letter-spacing: 0.04em;
 }
 
 
@@ -819,7 +813,6 @@ body:has(.searchv2-page) .tools-section-label {
     font-weight: 600;
     color: var(--v2-white);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
     white-space: nowrap;
     position: relative;
     user-select: none;
@@ -973,7 +966,6 @@ body:has(.searchv2-page) .tools-section-label {
     color: var(--v2-text);
     text-transform: uppercase;
     font-size: 12px;
-    letter-spacing: 0.02em;
 }
 
 
@@ -1006,7 +998,6 @@ body:has(.searchv2-page) .tools-section-label {
     font-weight: 700;
     border-radius: 0 !important;
     text-transform: uppercase;
-    letter-spacing: 0.04em;
 }
 
 
@@ -1202,7 +1193,6 @@ body:has(.searchv2-page) .tools-section-label {
     font-weight: 700;
     color: var(--v2-text);
     text-transform: uppercase;
-    letter-spacing: 0.04em;
     margin: 0 0 2px 0;
     line-height: 1.1;
 }
@@ -1248,7 +1238,6 @@ body:has(.searchv2-page) .tools-section-label {
     font-weight: 700;
     color: var(--v2-namari);
     line-height: 1;
-    letter-spacing: 0.02em;
 }
 
 
@@ -1290,7 +1279,6 @@ body:has(.searchv2-page) .tools-section-label {
     font-size: 15px;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
     cursor: pointer;
     transition: all 0.2s ease;
     white-space: nowrap;
@@ -1337,7 +1325,7 @@ body:has(.searchv2-page) .tools-section-label {
     content: '';
     position: absolute;
     inset: 0;
-    background: url('/images/brand/moodboard/warehouse-hero.png') center/cover no-repeat;
+    background: url('/images/brand/moodboard/warehouse-hero.webp') center/cover no-repeat;
     opacity: 0.12;
     filter: saturate(0.5);
 }
@@ -1358,7 +1346,6 @@ body:has(.searchv2-page) .tools-section-label {
     font-weight: 700;
     color: var(--v2-white);
     text-transform: uppercase;
-    letter-spacing: 0.06em;
     margin: 0 0 0px 0;
     line-height: 1.2;
 }
@@ -1372,7 +1359,6 @@ body:has(.searchv2-page) .tools-section-label {
     font-weight: 700;
     color: var(--v2-white);
     text-transform: uppercase;
-    letter-spacing: 0.06em;
     margin: 0 0 10px 0;
     line-height: 1.2;
 }
@@ -1401,7 +1387,6 @@ body:has(.searchv2-page) .tools-section-label {
     font-size: 14px;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
     text-decoration: none;
     text-align: center;
     border-radius: 0 !important;
@@ -1455,7 +1440,6 @@ body:has(.searchv2-page) .tools-section-label {
     color: var(--v2-text);
     margin: 0;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
     opacity: 0.5;
 }
 
@@ -1515,7 +1499,6 @@ body:has(.searchv2-page) .tools-section-label {
     color: var(--v2-text);
     margin: 0 0 14px 0;
     text-transform: uppercase;
-    letter-spacing: 0.04em;
 }
 
 .no-results-desc {
@@ -1562,10 +1545,12 @@ body:has(.searchv2-page) .tools-section-label {
     .searchv2-main-content {
         padding: 0 14px 0;
     }
+
     .searchv2-hero {
         height: 230px;
         padding: 40px 24px 14px;
     }
+
     .footer-content-grid {
         grid-template-columns: 1fr 200px;
     }
@@ -1575,48 +1560,60 @@ body:has(.searchv2-page) .tools-section-label {
     .searchv2-main-content {
         padding: 0 16px 24px;
     }
+
     .searchv2-hero {
         min-height: 200px;
         padding: 52px 20px 24px;
         /* 52px = ~navbar height + extra space on mobile */
     }
+
     .hero-tagline-v2 {
         display: none;
     }
+
     .hero-content-wrapper {
         padding: 0 20px;
         margin: 0 auto;
     }
+
     .hero-title-v2 {
         font-size: 28px;
         margin-bottom: 24px;
     }
+
     .searchv2-bar {
         flex-direction: column;
         border-radius: 0 !important;
     }
+
     .searchv2-input-wrapper {
         width: 100%;
         border-bottom: 1px solid var(--v2-border);
     }
+
     .searchv2-filter-btn {
         width: 100%;
         border-radius: 0 !important;
     }
+
     .searchv2-quick-actions {
         gap: 16px;
     }
+
     .results-table-v2 thead th,
     .results-table-v2 tbody td {
         padding: 10px 10px;
         font-size: 12px;
     }
+
     .footer-left {
         padding: 24px 24px;
     }
+
     .match-count-title {
         font-size: 24px;
     }
+
     .total-amount {
         font-size: 32px;
     }
@@ -1626,31 +1623,39 @@ body:has(.searchv2-page) .tools-section-label {
     .searchv2-main-content {
         padding: 0 12px 20px;
     }
+
     .searchv2-hero {
         padding: 52px 16px 20px;
     }
+
     .hero-title-v2 {
         font-size: 22px;
     }
+
     .quick-action-v2 span {
         font-size: 12px;
     }
+
     .qty-controls {
         gap: 3px;
     }
+
     .qty-btn {
         width: 26px;
         height: 26px;
         font-size: 16px;
     }
+
     .qty-input {
         width: 45px;
         height: 26px;
         font-size: 12px;
     }
+
     .match-count-title {
         font-size: 20px;
     }
+
     .total-amount {
         font-size: 28px;
     }
@@ -1721,6 +1726,7 @@ body:has(.searchv2-page) .tools-section-label {
     0% {
         background-position: 200% 0;
     }
+
     100% {
         background-position: -200% 0;
     }

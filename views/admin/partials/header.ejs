@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="admin-page">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,12 +7,10 @@
   <title><%= title %></title>
   
   <!-- Favicon -->
-  <link rel="icon" type="image/png" href="/images/PARTSFORM-LOGO.png">
+  <link rel="icon" type="image/png" href="/images/brand/icon-gold.png">
   
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Brand System - PARTSFORM Shibui Design (must load first) -->
+  <link rel="stylesheet" href="/css/brand-system.css">
   
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@0.294.0/dist/umd/lucide.min.js"></script>
@@ -22,6 +20,7 @@
   
   <!-- Admin CSS -->
   <link rel="stylesheet" href="/css/adminCSS/admin-main.css">
+  <link rel="stylesheet" href="/css/adminCSS/admin-overrides.css">
   
   <!-- Notification Manager Script -->
   <script src="/js/notifications.js"></script>
@@ -50,10 +49,10 @@
       pointer-events: none;
     }
     
-    /* Loader Background - Semi-transparent with blur */
+    /* Loader Background - Brand Aitetsu */
     .module-loader-overlay.loader-default,
     .module-loader-overlay.loader-automotive {
-      background: rgba(12, 74, 110, 0.45);
+      background: rgba(64, 84, 94, 0.6);
       backdrop-filter: blur(6px);
       -webkit-backdrop-filter: blur(6px);
     }
@@ -89,7 +88,7 @@
       height: 100%;
       border: 4px solid rgba(255, 255, 255, 0.2);
       border-top-color: white;
-      border-radius: 50%;
+      border-radius: 50%; /* Spinner requires circle */
       animation: loaderSpin 1s linear infinite;
     }
     

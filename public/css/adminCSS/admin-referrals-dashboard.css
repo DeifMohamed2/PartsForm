@@ -1,0 +1,587 @@
+/* ====================================
+   REFERRALS DASHBOARD
+   Brand colors, no border-radius, enhanced layout
+   ==================================== */
+
+/* Grid - Balanced 1:1 on large, stacked on smaller */
+.referrals-dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+@media (max-width: 1200px) {
+    .referrals-dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Analytics Card */
+.analytics-card {
+    background: var(--admin-bg-primary);
+    border: 1px solid var(--admin-border);
+    border-radius: 0 !important;
+    overflow: hidden;
+}
+
+.referrals-dashboard-card {
+    margin-bottom: 1.5rem;
+}
+
+.referrals-dashboard-card:last-child {
+    margin-bottom: 0;
+}
+
+.analytics-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--admin-border);
+}
+
+.analytics-card-header h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--admin-text-primary);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.analytics-card-header h3 i {
+    width: 18px;
+    height: 18px;
+    color: var(--aitetsu);
+}
+
+.analytics-card-body {
+    padding: 1.25rem;
+}
+
+.analytics-card-body-table {
+    padding: 0;
+}
+
+/* Summary Stats - Smaller, brand colors */
+.summary-stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+@media (max-width: 992px) {
+    .summary-stats-row {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.summary-stat-card {
+    background: var(--admin-bg-primary);
+    border: 1px solid var(--admin-border);
+    border-radius: 0 !important;
+    padding: 1rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.summary-stat-card.highlight {
+    background: rgba(64, 84, 94, 0.06);
+    border-color: rgba(64, 84, 94, 0.25);
+}
+
+.summary-stat-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 0 !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.summary-stat-icon i {
+    width: 18px;
+    height: 18px;
+}
+
+.summary-stat-icon.purple {
+    background: rgba(64, 84, 94, 0.12);
+    color: var(--aitetsu);
+}
+
+.summary-stat-icon.green {
+    background: rgba(149, 175, 192, 0.2);
+    color: var(--sei);
+}
+
+.summary-stat-icon.blue {
+    background: rgba(64, 84, 94, 0.12);
+    color: var(--aitetsu);
+}
+
+.summary-stat-icon.orange {
+    background: var(--kintsugi-light);
+    color: var(--kintsugi);
+}
+
+.summary-stat-icon.teal {
+    background: rgba(142, 156, 166, 0.2);
+    color: var(--namari);
+}
+
+.summary-stat-icon.amber {
+    background: var(--kintsugi-light);
+    color: var(--kintsugi);
+}
+
+.summary-stat-value {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--admin-text-primary);
+    line-height: 1;
+}
+
+.summary-stat-value small {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--admin-text-muted);
+}
+
+.summary-stat-label {
+    font-size: 0.75rem;
+    color: var(--admin-text-muted);
+}
+
+/* Partner Rank - Brand colors */
+.partner-rank {
+    width: 28px;
+    height: 28px;
+    border-radius: 0 !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.8rem;
+}
+
+.partner-rank.gold {
+    background: var(--kintsugi);
+    color: var(--kurogane);
+}
+
+.partner-rank.silver {
+    background: var(--namari);
+    color: var(--washi);
+}
+
+.partner-rank.bronze {
+    background: var(--aitetsu);
+    color: var(--washi);
+}
+
+.partner-rank.default {
+    background: var(--admin-bg-tertiary);
+    color: var(--namari);
+}
+
+/* Commission Breakdown - Brand colors */
+.commission-breakdown {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.breakdown-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.breakdown-bar-container {
+    flex: 1;
+    height: 8px;
+    background: var(--admin-bg-tertiary);
+    border-radius: 0;
+    overflow: hidden;
+}
+
+.breakdown-bar {
+    height: 100%;
+    border-radius: 0;
+    transition: width 0.5s ease;
+}
+
+.breakdown-bar.paid {
+    background: var(--sei);
+}
+
+.breakdown-bar.approved {
+    background: var(--aitetsu);
+}
+
+.breakdown-bar.pending {
+    background: var(--kintsugi);
+}
+
+.breakdown-bar.rejected {
+    background: var(--namari);
+}
+
+.breakdown-label {
+    width: 80px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.breakdown-label .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 0;
+}
+
+.breakdown-label .dot.paid {
+    background: var(--sei);
+}
+
+.breakdown-label .dot.approved {
+    background: var(--aitetsu);
+}
+
+.breakdown-label .dot.pending {
+    background: var(--kintsugi);
+}
+
+.breakdown-label .dot.rejected {
+    background: var(--namari);
+}
+
+.breakdown-value {
+    width: 100px;
+    text-align: right;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+/* Recent Orders */
+.recent-orders-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.recent-order-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+    background: var(--admin-bg-tertiary);
+    border-radius: 0 !important;
+    transition: all 0.2s ease;
+}
+
+.recent-order-item:hover {
+    background: rgba(64, 84, 94, 0.06);
+}
+
+.recent-order-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 0 !important;
+    background: var(--aitetsu);
+    color: var(--washi);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+
+.recent-order-amount .commission {
+    font-size: 0.7rem;
+    color: var(--sei);
+}
+
+/* Trend Chart */
+.trend-chart-container {
+    height: 200px;
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    padding: 1rem 0;
+}
+
+.trend-bar {
+    width: 100%;
+    max-width: 40px;
+    background: var(--aitetsu);
+    border-radius: 0;
+    min-height: 20px;
+    transition: height 0.5s ease;
+}
+
+/* All-Time Stats */
+.all-time-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.all-time-stat {
+    padding: 1rem;
+    background: var(--admin-bg-tertiary);
+    border-radius: 0 !important;
+    text-align: center;
+}
+
+.all-time-stat .value {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--admin-text-primary);
+}
+
+.all-time-stat .label {
+    font-size: 0.75rem;
+    color: var(--admin-text-muted);
+    margin-top: 4px;
+}
+
+/* Empty State */
+.analytics-empty {
+    text-align: center;
+    padding: 2rem;
+    color: var(--admin-text-muted);
+}
+
+.analytics-empty i {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+/* Quick Actions - Grid layout, brand colors, no border-radius */
+.referrals-quick-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.referrals-quick-action-card {
+    border-radius: 0 !important;
+}
+
+.referrals-quick-action-card:hover {
+    border-color: var(--aitetsu);
+}
+
+.referrals-quick-action-card:hover .referrals-quick-action-arrow {
+    color: var(--aitetsu);
+}
+
+.referrals-quick-action-icon {
+    border-radius: 0 !important;
+}
+
+.referrals-quick-action-icon.amber {
+    background: var(--kintsugi-light);
+    color: var(--kintsugi);
+}
+
+.referrals-quick-action-icon.blue {
+    background: rgba(64, 84, 94, 0.12);
+    color: var(--aitetsu);
+}
+
+.referrals-quick-action-icon.green {
+    background: rgba(149, 175, 192, 0.2);
+    color: var(--sei);
+}
+
+.referrals-quick-action-icon.orange {
+    background: var(--kintsugi-light);
+    color: var(--kintsugi);
+}
+
+.referrals-quick-action-icon.purple {
+    background: rgba(142, 156, 166, 0.2);
+    color: var(--namari);
+}
+
+.referrals-quick-action-icon.teal {
+    background: rgba(64, 84, 94, 0.12);
+    color: var(--aitetsu);
+}
+
+.referrals-quick-action-icon.error {
+    background: rgba(142, 156, 166, 0.2);
+    color: var(--namari);
+}
+
+/* Partner commission value in table */
+.partner-stats .value.commission-value {
+    color: var(--sei);
+}
+
+/* Top Partners Table */
+.top-partners-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.top-partners-table th {
+    text-align: left;
+    padding: 0.75rem 1rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--admin-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--admin-border);
+}
+
+.top-partners-table td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--admin-border);
+}
+
+.top-partners-table tr:last-child td {
+    border-bottom: none;
+}
+
+.partner-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.partner-info .name {
+    font-weight: 600;
+    color: var(--admin-text-primary);
+}
+
+.partner-info .email {
+    font-size: 0.75rem;
+    color: var(--admin-text-muted);
+}
+
+.partner-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    text-align: right;
+}
+
+.partner-stats .value {
+    font-weight: 700;
+    color: var(--admin-text-primary);
+}
+
+.partner-stats .label {
+    font-size: 0.7rem;
+    color: var(--admin-text-muted);
+}
+
+.referrals-link-btn {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--aitetsu);
+    text-decoration: none;
+}
+
+.referrals-link-btn:hover {
+    text-decoration: underline;
+}
+
+.trend-bar-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.trend-bar-label {
+    font-size: 0.7rem;
+    color: var(--admin-text-muted);
+    font-weight: 500;
+}
+
+.trend-bar-value {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--admin-text-primary);
+}
+
+.recent-order-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.recent-order-info .order-number {
+    font-weight: 600;
+    color: var(--admin-text-primary);
+    font-size: 0.85rem;
+}
+
+.recent-order-info .customer-name {
+    font-size: 0.75rem;
+    color: var(--admin-text-muted);
+}
+
+.recent-order-amount {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.recent-order-amount .amount {
+    font-weight: 700;
+    color: var(--admin-text-primary);
+}
+
+.referrals-section-header {
+    margin-bottom: 1rem;
+}
+
+.referrals-section-header h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--admin-text-primary);
+    margin: 0;
+}
+
+/* Quick action button (resync) - full width, no border */
+.referrals-quick-action-btn {
+    width: 100%;
+    text-align: left;
+    border: 1px solid var(--admin-border);
+    cursor: pointer;
+    font-family: inherit;
+    background: var(--admin-bg-secondary);
+}
+
+.referrals-quick-action-btn:hover {
+    border-color: var(--aitetsu);
+}
+
+/* Override highlight card for brand colors */
+.referrals-quick-action-card.highlight-card {
+    border: 2px solid var(--kintsugi);
+    background: var(--kintsugi-light);
+}
+
+.referrals-quick-action-card.highlight-card:hover {
+    border-color: var(--kintsugi);
+    background: rgba(212, 175, 55, 0.12);
+}

@@ -74,9 +74,7 @@ exports.dashboard = async (req, res) => {
 
 // Login page
 exports.login = (req, res) => {
-  res.render('supplier/login', {
-    title: 'Login | Supplier Portal'
-  });
+  res.redirect('/');
 };
 
 // Parts list

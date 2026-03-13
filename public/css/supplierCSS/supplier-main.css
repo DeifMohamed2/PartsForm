@@ -1,67 +1,64 @@
 /* ====================================
    SUPPLIER MAIN CSS - Core Supplier Portal Styling
-   PARTSFORM Professional Design System
-   Colors: Matching admin & buyer theme
+   PARTSFORM Brand System — Shibui (渋い)
+   Uses brand-system.css variables
    ==================================== */
-
-/* Import Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 /* ====================================
-   CSS VARIABLES - SUPPLIER THEME
+   CSS VARIABLES - SUPPLIER THEME (Brand Mapping)
    ==================================== */
 :root {
-  /* Primary Brand Colors - Matching Buyer/Admin */
-  --supplier-primary: #2b5278;
-  --supplier-primary-dark: #1e3a54;
-  --supplier-primary-light: #3d6a96;
-  --supplier-accent: #3b82f6;
-  --supplier-accent-dark: #2563eb;
-  --supplier-accent-light: #60a5fa;
+  /* Primary — Aitetsu (Indigo Iron) */
+  --supplier-primary: var(--aitetsu);
+  --supplier-primary-dark: #2F3F49;
+  --supplier-primary-light: var(--sei);
+  --supplier-accent: var(--aitetsu);
+  --supplier-accent-dark: #2F3F49;
+  --supplier-accent-light: var(--sei);
 
-  /* Background Colors - Light Mode */
-  --supplier-bg-primary: #ffffff;
-  --supplier-bg-secondary: #f8fafc;
-  --supplier-bg-tertiary: #f1f5f9;
-  --supplier-bg-accent: #e0effa;
+  /* Backgrounds — Washi */
+  --supplier-bg-primary: var(--color-bg-card);
+  --supplier-bg-secondary: var(--washi);
+  --supplier-bg-tertiary: var(--color-bg-subtle);
+  --supplier-bg-accent: rgba(149, 175, 192, 0.12);
 
-  /* Text Colors */
-  --supplier-text-primary: #1a2b3d;
-  --supplier-text-secondary: #475569;
-  --supplier-text-muted: #64748b;
-  --supplier-text-subtle: #94a3b8;
+  /* Text — Kurogane / Namari */
+  --supplier-text-primary: var(--kurogane);
+  --supplier-text-secondary: var(--namari);
+  --supplier-text-muted: var(--namari);
+  --supplier-text-subtle: var(--suzu);
 
-  /* Status Colors */
-  --supplier-success: #10b981;
-  --supplier-success-light: #d1fae5;
-  --supplier-warning: #f59e0b;
-  --supplier-warning-light: #fef3c7;
-  --supplier-danger: #ef4444;
-  --supplier-danger-light: #fee2e2;
-  --supplier-info: #3b82f6;
-  --supplier-info-light: #dbeafe;
+  /* Status — Brand semantic (no green) */
+  --supplier-success: var(--sei);
+  --supplier-success-light: rgba(149, 175, 192, 0.2);
+  --supplier-warning: var(--kintsugi);
+  --supplier-warning-light: var(--kintsugi-light);
+  --supplier-danger: var(--namari);
+  --supplier-danger-light: rgba(142, 156, 166, 0.2);
+  --supplier-info: var(--aitetsu);
+  --supplier-info-light: rgba(64, 84, 94, 0.12);
 
-  /* Border Colors */
-  --supplier-border: rgba(43, 82, 120, 0.12);
-  --supplier-border-light: rgba(43, 82, 120, 0.08);
-  --supplier-border-medium: rgba(43, 82, 120, 0.16);
+  /* Borders */
+  --supplier-border: var(--suzu);
+  --supplier-border-light: var(--color-border-light);
+  --supplier-border-medium: var(--color-border);
 
-  /* Shadows */
-  --supplier-shadow-sm: 0 2px 8px rgba(43, 82, 120, 0.06);
-  --supplier-shadow-md: 0 4px 16px rgba(43, 82, 120, 0.1);
-  --supplier-shadow-lg: 0 8px 24px rgba(43, 82, 120, 0.12);
-  --supplier-shadow-xl: 0 12px 40px rgba(43, 82, 120, 0.15);
-  --supplier-shadow-hover: 0 16px 48px rgba(43, 82, 120, 0.2);
+  /* Shadows — Brand industrial */
+  --supplier-shadow-sm: var(--shadow-sm);
+  --supplier-shadow-md: var(--shadow-md);
+  --supplier-shadow-lg: var(--shadow-lg);
+  --supplier-shadow-xl: var(--shadow-xl);
+  --supplier-shadow-hover: var(--shadow-xl);
 
-  /* Border Radius */
-  --supplier-radius-sm: 0.5rem;
-  --supplier-radius-md: 0.75rem;
-  --supplier-radius-lg: 1rem;
-  --supplier-radius-xl: 1.5rem;
+  /* NO BORDER RADIUS — Industrial */
+  --supplier-radius-sm: 0;
+  --supplier-radius-md: 0;
+  --supplier-radius-lg: 0;
+  --supplier-radius-xl: 0;
 
   /* Transitions */
-  --supplier-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  --supplier-transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --supplier-transition: var(--transition-base);
+  --supplier-transition-fast: var(--transition-fast);
 
   /* Layout */
   --supplier-sidebar-width: 260px;
@@ -74,6 +71,13 @@
   --supplier-space-md: 1.5rem;
   --supplier-space-lg: 2rem;
   --supplier-space-xl: 3rem;
+
+  /* Backward compatibility for inline styles */
+  --text-primary: var(--kurogane);
+  --text-secondary: var(--namari);
+  --border: var(--suzu);
+  --primary: var(--aitetsu);
+  --bg-main: var(--supplier-bg-tertiary);
 }
 
 /* ====================================
@@ -86,7 +90,7 @@
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: var(--font-body), -apple-system, BlinkMacSystemFont, sans-serif;
   background: var(--supplier-bg-secondary);
   color: var(--supplier-text-primary);
   line-height: 1.6;
@@ -128,7 +132,7 @@ a {
   left: 0;
   width: var(--supplier-sidebar-width);
   height: 100vh;
-  background: linear-gradient(180deg, var(--supplier-primary-dark) 0%, var(--supplier-primary) 100%);
+  background: var(--aitetsu);
   z-index: 1000;
   display: flex;
   flex-direction: column;
@@ -151,7 +155,7 @@ a {
 .sidebar-logo img {
   height: 36px;
   width: auto;
-  filter: brightness(0) invert(1);
+  object-fit: contain;
 }
 
 .sidebar-logo-text {
@@ -215,7 +219,7 @@ a {
 .nav-item.active {
   background: rgba(255, 255, 255, 0.15);
   color: white;
-  border-left-color: var(--supplier-accent-light);
+  border-left-color: var(--sei);
 }
 
 .nav-item i {
@@ -227,8 +231,8 @@ a {
 
 .nav-badge {
   margin-left: auto;
-  background: var(--supplier-accent);
-  color: white;
+  background: rgba(149, 175, 192, 0.3);
+  color: var(--washi);
   font-size: 0.65rem;
   font-weight: 700;
   padding: 0.15rem 0.5rem;
@@ -261,7 +265,7 @@ a {
 .sidebar-user-avatar {
   width: 36px;
   height: 36px;
-  background: var(--supplier-accent);
+  background: var(--aitetsu);
   border-radius: 0 !important;
   display: flex;
   align-items: center;
@@ -291,21 +295,21 @@ a {
 }
 
 /* ====================================
-   TOPBAR HEADER
+   TOPBAR HEADER — Same as buyer about-us (solid Kurogane)
    ==================================== */
 .supplier-topbar {
   position: sticky;
   top: 0;
   height: var(--supplier-topbar-height);
-  background: var(--supplier-bg-primary);
-  border-bottom: 1px solid var(--supplier-border);
+  background: #2B2B2B !important;
+  border-bottom: none !important;
   z-index: 999;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 var(--supplier-space-lg);
+  padding: 0.5rem 2rem;
   transition: var(--supplier-transition);
-  box-shadow: var(--supplier-shadow-sm);
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.35) !important;
 }
 
 .topbar-left {
@@ -317,7 +321,7 @@ a {
 .page-title {
   font-size: 1.25rem;
   font-weight: 700;
-  color: var(--supplier-text-primary);
+  color: rgba(255, 255, 255, 0.95);
 }
 
 .breadcrumb {
@@ -325,20 +329,20 @@ a {
   align-items: center;
   gap: 0.5rem;
   font-size: 0.875rem;
-  color: var(--supplier-text-muted);
+  color: #829AB1;
 }
 
 .breadcrumb a {
-  color: var(--supplier-accent);
+  color: rgba(255, 255, 255, 0.9);
   transition: var(--supplier-transition-fast);
 }
 
 .breadcrumb a:hover {
-  color: var(--supplier-accent-dark);
+  color: #FFFFFF;
 }
 
 .breadcrumb-separator {
-  color: var(--supplier-text-subtle);
+  color: #829AB1;
 }
 
 .topbar-right {
@@ -354,17 +358,17 @@ a {
   width: 40px;
   height: 40px;
   border-radius: 0 !important;
-  border: 1px solid var(--supplier-border);
-  background: var(--supplier-bg-primary);
+  border: none;
+  background: transparent;
   cursor: pointer;
   transition: var(--supplier-transition-fast);
-  color: var(--supplier-text-secondary);
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .topbar-btn:hover {
-  background: var(--supplier-bg-accent);
-  border-color: var(--supplier-accent);
-  color: var(--supplier-accent);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: transparent;
+  color: #FFFFFF;
 }
 
 .topbar-btn i {
@@ -385,14 +389,14 @@ a {
 }
 
 .user-menu:hover {
-  background: var(--supplier-bg-tertiary);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .user-avatar {
   width: 36px;
   height: 36px;
   border-radius: 0 !important;
-  background: linear-gradient(135deg, var(--supplier-primary), var(--supplier-accent));
+  background: var(--aitetsu);
   color: white;
   display: flex;
   align-items: center;
@@ -414,6 +418,16 @@ a {
 .user-company {
   font-size: 0.75rem;
   color: var(--supplier-text-muted);
+}
+
+/* Topbar dark theme — light text on kurogane */
+.supplier-topbar .page-title,
+.supplier-topbar .user-name {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.supplier-topbar .user-company {
+  color: #829AB1;
 }
 
 /* User Dropdown */
@@ -455,7 +469,7 @@ a {
 
 .user-dropdown-item:hover {
   background: var(--supplier-bg-accent);
-  color: var(--supplier-accent);
+  color: var(--aitetsu);
 }
 
 .user-dropdown-item.danger:hover {

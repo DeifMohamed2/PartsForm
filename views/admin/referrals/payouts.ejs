@@ -260,7 +260,7 @@
         }
         lucide.createIcons();
       } catch (e) {
-        container.innerHTML = '<p style="color:#ef4444;font-size:0.9rem;text-align:center;padding:1rem;">Failed to load payout data.</p>';
+        container.innerHTML = '<p style="color: var(--color-error); font-size: 0.9rem; text-align: center; padding: 1rem;">Failed to load payout data.</p>';
       }
     }
 
@@ -371,7 +371,7 @@
 
     function showToast(msg, type) {
       const t = document.createElement('div');
-      t.style.cssText = `position:fixed;top:20px;right:20px;z-index:10000;padding:12px 16px;border-radius:8px;background:${type==='error'?'#fee2e2':'#dcfce7'};color:${type==='error'?'#dc2626':'#16a34a'};font-weight:500;box-shadow:0 4px 12px rgba(0,0,0,0.15);`;
+      t.style.cssText = `position:fixed;top:20px;right:20px;z-index:10000;padding:12px 16px;border-radius:0;background:${type==='error'?'var(--color-error-bg)':'var(--color-success-bg)'};color:${type==='error'?'var(--color-error)':'var(--color-success-text)'};font-weight:500;box-shadow:var(--admin-shadow-md);`;
       t.textContent = msg;
       document.body.appendChild(t);
       setTimeout(() => t.remove(), 4000);

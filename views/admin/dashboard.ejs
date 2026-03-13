@@ -3,55 +3,55 @@
 <style>
   /* Module-Specific Unique Designs */
   
-  /* Automotive Module - Professional Blue Theme */
+  /* Automotive Module - Brand Aitetsu */
   .module-automotive .module-info-banner {
-    background: linear-gradient(135deg, rgba(14, 165, 233, 0.08) 0%, rgba(59, 130, 246, 0.04) 50%, transparent 100%);
-    border-color: rgba(14, 165, 233, 0.3);
+    background: linear-gradient(135deg, rgba(149, 175, 192, 0.12) 0%, transparent 100%);
+    border-color: rgba(64, 84, 94, 0.3);
   }
   .module-automotive .module-info-icon {
-    background: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%);
+    background: var(--aitetsu);
   }
   .module-automotive .stat-card.module-themed {
-    border-top: 3px solid #0ea5e9;
-    background: linear-gradient(135deg, rgba(14, 165, 233, 0.03) 0%, var(--admin-bg-primary) 100%);
+    border-top: 3px solid var(--aitetsu);
+    background: linear-gradient(135deg, rgba(64, 84, 94, 0.04) 0%, var(--admin-bg-primary) 100%);
   }
   .module-automotive .chart-card {
-    border-top: 3px solid #0ea5e9;
+    border-top: 3px solid var(--aitetsu);
   }
   .module-automotive .hero-stat-grid .stat-icon {
-    background: linear-gradient(135deg, rgba(14, 165, 233, 0.15), rgba(14, 165, 233, 0.08));
+    background: var(--color-info-bg);
   }
 
-  /* Aviation Module - Sky/Professional Theme */
+  /* Aviation Module - Brand Aitetsu */
   .module-aviation .module-info-banner {
-    background: linear-gradient(135deg, rgba(14, 165, 233, 0.08) 0%, rgba(59, 130, 246, 0.04) 50%, transparent 100%);
-    border-color: rgba(14, 165, 233, 0.3);
+    background: linear-gradient(135deg, rgba(149, 175, 192, 0.12) 0%, transparent 100%);
+    border-color: rgba(64, 84, 94, 0.3);
   }
   .module-aviation .module-info-icon {
-    background: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%);
+    background: var(--aitetsu);
   }
   .module-aviation .stat-card.module-themed {
-    border-top: 3px solid #0ea5e9;
-    background: linear-gradient(135deg, rgba(14, 165, 233, 0.03) 0%, var(--admin-bg-primary) 100%);
+    border-top: 3px solid var(--aitetsu);
+    background: linear-gradient(135deg, rgba(64, 84, 94, 0.04) 0%, var(--admin-bg-primary) 100%);
   }
   .module-aviation .chart-card {
-    border-top: 3px solid #0ea5e9;
+    border-top: 3px solid var(--aitetsu);
   }
 
-  /* Machinery Module - Industrial/Solid Theme */
+  /* Machinery Module - Brand Kintsugi */
   .module-machinery .module-info-banner {
-    background: linear-gradient(135deg, rgba(234, 179, 8, 0.08) 0%, rgba(202, 138, 4, 0.04) 50%, transparent 100%);
-    border-color: rgba(234, 179, 8, 0.3);
+    background: linear-gradient(135deg, var(--kintsugi-light) 0%, transparent 100%);
+    border-color: var(--kintsugi-border);
   }
   .module-machinery .module-info-icon {
-    background: linear-gradient(135deg, #eab308 0%, #a16207 100%);
+    background: var(--kintsugi);
   }
   .module-machinery .stat-card.module-themed {
-    border-top: 3px solid #eab308;
-    background: linear-gradient(135deg, rgba(234, 179, 8, 0.03) 0%, var(--admin-bg-primary) 100%);
+    border-top: 3px solid var(--kintsugi);
+    background: linear-gradient(135deg, var(--kintsugi-light) 0%, var(--admin-bg-primary) 100%);
   }
   .module-machinery .chart-card {
-    border-top: 3px solid #eab308;
+    border-top: 3px solid var(--kintsugi);
   }
   .module-machinery .equipment-tracker {
     display: grid;
@@ -62,25 +62,25 @@
   .module-machinery .equipment-card {
     background: var(--admin-bg-primary);
     border: 1px solid var(--admin-border);
-    border-radius: var(--admin-radius-lg);
+    border-radius: 0;
     padding: 1.25rem;
     text-align: center;
     transition: var(--admin-transition);
   }
   .module-machinery .equipment-card:hover {
-    border-color: #eab308;
+    border-color: var(--kintsugi);
     box-shadow: var(--admin-shadow-md);
   }
   .module-machinery .equipment-icon {
     width: 50px;
     height: 50px;
-    background: rgba(234, 179, 8, 0.12);
-    border-radius: 50%;
+    background: var(--kintsugi-light);
+    border-radius: 0;
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 0 auto 0.75rem;
-    color: #eab308;
+    color: var(--kintsugi);
   }
   .module-machinery .equipment-name { font-weight: 600; color: var(--admin-text-primary); }
   .module-machinery .equipment-count { font-size: 0.85rem; color: var(--admin-text-muted); }
@@ -95,7 +95,7 @@
   .hero-stat {
     background: var(--admin-bg-primary);
     border: 1px solid var(--admin-border);
-    border-radius: var(--admin-radius-lg);
+    border-radius: 0;
     padding: 1.25rem;
     text-align: center;
     transition: var(--admin-transition);
@@ -110,7 +110,7 @@
     width: 45px;
     height: 45px;
     background: var(--module-bg-accent);
-    border-radius: var(--admin-radius-md);
+    border-radius: 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -137,10 +137,10 @@
     font-weight: 600;
     margin-top: 0.5rem;
     padding: 0.2rem 0.5rem;
-    border-radius: 12px;
+    border-radius: 0;
   }
-  .hero-stat-change.positive { background: rgba(16, 185, 129, 0.12); color: #059669; }
-  .hero-stat-change.negative { background: rgba(239, 68, 68, 0.12); color: #dc2626; }
+  .hero-stat-change.positive { background: var(--color-success-bg); color: var(--color-success-text); }
+  .hero-stat-change.negative { background: var(--color-error-bg); color: var(--color-error); }
   .hero-stat-change i { width: 12px; height: 12px; }
 
   /* Multi Chart Grid */
@@ -164,7 +164,7 @@
   .performance-card {
     background: var(--admin-bg-primary);
     border: 1px solid var(--admin-border);
-    border-radius: var(--admin-radius-lg);
+    border-radius: 0;
     padding: 1.25rem;
     box-shadow: var(--admin-shadow-sm);
     transition: var(--admin-transition);
@@ -183,7 +183,7 @@
     width: 36px;
     height: 36px;
     background: var(--admin-bg-tertiary);
-    border-radius: var(--admin-radius-md);
+    border-radius: 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -207,8 +207,8 @@
     font-size: 0.75rem;
     color: var(--admin-text-muted);
   }
-  .performance-meta .positive { color: #10b981; }
-  .performance-meta .negative { color: #ef4444; }
+  .performance-meta .positive { color: var(--kintsugi); }
+  .performance-meta .negative { color: var(--namari); }
 
   /* Responsive */
   @media (max-width: 1400px) {
@@ -232,30 +232,30 @@
       <%- include('partials/topbar', { pageTitle: 'Dashboard' }) %>
       
       <div class="admin-content">
-        <!-- MAIN DASHBOARD - Premium Overview Design -->
-        <div class="main-dashboard-hero" style="background: linear-gradient(135deg, #1e3a5f 0%, #2b5278 50%, #3d6a96 100%); border-radius: var(--admin-radius-xl); padding: 2rem; margin-bottom: 2rem; color: white; position: relative; overflow: hidden;">
-          <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: rgba(255,255,255,0.05); border-radius: 50%;"></div>
-          <div style="position: absolute; bottom: -30px; left: 30%; width: 150px; height: 150px; background: rgba(255,255,255,0.03); border-radius: 50%;"></div>
+        <!-- MAIN DASHBOARD - Brand Hero -->
+        <div class="dashboard-hero main-dashboard-hero">
+          <div class="dashboard-hero-orb" style="top: -50px; right: -50px; width: 200px; height: 200px;"></div>
+          <div class="dashboard-hero-orb" style="bottom: -30px; left: 30%; width: 150px; height: 150px;"></div>
           <div style="display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 1;">
             <div>
               <h2 style="font-size: 1.75rem; font-weight: 800; margin-bottom: 0.5rem;">Welcome to PARTSFORM Admin</h2>
               <p style="opacity: 0.8; font-size: 0.95rem;">Automotive Parts Platform - Complete overview of platform performance</p>
             </div>
             <div style="display: flex; gap: 1rem;">
-              <div style="text-align: center; padding: 1rem 1.5rem; background: rgba(255,255,255,0.1); border-radius: var(--admin-radius-lg); backdrop-filter: blur(10px);">
+              <div class="dashboard-hero-stat">
                 <div style="font-size: 1.75rem; font-weight: 800;"><%= stats.totalOrders.toLocaleString() %></div>
                 <div style="font-size: 0.75rem; opacity: 0.8;">Total Orders</div>
               </div>
-              <div style="text-align: center; padding: 1rem 1.5rem; background: rgba(255,255,255,0.1); border-radius: var(--admin-radius-lg); backdrop-filter: blur(10px);">
+              <div class="dashboard-hero-stat">
                 <% var displayRevenue = stats.totalRevenue > 0 ? stats.totalRevenue : stats.potentialRevenue; %>
                 <div style="font-size: 1.75rem; font-weight: 800;"><%= displayRevenue >= 1000000 ? '$' + (displayRevenue / 1000000).toFixed(2) + 'M' : '$' + (displayRevenue / 1000).toFixed(1) + 'K' %></div>
                 <div style="font-size: 0.75rem; opacity: 0.8;"><%= stats.totalRevenue > 0 ? 'Revenue' : 'Pipeline' %></div>
               </div>
-              <div style="text-align: center; padding: 1rem 1.5rem; background: rgba(255,255,255,0.1); border-radius: var(--admin-radius-lg); backdrop-filter: blur(10px);">
+              <div class="dashboard-hero-stat">
                 <div style="font-size: 1.75rem; font-weight: 800;"><%= stats.totalBuyers || 0 %></div>
                 <div style="font-size: 0.75rem; opacity: 0.8;">Customers</div>
               </div>
-              <div style="text-align: center; padding: 1rem 1.5rem; background: rgba(255,255,255,0.1); border-radius: var(--admin-radius-lg); backdrop-filter: blur(10px);">
+              <div class="dashboard-hero-stat">
                 <div style="font-size: 1.75rem; font-weight: 800;"><%= stats.fulfillmentRate %>%</div>
                 <div style="font-size: 0.75rem; opacity: 0.8;">Fulfillment</div>
               </div>
@@ -263,43 +263,35 @@
           </div>
         </div>
 
-        <!-- Automotive Stats Overview - Single Focus -->
-        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin-bottom: 2rem;">
-          <div style="background: linear-gradient(135deg, rgba(14, 165, 233, 0.08) 0%, white 100%); border: 2px solid rgba(14, 165, 233, 0.2); border-radius: var(--admin-radius-xl); padding: 1.5rem; text-align: center;">
-            <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #0ea5e9, #0369a1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; margin: 0 auto 1rem;">
-              <i data-lucide="shopping-cart" style="width: 24px; height: 24px;"></i>
-            </div>
-            <div style="font-size: 1.75rem; font-weight: 800; color: #0ea5e9;"><%= stats.totalOrders.toLocaleString() %></div>
-            <div style="font-size: 0.85rem; color: #64748b;">Total Orders</div>
+        <!-- Automotive Stats Overview - Brand Cards -->
+        <div class="dashboard-stat-grid">
+          <div class="dashboard-stat-card orders">
+            <div class="dashboard-stat-icon"><i data-lucide="shopping-cart" style="width: 24px; height: 24px;"></i></div>
+            <div class="dashboard-stat-value"><%= stats.totalOrders.toLocaleString() %></div>
+            <div class="dashboard-stat-label">Total Orders</div>
           </div>
-          <div style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, white 100%); border: 2px solid rgba(16, 185, 129, 0.2); border-radius: var(--admin-radius-xl); padding: 1.5rem; text-align: center;">
-            <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #10b981, #059669); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; margin: 0 auto 1rem;">
-              <i data-lucide="dollar-sign" style="width: 24px; height: 24px;"></i>
-            </div>
+          <div class="dashboard-stat-card <%= stats.totalRevenue > 0 ? 'revenue' : 'pipeline' %>">
+            <div class="dashboard-stat-icon"><i data-lucide="dollar-sign" style="width: 24px; height: 24px;"></i></div>
             <% if (stats.totalRevenue > 0) { %>
-              <div style="font-size: 1.75rem; font-weight: 800; color: #10b981;"><%= stats.totalRevenue >= 1000000 ? '$' + (stats.totalRevenue / 1000000).toFixed(2) + 'M' : '$' + (stats.totalRevenue / 1000).toFixed(1) + 'K' %></div>
-              <div style="font-size: 0.85rem; color: #64748b;">Realized Revenue</div>
+              <div class="dashboard-stat-value"><%= stats.totalRevenue >= 1000000 ? '$' + (stats.totalRevenue / 1000000).toFixed(2) + 'M' : '$' + (stats.totalRevenue / 1000).toFixed(1) + 'K' %></div>
+              <div class="dashboard-stat-label">Realized Revenue</div>
             <% } else { %>
-              <div style="font-size: 1.75rem; font-weight: 800; color: #f59e0b;"><%= stats.potentialRevenue >= 1000000 ? '$' + (stats.potentialRevenue / 1000000).toFixed(2) + 'M' : '$' + (stats.potentialRevenue / 1000).toFixed(1) + 'K' %></div>
-              <div style="font-size: 0.85rem; color: #64748b;">Pipeline Value</div>
-              <div style="font-size: 0.65rem; color: #f59e0b; margin-top: 0.25rem;">Pending Orders</div>
+              <div class="dashboard-stat-value"><%= stats.potentialRevenue >= 1000000 ? '$' + (stats.potentialRevenue / 1000000).toFixed(2) + 'M' : '$' + (stats.potentialRevenue / 1000).toFixed(1) + 'K' %></div>
+              <div class="dashboard-stat-label">Pipeline Value</div>
+              <div class="dashboard-stat-sublabel">Pending Orders</div>
             <% } %>
           </div>
-          <div style="background: linear-gradient(135deg, rgba(14, 165, 233, 0.08) 0%, white 100%); border: 2px solid rgba(14, 165, 233, 0.2); border-radius: var(--admin-radius-xl); padding: 1.5rem; text-align: center;">
-            <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #0ea5e9, #0369a1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; margin: 0 auto 1rem;">
-              <i data-lucide="users" style="width: 24px; height: 24px;"></i>
-            </div>
-            <div style="font-size: 1.75rem; font-weight: 800; color: #0ea5e9;"><%= stats.totalBuyers || 0 %></div>
-            <div style="font-size: 0.85rem; color: #64748b;">Customers</div>
+          <div class="dashboard-stat-card customers">
+            <div class="dashboard-stat-icon"><i data-lucide="users" style="width: 24px; height: 24px;"></i></div>
+            <div class="dashboard-stat-value"><%= stats.totalBuyers || 0 %></div>
+            <div class="dashboard-stat-label">Customers</div>
           </div>
-          <div style="background: linear-gradient(135deg, <%= stats.fulfillmentRate >= 50 ? 'rgba(16, 185, 129, 0.08)' : 'rgba(245, 158, 11, 0.08)' %> 0%, white 100%); border: 2px solid <%= stats.fulfillmentRate >= 50 ? 'rgba(16, 185, 129, 0.2)' : 'rgba(245, 158, 11, 0.2)' %>; border-radius: var(--admin-radius-xl); padding: 1.5rem; text-align: center;">
-            <div style="width: 50px; height: 50px; background: linear-gradient(135deg, <%= stats.fulfillmentRate >= 50 ? '#10b981, #059669' : '#f59e0b, #d97706' %>); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; margin: 0 auto 1rem;">
-              <i data-lucide="<%= stats.fulfillmentRate >= 50 ? 'check-circle' : 'clock' %>" style="width: 24px; height: 24px;"></i>
-            </div>
-            <div style="font-size: 1.75rem; font-weight: 800; color: <%= stats.fulfillmentRate >= 50 ? '#10b981' : '#f59e0b' %>;"><%= stats.fulfillmentRate %>%</div>
-            <div style="font-size: 0.85rem; color: #64748b;">Fulfillment Rate</div>
+          <div class="dashboard-stat-card <%= stats.fulfillmentRate >= 50 ? 'fulfillment-success' : 'fulfillment-warning' %>">
+            <div class="dashboard-stat-icon"><i data-lucide="<%= stats.fulfillmentRate >= 50 ? 'check-circle' : 'clock' %>" style="width: 24px; height: 24px;"></i></div>
+            <div class="dashboard-stat-value"><%= stats.fulfillmentRate %>%</div>
+            <div class="dashboard-stat-label">Fulfillment Rate</div>
             <% if (stats.fulfillmentRate === 0 && stats.ordersPending > 0) { %>
-              <div style="font-size: 0.65rem; color: #f59e0b; margin-top: 0.25rem;"><%= stats.ordersPending %> orders pending</div>
+              <div class="dashboard-stat-sublabel"><%= stats.ordersPending %> orders pending</div>
             <% } %>
           </div>
         </div>
@@ -331,7 +323,7 @@
                 <div class="chart-header">
                   <div>
                     <div class="chart-title" style="display: flex; align-items: center; gap: 0.5rem;">
-                      <i data-lucide="pie-chart" style="width: 16px; height: 16px; color: #8b5cf6;"></i>
+                      <i data-lucide="pie-chart" class="chart-title-icon purple"></i>
                       Order Distribution
                     </div>
                     <div class="chart-subtitle">By status breakdown</div>
@@ -342,19 +334,19 @@
                 </div>
                 <div style="display: flex; justify-content: center; gap: 0.75rem; padding-top: 0.5rem; flex-wrap: wrap;">
                   <div style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.7rem;">
-                    <span style="width: 8px; height: 8px; background: #f59e0b; border-radius: 50%;"></span>
+                    <span class="legend-dot pending"></span>
                     Pending (<%= stats.ordersPending || 0 %>)
                   </div>
                   <div style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.7rem;">
-                    <span style="width: 8px; height: 8px; background: #3b82f6; border-radius: 50%;"></span>
+                    <span class="legend-dot processing"></span>
                     Processing (<%= stats.ordersProcessing || 0 %>)
                   </div>
                   <div style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.7rem;">
-                    <span style="width: 8px; height: 8px; background: #8b5cf6; border-radius: 50%;"></span>
+                    <span class="legend-dot shipped"></span>
                     Shipped (<%= stats.ordersShipped || 0 %>)
                   </div>
                   <div style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.7rem;">
-                    <span style="width: 8px; height: 8px; background: #10b981; border-radius: 50%;"></span>
+                    <span class="legend-dot completed"></span>
                     Completed (<%= (stats.ordersDelivered || 0) + (stats.ordersCompleted || 0) %>)
                   </div>
                 </div>
@@ -363,7 +355,7 @@
                 <div class="chart-header">
                   <div>
                     <div class="chart-title" style="display: flex; align-items: center; gap: 0.5rem;">
-                      <i data-lucide="map-pin" style="width: 16px; height: 16px; color: #0ea5e9;"></i>
+                      <i data-lucide="map-pin" class="chart-title-icon blue"></i>
                       Top Countries
                     </div>
                     <div class="chart-subtitle">By order volume</div>
@@ -379,24 +371,24 @@
           <!-- Right: Live Activity & Stats Sidebar -->
           <div>
             <!-- Performance Summary Card -->
-            <div style="background: linear-gradient(135deg, #1e3a5f, #2b5278); border-radius: var(--admin-radius-xl); padding: 1.5rem; margin-bottom: 1rem; color: white;">
-              <h4 style="font-size: 0.95rem; font-weight: 600; margin-bottom: 1rem; opacity: 0.9;">📊 Platform Health</h4>
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="platform-health-card">
+              <h4 style="font-weight: 600; opacity: 0.9;">Platform Health</h4>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
                 <div style="text-align: center;">
-                  <div style="font-size: 1.5rem; font-weight: 800;"><%= stats.fulfillmentRate %>%</div>
-                  <div style="font-size: 0.7rem; opacity: 0.7;">Fulfillment</div>
+                  <div class="platform-health-stat-value" style="font-weight: 800;"><%= stats.fulfillmentRate %>%</div>
+                  <div class="platform-health-stat-label" style="opacity: 0.7;">Fulfillment</div>
                 </div>
                 <div style="text-align: center;">
-                  <div style="font-size: 1.5rem; font-weight: 800;"><%= stats.totalBuyers || 0 %></div>
-                  <div style="font-size: 0.7rem; opacity: 0.7;">Customers</div>
+                  <div class="platform-health-stat-value" style="font-weight: 800;"><%= stats.totalBuyers || 0 %></div>
+                  <div class="platform-health-stat-label" style="opacity: 0.7;">Customers</div>
                 </div>
                 <div style="text-align: center;">
-                  <div style="font-size: 1.5rem; font-weight: 800;"><%= stats.pendingTickets %></div>
-                  <div style="font-size: 0.7rem; opacity: 0.7;">Open Tickets</div>
+                  <div class="platform-health-stat-value" style="font-weight: 800;"><%= stats.pendingTickets %></div>
+                  <div class="platform-health-stat-label" style="opacity: 0.7;">Open Tickets</div>
                 </div>
                 <div style="text-align: center;">
-                  <div style="font-size: 1.5rem; font-weight: 800;"><%= stats.totalProducts.toLocaleString() %></div>
-                  <div style="font-size: 0.7rem; opacity: 0.7;">Parts</div>
+                  <div class="platform-health-stat-value" style="font-weight: 800;"><%= stats.totalProducts.toLocaleString() %></div>
+                  <div class="platform-health-stat-label" style="opacity: 0.7;">Parts</div>
                 </div>
               </div>
             </div>
@@ -442,19 +434,19 @@
             </div>
             <div class="orders-body" style="max-height: 320px; overflow-y: auto;">
               <!-- Table Header -->
-              <div style="display: flex; align-items: center; padding: 0.75rem 1rem; border-bottom: 2px solid var(--admin-border); background: var(--admin-bg-secondary); gap: 1rem; position: sticky; top: 0;">
-                <div style="min-width: 110px; font-weight: 600; font-size: 0.7rem; text-transform: uppercase; color: var(--admin-text-muted); letter-spacing: 0.5px;">Order ID</div>
-                <div style="flex: 1; font-weight: 600; font-size: 0.7rem; text-transform: uppercase; color: var(--admin-text-muted); letter-spacing: 0.5px;">Customer</div>
-                <div style="min-width: 90px; font-weight: 600; font-size: 0.7rem; text-transform: uppercase; color: var(--admin-text-muted); letter-spacing: 0.5px; text-align: right;">Amount</div>
-                <div style="min-width: 36px; font-weight: 600; font-size: 0.7rem; text-transform: uppercase; color: var(--admin-text-muted); letter-spacing: 0.5px; text-align: center;">Type</div>
-                <div style="min-width: 100px; font-weight: 600; font-size: 0.7rem; text-transform: uppercase; color: var(--admin-text-muted); letter-spacing: 0.5px;">Status</div>
+              <div class="orders-table-header">
+                <div style="min-width: 110px;">Order ID</div>
+                <div style="flex: 1;">Customer</div>
+                <div style="min-width: 90px; text-align: right;">Amount</div>
+                <div style="min-width: 36px; text-align: center;">Type</div>
+                <div style="min-width: 100px;">Status</div>
               </div>
               <% recentOrders.slice(0, 8).forEach(function(order) { %>
-                <div class="order-row" style="display: flex; align-items: center; padding: 0.875rem 1rem; border-bottom: 1px solid var(--admin-border); gap: 1rem;">
-                  <div style="min-width: 110px; font-weight: 600; color: var(--admin-primary); font-size: 0.85rem;"><%= order.id %></div>
+                <div class="order-row order-row-flex">
+                  <div style="min-width: 110px; font-weight: 600; color: var(--aitetsu); font-size: 0.85rem;"><%= order.id %></div>
                   <div style="flex: 1; font-weight: 500; color: var(--admin-text-primary);"><%= order.customer %></div>
                   <div style="min-width: 90px; font-weight: 700; color: var(--admin-text-primary); text-align: right;">$<%= order.amount.toLocaleString() %></div>
-                  <div style="min-width: 36px; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: <%= order.industry === 'automotive' ? 'rgba(220, 38, 38, 0.12)' : order.industry === 'aviation' ? 'rgba(14, 165, 233, 0.12)' : 'rgba(234, 179, 8, 0.12)' %>; color: <%= order.industry === 'automotive' ? '#dc2626' : order.industry === 'aviation' ? '#0ea5e9' : '#eab308' %>;">
+                  <div class="order-industry-icon <%= order.industry || 'automotive' %>" style="min-width: 36px;">
                     <% if (order.industry === 'automotive') { %>
                       <i data-lucide="car" style="width: 16px; height: 16px;"></i>
                     <% } else if (order.industry === 'aviation') { %>
@@ -463,7 +455,7 @@
                       <i data-lucide="construction" style="width: 16px; height: 16px;"></i>
                     <% } %>
                   </div>
-                  <div style="min-width: 100px; display: flex; align-items: center; gap: 0.4rem; padding: 0.35rem 0.75rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; background: <%= order.status === 'pending' ? 'rgba(245, 158, 11, 0.12)' : order.status === 'processing' ? 'rgba(59, 130, 246, 0.12)' : order.status === 'shipped' ? 'rgba(139, 92, 246, 0.12)' : 'rgba(16, 185, 129, 0.12)' %>; color: <%= order.status === 'pending' ? '#d97706' : order.status === 'processing' ? '#2563eb' : order.status === 'shipped' ? '#7c3aed' : '#059669' %>;">
+                  <div class="order-status-badge <%= order.status || 'pending' %>" style="min-width: 100px;">
                     <% if (order.status === 'pending') { %>
                       <i data-lucide="clock" style="width: 12px; height: 12px;"></i>
                     <% } else if (order.status === 'processing') { %>
@@ -498,7 +490,7 @@
                   <div class="activity-content" style="flex: 1;">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                       <div class="activity-text"><strong><%= claim.id %></strong></div>
-                      <span style="font-size: 0.65rem; padding: 0.15rem 0.4rem; border-radius: 8px; background: <%= claim.priority === 'urgent' ? 'rgba(239, 68, 68, 0.15)' : claim.priority === 'high' ? 'rgba(245, 158, 11, 0.15)' : 'rgba(59, 130, 246, 0.15)' %>; color: <%= claim.priority === 'urgent' ? '#dc2626' : claim.priority === 'high' ? '#d97706' : '#3b82f6' %>;"><%= claim.priority %></span>
+                      <span class="claim-priority-badge <%= claim.priority || 'medium' %>"><%= claim.priority %></span>
                     </div>
                     <div class="activity-time" style="font-size: 0.75rem;"><%= claim.subject.substring(0, 30) %><%= claim.subject.length > 30 ? '...' : '' %></div>
                   </div>
@@ -520,7 +512,7 @@
             <div class="chart-header">
               <div>
                 <div class="chart-title" style="display: flex; align-items: center; gap: 0.5rem;">
-                  <i data-lucide="trophy" style="width: 18px; height: 18px; color: #f59e0b;"></i>
+                  <i data-lucide="trophy" class="chart-title-icon gold"></i>
                   Top Buyers by Revenue
                 </div>
                 <% var hasCompletedBuyers = typeof topBuyers !== 'undefined' && topBuyers.length > 0 && !topBuyers[0].isPending; %>
@@ -531,65 +523,42 @@
             <div style="padding: 0 1rem 1rem;">
               <% if (typeof topBuyers !== 'undefined' && topBuyers.length > 0) { %>
                 <% topBuyers.forEach(function(buyer, index) { %>
-                  <% 
-                    let rankStyle = '';
-                    let rankBg = '';
-                    if (index === 0) {
-                      rankStyle = 'background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(234, 179, 8, 0.05)); border-radius: 12px;';
-                      rankBg = 'background: linear-gradient(135deg, #f59e0b, #d97706);';
-                    } else if (index === 1) {
-                      rankStyle = 'background: rgba(148, 163, 184, 0.08); border-radius: 12px;';
-                      rankBg = 'background: linear-gradient(135deg, #94a3b8, #64748b);';
-                    } else if (index === 2) {
-                      rankStyle = 'background: rgba(194, 120, 3, 0.08); border-radius: 12px;';
-                      rankBg = 'background: linear-gradient(135deg, #cd7f32, #b8860b);';
-                    } else {
-                      rankStyle = 'border: 1px solid #e2e8f0; border-radius: 12px;';
-                      rankBg = 'background: #f1f5f9;';
-                    }
-                  %>
-                  <div style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; margin-bottom: 0.5rem; <%= rankStyle %>">
-                    <!-- Rank Badge -->
-                    <div style="width: <%= index < 3 ? '28px' : '24px' %>; height: <%= index < 3 ? '28px' : '24px' %>; <%= rankBg %> border-radius: 50%; display: flex; align-items: center; justify-content: center; color: <%= index < 3 ? 'white' : '#64748b' %>; font-weight: 800; font-size: <%= index < 3 ? '0.75rem' : '0.7rem' %>; flex-shrink: 0;">#<%= index + 1 %></div>
-                    
-                    <!-- Buyer Avatar -->
-                    <div style="width: 44px; height: 44px; border-radius: 50%; overflow: hidden; border: 2px solid <%= index === 0 ? '#f59e0b' : index === 1 ? '#94a3b8' : index === 2 ? '#cd7f32' : '#e2e8f0' %>; flex-shrink: 0;">
+                  <% var rankClass = index === 0 ? 'rank-1' : index === 1 ? 'rank-2' : index === 2 ? 'rank-3' : 'rank-default'; %>
+                  <div class="buyer-rank-row <%= rankClass %>">
+                    <div class="buyer-rank-badge <%= rankClass %>">#<%= index + 1 %></div>
+                    <div class="buyer-avatar <%= rankClass %>">
                       <% if (buyer.avatar) { %>
                         <img src="<%= buyer.avatar %>" alt="<%= buyer.fullName %>" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                        <div style="display: none; width: 100%; height: 100%; background: linear-gradient(135deg, #3b82f6, #1d4ed8); align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 1rem;">
+                        <div class="buyer-avatar-fallback" style="display: none;">
                           <%= buyer.firstName ? buyer.firstName.charAt(0).toUpperCase() : 'U' %><%= buyer.lastName ? buyer.lastName.charAt(0).toUpperCase() : '' %>
                         </div>
                       <% } else { %>
-                        <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #3b82f6, #1d4ed8); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 1rem;">
+                        <div class="buyer-avatar-fallback">
                           <%= buyer.firstName ? buyer.firstName.charAt(0).toUpperCase() : 'U' %><%= buyer.lastName ? buyer.lastName.charAt(0).toUpperCase() : '' %>
                         </div>
                       <% } %>
                     </div>
-                    
-                    <!-- Buyer Info -->
                     <div style="flex: 1; min-width: 0;">
-                      <div style="font-weight: 700; color: #1e293b; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><%= buyer.fullName %></div>
-                      <div style="font-size: 0.75rem; color: #0ea5e9; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 4px;">
+                      <div style="font-weight: 700; color: var(--admin-text-primary); font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><%= buyer.fullName %></div>
+                      <div style="font-size: 0.75rem; color: var(--aitetsu); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 4px;">
                         <i data-lucide="building-2" style="width: 11px; height: 11px; flex-shrink: 0;"></i>
                         <%= buyer.companyName %>
                       </div>
-                      <div style="font-size: 0.7rem; color: #64748b; margin-top: 2px; display: flex; align-items: center; gap: 0.5rem;">
-                        <span style="background: <%= buyer.isPending ? 'rgba(245, 158, 11, 0.1)' : 'rgba(16, 185, 129, 0.1)' %>; color: <%= buyer.isPending ? '#d97706' : '#059669' %>; padding: 0.1rem 0.35rem; border-radius: 8px; font-weight: 600;"><%= buyer.orderCount %> orders</span>
+                      <div style="font-size: 0.7rem; color: var(--admin-text-muted); margin-top: 2px; display: flex; align-items: center; gap: 0.5rem;">
+                        <span class="buyer-orders-badge <%= buyer.isPending ? 'pending' : 'completed' %>"><%= buyer.orderCount %> orders</span>
                         <% if (buyer.country && buyer.country !== 'N/A') { %>
                           <span>📍 <%= buyer.country %></span>
                         <% } %>
                       </div>
                     </div>
-                    
-                    <!-- Revenue -->
                     <div style="text-align: right; flex-shrink: 0;">
-                      <div style="font-weight: 800; color: <%= buyer.isPending ? '#f59e0b' : '#10b981' %>; font-size: 1rem;">$<%= buyer.totalSpent.toLocaleString() %></div>
-                      <div style="font-size: 0.65rem; color: #64748b;"><%= buyer.isPending ? 'Pending' : buyer.fulfillmentRate + '% fulfilled' %></div>
+                      <div class="buyer-revenue <%= buyer.isPending ? 'pending' : 'completed' %>">$<%= buyer.totalSpent.toLocaleString() %></div>
+                      <div style="font-size: 0.65rem; color: var(--admin-text-muted);"><%= buyer.isPending ? 'Pending' : buyer.fulfillmentRate + '% fulfilled' %></div>
                     </div>
                   </div>
                 <% }); %>
               <% } else { %>
-                <div style="padding: 2rem; text-align: center; color: #64748b;">
+                <div class="dashboard-empty-state" style="padding: 2rem;">
                   <i data-lucide="users" style="width: 48px; height: 48px; opacity: 0.3; margin-bottom: 1rem;"></i>
                   <div>No buyer data available yet</div>
                 </div>
@@ -602,7 +571,7 @@
             <div class="chart-header">
               <div>
                 <div class="chart-title" style="display: flex; align-items: center; gap: 0.5rem;">
-                  <i data-lucide="flame" style="width: 18px; height: 18px; color: #ef4444;"></i>
+                  <i data-lucide="flame" class="chart-title-icon gold"></i>
                   Most Wanted Parts
                 </div>
                 <div class="chart-subtitle">Top ordered parts by sales</div>
@@ -612,7 +581,7 @@
             <div style="padding: 0 1rem 1rem;">
               <% 
                 const partIcons = ['disc', 'filter', 'zap', 'settings', 'cog'];
-                const partColors = ['#0ea5e9', '#10b981', '#8b5cf6', '#f59e0b', '#ec4899'];
+                const partColors = ['#40545E', '#95AFC0', '#D4AF37', '#8E9CA6', '#64748b'];
                 const partBgColors = [
                   'rgba(14, 165, 233, 0.12)',
                   'rgba(16, 185, 129, 0.12)',
@@ -623,34 +592,33 @@
               %>
               <% if (typeof mostWantedParts !== 'undefined' && mostWantedParts.length > 0) { %>
                 <% mostWantedParts.forEach(function(part, index) { %>
-                  <div style="display: flex; align-items: center; gap: 1rem; padding: 0.875rem 1rem; border-radius: 14px; margin-bottom: 0.625rem; border: 1px solid #e2e8f0; background: white; transition: all 0.2s ease;" onmouseover="this.style.borderColor='<%= partColors[index % 5] %>'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none';">
-                    <div style="display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: <%= partBgColors[index % 5] %>; border-radius: 8px; font-size: 0.75rem; font-weight: 700; color: <%= partColors[index % 5] %>;">
-                      #<%= index + 1 %>
-                    </div>
-                    <div style="width: 42px; height: 42px; background: linear-gradient(135deg, <%= partBgColors[index % 5] %>, rgba(255,255,255,0.5)); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                      <i data-lucide="<%= partIcons[index % 5] %>" style="width: 20px; height: 20px; color: <%= partColors[index % 5] %>;"></i>
+                  <% var partNum = (index % 5) + 1; %>
+                  <div class="part-item">
+                    <div class="part-rank n<%= partNum %>">#<%= index + 1 %></div>
+                    <div class="part-icon-wrap n<%= partNum %>">
+                      <i data-lucide="<%= partIcons[index % 5] %>" style="width: 20px; height: 20px;"></i>
                     </div>
                     <div style="flex: 1; min-width: 0;">
-                      <div style="font-weight: 600; color: #1e293b; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="<%= part.description %>"><%= part.description || part.partNumber %></div>
+                      <div style="font-weight: 600; color: var(--admin-text-primary); font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="<%= part.description %>"><%= part.description || part.partNumber %></div>
                       <div style="display: flex; align-items: center; gap: 0.5rem; margin-top: 0.25rem;">
-                        <span style="font-size: 0.7rem; color: #64748b; font-family: monospace; background: #f1f5f9; padding: 0.15rem 0.4rem; border-radius: 4px;"><%= part.partNumber %></span>
+                        <span style="font-size: 0.7rem; color: var(--admin-text-muted); font-family: monospace; background: var(--admin-bg-tertiary); padding: 0.15rem 0.4rem; border-radius: 0;"><%= part.partNumber %></span>
                         <% if (part.brand && part.brand !== 'N/A') { %>
-                          <span style="font-size: 0.65rem; color: #94a3b8;">•</span>
-                          <span style="font-size: 0.7rem; color: #64748b;"><%= part.brand %></span>
+                          <span style="font-size: 0.65rem; color: var(--admin-text-subtle);">•</span>
+                          <span style="font-size: 0.7rem; color: var(--admin-text-muted);"><%= part.brand %></span>
                         <% } %>
                       </div>
                     </div>
                     <div style="text-align: right; flex-shrink: 0;">
-                      <div style="font-weight: 700; font-size: 0.95rem; color: <%= partColors[index % 5] %>;"><%= part.orderCount %> <span style="font-weight: 400; font-size: 0.75rem; color: #64748b;">orders</span></div>
-                      <div style="font-size: 0.75rem; color: #10b981; font-weight: 600; margin-top: 0.125rem;">$<%= (part.totalRevenue || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) %></div>
+                      <div class="part-order-count n<%= partNum %>"><%= part.orderCount %> <span style="font-weight: 400; font-size: 0.75rem; color: var(--admin-text-muted);">orders</span></div>
+                      <div class="part-revenue" style="margin-top: 0.125rem;">$<%= (part.totalRevenue || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) %></div>
                     </div>
                   </div>
                 <% }); %>
               <% } else { %>
-                <div style="padding: 2.5rem; text-align: center; color: #64748b; background: #f8fafc; border-radius: 12px; border: 1px dashed #e2e8f0;">
+                <div class="dashboard-empty-state">
                   <i data-lucide="package" style="width: 48px; height: 48px; opacity: 0.3; margin-bottom: 0.75rem;"></i>
                   <div style="font-size: 0.9rem; font-weight: 500;">No parts data available yet</div>
-                  <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 0.25rem;">Parts will appear here once orders are placed</div>
+                  <div style="font-size: 0.75rem; margin-top: 0.25rem;">Parts will appear here once orders are placed</div>
                 </div>
               <% } %>
             </div>
@@ -668,25 +636,25 @@
             </div>
             <div style="padding: 1rem;">
               <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem;">
-                <div style="text-align: center; padding: 1.5rem; background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(217, 119, 6, 0.05)); border-radius: 12px; border: 1px solid rgba(245, 158, 11, 0.2);">
-                  <i data-lucide="clock" style="width: 28px; height: 28px; color: #f59e0b; margin-bottom: 0.5rem;"></i>
-                  <div style="font-size: 1.5rem; font-weight: 800; color: #f59e0b;"><%= stats.ordersPending || 0 %></div>
-                  <div style="font-size: 0.8rem; color: #64748b;">Pending</div>
+                <div class="pipeline-stat pending">
+                  <i data-lucide="clock" class="pipeline-stat-icon"></i>
+                  <div class="pipeline-stat-value"><%= stats.ordersPending || 0 %></div>
+                  <div style="font-size: 0.8rem; color: var(--admin-text-muted);">Pending</div>
                 </div>
-                <div style="text-align: center; padding: 1.5rem; background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.05)); border-radius: 12px; border: 1px solid rgba(59, 130, 246, 0.2);">
-                  <i data-lucide="loader" style="width: 28px; height: 28px; color: #3b82f6; margin-bottom: 0.5rem;"></i>
-                  <div style="font-size: 1.5rem; font-weight: 800; color: #3b82f6;"><%= stats.ordersProcessing || 0 %></div>
-                  <div style="font-size: 0.8rem; color: #64748b;">Processing</div>
+                <div class="pipeline-stat processing">
+                  <i data-lucide="loader" class="pipeline-stat-icon"></i>
+                  <div class="pipeline-stat-value"><%= stats.ordersProcessing || 0 %></div>
+                  <div style="font-size: 0.8rem; color: var(--admin-text-muted);">Processing</div>
                 </div>
-                <div style="text-align: center; padding: 1.5rem; background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(124, 58, 237, 0.05)); border-radius: 12px; border: 1px solid rgba(139, 92, 246, 0.2);">
-                  <i data-lucide="truck" style="width: 28px; height: 28px; color: #8b5cf6; margin-bottom: 0.5rem;"></i>
-                  <div style="font-size: 1.5rem; font-weight: 800; color: #8b5cf6;"><%= stats.ordersShipped || 0 %></div>
-                  <div style="font-size: 0.8rem; color: #64748b;">Shipped</div>
+                <div class="pipeline-stat shipped">
+                  <i data-lucide="truck" class="pipeline-stat-icon"></i>
+                  <div class="pipeline-stat-value"><%= stats.ordersShipped || 0 %></div>
+                  <div style="font-size: 0.8rem; color: var(--admin-text-muted);">Shipped</div>
                 </div>
-                <div style="text-align: center; padding: 1.5rem; background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.05)); border-radius: 12px; border: 1px solid rgba(16, 185, 129, 0.2);">
-                  <i data-lucide="check-circle" style="width: 28px; height: 28px; color: #10b981; margin-bottom: 0.5rem;"></i>
-                  <div style="font-size: 1.5rem; font-weight: 800; color: #10b981;"><%= (stats.ordersDelivered || 0) + (stats.ordersCompleted || 0) %></div>
-                  <div style="font-size: 0.8rem; color: #64748b;">Completed</div>
+                <div class="pipeline-stat completed">
+                  <i data-lucide="check-circle" class="pipeline-stat-icon"></i>
+                  <div class="pipeline-stat-value"><%= (stats.ordersDelivered || 0) + (stats.ordersCompleted || 0) %></div>
+                  <div style="font-size: 0.8rem; color: var(--admin-text-muted);">Completed</div>
                 </div>
               </div>
             </div>
@@ -697,7 +665,7 @@
             <div class="chart-header">
               <div>
                 <div class="chart-title" style="display: flex; align-items: center; gap: 0.5rem;">
-                  <i data-lucide="globe" style="width: 18px; height: 18px; color: #0ea5e9;"></i>
+                  <i data-lucide="globe" class="chart-title-icon blue"></i>
                   Global Reach
                 </div>
                 <div class="chart-subtitle">Orders by customer countries</div>
@@ -733,7 +701,7 @@
                 const rawCountries = typeof ordersByCountry !== 'undefined' ? ordersByCountry : [];
                 const countries = rawCountries.filter(c => c.code && c.code !== 'XX' && c.code !== 'NA' && c.code !== 'N/A' && c.code.trim().length > 0);
                 const maxOrders = countries.length > 0 ? Math.max(...countries.map(c => c.orderCount)) : 1;
-                const barColors = ['#0ea5e9', '#10b981', '#8b5cf6', '#f59e0b', '#ec4899', '#06b6d4', '#84cc16', '#f97316'];
+                const barColors = ['#40545E', '#95AFC0', '#D4AF37', '#8E9CA6', '#64748b', '#94a3b8', '#a8b8c8', '#b8c4d0'];
               %>
               <% if (countries.length > 0) { %>
                 <% countries.slice(0, 5).forEach(function(country, index) { %>
@@ -745,7 +713,7 @@
                       </div>
                       <div style="display: flex; align-items: center; gap: 0.75rem;">
                         <span style="font-size: 0.75rem; color: #64748b;"><%= country.orderCount %> orders</span>
-                        <span style="font-size: 0.75rem; font-weight: 700; color: #10b981;">$<%= (country.revenue || 0).toLocaleString() %></span>
+                        <span style="font-size: 0.75rem; font-weight: 700; color: var(--kintsugi);">$<%= (country.revenue || 0).toLocaleString() %></span>
                       </div>
                     </div>
                     <div style="height: 6px; background: #e2e8f0; border-radius: 10px; overflow: hidden;">
@@ -769,30 +737,21 @@
              ============================================ -->
         <div class="ai-insights-section" style="margin-top: 2.5rem;">
           
-          <!-- AI Insights Header Banner -->
-          <div style="background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 40%, #2b5278 70%, #1e293b 100%); border-radius: 24px; padding: 0; position: relative; overflow: hidden; border: 1px solid rgba(59, 130, 246, 0.2);">
-            
-            <!-- Animated Background Elements -->
-            <div style="position: absolute; top: -100px; right: -100px; width: 400px; height: 400px; background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 70%); border-radius: 50%; animation: pulse 8s ease-in-out infinite;"></div>
-            <div style="position: absolute; bottom: -80px; left: -80px; width: 300px; height: 300px; background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%); border-radius: 50%; animation: pulse 10s ease-in-out infinite reverse;"></div>
-            <div style="position: absolute; top: 50%; left: 50%; width: 600px; height: 600px; background: radial-gradient(circle, rgba(14, 165, 233, 0.05) 0%, transparent 60%); border-radius: 50%; transform: translate(-50%, -50%);"></div>
-            
-            <!-- Grid Pattern Overlay -->
-            <div style="position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none;"></div>
-            
+          <!-- AI Insights Header Banner — Brand colors (search-v2 gradient) -->
+          <div class="ai-hub-banner">
             <!-- Main Header Content -->
             <div style="position: relative; z-index: 1; padding: 2rem 2.5rem;">
               <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1.5rem;">
                 
                 <!-- Left: Title & Description -->
                 <div style="display: flex; align-items: center; gap: 1.25rem;">
-                  <div style="width: 64px; height: 64px; background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #06b6d4 100%); border-radius: 18px; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 32px rgba(59, 130, 246, 0.4), 0 0 0 1px rgba(255,255,255,0.1); animation: iconGlow 3s ease-in-out infinite;">
-                    <i data-lucide="brain" style="width: 32px; height: 32px; color: white;"></i>
+                  <div class="ai-hub-icon">
+                    <i data-lucide="brain" style="width: 32px; height: 32px;"></i>
                   </div>
                   <div>
                     <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.25rem;">
-                      <h2 style="font-size: 1.75rem; font-weight: 800; color: white; margin: 0; letter-spacing: -0.02em;">AI Intelligence Hub</h2>
-                      <span style="padding: 0.25rem 0.75rem; background: linear-gradient(135deg, #10b981, #059669); border-radius: 20px; font-size: 0.65rem; font-weight: 700; color: white; text-transform: uppercase; letter-spacing: 0.05em;">LIVE</span>
+                      <h2 style="font-size: 1.75rem; font-weight: 800; color: #FFFFFF; margin: 0; letter-spacing: -0.02em;">AI Intelligence Hub</h2>
+                      <span class="ai-hub-badge-live">LIVE</span>
                     </div>
                     <p style="font-size: 1rem; color: rgba(255,255,255,0.7); margin: 0;">Predictive analytics & intelligent recommendations powered by machine learning</p>
                   </div>
@@ -800,15 +759,15 @@
                 
                 <!-- Right: AI Status & Controls -->
                 <div style="display: flex; align-items: center; gap: 1rem;">
-                  <div style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 12px;">
-                    <div style="width: 8px; height: 8px; background: #10b981; border-radius: 50%; animation: blink 2s ease-in-out infinite;"></div>
-                    <span style="font-size: 0.8rem; color: #10b981; font-weight: 600;">Model Active</span>
+                  <div class="ai-hub-model-active">
+                    <div class="dot"></div>
+                    <span>Model Active</span>
                   </div>
-                  <div style="padding: 0.5rem 1rem; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px;">
+                  <div style="padding: 0.5rem 1rem; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); border-radius: 0;">
                     <span style="font-size: 0.75rem; color: rgba(255,255,255,0.6);">Last Analysis:</span>
                     <span style="font-size: 0.8rem; color: white; font-weight: 600; margin-left: 0.25rem;">2 min ago</span>
                   </div>
-                  <button style="padding: 0.625rem 1.25rem; background: linear-gradient(135deg, #3b82f6, #2563eb); border: none; border-radius: 10px; color: white; font-size: 0.85rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; transition: all 0.3s; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);">
+                  <button class="ai-hub-refresh-btn">
                     <i data-lucide="refresh-cw" style="width: 16px; height: 16px;"></i>
                     Refresh Analysis
                   </button>
@@ -817,45 +776,45 @@
               
               <!-- AI Performance Metrics Bar -->
               <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.1);">
-                <div style="text-align: center;">
-                  <div style="font-size: 1.75rem; font-weight: 800; color: #10b981;">94.7%</div>
-                  <div style="font-size: 0.75rem; color: rgba(255,255,255,0.5); margin-top: 0.25rem;">Prediction Accuracy</div>
+                <div class="ai-hub-metric">
+                  <div class="ai-hub-metric-value accuracy">94.7%</div>
+                  <div class="ai-hub-metric-label">Prediction Accuracy</div>
                 </div>
-                <div style="text-align: center;">
-                  <div style="font-size: 1.75rem; font-weight: 800; color: #3b82f6;">2.4M</div>
-                  <div style="font-size: 0.75rem; color: rgba(255,255,255,0.5); margin-top: 0.25rem;">Data Points Analyzed</div>
+                <div class="ai-hub-metric">
+                  <div class="ai-hub-metric-value data">2.4M</div>
+                  <div class="ai-hub-metric-label">Data Points Analyzed</div>
                 </div>
-                <div style="text-align: center;">
-                  <div style="font-size: 1.75rem; font-weight: 800; color: #8b5cf6;">156</div>
-                  <div style="font-size: 0.75rem; color: rgba(255,255,255,0.5); margin-top: 0.25rem;">Insights Generated</div>
+                <div class="ai-hub-metric">
+                  <div class="ai-hub-metric-value insights">156</div>
+                  <div class="ai-hub-metric-label">Insights Generated</div>
                 </div>
-                <div style="text-align: center;">
-                  <div style="font-size: 1.75rem; font-weight: 800; color: #f59e0b;">$847K</div>
-                  <div style="font-size: 0.75rem; color: rgba(255,255,255,0.5); margin-top: 0.25rem;">Revenue Impact</div>
+                <div class="ai-hub-metric">
+                  <div class="ai-hub-metric-value revenue">$847K</div>
+                  <div class="ai-hub-metric-label">Revenue Impact</div>
                 </div>
-                <div style="text-align: center;">
-                  <div style="font-size: 1.75rem; font-weight: 800; color: #06b6d4;">12</div>
-                  <div style="font-size: 0.75rem; color: rgba(255,255,255,0.5); margin-top: 0.25rem;">Action Items</div>
+                <div class="ai-hub-metric">
+                  <div class="ai-hub-metric-value actions">12</div>
+                  <div class="ai-hub-metric-label">Action Items</div>
                 </div>
               </div>
             </div>
           </div>
           
           <!-- AI Insights Navigation Tabs -->
-          <div style="display: flex; align-items: center; gap: 0.5rem; margin-top: 1.5rem; padding: 0.5rem; background: white; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
-            <button class="ai-tab active" onclick="switchAITab('predictions')" style="flex: 1; padding: 0.875rem 1.5rem; background: linear-gradient(135deg, #2b5278, #1e3a54); border: none; border-radius: 12px; color: white; font-size: 0.9rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: all 0.3s;">
+          <div class="ai-hub-tabs">
+            <button class="ai-hub-tab ai-tab active" onclick="switchAITab('predictions')">
               <i data-lucide="trending-up" style="width: 18px; height: 18px;"></i>
               Revenue Predictions
             </button>
-            <button class="ai-tab" onclick="switchAITab('recommendations')" style="flex: 1; padding: 0.875rem 1.5rem; background: transparent; border: none; border-radius: 12px; color: #64748b; font-size: 0.9rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: all 0.3s;">
+            <button class="ai-hub-tab ai-tab" onclick="switchAITab('recommendations')">
               <i data-lucide="lightbulb" style="width: 18px; height: 18px;"></i>
               Smart Recommendations
             </button>
-            <button class="ai-tab" onclick="switchAITab('anomalies')" style="flex: 1; padding: 0.875rem 1.5rem; background: transparent; border: none; border-radius: 12px; color: #64748b; font-size: 0.9rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: all 0.3s;">
+            <button class="ai-hub-tab ai-tab" onclick="switchAITab('anomalies')">
               <i data-lucide="alert-triangle" style="width: 18px; height: 18px;"></i>
               Anomaly Detection
             </button>
-            <button class="ai-tab" onclick="switchAITab('forecast')" style="flex: 1; padding: 0.875rem 1.5rem; background: transparent; border: none; border-radius: 12px; color: #64748b; font-size: 0.9rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: all 0.3s;">
+            <button class="ai-hub-tab ai-tab" onclick="switchAITab('forecast')">
               <i data-lucide="calendar" style="width: 18px; height: 18px;"></i>
               30-Day Forecast
             </button>
@@ -874,8 +833,8 @@
                       <p style="font-size: 0.85rem; color: #64748b; margin: 0.25rem 0 0;">AI-powered forecast with 94.7% confidence interval</p>
                     </div>
                     <div style="display: flex; gap: 0.5rem;">
-                      <span style="padding: 0.375rem 0.875rem; background: #eff6ff; border-radius: 8px; font-size: 0.75rem; font-weight: 600; color: #3b82f6;">Historical</span>
-                      <span style="padding: 0.375rem 0.875rem; background: linear-gradient(135deg, #dcfce7, #bbf7d0); border-radius: 8px; font-size: 0.75rem; font-weight: 600; color: #16a34a;">Predicted</span>
+                      <span class="ai-hub-pred-badge-hist" style="padding: 0.375rem 0.875rem; border-radius: 0; font-size: 0.75rem; font-weight: 600;">Historical</span>
+                      <span class="ai-hub-pred-badge-pred" style="padding: 0.375rem 0.875rem; border-radius: 0; font-size: 0.75rem; font-weight: 600;">Predicted</span>
                     </div>
                   </div>
                 </div>
@@ -890,22 +849,22 @@
                   <div style="text-align: center; padding: 1rem; background: white; border-radius: 12px; border: 1px solid #e2e8f0;">
                     <div style="font-size: 0.75rem; color: #64748b; margin-bottom: 0.25rem;">Current Month</div>
                     <div style="font-size: 1.25rem; font-weight: 800; color: #1e293b;">$2.85M</div>
-                    <div style="font-size: 0.7rem; color: #10b981; margin-top: 0.25rem;">↑ 12.4% vs last month</div>
+                    <div style="font-size: 0.7rem; color: var(--kintsugi); margin-top: 0.25rem;">↑ 12.4% vs last month</div>
                   </div>
                   <div style="text-align: center; padding: 1rem; background: white; border-radius: 12px; border: 1px solid #e2e8f0;">
                     <div style="font-size: 0.75rem; color: #64748b; margin-bottom: 0.25rem;">Next Month Prediction</div>
-                    <div style="font-size: 1.25rem; font-weight: 800; color: #10b981;">$3.24M</div>
-                    <div style="font-size: 0.7rem; color: #10b981; margin-top: 0.25rem;">↑ 13.7% predicted growth</div>
+                    <div style="font-size: 1.25rem; font-weight: 800; color: var(--kintsugi);">$3.24M</div>
+                    <div style="font-size: 0.7rem; color: var(--kintsugi); margin-top: 0.25rem;">↑ 13.7% predicted growth</div>
                   </div>
                   <div style="text-align: center; padding: 1rem; background: white; border-radius: 12px; border: 1px solid #e2e8f0;">
                     <div style="font-size: 0.75rem; color: #64748b; margin-bottom: 0.25rem;">Q2 2025 Forecast</div>
-                    <div style="font-size: 1.25rem; font-weight: 800; color: #3b82f6;">$9.8M</div>
-                    <div style="font-size: 0.7rem; color: #3b82f6; margin-top: 0.25rem;">High confidence</div>
+                    <div style="font-size: 1.25rem; font-weight: 800; color: var(--aitetsu);">$9.8M</div>
+                    <div style="font-size: 0.7rem; color: var(--aitetsu); margin-top: 0.25rem;">High confidence</div>
                   </div>
                   <div style="text-align: center; padding: 1rem; background: white; border-radius: 12px; border: 1px solid #e2e8f0;">
                     <div style="font-size: 0.75rem; color: #64748b; margin-bottom: 0.25rem;">Annual Projection</div>
-                    <div style="font-size: 1.25rem; font-weight: 800; color: #8b5cf6;">$38.5M</div>
-                    <div style="font-size: 0.7rem; color: #8b5cf6; margin-top: 0.25rem;">+24% YoY growth</div>
+                    <div style="font-size: 1.25rem; font-weight: 800; color: var(--sei);">$38.5M</div>
+                    <div style="font-size: 0.7rem; color: var(--sei); margin-top: 0.25rem;">+24% YoY growth</div>
                   </div>
                 </div>
               </div>
@@ -916,7 +875,7 @@
                 <!-- AI Confidence Score -->
                 <div style="background: linear-gradient(135deg, #0f172a, #1e293b); border-radius: 16px; padding: 1.5rem; color: white;">
                   <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
-                    <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #10b981, #059669); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                    <div style="width: 40px; height: 40px; background: var(--aitetsu); border-radius: 0; display: flex; align-items: center; justify-content: center;">
                       <i data-lucide="shield-check" style="width: 20px; height: 20px;"></i>
                     </div>
                     <div>
@@ -925,7 +884,7 @@
                     </div>
                   </div>
                   <div style="height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;">
-                    <div style="height: 100%; width: 94.7%; background: linear-gradient(90deg, #10b981, #34d399); border-radius: 4px;"></div>
+                    <div style="height: 100%; width: 94.7%; background: linear-gradient(90deg, var(--aitetsu), var(--sei)); border-radius: 0;"></div>
                   </div>
                   <p style="font-size: 0.75rem; color: rgba(255,255,255,0.5); margin-top: 0.75rem;">Based on 2.4M data points from the last 24 months</p>
                 </div>
@@ -936,36 +895,36 @@
                   
                   <div style="display: flex; flex-direction: column; gap: 0.75rem;">
                     <div style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: #f8fafc; border-radius: 10px;">
-                      <div style="width: 36px; height: 36px; background: linear-gradient(135deg, #dcfce7, #bbf7d0); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
-                        <i data-lucide="users" style="width: 18px; height: 18px; color: #16a34a;"></i>
+                      <div style="width: 36px; height: 36px; background: rgba(149, 175, 192, 0.2); border-radius: 0; display: flex; align-items: center; justify-content: center;">
+                        <i data-lucide="users" style="width: 18px; height: 18px; color: var(--sei);"></i>
                       </div>
                       <div style="flex: 1;">
                         <div style="font-size: 0.85rem; font-weight: 600; color: #1e293b;">New Customer Acquisition</div>
                         <div style="font-size: 0.75rem; color: #64748b;">+18% contribution</div>
                       </div>
-                      <span style="font-size: 0.85rem; font-weight: 700; color: #16a34a;">↑ 32%</span>
+                      <span style="font-size: 0.85rem; font-weight: 700; color: var(--sei);">↑ 32%</span>
                     </div>
                     
                     <div style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: #f8fafc; border-radius: 10px;">
-                      <div style="width: 36px; height: 36px; background: linear-gradient(135deg, #dbeafe, #bfdbfe); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
-                        <i data-lucide="repeat" style="width: 18px; height: 18px; color: #2563eb;"></i>
+                      <div style="width: 36px; height: 36px; background: rgba(149, 175, 192, 0.2); border-radius: 0; display: flex; align-items: center; justify-content: center;">
+                        <i data-lucide="repeat" style="width: 18px; height: 18px; color: var(--sei);"></i>
                       </div>
                       <div style="flex: 1;">
                         <div style="font-size: 0.85rem; font-weight: 600; color: #1e293b;">Repeat Purchase Rate</div>
                         <div style="font-size: 0.75rem; color: #64748b;">+15% contribution</div>
                       </div>
-                      <span style="font-size: 0.85rem; font-weight: 700; color: #2563eb;">↑ 28%</span>
+                      <span style="font-size: 0.85rem; font-weight: 700; color: var(--sei);">↑ 28%</span>
                     </div>
                     
                     <div style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: #f8fafc; border-radius: 10px;">
-                      <div style="width: 36px; height: 36px; background: linear-gradient(135deg, #fef3c7, #fde68a); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
-                        <i data-lucide="shopping-cart" style="width: 18px; height: 18px; color: #d97706;"></i>
+                      <div style="width: 36px; height: 36px; background: var(--kintsugi-light); border-radius: 0; display: flex; align-items: center; justify-content: center;">
+                        <i data-lucide="shopping-cart" style="width: 18px; height: 18px; color: var(--kintsugi);"></i>
                       </div>
                       <div style="flex: 1;">
                         <div style="font-size: 0.85rem; font-weight: 600; color: #1e293b;">Average Order Value</div>
                         <div style="font-size: 0.75rem; color: #64748b;">+12% contribution</div>
                       </div>
-                      <span style="font-size: 0.85rem; font-weight: 700; color: #d97706;">↑ 15%</span>
+                      <span style="font-size: 0.85rem; font-weight: 700; color: var(--kintsugi);">↑ 15%</span>
                     </div>
                   </div>
                 </div>
@@ -977,26 +936,26 @@
           <div id="ai-tab-recommendations" class="ai-tab-content" style="margin-top: 1.5rem; display: none;">
             
             <!-- Priority Actions Banner -->
-            <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border: 2px solid #f59e0b; border-radius: 16px; padding: 1.25rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 1rem;">
-              <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #f59e0b, #d97706); border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <div class="ai-hub-priority-banner" style="border-radius: 0; padding: 1.25rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 1rem;">
+              <div class="ai-hub-priority-icon" style="width: 48px; height: 48px; border-radius: 0; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                 <i data-lucide="alert-circle" style="width: 24px; height: 24px; color: white;"></i>
               </div>
               <div style="flex: 1;">
-                <h4 style="font-size: 1rem; font-weight: 700; color: #92400e; margin: 0;">3 High-Priority Actions Require Attention</h4>
-                <p style="font-size: 0.85rem; color: #a16207; margin: 0.25rem 0 0;">Taking action on these recommendations could generate an additional $127,500 in revenue this month.</p>
+                <h4 style="font-size: 1rem; font-weight: 700; color: var(--kurogane); margin: 0;">3 High-Priority Actions Require Attention</h4>
+                <p style="font-size: 0.85rem; color: var(--namari); margin: 0.25rem 0 0;">Taking action on these recommendations could generate an additional $127,500 in revenue this month.</p>
               </div>
-              <button style="padding: 0.75rem 1.5rem; background: linear-gradient(135deg, #f59e0b, #d97706); border: none; border-radius: 10px; color: white; font-weight: 600; cursor: pointer; white-space: nowrap;">View All Actions</button>
+              <button class="ai-hub-btn-accent" style="padding: 0.75rem 1.5rem; border: none; border-radius: 0; font-weight: 600; cursor: pointer; white-space: nowrap;">View All Actions</button>
             </div>
             
             <!-- Recommendations Grid -->
             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem;">
               
               <!-- Recommendation Card 1 - Inventory -->
-              <div style="background: white; border-radius: 20px; border: 2px solid #dcfce7; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.06); transition: all 0.3s;">
+              <div class="ai-hub-card-success" style="background: white; border-radius: 0; border: 2px solid; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.06); transition: all 0.3s;">
                 <div style="padding: 1.5rem;">
                   <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
-                    <span style="padding: 0.375rem 0.875rem; background: linear-gradient(135deg, #dcfce7, #bbf7d0); border-radius: 20px; font-size: 0.7rem; font-weight: 700; color: #16a34a; text-transform: uppercase; letter-spacing: 0.05em;">HIGH OPPORTUNITY</span>
-                    <div style="width: 36px; height: 36px; background: linear-gradient(135deg, #10b981, #059669); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                    <span style="padding: 0.375rem 0.875rem; background: var(--kintsugi-light); border-radius: 0; font-size: 0.7rem; font-weight: 700; color: var(--kintsugi); text-transform: uppercase; letter-spacing: 0.05em;">HIGH OPPORTUNITY</span>
+                    <div class="ai-hub-card-icon" style="width: 36px; height: 36px; border-radius: 0; display: flex; align-items: center; justify-content: center;">
                       <i data-lucide="package" style="width: 18px; height: 18px; color: white;"></i>
                     </div>
                   </div>
@@ -1006,29 +965,29 @@
                   <div style="background: #f8fafc; border-radius: 12px; padding: 1rem; margin-bottom: 1rem;">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
                       <span style="font-size: 0.8rem; color: #64748b;">Confidence Score</span>
-                      <span style="font-size: 0.8rem; font-weight: 700; color: #10b981;">92%</span>
+                      <span style="font-size: 0.8rem; font-weight: 700; color: var(--kintsugi);">92%</span>
                     </div>
                     <div style="height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden;">
-                      <div style="height: 100%; width: 92%; background: linear-gradient(90deg, #10b981, #34d399); border-radius: 3px;"></div>
+                      <div style="height: 100%; width: 92%; background: linear-gradient(90deg, var(--aitetsu), var(--sei)); border-radius: 0;"></div>
                     </div>
                   </div>
                   
                   <div style="display: flex; align-items: center; justify-content: space-between; padding-top: 1rem; border-top: 1px solid #f1f5f9;">
                     <div>
                       <div style="font-size: 0.75rem; color: #64748b;">Potential Revenue</div>
-                      <div style="font-size: 1.25rem; font-weight: 800; color: #10b981;">+$42,500</div>
+                      <div style="font-size: 1.25rem; font-weight: 800; color: var(--kintsugi);">+$42,500</div>
                     </div>
-                    <button style="padding: 0.625rem 1.25rem; background: linear-gradient(135deg, #10b981, #059669); border: none; border-radius: 8px; color: white; font-size: 0.85rem; font-weight: 600; cursor: pointer;">Take Action</button>
+                    <button class="ai-hub-btn-success" style="padding: 0.625rem 1.25rem; border: none; border-radius: 0; font-size: 0.85rem; font-weight: 600; cursor: pointer;">Take Action</button>
                   </div>
                 </div>
               </div>
               
               <!-- Recommendation Card 2 - Customer Retention -->
-              <div style="background: white; border-radius: 20px; border: 2px solid #fef3c7; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.06); transition: all 0.3s;">
+              <div class="ai-hub-card-urgent" style="background: white; border-radius: 0; border: 2px solid; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.06); transition: all 0.3s;">
                 <div style="padding: 1.5rem;">
                   <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
-                    <span style="padding: 0.375rem 0.875rem; background: linear-gradient(135deg, #fef3c7, #fde68a); border-radius: 20px; font-size: 0.7rem; font-weight: 700; color: #d97706; text-transform: uppercase; letter-spacing: 0.05em;">URGENT ACTION</span>
-                    <div style="width: 36px; height: 36px; background: linear-gradient(135deg, #f59e0b, #d97706); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                    <span style="padding: 0.375rem 0.875rem; background: var(--kintsugi-light); border-radius: 0; font-size: 0.7rem; font-weight: 700; color: var(--kintsugi); text-transform: uppercase; letter-spacing: 0.05em;">URGENT ACTION</span>
+                    <div class="ai-hub-card-icon" style="width: 36px; height: 36px; border-radius: 0; display: flex; align-items: center; justify-content: center;">
                       <i data-lucide="users" style="width: 18px; height: 18px; color: white;"></i>
                     </div>
                   </div>
@@ -1038,28 +997,28 @@
                   <div style="background: #f8fafc; border-radius: 12px; padding: 1rem; margin-bottom: 1rem;">
                     <div style="font-size: 0.75rem; color: #64748b; margin-bottom: 0.5rem;">At-Risk Customers</div>
                     <div style="display: flex; gap: 0.5rem;">
-                      <div style="width: 32px; height: 32px; background: linear-gradient(135deg, #3b82f6, #2563eb); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: white;">AC</div>
-                      <div style="width: 32px; height: 32px; background: linear-gradient(135deg, #8b5cf6, #7c3aed); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: white;">PM</div>
-                      <div style="width: 32px; height: 32px; background: linear-gradient(135deg, #10b981, #059669); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: white;">FF</div>
+                      <div class="ai-hub-avatar-1" style="width: 32px; height: 32px; border-radius: 0; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: white;">AC</div>
+                      <div class="ai-hub-avatar-2" style="width: 32px; height: 32px; border-radius: 0; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: white;">PM</div>
+                      <div class="ai-hub-avatar-3" style="width: 32px; height: 32px; border-radius: 0; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: white;">FF</div>
                     </div>
                   </div>
                   
                   <div style="display: flex; align-items: center; justify-content: space-between; padding-top: 1rem; border-top: 1px solid #f1f5f9;">
                     <div>
                       <div style="font-size: 0.75rem; color: #64748b;">At-Risk Revenue</div>
-                      <div style="font-size: 1.25rem; font-weight: 800; color: #f59e0b;">$127,000</div>
+                      <div style="font-size: 1.25rem; font-weight: 800; color: var(--kintsugi);">$127,000</div>
                     </div>
-                    <button style="padding: 0.625rem 1.25rem; background: linear-gradient(135deg, #f59e0b, #d97706); border: none; border-radius: 8px; color: white; font-size: 0.85rem; font-weight: 600; cursor: pointer;">Send Offers</button>
+                    <button class="ai-hub-btn-accent" style="padding: 0.625rem 1.25rem; border: none; border-radius: 0; font-size: 0.85rem; font-weight: 600; cursor: pointer;">Send Offers</button>
                   </div>
                 </div>
               </div>
               
               <!-- Recommendation Card 3 - Cross-Sell -->
-              <div style="background: white; border-radius: 20px; border: 2px solid #ede9fe; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.06); transition: all 0.3s;">
+              <div class="ai-hub-card-cross" style="background: white; border-radius: 0; border: 2px solid; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.06); transition: all 0.3s;">
                 <div style="padding: 1.5rem;">
                   <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
-                    <span style="padding: 0.375rem 0.875rem; background: linear-gradient(135deg, #ede9fe, #ddd6fe); border-radius: 20px; font-size: 0.7rem; font-weight: 700; color: #7c3aed; text-transform: uppercase; letter-spacing: 0.05em;">CROSS-SELL</span>
-                    <div style="width: 36px; height: 36px; background: linear-gradient(135deg, #8b5cf6, #7c3aed); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                    <span style="padding: 0.375rem 0.875rem; background: rgba(149, 175, 192, 0.2); border-radius: 0; font-size: 0.7rem; font-weight: 700; color: var(--sei); text-transform: uppercase; letter-spacing: 0.05em;">CROSS-SELL</span>
+                    <div class="ai-hub-card-icon" style="width: 36px; height: 36px; border-radius: 0; display: flex; align-items: center; justify-content: center;">
                       <i data-lucide="gift" style="width: 18px; height: 18px; color: white;"></i>
                     </div>
                   </div>
@@ -1069,19 +1028,19 @@
                   <div style="background: #f8fafc; border-radius: 12px; padding: 1rem; margin-bottom: 1rem;">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
                       <span style="font-size: 0.8rem; color: #64748b;">Correlation Strength</span>
-                      <span style="font-size: 0.8rem; font-weight: 700; color: #8b5cf6;">78%</span>
+                      <span style="font-size: 0.8rem; font-weight: 700; color: var(--sei);">78%</span>
                     </div>
                     <div style="height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden;">
-                      <div style="height: 100%; width: 78%; background: linear-gradient(90deg, #8b5cf6, #a78bfa); border-radius: 3px;"></div>
+                      <div style="height: 100%; width: 78%; background: linear-gradient(90deg, var(--sei), var(--namari)); border-radius: 0;"></div>
                     </div>
                   </div>
                   
                   <div style="display: flex; align-items: center; justify-content: space-between; padding-top: 1rem; border-top: 1px solid #f1f5f9;">
                     <div>
                       <div style="font-size: 0.75rem; color: #64748b;">Conversion Boost</div>
-                      <div style="font-size: 1.25rem; font-weight: 800; color: #8b5cf6;">+23%</div>
+                      <div style="font-size: 1.25rem; font-weight: 800; color: var(--sei);">+23%</div>
                     </div>
-                    <button style="padding: 0.625rem 1.25rem; background: linear-gradient(135deg, #8b5cf6, #7c3aed); border: none; border-radius: 8px; color: white; font-size: 0.85rem; font-weight: 600; cursor: pointer;">Create Bundle</button>
+                    <button class="ai-hub-btn-primary" style="padding: 0.625rem 1.25rem; border: none; border-radius: 0; font-size: 0.85rem; font-weight: 600; cursor: pointer;">Create Bundle</button>
                   </div>
                 </div>
               </div>
@@ -1095,14 +1054,14 @@
               </div>
               <div style="display: grid; grid-template-columns: repeat(2, 1fr);">
                 <div style="padding: 1.25rem; border-right: 1px solid #f1f5f9; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; gap: 1rem;">
-                  <div style="width: 44px; height: 44px; background: linear-gradient(135deg, #dbeafe, #bfdbfe); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                    <i data-lucide="truck" style="width: 22px; height: 22px; color: #2563eb;"></i>
+                  <div style="width: 44px; height: 44px; background: rgba(149, 175, 192, 0.2); border-radius: 0; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <i data-lucide="truck" style="width: 22px; height: 22px; color: var(--sei);"></i>
                   </div>
                   <div style="flex: 1;">
                     <div style="font-size: 0.9rem; font-weight: 600; color: #1e293b;">Optimize Shipping Routes</div>
                     <div style="font-size: 0.8rem; color: #64748b;">Save $8,200/month on logistics</div>
                   </div>
-                  <span style="padding: 0.25rem 0.625rem; background: #dbeafe; border-radius: 6px; font-size: 0.7rem; font-weight: 600; color: #2563eb;">LOGISTICS</span>
+                  <span style="padding: 0.25rem 0.625rem; background: rgba(149, 175, 192, 0.2); border-radius: 0; font-size: 0.7rem; font-weight: 600; color: var(--sei);">LOGISTICS</span>
                 </div>
                 <div style="padding: 1.25rem; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; gap: 1rem;">
                   <div style="width: 44px; height: 44px; background: linear-gradient(135deg, #fce7f3, #fbcfe8); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
@@ -1125,14 +1084,14 @@
                   <span style="padding: 0.25rem 0.625rem; background: #ccfbf1; border-radius: 6px; font-size: 0.7rem; font-weight: 600; color: #0d9488;">EXPANSION</span>
                 </div>
                 <div style="padding: 1.25rem; display: flex; align-items: center; gap: 1rem;">
-                  <div style="width: 44px; height: 44px; background: linear-gradient(135deg, #fef3c7, #fde68a); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                    <i data-lucide="clock" style="width: 22px; height: 22px; color: #d97706;"></i>
+                  <div style="width: 44px; height: 44px; background: var(--kintsugi-light); border-radius: 0; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <i data-lucide="clock" style="width: 22px; height: 22px; color: var(--kintsugi);"></i>
                   </div>
                   <div style="flex: 1;">
                     <div style="font-size: 0.9rem; font-weight: 600; color: #1e293b;">Reduce Response Time</div>
                     <div style="font-size: 0.8rem; color: #64748b;">Improve satisfaction by 12%</div>
                   </div>
-                  <span style="padding: 0.25rem 0.625rem; background: #fef3c7; border-radius: 6px; font-size: 0.7rem; font-weight: 600; color: #d97706;">SERVICE</span>
+                  <span style="padding: 0.25rem 0.625rem; background: var(--kintsugi-light); border-radius: 0; font-size: 0.7rem; font-weight: 600; color: var(--kintsugi);">SERVICE</span>
                 </div>
               </div>
             </div>
@@ -1162,56 +1121,56 @@
                     <h3 style="font-size: 1.125rem; font-weight: 700; color: #1e293b; margin: 0;">Detected Anomalies</h3>
                     <p style="font-size: 0.85rem; color: #64748b; margin: 0.25rem 0 0;">Last 24 hours</p>
                   </div>
-                  <span style="padding: 0.375rem 0.875rem; background: #fef2f2; border-radius: 20px; font-size: 0.8rem; font-weight: 600; color: #dc2626;">3 Active</span>
+                  <span style="padding: 0.375rem 0.875rem; background: var(--kintsugi-light); border-radius: 0; font-size: 0.8rem; font-weight: 600; color: var(--kintsugi);">3 Active</span>
                 </div>
                 <div style="max-height: 320px; overflow-y: auto;">
                   
                   <!-- Anomaly Item 1 - Critical -->
                   <div style="padding: 1.25rem; border-bottom: 1px solid #f1f5f9; display: flex; gap: 1rem;">
                     <div style="width: 44px; height: 44px; background: linear-gradient(135deg, #fef2f2, #fecaca); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                      <i data-lucide="alert-triangle" style="width: 22px; height: 22px; color: #dc2626;"></i>
+                      <i data-lucide="alert-triangle" style="width: 22px; height: 22px; color: var(--kintsugi);"></i>
                     </div>
                     <div style="flex: 1;">
                       <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
                         <span style="font-size: 0.9rem; font-weight: 600; color: #1e293b;">Unusual Order Spike</span>
-                        <span style="padding: 0.125rem 0.5rem; background: #fef2f2; border-radius: 4px; font-size: 0.65rem; font-weight: 700; color: #dc2626;">CRITICAL</span>
+                        <span style="padding: 0.125rem 0.5rem; background: var(--kintsugi-light); border-radius: 0; font-size: 0.65rem; font-weight: 700; color: var(--kintsugi);">CRITICAL</span>
                       </div>
                       <p style="font-size: 0.8rem; color: #64748b; margin: 0;">Orders from IP range 192.168.x.x increased 340% - possible bot activity</p>
                       <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 0.5rem;">Detected 23 minutes ago</div>
                     </div>
-                    <button style="padding: 0.5rem 1rem; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; color: #dc2626; font-size: 0.8rem; font-weight: 600; cursor: pointer; white-space: nowrap;">Investigate</button>
+                    <button style="padding: 0.5rem 1rem; background: var(--kintsugi-light); border: 1px solid var(--kintsugi-border); border-radius: 0; color: var(--kintsugi); font-size: 0.8rem; font-weight: 600; cursor: pointer; white-space: nowrap;">Investigate</button>
                   </div>
                   
                   <!-- Anomaly Item 2 - Warning -->
                   <div style="padding: 1.25rem; border-bottom: 1px solid #f1f5f9; display: flex; gap: 1rem;">
-                    <div style="width: 44px; height: 44px; background: linear-gradient(135deg, #fef3c7, #fde68a); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                      <i data-lucide="activity" style="width: 22px; height: 22px; color: #d97706;"></i>
+                    <div style="width: 44px; height: 44px; background: var(--kintsugi-light); border-radius: 0; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                      <i data-lucide="activity" style="width: 22px; height: 22px; color: var(--kintsugi);"></i>
                     </div>
                     <div style="flex: 1;">
                       <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
                         <span style="font-size: 0.9rem; font-weight: 600; color: #1e293b;">Cart Abandonment Surge</span>
-                        <span style="padding: 0.125rem 0.5rem; background: #fef3c7; border-radius: 4px; font-size: 0.65rem; font-weight: 700; color: #d97706;">WARNING</span>
+                        <span style="padding: 0.125rem 0.5rem; background: var(--kintsugi-light); border-radius: 0; font-size: 0.65rem; font-weight: 700; color: var(--kintsugi);">WARNING</span>
                       </div>
                       <p style="font-size: 0.8rem; color: #64748b; margin: 0;">Abandonment rate jumped to 78% (normal: 45%) - checkout issue suspected</p>
                       <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 0.5rem;">Detected 1 hour ago</div>
                     </div>
-                    <button style="padding: 0.5rem 1rem; background: #fef3c7; border: 1px solid #fde68a; border-radius: 8px; color: #d97706; font-size: 0.8rem; font-weight: 600; cursor: pointer; white-space: nowrap;">Review</button>
+                    <button style="padding: 0.5rem 1rem; background: var(--kintsugi-light); border: 1px solid var(--kintsugi-border); border-radius: 0; color: var(--kintsugi); font-size: 0.8rem; font-weight: 600; cursor: pointer; white-space: nowrap;">Review</button>
                   </div>
                   
                   <!-- Anomaly Item 3 - Info -->
                   <div style="padding: 1.25rem; display: flex; gap: 1rem;">
-                    <div style="width: 44px; height: 44px; background: linear-gradient(135deg, #dbeafe, #bfdbfe); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                      <i data-lucide="info" style="width: 22px; height: 22px; color: #2563eb;"></i>
+                    <div style="width: 44px; height: 44px; background: rgba(149, 175, 192, 0.2); border-radius: 0; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                      <i data-lucide="info" style="width: 22px; height: 22px; color: var(--sei);"></i>
                     </div>
                     <div style="flex: 1;">
                       <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
                         <span style="font-size: 0.9rem; font-weight: 600; color: #1e293b;">Geographic Shift</span>
-                        <span style="padding: 0.125rem 0.5rem; background: #dbeafe; border-radius: 4px; font-size: 0.65rem; font-weight: 700; color: #2563eb;">INFO</span>
+                        <span style="padding: 0.125rem 0.5rem; background: rgba(149, 175, 192, 0.2); border-radius: 0; font-size: 0.65rem; font-weight: 700; color: var(--sei);">INFO</span>
                       </div>
                       <p style="font-size: 0.8rem; color: #64748b; margin: 0;">Traffic from UAE region increased 156% - marketing campaign effect</p>
                       <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 0.5rem;">Detected 3 hours ago</div>
                     </div>
-                    <button style="padding: 0.5rem 1rem; background: #dbeafe; border: 1px solid #bfdbfe; border-radius: 8px; color: #2563eb; font-size: 0.8rem; font-weight: 600; cursor: pointer; white-space: nowrap;">Details</button>
+                    <button style="padding: 0.5rem 1rem; background: rgba(149, 175, 192, 0.2); border: 1px solid var(--suzu); border-radius: 0; color: var(--sei); font-size: 0.8rem; font-weight: 600; cursor: pointer; white-space: nowrap;">Details</button>
                   </div>
                 </div>
               </div>
@@ -1223,25 +1182,25 @@
             
             <!-- Forecast Summary Cards -->
             <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
-              <div style="background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); border-radius: 16px; padding: 1.5rem; text-align: center;">
+              <div style="background: rgba(34, 197, 94, 0.15); border-radius: 0; padding: 1.5rem; text-align: center;">
                 <div style="font-size: 0.8rem; color: #166534; margin-bottom: 0.5rem; font-weight: 600;">Projected Revenue</div>
                 <div style="font-size: 2rem; font-weight: 800; color: #15803d;">$3.24M</div>
-                <div style="font-size: 0.8rem; color: #16a34a; margin-top: 0.25rem;">↑ 13.7% vs current</div>
+                <div style="font-size: 0.8rem; color: var(--kintsugi); margin-top: 0.25rem;">↑ 13.7% vs current</div>
               </div>
-              <div style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border-radius: 16px; padding: 1.5rem; text-align: center;">
-                <div style="font-size: 0.8rem; color: #1e40af; margin-bottom: 0.5rem; font-weight: 600;">Expected Orders</div>
-                <div style="font-size: 2rem; font-weight: 800; color: #1d4ed8;">2,847</div>
-                <div style="font-size: 0.8rem; color: #2563eb; margin-top: 0.25rem;">↑ 156 more than avg</div>
+              <div style="background: rgba(149, 175, 192, 0.15); border-radius: 0; padding: 1.5rem; text-align: center;">
+                <div style="font-size: 0.8rem; color: #64748b; margin-bottom: 0.5rem; font-weight: 600;">Expected Orders</div>
+                <div style="font-size: 2rem; font-weight: 800; color: #1e293b;">2,847</div>
+                <div style="font-size: 0.8rem; color: var(--sei); margin-top: 0.25rem;">↑ 156 more than avg</div>
               </div>
-              <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 16px; padding: 1.5rem; text-align: center;">
-                <div style="font-size: 0.8rem; color: #92400e; margin-bottom: 0.5rem; font-weight: 600;">New Customers</div>
-                <div style="font-size: 2rem; font-weight: 800; color: #b45309;">342</div>
-                <div style="font-size: 0.8rem; color: #d97706; margin-top: 0.25rem;">↑ 28% growth rate</div>
+              <div style="background: var(--kintsugi-light); border-radius: 0; padding: 1.5rem; text-align: center;">
+                <div style="font-size: 0.8rem; color: var(--kurogane); margin-bottom: 0.5rem; font-weight: 600;">New Customers</div>
+                <div style="font-size: 2rem; font-weight: 800; color: #1e293b;">342</div>
+                <div style="font-size: 0.8rem; color: var(--kintsugi); margin-top: 0.25rem;">↑ 28% growth rate</div>
               </div>
-              <div style="background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%); border-radius: 16px; padding: 1.5rem; text-align: center;">
-                <div style="font-size: 0.8rem; color: #5b21b6; margin-bottom: 0.5rem; font-weight: 600;">Avg Order Value</div>
-                <div style="font-size: 2rem; font-weight: 800; color: #7c3aed;">$1,138</div>
-                <div style="font-size: 0.8rem; color: #8b5cf6; margin-top: 0.25rem;">↑ 5.2% increase</div>
+              <div style="background: rgba(149, 175, 192, 0.15); border-radius: 0; padding: 1.5rem; text-align: center;">
+                <div style="font-size: 0.8rem; color: #64748b; margin-bottom: 0.5rem; font-weight: 600;">Avg Order Value</div>
+                <div style="font-size: 2rem; font-weight: 800; color: var(--sei);">$1,138</div>
+                <div style="font-size: 0.8rem; color: var(--sei); margin-top: 0.25rem;">↑ 5.2% increase</div>
               </div>
             </div>
             
@@ -1255,7 +1214,7 @@
                   </div>
                   <div style="display: flex; gap: 0.75rem;">
                     <div style="display: flex; align-items: center; gap: 0.375rem;">
-                      <div style="width: 12px; height: 12px; background: #3b82f6; border-radius: 2px;"></div>
+                      <div style="width: 12px; height: 12px; background: var(--aitetsu); border-radius: 0;"></div>
                       <span style="font-size: 0.75rem; color: #64748b;">Forecast</span>
                     </div>
                     <div style="display: flex; align-items: center; gap: 0.375rem;">
@@ -1278,32 +1237,32 @@
                 <div style="font-size: 0.8rem; color: #64748b; margin-bottom: 0.5rem;">Week 1 (Jan 9-15)</div>
                 <div style="font-size: 1.5rem; font-weight: 800; color: #1e293b;">$756K</div>
                 <div style="display: flex; align-items: center; gap: 0.25rem; margin-top: 0.5rem;">
-                  <i data-lucide="trending-up" style="width: 14px; height: 14px; color: #10b981;"></i>
-                  <span style="font-size: 0.8rem; color: #10b981; font-weight: 600;">+8.2%</span>
+                  <i data-lucide="trending-up" style="width: 14px; height: 14px; color: var(--kintsugi);"></i>
+                  <span style="font-size: 0.8rem; color: var(--kintsugi); font-weight: 600;">+8.2%</span>
                 </div>
               </div>
               <div style="background: white; border-radius: 16px; border: 1px solid #e2e8f0; padding: 1.25rem;">
                 <div style="font-size: 0.8rem; color: #64748b; margin-bottom: 0.5rem;">Week 2 (Jan 16-22)</div>
                 <div style="font-size: 1.5rem; font-weight: 800; color: #1e293b;">$812K</div>
                 <div style="display: flex; align-items: center; gap: 0.25rem; margin-top: 0.5rem;">
-                  <i data-lucide="trending-up" style="width: 14px; height: 14px; color: #10b981;"></i>
-                  <span style="font-size: 0.8rem; color: #10b981; font-weight: 600;">+12.4%</span>
+                  <i data-lucide="trending-up" style="width: 14px; height: 14px; color: var(--kintsugi);"></i>
+                  <span style="font-size: 0.8rem; color: var(--kintsugi); font-weight: 600;">+12.4%</span>
                 </div>
               </div>
               <div style="background: white; border-radius: 16px; border: 1px solid #e2e8f0; padding: 1.25rem;">
                 <div style="font-size: 0.8rem; color: #64748b; margin-bottom: 0.5rem;">Week 3 (Jan 23-29)</div>
                 <div style="font-size: 1.5rem; font-weight: 800; color: #1e293b;">$845K</div>
                 <div style="display: flex; align-items: center; gap: 0.25rem; margin-top: 0.5rem;">
-                  <i data-lucide="trending-up" style="width: 14px; height: 14px; color: #10b981;"></i>
-                  <span style="font-size: 0.8rem; color: #10b981; font-weight: 600;">+15.1%</span>
+                  <i data-lucide="trending-up" style="width: 14px; height: 14px; color: var(--kintsugi);"></i>
+                  <span style="font-size: 0.8rem; color: var(--kintsugi); font-weight: 600;">+15.1%</span>
                 </div>
               </div>
               <div style="background: white; border-radius: 16px; border: 1px solid #e2e8f0; padding: 1.25rem;">
                 <div style="font-size: 0.8rem; color: #64748b; margin-bottom: 0.5rem;">Week 4 (Jan 30-Feb 5)</div>
                 <div style="font-size: 1.5rem; font-weight: 800; color: #1e293b;">$827K</div>
                 <div style="display: flex; align-items: center; gap: 0.25rem; margin-top: 0.5rem;">
-                  <i data-lucide="trending-up" style="width: 14px; height: 14px; color: #10b981;"></i>
-                  <span style="font-size: 0.8rem; color: #10b981; font-weight: 600;">+11.8%</span>
+                  <i data-lucide="trending-up" style="width: 14px; height: 14px; color: var(--kintsugi);"></i>
+                  <span style="font-size: 0.8rem; color: var(--kintsugi); font-weight: 600;">+11.8%</span>
                 </div>
               </div>
             </div>
@@ -1313,10 +1272,6 @@
         
         <style>
           @keyframes pulse { 0%, 100% { opacity: 0.5; transform: scale(1); } 50% { opacity: 0.8; transform: scale(1.05); } }
-          @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-          @keyframes iconGlow { 0%, 100% { box-shadow: 0 8px 32px rgba(59, 130, 246, 0.4); } 50% { box-shadow: 0 8px 48px rgba(59, 130, 246, 0.6); } }
-          .ai-tab.active { background: linear-gradient(135deg, #2b5278, #1e3a54) !important; color: white !important; }
-          .ai-tab:hover:not(.active) { background: #f8fafc; color: #1e293b; }
         </style>
 
         <!-- Additional Charts Row -->
@@ -1397,7 +1352,7 @@
                   <div style="min-width: 120px; font-weight: 600; color: var(--module-primary); font-size: 0.85rem;"><%= order.id %></div>
                   <div style="flex: 1; font-weight: 500; color: var(--admin-text-primary);"><%= order.customer %></div>
                   <div style="min-width: 100px; font-weight: 700; color: var(--admin-text-primary); text-align: right;">$<%= order.amount.toLocaleString() %></div>
-                  <div style="min-width: 110px; display: flex; align-items: center; gap: 0.4rem; padding: 0.35rem 0.75rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; background: <%= order.status === 'pending' ? 'rgba(245, 158, 11, 0.12)' : order.status === 'processing' ? 'rgba(59, 130, 246, 0.12)' : order.status === 'shipped' ? 'rgba(139, 92, 246, 0.12)' : 'rgba(16, 185, 129, 0.12)' %>; color: <%= order.status === 'pending' ? '#d97706' : order.status === 'processing' ? '#2563eb' : order.status === 'shipped' ? '#7c3aed' : '#059669' %>;">
+                  <div style="min-width: 110px; display: flex; align-items: center; gap: 0.4rem; padding: 0.35rem 0.75rem; border-radius: 0; font-size: 0.75rem; font-weight: 600; background: <%= order.status === 'pending' ? 'var(--kintsugi-light)' : order.status === 'processing' ? 'rgba(64, 84, 94, 0.12)' : order.status === 'shipped' ? 'var(--kintsugi-light)' : 'rgba(149, 175, 192, 0.2)' %>; color: <%= order.status === 'pending' ? 'var(--kintsugi)' : order.status === 'processing' ? 'var(--aitetsu)' : order.status === 'shipped' ? 'var(--kintsugi-hover)' : 'var(--sei)' %>;">
                     <% if (order.status === 'pending') { %>
                       <i data-lucide="clock" style="width: 12px; height: 12px;"></i>
                     <% } else if (order.status === 'processing') { %>
@@ -1443,7 +1398,7 @@
                     <div class="activity-content" style="flex: 1;">
                       <div style="display: flex; justify-content: space-between; align-items: center;">
                         <div class="activity-text"><strong><%= claim.id %></strong></div>
-                        <span style="font-size: 0.65rem; padding: 0.15rem 0.4rem; border-radius: 8px; background: <%= claim.priority === 'urgent' ? 'rgba(239, 68, 68, 0.15)' : claim.priority === 'high' ? 'rgba(245, 158, 11, 0.15)' : 'rgba(59, 130, 246, 0.15)' %>; color: <%= claim.priority === 'urgent' ? '#dc2626' : claim.priority === 'high' ? '#d97706' : '#3b82f6' %>;"><%= claim.priority %></span>
+                        <span class="claim-priority-badge <%= claim.priority || 'medium' %>"><%= claim.priority %></span>
                       </div>
                       <div class="activity-time"><%= claim.subject.substring(0, 30) %><%= claim.subject.length > 30 ? '...' : '' %></div>
                       <div style="font-size: 0.7rem; color: var(--admin-text-muted); margin-top: 0.25rem;">
@@ -1497,7 +1452,7 @@
               <a href="/admin/products" class="admin-btn admin-btn-secondary">View All</a>
             </div>
             <div class="activity-list">
-              <% const sellPartColors = ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#ec4899']; %>
+              <% const sellPartColors = ['#40545E', '#95AFC0', '#D4AF37', '#8E9CA6', '#64748b']; %>
               <% const sellPartIcons = ['award', 'trending-up', 'star', 'package', 'box']; %>
               <% if (topSellingParts && topSellingParts.length > 0) { %>
                 <% topSellingParts.forEach(function(part, index) { %>
@@ -1535,7 +1490,7 @@
   <!-- Charts Initialization -->
   <script>
     // Get module-themed color
-    const moduleColor = getComputedStyle(document.documentElement).getPropertyValue('--module-primary').trim() || '#3b82f6';
+    const moduleColor = getComputedStyle(document.documentElement).getPropertyValue('--module-primary').trim() || '#40545E';
     const currentModule = 'automotive'; // Single platform - automotive only
 
     // Revenue Chart - Automotive Styling
@@ -1545,17 +1500,17 @@
     const chartConfigs = {
       automotive: {
         type: 'bar',
-        primaryColor: '#dc2626',
-        secondaryColor: '#f97316',
-        gradient: ['#dc2626', '#ef4444', '#f87171'],
+        primaryColor: '#40545E',
+        secondaryColor: '#D4AF37',
+        gradient: ['#40545E', '#64748b', '#95AFC0'],
         borderRadius: 8,
         barThickness: 24
       },
       default: {
         type: 'bar',
-        primaryColor: '#dc2626',
-        secondaryColor: '#f97316',
-        gradient: ['#dc2626', '#ef4444', '#f87171'],
+        primaryColor: '#40545E',
+        secondaryColor: '#D4AF37',
+        gradient: ['#40545E', '#64748b', '#95AFC0'],
         borderRadius: 8,
         barThickness: 24
       },
@@ -1577,9 +1532,9 @@
       },
       default: {
         type: 'line',
-        primaryColor: '#3b82f6',
-        secondaryColor: '#8b5cf6',
-        gradient: ['#3b82f6', '#60a5fa', '#93c5fd'],
+        primaryColor: '#40545E',
+        secondaryColor: '#95AFC0',
+        gradient: ['#40545E', '#64748b', '#95AFC0'],
         tension: 0.4,
         pointStyle: 'rectRounded'
       }
@@ -1697,7 +1652,7 @@
         labels: ['Pending', 'Processing', 'Shipped', 'Completed'],
         datasets: [{
           data: <%- JSON.stringify(chartData.statusData) %>,
-          backgroundColor: ['#f59e0b', '#3b82f6', '#8b5cf6', '#10b981'],
+          backgroundColor: ['#D4AF37', '#40545E', '#95AFC0', '#8E9CA6'],
           borderWidth: 0,
           hoverOffset: 10
         }]
@@ -1718,7 +1673,7 @@
         labels: ['Pending', 'Processing', 'Shipped', 'Delivered'],
         datasets: [{
           data: <%- JSON.stringify(chartData.statusData) %>,
-          backgroundColor: ['#f59e0b', '#3b82f6', '#8b5cf6', '#10b981'],
+          backgroundColor: ['#D4AF37', '#40545E', '#95AFC0', '#8E9CA6'],
           borderRadius: 6
         }]
       },
@@ -1774,7 +1729,7 @@
         labels: <%- JSON.stringify(countryLabels) %>,
         datasets: [{
           data: <%- JSON.stringify(countryValues) %>,
-          backgroundColor: ['#0ea5e9', '#10b981', '#8b5cf6', '#f59e0b', '#ec4899'],
+          backgroundColor: ['#40545E', '#95AFC0', '#D4AF37', '#8E9CA6', '#64748b'],
           borderRadius: 6
         }]
       },
@@ -1798,7 +1753,7 @@
         labels: ['BMW', 'Mercedes', 'Audi', 'Toyota', 'Ford'],
         datasets: [{
           data: [89, 76, 65, 54, 48],
-          backgroundColor: '#dc2626',
+          backgroundColor: '#40545E',
           borderRadius: 4
         }]
       },
@@ -1828,8 +1783,6 @@
       // Remove active class from all tabs
       document.querySelectorAll('.ai-tab').forEach(tab => {
         tab.classList.remove('active');
-        tab.style.background = 'transparent';
-        tab.style.color = '#64748b';
       });
       
       // Show selected tab content
@@ -1838,10 +1791,9 @@
         selectedContent.style.display = 'block';
       }
       
-      // Add active class to clicked tab
-      event.target.closest('.ai-tab').classList.add('active');
-      event.target.closest('.ai-tab').style.background = 'linear-gradient(135deg, #2b5278, #1e3a54)';
-      event.target.closest('.ai-tab').style.color = 'white';
+      // Add active class to clicked tab (brand styling via .ai-hub-tab.active)
+      const clickedTab = event.target.closest('.ai-tab');
+      if (clickedTab) clickedTab.classList.add('active');
       
       // Initialize charts for the tab if needed
       if (tabName === 'predictions' && !window.aiPredictionChartInitialized) {
@@ -1875,12 +1827,12 @@
       const lowerBand = [null, null, null, null, null, null, null, null, null, null, 2850, 2880, 2990, 3080];
       
       const gradient = predictionCtx.createLinearGradient(0, 0, 0, 300);
-      gradient.addColorStop(0, 'rgba(59, 130, 246, 0.2)');
-      gradient.addColorStop(1, 'rgba(59, 130, 246, 0.02)');
+      gradient.addColorStop(0, 'rgba(64, 84, 94, 0.2)');
+      gradient.addColorStop(1, 'rgba(64, 84, 94, 0.02)');
       
       const predictedGradient = predictionCtx.createLinearGradient(0, 0, 0, 300);
-      predictedGradient.addColorStop(0, 'rgba(16, 185, 129, 0.3)');
-      predictedGradient.addColorStop(1, 'rgba(16, 185, 129, 0.02)');
+      predictedGradient.addColorStop(0, 'rgba(149, 175, 192, 0.3)');
+      predictedGradient.addColorStop(1, 'rgba(149, 175, 192, 0.02)');
       
       new Chart(predictionCtx, {
         type: 'line',
@@ -1890,7 +1842,7 @@
             {
               label: 'Upper Confidence',
               data: upperBand,
-              borderColor: 'rgba(16, 185, 129, 0.3)',
+              borderColor: 'rgba(149, 175, 192, 0.3)',
               backgroundColor: 'transparent',
               borderWidth: 1,
               borderDash: [5, 5],
@@ -1900,7 +1852,7 @@
             {
               label: 'Lower Confidence',
               data: lowerBand,
-              borderColor: 'rgba(16, 185, 129, 0.3)',
+              borderColor: 'rgba(149, 175, 192, 0.3)',
               backgroundColor: 'rgba(16, 185, 129, 0.1)',
               borderWidth: 1,
               borderDash: [5, 5],
@@ -1910,12 +1862,12 @@
             {
               label: 'Historical Revenue ($K)',
               data: historicalData,
-              borderColor: '#3b82f6',
+              borderColor: '#40545E',
               backgroundColor: gradient,
               borderWidth: 3,
               fill: true,
               tension: 0.4,
-              pointBackgroundColor: '#3b82f6',
+              pointBackgroundColor: '#40545E',
               pointBorderColor: '#fff',
               pointBorderWidth: 2,
               pointRadius: 5,
@@ -1924,12 +1876,12 @@
             {
               label: 'Predicted Revenue ($K)',
               data: predictedData,
-              borderColor: '#10b981',
+              borderColor: '#95AFC0',
               backgroundColor: predictedGradient,
               borderWidth: 3,
               fill: true,
               tension: 0.4,
-              pointBackgroundColor: '#10b981',
+              pointBackgroundColor: '#95AFC0',
               pointBorderColor: '#fff',
               pointBorderWidth: 2,
               pointRadius: 5,
@@ -1998,7 +1950,7 @@
             {
               label: 'Normal Range (Upper)',
               data: Array(24).fill(70),
-              borderColor: 'rgba(239, 68, 68, 0.3)',
+              borderColor: 'rgba(64, 84, 94, 0.3)',
               backgroundColor: 'transparent',
               borderWidth: 1,
               borderDash: [5, 5],
@@ -2008,8 +1960,8 @@
             {
               label: 'Normal Range (Lower)',
               data: Array(24).fill(30),
-              borderColor: 'rgba(239, 68, 68, 0.3)',
-              backgroundColor: 'rgba(16, 185, 129, 0.1)',
+              borderColor: 'rgba(64, 84, 94, 0.3)',
+              backgroundColor: 'rgba(149, 175, 192, 0.1)',
               borderWidth: 1,
               borderDash: [5, 5],
               pointRadius: 0,
@@ -2018,12 +1970,12 @@
             {
               label: 'Orders/Hour',
               data: normalData,
-              borderColor: '#3b82f6',
-              backgroundColor: 'rgba(59, 130, 246, 0.1)',
+              borderColor: '#40545E',
+              backgroundColor: 'rgba(64, 84, 94, 0.1)',
               borderWidth: 2,
               fill: true,
               tension: 0.4,
-              pointBackgroundColor: normalData.map(val => val > 100 ? '#ef4444' : '#3b82f6'),
+              pointBackgroundColor: normalData.map(val => val > 100 ? '#D4AF37' : '#40545E'),
               pointBorderColor: '#fff',
               pointBorderWidth: 2,
               pointRadius: normalData.map(val => val > 100 ? 8 : 3),
@@ -2076,8 +2028,8 @@
       const lowerBand = forecastData.map(v => v * 0.85);
       
       const gradient = forecastCtx.createLinearGradient(0, 0, 0, 280);
-      gradient.addColorStop(0, 'rgba(59, 130, 246, 0.3)');
-      gradient.addColorStop(1, 'rgba(59, 130, 246, 0.02)');
+      gradient.addColorStop(0, 'rgba(64, 84, 94, 0.3)');
+      gradient.addColorStop(1, 'rgba(64, 84, 94, 0.02)');
       
       new Chart(forecastCtx, {
         type: 'line',
@@ -2087,7 +2039,7 @@
             {
               label: 'Upper Band',
               data: upperBand,
-              borderColor: 'rgba(59, 130, 246, 0.2)',
+              borderColor: 'rgba(64, 84, 94, 0.2)',
               backgroundColor: 'transparent',
               borderWidth: 1,
               pointRadius: 0,
@@ -2096,8 +2048,8 @@
             {
               label: 'Lower Band',
               data: lowerBand,
-              borderColor: 'rgba(59, 130, 246, 0.2)',
-              backgroundColor: 'rgba(59, 130, 246, 0.1)',
+              borderColor: 'rgba(64, 84, 94, 0.2)',
+              backgroundColor: 'rgba(64, 84, 94, 0.1)',
               borderWidth: 1,
               pointRadius: 0,
               fill: '-1'
@@ -2105,12 +2057,12 @@
             {
               label: 'Daily Revenue ($K)',
               data: forecastData,
-              borderColor: '#3b82f6',
+              borderColor: '#40545E',
               backgroundColor: gradient,
               borderWidth: 2,
               fill: true,
               tension: 0.3,
-              pointBackgroundColor: '#3b82f6',
+              pointBackgroundColor: '#40545E',
               pointBorderColor: '#fff',
               pointBorderWidth: 1,
               pointRadius: 2,

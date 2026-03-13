@@ -1,4 +1,6 @@
 <%- include('../partials/header') %>
+<link rel="stylesheet" href="/css/adminCSS/admin-dashboard.css">
+<link rel="stylesheet" href="/css/adminCSS/admin-orders.css">
 <link rel="stylesheet" href="/css/adminCSS/admin-referrals.css">
 <!-- SweetAlert2 -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -13,77 +15,75 @@
 
       <div class="admin-content">
         <!-- Page Header -->
-        <div class="referrals-page-header">
+        <div class="page-header applications-page-header">
           <div>
             <h2>Partner Applications</h2>
             <p class="page-subtitle">Review and manage incoming referral partner applications</p>
           </div>
-          <a href="/admin/referrals" class="referrals-btn referrals-btn-secondary">
+          <a href="/admin/referrals" class="admin-btn admin-btn-secondary">
             <i data-lucide="arrow-left"></i>
             Back to Dashboard
           </a>
         </div>
 
         <!-- Stats Cards -->
-        <div class="applications-stats" id="applicationStats">
-          <div class="app-stat-card pending">
-            <div class="app-stat-icon">
+        <div class="applications-stats admin-grid admin-grid-3" id="applicationStats">
+          <div class="stat-card orange app-stat-card">
+            <div class="stat-icon app-stat-icon">
               <i data-lucide="clock"></i>
             </div>
-            <div class="app-stat-content">
-              <span class="app-stat-value" id="pendingCount">0</span>
-              <span class="app-stat-label">Pending Review</span>
+            <div class="stat-content app-stat-content">
+              <span class="stat-value app-stat-value" id="pendingCount">0</span>
+              <span class="stat-label app-stat-label">Pending Review</span>
             </div>
           </div>
-          <div class="app-stat-card approved">
-            <div class="app-stat-icon">
+          <div class="stat-card cyan app-stat-card">
+            <div class="stat-icon app-stat-icon">
               <i data-lucide="check-circle"></i>
             </div>
-            <div class="app-stat-content">
-              <span class="app-stat-value" id="approvedCount">0</span>
-              <span class="app-stat-label">Approved (Active)</span>
+            <div class="stat-content app-stat-content">
+              <span class="stat-value app-stat-value" id="approvedCount">0</span>
+              <span class="stat-label app-stat-label">Approved (Active)</span>
             </div>
           </div>
-          <div class="app-stat-card rejected">
-            <div class="app-stat-icon">
+          <div class="stat-card purple app-stat-card">
+            <div class="stat-icon app-stat-icon">
               <i data-lucide="x-circle"></i>
             </div>
-            <div class="app-stat-content">
-              <span class="app-stat-value" id="rejectedCount">0</span>
-              <span class="app-stat-label">Rejected</span>
+            <div class="stat-content app-stat-content">
+              <span class="stat-value app-stat-value" id="rejectedCount">0</span>
+              <span class="stat-label app-stat-label">Rejected</span>
             </div>
           </div>
         </div>
 
         <!-- Filters -->
-        <div class="referrals-advanced-filters">
-          <div class="referrals-filters-primary">
-            <div class="referrals-filter-item">
-              <label>Status</label>
-              <select id="filterStatus" class="referrals-filter-select">
-                <option value="pending" selected>Pending</option>
-                <option value="active">Approved</option>
-                <option value="inactive">Rejected</option>
-              </select>
-            </div>
-            <div class="referrals-filter-item">
-              <label>Search</label>
-              <input type="text" id="searchInput" class="referrals-filter-input" placeholder="Search by name, email...">
-            </div>
-            <button class="referrals-filter-apply-btn" onclick="loadApplications()">
-              <i data-lucide="search"></i>
-              Search
-            </button>
+        <div class="orders-filters applications-filters">
+          <div class="filter-group">
+            <label class="filter-label">Status</label>
+            <select id="filterStatus" class="filter-select">
+              <option value="pending" selected>Pending</option>
+              <option value="active">Approved</option>
+              <option value="inactive">Rejected</option>
+            </select>
           </div>
+          <div class="filter-group filter-search">
+            <label class="filter-label">Search</label>
+            <input type="text" id="searchInput" placeholder="Search by name, email...">
+          </div>
+          <button class="admin-btn admin-btn-primary" onclick="loadApplications()">
+            <i data-lucide="search"></i>
+            Search
+          </button>
         </div>
 
         <!-- Applications Table -->
-        <div class="referrals-table-wrapper" id="applicationsTableWrapper">
+        <div class="admin-table-container applications-table-wrapper" id="applicationsTableWrapper">
           <div class="referrals-loading" id="loadingIndicator">
             <div class="loading-spinner"></div>
             <span>Loading applications...</span>
           </div>
-          <table class="referrals-table" id="applicationsTable" style="display: none;">
+          <table class="admin-table referrals-table" id="applicationsTable" style="display: none;">
             <thead>
               <tr>
                 <th>Applicant</th>
@@ -107,7 +107,7 @@
         </div>
 
         <!-- Pagination -->
-        <div class="referrals-pagination" id="pagination" style="display: none;">
+        <div class="referrals-pagination applications-pagination" id="pagination" style="display: none;">
           <div class="referrals-pagination-info">
             Showing <span id="showingFrom">0</span>-<span id="showingTo">0</span> of <span id="totalCount">0</span> applications
           </div>
@@ -245,67 +245,71 @@
   <%- include('../partials/footer') %>
 
   <style>
-    /* Applications Stats */
+    /* Applications Page - Admin Design Scheme */
+    .applications-page-header h2 {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--admin-text-primary);
+    }
+
+    .applications-page-header .page-subtitle {
+      font-size: 0.875rem;
+      color: var(--admin-text-muted);
+      margin: 0.25rem 0 0 0;
+    }
+
     .applications-stats {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1rem;
       margin-bottom: 1.5rem;
     }
 
-    .app-stat-card {
-      background: white;
-      border-radius: 12px;
-      padding: 1.25rem;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      border: 1px solid #e2e8f0;
+    /* Approved: sei (completed). Rejected: namari (muted) — brand colors only */
+    .applications-stats .stat-card.cyan .stat-icon {
+      background: var(--color-info-bg);
+      color: var(--sei);
     }
 
-    .app-stat-icon {
-      width: 48px;
-      height: 48px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    .applications-stats .stat-card.cyan {
+      --stat-color: var(--sei);
     }
 
-    .app-stat-card.pending .app-stat-icon {
-      background: #fef3c7;
-      color: #d97706;
+    .applications-stats .stat-card.purple .stat-icon {
+      background: rgba(142, 156, 166, 0.2);
+      color: var(--namari);
     }
 
-    .app-stat-card.approved .app-stat-icon {
-      background: #d1fae5;
-      color: #059669;
+    .applications-stats .stat-card.purple {
+      --stat-color: var(--namari);
     }
 
-    .app-stat-card.rejected .app-stat-icon {
-      background: #fee2e2;
-      color: #dc2626;
+    .applications-filters .filter-group.filter-search {
+      flex: 1;
+      min-width: 200px;
     }
 
-    .app-stat-icon i {
-      width: 24px;
-      height: 24px;
+    .applications-filters .filter-group.filter-search input {
+      width: 100%;
+      padding: 0.5rem 1rem;
+      background: var(--admin-bg-primary);
+      border: 1px solid var(--admin-border);
+      border-radius: 0;
+      color: var(--admin-text-primary);
+      font-size: 0.875rem;
     }
 
-    .app-stat-content {
-      display: flex;
-      flex-direction: column;
+    .applications-filters .filter-group.filter-search input:focus {
+      outline: none;
+      border-color: var(--sei);
+      box-shadow: 0 0 0 3px var(--color-focus-ring);
     }
 
-    .app-stat-value {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: #1e293b;
-    }
-
-    .app-stat-label {
-      font-size: 0.85rem;
-      color: #64748b;
+    .applications-table-wrapper {
+      background: var(--admin-bg-primary);
+      border: 1px solid var(--admin-border);
+      border-radius: 0;
+      overflow: hidden;
     }
 
     /* Application Modal Styles */
@@ -321,14 +325,15 @@
     }
 
     .modal-container {
-      background: white;
-      border-radius: 16px;
+      background: var(--admin-bg-primary);
+      border-radius: 0;
+      border: 1px solid var(--admin-border);
       width: 100%;
       max-width: 700px;
       max-height: 90vh;
       display: flex;
       flex-direction: column;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      box-shadow: var(--admin-shadow-xl);
     }
 
     .application-modal {
@@ -341,7 +346,7 @@
 
     .modal-header {
       padding: 1.25rem 1.5rem;
-      border-bottom: 1px solid #e2e8f0;
+      border-bottom: 1px solid var(--admin-border);
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -350,14 +355,14 @@
     .modal-header h3 {
       font-size: 1.125rem;
       font-weight: 600;
-      color: #1e293b;
+      color: var(--admin-text-primary);
       margin: 0;
     }
 
     .modal-header-icon {
       width: 40px;
       height: 40px;
-      border-radius: 10px;
+      border-radius: 0;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -365,40 +370,42 @@
     }
 
     .approve-header {
-      background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+      background: var(--kintsugi-light);
+      border-bottom-color: var(--kintsugi-border);
     }
 
     .approve-header .modal-header-icon {
-      background: #22c55e;
-      color: white;
+      background: var(--aitetsu);
+      color: var(--washi);
     }
 
     .reject-header {
-      background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+      background: rgba(142, 156, 166, 0.12);
+      border-bottom-color: rgba(142, 156, 166, 0.25);
     }
 
     .reject-header .modal-header-icon {
-      background: #ef4444;
-      color: white;
+      background: var(--namari);
+      color: var(--washi);
     }
 
     .modal-close {
       width: 36px;
       height: 36px;
       border: none;
-      background: #f1f5f9;
-      border-radius: 8px;
+      background: var(--admin-bg-tertiary);
+      border-radius: 0;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #64748b;
-      transition: all 0.2s;
+      color: var(--admin-text-muted);
+      transition: var(--admin-transition-fast);
     }
 
     .modal-close:hover {
-      background: #e2e8f0;
-      color: #1e293b;
+      background: var(--admin-border-light);
+      color: var(--admin-text-primary);
     }
 
     .modal-body {
@@ -409,7 +416,7 @@
 
     .modal-footer {
       padding: 1rem 1.5rem;
-      border-top: 1px solid #e2e8f0;
+      border-top: 1px solid var(--admin-border);
       display: flex;
       justify-content: flex-end;
       gap: 0.75rem;
@@ -427,7 +434,7 @@
     .app-detail-section h4 {
       font-size: 0.9rem;
       font-weight: 600;
-      color: #64748b;
+      color: var(--admin-text-muted);
       text-transform: uppercase;
       letter-spacing: 0.05em;
       margin-bottom: 0.75rem;
@@ -455,12 +462,12 @@
 
     .app-detail-item label {
       font-size: 0.8rem;
-      color: #94a3b8;
+      color: var(--admin-text-muted);
     }
 
     .app-detail-item span {
       font-size: 0.95rem;
-      color: #1e293b;
+      color: var(--admin-text-primary);
       font-weight: 500;
     }
 
@@ -475,9 +482,9 @@
       align-items: center;
       gap: 0.375rem;
       padding: 0.375rem 0.75rem;
-      background: #eff6ff;
-      color: #3b82f6;
-      border-radius: 100px;
+      background: var(--color-info-bg);
+      color: var(--aitetsu);
+      border-radius: 0;
       font-size: 0.8rem;
       font-weight: 500;
     }
@@ -488,13 +495,13 @@
     }
 
     .app-motivation-text {
-      background: #f8fafc;
-      border-radius: 8px;
+      background: var(--admin-bg-tertiary);
+      border-radius: 0;
       padding: 1rem;
       font-size: 0.9rem;
-      color: #475569;
+      color: var(--admin-text-secondary);
       line-height: 1.6;
-      border: 1px solid #e2e8f0;
+      border: 1px solid var(--admin-border);
     }
 
     /* Status Badges */
@@ -503,24 +510,24 @@
       align-items: center;
       gap: 0.375rem;
       padding: 0.375rem 0.75rem;
-      border-radius: 100px;
+      border-radius: 0;
       font-size: 0.8rem;
       font-weight: 500;
     }
 
     .status-badge.pending {
-      background: #fef3c7;
-      color: #b45309;
+      background: var(--kintsugi-light);
+      color: var(--kintsugi);
     }
 
     .status-badge.active {
-      background: #d1fae5;
-      color: #047857;
+      background: var(--color-info-bg);
+      color: var(--aitetsu);
     }
 
     .status-badge.inactive {
-      background: #fee2e2;
-      color: #b91c1c;
+      background: rgba(142, 156, 166, 0.15);
+      color: var(--namari);
     }
 
     /* Business Type Badge */
@@ -529,9 +536,9 @@
       align-items: center;
       gap: 0.375rem;
       padding: 0.25rem 0.625rem;
-      background: #f1f5f9;
-      color: #475569;
-      border-radius: 6px;
+      background: var(--admin-bg-tertiary);
+      color: var(--admin-text-secondary);
+      border-radius: 0;
       font-size: 0.8rem;
     }
 
@@ -541,9 +548,9 @@
       align-items: center;
       gap: 0.375rem;
       padding: 0.25rem 0.625rem;
-      background: #e0e7ff;
-      color: #4338ca;
-      border-radius: 6px;
+      background: var(--color-info-bg);
+      color: var(--aitetsu);
+      border-radius: 0;
       font-size: 0.8rem;
     }
 
@@ -557,12 +564,12 @@
       width: 36px;
       height: 36px;
       border: none;
-      border-radius: 8px;
+      border-radius: 0;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: all 0.2s;
+      transition: var(--admin-transition-fast);
     }
 
     .app-action-btn i {
@@ -571,31 +578,33 @@
     }
 
     .app-action-btn.view {
-      background: #f1f5f9;
-      color: #64748b;
+      background: var(--admin-bg-tertiary);
+      color: var(--admin-text-muted);
     }
 
     .app-action-btn.view:hover {
-      background: #e2e8f0;
-      color: #1e293b;
+      background: var(--admin-border-light);
+      color: var(--admin-text-primary);
     }
 
     .app-action-btn.approve {
-      background: #d1fae5;
-      color: #059669;
+      background: var(--kintsugi-light);
+      color: var(--aitetsu);
     }
 
     .app-action-btn.approve:hover {
-      background: #a7f3d0;
+      background: var(--aitetsu);
+      color: var(--washi);
     }
 
     .app-action-btn.reject {
-      background: #fee2e2;
-      color: #dc2626;
+      background: rgba(142, 156, 166, 0.15);
+      color: var(--namari);
     }
 
     .app-action-btn.reject:hover {
-      background: #fecaca;
+      background: var(--namari);
+      color: var(--washi);
     }
 
     /* Form in Modal */
@@ -613,7 +622,7 @@
       display: block;
       font-size: 0.875rem;
       font-weight: 500;
-      color: #374151;
+      color: var(--admin-text-secondary);
       margin-bottom: 0.5rem;
     }
 
@@ -622,48 +631,28 @@
       width: 100%;
       padding: 0.75rem;
       font-size: 0.9rem;
-      border: 2px solid #e2e8f0;
-      border-radius: 8px;
+      border: 1px solid var(--admin-border);
+      border-radius: 0;
       outline: none;
-      transition: border-color 0.2s;
+      transition: var(--admin-transition-fast);
+      background: var(--admin-bg-primary);
+      color: var(--admin-text-primary);
     }
 
     .form-group input:focus,
     .form-group textarea:focus {
-      border-color: #3b82f6;
+      border-color: var(--sei);
+      box-shadow: 0 0 0 3px var(--color-focus-ring);
     }
 
     .form-group small {
       display: block;
       font-size: 0.8rem;
-      color: #94a3b8;
+      color: var(--admin-text-muted);
       margin-top: 0.375rem;
     }
 
-    /* Button styles */
-    .referrals-btn-success {
-      background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
-      color: white;
-    }
-
-    .referrals-btn-success:hover {
-      background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
-    }
-
-    .referrals-btn-danger {
-      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-      color: white;
-    }
-
-    .referrals-btn-danger:hover {
-      background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
-    }
-
     @media (max-width: 768px) {
-      .applications-stats {
-        grid-template-columns: 1fr;
-      }
-
       .app-detail-grid {
         grid-template-columns: 1fr;
       }
@@ -681,7 +670,7 @@
     .approve-applicant-info {
       margin-bottom: 1.5rem;
       padding-bottom: 1.5rem;
-      border-bottom: 1px solid #e2e8f0;
+      border-bottom: 1px solid var(--admin-border);
     }
 
     .applicant-preview {
@@ -689,16 +678,17 @@
       align-items: center;
       gap: 1rem;
       padding: 1rem;
-      background: #f8fafc;
-      border-radius: 12px;
+      background: var(--admin-bg-tertiary);
+      border-radius: 0;
+      border: 1px solid var(--admin-border);
     }
 
     .applicant-avatar {
       width: 48px;
       height: 48px;
-      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-      color: white;
-      border-radius: 12px;
+      background: var(--aitetsu);
+      color: var(--washi);
+      border-radius: 0;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -713,12 +703,12 @@
 
     .applicant-details strong {
       font-size: 1rem;
-      color: #1e293b;
+      color: var(--admin-text-primary);
     }
 
     .applicant-details span {
       font-size: 0.875rem;
-      color: #64748b;
+      color: var(--admin-text-muted);
     }
 
     .approve-section {
@@ -728,7 +718,7 @@
     .approve-section h4 {
       font-size: 0.9rem;
       font-weight: 600;
-      color: #374151;
+      color: var(--admin-text-secondary);
       margin-bottom: 1rem;
       display: flex;
       align-items: center;
@@ -738,11 +728,11 @@
     .approve-section h4 i {
       width: 18px;
       height: 18px;
-      color: #64748b;
+      color: var(--admin-text-muted);
     }
 
     .approve-section h4 .required {
-      color: #ef4444;
+      color: var(--namari);
     }
 
     .password-input-wrapper {
@@ -766,14 +756,14 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #64748b;
-      border-radius: 6px;
-      transition: all 0.2s;
+      color: var(--admin-text-muted);
+      border-radius: 0;
+      transition: var(--admin-transition-fast);
     }
 
     .password-toggle-btn:hover {
-      background: #f1f5f9;
-      color: #1e293b;
+      background: var(--admin-bg-tertiary);
+      color: var(--admin-text-primary);
     }
 
     .password-toggle-btn i {
@@ -786,19 +776,20 @@
       align-items: center;
       gap: 0.5rem;
       padding: 0.625rem 1rem;
-      background: #f1f5f9;
-      color: #374151;
-      border: 2px solid #e2e8f0;
-      border-radius: 8px;
+      background: var(--admin-bg-tertiary);
+      color: var(--admin-text-secondary);
+      border: 1px solid var(--admin-border);
+      border-radius: 0;
       font-size: 0.875rem;
       font-weight: 500;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: var(--admin-transition-fast);
     }
 
     .generate-password-btn:hover {
-      background: #e2e8f0;
-      border-color: #cbd5e1;
+      background: var(--admin-border-light);
+      border-color: var(--admin-border);
+      color: var(--admin-text-primary);
     }
 
     .generate-password-btn i {
@@ -811,10 +802,10 @@
       align-items: center;
       gap: 0.75rem;
       padding: 1rem;
-      background: #eff6ff;
-      border: 1px solid #bfdbfe;
-      border-radius: 10px;
-      color: #1e40af;
+      background: var(--color-info-bg);
+      border: 1px solid rgba(64, 84, 94, 0.2);
+      border-radius: 0;
+      color: var(--aitetsu);
       font-size: 0.875rem;
     }
 
@@ -822,6 +813,40 @@
       width: 20px;
       height: 20px;
       flex-shrink: 0;
+    }
+
+    /* Modal footer buttons - use admin-btn */
+    .modal-footer .referrals-btn-secondary {
+      background: var(--admin-bg-tertiary);
+      border: 1px solid var(--admin-border);
+      color: var(--admin-text-secondary);
+      border-radius: 0;
+    }
+
+    .modal-footer .referrals-btn-success {
+      background: var(--aitetsu);
+      color: var(--washi);
+      border-radius: 0;
+    }
+
+    .modal-footer .referrals-btn-danger {
+      background: var(--namari);
+      color: var(--washi);
+      border-radius: 0;
+    }
+
+    /* Pagination - admin scheme */
+    .applications-pagination .referrals-pagination-btn {
+      border-radius: 0;
+    }
+
+    /* Referral code display in modal */
+    .app-referral-code {
+      font-family: 'Monaco', 'Consolas', monospace;
+      background: var(--admin-bg-tertiary);
+      padding: 0.25rem 0.5rem;
+      border-radius: 0;
+      border: 1px solid var(--admin-border);
     }
   </style>
 
@@ -1075,7 +1100,7 @@
           <div class="app-detail-section">
             <h4><i data-lucide="megaphone"></i> Marketing Channels</h4>
             <div class="app-channels">
-              ${channelTags || '<span style="color: #94a3b8;">No channels specified</span>'}
+              ${channelTags || '<span style="color: #8E9CA6;">No channels specified</span>'}
             </div>
           </div>
 
@@ -1100,7 +1125,7 @@
               </div>
               <div class="app-detail-item">
                 <label>Referral Code</label>
-                <span style="font-family: monospace; background: #f1f5f9; padding: 0.25rem 0.5rem; border-radius: 4px;">${app.referralCode}</span>
+                <span class="app-referral-code">${app.referralCode}</span>
               </div>
             </div>
           </div>
@@ -1231,7 +1256,7 @@
           icon: 'warning',
           title: 'Password Required',
           text: 'Please enter a password with at least 8 characters',
-          confirmButtonColor: '#f59e0b',
+          confirmButtonColor: '#D4AF37',
           confirmButtonText: 'Got it'
         });
         document.getElementById('partnerPassword').focus();
@@ -1248,8 +1273,8 @@
                </ul>`,
         icon: 'question',
         showCancelButton: true,
-        confirmButtonColor: '#10b981',
-        cancelButtonColor: '#64748b',
+        confirmButtonColor: '#40545E',
+        cancelButtonColor: '#8E9CA6',
         confirmButtonText: 'Yes, Approve',
         cancelButtonText: 'Cancel'
       });
@@ -1278,18 +1303,18 @@
             icon: 'success',
             title: 'Partner Approved!',
             html: `<div style="text-align: center;">
-                     <p style="font-size: 1rem; color: #374151; margin-bottom: 1rem;">
+                     <p style="font-size: 1rem; color: #2B2B2B; margin-bottom: 1rem;">
                        <strong>${data.partner.fullName}</strong> is now an active partner.
                      </p>
-                     <div style="background: #f0fdf4; border-radius: 8px; padding: 1rem; border: 1px solid #bbf7d0;">
-                       <p style="font-size: 0.875rem; color: #166534; margin: 0;">
+                     <div style="background: rgba(149, 175, 192, 0.08); border-radius: 0; padding: 1rem; border: 1px solid rgba(149, 175, 192, 0.25);">
+                       <p style="font-size: 0.875rem; color: #40545E; margin: 0;">
                          <strong>✉️ Email Sent!</strong><br>
                          Login credentials have been sent to<br>
                          <span style="font-weight: 600;">${data.partner.email}</span>
                        </p>
                      </div>
                    </div>`,
-            confirmButtonColor: '#10b981',
+            confirmButtonColor: '#40545E',
             confirmButtonText: 'Great!'
           });
         } else {
@@ -1297,7 +1322,7 @@
             icon: 'error',
             title: 'Approval Failed',
             text: data.message || 'Failed to approve application',
-            confirmButtonColor: '#ef4444'
+            confirmButtonColor: '#8E9CA6'
           });
         }
       } catch (error) {
@@ -1306,7 +1331,7 @@
           icon: 'error',
           title: 'Error',
           text: 'Failed to approve application. Please try again.',
-          confirmButtonColor: '#ef4444'
+          confirmButtonColor: '#8E9CA6'
         });
       } finally {
         btn.disabled = false;
@@ -1327,8 +1352,8 @@
         text: 'Are you sure you want to reject this application?',
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: '#ef4444',
-        cancelButtonColor: '#64748b',
+        confirmButtonColor: '#8E9CA6',
+        cancelButtonColor: '#8E9CA6',
         confirmButtonText: 'Yes, Reject',
         cancelButtonText: 'Cancel'
       });
@@ -1357,7 +1382,7 @@
             icon: 'success',
             title: 'Application Rejected',
             text: 'The partner application has been rejected.',
-            confirmButtonColor: '#64748b',
+            confirmButtonColor: '#8E9CA6',
             timer: 2000,
             timerProgressBar: true
           });
@@ -1366,7 +1391,7 @@
             icon: 'error',
             title: 'Rejection Failed',
             text: data.message || 'Failed to reject application',
-            confirmButtonColor: '#ef4444'
+            confirmButtonColor: '#8E9CA6'
           });
         }
       } catch (error) {
@@ -1375,7 +1400,7 @@
           icon: 'error',
           title: 'Error',
           text: 'Failed to reject application. Please try again.',
-          confirmButtonColor: '#ef4444'
+          confirmButtonColor: '#8E9CA6'
         });
       } finally {
         btn.disabled = false;

@@ -12,7 +12,7 @@
           <h1>My Commissions</h1>
         </div>
         <div class="partner-page-filters">
-          <a href="?status=all" class="partner-filter-btn <%= !status || status === 'all' ? 'active' : '' %>">All</a>
+          <a href="?status=all" class="partner-filter-btn <%= (typeof status === 'undefined' || !status || status === 'all') ? 'active' : '' %>">All</a>
           <a href="?status=pending" class="partner-filter-btn <%= status === 'pending' ? 'active' : '' %>">Pending</a>
           <a href="?status=approved" class="partner-filter-btn <%= status === 'approved' ? 'active' : '' %>">Approved</a>
           <a href="?status=paid" class="partner-filter-btn <%= status === 'paid' ? 'active' : '' %>">Paid</a>
@@ -20,13 +20,14 @@
       </div>
 
       <!-- Summary Stats -->
+      <% var s = typeof stats !== 'undefined' ? stats : {}; %>
       <div class="partner-stats-grid" style="margin-bottom: 2rem;">
         <div class="partner-stat-card">
           <div class="partner-stat-icon partner-stat-icon-primary">
             <i data-lucide="receipt"></i>
           </div>
           <div class="partner-stat-content">
-            <div class="partner-stat-value"><%= stats?.totalReferrals || 0 %></div>
+            <div class="partner-stat-value"><%= s.totalReferrals || 0 %></div>
             <div class="partner-stat-label">Total Referrals</div>
           </div>
         </div>
@@ -35,7 +36,7 @@
             <i data-lucide="clock"></i>
           </div>
           <div class="partner-stat-content">
-            <div class="partner-stat-value"><%= (stats?.pendingAmount || 0).toFixed(2) %> AED</div>
+            <div class="partner-stat-value"><%= (Number(s.pendingAmount) || 0).toFixed(2) %> AED</div>
             <div class="partner-stat-label">Pending</div>
           </div>
         </div>
@@ -44,7 +45,7 @@
             <i data-lucide="check-circle"></i>
           </div>
           <div class="partner-stat-content">
-            <div class="partner-stat-value"><%= (stats?.approvedAmount || 0).toFixed(2) %> AED</div>
+            <div class="partner-stat-value"><%= (Number(s.approvedAmount) || 0).toFixed(2) %> AED</div>
             <div class="partner-stat-label">Approved</div>
           </div>
         </div>
@@ -53,7 +54,7 @@
             <i data-lucide="wallet"></i>
           </div>
           <div class="partner-stat-content">
-            <div class="partner-stat-value"><%= (stats?.paidAmount || 0).toFixed(2) %> AED</div>
+            <div class="partner-stat-value"><%= (Number(s.paidAmount) || 0).toFixed(2) %> AED</div>
             <div class="partner-stat-label">Total Paid</div>
           </div>
         </div>
@@ -68,7 +69,8 @@
           </div>
         </div>
         <div class="partner-table-wrapper">
-          <% if (commissions && commissions.length > 0) { %>
+          <% var commList = Array.isArray(commissions) ? commissions : []; %>
+          <% if (commList.length > 0) { %>
           <table class="partner-table">
             <thead>
               <tr>
@@ -82,7 +84,7 @@
               </tr>
             </thead>
             <tbody>
-              <% commissions.forEach(function(commission) { %>
+              <% commList.forEach(function(commission) { %>
               <tr>
                 <td>
                   <div class="partner-date-cell">
@@ -127,28 +129,21 @@
         </div>
 
         <!-- Pagination -->
-        <% if (pagination && pagination.totalPages > 1) { %>
+        <% var pag = typeof pagination !== 'undefined' ? pagination : null; %>
+        <% if (pag && pag.totalPages > 1) { %>
         <div class="partner-pagination">
-          <% if (pagination.currentPage > 1) { %>
-          <a href="?page=<%= pagination.currentPage - 1 %><%= status ? '&status=' + status : '' %>" class="partner-pagination-btn">
+          <% if (pag.hasPrev) { %>
+          <a href="?page=<%= pag.prevPage %><%= (typeof status !== 'undefined' && status && status !== 'all') ? '&status=' + status : '' %>" class="partner-pagination-btn">
             <i data-lucide="chevron-left"></i>
           </a>
           <% } else { %>
           <span class="partner-pagination-btn disabled"><i data-lucide="chevron-left"></i></span>
           <% } %>
 
-          <% for (let i = 1; i <= pagination.totalPages; i++) { %>
-            <% if (i === pagination.currentPage) { %>
-            <span class="partner-pagination-btn active"><%= i %></span>
-            <% } else if (Math.abs(i - pagination.currentPage) < 3 || i === 1 || i === pagination.totalPages) { %>
-            <a href="?page=<%= i %><%= status ? '&status=' + status : '' %>" class="partner-pagination-btn"><%= i %></a>
-            <% } else if (Math.abs(i - pagination.currentPage) === 3) { %>
-            <span class="partner-pagination-dots">...</span>
-            <% } %>
-          <% } %>
+          <span class="partner-pagination-info">Page <%= pag.currentPage %> of <%= pag.totalPages %></span>
 
-          <% if (pagination.currentPage < pagination.totalPages) { %>
-          <a href="?page=<%= pagination.currentPage + 1 %><%= status ? '&status=' + status : '' %>" class="partner-pagination-btn">
+          <% if (pag.hasNext) { %>
+          <a href="?page=<%= pag.nextPage %><%= (typeof status !== 'undefined' && status && status !== 'all') ? '&status=' + status : '' %>" class="partner-pagination-btn">
             <i data-lucide="chevron-right"></i>
           </a>
           <% } else { %>
@@ -159,17 +154,19 @@
       </div>
 
       <!-- How Commissions Work -->
+      <% if (typeof partner !== 'undefined' && partner) { %>
       <div class="partner-info-box" style="margin-top: 2rem;">
         <i data-lucide="info"></i>
         <div class="partner-info-box-content">
           <h4>How Commissions Work</h4>
           <p>
-            You earn <strong><%= partner.commissionRate %>%</strong> commission on every order placed by your referrals. 
+            You earn <strong><%= partner.commissionRate || 0 %>%</strong> commission on every order placed by your referrals. 
             Commissions are calculated on the order total and are reviewed within 24-48 hours. 
             Once approved, they'll be included in your next monthly payout.
           </p>
         </div>
       </div>
+      <% } %>
     </main>
   </div>
 </div>

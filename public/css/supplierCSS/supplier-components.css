@@ -40,7 +40,7 @@
 .card-title i {
   width: 20px;
   height: 20px;
-  color: var(--supplier-accent);
+  color: var(--aitetsu);
 }
 
 .card-subtitle {
@@ -117,28 +117,28 @@
 }
 
 .stat-icon.blue {
-  background: var(--supplier-info-light);
-  color: var(--supplier-info);
+  background: rgba(64, 84, 94, 0.12);
+  color: var(--aitetsu);
 }
 
 .stat-icon.green {
-  background: var(--supplier-success-light);
-  color: var(--supplier-success);
+  background: rgba(149, 175, 192, 0.2);
+  color: var(--sei);
 }
 
 .stat-icon.orange {
-  background: var(--supplier-warning-light);
-  color: var(--supplier-warning);
+  background: rgba(142, 156, 166, 0.2);
+  color: var(--namari);
 }
 
 .stat-icon.red {
-  background: var(--supplier-danger-light);
-  color: var(--supplier-danger);
+  background: rgba(142, 156, 166, 0.2);
+  color: var(--namari);
 }
 
 .stat-icon.purple {
-  background: rgba(139, 92, 246, 0.1);
-  color: #8b5cf6;
+  background: rgba(64, 84, 94, 0.12);
+  color: var(--aitetsu);
 }
 
 .stat-content {
@@ -168,11 +168,11 @@
 }
 
 .stat-trend.up {
-  color: var(--supplier-success);
+  color: var(--sei);
 }
 
 .stat-trend.down {
-  color: var(--supplier-danger);
+  color: var(--namari);
 }
 
 .stat-trend i {
@@ -204,16 +204,16 @@
   height: 18px;
 }
 
-/* Primary Button */
+/* Primary Button — Aitetsu (like admin) */
 .btn-primary {
-  background: linear-gradient(135deg, var(--supplier-primary), var(--supplier-primary-dark));
-  color: white;
-  box-shadow: var(--supplier-shadow-sm), 0 2px 8px rgba(43, 82, 120, 0.3);
+  background: var(--aitetsu);
+  color: var(--washi);
+  box-shadow: var(--supplier-shadow-sm);
 }
 
 .btn-primary:hover {
-  background: linear-gradient(135deg, var(--supplier-primary-dark), var(--supplier-primary-dark));
-  box-shadow: var(--supplier-shadow-md), 0 4px 12px rgba(43, 82, 120, 0.4);
+  background: #2F3F49;
+  box-shadow: var(--supplier-shadow-md);
   transform: translateY(-1px);
 }
 
@@ -239,8 +239,8 @@
 
 .btn-secondary:hover {
   background: var(--supplier-bg-accent);
-  border-color: var(--supplier-accent);
-  color: var(--supplier-accent);
+  border-color: var(--aitetsu);
+  color: var(--aitetsu);
 }
 
 /* Outline Button */
@@ -375,8 +375,8 @@
 
 .form-input:focus {
   outline: none;
-  border-color: var(--supplier-accent);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+  border-color: var(--sei);
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
 }
 
 .form-input:disabled {
@@ -534,12 +534,12 @@
 
 .table-action-btn:hover {
   background: var(--supplier-bg-tertiary);
-  color: var(--supplier-accent);
+  color: var(--aitetsu);
 }
 
 .table-action-btn.danger:hover {
-  background: var(--supplier-danger-light);
-  color: var(--supplier-danger);
+  background: rgba(142, 156, 166, 0.2);
+  color: var(--namari);
 }
 
 .table-action-btn i {
@@ -572,23 +572,23 @@
 }
 
 .badge-success {
-  background: var(--supplier-success-light);
-  color: #047857;
+  background: rgba(149, 175, 192, 0.2);
+  color: var(--aitetsu);
 }
 
 .badge-warning {
-  background: var(--supplier-warning-light);
-  color: #b45309;
+  background: var(--kintsugi-light);
+  color: var(--kintsugi);
 }
 
 .badge-danger {
-  background: var(--supplier-danger-light);
-  color: #b91c1c;
+  background: rgba(142, 156, 166, 0.2);
+  color: var(--namari);
 }
 
 .badge-info {
-  background: var(--supplier-info-light);
-  color: #1d4ed8;
+  background: rgba(64, 84, 94, 0.12);
+  color: var(--aitetsu);
 }
 
 .badge-neutral {
@@ -668,7 +668,7 @@
 .modal-title i {
   width: 20px;
   height: 20px;
-  color: var(--supplier-accent);
+  color: var(--aitetsu);
 }
 
 .modal-close {
@@ -783,35 +783,35 @@
 }
 
 .toast-success {
-  border-left: 4px solid var(--supplier-success);
+  border-left: 4px solid var(--sei);
 }
 
 .toast-success .toast-icon {
-  color: var(--supplier-success);
+  color: var(--sei);
 }
 
 .toast-error {
-  border-left: 4px solid var(--supplier-danger);
+  border-left: 4px solid var(--namari);
 }
 
 .toast-error .toast-icon {
-  color: var(--supplier-danger);
+  color: var(--namari);
 }
 
 .toast-warning {
-  border-left: 4px solid var(--supplier-warning);
+  border-left: 4px solid var(--kintsugi);
 }
 
 .toast-warning .toast-icon {
-  color: var(--supplier-warning);
+  color: var(--kintsugi);
 }
 
 .toast-info {
-  border-left: 4px solid var(--supplier-info);
+  border-left: 4px solid var(--aitetsu);
 }
 
 .toast-info .toast-icon {
-  color: var(--supplier-info);
+  color: var(--aitetsu);
 }
 
 /* ====================================
@@ -828,7 +828,7 @@
   width: 40px;
   height: 40px;
   border: 3px solid var(--supplier-border);
-  border-top-color: var(--supplier-accent);
+  border-top-color: var(--aitetsu);
   border-radius: 0 !important;
   animation: spin 0.8s linear infinite;
 }
@@ -1028,8 +1028,8 @@
 }
 
 .tab.active {
-  color: var(--supplier-accent);
-  border-bottom-color: var(--supplier-accent);
+  color: var(--aitetsu);
+  border-bottom-color: var(--aitetsu);
 }
 
 .tab-panel {
@@ -1143,7 +1143,7 @@
 
 .dropdown-item:hover {
   background: var(--supplier-bg-accent);
-  color: var(--supplier-accent);
+  color: var(--aitetsu);
 }
 
 .dropdown-item i {
@@ -1169,21 +1169,21 @@
 
 .progress-bar {
   height: 100%;
-  background: linear-gradient(90deg, var(--supplier-accent), var(--supplier-accent-light));
+  background: var(--aitetsu);
   border-radius: 0 !important;
   transition: width 0.3s ease;
 }
 
 .progress-success .progress-bar {
-  background: linear-gradient(90deg, var(--supplier-success), #34d399);
+  background: var(--sei);
 }
 
 .progress-warning .progress-bar {
-  background: linear-gradient(90deg, var(--supplier-warning), #fbbf24);
+  background: var(--kintsugi);
 }
 
 .progress-danger .progress-bar {
-  background: linear-gradient(90deg, var(--supplier-danger), #f87171);
+  background: var(--namari);
 }
 
 /* ====================================
@@ -1198,7 +1198,7 @@
   justify-content: center;
   font-weight: 600;
   color: white;
-  background: linear-gradient(135deg, var(--supplier-primary), var(--supplier-accent));
+  background: var(--aitetsu);
 }
 
 .avatar-sm {

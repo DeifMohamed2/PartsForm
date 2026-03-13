@@ -14,9 +14,9 @@ body:has(.automotive-theme) {
 }
 
 /* Modals, scripts, scroll-top — don't participate in flex layout */
-body:has(.automotive-theme) > .modal,
-body:has(.automotive-theme) > script,
-body:has(.automotive-theme) > .scroll-top-fixed {
+body:has(.automotive-theme)>.modal,
+body:has(.automotive-theme)>script,
+body:has(.automotive-theme)>.scroll-top-fixed {
   flex-shrink: 0 !important;
   height: 0 !important;
   overflow: visible !important;
@@ -58,13 +58,13 @@ body:has(.automotive-theme) > .scroll-top-fixed {
   position: relative;
   overflow: visible;
   flex-shrink: 0;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.18);
   clip-path: none;
   isolation: auto;
 }
 
 .automotive-theme .search2-hero::before {
-  background: url('/images/brand/moodboard/warehouse-hero.png') center/cover no-repeat;
+  background: url('/images/brand/moodboard/warehouse-hero.webp') center/cover no-repeat;
   filter: brightness(0.50) saturate(0.60) contrast(1.0);
   opacity: 0.75;
   overflow: hidden;
@@ -72,12 +72,10 @@ body:has(.automotive-theme) > .scroll-top-fixed {
 }
 
 .automotive-theme .search2-hero::after {
-  background: linear-gradient(
-    160deg,
-    rgba(149, 175, 192, 0.65) 0%,
-    rgba(120, 150, 170, 0.50) 55%,
-    rgba(90, 120, 140, 0.35) 100%
-  );
+  background: linear-gradient(160deg,
+      rgba(149, 175, 192, 0.65) 0%,
+      rgba(120, 150, 170, 0.50) 55%,
+      rgba(90, 120, 140, 0.35) 100%);
   z-index: 2;
 }
 
@@ -100,7 +98,6 @@ body:has(.automotive-theme) > .scroll-top-fixed {
   font-size: 0.875rem;
   font-weight: 700;
   color: #FFFFFF;
-  letter-spacing: 0.02em;
 }
 
 .tagline-sub {
@@ -137,9 +134,8 @@ body:has(.automotive-theme) > .scroll-top-fixed {
   font-weight: 900 !important;
   color: #FFFFFF !important;
   text-transform: uppercase !important;
-  letter-spacing: 0.12em !important;
   margin-bottom: 1.25rem !important;
-  text-shadow: 0 2px 16px rgba(0,0,0,0.25) !important;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.25) !important;
   line-height: 1.05 !important;
 }
 
@@ -214,7 +210,6 @@ body:has(.automotive-theme) > .scroll-top-fixed {
   color: #FFFFFF !important;
   font-size: 12px !important;
   font-weight: 600 !important;
-  letter-spacing: 0.04em !important;
   text-transform: uppercase !important;
   text-decoration: none !important;
   display: inline-flex !important;
@@ -222,7 +217,7 @@ body:has(.automotive-theme) > .scroll-top-fixed {
   gap: 0.4rem !important;
 }
 
-.automotive-theme .search2-quick-actions .quick-action-btn > span:not(.ai-chip) {
+.automotive-theme .search2-quick-actions .quick-action-btn>span:not(.ai-chip) {
   text-decoration: underline !important;
   text-underline-offset: 4px !important;
 }
@@ -244,10 +239,9 @@ body:has(.automotive-theme) > .scroll-top-fixed {
   background: #FFFFFF !important;
   color: #1a1a1a !important;
   border: none !important;
-  border-left: 1px solid rgba(255,255,255,0.1) !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.1) !important;
   font-weight: 800 !important;
   text-transform: uppercase !important;
-  letter-spacing: 0.14em !important;
   padding: 0.85rem 2rem !important;
   border-radius: 0 !important;
   transition: none !important;
@@ -258,7 +252,6 @@ body:has(.automotive-theme) > .scroll-top-fixed {
 .automotive-theme .search2-btn:hover {
   background: #FFFFFF !important;
   color: #1a1a1a !important;
-  letter-spacing: 0.14em !important;
   transform: none !important;
 }
 
@@ -275,7 +268,6 @@ body:has(.automotive-theme) > .scroll-top-fixed {
 .automotive-theme .search2-btn.is-reset-mode {
   background: #40545E !important;
   color: #FFFFFF !important;
-  letter-spacing: 0.14em !important;
 }
 
 .automotive-theme .search2-btn.is-reset-mode:hover {
@@ -293,8 +285,7 @@ body:has(.automotive-theme) > .scroll-top-fixed {
 .automotive-theme .search2-autocomplete {
   z-index: 99999 !important;
 }
-  margin-bottom: 0.75rem !important;
-}
+
 
 /* Quick actions: spread apart, left and right */
 .automotive-theme .search2-quick-actions {
@@ -339,7 +330,6 @@ body:has(.automotive-theme) > .scroll-top-fixed {
   font-family: var(--font-display) !important;
   font-weight: 700 !important;
   text-transform: uppercase !important;
-  letter-spacing: 0.1em !important;
   font-size: 12px !important;
   padding: 0.75rem 1.5rem !important;
   border-radius: 0 !important;
@@ -360,7 +350,6 @@ body:has(.automotive-theme) > .scroll-top-fixed {
   font-family: var(--font-display) !important;
   font-weight: 700 !important;
   text-transform: uppercase !important;
-  letter-spacing: 0.1em !important;
   font-size: 12px !important;
   padding: 0.75rem 1.5rem !important;
   border-radius: 0 !important;
@@ -384,7 +373,6 @@ body:has(.automotive-theme) > .scroll-top-fixed {
   font-family: var(--font-display) !important;
   font-size: 11px !important;
   text-transform: uppercase !important;
-  letter-spacing: 0.08em !important;
 }
 
 .automotive-theme .preview-count {
@@ -409,7 +397,6 @@ body:has(.automotive-theme) > .scroll-top-fixed {
   font-size: 12.5px !important;
   font-weight: 700 !important;
   text-transform: uppercase !important;
-  letter-spacing: 0.04em !important;
   padding: 9px 12px !important;
   text-align: center !important;
   border-right: 1px solid rgba(255, 255, 255, 0.2) !important;
@@ -484,7 +471,6 @@ body:has(.automotive-theme) > .scroll-top-fixed {
   border-radius: 0 !important;
   font-size: 0.75rem !important;
   font-weight: 700 !important;
-  letter-spacing: 0.03em !important;
   text-transform: uppercase !important;
 }
 
@@ -621,7 +607,7 @@ body:has(.automotive-theme) > .scroll-top-fixed {
   position: relative !important;
   border-radius: 6px !important;
   margin-bottom: 10px !important;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.07) !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.07) !important;
 }
 
 /* Gold left accent — REMOVED */
@@ -647,7 +633,6 @@ body:has(.automotive-theme) > .scroll-top-fixed {
   font-weight: 700 !important;
   color: #9CA3AF !important;
   text-transform: uppercase !important;
-  letter-spacing: 0.1em !important;
 }
 
 .automotive-theme .summary-found-number {
@@ -655,7 +640,6 @@ body:has(.automotive-theme) > .scroll-top-fixed {
   font-size: 22px !important;
   font-weight: 900 !important;
   color: #111827 !important;
-  letter-spacing: -0.01em !important;
   line-height: 1 !important;
 }
 
@@ -665,7 +649,6 @@ body:has(.automotive-theme) > .scroll-top-fixed {
   font-weight: 700 !important;
   color: #9CA3AF !important;
   text-transform: uppercase !important;
-  letter-spacing: 0.1em !important;
 }
 
 .automotive-theme .summary-divider {
@@ -700,7 +683,6 @@ body:has(.automotive-theme) > .scroll-top-fixed {
   font-size: 10px !important;
   color: #9CA3AF !important;
   text-transform: uppercase !important;
-  letter-spacing: 0.1em !important;
 }
 
 .automotive-theme .summary-total-value {
@@ -708,7 +690,6 @@ body:has(.automotive-theme) > .scroll-top-fixed {
   font-size: 22px !important;
   font-weight: 800 !important;
   color: #374151 !important;
-  letter-spacing: -0.01em !important;
   line-height: 1 !important;
 }
 
@@ -723,7 +704,6 @@ body:has(.automotive-theme) > .scroll-top-fixed {
   color: #1A1A1A !important;
   font-weight: 700 !important;
   text-transform: uppercase !important;
-  letter-spacing: 0.05em !important;
   padding: 0.625rem 1.5rem !important;
   border-radius: 0 !important;
   font-size: 0.8125rem !important;
@@ -759,7 +739,6 @@ body:has(.automotive-theme) > .scroll-top-fixed {
   font-weight: 700 !important;
   color: #FFFFFF !important;
   text-transform: uppercase !important;
-  letter-spacing: 0.02em !important;
   margin: 0 0 0.5rem 0 !important;
   line-height: 1.3 !important;
 }
@@ -786,7 +765,6 @@ body:has(.automotive-theme) > .scroll-top-fixed {
   font-size: 0.875rem !important;
   font-weight: 600 !important;
   text-transform: uppercase !important;
-  letter-spacing: 0.05em !important;
   cursor: pointer !important;
   transition: all 0.2s ease !important;
 }
@@ -811,7 +789,7 @@ body:has(.automotive-theme) > .scroll-top-fixed {
 .automotive-theme .results-table-container {
   border-radius: 6px !important;
   overflow: hidden !important;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 2px 8px rgba(0,0,0,0.04) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 2px 8px rgba(0, 0, 0, 0.04) !important;
   border: 1px solid #E2E5E9 !important;
   flex: 1 !important;
   display: flex !important;
@@ -887,7 +865,6 @@ body:has(.automotive-theme) > .scroll-top-fixed {
   font-weight: 600;
   color: #40545E;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
   font-style: normal;
 }
 
@@ -914,7 +891,6 @@ body:has(.automotive-theme) .footer .footer-nav {
 
 body:has(.automotive-theme) .footer .footer-nav-link {
   font-size: 14px !important;
-  letter-spacing: 0.1em !important;
 }
 
 body:has(.automotive-theme) .footer .footer-nav-left,
@@ -1049,7 +1025,6 @@ body:has(.automotive-theme) .scroll-top-fixed {
   border-radius: 0 !important;
   font-size: 0.6rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
   margin-left: 0.5rem;
   text-decoration: none !important;
   display: inline-block;

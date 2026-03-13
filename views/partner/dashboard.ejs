@@ -7,6 +7,7 @@
     <main class="partner-main">
     <!-- Welcome Banner -->
     <div class="partner-welcome-banner">
+      <div class="partner-welcome-bg-overlay"></div>
       <div class="partner-welcome-text">
         <h1>Welcome back, <%= partner.firstName %>!</h1>
         <p>Here's your referral performance at a glance for <%= currentMonth %></p>
@@ -31,8 +32,7 @@
       </div>
       <% } %>
     </div>
-٤٢٢٠٨٦٩٥٢٦٨٧
-422086952687
+
     <!-- Stats Grid -->
     <div class="partner-stats-grid">
       <div class="partner-stat-card">
@@ -145,7 +145,7 @@
           </div>
           <div class="partner-card-body">
             <div class="partner-rate-cards">
-              <div class="partner-rate-card" style="background: linear-gradient(135deg, var(--partner-primary-light) 0%, #e0effa 100%);">
+              <div class="partner-rate-card" style="background: linear-gradient(135deg, var(--sei) 0%, rgba(149, 175, 192, 0.15) 100%);">
                 <div class="partner-rate-card-title">Commission Rate</div>
                 <div class="partner-rate-card-value"><%= partner.commissionRate %>% <span>per sale</span></div>
               </div>

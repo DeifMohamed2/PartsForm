@@ -6,9 +6,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#2B2B2B">
     <title>PartsForm | Create Account</title>
-    <link rel="icon" type="image/png" href="/images/brand/icon-light.png">
+    <link rel="icon" type="image/png" href="/images/brand/icon-gold.png">
     <link rel="stylesheet" href="/css/brand-system.css">
     <style>
+        @font-face {
+            font-family: 'Quantico';
+            src: url('/fonts/Quantico/Quantico-Regular.ttf') format('truetype');
+            font-weight: 400; font-style: normal; font-display: swap;
+        }
+        @font-face {
+            font-family: 'Quantico';
+            src: url('/fonts/Quantico/Quantico-Bold.ttf') format('truetype');
+            font-weight: 700; font-style: normal; font-display: swap;
+        }
+        @font-face {
+            font-family: 'Antartida';
+            src: url('/fonts/Antartida/Antartida-Light.otf') format('opentype');
+            font-weight: 300; font-style: normal; font-display: swap;
+        }
+        @font-face {
+            font-family: 'Antartida';
+            src: url('/fonts/Antartida/Antartida-Medium.otf') format('opentype');
+            font-weight: 500; font-style: normal; font-display: swap;
+        }
+        @font-face {
+            font-family: 'Antartida';
+            src: url('/fonts/Antartida/Antartida-Bold.otf') format('opentype');
+            font-weight: 700; font-style: normal; font-display: swap;
+        }
+        @font-face {
+            font-family: 'Antartida';
+            src: url('/fonts/Antartida/Antartida-Black.otf') format('opentype');
+            font-weight: 900; font-style: normal; font-display: swap;
+        }
+
         *,
         *::before,
         *::after {
@@ -24,9 +55,11 @@
         }
         
         body {
-            font-family: var(--font-body);
+            font-family: 'Antartida', sans-serif;
             font-weight: 500;
-            color: var(--washi)
+            color: var(--washi);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale
         }
         
         .reg-page {
@@ -46,7 +79,7 @@
         .reg-bg__photo {
             position: absolute;
             inset: 0;
-            background: url('/images/brand/moodboard/warehouse-hero.png') center/cover no-repeat;
+            background: url('/images/brand/moodboard/warehouse-hero.webp') center/cover no-repeat;
             filter: brightness(0.55) saturate(0.80)
         }
         
@@ -79,7 +112,7 @@
             left: 48px;
             top: 50%;
             transform: translateY(-50%);
-            font-family: var(--font-body);
+            font-family: 'Antartida', sans-serif;
             font-size: var(--text-small);
             font-weight: 500;
             color: rgba(248, 250, 252, 0.80);
@@ -138,7 +171,7 @@
             align-items: center;
             justify-content: center;
             border: 2px solid rgba(248, 250, 252, 0.22);
-            font-family: var(--font-display);
+            font-family: 'Quantico', sans-serif;
             font-size: 13px;
             font-weight: 700;
             color: rgba(248, 250, 252, 0.35);
@@ -146,7 +179,7 @@
         }
         
         .reg-step__label {
-            font-family: var(--font-body);
+            font-family: 'Antartida', sans-serif;
             font-size: 10px;
             font-weight: 600;
             color: rgba(248, 250, 252, 0.32);
@@ -187,7 +220,7 @@
             display: none;
             padding: 9px 14px;
             margin-bottom: 10px;
-            font-family: var(--font-body);
+            font-family: 'Antartida', sans-serif;
             font-size: var(--text-xs);
             font-weight: 500;
             color: #fca5a5;
@@ -222,18 +255,19 @@
         }
         
         .reg-field__label {
-            font-family: var(--font-body);
-            font-size: var(--text-small);
-            font-weight: 600;
+            font-family: 'Quantico', sans-serif;
+            font-size: 0.72rem;
+            font-weight: 700;
             color: rgba(248, 250, 252, 0.82);
-            letter-spacing: 0.02em
+            letter-spacing: 0.07em;
+            text-transform: uppercase
         }
         
         .reg-field__input {
             width: 100%;
             height: 48px;
             padding: 0 14px;
-            font-family: var(--font-body);
+            font-family: 'Antartida', sans-serif;
             font-size: 0.95rem;
             font-weight: 500;
             color: var(--washi);
@@ -305,7 +339,7 @@
         }
         
         .reg-check span {
-            font-family: var(--font-body);
+            font-family: 'Antartida', sans-serif;
             font-size: var(--text-small);
             font-weight: 500;
             color: rgba(248, 250, 252, 0.62);
@@ -331,7 +365,7 @@
         .reg-btn {
             width: 100%;
             height: 54px;
-            font-family: var(--font-display);
+            font-family: 'Quantico', sans-serif;
             font-size: 0.95rem;
             font-weight: 900;
             text-transform: uppercase;
@@ -395,7 +429,7 @@
         .reg-login-link {
             text-align: center;
             margin-top: 8px;
-            font-family: var(--font-body);
+            font-family: 'Antartida', sans-serif;
             font-size: var(--text-small);
             color: rgba(248, 250, 252, 0.48)
         }
