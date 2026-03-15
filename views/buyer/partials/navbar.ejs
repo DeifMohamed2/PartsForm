@@ -22,10 +22,15 @@
 
         <!-- Navigation Links -->
         <div class="nav-links" id="navLinks">
-            <!-- Parts Search - Direct link to automotive -->
-            <a href="/buyer/search-automotive" class="nav-link" data-section="search">
-                <i data-lucide="search" class="nav-icon-search"></i>
-                <%= t('nav.search') %>
+            <!-- Mobile drawer header: close button only (no Menu title) -->
+            <div class="nav-links-drawer-header">
+                <button type="button" class="nav-links-drawer-close" id="navLinksDrawerClose" aria-label="<%= t('common.close') || 'Close menu' %>">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <!-- Parts Search - Direct link to automotive (no icon) -->
+            <a href="/buyer/search" class="nav-link" data-section="search">
+                <%= t('nav.searchParts') || 'Search Parts' %>
             </a>
 
             <a href="/buyer/about-us" class="nav-link" data-section="about">
@@ -290,8 +295,10 @@
     </div>
 </nav>
 
-<!-- Mobile Menu Backdrop -->
-<div class="mobile-backdrop" id="mobileBackdrop"></div>
+<!-- Mobile Menu: fixed overlay so it never disappears on scroll -->
+<div class="buyer-mobile-menu-overlay" id="buyerMobileMenuOverlay" aria-hidden="true">
+  <div class="mobile-backdrop" id="mobileBackdrop"></div>
+</div>
 
 <!-- Currency Converter Modal -->
 <div class="currency-converter-modal" id="currencyConverterModal">
@@ -311,9 +318,6 @@
                 <h2 class="currency-converter-title">
                     <%= t('nav.currencySettings.title') %>
                 </h2>
-                <p class="currency-converter-subtitle">
-                    <%= t('nav.currencySettings.subtitle') %>
-                </p>
             </div>
 
             <!-- Main Converter -->
@@ -398,5 +402,6 @@
     <% } %>
         <script src="/js/i18n.js"></script>
         <script src="/js/navbar.js"></script>
+        <script src="/js/cart-badge-updater.js"></script>
         <script src="/js/currency-converter.js"></script>
         <script src="/js/buyer-auth.js"></script>

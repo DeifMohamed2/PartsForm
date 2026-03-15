@@ -20,6 +20,10 @@ body:has(.claim-details-page) {
     flex-direction: column;
 }
 
+body:has(.claim-details-page) footer.footer {
+    flex-shrink: 0;
+}
+
 
 /* ====================================
    PAGE LAYOUT
@@ -705,44 +709,116 @@ body:has(.claim-details-page) {
 
 
 /* ====================================
-   RESPONSIVE DESIGN
+   RESPONSIVE DESIGN — Full (checkout, cart, claims pattern)
    ==================================== */
 
-@media (max-width: 1200px) {
-    .claim-details-grid {
-        grid-template-columns: 280px 1fr;
-        gap: 1rem;
+@media (max-width: 1400px) {
+    .claim-details-page .container,
+    .claim-details-content .container {
+        padding-left: 1.25rem;
+        padding-right: 1.25rem;
+        max-width: 100%;
+    }
+    .claim-details-container {
+        max-width: 100%;
     }
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1200px) {
+    .claim-details-grid {
+        grid-template-columns: 260px 1fr;
+        gap: 1rem;
+    }
+    .claim-details-page .container,
+    .claim-details-content .container {
+        padding-left: 1.25rem;
+        padding-right: 1.25rem;
+    }
+}
+
+@media (max-width: 992px) {
+    .claim-details-page .container,
+    .claim-details-content .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
     .claim-details-grid {
         grid-template-columns: 1fr;
         grid-template-rows: auto 1fr;
-        overflow-y: auto;
+        gap: 1rem;
     }
     .claim-info-card {
         height: auto;
-        max-height: 320px;
+        max-height: 280px;
     }
     .chat-container {
-        min-height: 400px;
+        min-height: 380px;
     }
 }
 
 @media (max-width: 768px) {
     .claim-details-page {
-        padding-top: 4rem;
+        padding-top: 56px;
+        padding-bottom: 0;
     }
+    .claim-details-content {
+        padding: 0.5rem 0 1rem;
+        padding-bottom: 80px;
+    }
+    .claim-details-page .container,
+    .claim-details-content .container {
+        padding-left: 16px;
+        padding-right: 16px;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+    body:has(.claim-details-page) .nav-container {
+        padding: 0.5rem 1rem !important;
+    }
+    /* Header */
     .claim-details-header-bar {
         padding: 1.25rem 0 1rem;
+        margin-top: 0.5rem;
+        margin-bottom: 0.75rem;
+    }
+    .claim-details-header-bar .container {
+        padding-left: 16px;
+        padding-right: 16px;
     }
     .claim-details-header-title {
-        font-size: 1.5rem;
+        font-size: 1.75rem;
     }
-    .claim-details-header-content {
-        flex-direction: column;
-        align-items: flex-start;
+    .claim-details-header-left {
+        min-width: 0;
+    }
+    .claim-details-header-bar::before {
+        width: 100px;
+    }
+    /* Back button */
+    .btn-back {
+        padding: 0.5rem 1rem;
+        font-size: 0.8125rem;
+    }
+    /* Info card */
+    .claim-info-card {
+        max-height: 240px;
+    }
+    .info-card-header,
+    .info-card-body {
+        padding: 0.75rem 0.875rem;
+    }
+    .info-card-title {
+        font-size: 0.8125rem;
+    }
+    .info-value {
+        font-size: 0.8125rem;
+    }
+    /* Chat */
+    .chat-header {
+        padding: 0.75rem 0.875rem;
+    }
+    .chat-title {
+        font-size: 0.9375rem;
     }
     .chat-messages {
         padding: 0.875rem;
@@ -752,29 +828,81 @@ body:has(.claim-details-page) {
     }
     .chat-form {
         flex-direction: column;
+        gap: 0.5rem;
     }
     .btn-send {
         width: 100%;
         justify-content: center;
     }
+    .chat-input-container {
+        padding: 0.75rem;
+    }
+    /* Footer */
+    body:has(.claim-details-page) footer.footer {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 0.75rem;
+        padding: 1rem 16px !important;
+    }
+    body:has(.claim-details-page) .footer-nav {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    body:has(.claim-details-page) .footer-copyright-bar {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+    }
 }
 
 @media (max-width: 480px) {
+    .claim-details-page .container,
+    .claim-details-content .container {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+    .claim-details-header-bar .container {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
     .claim-details-header-title {
         font-size: 1.5rem;
     }
-    
+    .claim-info-card {
+        max-height: 220px;
+    }
     .chat-messages {
         padding: 0.75rem;
     }
-    
     .message-content {
         max-width: 90%;
     }
-    
     .message-bubble {
         padding: 0.625rem 0.75rem;
         font-size: 0.8125rem;
+    }
+    body:has(.claim-details-page) footer.footer {
+        padding: 0.875rem 12px !important;
+    }
+}
+
+@media (max-width: 375px) {
+    .claim-details-page .container,
+    .claim-details-content .container {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+    .claim-details-header-bar .container {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+    .claim-details-header-title {
+        font-size: 1.375rem;
+    }
+    body:has(.claim-details-page) footer.footer {
+        padding: 0.75rem 10px !important;
     }
 }
 
@@ -911,7 +1039,7 @@ body:has(.claim-details-page) {
 .file-status i {
     width: 16px;
     height: 16px;
-    color: #22c55e;
+    color: var(--sei, #95AFC0);
 }
 .upload-spinner {
     width: 18px;

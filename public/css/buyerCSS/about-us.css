@@ -80,6 +80,25 @@ body:has(.aboutus-page) {
     flex-direction: column;
 }
 
+/* Desktop: no scrolling - content fits viewport */
+@media (min-width: 1025px) {
+    .aboutus-main-content {
+        overflow: hidden;
+    }
+    .aboutus-hero {
+        flex: 0 0 auto;
+    }
+    .large-banner-section {
+        flex: 1 1 0;
+        min-height: 260px;
+        height: auto;
+        margin: 12px auto;
+    }
+    .gateway-section {
+        flex: 0 0 auto;
+    }
+}
+
 
 /* Site footer - always visible at bottom, compact on this page */
 
@@ -183,8 +202,8 @@ body:has(.aboutus-page) .nav-link:hover {
 .aboutus-hero {
     position: relative;
     width: 100%;
-    padding: 50px 60px 20px 60px;
-    padding-top: 70px;
+    padding: 44px 60px 14px 60px;
+    padding-top: 56px;
     background: #F5F5F5;
     overflow: visible;
     flex-shrink: 0;
@@ -199,7 +218,7 @@ body:has(.aboutus-page) .nav-link:hover {
 
 .hero-tagline-aboutus {
     position: absolute;
-    top: 33px;
+    top: 20px;
     right: 60px;
     text-align: right;
     z-index: 10;
@@ -232,19 +251,18 @@ body:has(.aboutus-page) .nav-link:hover {
     width: 100%;
     max-width: 100%;
     padding: 0;
+    min-height: 140px;
     background: #95afc0;
     overflow: hidden;
 }
 
 
-/* ---- Stat enter/exit transitions ---- */
+/* ---- Stat transitions: numbers = counter (JS), labels = flip ---- */
 
-.stat-number.stat-exit,
 .stat-label.stat-exit {
     animation: statFadeOut 0.25s ease forwards;
 }
 
-.stat-number.stat-enter,
 .stat-label.stat-enter {
     animation: statFadeIn 0.45s ease forwards;
 }
@@ -302,23 +320,23 @@ body:has(.aboutus-page) .nav-link:hover {
 
 .stat-item {
     text-align: center;
-    padding: 32px 24px;
+    padding: 36px 28px;
     position: relative;
     z-index: 2;
     background: transparent;
 }
 
 .stat-number {
-    font-size: 52px;
+    font-size: 58px;
     font-weight: 700;
     color: #FFFFFF;
     line-height: 1;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
     font-family: 'Quantico', sans-serif;
 }
 
 .stat-label {
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 700;
     color: rgba(43, 43, 43, 0.88);
     line-height: 1.4;
@@ -336,12 +354,13 @@ body:has(.aboutus-page) .nav-link:hover {
     position: relative;
     width: calc(100% - 120px);
     max-width: 100%;
-    height: 300px;
+    min-width: 0;
+    height: 340px;
     display: grid;
     grid-template-columns: 1.3fr 1fr;
     gap: 0;
     overflow: hidden;
-    margin: 20px auto;
+    margin: 14px auto;
     flex-shrink: 0;
 }
 
@@ -456,7 +475,7 @@ body:has(.aboutus-page) .nav-link:hover {
     position: relative;
     width: 100%;
     background: #F5F5F5;
-    padding: 30px 60px 30px 60px;
+    padding: 20px 60px 24px 60px;
     flex-shrink: 0;
 }
 
@@ -465,7 +484,7 @@ body:has(.aboutus-page) .nav-link:hover {
     margin: 0 auto;
     display: grid;
     grid-template-columns: 1.5fr 0.8fr;
-    gap: 80px;
+    gap: 56px;
     align-items: flex-start;
 }
 
@@ -474,7 +493,7 @@ body:has(.aboutus-page) .nav-link:hover {
     font-weight: 700;
     color: var(--v2-kurogane);
     line-height: 1.25;
-    margin: 0 0 18px 0;
+    margin: 0 0 12px 0;
     text-transform: uppercase;
     font-family: 'Quantico', sans-serif;
 }
@@ -533,24 +552,153 @@ body:has(.aboutus-page) .nav-link:hover {
     font-family: 'Quantico', sans-serif;
 }
 
-.btn-become-partner:hover {
-    background: var(--v2-gold-hover);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(212, 175, 55, 0.3);
-}
-
-
 /* ====================================
-   RESPONSIVE DESIGN
+   RESPONSIVE DESIGN — Pro, all sizes (aligned with search page)
    ==================================== */
 
+/* Mobile: allow scroll like search page, fix viewport */
+@media (max-width: 768px) {
+    html:has(.aboutus-page) {
+        height: auto;
+        overflow: auto;
+    }
+
+    body:has(.aboutus-page) {
+        height: auto;
+        overflow-x: hidden;
+        overflow-y: auto;
+        min-height: 100vh;
+    }
+
+    .aboutus-page {
+        min-height: 100vh;
+        padding-top: 56px;
+    }
+
+    .aboutus-main-content {
+        overflow-y: visible;
+        overflow-x: hidden;
+        padding: 0 16px;
+        box-sizing: border-box;
+    }
+
+    body:has(.aboutus-page) .nav-container {
+        padding: 0.5rem 1rem !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .aboutus-main-content {
+        padding: 0 12px;
+    }
+}
+
+@media (max-width: 375px) {
+    .aboutus-main-content {
+        padding: 0 10px;
+    }
+}
+
+/* Footer — responsive on mobile (stacked, centered, no overflow) */
+@media (max-width: 768px) {
+    body:has(.aboutus-page) footer.footer {
+        padding: 12px 16px 16px !important;
+        padding-bottom: max(16px, env(safe-area-inset-bottom)) !important;
+    }
+
+    body:has(.aboutus-page) .footer-nav {
+        flex-direction: column !important;
+        height: auto !important;
+        gap: 10px !important;
+        margin-bottom: 10px !important;
+    }
+
+    body:has(.aboutus-page) .footer-logo-center {
+        position: static !important;
+        transform: none !important;
+        order: 0 !important;
+    }
+
+    body:has(.aboutus-page) .footer-logo-icon {
+        height: 28px !important;
+        width: 28px !important;
+    }
+
+    body:has(.aboutus-page) .footer-nav-left,
+    body:has(.aboutus-page) .footer-nav-right {
+        padding: 0 !important;
+        justify-content: center !important;
+        flex-wrap: wrap !important;
+        gap: 10px 16px !important;
+    }
+
+    body:has(.aboutus-page) .footer-nav-left {
+        order: -1 !important;
+    }
+
+    body:has(.aboutus-page) .footer-nav-right {
+        order: 1 !important;
+    }
+
+    body:has(.aboutus-page) .footer-nav-link {
+        font-size: 11px !important;
+    }
+
+    body:has(.aboutus-page) .footer-copyright-bar {
+        padding: 8px 0 0 !important;
+    }
+
+    body:has(.aboutus-page) .footer-copyright-text {
+        font-size: 10px !important;
+        line-height: 1.3 !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .aboutus-main-content {
+        padding: 0 12px;
+    }
+    body:has(.aboutus-page) footer.footer {
+        padding: 0.875rem 12px !important;
+        padding-bottom: max(0.875rem, env(safe-area-inset-bottom)) !important;
+    }
+
+    body:has(.aboutus-page) .footer-nav-link {
+        font-size: 10px !important;
+    }
+
+    body:has(.aboutus-page) .footer-copyright-text {
+        font-size: 9px !important;
+    }
+}
+
+/* Large Desktop */
+@media (max-width: 1400px) {
+    .aboutus-hero {
+        padding: 40px 50px 12px 50px;
+        padding-top: 54px;
+    }
+    .hero-tagline-aboutus {
+        top: 18px;
+        right: 50px;
+    }
+    .large-banner-section {
+        width: calc(100% - 100px);
+        margin: 14px auto;
+    }
+    .banner-content-side {
+        padding: 52px 56px;
+    }
+    .gateway-section {
+        padding: 16px 50px 18px 50px;
+    }
+}
 
 /* Tablet Landscape */
-
 @media (max-width: 1200px) {
     .aboutus-hero {
-        padding: 50px 40px 40px 40px;
-        padding-top: 70px;
+        padding: 36px 40px 10px 40px;
+        padding-top: 52px;
     }
     
     .hero-tagline-aboutus {
@@ -580,9 +728,9 @@ body:has(.aboutus-page) .nav-link:hover {
     }
     
     .large-banner-section {
-        height: 400px;
+        height: 360px;
         width: calc(100% - 80px);
-        margin: 32px auto;
+        margin: 16px auto;
     }
     
     .banner-content-side {
@@ -613,7 +761,7 @@ body:has(.aboutus-page) .nav-link:hover {
     }
     
     .gateway-section {
-        padding: 32px 40px 24px 40px;
+        padding: 18px 40px 20px 40px;
     }
     
     .gateway-title {
@@ -642,8 +790,8 @@ body:has(.aboutus-page) .nav-link:hover {
 /* Tablet Portrait */
 @media (max-width: 992px) {
     .aboutus-hero {
-        padding: 40px 30px 32px 30px;
-        padding-top: 60px;
+        padding: 32px 30px 10px 30px;
+        padding-top: 52px;
     }
     
     .hero-tagline-aboutus {
@@ -676,9 +824,9 @@ body:has(.aboutus-page) .nav-link:hover {
     }
     
     .large-banner-section {
-        height: 350px;
+        height: 320px;
         width: calc(100% - 60px);
-        margin: 24px auto;
+        margin: 14px auto;
         grid-template-columns: 1fr;
         grid-template-rows: 1fr 1fr;
     }
@@ -716,7 +864,7 @@ body:has(.aboutus-page) .nav-link:hover {
     }
     
     .gateway-section {
-        padding: 28px 30px 20px 30px;
+        padding: 16px 30px 18px 30px;
     }
     
     .gateway-title {
@@ -731,18 +879,6 @@ body:has(.aboutus-page) .nav-link:hover {
 
 /* Mobile */
 @media (max-width: 768px) {
-    body:has(.aboutus-page) footer.footer {
-        padding: 6px 24px 5px !important;
-    }
-    
-    body:has(.aboutus-page) .footer-nav-link {
-        font-size: 11px !important;
-    }
-    
-    .aboutus-page {
-        padding-top: 44px;
-    }
-    
     .aboutus-hero {
         padding: 32px 24px 24px 24px;
         padding-top: 52px;
@@ -790,45 +926,46 @@ body:has(.aboutus-page) .nav-link:hover {
     
     .large-banner-section {
         height: 300px;
-        width: calc(100% - 48px);
-        margin: 20px auto;
+        width: 100%;
+        max-width: 100%;
+        margin: 12px 0;
         grid-template-columns: 1fr;
         grid-template-rows: 1fr 1fr;
     }
     
     .banner-content-side {
-        padding: 32px 40px;
+        padding: 28px 24px;
     }
     
     .banner-title {
-        font-size: 32px;
+        font-size: 28px;
     }
     
     .banner-subtitle {
-        font-size: 13px;
+        font-size: 12px;
     }
     
     .badge-icon-img {
-        width: 50px;
-        height: 50px;
+        width: 48px;
+        height: 48px;
     }
     
     .banner-badge-top {
-        top: 20px;
-        right: 24px;
+        top: 16px;
+        right: 20px;
     }
     
     .banner-badge-bottom {
-        bottom: 20px;
-        left: 20px;
+        bottom: 16px;
+        left: 16px;
     }
     
     .gateway-section {
-        padding: 24px 24px 16px 24px;
+        padding: 14px 20px 18px;
     }
     
     .gateway-title {
-        font-size: 24px;
+        font-size: 22px;
         margin-bottom: 12px;
     }
     
@@ -838,7 +975,7 @@ body:has(.aboutus-page) .nav-link:hover {
     }
     
     .cta-box {
-        padding: 20px 20px;
+        padding: 20px 18px;
     }
     
     .cta-text {
@@ -848,7 +985,8 @@ body:has(.aboutus-page) .nav-link:hover {
     
     .btn-become-partner {
         padding: 12px 28px;
-        font-size: 12px;
+        font-size: 11px;
+        min-height: 44px;
     }
 }
 
@@ -896,39 +1034,127 @@ body:has(.aboutus-page) .nav-link:hover {
     }
     
     .large-banner-section {
-        height: 280px;
-        width: calc(100% - 32px);
-        margin: 16px auto;
+        height: 260px;
+        width: 100%;
+        max-width: 100%;
+        margin: 16px 0;
+        border-radius: 0;
     }
     
     .banner-content-side {
-        padding: 28px 32px;
+        padding: 24px 20px;
     }
     
     .banner-title {
-        font-size: 28px;
+        font-size: 24px;
     }
     
     .banner-subtitle {
-        font-size: 12px;
+        font-size: 11px;
     }
     
     .badge-icon-img {
-        width: 45px;
-        height: 45px;
+        width: 40px;
+        height: 40px;
     }
     
     .banner-badge-top {
-        top: 16px;
-        right: 20px;
+        top: 12px;
+        right: 16px;
     }
     
     .banner-badge-bottom {
-        bottom: 16px;
-        left: 16px;
+        bottom: 12px;
+        left: 12px;
+    }
+    
+    .gateway-section {
+        padding: 20px 16px 24px;
     }
     
     .gateway-title {
-        font-size: 22px;
+        font-size: 20px;
+        margin-bottom: 12px;
+    }
+    
+    .gateway-description {
+        font-size: 12px;
+    }
+    
+    .cta-box {
+        padding: 18px 16px;
+    }
+    
+    .cta-text {
+        font-size: 11px;
+        margin-bottom: 14px;
+    }
+    
+    .btn-become-partner {
+        padding: 12px 24px;
+        font-size: 11px;
+        min-height: 44px;
+    }
+}
+
+/* Extra small (375px) — match search page breakpoint */
+@media (max-width: 375px) {
+    .aboutus-page {
+        padding-top: 52px;
+    }
+    
+    .aboutus-hero {
+        padding: 20px 12px 16px;
+        padding-top: 44px;
+    }
+    
+    .hero-tagline-aboutus {
+        top: 8px;
+        right: 12px;
+    }
+    
+    .hero-tagline-aboutus .tagline-top {
+        font-size: 8px;
+    }
+    
+    .hero-tagline-aboutus .tagline-bottom {
+        font-size: 7px;
+    }
+    
+    .stat-item {
+        padding: 16px 12px;
+    }
+    
+    .stat-number {
+        font-size: 28px;
+    }
+    
+    .stat-label {
+        font-size: 10px;
+    }
+    
+    .large-banner-section {
+        height: 240px;
+    }
+    
+    .banner-title {
+        font-size: 20px;
+    }
+    
+    .banner-subtitle {
+        font-size: 10px;
+    }
+    
+    .badge-icon-img {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .gateway-title {
+        font-size: 18px;
+    }
+    
+    .gateway-description {
+        font-size: 11px;
     }
 }

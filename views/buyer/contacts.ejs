@@ -16,9 +16,6 @@
                             <h1 class="contacts-header-title">
                                 <%= t('contacts.title') %>
                             </h1>
-                            <p class="contacts-header-subtitle">
-                                <%= t('contacts.subtitle') %>
-                            </p>
                         </div>
                     </div>
                 </div>
@@ -80,15 +77,20 @@
                     </div>
                 </div>
             </div>
+        </div>
 
-            <%- include('partials/quick-search') %>
-                <%- include('partials/footer') %>
+        <%- include('partials/quick-search') %>
+        <%- include('partials/footer') %>
 
-                    <script src="/js/main.js"></script>
-                    <script src="/js/quick-search.js"></script>
-                    <script src="/js/cart.js"></script>
-                    <script src="/js/cart-badge-updater.js"></script>
-                    <script>
+        <script src="/js/main.js"></script>
+        <script src="/js/quick-search.js"></script>
+        <script src="/js/cart.js"></script>
+        <script>
                         lucide.createIcons();
                         window.addEventListener('load', () => lucide.createIcons());
-                    </script>
+
+            document.addEventListener('DOMContentLoaded', () => {
+                const navbar = document.getElementById('navbar');
+                if (navbar) navbar.classList.add('scrolled');
+            });
+        </script>

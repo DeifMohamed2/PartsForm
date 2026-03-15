@@ -20,6 +20,10 @@ body:has(.orders-page) {
     flex-direction: column;
 }
 
+body:has(.orders-page) footer.footer {
+    flex-shrink: 0;
+}
+
 
 /* ====================================
    PAGE LAYOUT
@@ -323,7 +327,6 @@ body:has(.orders-page) {
 .orders-table-container {
     background: white;
     border: 1px solid rgba(149, 175, 192, 0.25);
-    border-radius: 4px;
     overflow-x: auto;
     overflow-y: auto;
     width: 100%;
@@ -331,19 +334,29 @@ body:has(.orders-page) {
     max-height: 600px;
     box-shadow: 0 2px 16px rgba(149, 175, 192, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04);
     transition: box-shadow 0.3s ease;
+    -webkit-overflow-scrolling: touch;
 }
 
-@media (min-width: 1200px) {
-    .orders-table-container {
-        width: 100%;
-    }
-    .orders-table {
-        min-width: 1000px;
-    }
+.orders-table-container::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.orders-table-container::-webkit-scrollbar-track {
+    background: rgba(64, 84, 94, 0.05);
+}
+
+.orders-table-container::-webkit-scrollbar-thumb {
+    background: rgba(64, 84, 94, 0.3);
+}
+
+.orders-table-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(64, 84, 94, 0.5);
 }
 
 .orders-table {
     width: 100%;
+    min-width: 900px;
     border-collapse: collapse;
     background: white;
     table-layout: auto;
@@ -1007,88 +1020,266 @@ body:has(.orders-page) {
 
 
 /* ====================================
-   RESPONSIVE DESIGN
+   RESPONSIVE DESIGN — Full (checkout, cart, claims pattern)
    ==================================== */
 
-@media (max-width: 992px) {
+@media (max-width: 1400px) {
+    .orders-page .container,
+    .orders-content .container {
+        padding-left: 1.25rem;
+        padding-right: 1.25rem;
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 1200px) {
+    .orders-page .container,
+    .orders-content .container {
+        padding-left: 1.25rem;
+        padding-right: 1.25rem;
+    }
     .orders-table {
-        display: block;
+        min-width: 850px;
     }
-    .orders-table thead {
-        display: none;
+}
+
+@media (max-width: 992px) {
+    .orders-page .container,
+    .orders-content .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
     }
-    .orders-table tbody {
-        display: block;
+    .orders-table {
+        min-width: 800px;
     }
-    .orders-table tbody tr {
-        display: block;
-        margin-bottom: 1.5rem;
-        border: 2px solid #e2e8f0;
-        border-radius: 12px;
-        padding: 1rem;
-        background: white;
-    }
-    .orders-table td {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0.75rem 0;
-        border: none;
-    }
-    .orders-table td::before {
-        content: attr(data-label);
-        font-weight: 700;
-        color: var(--namari);
-        text-transform: uppercase;
-        font-size: 0.75rem;
-        margin-right: 1rem;
-    }
-    .order-actions {
+    .filters-row {
         flex-wrap: wrap;
-        width: 100%;
-    }
-    .order-actions .btn-action {
-        flex: 1;
-        justify-content: center;
-        min-width: 120px;
     }
 }
 
 @media (max-width: 768px) {
+    .orders-page {
+        padding-top: 56px;
+        padding-bottom: 0;
+    }
+    .orders-content {
+        padding: 0.5rem 0 1rem;
+        padding-bottom: 80px;
+        overflow-y: auto;
+    }
+    .orders-page .container,
+    .orders-content .container {
+        padding-left: 16px;
+        padding-right: 16px;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+    body:has(.orders-page) .nav-container {
+        padding: 0.5rem 1rem !important;
+    }
+    /* Header */
+    .orders-header-bar {
+        padding: 1.25rem 0 1rem;
+        margin-top: 0.5rem;
+        margin-bottom: 0.75rem;
+    }
+    .orders-header-bar .container {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+    .orders-header-title {
+        font-size: 1.75rem;
+    }
+    .orders-header-left {
+        min-width: 0;
+    }
+    .orders-header-bar::before {
+        width: 100px;
+    }
     .orders-header-content {
         flex-direction: column;
-        align-items: flex-start;
+        align-items: stretch;
+        gap: 1rem;
     }
     .orders-header-right {
         width: 100%;
     }
-    .orders-stats {
-        width: 100%;
+    .orders-stats-minimal {
+        flex-direction: row;
+        justify-content: space-around;
+        padding: 0.75rem 1rem;
+        gap: 0.75rem;
     }
-    .stat-card {
+    .stat-divider {
+        display: none;
+    }
+    .stat-minimal {
         flex: 1;
-        min-width: 140px;
+    }
+    .stat-value {
+        font-size: 1.35rem;
+    }
+    /* Filters */
+    .orders-filters {
+        padding: 1rem;
     }
     .filters-row {
         flex-direction: column;
+        gap: 0.75rem;
     }
     .filter-group {
         width: 100%;
     }
     .filter-actions {
+        flex-direction: column;
         width: 100%;
     }
     .btn-filter,
     .btn-reset {
-        flex: 1;
+        width: 100%;
+        justify-content: center;
     }
+    /* Table container - horizontal scroll like search page */
+    .orders-table-container {
+        margin-left: -16px;
+        margin-right: -16px;
+        padding-left: 16px;
+        padding-right: 16px;
+        overflow-x: auto;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        max-height: 500px;
+    }
+    .orders-table {
+        min-width: 750px;
+    }
+    /* Pagination */
     .orders-pagination {
         flex-wrap: wrap;
+        padding: 1rem;
+        gap: 0.75rem;
     }
     .pagination-info {
         width: 100%;
         text-align: center;
-        margin: 1rem 0;
+        margin: 0.5rem 0;
+    }
+    .pagination-btn {
+        flex: 1;
+        min-width: 100px;
+    }
+    /* Empty state */
+    .orders-empty {
+        padding: 2rem 1rem;
+    }
+    .orders-empty-title {
+        font-size: 1.35rem;
+    }
+    .orders-empty-text {
+        font-size: 0.9375rem;
+        max-width: 100%;
+    }
+    .orders-empty-actions {
+        flex-direction: column;
+    }
+    .btn-empty-action {
+        width: 100%;
+        justify-content: center;
+    }
+    /* Footer */
+    body:has(.orders-page) footer.footer {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 0.75rem;
+        padding: 1rem 16px !important;
+    }
+    body:has(.orders-page) .footer-nav {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    body:has(.orders-page) .footer-copyright-bar {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .orders-page .container,
+    .orders-content .container {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+    .orders-header-bar .container {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+    .orders-header-title {
+        font-size: 1.5rem;
+    }
+    .orders-stats-minimal {
+        padding: 0.625rem 0.75rem;
+    }
+    .stat-value {
+        font-size: 1.25rem;
+    }
+    .orders-filters {
+        padding: 0.875rem;
+    }
+    .orders-table-container {
+        margin-left: -12px;
+        margin-right: -12px;
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+    .orders-table {
+        min-width: 720px;
+    }
+    .orders-empty-icon {
+        width: 70px;
+        height: 70px;
+    }
+    .orders-empty-icon i {
+        width: 36px !important;
+        height: 36px !important;
+    }
+    .orders-empty-title {
+        font-size: 1.2rem;
+    }
+    body:has(.orders-page) footer.footer {
+        padding: 0.875rem 12px !important;
+    }
+}
+
+@media (max-width: 375px) {
+    .orders-page .container,
+    .orders-content .container {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+    .orders-header-bar .container {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+    .orders-header-title {
+        font-size: 1.375rem;
+    }
+    .stat-value {
+        font-size: 1.1rem;
+    }
+    .orders-table-container {
+        margin-left: -10px;
+        margin-right: -10px;
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+    .orders-table {
+        min-width: 680px;
+    }
+    body:has(.orders-page) footer.footer {
+        padding: 0.75rem 10px !important;
     }
 }
 

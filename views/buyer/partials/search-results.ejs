@@ -10,13 +10,11 @@
           <%= t('searchResults.header.found') %> <strong id="results-count">0</strong> <%= t('searchResults.header.partsMatching') %>
           <span class="results-page-info hidden" id="results-page-info"></span>
         </p>
-        <p class="results-subtitle">
-          <span id="selection-status"><%= t('searchResults.header.selectItems') %></span>
-          <span class="selected-badge hidden" id="selected-badge">
-            <i data-lucide="shopping-cart"></i>
-            <span id="selected-items-count">0</span> <%= t('searchResults.header.selected') %>
-          </span>
-        </p>
+        <span id="selection-status"><%= t('searchResults.header.selectItems') %></span>
+        <span class="selected-badge hidden" id="selected-badge">
+          <i data-lucide="shopping-cart"></i>
+          <span id="selected-items-count">0</span> <%= t('searchResults.header.selected') %>
+        </span>
         </div>
         <div class="results-header-right">
         <div class="selected-total-box">
@@ -178,7 +176,6 @@
     <!-- Referral Program Sidebar -->
     <div class="referral-sidebar" id="referral-sidebar">
       <h3 class="referral-sidebar-title"><%= t('searchResults.referral.title') || 'JOIN PARTSFORM REFERRAL PROGRAM' %></h3>
-      <p class="referral-sidebar-subtitle"><%= t('searchResults.referral.subtitle') || 'Special Price Reductions and More.' %></p>
       <a href="/partner/register" class="referral-sidebar-btn">
         <%= t('searchResults.referral.inviteBtn') || 'INVITE A PARTNER' %>
       </a>
@@ -201,7 +198,6 @@
             <%= t('searchResults.excel.title') %>
             <span class="ai-badge"><%= t('searchResults.excel.aiBadge') %></span>
           </h3>
-          <p class="ai-excel-subtitle"><%= t('searchResults.excel.subtitle') %></p>
         </div>
       </div>
       <button class="modal-close" id="excel-modal-close">
@@ -242,7 +238,6 @@
           </div>
           
           <h4 class="upload-title"><%= t('searchResults.excel.dragDrop') %></h4>
-          <p class="upload-subtitle"><%= t('searchResults.excel.aiExtract') %></p>
           
           <button class="btn-primary ai-browse-btn" id="browse-file-btn">
             <i data-lucide="folder-open"></i>

@@ -98,7 +98,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 28px 48px
+            padding: 16px 48px
         }
         
         .login-topbar__icon {
@@ -176,8 +176,8 @@
         
         .login-field__label {
             font-family: 'Quantico', sans-serif;
-            font-size: 0.82rem;
-            font-weight: 700;
+            font-size: 1.05rem;
+            font-weight: 900;
             color: rgba(248, 250, 252, 0.88);
             letter-spacing: 0.07em;
             text-transform: uppercase
@@ -188,7 +188,7 @@
             height: 54px;
             padding: 0 18px;
             font-family: 'Antartida', sans-serif;
-            font-size: 1.05rem;
+            font-size: 1.15rem;
             font-weight: 500;
             color: var(--washi);
             background: rgba(248, 250, 252, 0.06);
@@ -267,11 +267,9 @@
             top: calc(100% + 6px);
             right: 0;
             width: 220px;
-            background: rgba(12, 22, 46, 0.96);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.14);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
+            background: #2B2B2B;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
             z-index: 100;
             opacity: 0;
             visibility: hidden;
@@ -291,14 +289,14 @@
             gap: 12px;
             padding: 13px 16px;
             text-decoration: none;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
             transition: background 0.15s ease
         }
 
         .login-create-menu__item:last-child { border-bottom: none }
 
         .login-create-menu__item:hover {
-            background: rgba(212, 175, 55, 0.08)
+            background: rgba(255, 255, 255, 0.08)
         }
 
         .login-create-menu__icon {
@@ -307,30 +305,23 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: rgba(212, 175, 55, 0.10);
-            border: 1px solid rgba(212, 175, 55, 0.22);
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
             flex-shrink: 0;
-            color: var(--kintsugi)
+            color: rgba(248, 250, 252, 0.7)
         }
 
         .login-create-menu__icon svg { width: 16px; height: 16px }
 
-        .login-create-menu__text { display: flex; flex-direction: column; gap: 2px }
+        .login-create-menu__text { display: flex; align-items: center }
 
         .login-create-menu__title {
             font-family: 'Quantico', sans-serif;
-            font-size: 0.75rem;
-            font-weight: 700;
+            font-size: 0.95rem;
+            font-weight: 900;
             text-transform: uppercase;
             letter-spacing: 0.07em;
             color: var(--washi)
-        }
-
-        .login-create-menu__desc {
-            font-family: 'Antartida', sans-serif;
-            font-size: 0.7rem;
-            color: rgba(248, 250, 252, 0.42);
-            line-height: 1.3
         }
 
         /* Forgot Password Dropdown (mirrors Create Account dropdown) */
@@ -376,11 +367,9 @@
             bottom: calc(100% + 6px);
             right: 0;
             width: 230px;
-            background: rgba(12, 22, 46, 0.96);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.14);
-            box-shadow: 0 -10px 36px rgba(0, 0, 0, 0.55);
+            background: #2B2B2B;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 -10px 36px rgba(0, 0, 0, 0.6);
             z-index: 100;
             opacity: 0;
             visibility: hidden;
@@ -400,12 +389,12 @@
             gap: 12px;
             padding: 12px 16px;
             text-decoration: none;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
             transition: background 0.15s ease
         }
 
         .login-fp-menu__item:last-child { border-bottom: none }
-        .login-fp-menu__item:hover { background: rgba(212, 175, 55, 0.08) }
+        .login-fp-menu__item:hover { background: rgba(255, 255, 255, 0.08) }
 
         .login-fp-menu__icon {
             width: 30px;
@@ -413,30 +402,23 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: rgba(248, 250, 252, 0.06);
-            border: 1px solid rgba(248, 250, 252, 0.12);
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
             flex-shrink: 0;
-            color: rgba(248, 250, 252, 0.55)
+            color: rgba(248, 250, 252, 0.7)
         }
 
         .login-fp-menu__icon svg { width: 14px; height: 14px }
 
-        .login-fp-menu__text { display: flex; flex-direction: column; gap: 1px }
+        .login-fp-menu__text { display: flex; align-items: center }
 
         .login-fp-menu__title {
             font-family: 'Quantico', sans-serif;
-            font-size: 0.70rem;
-            font-weight: 700;
+            font-size: 0.95rem;
+            font-weight: 900;
             text-transform: uppercase;
             letter-spacing: 0.07em;
             color: var(--washi)
-        }
-
-        .login-fp-menu__desc {
-            font-family: 'Antartida', sans-serif;
-            font-size: 0.68rem;
-            color: rgba(248, 250, 252, 0.38);
-            line-height: 1.3
         }
 
         .login-btn {
@@ -453,16 +435,45 @@
             border: none;
             border-radius: 0;
             cursor: pointer;
-            transition: background 0.2s ease, transform 0.15s ease
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(64, 84, 94, 0.3)
         }
-        
+        .login-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.3);
+            transition: left 0.5s
+        }
+        .login-btn:hover::before {
+            left: 100%
+        }
         .login-btn:hover {
             background: var(--kintsugi-hover);
-            transform: translateY(-2px)
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(212, 175, 55, 0.4)
         }
-        
         .login-btn:active {
             background: var(--kintsugi-active);
+            transform: translateY(0)
+        }
+
+        /* Change-password submit — sei (only Verify Access stays gold) */
+        .chpw-card .login-btn {
+            background: var(--sei);
+            transition: background 0.2s ease, transform 0.15s ease
+        }
+        .chpw-card .login-btn:hover {
+            background: rgba(129, 155, 172, 1);
+            transform: translateY(-2px)
+        }
+        .chpw-card .login-btn:active {
+            background: rgba(110, 138, 156, 1);
             transform: translateY(0)
         }
         
@@ -473,9 +484,9 @@
             font-family: 'Antartida', sans-serif;
             font-size: 0.82rem;
             font-weight: 500;
-            color: #fca5a5;
-            background: rgba(220, 38, 38, 0.12);
-            border: 1px solid rgba(220, 38, 38, 0.25);
+            color: var(--kintsugi);
+            background: rgba(212, 175, 55, 0.12);
+            border: 1px solid rgba(212, 175, 55, 0.25);
             border-radius: 0
         }
         
@@ -563,8 +574,8 @@
 
         .chpw-title {
             font-family: 'Quantico', sans-serif;
-            font-size: 1.35rem;
-            font-weight: 700;
+            font-size: 1.6rem;
+            font-weight: 900;
             color: var(--washi);
             letter-spacing: 0.04em;
             text-transform: uppercase;
@@ -573,7 +584,7 @@
 
         .chpw-sub {
             font-family: 'Antartida', sans-serif;
-            font-size: 0.82rem;
+            font-size: 1rem;
             color: rgba(248, 250, 252, 0.55);
             line-height: 1.5;
             margin-bottom: 32px
@@ -604,8 +615,8 @@
 
         .chpw-reqs__title {
             font-family: 'Quantico', sans-serif;
-            font-size: 0.65rem;
-            font-weight: 700;
+            font-size: 0.95rem;
+            font-weight: 900;
             text-transform: uppercase;
             letter-spacing: 0.08em;
             color: rgba(248, 250, 252, 0.40);
@@ -617,7 +628,7 @@
             align-items: center;
             gap: 8px;
             font-family: 'Antartida', sans-serif;
-            font-size: 0.76rem;
+            font-size: 0.95rem;
             color: rgba(248, 250, 252, 0.40);
             margin-bottom: 4px;
             transition: color 0.2s
@@ -626,10 +637,10 @@
         .chpw-req svg { width: 12px; height: 12px; flex-shrink: 0 }
 
         .chpw-req.met {
-            color: #6ee7b7
+            color: var(--sei)
         }
 
-        .chpw-req.met svg { stroke: #6ee7b7 }
+        .chpw-req.met svg { stroke: var(--sei) }
 
         .chpw-input-wrap {
             position: relative;
@@ -656,6 +667,32 @@
         }
         .chpw-pw-toggle:hover { color: rgba(248, 250, 252, 0.85) }
         .chpw-pw-toggle svg { width: 18px; height: 18px; flex-shrink: 0 }
+
+        .login-pw-wrap {
+            position: relative;
+            display: flex;
+            align-items: center
+        }
+        .login-pw-wrap .login-field__input {
+            padding-right: 48px
+        }
+        .login-pw-toggle {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+            color: rgba(248, 250, 252, 0.5);
+            transition: color 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center
+        }
+        .login-pw-toggle:hover { color: rgba(248, 250, 252, 0.85) }
+        .login-pw-toggle svg { width: 18px; height: 18px; flex-shrink: 0 }
 
         @media(max-width:560px) {
             .chpw-card { width: calc(100% - 32px); max-width: 480px; padding: 44px 28px 40px }
@@ -699,7 +736,6 @@
                                 </div>
                                 <div class="login-create-menu__text">
                                     <span class="login-create-menu__title">As Business</span>
-                                    <span class="login-create-menu__desc">Buy parts &amp; manage orders</span>
                                 </div>
                             </a>
                             <a href="/become-partner" class="login-create-menu__item">
@@ -710,7 +746,6 @@
                                 </div>
                                 <div class="login-create-menu__text">
                                     <span class="login-create-menu__title">As Partner</span>
-                                    <span class="login-create-menu__desc">Refer &amp; earn commissions</span>
                                 </div>
                             </a>
                         </div>
@@ -718,7 +753,13 @@
                 </div>
                 <div class="login-field login-field--spaced">
                     <label class="login-field__label" for="password">Password</label>
-                    <input class="login-field__input" type="password" id="password" name="password" placeholder="Enter your password" autocomplete="current-password" required>
+                    <div class="login-pw-wrap">
+                        <input class="login-field__input" type="password" id="password" name="password" placeholder="Enter your password" autocomplete="current-password" required>
+                        <button type="button" class="login-pw-toggle" onclick="toggleLoginPassword('password')" title="Show password" aria-label="Toggle password visibility">
+                            <svg class="login-eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            <svg class="login-eye-off-icon" style="display:none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                        </button>
+                    </div>
                     <div class="login-fp-wrap" id="fpDropWrap">
                         <button type="button" class="login-fp-toggle" id="fpDropToggle">
                             Forgot Password
@@ -735,7 +776,6 @@
                                 </div>
                                 <div class="login-fp-menu__text">
                                     <span class="login-fp-menu__title">As Business</span>
-                                    <span class="login-fp-menu__desc">Buyer</span>
                                 </div>
                             </a>
                             <a href="/forgot-password/partner" class="login-fp-menu__item">
@@ -747,7 +787,6 @@
                                 </div>
                                 <div class="login-fp-menu__text">
                                     <span class="login-fp-menu__title">As Partner</span>
-                                    <span class="login-fp-menu__desc">Referral partner account</span>
                                 </div>
                             </a>
                             <a href="/forgot-password/supplier" class="login-fp-menu__item">
@@ -758,7 +797,6 @@
                                 </div>
                                 <div class="login-fp-menu__text">
                                     <span class="login-fp-menu__title">As Supplier</span>
-                                    <span class="login-fp-menu__desc">Supplier portal account</span>
                                 </div>
                             </a>
                         </div>
@@ -956,6 +994,22 @@
             var wrap = input.closest('.chpw-input-wrap');
             var eyeIcon = wrap.querySelector('.chpw-eye-icon');
             var eyeOffIcon = wrap.querySelector('.chpw-eye-off-icon');
+            if (input.type === 'password') {
+                input.type = 'text';
+                eyeIcon.style.display = 'none';
+                eyeOffIcon.style.display = 'block';
+            } else {
+                input.type = 'password';
+                eyeIcon.style.display = 'block';
+                eyeOffIcon.style.display = 'none';
+            }
+        }
+
+        function toggleLoginPassword(inputId) {
+            var input = document.getElementById(inputId);
+            var wrap = input.closest('.login-pw-wrap');
+            var eyeIcon = wrap.querySelector('.login-eye-icon');
+            var eyeOffIcon = wrap.querySelector('.login-eye-off-icon');
             if (input.type === 'password') {
                 input.type = 'text';
                 eyeIcon.style.display = 'none';

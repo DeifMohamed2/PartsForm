@@ -1,23 +1,40 @@
 /* ====================================
    CONTACT PAGE - HEADER BAR DESIGN
    PARTSFORM Buyer Portal
+   Matches structure: claims, orders (viewport lock, fixed hero, scroll content)
    ==================================== */
 
 
 /* ====================================
-   PAGE LAYOUT - VIEWPORT LOCK
+   STICKY FOOTER - Natural flow, no white space
+   Footer sticks to viewport bottom when content short
    ==================================== */
 
-
-/* Contacts page is scrollable - no viewport lock */
-
-.contacts-page {
+body:has(.contacts-page) {
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
+    margin: 0;
+}
+
+body:has(.contacts-page) .contacts-page {
+    flex: 1 0 auto;
+}
+
+body:has(.contacts-page) footer.footer {
+    flex-shrink: 0;
+}
+
+/* ====================================
+   PAGE LAYOUT — Natural flow, no flex expansion
+   ==================================== */
+
+.contacts-page {
+    display: block;
     background: var(--washi);
     padding-top: 44px;
+    padding-bottom: 0;
     position: relative;
-    min-height: 100vh;
 }
 
 
@@ -45,7 +62,6 @@
 .contacts-page .nav-bar {
     overflow: visible !important;
 }
-
 
 /* Ensure navbar links are visible */
 
@@ -75,7 +91,8 @@
 
 .contacts-page .container {
     max-width: 1600px;
-    padding: 0 1.5rem;
+    padding-left: 0;
+    padding-right: 0;
 }
 
 
@@ -152,13 +169,11 @@
 
 
 /* ====================================
-   CONTACTS CONTENT
+   CONTACTS CONTENT — Natural flow, no expansion
    ==================================== */
 
 .contacts-content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
+    display: block;
 }
 
 .contacts-content .container {
@@ -337,96 +352,213 @@
 }
 
 /* ====================================
-   RESPONSIVE DESIGN
+   RESPONSIVE DESIGN — Full (orders, checkout, claims pattern)
    ==================================== */
-@media (max-width: 1024px) {
+@media (max-width: 1400px) {
+    .contacts-page .container {
+        padding-left: 1.25rem;
+        padding-right: 1.25rem;
+        max-width: 100%;
+    }
+    .contacts-header-bar .container {
+        padding-left: 1.25rem;
+        padding-right: 1.25rem;
+    }
+}
+@media (max-width: 1200px) {
+    .contacts-page .container {
+        padding-left: 1.25rem;
+        padding-right: 1.25rem;
+    }
+    .contacts-header-bar .container {
+        padding-left: 1.25rem;
+        padding-right: 1.25rem;
+    }
+}
+@media (max-width: 992px) {
     .contacts-two-column {
         grid-template-columns: 1fr;
+    }
+    .contacts-page .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    .contacts-header-bar .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    .contacts-section {
+        margin-top: 1rem;
+    }
+    .contacts-two-column {
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+    }
+    .company-info-card-main {
+        padding: 1.75rem;
+    }
+    .social-media-card {
+        padding: 1.75rem;
+        margin-top: 1.5rem;
     }
 }
 @media (max-width: 768px) {
     .contacts-page {
-        padding-top: 0;
+        padding-top: 56px;
+        padding-bottom: 80px;
     }
-    
-    .contacts-hero {
-        padding: 8rem 0 4rem;
+    .contacts-page .container {
+        padding-left: 16px;
+        padding-right: 16px;
+        max-width: 100%;
+        box-sizing: border-box;
     }
-    
-    .contacts-hero-title {
-        font-size: 2.5rem;
+    .contacts-header-bar .container {
+        padding-left: 16px;
+        padding-right: 16px;
     }
-    
-    .contacts-hero-subtitle {
-        font-size: 1.1rem;
+    body:has(.contacts-page) .nav-container {
+        padding: 0.5rem 1rem !important;
     }
-    
-    .contacts-hero-description {
-        font-size: 0.95rem;
+    .contacts-header-bar {
+        padding: 1.25rem 0 1rem;
+        margin-top: 0.5rem;
+        margin-bottom: 0.75rem;
     }
-    
+    .contacts-header-title {
+        font-size: 1.75rem;
+    }
+    .contacts-header-left {
+        min-width: 0;
+    }
+    .contacts-header-bar::before {
+        width: 100px;
+    }
+    .contacts-two-column {
+        gap: 1.25rem;
+        margin-top: 1.25rem;
+    }
     .company-info-card-main {
         padding: 1.5rem;
     }
-    
-    .maps-card-main {
-        height: 350px;
+    .company-name {
+        font-size: 1.35rem;
     }
-    
+    .maps-card-main {
+        height: 320px;
+    }
     .social-media-card {
         padding: 1.5rem;
+        margin-top: 1.25rem;
     }
-    
     .social-media-link {
         width: 44px;
         height: 44px;
     }
-    
-    .social-media-link i {
+    .social-media-link i,
+    .social-media-link svg {
         width: 20px;
         height: 20px;
     }
+    body:has(.contacts-page) footer.footer {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 0.75rem;
+        padding: 1rem 16px !important;
+    }
+    body:has(.contacts-page) .footer-nav {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    body:has(.contacts-page) .footer-copyright-bar {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+    }
 }
 @media (max-width: 480px) {
-    .contacts-hero {
-        padding: 7rem 0 3rem;
+    .contacts-page .container {
+        padding-left: 12px;
+        padding-right: 12px;
     }
-    
-    .contacts-hero-title {
-        font-size: 2rem;
+    .contacts-header-bar .container {
+        padding-left: 12px;
+        padding-right: 12px;
     }
-    
-    .contacts-hero-subtitle {
-        font-size: 1rem;
+    .contacts-header-title {
+        font-size: 1.5rem;
     }
-    
-    .contacts-hero-description {
-        font-size: 0.9rem;
+    .contacts-header-bar {
+        padding: 1rem 0 0.875rem;
     }
-    
     .company-info-card-main {
         padding: 1.25rem;
     }
-    
     .company-name {
         font-size: 1.25rem;
     }
-    
-    .maps-card-main {
-        height: 300px;
+    .detail-label {
+        font-size: 0.85rem;
     }
-    
+    .detail-value {
+        font-size: 0.9rem;
+    }
+    .maps-card-main {
+        height: 280px;
+    }
     .social-media-card {
         padding: 1.25rem;
     }
-    
     .social-media-link {
         width: 40px;
         height: 40px;
     }
-    
-    .social-media-link i {
+    .social-media-link i,
+    .social-media-link svg {
         width: 18px;
         height: 18px;
+    }
+    body:has(.contacts-page) footer.footer {
+        padding: 0.875rem 12px !important;
+    }
+}
+@media (max-width: 375px) {
+    .contacts-page .container {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+    .contacts-header-bar .container {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+    .contacts-header-title {
+        font-size: 1.375rem;
+    }
+    .company-info-card-main {
+        padding: 1rem;
+    }
+    .company-name {
+        font-size: 1.125rem;
+    }
+    .maps-card-main {
+        height: 250px;
+    }
+    .social-media-card {
+        padding: 1rem;
+        margin-top: 1rem;
+    }
+    .social-media-link {
+        width: 38px;
+        height: 38px;
+    }
+    .social-media-link i,
+    .social-media-link svg {
+        width: 16px;
+        height: 16px;
+    }
+    body:has(.contacts-page) footer.footer {
+        padding: 0.75rem 10px !important;
     }
 }

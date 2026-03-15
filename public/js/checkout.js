@@ -109,8 +109,8 @@
     toast.style.cssText = `
       position: fixed; top: 20px; right: 20px; z-index: 10000;
       padding: 16px 20px; border-radius: 8px; display: flex; align-items: center; gap: 12px;
-      background: ${type === 'error' ? '#fee2e2' : type === 'success' ? '#dcfce7' : '#fef3c7'};
-      color: ${type === 'error' ? '#dc2626' : type === 'success' ? '#16a34a' : '#ca8a04'};
+      background: ${type === 'error' ? 'rgba(212, 175, 55, 0.15)' : type === 'success' ? 'rgba(149, 175, 192, 0.15)' : '#fef3c7'};
+      color: ${type === 'error' ? '#D4AF37' : type === 'success' ? '#95AFC0' : '#ca8a04'};
       box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-weight: 500;
     `;
     toast.querySelector('button').style.cssText = 'background:none;border:none;font-size:20px;cursor:pointer;color:inherit;';
@@ -242,7 +242,7 @@
       itemsContainer.innerHTML = `
         <div class="empty-cart-message" style="text-align:center;padding:20px;">
           <p>Your cart is empty</p>
-          <a href="/buyer/search-automotive" class="btn-continue-shopping-small">Browse Parts</a>
+          <a href="/buyer/search" class="btn-continue-shopping-small">Browse Parts</a>
         </div>
       `;
       const btnNext = document.getElementById('btn-to-step-2');

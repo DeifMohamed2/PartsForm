@@ -23,7 +23,7 @@ try {
  */
 const getBuyerMain = async(req, res) => {
     try {
-        res.render('buyer/search-v2', {
+        res.render('buyer/search', {
             title: 'Buyer Portal - Main | PARTSFORM',
             industry: 'automotive',
             industryName: 'Automotive',
@@ -40,34 +40,18 @@ const getBuyerMain = async(req, res) => {
 /**
  * Get Automotive industry-specific search page
  */
-const getAutomotiveSearchPage = async(req, res) => {
-    try {
-        res.render('buyer/search-automotive', {
-            title: 'Automotive Parts Search | PARTSFORM',
-            industry: 'automotive',
-            industryName: 'Automotive',
-        });
-    } catch (error) {
-        console.error('Error in getAutomotiveSearchPage:', error);
-        res.status(500).render('error', {
-            title: 'Error | PARTSFORM',
-            error: 'Failed to load automotive search page',
-        });
-    }
-};
-
 /**
- * Get Search V2 page - New design
+ * Get Search page (unified search view)
  */
-const getSearchV2Page = async(req, res) => {
+const getSearchPage = async(req, res) => {
     try {
-        res.render('buyer/search-v2', {
+        res.render('buyer/search', {
             title: 'Find Automotive Parts | PARTSFORM',
             industry: 'automotive',
             industryName: 'Automotive',
         });
     } catch (error) {
-        console.error('Error in getSearchV2Page:', error);
+        console.error('Error in getSearchPage:', error);
         res.status(500).render('error', {
             title: 'Error | PARTSFORM',
             error: 'Failed to load search page',
@@ -2249,8 +2233,7 @@ const setDefaultAddress = async(req, res) => {
 // Export controller functions
 module.exports = {
     getBuyerMain,
-    getAutomotiveSearchPage,
-    getSearchV2Page,
+    getSearchPage,
     getAffiliatePage,
     getAboutUsPage,
     getOrdersPage,

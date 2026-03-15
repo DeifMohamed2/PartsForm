@@ -16,9 +16,6 @@
                             <h1 class="profile-header-title">
                                 <%= t('profile.title') %>
                             </h1>
-                            <p class="profile-header-subtitle">
-                                <%= t('profile.subtitle') %>
-                            </p>
                         </div>
                     </div>
                 </div>
@@ -416,7 +413,6 @@
                     <script src="/js/main.js"></script>
                     <script src="/js/quick-search.js"></script>
                     <script src="/js/cart.js"></script>
-                    <script src="/js/cart-badge-updater.js"></script>
                     <script>
                         lucide.createIcons();
                         window.addEventListener('load', () => lucide.createIcons());
@@ -554,7 +550,7 @@
                                 } catch (error) {
                                     console.error('Upload error:', error);
                                     progressText.textContent = 'Upload failed. Please try again.';
-                                    progressFill.style.background = '#ef4444';
+                                    progressFill.style.background = '#D4AF37';
                                     avatarUploadBtn.disabled = false;
                                     uploadProgress.classList.add('hidden');
                                 }
@@ -716,15 +712,16 @@
                                         if (!container) return;
 
                                         const html = addresses.map(addr => `
-          <div class="address-item ${addr.isDefault ? 'default' : ''}">
-            <div class="address-item-header">
-              <span class="address-label">
-                <i data-lucide="tag"></i>
-                ${addr.label}
-              </span>
+          <div class="address-item address-card ${addr.isDefault ? 'default' : ''}">
+            <div class="address-item-row" role="button" tabindex="0" aria-label="Show full address">
+              <span class="address-name-only">${addr.label || addr.fullName}</span>
               ${addr.isDefault ? '<span class="default-badge">Default</span>' : ''}
+              <button type="button" class="address-toggle-btn" title="View full address" aria-label="View full address">
+                <i data-lucide="eye" class="icon-eye"></i>
+                <i data-lucide="eye-off" class="icon-eye-off"></i>
+              </button>
             </div>
-            <div class="address-item-body">
+            <div class="address-item-details">
               <p class="address-name">${addr.fullName}</p>
               <p class="address-line">${addr.street}</p>
               <p class="address-line">${addr.city}, ${addr.state} ${addr.postalCode || ''}</p>
@@ -734,9 +731,22 @@
           </div>
         `).join('');
 
-        container.innerHTML = html;
-        lucide.createIcons();
-      }
+                                        container.innerHTML = html;
+                                        if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+
+                                        container.querySelectorAll('.address-item-row, .address-toggle-btn').forEach(el => {
+                                            el.addEventListener('click', function(e) {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                const item = this.closest('.address-item');
+                                                if (!item) return;
+                                                const details = item.querySelector('.address-item-details');
+                                                if (!details) return;
+                                                item.classList.toggle('is-expanded');
+                                                if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+                                            });
+                                        });
+                                    }
 
       // Load addresses on page load
       loadAddresses();

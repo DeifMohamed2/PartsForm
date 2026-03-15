@@ -16,9 +16,6 @@
                             <h1 class="claims-header-title">
                                 <%= t('tickets.title') %>
                             </h1>
-                            <p class="claims-header-subtitle">
-                                <%= t('tickets.subtitle') %>
-                            </p>
                         </div>
                         <div class="claims-header-right">
                             <div class="claims-stats-minimal">
@@ -77,15 +74,29 @@
                         </div>
                     </div>
 
-                    <!-- Claims List Container (Scrollable) -->
-                    <div class="claims-list-container">
-                        <!-- Claims List -->
-                        <div class="claims-list" id="claims-list">
-                            <!-- Claims will be populated by JavaScript -->
-                        </div>
+                    <!-- Claims Table Container (horizontal scroll like orders) -->
+                    <div class="claims-table-container hidden" id="claims-table-container">
+                        <table class="claims-table" id="claims-table">
+                            <thead>
+                                <tr>
+                                    <th><%= t('tickets.ticketNumber') %></th>
+                                    <th><%= t('tickets.subject') %></th>
+                                    <th>Order</th>
+                                    <th><%= t('tickets.category') %></th>
+                                    <th><%= t('tickets.status') %></th>
+                                    <th>Messages</th>
+                                    <th><%= t('tickets.updated') %></th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="claims-tbody">
+                                <!-- Claims will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
 
-                        <!-- Empty State -->
-                        <div class="claims-empty" id="claims-empty">
+                    <!-- Empty State -->
+                    <div class="claims-empty" id="claims-empty">
                             <div class="claims-empty-icon">
                                 <i data-lucide="inbox"></i>
                             </div>
@@ -105,7 +116,6 @@
                                     <span>Back to Main</span>
                                 </a>
                             </div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -117,7 +127,6 @@
                 <script src="/js/main.js"></script>
                 <script src="/js/quick-search.js"></script>
                 <script src="/js/cart.js"></script>
-                <script src="/js/cart-badge-updater.js"></script>
                 <script src="/js/claims.js"></script>
                 <script>
                     lucide.createIcons();

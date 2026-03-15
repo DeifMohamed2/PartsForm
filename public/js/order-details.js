@@ -435,7 +435,7 @@
       const noteTypes = {
         update: { icon: 'refresh-cw', label: 'Update', color: '#3b82f6' },
         delay: { icon: 'clock', label: 'Delay Notice', color: '#f59e0b' },
-        issue: { icon: 'alert-triangle', label: 'Issue', color: '#ef4444' },
+        issue: { icon: 'alert-triangle', label: 'Issue', color: '#D4AF37' },
         info: { icon: 'info', label: 'Information', color: '#6366f1' },
         action: { icon: 'alert-circle', label: 'Action Required', color: '#8b5cf6' },
         resolution: { icon: 'check-square', label: 'Resolved', color: '#10b981' },
@@ -449,7 +449,7 @@
         shipped: { icon: 'truck', label: 'Shipped', color: '#3b82f6' },
         delivered: { icon: 'check-circle', label: 'Delivered', color: '#10b981' },
         completed: { icon: 'check-circle', label: 'Completed', color: '#10b981' },
-        cancelled: { icon: 'x-circle', label: 'Cancelled', color: '#ef4444' }
+        cancelled: { icon: 'x-circle', label: 'Cancelled', color: '#D4AF37' }
       };
       
       if (isNote) {
@@ -564,8 +564,8 @@
         <div class="timeline-item cancelled">
           <div class="timeline-item-content" style="border-color: #fca5a5; background: #fef2f2;">
             <div class="timeline-item-header">
-              <div class="timeline-item-title" style="color: #dc2626;">
-                <i data-lucide="x-circle" style="color: #dc2626;"></i>
+              <div class="timeline-item-title" style="color: #D4AF37;">
+                <i data-lucide="x-circle" style="color: #D4AF37;"></i>
                 Order Cancelled
               </div>
             </div>

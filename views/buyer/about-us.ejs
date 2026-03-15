@@ -15,11 +15,7 @@
                     <!-- Hero Background Overlay -->
                     <div class="hero-bg-overlay"></div>
 
-                    <!-- Tagline Top Right -->
-                    <div class="hero-tagline-aboutus">
-                        <span class="tagline-top">Engineered for Business.</span>
-                        <span class="tagline-bottom">Powered by Intelligence.</span>
-                    </div>
+              
 
                 <!-- Stats Ticker Banner -->
                 <div class="stats-banner">
@@ -75,9 +71,51 @@
                     ];
 
                     var DURATION = 5000;
+                    var COUNTER_MS = 700;
                     var current = 0;
                     var startTime = null;
                     var rafId = null;
+
+                    function parseNum(str) {
+                        var m = str.match(/^([<$]?)([\d,.]+)([MBK%+]?|h)$/);
+                        if (!m && str === '24/7') return { start: 0, end: 24, prefix: '', suffix: '/7', decimals: 0 };
+                        if (!m) return null;
+                        var prefix = m[1] || '';
+                        var numStr = m[2].replace(/,/g, '');
+                        var val = parseFloat(numStr);
+                        if (isNaN(val)) return null;
+                        var suffix = m[3] || '';
+                        if (suffix === 'M') val *= 1000000;
+                        else if (suffix === 'B') val *= 1000000000;
+                        return { start: 0, end: val, prefix: prefix, suffix: suffix, decimals: (numStr.split('.')[1] || '').length };
+                    }
+
+                    function formatCounter(v, opts) {
+                        var s = opts.suffix, p = opts.prefix, dec = opts.decimals;
+                        if (s === 'M') return p + (dec ? (v/1e6).toFixed(dec) : Math.round(v/1e6)) + 'M+';
+                        if (s === 'B') return p + (dec ? (v/1e9).toFixed(dec) : Math.round(v/1e9)) + 'B';
+                        if (s === 'h') return p + Math.round(v) + 'h';
+                        if (s === '/7') return Math.round(v) + '/7';
+                        if (s === '%') return (dec ? v.toFixed(dec) : Math.round(v)) + '%';
+                        if (s === '+') return p + (dec ? v.toFixed(dec) : Math.round(v)) + '+';
+                        return p + (dec ? v.toFixed(dec) : Math.round(v));
+                    }
+
+                    function animateCounter(el, targetStr) {
+                        var parsed = parseNum(targetStr);
+                        if (!parsed) { el.textContent = targetStr; return; }
+                        var endVal = parsed.end;
+                        var startMs = performance.now();
+                        function step(now) {
+                            var t = Math.min((now - startMs) / COUNTER_MS, 1);
+                            t = 1 - Math.pow(1 - t, 2.5);
+                            var v = endVal * t;
+                            el.textContent = formatCounter(v, parsed);
+                            if (t < 1) requestAnimationFrame(step);
+                            else el.textContent = targetStr;
+                        }
+                        requestAnimationFrame(step);
+                    }
 
                     function setSlide(idx, animate) {
                         var s = slides[idx];
@@ -86,21 +124,15 @@
                             var lblEl = document.getElementById('stat-lbl-' + i);
                             if (!numEl || !lblEl) continue;
                             if (animate) {
-                                numEl.classList.add('stat-exit');
                                 lblEl.classList.add('stat-exit');
                                 (function (n, l, si, ii) {
                                     setTimeout(function () {
-                                        n.textContent = si[ii].num;
                                         l.innerHTML = si[ii].lbl.replace('\n', '<br>');
-                                        n.classList.remove('stat-exit');
                                         l.classList.remove('stat-exit');
-                                        n.classList.add('stat-enter');
                                         l.classList.add('stat-enter');
-                                        setTimeout(function () {
-                                            n.classList.remove('stat-enter');
-                                            l.classList.remove('stat-enter');
-                                        }, 500);
-                                    }, 260);
+                                        setTimeout(function () { l.classList.remove('stat-enter'); }, 400);
+                                        animateCounter(n, si[ii].num);
+                                    }, 220);
                                 })(numEl, lblEl, s, i);
                             } else {
                                 numEl.textContent = s[i].num;
@@ -137,7 +169,6 @@
                     </div>
                     <div class="banner-content-side">
                         <h2 class="banner-title">OVER 1.2 MILLION<br>ACTIVE SKUS</h2>
-                        <p class="banner-subtitle">With <strong>Real-Time Stock</strong> Verification.</p>
                     </div>
                 </section>
 

@@ -1011,15 +1011,15 @@
     
     if (successRateValue) {
       successRateValue.textContent = `${successRate}%`;
-      successRateValue.style.color = successRate >= 70 ? '#22c55e' : successRate >= 40 ? '#f59e0b' : '#ef4444';
+      successRateValue.style.color = successRate >= 70 ? '#95AFC0' : successRate >= 40 ? '#f59e0b' : '#D4AF37';
     }
     if (successRateFill) {
       successRateFill.style.width = `${successRate}%`;
       successRateFill.style.background = successRate >= 70 
-        ? 'linear-gradient(90deg, #22c55e 0%, #16a34a 100%)' 
+        ? 'linear-gradient(90deg, #95AFC0 0%, #7a9aab 100%)' 
         : successRate >= 40 
           ? 'linear-gradient(90deg, #f59e0b 0%, #d97706 100%)'
-          : 'linear-gradient(90deg, #ef4444 0%, #dc2626 100%)';
+          : 'linear-gradient(90deg, #D4AF37 0%, #BF9D2F 100%)';
     }
 
     // Display not found parts

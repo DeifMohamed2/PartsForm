@@ -8,16 +8,15 @@
      CHECKOUT PAGE - PROFESSIONAL DESIGN
      ==================================== -->
     <div class="checkout-page">
-      <!-- Compact Header Bar -->
+      <!-- Header Bar (matches orders, cart, etc.) -->
       <div class="checkout-header-bar">
         <div class="container">
-          <div class="header-bar-content">
-            <div class="header-left">
-              <h1 class="header-title"><%= t('checkout.title') %></h1>
-              <p class="header-subtitle" id="checkout-subtitle"><%= t('checkout.subtitle') %></p>
+          <div class="checkout-header-content">
+            <div class="checkout-header-left">
+              <h1 class="checkout-header-title"><%= t('checkout.title') %></h1>
             </div>
-            <div class="header-right">
-              <div class="checkout-badge" id="secure-badge">
+            <div class="checkout-header-right">
+              <div class="checkout-secure-badge" id="secure-badge">
                 <i data-lucide="shield-check"></i>
                 <span><%= t('checkout.secureBadge') %></span>
               </div>
@@ -63,7 +62,6 @@
                   <h2 class="section-title">
                     <span>Shipping Address</span>
                   </h2>
-                  <p class="section-subtitle">Select where you'd like your order delivered</p>
                 </div>
 
                 <!-- Skeleton Loading State -->
@@ -131,7 +129,6 @@
                   <h2 class="section-title">
                     <span><%= t('checkout.steps.paymentMethod.title') %></span>
                   </h2>
-                  <p class="section-subtitle"><%= t('checkout.steps.paymentMethod.desc') %></p>
                 </div>
 
                 <div class="payment-methods payment-methods-single">
@@ -176,7 +173,6 @@
                   <h2 class="section-title">
                     <span><%= t('checkout.step3.title') %></span>
                   </h2>
-                  <p class="section-subtitle"><%= t('checkout.step3.subtitle') %></p>
                 </div>
 
                 <div class="confirmation-details">
@@ -384,7 +380,7 @@
             <i data-lucide="package"></i>
             <span>View My Orders</span>
           </a>
-          <a href="/buyer/search-automotive" class="btn-continue-shopping">
+          <a href="/buyer/search" class="btn-continue-shopping">
             <span>Continue Shopping</span>
             <i data-lucide="arrow-right"></i>
           </a>
@@ -399,7 +395,6 @@
         <script src="/js/main.js"></script>
         <script src="/js/quick-search.js"></script>
         <script src="/js/cart.js"></script>
-        <script src="/js/cart-badge-updater.js"></script>
         <script src="/js/checkout.js?v=<%= Date.now() %>"></script>
         <script>
           lucide.createIcons();

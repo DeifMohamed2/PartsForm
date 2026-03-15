@@ -187,6 +187,7 @@
   --kintsugi-active: #A8892A;
   --kintsugi-light: rgba(212, 175, 55, 0.08);
   --kintsugi-border: rgba(212, 175, 55, 0.3);
+  --kintsugi-foreground: var(--kurogane);
 
   /* === SEMANTIC ALIASES === */
   --color-text-primary:    var(--kurogane);
@@ -522,6 +523,105 @@ p, span, label, li, td, th, input, textarea, select, button, a {
 .btn-brand-primary:active {
   background: var(--kintsugi-active);
   transform: translateY(0);
+}
+
+/* ================================================
+   Gold button hover — Proceed to Checkout effect (system-wide)
+   Shine sweep + lift + enhanced shadow for all gold-background CTAs
+   ================================================ */
+.btn-checkout,
+.btn-complete,
+.btn-brand-primary,
+.btn-download-quotation,
+.btn-view-orders,
+.btn-add-cart-v2,
+.btn-row-cart,
+.automotive-theme .btn-add-to-cart,
+.automotive-theme .btn-add-single-to-cart,
+.order-details-action-btn.primary,
+.tier-card.gold .tier-action,
+.ai-btn-primary,
+.btn-become-partner,
+.admin-btn-accent,
+.btn-add-connection,
+.search2-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-checkout::before,
+.btn-complete::before,
+.btn-brand-primary::before,
+.btn-download-quotation::before,
+.btn-view-orders::before,
+.btn-add-cart-v2::before,
+.btn-row-cart::before,
+.automotive-theme .btn-add-to-cart::before,
+.automotive-theme .btn-add-single-to-cart::before,
+.order-details-action-btn.primary::before,
+.tier-card.gold .tier-action::before,
+.ai-btn-primary::before,
+.btn-become-partner::before,
+.admin-btn-accent::before,
+.btn-add-connection::before,
+.search2-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.3);
+  transition: left 0.5s;
+}
+
+.btn-checkout:hover::before,
+.btn-complete:hover::before,
+.btn-brand-primary:hover::before,
+.btn-download-quotation:hover::before,
+.btn-view-orders:hover::before,
+.btn-add-cart-v2:hover:not(:disabled)::before,
+.btn-row-cart:hover::before,
+.automotive-theme .btn-add-to-cart:hover:not(:disabled)::before,
+.automotive-theme .btn-add-single-to-cart:hover:not(:disabled)::before,
+.order-details-action-btn.primary:hover::before,
+.tier-card.gold .tier-action:hover::before,
+.ai-btn-primary:hover::before,
+.btn-become-partner:hover::before,
+.admin-btn-accent:hover::before,
+.btn-add-connection:hover::before,
+.search2-btn:hover::before {
+  left: 100%;
+}
+
+.btn-checkout:hover:not(:disabled),
+.btn-complete:hover:not(:disabled),
+.btn-brand-primary:hover,
+.btn-download-quotation:hover,
+.btn-view-orders:hover,
+.btn-add-cart-v2:hover:not(:disabled),
+.btn-row-cart:hover,
+.automotive-theme .btn-add-to-cart:hover:not(:disabled),
+.automotive-theme .btn-add-single-to-cart:hover:not(:disabled),
+.order-details-action-btn.primary:hover,
+.tier-card.gold .tier-action:hover,
+.ai-btn-primary:hover,
+.btn-become-partner:hover,
+.admin-btn-accent:hover,
+.btn-add-connection:hover,
+.search2-btn:hover {
+  background: var(--kintsugi-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(212, 175, 55, 0.4);
+}
+
+.btn-checkout:disabled:hover,
+.btn-complete:disabled:hover,
+.btn-add-cart-v2:disabled:hover,
+.automotive-theme .btn-add-to-cart:disabled:hover,
+.automotive-theme .btn-add-single-to-cart:disabled:hover {
+  transform: none;
+  box-shadow: inherit;
 }
 
 /* Secondary Action (Wireframe) */

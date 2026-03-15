@@ -45,22 +45,33 @@
       updateMenuState();
     }
 
-    // Update menu state
+    // Update menu state - always lock body scroll when menu open so menu never disappears on scroll
     function updateMenuState() {
+      const overlay = document.getElementById('buyerMobileMenuOverlay');
       if (isOpen) {
         menuBtn.setAttribute('aria-expanded', 'true');
         backdrop.classList.add('active');
         navLinks.classList.add('active');
         navActions.classList.add('active');
+        document.body.classList.add('mobile-menu-open');
         document.body.style.overflow = 'hidden';
         document.documentElement.style.overflow = 'hidden';
+        if (overlay) {
+          overlay.classList.add('open');
+          overlay.setAttribute('aria-hidden', 'false');
+        }
       } else {
         menuBtn.setAttribute('aria-expanded', 'false');
         backdrop.classList.remove('active');
         navLinks.classList.remove('active');
         navActions.classList.remove('active');
+        document.body.classList.remove('mobile-menu-open');
         document.body.style.overflow = '';
         document.documentElement.style.overflow = '';
+        if (overlay) {
+          overlay.classList.remove('open');
+          overlay.setAttribute('aria-hidden', 'true');
+        }
       }
     }
 
@@ -73,8 +84,17 @@
 
     backdrop.addEventListener('click', closeMenu);
 
-    // Close on nav link click (support both .nav-link and .nav-link-pill)
-    const links = navLinks.querySelectorAll('.nav-link, .nav-link-pill');
+    const drawerCloseBtn = document.getElementById('navLinksDrawerClose');
+    if (drawerCloseBtn) {
+      drawerCloseBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        closeMenu();
+      });
+    }
+
+    // Close menu only when clicking actual links or dropdown items (NOT dropdown triggers so Account/Support can expand)
+    const links = navLinks.querySelectorAll('a.nav-link, .nav-link-pill, .nav-dropdown-item');
     links.forEach((link) => {
       link.addEventListener('click', closeMenu);
     });
@@ -92,12 +112,12 @@
       }
     });
 
-    // Close on resize to desktop
+    // Close on resize to desktop (992px = tablet breakpoint for buyer nav)
     let resizeTimer;
     window.addEventListener('resize', function () {
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(function () {
-        if (window.innerWidth > 767 && isOpen) {
+        if (window.innerWidth > 992 && isOpen) {
           closeMenu();
         }
       }, 250);
@@ -370,7 +390,7 @@
     window.addEventListener('resize', function() {
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(function() {
-        if (window.innerWidth <= 767) {
+        if (window.innerWidth <= 992) {
           closeAllDropdowns();
         }
       }, 250);

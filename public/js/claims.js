@@ -31,9 +31,13 @@ async function initializeClaims() {
 async function loadClaims() {
   try {
     // Show loading state
-    const claimsList = document.getElementById('claims-list');
-    if (claimsList) {
-      claimsList.innerHTML = '<div class="loading-state"><i data-lucide="loader-2" class="spin"></i><span>Loading claims...</span></div>';
+    const claimsTbody = document.getElementById('claims-tbody');
+    const tableContainer = document.getElementById('claims-table-container');
+    const claimsEmpty = document.getElementById('claims-empty');
+    if (claimsTbody && tableContainer) {
+      tableContainer.classList.remove('hidden');
+      if (claimsEmpty) claimsEmpty.style.display = 'none';
+      claimsTbody.innerHTML = '<tr><td colspan="8" class="loading-cell"><div class="loading-state"><i data-lucide="loader-2" class="spin"></i><span>Loading claims...</span></div></td></tr>';
       if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 
@@ -145,22 +149,23 @@ function resetFilters() {
 }
 
 function renderClaims() {
-  const claimsList = document.getElementById('claims-list');
+  const claimsTbody = document.getElementById('claims-tbody');
   const claimsEmpty = document.getElementById('claims-empty');
+  const tableContainer = document.getElementById('claims-table-container');
 
-  if (!claimsList) return;
+  if (!claimsTbody || !tableContainer) return;
 
   if (currentClaims.length === 0) {
-    claimsList.style.display = 'none';
+    tableContainer.classList.add('hidden');
     if (claimsEmpty) claimsEmpty.style.display = 'block';
     return;
   }
 
-  claimsList.style.display = 'grid';
+  tableContainer.classList.remove('hidden');
   if (claimsEmpty) claimsEmpty.style.display = 'none';
 
-  claimsList.innerHTML = currentClaims.map(function(claim) {
-    return createClaimCard(claim);
+  claimsTbody.innerHTML = currentClaims.map(function(claim) {
+    return createClaimRow(claim);
   }).join('');
 
   // Re-initialize Lucide icons
@@ -168,64 +173,31 @@ function renderClaims() {
     lucide.createIcons();
   }
 
-  // Add click handlers
-  const cards = document.querySelectorAll('.claim-card');
-  cards.forEach(function(card) {
-    card.addEventListener('click', function() {
-      const claimId = card.dataset.claimId;
-      window.location.href = '/buyer/claim-support/' + claimId;
+  // Add click handlers (row click + prevent on action link)
+  claimsTbody.querySelectorAll('tr.claim-row').forEach(function(row) {
+    row.addEventListener('click', function(e) {
+      if (e.target.closest('a, button')) return;
+      const claimId = row.dataset.claimId;
+      if (claimId) window.location.href = '/buyer/claim-support/' + claimId;
     });
   });
 }
 
-function createClaimCard(claim) {
-  const createdDate = formatDate(claim.createdAt);
+function createClaimRow(claim) {
   const updatedDate = formatRelativeTime(claim.updatedAt);
   const categoryIcon = getCategoryIcon(claim.category);
   const hasUnread = claim.unreadCount > 0;
 
-  return '<div class="claim-card' + (hasUnread ? ' has-unread' : '') + '" data-claim-id="' + claim.id + '" data-status="' + claim.status + '">' +
-    '<div class="claim-card-header">' +
-      '<div class="claim-card-left">' +
-        '<div class="claim-id">' + escapeHtml(claim.id) + '</div>' +
-        '<h3 class="claim-subject">' + escapeHtml(claim.subject) + '</h3>' +
-        '<div class="claim-order">' +
-          '<i data-lucide="package"></i>' +
-          '<span>' + escapeHtml(claim.orderNumber || 'No Order') + '</span>' +
-        '</div>' +
-      '</div>' +
-      '<div class="claim-card-right">' +
-        '<span class="claim-status-badge ' + claim.status + '">' + formatStatus(claim.status) + '</span>' +
-        (hasUnread ? '<span class="unread-badge">' + claim.unreadCount + '</span>' : '') +
-      '</div>' +
-    '</div>' +
-    '<div class="claim-card-body">' +
-      '<div class="claim-category">' +
-        '<i data-lucide="' + categoryIcon + '"></i>' +
-        '<span>' + escapeHtml(claim.category) + '</span>' +
-      '</div>' +
-    '</div>' +
-    '<div class="claim-card-footer">' +
-      '<div class="claim-meta">' +
-        '<div class="claim-meta-item">' +
-          '<i data-lucide="calendar"></i>' +
-          '<span>' + createdDate + '</span>' +
-        '</div>' +
-        '<div class="claim-meta-item">' +
-          '<i data-lucide="clock"></i>' +
-          '<span>Updated ' + updatedDate + '</span>' +
-        '</div>' +
-        '<div class="claim-meta-item">' +
-          '<i data-lucide="message-circle"></i>' +
-          '<span>' + claim.messageCount + ' ' + (claim.messageCount === 1 ? 'message' : 'messages') + '</span>' +
-        '</div>' +
-      '</div>' +
-      '<div class="claim-action">' +
-        '<span>View Details</span>' +
-        '<i data-lucide="arrow-right"></i>' +
-      '</div>' +
-    '</div>' +
-  '</div>';
+  return '<tr class="claim-row' + (hasUnread ? ' has-unread' : '') + '" data-claim-id="' + claim.id + '" data-status="' + claim.status + '">' +
+    '<td class="claim-id-cell">' + escapeHtml(claim.id) + '</td>' +
+    '<td class="claim-subject-cell">' + escapeHtml(claim.subject) + '</td>' +
+    '<td class="claim-order-cell"><span>' + escapeHtml(claim.orderNumber || '—') + '</span></td>' +
+    '<td class="claim-category-cell"><i data-lucide="' + categoryIcon + '"></i><span>' + escapeHtml(claim.category) + '</span></td>' +
+    '<td><span class="claim-status-badge ' + claim.status + '">' + formatStatus(claim.status) + (hasUnread ? ' (' + claim.unreadCount + ')' : '') + '</span></td>' +
+    '<td>' + claim.messageCount + '</td>' +
+    '<td>' + updatedDate + '</td>' +
+    '<td><a href="/buyer/claim-support/' + claim.id + '" class="btn-view-claim"><i data-lucide="arrow-right"></i><span>View</span></a></td>' +
+  '</tr>';
 }
 
 function formatStatus(status) {

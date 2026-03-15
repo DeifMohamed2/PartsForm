@@ -582,13 +582,13 @@
   }
 
   function updateCartSummary() {
-    // Only update if we're on the cart page
+    const totals = calculateTotals();
+    const convertedAmount = totals.totalAmount * exchangeRate;
+
+    // Update in-page summary only if we're on the cart page and summary DOM exists
     if (!DOM.totalItemsCount || !DOM.totalItems) {
       return;
     }
-
-    const totals = calculateTotals();
-    const convertedAmount = totals.totalAmount * exchangeRate;
 
     if (DOM.totalItemsCount) DOM.totalItemsCount.textContent = totals.totalItems;
     if (DOM.totalItems) DOM.totalItems.textContent = totals.totalItems;

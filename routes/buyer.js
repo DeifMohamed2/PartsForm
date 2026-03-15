@@ -6,8 +6,7 @@ const fs = require('fs');
 const { requireAuth, attachUser } = require('../middleware/auth');
 const {
     getBuyerMain,
-    getAutomotiveSearchPage,
-    getSearchV2Page,
+    getSearchPage,
     getAffiliatePage,
     getAboutUsPage,
     getOrdersPage,
@@ -162,13 +161,9 @@ router.post('/profile/avatar', handleProfileImageUpload, uploadAvatar);
 router.put('/profile', updateProfile);
 router.put('/profile/password', changePassword);
 
-// Parts search - Automotive only
-router.get('/search/automotive', getSearchV2Page);
-router.get('/search-automotive', getSearchV2Page);
-router.get('/search', getSearchV2Page); // Default search goes to search v2
-
-// Search V2
-router.get('/search-v2', getAutomotiveSearchPage);
+// Parts search - unified search page
+router.get('/search/automotive', getSearchPage);
+router.get('/search', getSearchPage);
 
 // Search API endpoints
 router.get('/api/search', searchParts);

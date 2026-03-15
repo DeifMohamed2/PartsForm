@@ -28,7 +28,6 @@
  */
 
 const mongoose = require('mongoose');
-const { MongoClient } = require('mongodb');
 const path = require('path');
 
 // Load environment variables
@@ -39,6 +38,7 @@ try {
 }
 
 const Admin = require('../models/Admin');
+const ReferralPartner = require('../models/ReferralPartner');
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/partsform';
 
@@ -113,30 +113,23 @@ async function seedReferralPartner() {
   }
 
   try {
-    console.log('\n🔗 Connecting to MongoDB (native driver)...');
-    const client = new MongoClient(MONGODB_URI);
-    await client.connect();
+    console.log('\n🔗 Connecting to MongoDB...');
+    await mongoose.connect(MONGODB_URI);
     console.log('✅ Connected to MongoDB');
-
-    const dbName = MONGODB_URI.split('/').pop().split('?')[0];
-    const db = client.db(dbName);
-    const coll = db.collection('referralpartners');
 
     const email = EMAIL.toLowerCase();
 
-    const existing = await coll.findOne({ email });
+    const existing = await ReferralPartner.findOne({ email });
     if (existing) {
       console.log(
         `\nℹ️  Referral partner with email ${email} already exists (id: ${existing._id}). No changes made.`
       );
-      await client.close();
+      await mongoose.disconnect();
       process.exit(0);
     }
 
     console.log('\n⏳ Seeding referral partner account from environment variables...');
 
-    // Try to associate creator with a super admin if one exists (via Mongoose, using correct DB)
-    await mongoose.connect(MONGODB_URI);
     let createdBy = undefined;
     try {
       const superAdmin = await Admin.findOne({ role: 'super_admin' }).select('_id');
@@ -145,20 +138,15 @@ async function seedReferralPartner() {
       }
     } catch (e) {
       // Optional field; ignore errors
-    } finally {
-      await mongoose.disconnect();
     }
 
-    // Insert document directly, including a non-null referralCode field to satisfy any legacy index
-    const now = new Date();
-    const referralCodeValue = `SEED-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
-
-    const result = await coll.insertOne({
+    // Use ReferralPartner model so pre-save hook hashes the password
+    const partner = new ReferralPartner({
       firstName: FIRST_NAME,
       lastName: LAST_NAME,
       email,
       phone: PHONE,
-      password: PASSWORD, // will not be hashed here, but partner login flow expects hashed passwords; we set a flag to force reset
+      password: PASSWORD,
       commissionRate: COMMISSION_RATE,
       buyerDiscountRate: BUYER_DISCOUNT,
       status: 'active',
@@ -171,22 +159,20 @@ async function seedReferralPartner() {
         totalOrderValue: 0,
       },
       createdBy,
-      createdAt: now,
-      updatedAt: now,
-      // Legacy compatibility field if an old unique index on referralCode exists
-      referralCode: referralCodeValue,
     });
+
+    await partner.save();
 
     console.log('\n✅ Referral partner account seeded successfully!');
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log(`   ID:    ${result.insertedId}`);
+    console.log(`   ID:    ${partner._id}`);
     console.log(`   Name:  ${FIRST_NAME} ${LAST_NAME}`);
     console.log(`   Email: ${email}`);
     console.log(`   Phone: ${PHONE}`);
     console.log(`   Status: active`);
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 
-    await client.close();
+    await mongoose.disconnect();
     process.exit(0);
   } catch (error) {
     console.error('\n❌ Error seeding referral partner:', error.message);

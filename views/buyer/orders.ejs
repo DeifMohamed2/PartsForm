@@ -14,7 +14,6 @@
           <div class="orders-header-content">
             <div class="orders-header-left">
               <h1 class="orders-header-title"><%= t('orders.title') %></h1>
-              <p class="orders-header-subtitle"><%= t('orders.subtitle') %></p>
             </div>
             <div class="orders-header-right">
               <div class="orders-stats-minimal">
@@ -131,7 +130,7 @@
               <%= t('orders.emptyState.text') %>
             </p>
             <div class="orders-empty-actions">
-              <a href="/buyer/search-automotive" class="btn-empty-action primary">
+              <a href="/buyer/search" class="btn-empty-action primary">
                 <i data-lucide="shopping-bag"></i>
                 <span><%= t('orders.emptyState.startShopping') %></span>
               </a>
@@ -151,7 +150,6 @@
         <script src="/js/main.js"></script>
         <script src="/js/quick-search.js"></script>
         <script src="/js/cart.js"></script>
-        <script src="/js/cart-badge-updater.js"></script>
         <script src="/js/orders.js"></script>
         <script>
           lucide.createIcons();

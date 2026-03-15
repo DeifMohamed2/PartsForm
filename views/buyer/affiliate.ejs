@@ -16,25 +16,22 @@
                             <h1 class="affiliate-header-title">
                                 <%= t('affiliate.title') %>
                             </h1>
-                            <p class="affiliate-header-subtitle">
-                                <%= t('affiliate.subtitle') %>
-                            </p>
                         </div>
                         <div class="affiliate-header-right">
                             <div class="affiliate-program-stats">
                                 <div class="aff-stat">
                                     <span class="aff-stat-num">5</span>
-                                    <span class="aff-stat-label">Tiers</span>
+                                    <span class="aff-stat-label"><%= t('affiliate.headerStats.tiers') %></span>
                                 </div>
                                 <div class="aff-stat-divider"></div>
                                 <div class="aff-stat">
                                     <span class="aff-stat-num">8%</span>
-                                    <span class="aff-stat-label">Max Commission</span>
+                                    <span class="aff-stat-label"><%= t('affiliate.headerStats.maxCommission') %></span>
                                 </div>
                                 <div class="aff-stat-divider"></div>
                                 <div class="aff-stat">
                                     <span class="aff-stat-num">6%</span>
-                                    <span class="aff-stat-label">Max Discount</span>
+                                    <span class="aff-stat-label"><%= t('affiliate.headerStats.maxDiscount') %></span>
                                 </div>
                             </div>
                         </div>
@@ -50,9 +47,6 @@
                             <h2 class="section-title">
                                 <%= t('affiliate.tiers.title') %>
                             </h2>
-                            <p class="section-subtitle">
-                                <%= t('affiliate.tiers.subtitle') %>
-                            </p>
                         </div>
 
                         <!-- Tier Cards Grid -->
@@ -428,94 +422,18 @@
                             </div>
                         </div>
 
-                        <!-- How It Works - Photo Cards (moodboard images) -->
-                        <div class="affiliate-how-it-works" id="how-it-works">
-                            <div class="section-header">
-                                <h2 class="section-title">
-                                    <%= t('affiliate.howItWorks.title') %>
-                                </h2>
-                                <p class="section-subtitle">
-                                    <%= t('affiliate.howItWorks.subtitle') %>
-                                </p>
-                            </div>
-
-                            <div class="how-it-works-grid">
-                                <div class="how-it-works-card" style="--card-bg: url('/images/brand/moodboard/automated-warehouse.webp')">
-                                    <div class="how-it-works-bg"></div>
-                                    <div class="how-it-works-overlay"></div>
-                                    <div class="how-it-works-content">
-                                        <div class="how-it-works-icon">
-                                            <i data-lucide="shopping-cart"></i>
-                                        </div>
-                                        <h3 class="how-it-works-title">
-                                            <%= t('affiliate.howItWorks.placeOrders.title') %>
-                                        </h3>
-                                        <p class="how-it-works-text">
-                                            <%= t('affiliate.howItWorks.placeOrders.description') %>
-                                        </p>
-                                    </div>
-                                </div>
-                                <div class="how-it-works-card" style="--card-bg: url('/images/brand/moodboard/logistics-belt.webp')">
-                                    <div class="how-it-works-bg"></div>
-                                    <div class="how-it-works-overlay"></div>
-                                    <div class="how-it-works-content">
-                                        <div class="how-it-works-icon">
-                                            <i data-lucide="trending-up"></i>
-                                        </div>
-                                        <h3 class="how-it-works-title">
-                                            <%= t('affiliate.howItWorks.growSales.title') %>
-                                        </h3>
-                                        <p class="how-it-works-text">
-                                            <%= t('affiliate.howItWorks.growSales.description') %>
-                                        </p>
-                                    </div>
-                                </div>
-                                <div class="how-it-works-card" style="--card-bg: url('/images/brand/moodboard/components-display.webp')">
-                                    <div class="how-it-works-bg"></div>
-                                    <div class="how-it-works-overlay"></div>
-                                    <div class="how-it-works-content">
-                                        <div class="how-it-works-icon">
-                                            <i data-lucide="gift"></i>
-                                        </div>
-                                        <h3 class="how-it-works-title">
-                                            <%= t('affiliate.howItWorks.earnRewards.title') %>
-                                        </h3>
-                                        <p class="how-it-works-text">
-                                            <%= t('affiliate.howItWorks.earnRewards.description') %>
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Disclaimer -->
-                        <div class="affiliate-disclaimer">
-                            <div class="disclaimer-icon">
-                                <i data-lucide="info"></i>
-                            </div>
-                            <p class="disclaimer-text">
-                                <strong><%= t('affiliate.disclaimer.note') %></strong>
-                                <%= t('affiliate.disclaimer.text') %>
-                            </p>
-                        </div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Quick Search Modal -->
-            <%- include('partials/quick-search') %>
+        <%- include('partials/quick-search') %>
+        <%- include('partials/footer') %>
 
-
-                <%- include('partials/footer') %>
-
-                    <!-- Scripts -->
-                    <script src="/js/main.js"></script>
-                    <script src="/js/cart.js"></script>
-                    <script src="/js/quick-search.js"></script>
-                    <script src="/js/cart-badge-updater.js"></script>
-
-                    <!-- Initialize Lucide Icons -->
-                    <script>
+        <script src="/js/main.js"></script>
+        <script src="/js/cart.js"></script>
+        <script src="/js/quick-search.js"></script>
+        <script>
                         lucide.createIcons();
                         window.addEventListener('load', () => lucide.createIcons());
 
@@ -556,5 +474,5 @@
                                     }
                                 });
                             });
-                        });
-                    </script>
+        });
+        </script>

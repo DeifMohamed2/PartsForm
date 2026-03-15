@@ -1100,7 +1100,7 @@
         <div class="quotation-meta">
           <strong>${quotationNumber}</strong>
           Date: ${formatDate(today)}<br>
-          Valid Until: <span style="color: #dc2626; font-weight: 600;">${formatDate(validUntil)}</span>
+          Valid Until: <span style="color: #D4AF37; font-weight: 600;">${formatDate(validUntil)}</span>
         </div>
       </div>
     </div>

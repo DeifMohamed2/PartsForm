@@ -1,15 +1,13 @@
 <%- include('partials/header') %>
     <link rel="stylesheet" href="/css/buyerCSS/buyer-main.css">
-    <link rel="stylesheet" href="/css/buyerCSS/search2.css">
-    <link rel="stylesheet" href="/css/buyerCSS/search-v2.css">
+    <link rel="stylesheet" href="/css/buyerCSS/search.css">
     <link rel="stylesheet" href="/css/buyerCSS/ai-filters.css">
     <link rel="stylesheet" href="/css/buyerCSS/ai-excel.css">
 
     <%- include('partials/navbar') %>
 
         <!-- ====================================
-    SEARCH V2 PAGE - SCREENSHOT EXACT MATCH DESIGN
-    Branding: Kurogane + Kintsugi Gold
+    SEARCH PAGE - Branding: Kurogane + Kintsugi Gold
     ==================================== -->
         <div class="searchv2-page">
             <!-- Advanced Filters - Full Page Overlay Sidebar -->
@@ -20,12 +18,6 @@
                     <section class="searchv2-hero">
                         <!-- Hero Background Overlay -->
                         <div class="hero-bg-overlay"></div>
-
-                        <!-- Tagline Top Right -->
-                        <div class="hero-tagline-v2">
-                            <span class="tagline-top">Engineered for Business.</span>
-                            <span class="tagline-bottom">Powered by Intelligence.</span>
-                        </div>
 
                         <div class="hero-content-wrapper">
                             <!-- Hero Title -->
@@ -123,7 +115,6 @@
                                 <div class="empty-placeholder-content">
                                     <i data-lucide="search" class="empty-icon"></i>
                                     <h3 class="empty-title">START YOUR SEARCH</h3>
-                                    <p class="empty-desc">Enter a part number, brand, or description above to find automotive parts</p>
                                 </div>
                             </div>
                         </div>
@@ -135,7 +126,6 @@
                             <!-- Left: Match Count -->
                             <div class="footer-left">
                                 <h2 class="match-count-title">FOUND <span id="footer-results-count">0</span> MATCHES</h2>
-                                <p class="match-count-subtitle">Select items to add to cart</p>
                                 <div class="selected-total-v2">
                                     <span class="total-amount" id="selected-total-value">0.00</span>
                                     <span class="total-currency">USD</span>
@@ -150,9 +140,8 @@
                             <div class="footer-right">
                                 <div class="referral-banner">
                                     <div class="referral-content">
-                                        <h3 class="referral-title">JOIN PARTSFORM</h3>
-                                        <h4 class="referral-subtitle">REFERRAL PROGRAM</h4>
-                                        <p class="referral-desc">Special Price Reductions and More</p>
+                                        <h3 class="referral-title">JOIN PARTSFORM REFERRAL PROGRAM</h3>
+                                        <p class="referral-desc">Special Price Reductions and More.</p>
                                         <a href="/buyer/affiliate" class="btn-referral">INVITE A PARTNER</a>
                                     </div>
                                 </div>
@@ -202,9 +191,6 @@
                                 <h2 class="ai-filter-title"><span class="title-ai">AI</span>
                                     <%= t('search.aiFilter.title') %>
                                 </h2>
-                                <p class="ai-filter-subtitle">
-                                    <%= t('search.aiFilter.subtitle') %>
-                                </p>
                             </div>
                         </div>
                         <button class="ai-filter-close" id="ai-filter-close">
@@ -328,9 +314,6 @@
                                     <%= t('searchResults.excel.title') %>
                                         <span class="ai-badge"><%= t('searchResults.excel.aiBadge') %></span>
                                 </h3>
-                                <p class="ai-excel-subtitle">
-                                    <%= t('searchResults.excel.subtitle') %>
-                                </p>
                             </div>
                         </div>
                         <button class="modal-close" id="excel-modal-close">
@@ -375,9 +358,6 @@
                                 <h4 class="upload-title">
                                     <%= t('searchResults.excel.dragDrop') %>
                                 </h4>
-                                <p class="upload-subtitle">
-                                    <%= t('searchResults.excel.aiExtract') %>
-                                </p>
 
                                 <button class="btn-primary ai-browse-btn" id="browse-file-btn">
                                     <i data-lucide="folder-open"></i>
@@ -761,9 +741,8 @@
                     }
                 };
             </script>
-            <script src="/js/search-v2.js"></script>
+            <script src="/js/search.js"></script>
             <script src="/js/quick-search.js"></script>
-            <script src="/js/cart-badge-updater.js"></script>
             <script src="/js/ai-learning.js"></script>
             <script src="/js/ai-filters.js"></script>
             <script src="/js/ai-excel.js"></script>

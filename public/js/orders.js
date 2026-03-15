@@ -180,7 +180,7 @@
       tbody.innerHTML = `
         <tr>
           <td colspan="5" style="text-align: center; padding: 3rem;">
-            <div style="display: flex; flex-direction: column; align-items: center; gap: 1rem; color: #ef4444;">
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 1rem; color: #D4AF37;">
               <i data-lucide="alert-circle" style="width: 2rem; height: 2rem;"></i>
               <span>${message}</span>
               <button onclick="location.reload()" style="padding: 0.5rem 1rem; background: var(--color-accent); color: white; border: none; border-radius: 6px; cursor: pointer;">

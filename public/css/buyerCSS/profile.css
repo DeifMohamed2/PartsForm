@@ -77,7 +77,9 @@ body:has(.profile-page) {
    HEADER BAR
    ==================================== */
 
+/* Header bar — same pattern as Settings; flex-shrink: 0 so "Profile" title is never removed */
 .profile-header-bar {
+    flex-shrink: 0;
     background: linear-gradient(to bottom, var(--washi) 0%, rgba(149, 175, 192, 0.05) 100%);
     padding: 1.5rem 0 1.25rem;
     border-bottom: 1px solid rgba(149, 175, 192, 0.2);
@@ -190,7 +192,7 @@ body:has(.profile-page) {
     flex: 1;
     min-height: 0;
     overflow: hidden;
-    padding: 1rem 0 1rem;
+    padding: 0.5rem 0 0.75rem;
     display: flex;
     flex-direction: column;
 }
@@ -198,9 +200,10 @@ body:has(.profile-page) {
 .profile-content .container {
     flex: 1;
     min-height: 0;
-    overflow-y: visible;
+    overflow-y: auto;
     overflow-x: hidden;
     margin: 0 auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 
@@ -209,7 +212,7 @@ body:has(.profile-page) {
    ==================================== */
 
 .profile-section {
-    padding: 1.5rem 0;
+    padding: 0.75rem 0;
     position: relative;
     height: 100%;
     overflow: visible;
@@ -218,7 +221,7 @@ body:has(.profile-page) {
 .profile-layout {
     display: grid;
     grid-template-columns: 400px 1fr;
-    gap: 2rem;
+    gap: 1.25rem;
     margin-top: 0;
     min-height: calc(100vh - 280px);
     overflow: visible;
@@ -232,7 +235,7 @@ body:has(.profile-page) {
 .profile-card-main {
     background: white;
     border-radius: 0 !important;
-    padding: 2rem;
+    padding: 1.25rem 1.5rem;
     border: 2px solid rgba(149, 175, 192, 0.3);
     box-shadow: 0 2px 16px rgba(149, 175, 192, 0.08);
     height: fit-content;
@@ -252,19 +255,19 @@ body:has(.profile-page) {
 
 .profile-avatar-section {
     text-align: center;
-    padding-bottom: 2rem;
+    padding-bottom: 1.25rem;
     border-bottom: 1px solid rgba(149, 175, 192, 0.2);
-    margin-bottom: 2rem;
+    margin-bottom: 1.25rem;
     position: sticky;
-    top: -2rem;
+    top: -1.5rem;
     background: white;
     z-index: 10;
-    margin-left: -2rem;
-    margin-right: -2rem;
-    margin-top: -2rem;
-    padding-left: 2rem;
-    padding-right: 2rem;
-    padding-top: 2rem;
+    margin-left: -1.5rem;
+    margin-right: -1.5rem;
+    margin-top: -1.5rem;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+    padding-top: 1.5rem;
 }
 
 .profile-avatar-wrapper {
@@ -393,14 +396,14 @@ body:has(.profile-page) {
 .profile-stats {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 0.5rem;
 }
 
 .profile-stat-item {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    padding: 1rem;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
     background: var(--washi);
     border-radius: 0 !important;
     border: 2px solid rgba(149, 175, 192, 0.25);
@@ -455,7 +458,7 @@ body:has(.profile-page) {
 .profile-info-section {
     display: flex;
     flex-direction: column;
-    gap: 2rem;
+    gap: 1rem;
     overflow-y: visible;
     overflow-x: visible;
     height: auto;
@@ -494,7 +497,7 @@ body:has(.profile-page) {
 .info-card {
     background: white;
     border-radius: 0 !important;
-    padding: 2rem;
+    padding: 1.25rem 1.5rem;
     border: 2px solid rgba(149, 175, 192, 0.3);
     box-shadow: 0 2px 16px rgba(149, 175, 192, 0.08);
     transition: border-color 0.2s ease;
@@ -508,26 +511,28 @@ body:has(.profile-page) {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
     border-bottom: 1px solid rgba(149, 175, 192, 0.2);
 }
 
+/* Icon + title horizontal (like partner dashboard) */
 .info-card-title-wrapper {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 0.5rem;
 }
 
 .info-card-title-wrapper i {
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
     color: var(--aitetsu);
+    flex-shrink: 0;
 }
 
 .info-card-title {
     font-family: 'Quantico', sans-serif;
-    font-size: 1.125rem;
+    font-size: 1rem;
     font-weight: 400;
     color: var(--kurogane);
     margin: 0;
@@ -565,14 +570,14 @@ body:has(.profile-page) {
 .info-card-body {
     display: flex;
     flex-direction: column;
-    gap: 1.25rem;
+    gap: 0.5rem;
 }
 
 .info-row {
     display: flex;
     align-items: flex-start;
-    gap: 1rem;
-    padding: 1rem 0;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
     border-bottom: 1px solid rgba(149, 175, 192, 0.15);
 }
 
@@ -716,13 +721,33 @@ body:has(.profile-page) {
 
 
 /* ====================================
-   RESPONSIVE DESIGN
+   RESPONSIVE DESIGN — Match Settings & other buyer pages
    ==================================== */
 
 @media (max-width: 1024px) {
+    .profile-page .container,
+    .profile-content .container {
+        padding: 0 1.25rem;
+        max-width: 100%;
+    }
+    .profile-header-bar {
+        padding: 1.25rem 0 1rem;
+    }
+    .profile-header-bar .container {
+        padding-left: 1.25rem;
+        padding-right: 1.25rem;
+    }
+    .profile-header-title {
+        font-size: 1.9rem;
+    }
+    .profile-header-left {
+        min-width: 0;
+    }
     .profile-layout {
         grid-template-columns: 1fr;
+        gap: 1.5rem;
         height: auto;
+        min-height: 0;
     }
     .profile-card-main {
         position: static;
@@ -734,29 +759,74 @@ body:has(.profile-page) {
         margin: 0;
         padding: 0;
         padding-bottom: 2rem;
+        margin-left: 0;
+        margin-right: 0;
+        margin-top: 0;
     }
     .profile-info-section {
         height: auto;
         overflow-y: visible;
         padding-right: 0;
     }
+    .profile-content .container {
+        padding-left: 1.25rem;
+        padding-right: 1.25rem;
+    }
 }
 
 @media (max-width: 768px) {
-    .profile-hero {
-        padding: 6rem 0 3rem;
+    .profile-page {
+        padding-top: 56px;
+        padding-bottom: 0;
     }
-    .profile-hero-title {
-        font-size: 2rem;
+    .profile-content {
+        padding: 0.5rem 0 1rem;
+        padding-bottom: 80px;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
     }
-    .profile-hero-subtitle {
-        font-size: 1rem;
+    .profile-page .container,
+    .profile-content .container {
+        padding-left: 16px;
+        padding-right: 16px;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+    body:has(.profile-page) .nav-container {
+        padding: 0.5rem 1rem !important;
+    }
+    /* Header — same as orders/claims/settings, always visible */
+    .profile-header-bar {
+        padding: 1.25rem 0 1rem;
+        margin-top: 0.5rem;
+        margin-bottom: 0.75rem;
+    }
+    .profile-header-bar .container {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+    .profile-header-title {
+        font-size: 1.75rem;
+    }
+    .profile-header-left {
+        min-width: 0;
+    }
+    .profile-header-bar::before {
+        width: 100px;
+    }
+    .profile-header-content {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
+    .profile-section {
+        padding: 1rem 0;
     }
     .profile-card-main {
-        padding: 1.5rem;
+        padding: 1.25rem;
     }
     .info-card {
-        padding: 1.5rem;
+        padding: 1.25rem;
     }
     .info-row {
         flex-direction: column;
@@ -769,28 +839,59 @@ body:has(.profile-page) {
         flex-direction: column;
         align-items: flex-start;
     }
+    /* Footer — match orders/claims */
+    body:has(.profile-page) footer.footer {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 0.75rem;
+        padding: 1rem 16px !important;
+    }
+    body:has(.profile-page) .footer-nav {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    body:has(.profile-page) .footer-copyright-bar {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+    }
 }
 
 @media (max-width: 480px) {
-    .profile-hero {
-        padding: 5.5rem 0 2.5rem;
+    .profile-page .container,
+    .profile-content .container {
+        padding-left: 12px;
+        padding-right: 12px;
     }
-    .profile-hero-title {
+    .profile-header-bar .container {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+    .profile-header-title {
         font-size: 1.5rem;
     }
-    .profile-hero-subtitle {
-        font-size: 0.95rem;
-    }
     .profile-card-main {
-        padding: 1.25rem;
+        padding: 1rem;
     }
     .profile-avatar {
         width: 100px;
         height: 100px;
     }
+    .profile-avatar .avatar-initials {
+        font-size: 2rem;
+    }
     .profile-avatar i {
         width: 50px;
         height: 50px;
+    }
+    .profile-name {
+        font-size: 1.25rem;
+    }
+    .profile-email,
+    .profile-company {
+        font-size: 0.875rem;
     }
     .stat-icon {
         width: 44px;
@@ -801,10 +902,32 @@ body:has(.profile-page) {
         height: 22px;
     }
     .info-card {
-        padding: 1.25rem;
+        padding: 1rem;
     }
     .info-card-title {
         font-size: 1.1rem;
+    }
+    /* My Addresses: same compact list on small screens */
+    body:has(.profile-page) footer.footer {
+        padding: 0.875rem 12px !important;
+    }
+}
+
+@media (max-width: 375px) {
+    .profile-page .container,
+    .profile-content .container {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+    .profile-header-bar .container {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+    .profile-header-title {
+        font-size: 1.375rem;
+    }
+    body:has(.profile-page) footer.footer {
+        padding: 0.75rem 10px !important;
     }
 }
 
@@ -1125,18 +1248,20 @@ body:has(.profile-page) {
    ADDRESSES SECTION IN PROFILE
    ==================================== */
 
+/* My Addresses — small cards, name + eye; click to expand full address */
 .addresses-container {
     display: flex;
-    flex-direction: column;
-    gap: 1rem;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.5rem;
 }
 
 .addresses-loading {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.75rem;
-    padding: 2rem;
+    gap: 0.5rem;
+    padding: 1rem 1.25rem;
     color: var(--namari);
 }
 
@@ -1157,20 +1282,20 @@ body:has(.profile-page) {
 
 .no-addresses {
     text-align: center;
-    padding: 2rem;
+    padding: 1rem 1.25rem;
     color: var(--namari);
 }
 
 .no-addresses i {
-    width: 48px;
-    height: 48px;
+    width: 40px;
+    height: 40px;
     color: #cbd5e1;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
 }
 
 .no-addresses p {
-    font-size: 1rem;
-    margin-bottom: 1rem;
+    font-size: 0.9375rem;
+    margin-bottom: 0.5rem;
 }
 
 .add-address-link {
@@ -1196,97 +1321,152 @@ body:has(.profile-page) {
 
 .addresses-error {
     text-align: center;
-    padding: 2rem;
+    padding: 1rem 1.25rem;
     color: var(--namari);
 }
 
 .addresses-error i {
-    width: 32px;
-    height: 32px;
-    margin-bottom: 0.5rem;
+    width: 28px;
+    height: 28px;
+    margin-bottom: 0.375rem;
 }
 
-.address-item {
-    border: 2px solid rgba(149, 175, 192, 0.25);
+/* ====================================
+   MY ADDRESSES — Small cards: name + eye, click to see full address
+   ==================================== */
+
+.address-item.address-card {
+    display: flex;
+    flex-direction: column;
+    min-width: 140px;
+    max-width: 200px;
+    flex: 1 1 140px;
+    border: 1.5px solid rgba(149, 175, 192, 0.25);
     border-radius: 0 !important;
-    padding: 1rem 1.25rem;
     background: var(--washi);
     transition: border-color 0.2s ease;
+    overflow: hidden;
 }
 
 .address-item:hover {
     border-color: rgba(149, 175, 192, 0.4);
 }
 
-.address-item.default {
-    border-color: rgba(149, 175, 192, 0.5);
-    background: rgba(149, 175, 192, 0.08);
+.address-item.default .address-item-row {
+    background: rgba(149, 175, 192, 0.06);
 }
 
-.address-item-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 0.75rem;
-}
-
-.address-label {
+/* Row: address name + default badge + eye button (click to expand) */
+.address-item-row {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    font-weight: 600;
-    color: var(--kurogane);
-    font-size: 0.95rem;
+    padding: 0.5rem 0.75rem;
+    cursor: pointer;
+    transition: background 0.2s ease;
 }
 
-.address-label i {
-    width: 16px;
-    height: 16px;
-    color: var(--aitetsu);
+.address-item-row:hover {
+    background: rgba(149, 175, 192, 0.08);
+}
+
+.address-name-only {
+    flex: 1;
+    font-weight: 600;
+    color: var(--kurogane);
+    font-size: 0.875rem;
+    text-align: left;
 }
 
 .default-badge {
     display: inline-flex;
     align-items: center;
-    padding: 0.25rem 0.75rem;
+    padding: 0.15rem 0.4rem;
     background: rgba(149, 175, 192, 0.2);
     color: var(--aitetsu);
     font-family: 'Antartida', sans-serif;
-    font-size: 0.75rem;
+    font-size: 0.6rem;
     font-weight: 600;
     border-radius: 0 !important;
     text-transform: uppercase;
 }
 
-.address-item-body {
-    padding-left: 1.5rem;
+.address-toggle-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: none;
+    background: rgba(149, 175, 192, 0.15);
+    color: var(--aitetsu);
+    border-radius: 0 !important;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
 }
 
-.address-name {
+.address-toggle-btn:hover {
+    background: var(--aitetsu);
+    color: white;
+}
+
+.address-toggle-btn i {
+    width: 14px;
+    height: 14px;
+}
+
+.address-toggle-btn .icon-eye-off {
+    display: none;
+}
+
+.address-item.is-expanded .address-toggle-btn .icon-eye {
+    display: none;
+}
+
+.address-item.is-expanded .address-toggle-btn .icon-eye-off {
+    display: block;
+}
+
+/* Full address — hidden by default, visible when .address-item.is-expanded */
+.address-item-details {
+    display: none;
+    padding: 0.5rem 0.75rem 0.6rem;
+    border-top: 1px solid rgba(149, 175, 192, 0.2);
+    background: white;
+    line-height: 1.3;
+}
+
+.address-item.is-expanded .address-item-details {
+    display: block;
+}
+
+.address-item-details .address-name {
     font-weight: 600;
     color: var(--kurogane);
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.2rem;
+    font-size: 0.8125rem;
 }
 
-.address-line {
+.address-item-details .address-line {
     color: var(--namari);
-    font-size: 0.9rem;
-    line-height: 1.5;
+    font-size: 0.75rem;
+    line-height: 1.35;
     margin: 0;
 }
 
-.address-phone {
+.address-item-details .address-phone {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.3rem;
     color: var(--namari);
-    font-size: 0.85rem;
-    margin-top: 0.5rem;
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
 }
 
-.address-phone i {
-    width: 14px;
-    height: 14px;
+.address-item-details .address-phone i {
+    width: 11px;
+    height: 11px;
 }
 
 
@@ -1671,7 +1851,7 @@ body:has(.profile-page) {
     transform: translateY(20px);
     pointer-events: none;
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    border-left: 4px solid var(--aitetsu);
+    border-left: 4px solid var(--sei, #95AFC0);
 }
 
 .notification-toast.show {
@@ -1681,7 +1861,7 @@ body:has(.profile-page) {
 }
 
 .notification-toast.success {
-    border-left-color: var(--aitetsu);
+    border-left-color: var(--sei, #95AFC0);
 }
 
 .notification-toast.error {
@@ -1704,7 +1884,7 @@ body:has(.profile-page) {
 
 .notification-toast.success .notification-icon {
     background: rgba(149, 175, 192, 0.15);
-    color: var(--aitetsu);
+    color: var(--sei, #95AFC0);
 }
 
 .notification-toast.error .notification-icon {

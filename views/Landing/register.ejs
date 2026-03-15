@@ -179,9 +179,9 @@
         }
         
         .reg-step__label {
-            font-family: 'Antartida', sans-serif;
-            font-size: 10px;
-            font-weight: 600;
+            font-family: 'Quantico', sans-serif;
+            font-size: 14px;
+            font-weight: 900;
             color: rgba(248, 250, 252, 0.32);
             letter-spacing: 0.07em;
             text-transform: uppercase;
@@ -189,23 +189,23 @@
         }
         
         .reg-step.active .reg-step__dot {
-            border-color: var(--kintsugi);
-            color: var(--kintsugi);
-            background: rgba(212, 175, 55, 0.10)
+            border-color: var(--sei);
+            color: var(--sei);
+            background: rgba(149, 175, 192, 0.15)
         }
         
         .reg-step.active .reg-step__label {
-            color: var(--kintsugi)
+            color: var(--sei)
         }
         
         .reg-step.done .reg-step__dot {
-            border-color: rgba(212, 175, 55, 0.45);
-            color: rgba(212, 175, 55, 0.55);
-            background: rgba(212, 175, 55, 0.06)
+            border-color: rgba(149, 175, 192, 0.5);
+            color: rgba(149, 175, 192, 0.7);
+            background: rgba(149, 175, 192, 0.08)
         }
         
         .reg-step.done .reg-step__label {
-            color: rgba(212, 175, 55, 0.50)
+            color: rgba(149, 175, 192, 0.65)
         }
         
         .reg-step__line {
@@ -223,9 +223,9 @@
             font-family: 'Antartida', sans-serif;
             font-size: var(--text-xs);
             font-weight: 500;
-            color: #fca5a5;
-            background: rgba(220, 38, 38, 0.12);
-            border: 1px solid rgba(220, 38, 38, 0.25)
+            color: var(--kintsugi);
+            background: rgba(212, 175, 55, 0.12);
+            border: 1px solid rgba(212, 175, 55, 0.25)
         }
         
         .reg-error.show {
@@ -256,8 +256,8 @@
         
         .reg-field__label {
             font-family: 'Quantico', sans-serif;
-            font-size: 0.72rem;
-            font-weight: 700;
+            font-size: 1rem;
+            font-weight: 900;
             color: rgba(248, 250, 252, 0.82);
             letter-spacing: 0.07em;
             text-transform: uppercase
@@ -268,7 +268,7 @@
             height: 48px;
             padding: 0 14px;
             font-family: 'Antartida', sans-serif;
-            font-size: 0.95rem;
+            font-size: 1.05rem;
             font-weight: 500;
             color: var(--washi);
             background: rgba(248, 250, 252, 0.06);
@@ -283,6 +283,32 @@
         .reg-field__input::placeholder {
             color: rgba(248, 250, 252, 0.28)
         }
+        
+        .reg-pw-wrap {
+            position: relative;
+            display: flex;
+            align-items: center
+        }
+        .reg-pw-wrap .reg-field__input {
+            padding-right: 48px
+        }
+        .reg-pw-toggle {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+            color: rgba(248, 250, 252, 0.5);
+            transition: color 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center
+        }
+        .reg-pw-toggle:hover { color: rgba(248, 250, 252, 0.85) }
+        .reg-pw-toggle svg { width: 18px; height: 18px; flex-shrink: 0 }
         
         .reg-field__input:focus {
             background: rgba(248, 250, 252, 0.09);
@@ -340,7 +366,7 @@
         
         .reg-check span {
             font-family: 'Antartida', sans-serif;
-            font-size: var(--text-small);
+            font-size: 1.05rem;
             font-weight: 500;
             color: rgba(248, 250, 252, 0.62);
             line-height: 1.45
@@ -371,24 +397,41 @@
             text-transform: uppercase;
             letter-spacing: 0.10em;
             color: var(--kurogane);
-            background: var(--kintsugi);
+            background: var(--sei);
             border: none;
             border-radius: 0;
             cursor: pointer;
             transition: background 0.2s ease, transform 0.15s ease;
             margin-top: 6px
         }
-        
+
         .reg-btn:hover {
-            background: var(--kintsugi-hover);
-            transform: translateY(-1px)
+            background: rgba(129, 155, 172, 1);
+            transform: translateY(-2px)
         }
-        
+
         .reg-btn:active {
-            background: var(--kintsugi-active);
+            background: rgba(110, 138, 156, 1);
             transform: translateY(0)
         }
-        
+
+        /* Next Step — G. Sei (Pure Blue), solid like Verify Access */
+        .reg-btn--next {
+            font-family: 'Quantico', sans-serif;
+            background: var(--sei);
+            border: none;
+            color: var(--kurogane);
+            transition: background 0.2s ease, transform 0.15s ease
+        }
+        .reg-btn--next:hover {
+            background: rgba(129, 155, 172, 1);
+            transform: translateY(-2px)
+        }
+        .reg-btn--next:active {
+            background: rgba(110, 138, 156, 1);
+            transform: translateY(0)
+        }
+
         .reg-btn--ghost {
             background: transparent;
             border: 1px solid rgba(248, 250, 252, 0.28);
@@ -517,7 +560,7 @@
                             <input class="reg-field__input" type="tel" id="phone" name="phone" placeholder="+1 555 000 0000" autocomplete="tel" required>
                         </div>
                     </div>
-                    <button type="button" class="reg-btn" onclick="goStep(2)">Next Step &rarr;</button>
+                    <button type="button" class="reg-btn reg-btn--next" onclick="goStep(2)">Next Step &rarr;</button>
                     <p class="reg-login-link">Already have an account? <a href="/">Sign In</a></p>
                 </div>
 
@@ -584,7 +627,7 @@
                     </div>
                     <div class="reg-nav">
                         <button type="button" class="reg-btn reg-btn--ghost" onclick="goStep(1)">&larr; Back</button>
-                        <button type="button" class="reg-btn" onclick="goStep(3)">Next Step &rarr;</button>
+                        <button type="button" class="reg-btn reg-btn--next" onclick="goStep(3)">Next Step &rarr;</button>
                     </div>
                 </div>
 
@@ -593,11 +636,23 @@
                     <div class="reg-row">
                         <div class="reg-field">
                             <label class="reg-field__label" for="password">Password</label>
-                            <input class="reg-field__input" type="password" id="password" name="password" placeholder="Min. 8 characters" autocomplete="new-password" required minlength="8">
+                            <div class="reg-pw-wrap">
+                                <input class="reg-field__input" type="password" id="password" name="password" placeholder="Min. 8 characters" autocomplete="new-password" required minlength="8">
+                                <button type="button" class="reg-pw-toggle" onclick="toggleRegPassword('password')" title="Show password" aria-label="Toggle password visibility">
+                                    <svg class="reg-eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                    <svg class="reg-eye-off-icon" style="display:none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                                </button>
+                            </div>
                         </div>
                         <div class="reg-field">
                             <label class="reg-field__label" for="confirmPassword">Confirm Password</label>
-                            <input class="reg-field__input" type="password" id="confirmPassword" name="confirmPassword" placeholder="Repeat password" autocomplete="new-password" required>
+                            <div class="reg-pw-wrap">
+                                <input class="reg-field__input" type="password" id="confirmPassword" name="confirmPassword" placeholder="Repeat password" autocomplete="new-password" required>
+                                <button type="button" class="reg-pw-toggle" onclick="toggleRegPassword('confirmPassword')" title="Show password" aria-label="Toggle password visibility">
+                                    <svg class="reg-eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                    <svg class="reg-eye-off-icon" style="display:none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                                </button>
+                            </div>
                         </div>
                     </div>
                     <div class="reg-field">
@@ -624,6 +679,22 @@
         </div>
     </div>
     <script>
+        function toggleRegPassword(inputId) {
+            var input = document.getElementById(inputId);
+            var wrap = input.closest('.reg-pw-wrap');
+            var eyeIcon = wrap.querySelector('.reg-eye-icon');
+            var eyeOffIcon = wrap.querySelector('.reg-eye-off-icon');
+            if (input.type === 'password') {
+                input.type = 'text';
+                eyeIcon.style.display = 'none';
+                eyeOffIcon.style.display = 'block';
+            } else {
+                input.type = 'password';
+                eyeIcon.style.display = 'block';
+                eyeOffIcon.style.display = 'none';
+            }
+        }
+
         function goStep(n) {
             var panels = document.querySelectorAll('.reg-step-panel');
             var current = 1;
